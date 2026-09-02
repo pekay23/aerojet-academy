@@ -55,7 +55,7 @@ function makeSeat(overrides: Record<string, any> = {}) {
 
 describe('Staff Exam Sittings Seats — GET/PUT /api/staff/exams/sittings/[id]/seats', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
   })
 
   it('returns 401 when unauthenticated', async () => {

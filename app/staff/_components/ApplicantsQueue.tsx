@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   Search,
   Download,
@@ -19,6 +20,7 @@ import { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers } from '../acti
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import ApplicantDetailDrawer from './ApplicantDetailDrawer'
+import { SortableTh } from '@/components/ui/sortable-th'
 
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
@@ -57,6 +59,7 @@ interface Counts {
 }
 
 export default function ApplicantsQueue({ initialCounts }: { initialCounts: Counts }) {
+  const searchParams = useSearchParams()
   const [applicants, setApplicants] = useState<Applicant[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -85,9 +88,13 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
         page: page.toString(),
         limit: perPage.toString(),
       })
+      const sort = searchParams.get('sort')
+      const order = searchParams.get('order')
+      if (sort) params.set('sort', sort)
+      if (order) params.set('order', order)
       const res = await fetch(`/api/staff/applicants?${params}`)
       const data = await res.json()
-      
+
       if (data.success) {
         setApplicants(data.data ?? [])
         setTotal(data.meta?.total ?? 0)
@@ -101,7 +108,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
     } finally {
       setLoading(false)
     }
-  }, [tab, search, page, perPage])
+  }, [tab, search, page, perPage, searchParams])
 
   useEffect(() => {
     setPage(1)
@@ -349,16 +356,13 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                       )}
                     </button>
                   </th>
-                  {['Applicant', 'Registration Code', 'Date Applied', 'Fee Status', 'Action'].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="px-6 py-3 text-[10px] font-black tracking-wider text-slate-500 uppercase"
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
+                  <SortableTh sortKey="name" label="Applicant" />
+                  <SortableTh sortKey="code" label="Registration Code" />
+                  <SortableTh sortKey="date" label="Date Applied" />
+                  <SortableTh sortKey="fee" label="Fee Status" align="center" />
+                  <th className="px-6 py-3 text-[10px] font-black tracking-wider text-slate-500 uppercase">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

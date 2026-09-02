@@ -73,7 +73,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [tabSwitchCount, setTabSwitchCount] = useState(0)
   const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const eventSourceRef = useRef<EventSource | null>(null)
 
   const logViolation = useCallback(
     async (type: string, detail?: string, opts?: { severity?: 'WARNING' | 'NOTICE' | 'CRITICAL' }) => {
@@ -332,22 +332,45 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     }
   }, [data, result, sessionId])
 
-  // Timer countdown
+  const eventSourceRef = useRef<EventSource | null>(null)
+
+  // SSE timer from server-authoritative clock
   useEffect(() => {
-    if (!data || result) return
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          // Auto-submit on expiry
-          clearInterval(timerRef.current!)
-          handleSubmit(true)
-          return 0
+    if (!data || result || !sessionId) return
+
+    const url = `/api/student/exams/internal/session/${sessionId}/events`
+    const eventSource = new EventSource(url)
+    eventSourceRef.current = eventSource
+
+    eventSource.addEventListener('tick', (e: MessageEvent) => {
+      try {
+        const parsed = JSON.parse(e.data)
+        if (typeof parsed.timeRemaining === 'number') {
+          setTimeLeft(parsed.timeRemaining)
         }
-        return prev - 1
-      })
-    }, 1000)
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [data, result])
+      } catch {
+        // ignore malformed tick
+      }
+    })
+
+    eventSource.addEventListener('close', () => {
+      eventSource.close()
+      eventSourceRef.current = null
+      if (data.status === 'IN_PROGRESS' && !result && !submitting) {
+        void handleSubmit(true)
+      }
+    })
+
+    eventSource.onerror = () => {
+      eventSource.close()
+      eventSourceRef.current = null
+    }
+
+    return () => {
+      eventSource.close()
+      eventSourceRef.current = null
+    }
+  }, [data, result, sessionId, submitting, handleSubmit])
 
   // Autosave answer
   const saveAnswer = useCallback(async (questionId: string, selectedAnswer: string) => {
@@ -368,7 +391,6 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   const handleSubmit = async (auto = false) => {
     if (submitting) return
     setSubmitting(true)
-    if (timerRef.current) clearInterval(timerRef.current)
 
     try {
       const res = await fetch('/api/student/exams/internal/submit', {

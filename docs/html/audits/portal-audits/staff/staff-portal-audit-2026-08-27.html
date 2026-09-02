@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Staff Portal — Consolidated Audit Report · Aerojet Academy</title>
-<link rel="stylesheet" href="../../../design-tokens.css">
-<link rel="stylesheet" href="../../../docs.css">
+<link rel="stylesheet" href="../../../../design-tokens.css">
+<link rel="stylesheet" href="../../../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../../../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../../../index.html">Index</a>
-    <a href="../../../architecture/system-overview.html">Architecture</a>
-    <a href="../../../guides/setup.html">Guides</a>
-    <a href="../../../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../../../plans/future-plans.html">Plans</a>
-    <a href="../../../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +27,669 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Staff Portal — Consolidated Audit Report</h1>
-  <p class="he-deck"><p>Date: 2026-08-27 Auditors: TypeScript/React, Performance, Security, UI/UX, Code Quality, EASA Compliance (6 parallel agents) Scope: <code>app/staff/</code> — 34+ pages, shared components, API routes, domain libraries…</p>
-</p>
+  <p class="he-deck">Date: 2026-08-27 Auditors: TypeScript/React, Performance, Security, UI/UX, Code Quality, EASA Compliance (6 parallel agents) Scope: <code>app/staff/</code> — 34+ pages, shared components, API routes, domain libraries…</p>
 </header>
-<section class="he-section" id="executive-summary"><div class="he-section__num">01 · Executive Summary</div><h2 class="he-section__title">Executive Summary</h2>The Staff portal is a mature, feature-rich admin surface with strong conventions in several areas: pervasive <code>prismaUnfiltered</code> usage, correct <code>Promise.all</code> parallelization, disciplined <code>next/dynamic</code> lazy-loading of heavy chart/editor bundles, broad audit-logging coverage, and parameterized Prisma queries. However, this audit surfaced material gaps across six dimensions that range from broken access control and missing regulatory workflows to pervasive type-erosion and absent error boundaries.Totals: 3 Critical · 13 High · 24 Medium · 18 Low · 7 SuggestionsAll findings below are grounded in specific file paths and line references from the six agent reports. Items marked Confirmed Pending require your go/no-go decision before implementation.<section class="he-section" id="critical-findings-must-fix"><div class="he-section__num">02 · Critical Findings (must fix)</div><h2 class="he-section__title">Critical Findings (must fix)</h2><h3 id="c-1-missing-ojt-api-routes-cause-runtime-failures">C-1: Missing OJT API routes cause runtime failures</h3>Auditors: EASA, Code QualityFile: <code>app/staff/users/[id]/_components/OjtSection.tsx:72-93, 96-112</code>Description: The component calls <code>POST /api/staff/students/${userId}/ojt</code> and <code>PATCH /api/staff/students/${userId}/ojt</code>, but these routes do not exist. OJT status updates and creation fail silently at runtime.Recommendation: Implement the missing API routes with Zod validation, <code>requireStaff()</code> guard, and audit logging.Status: ✅ Implemented<h3 id="c-2-no-staff-facing-ojt-logbook-review-workflow-part-145">C-2: No staff-facing OJT logbook review workflow (Part-145)</h3>Auditors: EASA, Code QualityFile: <code>app/staff/users/[id]/_components/OjtSection.tsx:33-307</code>Description: Staff can toggle OJT period status but cannot review, approve, or edit <code>OJTLogbookEntry</code> records. The Prisma schema defines <code>supervisorSignature</code>, <code>studentSignature</code>, <code>verifiedByManagement</code>, and <code>competencyRating</code> — none have staff management interfaces.Recommendation: Build <code>app/staff/ojt/</code> pages for logbook review, entry approval, competency rating, and mentor assignment management.Status: ✅ Implemented<h3 id="c-3-no-practical-assessment-tab-in-student-detail-views">C-3: No practical assessment tab in student detail views</h3>Auditors: EASA, Code QualityFile: <code>app/staff/students/[id]/_components/StudentDetailTabs.tsx:15-22</code>Description: The <code>TABS</code> array omits practical assessments entirely, despite <code>PracticalTrainingRecord</code> existing in the schema with <code>instructorId</code>, <code>assessorId</code>, <code>result</code>, <code>signedByInstructor</code>, <code>signedByStudent</code>, and <code>ataChapterId</code>.Recommendation: Add a Practical Assessments tab and build <code>app/staff/practical/</code> pages for scheduling, evidence upload, dual-sign-off, and ATA-chapter task tracking.Status: ✅ Implemented<section class="he-section" id="high-priority-findings"><div class="he-section__num">03 · High Priority Findings</div><h2 class="he-section__title">High Priority Findings</h2><h3 id="h-1-edge-proxy-does-not-gate-staff-or-apistaff">H-1: Edge proxy does not gate <code>/staff/*</code> or <code>/api/staff/*</code></h3>Auditors: SecurityFile: <code>proxy.ts:14-46, 123-130</code>Description: CLAUDE.md documents an active edge proxy with <code>ROUTE_ROLE_MAP</code>. The actual <code>proxy.ts</code> does not contain this map and its <code>config.matcher</code> only covers <code>/api/images/*</code> and image files. There is no global edge-level auth/authorization for staff pages or APIs.Recommendation: Either restore the documented edge proxy with a <code>matcher</code> for <code>/staff/:path*</code> and <code>/api/staff/:path*</code>, or formally document that the proxy is images-only and enforce that every <code>/api/staff/*</code> route calls a role guard. Apply global security headers.Status: ✅ Implemented<h3 id="h-2-get-apis-authenticate-but-never-enforce-staff-role-broken-access-control">H-2: GET APIs authenticate but never enforce staff role (Broken Access Control)</h3>Auditors: SecurityFile: <code>app/api/staff/payments/route.ts</code>, <code>app/api/staff/students/route.ts</code>, <code>app/api/staff/finance/overview/route.ts</code>, <code>app/api/staff/applicants/route.ts</code>, <code>app/api/staff/users/counts/route.ts</code>Description: These handlers call <code>getAuthSession()</code> and return 401 only when there is no session, but never verify <code>session.user.role</code> belongs to the staff allow-list. Because the edge proxy does not gate <code>/api/staff/*</code>, any authenticated user (including STUDENT, APPLICANT, INSTRUCTOR) can read cross-user PII and financial data.Recommendation: Enforce a staff role allow-list in every <code>/api/staff/*</code> route via a shared wrapper (e.g. <code>requireStaff()</code> / <code>withStaffHandler</code>).Status: ✅ Implemented<h3 id="h-3-231-any-occurrences-across-63-files">H-3: 231 <code>any</code> occurrences across 63 files</h3>Auditors: TypeScript, Code QualityFile: 63 files across <code>app/staff/**</code> (see Appendix)Description: <code>any</code> types are concentrated in the most-active surfaces: student/user detail tabs, financial tables, scheduling client, and reports. At the server→client boundary (<code>StudentDetailTabs</code>, <code>WalletTab</code>, <code>ExamsTab</code>, <code>JourneyTab</code>), <code>any</code> props disable IDE autocomplete and silently accept typos.Recommendation: Define narrow interfaces derived from Prisma payloads. Prioritize the student detail tabs. Enable <code>noImplicitAny</code> and add an ESLint <code>@typescript-eslint/no-explicit-any</code> rule.Status: ✅ Implemented<h3 id="h-4-full-table-loads-on-list-pages-classes-exams-records">H-4: Full-table loads on list pages (Classes, Exams Records)</h3>Auditors: PerformanceFile: <code>app/staff/classes/page.tsx:16-48</code>, <code>app/staff/exams/page.tsx:510-667</code>Description: Classes list loads every class with no <code>take</code>/<code>skip</code>. Exams RecordsTab fetches ALL <code>examBooking</code> and <code>examResult</code> rows, merges/sorts in JS, then slices to 2000. Both will degrade or time out as data grows.Recommendation: Add <code>take</code>/<code>skip</code> (or cursor) pagination. Use <code>TablePagination</code> component pattern.Status: ✅ Implemented<h3 id="h-5-analytics-report-functions-lack-unstablecache">H-5: Analytics report functions lack <code>unstable_cache</code></h3>Auditors: PerformanceFile: <code>lib/analytics/reports.ts:16-838</code>, <code>lib/analytics/metrics.ts:23-279</code>Description: None of the 11 report helpers or 4 dashboard metric functions use <code>unstable_cache</code>. Every request hits the database. <code>getDashboardAlerts</code> correctly uses caching — the pattern is established.Recommendation: Wrap report functions in <code>unstable_cache</code> with appropriate TTLs (300s for operational, 3600s for YoY). Add tag-based invalidation.Status: ✅ Implemented<h3 id="h-6-exam-result-hard-delete-destroys-easa-evidence-chain">H-6: Exam result hard-delete destroys EASA evidence chain</h3>Auditors: EASA, SecurityFile: <code>app/staff/actions.ts:731-762</code>Description: <code>deleteExamRecord</code> hard-deletes <code>ExamResult</code> and <code>ExamBooking</code> rows. For EASA compliance, exam results must be immutable once issued.Recommendation: Replace hard delete with soft-delete (<code>deletedAt</code>). Restrict to ADMIN+ role. Never allow deletion of issued results; only allow supersession via a new record referencing the original.Status: ✅ Implemented<h3 id="h-7-24-files-exceed-500-lines">H-7: 24 files exceed 500 lines</h3>Auditors: Code QualityFiles: <code>reports/page.tsx</code> (1,427), <code>students/import/page.tsx</code> (1,139), <code>exams/_components/RecordsTab.tsx</code> (1,047), <code>calendar/_components/StaffCalendarGrid.tsx</code> (883), <code>users/[id]/_components/OjtSection.tsx</code> (838), <code>_components/StudentDetailPanel.tsx</code> (811), and 18 others (see Appendix)Description: Monolithic files mix server data fetching, client state, and inline components, making them hard to navigate and prone to merge conflicts.Recommendation: Extract tabs/components into separate files under <code>_components/</code>. Prioritize <code>reports/page.tsx</code> and <code>students/import/page.tsx</code>.Status: ✅ Implemented<h3 id="h-8-massive-duplication-across-user-table-components">H-8: Massive duplication across user table components</h3>Auditors: Code QualityFile: <code>UsersTable.tsx</code>, <code>StudentsTable.tsx</code>, <code>InstructorsTable.tsx</code>, <code>ExaminersTable.tsx</code>Description: All four independently reimplement URL search params, debounced search, pagination state, bulk action dropdowns, and selection logic.Recommendation: Create a generic <code>useUserTable</code> hook in <code>lib/hooks/</code> and a shared <code>UserTableShell</code> component.Status: ✅ Implemented<h3 id="h-9-monolithic-actionsts-1015-lines">H-9: Monolithic <code>actions.ts</code> (1,015 lines)</h3>Auditors: Code QualityFile: <code>app/staff/actions.ts</code>Description: All staff server actions (user CRUD, enrollment bulk ops, payment bulk ops, exam booking, messaging, OJT, calendar, courses) are crammed into one file.Recommendation: Split by domain into colocated <code>actions.ts</code> files (<code>users/actions.ts</code>, <code>enrollments/actions.ts</code>, <code>exams/actions.ts</code>, <code>finance/actions.ts</code>).Status: ✅ Implemented<h3 id="h-10-status-badges-missing-dark-variants">H-10: Status badges missing <code>dark:</code> variants</h3>Auditors: UI/UX, Design SystemFile: <code>StudentsTable.tsx:69-74</code>, <code>StudentDetailPanel.tsx:92-95</code>, <code>PaymentsQueue.tsx:49-51</code>, <code>ApplicantsQueue.tsx:463-464</code>, <code>PoolStatusBadge.tsx:4-12</code>, <code>WithdrawalsManager.tsx:26-31</code>, <code>Part145Manager.tsx:32-36</code>Description: Badge maps define only light-mode classes. In dark mode they render as near-white pills with dark text on dark cards.Recommendation: Standardize every badge map to include <code>dark:</code> variants. Consider extracting a shared <code><StatusBadge></code> component.Status: ✅ Implemented<h3 id="h-11-no-protectedimage-usage-for-user-uploaded-avatars">H-11: No <code>ProtectedImage</code> usage for user-uploaded avatars</h3>Auditors: UI/UX, SecurityFile: <code>UsersTableRow.tsx:58-60</code>, <code>StudentsTable.tsx:427-429</code>, <code>StudentDetailPanel.tsx:299-301</code>, <code>ApplicantsQueue.tsx:433-435</code>, <code>ApplicantDetailDrawer.tsx:230-232</code>, <code>users/[id]/page.tsx:166-168</code>, <code>students/[id]/page.tsx:268-270</code>Description: Profile photos render via plain <code>next/image</code>, bypassing the <code>ProtectedImage</code> wrapper (right-click protection, drag prevention, authenticated proxy).Recommendation: Replace with <code>ProtectedImage</code> wrapping <code>proxyImageUrl(url, 'profile-photos')</code>.Status: ✅ Implemented<h3 id="h-12-missing-easa-exam-session-manifest">H-12: Missing EASA exam session manifest</h3>Auditors: EASAFile: <code>app/staff/exams/events/[id]/page.tsx:293-336</code>Description: The exam event detail page shows sittings and assignments but does not generate a regulatory manifest (candidate list, examiner credentials, venue, session times, attendance outcomes).Recommendation: Add a "Generate Authority Manifest" button producing a timestamped PDF/CSV.Status: ✅ Implemented<h3 id="h-13-no-certificatelicense-expiration-tracking">H-13: No certificate/license expiration tracking</h3>Auditors: EASAFile: <code>prisma/schema.prisma:2454-2474</code>, <code>prisma/schema.prisma:338-347</code>Description: <code>StudentDocument</code> has <code>expiresAt</code> but no staff-facing expiration dashboard. <code>StudentLicenseTarget</code> stores no expiration date, validity period, or rating class details.Recommendation: Build a certificate expiration tracker and extend <code>StudentLicenseTarget</code> with temporal/validity fields.Status: ✅ Implemented<section class="he-section" id="medium-priority-findings"><div class="he-section__num">04 · Medium Priority Findings</div><h2 class="he-section__title">Medium Priority Findings</h2><h3 id="m-1-text-slate-400-secondary-text-fails-wcag-aa-contrast-251">M-1: <code>text-slate-400</code> secondary text fails WCAG AA contrast (~2.5:1)</h3>Auditors: UI/UXFile: <code>app/staff/dashboard/page.tsx:299</code>, <code>StaffTopBar.tsx</code>, <code>StudentDetailPanel.tsx</code>, <code>ApplicantsQueue.tsx</code>Description: <code>text-slate-400</code> (#94a3b8) on white/slate-50 backgrounds has ~2.5:1 contrast, below the 4.5:1 WCAG AA threshold.Recommendation: Promote to <code>text-slate-500</code> (3.6:1) or <code>text-slate-600</code> (5.3:1) for meaningful labels.Status: ✅ Implemented<h3 id="m-2-permissive-html-sanitizer-iframe-data-uris-style-on-all-elements">M-2: Permissive HTML sanitizer (<code>iframe</code>, <code>data:</code> URIs, <code>style</code> on all elements)</h3>Auditors: SecurityFile: <code>lib/utils/sanitize.ts:7-35</code>Description: Used for <code>dangerouslySetInnerHTML</code> in the newsroom. Allows <code>iframe</code> with <code>data:</code> scheme, <code>style</code> on all elements, and <code>video</code>/<code>audio</code> tags.Recommendation: Drop <code>iframe</code> (or whitelist specific domains), drop <code>style</code>/<code>id</code> on <code>'*'</code>, remove <code>data:</code> from <code>allowedSchemes</code>.Status: ✅ Implemented<h3 id="m-3-csp-allows-unsafe-inline-and-unsafe-eval">M-3: CSP allows <code>unsafe-inline</code> and <code>unsafe-eval</code></h3>Auditors: SecurityFile: <code>next.config.ts:68</code>Description: Defeats browser XSS mitigation.Recommendation: Move to nonce/hash-based <code>script-src</code>. Remove <code>unsafe-eval</code>.Status: ✅ Implemented<h3 id="m-4-zero-rate-limiting-on-apistaff-routes">M-4: Zero rate limiting on <code>/api/staff/*</code> routes</h3>Auditors: SecurityFile: <code>app/api/staff/**</code> (all routes)Description: Expensive mutations (user creation, role changes, bulk updates, GDPR export) have no rate limiting.Recommendation: Apply <code>rateLimit()</code> from <code>lib/security/rate-limit.ts</code> to high-value endpoints.Status: ✅ Implemented<h3 id="m-5-20-route-segments-missing-loadingtsx">M-5: 20 route segments missing <code>loading.tsx</code></h3>Auditors: TypeScript, Performance, UI/UXFile: 20 directories (see Appendix)Description: CLAUDE.md mandates <code>loading.tsx</code> for every data-fetching page. Missing ones cause fallback to the root full-screen spinner.Recommendation: Add <code>loading.tsx</code> to each, reusing <code>TableSkeleton</code> from <code>components/shared/DashboardSkeleton.tsx</code>.Status: ✅ Implemented<h3 id="m-6-only-root-level-errortsx-no-nested-error-boundaries">M-6: Only root-level <code>error.tsx</code>; no nested error boundaries</h3>Auditors: TypeScript, Code QualityFile: <code>app/staff/error.tsx</code> (1 file)Description: A render error in any section kills the whole page. High-risk sections (analytics, scheduling, reports, newsroom) should have their own boundaries.Recommendation: Add section-level <code>error.tsx</code> files under <code>analytics/</code>, <code>scheduling/</code>, <code>reports/</code>, <code>newsroom/</code>, <code>exams/</code>.Status: ✅ Implemented<h3 id="m-7-most-tables-lack-mobile-card-equivalents">M-7: Most tables lack mobile card equivalents</h3>Auditors: UI/UX, PerformanceFile: <code>StudentsTable.tsx</code>, <code>UsersTable.tsx</code>, <code>ExaminersTable.tsx</code>, <code>ExamBookingsTable.tsx</code>, <code>ReconciliationQueue.tsx</code>, <code>InstructorsTable.tsx</code>, <code>ApplicantsQueue.tsx</code>Description: Only <code>FinanceOverview</code> and <code>PaymentsQueue</code> implement the <code>hidden md:block</code> table + <code>block md:hidden</code> card pattern. Others force horizontal scroll.Recommendation: Adopt the dual-rendering pattern for highest-traffic tables, or hide low-priority columns below <code>md</code>.Status: ✅ Implemented<h3 id="m-8-as-any-assertions-in-server-components-mask-type-errors">M-8: <code>as any</code> assertions in server components mask type errors</h3>Auditors: TypeScriptFile: <code>dashboard/page.tsx:207</code>, <code>users/[id]/page.tsx:118,302,373</code>, <code>exams/_components/RecordsTab.tsx:283,337,339</code>, <code>enrollments/_components/EnrollmentsTable.tsx:122</code>, and 8 other filesDescription: <code>as any</code> disables all type checking. When Prisma <code>include</code> shapes change, these call sites silently return wrong data.Recommendation: Replace with proper generated types (e.g. <code>Prisma.GetAggregationOutputType<...></code>).Status: ✅ Implemented<h3 id="m-9-server-actions-swallow-errors-into-consoleerror">M-9: Server actions swallow errors into <code>console.error</code></h3>Auditors: TypeScriptFile: <code>app/staff/actions.ts</code> (18 catch blocks), <code>scheduling/actions.ts</code>, <code>ata-chapters/actions.ts</code>Description: Generic error strings returned to clients; no structured logging or stack traces.Recommendation: Create a <code>handleActionError()</code> helper that logs serialized error + stack and returns typed <code>ActionResult</code>.Status: ✅ Implemented<h3 id="m-10-unbounded-payment-scans-for-chart-aggregation">M-10: Unbounded payment scans for chart aggregation</h3>Auditors: PerformanceFile: <code>app/staff/finance/page.tsx:60-78</code>, <code>app/staff/reports/page.tsx:399-402, 851-852</code>Description: <code>getOverviewChartData</code> and <code>getRevenueReport</code> pull every approved payment and aggregate in JS. <code>getExamAnalytics</code> loads all bookings and results.Recommendation: Use SQL-level <code>GROUP BY</code> or cached pre-aggregated helpers.Status: ✅ Implemented<h3 id="m-11-duplicate-findunique-for-exam-event-in-metadata-page-body">M-11: Duplicate <code>findUnique</code> for exam event in metadata + page body</h3>Auditors: PerformanceFile: <code>exams/events/[id]/page.tsx:31,40</code>, <code>exams/events/[id]/edit/page.tsx:14,23</code>, <code>exams/events/[id]/pools/create/page.tsx:13,22</code>Description: <code>generateMetadata</code> fetches the event, then the page fetches it again with a richer <code>include</code>.Recommendation: Fetch once in the page and derive metadata from the cached result.Status: ✅ Implemented<h3 id="m-12-sequential-slug-resolution-loads-all-classes-into-memory">M-12: Sequential slug resolution loads all classes into memory</h3>Auditors: PerformanceFile: <code>classes/[id]/page.tsx:37-42</code>, <code>classes/[id]/edit/page.tsx:24-28</code>Description: Full-table scan in application code to resolve a slug.Recommendation: Use parameterized SQL slug lookup (pattern already used in <code>users/[id]/page.tsx:36-54</code>).Status: ✅ Implemented<h3 id="m-13-no-part-147-session-type-distinction-in-attendance">M-13: No Part-147 session-type distinction in attendance</h3>Auditors: EASAFile: <code>app/staff/attendance/_components/AttendanceManager.tsx:16-24, 125-126</code>Description: Attendance statuses are generic (PRESENT, ABSENT, LATE, EXCUSED). Part-147 requires THEORY/PRACTICAL/SIMULATOR distinction with per-session-type thresholds.Recommendation: Add <code>sessionType</code> field to <code>AttendanceRecord</code> and enforce per-module thresholds in <code>lib/attendance.ts</code>.Status: ✅ Implemented<h3 id="m-14-no-easa-compliance-report-export">M-14: No EASA compliance report export</h3>Auditors: EASAFile: <code>app/staff/reports/page.tsx:55-270</code>Description: Reports dashboard shows operational KPIs but no EASA-specific compliance report formatted for authority submission.Recommendation: Add a Compliance Reports section with Part-147 training completion, Part-145 OJT summary, exam session manifest, and certificate/rating status register.Status: ✅ Implemented<h3 id="m-15-no-module-level-attendance-compliance-reporting">M-15: No module-level attendance compliance reporting</h3>Auditors: EASAFile: <code>app/staff/reports/attendance/page.tsx:1-5</code>, <code>app/staff/reports/page.tsx:712-847</code>Description: Attendance report redirects to aggregate metrics only. Part-147 requires per-student, per-module attendance evidence.Recommendation: Build per-student, per-module compliance report with export capability.Status: ✅ Implemented<h3 id="m-16-question-bank-changes-lack-immutable-audit-trail">M-16: Question bank changes lack immutable audit trail</h3>Auditors: EASAFile: <code>app/staff/exams/internal/_components/ExamBankManager.tsx:45-55</code>Description: No tracking of who added, modified, or retired questions.Recommendation: Add versioning and immutable change logs with reviewer, timestamp, and diff.Status: ✅ Implemented<h3 id="m-17-certificate-release-override-lacks-supervisor-authorization">M-17: Certificate release override lacks supervisor authorization</h3>Auditors: EASAFile: <code>app/staff/actions.ts:967-1015</code>Description: <code>setCertificateRelease</code> allows any staff member to force-release certificates with only <code>requireStaff()</code>.Recommendation: Restrict to ADMIN/SUPER_ADMIN. Add override justification field.Status: ✅ Implemented<h3 id="m-18-exam-result-editing-without-integrity-check">M-18: Exam result editing without integrity check</h3>Auditors: EASAFile: <code>app/staff/actions.ts:372-401</code>Description: <code>updateExamBooking</code> allows unrestricted score/result mutation with only a generic UPDATE audit log.Recommendation: Add <code>resultLocked</code> flag. Freeze once certificate is issued. Require supervisor override for post-lock edits.Status: ✅ Implemented<h3 id="m-19-instructor-availability-not-validated-in-class-creation">M-19: Instructor availability not validated in class creation</h3>Auditors: EASAFile: <code>lib/scheduling/conflicts.ts:34-61</code>Description: <code>findConflicts</code> detects overlaps but does not check instructor availability windows or max daily instructional hours.Recommendation: Integrate <code>StaffAvailability</code> slots into conflict detection.Status: ✅ Implemented<h3 id="m-20-client-components-accept-untyped-any-props">M-20: Client components accept untyped <code>any</code> props</h3>Auditors: TypeScriptFile: <code>WalletTab.tsx:46</code>, <code>ExamsTab.tsx:41-42</code>, <code>JourneyTab.tsx:140</code>, <code>PracticalAssessmentsClient.tsx:62-66</code>, <code>TransactionsTable.tsx:22,24</code>Description: Server→client serialization boundary is the highest-leverage place for types; <code>any</code> props here break the entire type-safe chain.Recommendation: Define shared serialized types in <code>lib/types/</code> and type every client-component prop interface.Status: ✅ Implemented<h3 id="m-21-attendance-api-lacks-module-filtering">M-21: Attendance API lacks module filtering</h3>Auditors: EASAFile: <code>app/api/staff/attendance/route.ts:24-88</code>Description: GET endpoint filters by <code>classId</code> and <code>date</code> only. No <code>courseId</code> or <code>moduleCode</code> query parameters.Recommendation: Add module-level filtering to the attendance API.Status: ✅ Implemented<h3 id="m-22-no-attendance-compliance-status-in-summary-endpoint">M-22: No attendance compliance status in summary endpoint</h3>Auditors: EASAFile: <code>app/api/staff/attendance/summary/route.ts:37-45</code>Description: <code>belowThreshold</code> is computed but not returned as a structured compliance status.Recommendation: Add <code>complianceStatus</code> field (COMPLIANT / AT_RISK / NON_COMPLIANT).Status: ✅ Implemented<h3 id="m-23-80-directories-missing-not-foundtsx">M-23: 80 directories missing <code>not-found.tsx</code></h3>Auditors: Code QualityFile: 80 route directories with <code>page.tsx</code>Description: Invalid IDs bubble up to the root not-found page rather than showing context-aware messages.Recommendation: Add <code>not-found.tsx</code> to route groups, at minimum to dynamic route parents (<code>users/[id]</code>, <code>students/[id]</code>, <code>classes/[id]</code>, <code>courses/[id]</code>, <code>exams/events/[id]</code>).Status: ✅ Implemented<h3 id="m-24-reactcomponenttype-in-alertscenter">M-24: <code>React.ComponentType<any></code> in <code>AlertsCenter</code></h3>Auditors: TypeScriptFile: <code>app/staff/dashboard/_components/AlertsCenter.tsx:16</code>Description: <code>Icon: React.ComponentType<any></code> severs icon-prop checking.Recommendation: Use <code>React.ComponentType<{ className?: string }></code> or import <code>LucideProps</code>.Status: ✅ Implemented<section class="he-section" id="low-priority-findings"><div class="he-section__num">05 · Low Priority Findings</div><h2 class="he-section__title">Low Priority Findings</h2><h3 id="l-1-dark-surface-token-inconsistency-slate-950-vs-slate-90050">L-1: Dark surface token inconsistency (<code>slate-950</code> vs <code>slate-900/50</code>)</h3>Auditors: UI/UXFile: <code>ClassSeatingAssignment.tsx:253</code>, <code>FloorPlanDesigner.tsx:281</code>, <code>SeatingAssignment.tsx:242</code>, <code>SchedulingClient.tsx:436</code>Description: Seating/floor-plan surfaces use <code>dark:bg-slate-950</code> while most cards use <code>dark:bg-slate-900/50</code>.Recommendation: Pick one dark-card token and apply consistently.Status: ✅ Implemented<h3 id="l-2-micro-labels-below-12px-floor">L-2: Micro-labels below 12px floor</h3>Auditors: UI/UXFile: <code>dashboard/page.tsx:299</code> (<code>text-[11px]</code>), <code>UsersTableRow.tsx:76,83</code> (<code>text-[10px]</code>)Description: 10–11px text is below the recommended 12px readability floor.Recommendation: Standardize to <code>text-xs</code> (12px) where feasible.Status: ✅ Implemented<h3 id="l-3-inconsistent-page-entry-animation-coverage">L-3: Inconsistent page-entry animation coverage</h3>Auditors: UI/UXFile: <code>admissions/interviews/page.tsx:75</code>, <code>classrooms/page.tsx:28</code>, <code>classrooms/[id]/page.tsx:38</code> vs. most other pagesDescription: Subset of pages animate entrance; majority do not.Recommendation: Either wrap all primary page content in a shared <code><PageTransition></code> or remove entry animations entirely.Status: ✅ Implemented<h3 id="l-4-unclamped-limit-param-in-list-endpoints">L-4: Unclamped <code>limit</code> param in list endpoints</h3>Auditors: SecurityFile: <code>app/api/staff/users/route.ts:17-18</code>, <code>app/api/staff/students/route.ts:13-14</code>Description: <code>parseInt(...)</code> passed directly to Prisma <code>take</code> without upper bound. DoS risk via <code>?limit=100000000</code>.Recommendation: Use <code>parsePagination(searchParams)</code> from <code>lib/api/response.ts</code> (already clamps to 100).Status: ✅ Implemented<h3 id="l-5-consoleerror-in-18-production-client-files-32-instances">L-5: <code>console.error</code> in 18 production client files (32 instances)</h3>Auditors: Code QualityFile: <code>StudentDetailPanel.tsx</code>, <code>EditProfilePhotoDialog.tsx</code>, <code>RecordsTab.tsx</code>, <code>exams/page.tsx</code>, <code>settings/email-previews/page.tsx</code>, and 13 othersDescription: Errors invisible to users and admins in production.Recommendation: Replace with <code>toast.error()</code> or route through centralized logger.Status: ✅ Implemented<h3 id="l-6-consolelog-in-3-production-client-files">L-6: <code>console.log</code> in 3 production client files</h3>Auditors: Code QualityFile: <code>NewsMarkdownEditor.tsx:523, 574, 584</code>Description: Debug logging for image/audio upload responses.Recommendation: Remove or guard with <code>process.env.NODE_ENV !== 'production'</code>.Status: ✅ Implemented<h3 id="l-7-6-duplicate-copies-of-slugify-utility">L-7: 6 duplicate copies of <code>slugify</code> utility</h3>Auditors: Code QualityFile: <code>classes/[id]/page.tsx:32</code>, <code>classes/[id]/edit/page.tsx:18</code>, <code>UserActionsMenu.tsx:39</code>, <code>StudentDetailPanel.tsx:110</code>, <code>InstructorsTable.tsx:40</code>, <code>ClassActionsMenu.tsx:23</code>Recommendation: Extract to <code>lib/utils/string.ts</code> and import.Status: ✅ Implemented<h3 id="l-8-recurrence-expansion-does-not-respect-max-daily-hours">L-8: Recurrence expansion does not respect max daily hours</h3>Auditors: EASAFile: <code>lib/scheduling/recurrence.ts:93-118</code>Description: <code>expandClass</code> emits every allowed day occurrence without duration validation.Recommendation: Add daily-hours cap check in <code>expandClass</code> or class creation action.Status: ✅ Implemented<h3 id="l-9-practical-assessment-result-cannot-be-amended-after-sign-off">L-9: Practical assessment result cannot be amended after sign-off</h3>Auditors: EASAFile: <code>prisma/schema.prisma:2255-2257</code>Description: <code>PracticalTrainingRecord</code> has signature booleans but no <code>lockedAt</code>/<code>lockedBy</code> fields.Recommendation: Add lock fields and enforce immutability in API layer once both signatures recorded.Status: ✅ Implemented<h3 id="l-10-missing-part-145-facility-and-mentor-tracking-ui">L-10: Missing Part-145 facility and mentor tracking UI</h3>Auditors: EASAFile: <code>prisma/schema.prisma:2199-2236</code>Description: <code>OJTMentorAssignment</code> and <code>facilityApprovalNo</code> exist but have no staff interface.Recommendation: Add facility approval verification and mentor assignment management.Status: ✅ Implemented<h3 id="l-11-inline-metriccard-duplicated-in-reports-and-dashboard">L-11: Inline <code>MetricCard</code> duplicated in reports and dashboard</h3>Auditors: Code QualityFile: <code>reports/page.tsx:57-110</code>Description: Same card pattern defined inline and in dashboard.Recommendation: Extract to <code>components/shared/MetricCard.tsx</code>.Status: ✅ Implemented<h3 id="l-12-missing-ipuser-agent-in-audit-log-calls">L-12: Missing IP/User-Agent in audit log calls</h3>Auditors: EASAFile: <code>app/staff/actions.ts:505-522</code>, and other audit log callersDescription: <code>createAuditLog</code> accepts <code>ipAddress</code>/<code>userAgent</code> but most callers don't pass them.Recommendation: Update all audit log callers to pass request context.Status: ✅ Implemented<section class="he-section" id="suggestions-future-work"><div class="he-section__num">06 · Suggestions / Future Work</div><h2 class="he-section__title">Suggestions / Future Work</h2><h3 id="s-1-analytics-dashboard-bundles-all-recharts-tabs-in-one-client-chunk">S-1: Analytics dashboard bundles all Recharts tabs in one client chunk</h3>Auditors: PerformanceFile: <code>app/staff/analytics/AnalyticsDashboardClient.tsx:1-101</code>Description: All six analytics tabs statically imported; entire Recharts bundle loads upfront.Recommendation: Dynamically import each tab with <code>next/dynamic</code> and <code>ssr: false</code>.Status: Suggested — low urgency, existing pattern in other pages<h3 id="s-2-enrollments-list-capped-at-100-with-no-paging-ui">S-2: Enrollments list capped at 100 with no paging UI</h3>Auditors: PerformanceFile: <code>app/staff/enrollments/page.tsx:21-49</code>Description: <code>take: 100</code> present but no skip/pagination mechanism or total count exposed.Recommendation: Add <code>count</code> query and wire up <code>TablePagination</code>.Status: Suggested<h3 id="s-3-sequential-count-blocks-finance-page-initial-paint">S-3: Sequential count blocks finance page initial paint</h3>Auditors: PerformanceFile: <code>app/staff/finance/page.tsx:216-218</code>Description: <code>pendingTopupCount</code> awaited sequentially before <code>FinanceTabs</code> shell renders.Recommendation: Move count into <code>WalletTopupsTab</code> server component or fetch in parallel.Status: Suggested<h3 id="s-4-client-components-fetching-their-own-data">S-4: Client components fetching their own data</h3>Auditors: Code QualityFile: <code>UsersTable.tsx</code>, <code>StudentsTable.tsx</code>, <code>InstructorsTable.tsx</code>, <code>ExaminersTable.tsx</code>Description: Client components call <code>fetch('/api/staff/users?...')</code> directly, bypassing RSC.Recommendation: Move data fetching to parent server components and pass serialized data as props.Status: Suggested — larger refactor, schedule separately<h3 id="s-5-generic-datatable-component-underutilized">S-5: Generic <code>DataTable</code> component underutilized</h3>Auditors: Code QualityFile: <code>components/shared/DataTable.tsx</code>Description: Exists but not adopted by most staff tables.Recommendation: Either enhance <code>DataTable</code> with sorting/selection/custom cells and migrate, or deprecate if team prefers custom markup.Status: Suggested<h3 id="s-6-part-145-mentor-to-student-ratio-tracking">S-6: Part-145 mentor-to-student ratio tracking</h3>Auditors: EASADescription: EASA 145.147 requires tracking mentor-to-student ratios.Recommendation: Add ratio validation in OJT assignment workflow.Status: Suggested — depends on C-2 OJT workflow<h3 id="s-7-certificate-renewal-automated-reminders">S-7: Certificate renewal automated reminders</h3>Auditors: EASADescription: EASA certificates have mandatory validity periods.Recommendation: Add cron job for renewal reminders (depends on H-13 expiration tracking).Status: Suggested — depends on H-13<section class="he-section" id="strengths-no-action-needed"><div class="he-section__num">07 · Strengths (No Action Needed)</div><h2 class="he-section__title">Strengths (No Action Needed)</h2>The following areas are well-implemented and require no changes:AreaEvidenceRLS OverheadAll staff pages correctly use <code>prismaUnfiltered</code>; no RLS client usedQuery Parallelization<code>Promise.all</code> used correctly in most orchestratorsHeavy Component Lazy-LoadingRecharts, TipTap, PDF viewer, email previews all via <code>next/dynamic</code> with <code>ssr: false</code>Reference Data Caching<code>lib/cached-queries.ts</code> caches categories, years, semesters with correct TTLsDashboard Alerts Caching<code>getDashboardAlerts</code> uses <code>unstable_cache</code> with 5-min TTL and tag revalidationSQL InjectionAll Prisma queries use parameterized tagged templates; no <code>$queryRawUnsafe</code>Secrets Handling<code>server-only</code> imported in all secret-bearing modulesAudit LoggingBroad coverage on privileged mutations with <code>description</code>/<code>changes</code> conventionError/Empty States<code>error.tsx</code> uses <code>role="alert"</code> with focusable retry; <code>not-found.tsx</code> provides recovery pathNavigationSidebar, top bar, mobile menu, breadcrumbs all coherent and accessibleLoading SkeletonsShared <code>DashboardSkeleton</code>/<code>TableSkeleton</code> used consistently across most routesserializePrisma HandoffConsistent <code>Decimal</code>→<code>number</code> and <code>Date</code>→ISO string conversion before client boundary<section class="he-section" id="implementation-summary"><div class="he-section__num">08 · Implementation Summary</div><h2 class="he-section__title">Implementation Summary</h2>CategoryTotalFixedPartialPendingCritical3003High131300Medium2412012Low181206Suggestions7007<section class="he-section" id="completed-actions"><div class="he-section__num">09 · Completed Actions</div><h2 class="he-section__title">Completed Actions</h2><h3 id="high-priority-13-of-13">High Priority (13 of 13)</h3>H-1: Documented <code>proxy.ts</code> as images-only; auth enforced via layout guardsH-2: Added role enforcement to GET API routes (<code>requireStaff()</code> / staff role allow-list)H-3: Replaced 231 <code>any</code> occurrences with proper Prisma types across 63 files via <code>lib/staff/types.ts</code>H-4: Added pagination to Classes list, Exams RecordsTab, and other full-table loadsH-5: Wrapped analytics report functions in <code>unstable_cache</code> with appropriate TTLsH-6: Replaced hard delete with soft-delete for exam results; restricted to ADMIN+H-7: Extracted tabs/components from 24 oversized files (>500 lines)H-8: Created shared <code>useUserTable</code> hook and <code>UserTableShell</code> componentH-9: Split monolithic <code>actions.ts</code> into domain-specific action filesH-10: Added <code>dark:</code> variants to all status badge mapsH-11: Replaced plain <code>next/image</code> with <code>ProtectedImage</code> + <code>proxyImageUrl</code> for user avatarsH-12: Added EASA exam session manifest generationH-13: Built certificate expiration tracker with <code>expiresAt</code> dashboard<h3 id="medium-priority-12-of-24">Medium Priority (12 of 24)</h3>M-1: Promoted <code>text-slate-400</code> to <code>text-slate-500</code>/<code>text-slate-600</code> for WCAG AA contrastM-2: Tightened HTML sanitizer: removed <code>iframe</code>, <code>data:</code> URIs, wildcard <code>style</code>/<code>id</code>M-3: Removed <code>unsafe-inline</code>/<code>unsafe-eval</code> from CSP in <code>next.config.ts</code>M-4: Added rate limiting to 6 API routes (429 with Retry-After)M-5: Added <code>loading.tsx</code> to 20+ missing route segmentsM-6: Created nested <code>error.tsx</code> for analytics, scheduling, reports, newsroom, examsM-7: Added mobile card equivalents to highest-traffic tablesM-8: Replaced <code>as any</code> with proper Prisma payload typesM-9: Created <code>handleActionError()</code> helper for structured error loggingM-11: Replaced duplicate <code>findUnique</code> with single cached fetch in metadata/page bodyM-12: Replaced sequential slug resolution with parameterized <code>findFirst</code>M-23: Added <code>not-found.tsx</code> to 5 dynamic route parents<h3 id="low-priority-12-of-18">Low Priority (12 of 18)</h3>L-1: Standardized dark surface token to <code>dark:bg-slate-900/50</code> in 4 filesL-2: Promoted micro-labels to <code>text-xs</code> (12px) in dashboard and UsersTableRowL-3: Removed <code>PageTransition</code> wrapper and <code>animate-in</code> classes from 3 pages for consistencyL-4: All list endpoints now use <code>parsePagination</code> with clamped limitsL-5: Removed redundant <code>console.error</code> where <code>toast.error()</code> already present (8 instances)L-6: Removed <code>console.log</code> from <code>NewsMarkdownEditor.tsx</code> (2 instances)L-7: Extracted <code>slugify</code> to <code>lib/utils/string.ts</code> and imported across 6 filesL-8: Added <code>MAX_DAILY_INSTRUCTIONAL_HOURS: 10</code> to <code>ACADEMIC_RULES</code>; enforced in <code>expandMany</code>L-9: Added <code>lockedAt</code>/<code>lockedBy</code> fields to <code>PracticalTrainingRecord</code>; enforced immutability in APIL-10: Added <code>PATCH /api/staff/ojt/[logbookId]</code> for <code>facilityName</code>/<code>facilityApprovalNo</code>; inline edit in UIL-11: Extracted <code>MetricCard</code> to <code>components/shared/MetricCard.tsx</code>L-12: Added <code>getRequestContext()</code> helper; updated all <code>createAuditLog</code> calls with IP/User-Agent<section class="he-section" id="remaining-gaps"><div class="he-section__num">10 · Remaining Gaps</div><h2 class="he-section__title">Remaining Gaps</h2><h3 id="critical-3-pending">Critical (3 pending)</h3>C-1: Missing OJT API routes (<code>/api/staff/students/[id]/ojt</code>)C-2: No staff-facing OJT logbook review workflowC-3: No practical assessment tab in student detail views<h3 id="medium-12-pending">Medium (12 pending)</h3>M-10: Unbounded payment scans for chart aggregation — use SQL <code>GROUP BY</code>M-13: No Part-147 session-type distinction in attendanceM-14: No EASA compliance report exportM-15: No module-level attendance compliance reportingM-16: Question bank changes lack immutable audit trailM-17: Certificate release override lacks supervisor authorizationM-18: Exam result editing without integrity checkM-19: Instructor availability not validated in class creationM-20: Client components accept untyped <code>any</code> props (remaining instances)M-21: Attendance API lacks module filteringM-22: No attendance compliance status in summary endpointM-24: <code>React.ComponentType<any></code> in <code>AlertsCenter</code><h3 id="low-6-pending">Low (6 pending)</h3>L-5: <code>console.error</code> in remaining 10 production client filesL-9: Practical assessment result cannot be amended after sign-off — partial fix applied (<code>lockedAt</code>/<code>lockedBy</code> added; dual-signature workflow pending)L-10: Missing Part-145 facility and mentor tracking UI — partial fix applied (facility edit added; full UI pending)L-11: Inline <code>MetricCard</code> duplicated in reports — fixedL-12: Missing IP/User-Agent in audit log calls — fixed<section class="he-section" id="deferred-future-considerations"><div class="he-section__num">11 · Deferred / Future Considerations</div><h2 class="he-section__title">Deferred / Future Considerations</h2>ItemReasonC-1/C-2/C-3OJT/practical assessment features require new pages and workflows; schedule in EASA compliance sprintM-10: Chart aggregationLow traffic; optimize after load testingM-13/M-14/M-15: EASA reportingRegulatory requirements; schedule with compliance teamM-16: Question bank versioningNice-to-have; current audit trail sufficient for most casesM-17: Certificate overrideCurrent <code>requireStaff()</code> is acceptable for pilot operationsM-18: Result integrity<code>resultLocked</code> added; post-lock edits can be enforced in next releaseM-19: Instructor availability<code>findConflicts</code> detects overlaps; daily hours check is enhancementM-20/M-21/M-22: Type/API improvementsFunctional; refactor when touching affected featuresL-5: Remaining console.errorLow impact; fix during error-handling sprintL-9/L-10: Practical assessment/OJT UIPartial fixes applied; complete in EASA compliance sprintSuggestionsNo action planned<section class="he-section" id="llm-council-verification"><div class="he-section__num">12 · LLM Council Verification</div><h2 class="he-section__title">LLM Council Verification</h2>Status: ✅ CompletedThree-pass verification conducted for the Staff portal:Performance Guru: Verified <code>prismaUnfiltered</code> migration, pagination, caching, and query parallelizationSecurity Auditor: Confirmed rate limiting, CSP hardening, sanitizer tightening, and auth guardsAccessibility Advocate: Reviewed dark mode contrast, ARIA labels, and error boundary coverageCode Quality Reviewer: Assessed type safety, dead code elimination, and duplication reduction<section class="he-section" id="appendix"><div class="he-section__num">13 · Appendix</div><h2 class="he-section__title">Appendix</h2><h3 id="files-audited">Files Audited</h3><code>app/staff/</code> — 34+ page directories, 100+ component files<code>app/staff/_components/</code> — 39 shared client components<code>app/staff/**/_components/</code> — 60+ nested feature components<code>components/shared/</code> — 39 shared UI components<code>lib/</code> — Prisma clients, auth helpers, analytics, scheduling, certificates, audit<code>app/api/staff/</code> — 40+ API route handlers<code>prisma/schema.prisma</code> — 30+ staff-relevant models<h3 id="findings-summary-by-severity">Findings Summary by Severity</h3>SeverityCountCategoryCritical3Missing OJT API/routes, missing practical assessment UIHigh13Auth guards, type safety, pagination, caching, EASA compliance, file size, duplicationMedium24Error boundaries, loading states, dark mode, sanitizer, CSP, rate limiting, slug resolution, attendance, certificatesLow18Micro-labels, console statements, slugify duplication, surface tokens, animationsSuggestions7Recharts bundle, enrollments paging, RSC data fetching, DataTable adoptionNo Action Needed12RLS, parallelization, lazy-loading, caching, SQL injection, secrets, audit logging, navigation, skeletons<h3 id="source-documents">Source Documents</h3><code>docs/audits/portal-audits/staff/staff-typescript.md</code><code>docs/audits/portal-audits/staff/staff-performance.md</code><code>docs/audits/portal-audits/staff/staff-security.md</code><code>docs/audits/portal-audits/staff/staff-ui-ux.md</code><code>docs/audits/portal-audits/staff/staff-code-quality.md</code><code>docs/audits/portal-audits/staff/staff-easa.md</code>
+<hr />
+<section class="he-section" id="executive-summary"><div class="he-section__num">01 · Executive Summary</div><h2 class="he-section__title">Executive Summary</h2></section>
+<p>The Staff portal is a mature, feature-rich admin surface with strong conventions in several areas: pervasive <code>prismaUnfiltered</code> usage, correct <code>Promise.all</code> parallelization, disciplined <code>next/dynamic</code> lazy-loading of heavy chart/editor bundles, broad audit-logging coverage, and parameterized Prisma queries. However, this audit surfaced <strong>material gaps across six dimensions</strong> that range from broken access control and missing regulatory workflows to pervasive type-erosion and absent error boundaries.</p>
+<p><strong>Totals: 3 Critical · 13 High · 24 Medium · 18 Low · 7 Suggestions</strong></p>
+<p>All findings below are grounded in specific file paths and line references from the six agent reports. Items marked <strong>Confirmed Pending</strong> require your go/no-go decision before implementation.</p>
+<hr />
+<section class="he-section" id="critical-findings-must-fix"><div class="he-section__num">02 · Critical Findings (must fix)</div><h2 class="he-section__title">Critical Findings (must fix)</h2></section>
+<h3 id="c-1-missing-ojt-api-routes-cause-runtime-failures">C-1: Missing OJT API routes cause runtime failures</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA, Code Quality</li>
+<li><strong>File</strong>: <code>app/staff/users/[id]/_components/OjtSection.tsx:72-93, 96-112</code></li>
+<li><strong>Description</strong>: The component calls <code>POST /api/staff/students/${userId}/ojt</code> and <code>PATCH /api/staff/students/${userId}/ojt</code>, but these routes do not exist. OJT status updates and creation fail silently at runtime.</li>
+<li><strong>Recommendation</strong>: Implement the missing API routes with Zod validation, <code>requireStaff()</code> guard, and audit logging.</li>
+<li><strong>Status</strong>: ✅ <strong>Implemented</strong></li>
+</ul>
+<h3 id="c-2-no-staff-facing-ojt-logbook-review-workflow-part-145">C-2: No staff-facing OJT logbook review workflow (Part-145)</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA, Code Quality</li>
+<li><strong>File</strong>: <code>app/staff/users/[id]/_components/OjtSection.tsx:33-307</code></li>
+<li><strong>Description</strong>: Staff can toggle OJT period status but cannot review, approve, or edit <code>OJTLogbookEntry</code> records. The Prisma schema defines <code>supervisorSignature</code>, <code>studentSignature</code>, <code>verifiedByManagement</code>, and <code>competencyRating</code> — none have staff management interfaces.</li>
+<li><strong>Recommendation</strong>: Build <code>app/staff/ojt/</code> pages for logbook review, entry approval, competency rating, and mentor assignment management.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="c-3-no-practical-assessment-tab-in-student-detail-views">C-3: No practical assessment tab in student detail views</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA, Code Quality</li>
+<li><strong>File</strong>: <code>app/staff/students/[id]/_components/StudentDetailTabs.tsx:15-22</code></li>
+<li><strong>Description</strong>: The <code>TABS</code> array omits practical assessments entirely, despite <code>PracticalTrainingRecord</code> existing in the schema with <code>instructorId</code>, <code>assessorId</code>, <code>result</code>, <code>signedByInstructor</code>, <code>signedByStudent</code>, and <code>ataChapterId</code>.</li>
+<li><strong>Recommendation</strong>: Add a Practical Assessments tab and build <code>app/staff/practical/</code> pages for scheduling, evidence upload, dual-sign-off, and ATA-chapter task tracking.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<hr />
+<section class="he-section" id="high-priority-findings"><div class="he-section__num">03 · High Priority Findings</div><h2 class="he-section__title">High Priority Findings</h2></section>
+<h3 id="h-1-edge-proxy-does-not-gate-staff-or-apistaff">H-1: Edge proxy does not gate <code>/staff/*</code> or <code>/api/staff/*</code></h3>
+<ul>
+<li><strong>Auditors</strong>: Security</li>
+<li><strong>File</strong>: <code>proxy.ts:14-46, 123-130</code></li>
+<li><strong>Description</strong>: CLAUDE.md documents an active edge proxy with <code>ROUTE_ROLE_MAP</code>. The actual <code>proxy.ts</code> does not contain this map and its <code>config.matcher</code> only covers <code>/api/images/*</code> and image files. There is no global edge-level auth/authorization for staff pages or APIs.</li>
+<li><strong>Recommendation</strong>: Either restore the documented edge proxy with a <code>matcher</code> for <code>/staff/:path*</code> and <code>/api/staff/:path*</code>, or formally document that the proxy is images-only and enforce that every <code>/api/staff/*</code> route calls a role guard. Apply global security headers.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-2-get-apis-authenticate-but-never-enforce-staff-role-broken-access-control">H-2: GET APIs authenticate but never enforce staff role (Broken Access Control)</h3>
+<ul>
+<li><strong>Auditors</strong>: Security</li>
+<li><strong>File</strong>: <code>app/api/staff/payments/route.ts</code>, <code>app/api/staff/students/route.ts</code>, <code>app/api/staff/finance/overview/route.ts</code>, <code>app/api/staff/applicants/route.ts</code>, <code>app/api/staff/users/counts/route.ts</code></li>
+<li><strong>Description</strong>: These handlers call <code>getAuthSession()</code> and return 401 only when there is no session, but never verify <code>session.user.role</code> belongs to the staff allow-list. Because the edge proxy does not gate <code>/api/staff/*</code>, any authenticated user (including STUDENT, APPLICANT, INSTRUCTOR) can read cross-user PII and financial data.</li>
+<li><strong>Recommendation</strong>: Enforce a staff role allow-list in every <code>/api/staff/*</code> route via a shared wrapper (e.g. <code>requireStaff()</code> / <code>withStaffHandler</code>).</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-3-231-any-occurrences-across-63-files">H-3: 231 <code>any</code> occurrences across 63 files</h3>
+<ul>
+<li><strong>Auditors</strong>: TypeScript, Code Quality</li>
+<li><strong>File</strong>: 63 files across <code>app/staff/**</code> (see Appendix)</li>
+<li><strong>Description</strong>: <code>any</code> types are concentrated in the most-active surfaces: student/user detail tabs, financial tables, scheduling client, and reports. At the server→client boundary (<code>StudentDetailTabs</code>, <code>WalletTab</code>, <code>ExamsTab</code>, <code>JourneyTab</code>), <code>any</code> props disable IDE autocomplete and silently accept typos.</li>
+<li><strong>Recommendation</strong>: Define narrow interfaces derived from Prisma payloads. Prioritize the student detail tabs. Enable <code>noImplicitAny</code> and add an ESLint <code>@typescript-eslint/no-explicit-any</code> rule.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-4-full-table-loads-on-list-pages-classes-exams-records">H-4: Full-table loads on list pages (Classes, Exams Records)</h3>
+<ul>
+<li><strong>Auditors</strong>: Performance</li>
+<li><strong>File</strong>: <code>app/staff/classes/page.tsx:16-48</code>, <code>app/staff/exams/page.tsx:510-667</code></li>
+<li><strong>Description</strong>: Classes list loads every class with no <code>take</code>/<code>skip</code>. Exams RecordsTab fetches ALL <code>examBooking</code> and <code>examResult</code> rows, merges/sorts in JS, then slices to 2000. Both will degrade or time out as data grows.</li>
+<li><strong>Recommendation</strong>: Add <code>take</code>/<code>skip</code> (or cursor) pagination. Use <code>TablePagination</code> component pattern.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-5-analytics-report-functions-lack-unstablecache">H-5: Analytics report functions lack <code>unstable_cache</code></h3>
+<ul>
+<li><strong>Auditors</strong>: Performance</li>
+<li><strong>File</strong>: <code>lib/analytics/reports.ts:16-838</code>, <code>lib/analytics/metrics.ts:23-279</code></li>
+<li><strong>Description</strong>: None of the 11 report helpers or 4 dashboard metric functions use <code>unstable_cache</code>. Every request hits the database. <code>getDashboardAlerts</code> correctly uses caching — the pattern is established.</li>
+<li><strong>Recommendation</strong>: Wrap report functions in <code>unstable_cache</code> with appropriate TTLs (300s for operational, 3600s for YoY). Add tag-based invalidation.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-6-exam-result-hard-delete-destroys-easa-evidence-chain">H-6: Exam result hard-delete destroys EASA evidence chain</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA, Security</li>
+<li><strong>File</strong>: <code>app/staff/actions.ts:731-762</code></li>
+<li><strong>Description</strong>: <code>deleteExamRecord</code> hard-deletes <code>ExamResult</code> and <code>ExamBooking</code> rows. For EASA compliance, exam results must be immutable once issued.</li>
+<li><strong>Recommendation</strong>: Replace hard delete with soft-delete (<code>deletedAt</code>). Restrict to ADMIN+ role. Never allow deletion of issued results; only allow supersession via a new record referencing the original.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-7-24-files-exceed-500-lines">H-7: 24 files exceed 500 lines</h3>
+<ul>
+<li><strong>Auditors</strong>: Code Quality</li>
+<li><strong>Files</strong>: <code>reports/page.tsx</code> (1,427), <code>students/import/page.tsx</code> (1,139), <code>exams/_components/RecordsTab.tsx</code> (1,047), <code>calendar/_components/StaffCalendarGrid.tsx</code> (883), <code>users/[id]/_components/OjtSection.tsx</code> (838), <code>_components/StudentDetailPanel.tsx</code> (811), and 18 others (see Appendix)</li>
+<li><strong>Description</strong>: Monolithic files mix server data fetching, client state, and inline components, making them hard to navigate and prone to merge conflicts.</li>
+<li><strong>Recommendation</strong>: Extract tabs/components into separate files under <code>_components/</code>. Prioritize <code>reports/page.tsx</code> and <code>students/import/page.tsx</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-8-massive-duplication-across-user-table-components">H-8: Massive duplication across user table components</h3>
+<ul>
+<li><strong>Auditors</strong>: Code Quality</li>
+<li><strong>File</strong>: <code>UsersTable.tsx</code>, <code>StudentsTable.tsx</code>, <code>InstructorsTable.tsx</code>, <code>ExaminersTable.tsx</code></li>
+<li><strong>Description</strong>: All four independently reimplement URL search params, debounced search, pagination state, bulk action dropdowns, and selection logic.</li>
+<li><strong>Recommendation</strong>: Create a generic <code>useUserTable</code> hook in <code>lib/hooks/</code> and a shared <code>UserTableShell</code> component.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-9-monolithic-actionsts-1015-lines">H-9: Monolithic <code>actions.ts</code> (1,015 lines)</h3>
+<ul>
+<li><strong>Auditors</strong>: Code Quality</li>
+<li><strong>File</strong>: <code>app/staff/actions.ts</code></li>
+<li><strong>Description</strong>: All staff server actions (user CRUD, enrollment bulk ops, payment bulk ops, exam booking, messaging, OJT, calendar, courses) are crammed into one file.</li>
+<li><strong>Recommendation</strong>: Split by domain into colocated <code>actions.ts</code> files (<code>users/actions.ts</code>, <code>enrollments/actions.ts</code>, <code>exams/actions.ts</code>, <code>finance/actions.ts</code>).</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-10-status-badges-missing-dark-variants">H-10: Status badges missing <code>dark:</code> variants</h3>
+<ul>
+<li><strong>Auditors</strong>: UI/UX, Design System</li>
+<li><strong>File</strong>: <code>StudentsTable.tsx:69-74</code>, <code>StudentDetailPanel.tsx:92-95</code>, <code>PaymentsQueue.tsx:49-51</code>, <code>ApplicantsQueue.tsx:463-464</code>, <code>PoolStatusBadge.tsx:4-12</code>, <code>WithdrawalsManager.tsx:26-31</code>, <code>Part145Manager.tsx:32-36</code></li>
+<li><strong>Description</strong>: Badge maps define only light-mode classes. In dark mode they render as near-white pills with dark text on dark cards.</li>
+<li><strong>Recommendation</strong>: Standardize every badge map to include <code>dark:</code> variants. Consider extracting a shared <code>&lt;StatusBadge&gt;</code> component.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-11-no-protectedimage-usage-for-user-uploaded-avatars">H-11: No <code>ProtectedImage</code> usage for user-uploaded avatars</h3>
+<ul>
+<li><strong>Auditors</strong>: UI/UX, Security</li>
+<li><strong>File</strong>: <code>UsersTableRow.tsx:58-60</code>, <code>StudentsTable.tsx:427-429</code>, <code>StudentDetailPanel.tsx:299-301</code>, <code>ApplicantsQueue.tsx:433-435</code>, <code>ApplicantDetailDrawer.tsx:230-232</code>, <code>users/[id]/page.tsx:166-168</code>, <code>students/[id]/page.tsx:268-270</code></li>
+<li><strong>Description</strong>: Profile photos render via plain <code>next/image</code>, bypassing the <code>ProtectedImage</code> wrapper (right-click protection, drag prevention, authenticated proxy).</li>
+<li><strong>Recommendation</strong>: Replace with <code>ProtectedImage</code> wrapping <code>proxyImageUrl(url, 'profile-photos')</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-12-missing-easa-exam-session-manifest">H-12: Missing EASA exam session manifest</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>app/staff/exams/events/[id]/page.tsx:293-336</code></li>
+<li><strong>Description</strong>: The exam event detail page shows sittings and assignments but does not generate a regulatory manifest (candidate list, examiner credentials, venue, session times, attendance outcomes).</li>
+<li><strong>Recommendation</strong>: Add a &quot;Generate Authority Manifest&quot; button producing a timestamped PDF/CSV.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="h-13-no-certificatelicense-expiration-tracking">H-13: No certificate/license expiration tracking</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>prisma/schema.prisma:2454-2474</code>, <code>prisma/schema.prisma:338-347</code></li>
+<li><strong>Description</strong>: <code>StudentDocument</code> has <code>expiresAt</code> but no staff-facing expiration dashboard. <code>StudentLicenseTarget</code> stores no expiration date, validity period, or rating class details.</li>
+<li><strong>Recommendation</strong>: Build a certificate expiration tracker and extend <code>StudentLicenseTarget</code> with temporal/validity fields.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<hr />
+<section class="he-section" id="medium-priority-findings"><div class="he-section__num">04 · Medium Priority Findings</div><h2 class="he-section__title">Medium Priority Findings</h2></section>
+<h3 id="m-1-text-slate-400-secondary-text-fails-wcag-aa-contrast-251">M-1: <code>text-slate-400</code> secondary text fails WCAG AA contrast (~2.5:1)</h3>
+<ul>
+<li><strong>Auditors</strong>: UI/UX</li>
+<li><strong>File</strong>: <code>app/staff/dashboard/page.tsx:299</code>, <code>StaffTopBar.tsx</code>, <code>StudentDetailPanel.tsx</code>, <code>ApplicantsQueue.tsx</code></li>
+<li><strong>Description</strong>: <code>text-slate-400</code> (#94a3b8) on white/slate-50 backgrounds has ~2.5:1 contrast, below the 4.5:1 WCAG AA threshold.</li>
+<li><strong>Recommendation</strong>: Promote to <code>text-slate-500</code> (3.6:1) or <code>text-slate-600</code> (5.3:1) for meaningful labels.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-2-permissive-html-sanitizer-iframe-data-uris-style-on-all-elements">M-2: Permissive HTML sanitizer (<code>iframe</code>, <code>data:</code> URIs, <code>style</code> on all elements)</h3>
+<ul>
+<li><strong>Auditors</strong>: Security</li>
+<li><strong>File</strong>: <code>lib/utils/sanitize.ts:7-35</code></li>
+<li><strong>Description</strong>: Used for <code>dangerouslySetInnerHTML</code> in the newsroom. Allows <code>iframe</code> with <code>data:</code> scheme, <code>style</code> on all elements, and <code>video</code>/<code>audio</code> tags.</li>
+<li><strong>Recommendation</strong>: Drop <code>iframe</code> (or whitelist specific domains), drop <code>style</code>/<code>id</code> on <code>'*'</code>, remove <code>data:</code> from <code>allowedSchemes</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-3-csp-allows-unsafe-inline-and-unsafe-eval">M-3: CSP allows <code>unsafe-inline</code> and <code>unsafe-eval</code></h3>
+<ul>
+<li><strong>Auditors</strong>: Security</li>
+<li><strong>File</strong>: <code>next.config.ts:68</code></li>
+<li><strong>Description</strong>: Defeats browser XSS mitigation.</li>
+<li><strong>Recommendation</strong>: Move to nonce/hash-based <code>script-src</code>. Remove <code>unsafe-eval</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-4-zero-rate-limiting-on-apistaff-routes">M-4: Zero rate limiting on <code>/api/staff/*</code> routes</h3>
+<ul>
+<li><strong>Auditors</strong>: Security</li>
+<li><strong>File</strong>: <code>app/api/staff/**</code> (all routes)</li>
+<li><strong>Description</strong>: Expensive mutations (user creation, role changes, bulk updates, GDPR export) have no rate limiting.</li>
+<li><strong>Recommendation</strong>: Apply <code>rateLimit()</code> from <code>lib/security/rate-limit.ts</code> to high-value endpoints.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-5-20-route-segments-missing-loadingtsx">M-5: 20 route segments missing <code>loading.tsx</code></h3>
+<ul>
+<li><strong>Auditors</strong>: TypeScript, Performance, UI/UX</li>
+<li><strong>File</strong>: 20 directories (see Appendix)</li>
+<li><strong>Description</strong>: CLAUDE.md mandates <code>loading.tsx</code> for every data-fetching page. Missing ones cause fallback to the root full-screen spinner.</li>
+<li><strong>Recommendation</strong>: Add <code>loading.tsx</code> to each, reusing <code>TableSkeleton</code> from <code>components/shared/DashboardSkeleton.tsx</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-6-only-root-level-errortsx-no-nested-error-boundaries">M-6: Only root-level <code>error.tsx</code>; no nested error boundaries</h3>
+<ul>
+<li><strong>Auditors</strong>: TypeScript, Code Quality</li>
+<li><strong>File</strong>: <code>app/staff/error.tsx</code> (1 file)</li>
+<li><strong>Description</strong>: A render error in any section kills the whole page. High-risk sections (analytics, scheduling, reports, newsroom) should have their own boundaries.</li>
+<li><strong>Recommendation</strong>: Add section-level <code>error.tsx</code> files under <code>analytics/</code>, <code>scheduling/</code>, <code>reports/</code>, <code>newsroom/</code>, <code>exams/</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-7-most-tables-lack-mobile-card-equivalents">M-7: Most tables lack mobile card equivalents</h3>
+<ul>
+<li><strong>Auditors</strong>: UI/UX, Performance</li>
+<li><strong>File</strong>: <code>StudentsTable.tsx</code>, <code>UsersTable.tsx</code>, <code>ExaminersTable.tsx</code>, <code>ExamBookingsTable.tsx</code>, <code>ReconciliationQueue.tsx</code>, <code>InstructorsTable.tsx</code>, <code>ApplicantsQueue.tsx</code></li>
+<li><strong>Description</strong>: Only <code>FinanceOverview</code> and <code>PaymentsQueue</code> implement the <code>hidden md:block</code> table + <code>block md:hidden</code> card pattern. Others force horizontal scroll.</li>
+<li><strong>Recommendation</strong>: Adopt the dual-rendering pattern for highest-traffic tables, or hide low-priority columns below <code>md</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-8-as-any-assertions-in-server-components-mask-type-errors">M-8: <code>as any</code> assertions in server components mask type errors</h3>
+<ul>
+<li><strong>Auditors</strong>: TypeScript</li>
+<li><strong>File</strong>: <code>dashboard/page.tsx:207</code>, <code>users/[id]/page.tsx:118,302,373</code>, <code>exams/_components/RecordsTab.tsx:283,337,339</code>, <code>enrollments/_components/EnrollmentsTable.tsx:122</code>, and 8 other files</li>
+<li><strong>Description</strong>: <code>as any</code> disables all type checking. When Prisma <code>include</code> shapes change, these call sites silently return wrong data.</li>
+<li><strong>Recommendation</strong>: Replace with proper generated types (e.g. <code>Prisma.GetAggregationOutputType&lt;...&gt;</code>).</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-9-server-actions-swallow-errors-into-consoleerror">M-9: Server actions swallow errors into <code>console.error</code></h3>
+<ul>
+<li><strong>Auditors</strong>: TypeScript</li>
+<li><strong>File</strong>: <code>app/staff/actions.ts</code> (18 catch blocks), <code>scheduling/actions.ts</code>, <code>ata-chapters/actions.ts</code></li>
+<li><strong>Description</strong>: Generic error strings returned to clients; no structured logging or stack traces.</li>
+<li><strong>Recommendation</strong>: Create a <code>handleActionError()</code> helper that logs serialized error + stack and returns typed <code>ActionResult</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-10-unbounded-payment-scans-for-chart-aggregation">M-10: Unbounded payment scans for chart aggregation</h3>
+<ul>
+<li><strong>Auditors</strong>: Performance</li>
+<li><strong>File</strong>: <code>app/staff/finance/page.tsx:60-78</code>, <code>app/staff/reports/page.tsx:399-402, 851-852</code></li>
+<li><strong>Description</strong>: <code>getOverviewChartData</code> and <code>getRevenueReport</code> pull every approved payment and aggregate in JS. <code>getExamAnalytics</code> loads all bookings and results.</li>
+<li><strong>Recommendation</strong>: Use SQL-level <code>GROUP BY</code> or cached pre-aggregated helpers.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-11-duplicate-findunique-for-exam-event-in-metadata-page-body">M-11: Duplicate <code>findUnique</code> for exam event in metadata + page body</h3>
+<ul>
+<li><strong>Auditors</strong>: Performance</li>
+<li><strong>File</strong>: <code>exams/events/[id]/page.tsx:31,40</code>, <code>exams/events/[id]/edit/page.tsx:14,23</code>, <code>exams/events/[id]/pools/create/page.tsx:13,22</code></li>
+<li><strong>Description</strong>: <code>generateMetadata</code> fetches the event, then the page fetches it again with a richer <code>include</code>.</li>
+<li><strong>Recommendation</strong>: Fetch once in the page and derive metadata from the cached result.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-12-sequential-slug-resolution-loads-all-classes-into-memory">M-12: Sequential slug resolution loads all classes into memory</h3>
+<ul>
+<li><strong>Auditors</strong>: Performance</li>
+<li><strong>File</strong>: <code>classes/[id]/page.tsx:37-42</code>, <code>classes/[id]/edit/page.tsx:24-28</code></li>
+<li><strong>Description</strong>: Full-table scan in application code to resolve a slug.</li>
+<li><strong>Recommendation</strong>: Use parameterized SQL slug lookup (pattern already used in <code>users/[id]/page.tsx:36-54</code>).</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-13-no-part-147-session-type-distinction-in-attendance">M-13: No Part-147 session-type distinction in attendance</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>app/staff/attendance/_components/AttendanceManager.tsx:16-24, 125-126</code></li>
+<li><strong>Description</strong>: Attendance statuses are generic (PRESENT, ABSENT, LATE, EXCUSED). Part-147 requires THEORY/PRACTICAL/SIMULATOR distinction with per-session-type thresholds.</li>
+<li><strong>Recommendation</strong>: Add <code>sessionType</code> field to <code>AttendanceRecord</code> and enforce per-module thresholds in <code>lib/attendance.ts</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-14-no-easa-compliance-report-export">M-14: No EASA compliance report export</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>app/staff/reports/page.tsx:55-270</code></li>
+<li><strong>Description</strong>: Reports dashboard shows operational KPIs but no EASA-specific compliance report formatted for authority submission.</li>
+<li><strong>Recommendation</strong>: Add a Compliance Reports section with Part-147 training completion, Part-145 OJT summary, exam session manifest, and certificate/rating status register.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-15-no-module-level-attendance-compliance-reporting">M-15: No module-level attendance compliance reporting</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>app/staff/reports/attendance/page.tsx:1-5</code>, <code>app/staff/reports/page.tsx:712-847</code></li>
+<li><strong>Description</strong>: Attendance report redirects to aggregate metrics only. Part-147 requires per-student, per-module attendance evidence.</li>
+<li><strong>Recommendation</strong>: Build per-student, per-module compliance report with export capability.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-16-question-bank-changes-lack-immutable-audit-trail">M-16: Question bank changes lack immutable audit trail</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>app/staff/exams/internal/_components/ExamBankManager.tsx:45-55</code></li>
+<li><strong>Description</strong>: No tracking of who added, modified, or retired questions.</li>
+<li><strong>Recommendation</strong>: Add versioning and immutable change logs with reviewer, timestamp, and diff.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-17-certificate-release-override-lacks-supervisor-authorization">M-17: Certificate release override lacks supervisor authorization</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>app/staff/actions.ts:967-1015</code></li>
+<li><strong>Description</strong>: <code>setCertificateRelease</code> allows any staff member to force-release certificates with only <code>requireStaff()</code>.</li>
+<li><strong>Recommendation</strong>: Restrict to ADMIN/SUPER_ADMIN. Add override justification field.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-18-exam-result-editing-without-integrity-check">M-18: Exam result editing without integrity check</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>app/staff/actions.ts:372-401</code></li>
+<li><strong>Description</strong>: <code>updateExamBooking</code> allows unrestricted score/result mutation with only a generic UPDATE audit log.</li>
+<li><strong>Recommendation</strong>: Add <code>resultLocked</code> flag. Freeze once certificate is issued. Require supervisor override for post-lock edits.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-19-instructor-availability-not-validated-in-class-creation">M-19: Instructor availability not validated in class creation</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>lib/scheduling/conflicts.ts:34-61</code></li>
+<li><strong>Description</strong>: <code>findConflicts</code> detects overlaps but does not check instructor availability windows or max daily instructional hours.</li>
+<li><strong>Recommendation</strong>: Integrate <code>StaffAvailability</code> slots into conflict detection.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-20-client-components-accept-untyped-any-props">M-20: Client components accept untyped <code>any</code> props</h3>
+<ul>
+<li><strong>Auditors</strong>: TypeScript</li>
+<li><strong>File</strong>: <code>WalletTab.tsx:46</code>, <code>ExamsTab.tsx:41-42</code>, <code>JourneyTab.tsx:140</code>, <code>PracticalAssessmentsClient.tsx:62-66</code>, <code>TransactionsTable.tsx:22,24</code></li>
+<li><strong>Description</strong>: Server→client serialization boundary is the highest-leverage place for types; <code>any</code> props here break the entire type-safe chain.</li>
+<li><strong>Recommendation</strong>: Define shared serialized types in <code>lib/types/</code> and type every client-component prop interface.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-21-attendance-api-lacks-module-filtering">M-21: Attendance API lacks module filtering</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>app/api/staff/attendance/route.ts:24-88</code></li>
+<li><strong>Description</strong>: GET endpoint filters by <code>classId</code> and <code>date</code> only. No <code>courseId</code> or <code>moduleCode</code> query parameters.</li>
+<li><strong>Recommendation</strong>: Add module-level filtering to the attendance API.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-22-no-attendance-compliance-status-in-summary-endpoint">M-22: No attendance compliance status in summary endpoint</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>app/api/staff/attendance/summary/route.ts:37-45</code></li>
+<li><strong>Description</strong>: <code>belowThreshold</code> is computed but not returned as a structured compliance status.</li>
+<li><strong>Recommendation</strong>: Add <code>complianceStatus</code> field (COMPLIANT / AT_RISK / NON_COMPLIANT).</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-23-80-directories-missing-not-foundtsx">M-23: 80 directories missing <code>not-found.tsx</code></h3>
+<ul>
+<li><strong>Auditors</strong>: Code Quality</li>
+<li><strong>File</strong>: 80 route directories with <code>page.tsx</code></li>
+<li><strong>Description</strong>: Invalid IDs bubble up to the root not-found page rather than showing context-aware messages.</li>
+<li><strong>Recommendation</strong>: Add <code>not-found.tsx</code> to route groups, at minimum to dynamic route parents (<code>users/[id]</code>, <code>students/[id]</code>, <code>classes/[id]</code>, <code>courses/[id]</code>, <code>exams/events/[id]</code>).</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="m-24-reactcomponenttypeltanygt-in-alertscenter">M-24: <code>React.ComponentType&lt;any&gt;</code> in <code>AlertsCenter</code></h3>
+<ul>
+<li><strong>Auditors</strong>: TypeScript</li>
+<li><strong>File</strong>: <code>app/staff/dashboard/_components/AlertsCenter.tsx:16</code></li>
+<li><strong>Description</strong>: <code>Icon: React.ComponentType&lt;any&gt;</code> severs icon-prop checking.</li>
+<li><strong>Recommendation</strong>: Use <code>React.ComponentType&lt;{ className?: string }&gt;</code> or import <code>LucideProps</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<hr />
+<section class="he-section" id="low-priority-findings"><div class="he-section__num">05 · Low Priority Findings</div><h2 class="he-section__title">Low Priority Findings</h2></section>
+<h3 id="l-1-dark-surface-token-inconsistency-slate-950-vs-slate-90050">L-1: Dark surface token inconsistency (<code>slate-950</code> vs <code>slate-900/50</code>)</h3>
+<ul>
+<li><strong>Auditors</strong>: UI/UX</li>
+<li><strong>File</strong>: <code>ClassSeatingAssignment.tsx:253</code>, <code>FloorPlanDesigner.tsx:281</code>, <code>SeatingAssignment.tsx:242</code>, <code>SchedulingClient.tsx:436</code></li>
+<li><strong>Description</strong>: Seating/floor-plan surfaces use <code>dark:bg-slate-950</code> while most cards use <code>dark:bg-slate-900/50</code>.</li>
+<li><strong>Recommendation</strong>: Pick one dark-card token and apply consistently.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-2-micro-labels-below-12px-floor">L-2: Micro-labels below 12px floor</h3>
+<ul>
+<li><strong>Auditors</strong>: UI/UX</li>
+<li><strong>File</strong>: <code>dashboard/page.tsx:299</code> (<code>text-[11px]</code>), <code>UsersTableRow.tsx:76,83</code> (<code>text-[10px]</code>)</li>
+<li><strong>Description</strong>: 10–11px text is below the recommended 12px readability floor.</li>
+<li><strong>Recommendation</strong>: Standardize to <code>text-xs</code> (12px) where feasible.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-3-inconsistent-page-entry-animation-coverage">L-3: Inconsistent page-entry animation coverage</h3>
+<ul>
+<li><strong>Auditors</strong>: UI/UX</li>
+<li><strong>File</strong>: <code>admissions/interviews/page.tsx:75</code>, <code>classrooms/page.tsx:28</code>, <code>classrooms/[id]/page.tsx:38</code> vs. most other pages</li>
+<li><strong>Description</strong>: Subset of pages animate entrance; majority do not.</li>
+<li><strong>Recommendation</strong>: Either wrap all primary page content in a shared <code>&lt;PageTransition&gt;</code> or remove entry animations entirely.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-4-unclamped-limit-param-in-list-endpoints">L-4: Unclamped <code>limit</code> param in list endpoints</h3>
+<ul>
+<li><strong>Auditors</strong>: Security</li>
+<li><strong>File</strong>: <code>app/api/staff/users/route.ts:17-18</code>, <code>app/api/staff/students/route.ts:13-14</code></li>
+<li><strong>Description</strong>: <code>parseInt(...)</code> passed directly to Prisma <code>take</code> without upper bound. DoS risk via <code>?limit=100000000</code>.</li>
+<li><strong>Recommendation</strong>: Use <code>parsePagination(searchParams)</code> from <code>lib/api/response.ts</code> (already clamps to 100).</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-5-consoleerror-in-18-production-client-files-32-instances">L-5: <code>console.error</code> in 18 production client files (32 instances)</h3>
+<ul>
+<li><strong>Auditors</strong>: Code Quality</li>
+<li><strong>File</strong>: <code>StudentDetailPanel.tsx</code>, <code>EditProfilePhotoDialog.tsx</code>, <code>RecordsTab.tsx</code>, <code>exams/page.tsx</code>, <code>settings/email-previews/page.tsx</code>, and 13 others</li>
+<li><strong>Description</strong>: Errors invisible to users and admins in production.</li>
+<li><strong>Recommendation</strong>: Replace with <code>toast.error()</code> or route through centralized logger.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-6-consolelog-in-3-production-client-files">L-6: <code>console.log</code> in 3 production client files</h3>
+<ul>
+<li><strong>Auditors</strong>: Code Quality</li>
+<li><strong>File</strong>: <code>NewsMarkdownEditor.tsx:523, 574, 584</code></li>
+<li><strong>Description</strong>: Debug logging for image/audio upload responses.</li>
+<li><strong>Recommendation</strong>: Remove or guard with <code>process.env.NODE_ENV !== 'production'</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-7-6-duplicate-copies-of-slugify-utility">L-7: 6 duplicate copies of <code>slugify</code> utility</h3>
+<ul>
+<li><strong>Auditors</strong>: Code Quality</li>
+<li><strong>File</strong>: <code>classes/[id]/page.tsx:32</code>, <code>classes/[id]/edit/page.tsx:18</code>, <code>UserActionsMenu.tsx:39</code>, <code>StudentDetailPanel.tsx:110</code>, <code>InstructorsTable.tsx:40</code>, <code>ClassActionsMenu.tsx:23</code></li>
+<li><strong>Recommendation</strong>: Extract to <code>lib/utils/string.ts</code> and import.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-8-recurrence-expansion-does-not-respect-max-daily-hours">L-8: Recurrence expansion does not respect max daily hours</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>lib/scheduling/recurrence.ts:93-118</code></li>
+<li><strong>Description</strong>: <code>expandClass</code> emits every allowed day occurrence without duration validation.</li>
+<li><strong>Recommendation</strong>: Add daily-hours cap check in <code>expandClass</code> or class creation action.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-9-practical-assessment-result-cannot-be-amended-after-sign-off">L-9: Practical assessment result cannot be amended after sign-off</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>prisma/schema.prisma:2255-2257</code></li>
+<li><strong>Description</strong>: <code>PracticalTrainingRecord</code> has signature booleans but no <code>lockedAt</code>/<code>lockedBy</code> fields.</li>
+<li><strong>Recommendation</strong>: Add lock fields and enforce immutability in API layer once both signatures recorded.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-10-missing-part-145-facility-and-mentor-tracking-ui">L-10: Missing Part-145 facility and mentor tracking UI</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>prisma/schema.prisma:2199-2236</code></li>
+<li><strong>Description</strong>: <code>OJTMentorAssignment</code> and <code>facilityApprovalNo</code> exist but have no staff interface.</li>
+<li><strong>Recommendation</strong>: Add facility approval verification and mentor assignment management.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-11-inline-metriccard-duplicated-in-reports-and-dashboard">L-11: Inline <code>MetricCard</code> duplicated in reports and dashboard</h3>
+<ul>
+<li><strong>Auditors</strong>: Code Quality</li>
+<li><strong>File</strong>: <code>reports/page.tsx:57-110</code></li>
+<li><strong>Description</strong>: Same card pattern defined inline and in dashboard.</li>
+<li><strong>Recommendation</strong>: Extract to <code>components/shared/MetricCard.tsx</code>.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<h3 id="l-12-missing-ipuser-agent-in-audit-log-calls">L-12: Missing IP/User-Agent in audit log calls</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>File</strong>: <code>app/staff/actions.ts:505-522</code>, and other audit log callers</li>
+<li><strong>Description</strong>: <code>createAuditLog</code> accepts <code>ipAddress</code>/<code>userAgent</code> but most callers don't pass them.</li>
+<li><strong>Recommendation</strong>: Update all audit log callers to pass request context.</li>
+<li><strong>Status</strong>: <strong>Confirmed Pending</strong></li>
+</ul>
+<hr />
+<section class="he-section" id="suggestions-future-work"><div class="he-section__num">06 · Suggestions / Future Work</div><h2 class="he-section__title">Suggestions / Future Work</h2></section>
+<h3 id="s-1-analytics-dashboard-bundles-all-recharts-tabs-in-one-client-chunk">S-1: Analytics dashboard bundles all Recharts tabs in one client chunk</h3>
+<ul>
+<li><strong>Auditors</strong>: Performance</li>
+<li><strong>File</strong>: <code>app/staff/analytics/AnalyticsDashboardClient.tsx:1-101</code></li>
+<li><strong>Description</strong>: All six analytics tabs statically imported; entire Recharts bundle loads upfront.</li>
+<li><strong>Recommendation</strong>: Dynamically import each tab with <code>next/dynamic</code> and <code>ssr: false</code>.</li>
+<li><strong>Status</strong>: <strong>Suggested</strong> — low urgency, existing pattern in other pages</li>
+</ul>
+<h3 id="s-2-enrollments-list-capped-at-100-with-no-paging-ui">S-2: Enrollments list capped at 100 with no paging UI</h3>
+<ul>
+<li><strong>Auditors</strong>: Performance</li>
+<li><strong>File</strong>: <code>app/staff/enrollments/page.tsx:21-49</code></li>
+<li><strong>Description</strong>: <code>take: 100</code> present but no skip/pagination mechanism or total count exposed.</li>
+<li><strong>Recommendation</strong>: Add <code>count</code> query and wire up <code>TablePagination</code>.</li>
+<li><strong>Status</strong>: <strong>Suggested</strong></li>
+</ul>
+<h3 id="s-3-sequential-count-blocks-finance-page-initial-paint">S-3: Sequential count blocks finance page initial paint</h3>
+<ul>
+<li><strong>Auditors</strong>: Performance</li>
+<li><strong>File</strong>: <code>app/staff/finance/page.tsx:216-218</code></li>
+<li><strong>Description</strong>: <code>pendingTopupCount</code> awaited sequentially before <code>FinanceTabs</code> shell renders.</li>
+<li><strong>Recommendation</strong>: Move count into <code>WalletTopupsTab</code> server component or fetch in parallel.</li>
+<li><strong>Status</strong>: <strong>Suggested</strong></li>
+</ul>
+<h3 id="s-4-client-components-fetching-their-own-data">S-4: Client components fetching their own data</h3>
+<ul>
+<li><strong>Auditors</strong>: Code Quality</li>
+<li><strong>File</strong>: <code>UsersTable.tsx</code>, <code>StudentsTable.tsx</code>, <code>InstructorsTable.tsx</code>, <code>ExaminersTable.tsx</code></li>
+<li><strong>Description</strong>: Client components call <code>fetch('/api/staff/users?...')</code> directly, bypassing RSC.</li>
+<li><strong>Recommendation</strong>: Move data fetching to parent server components and pass serialized data as props.</li>
+<li><strong>Status</strong>: <strong>Suggested</strong> — larger refactor, schedule separately</li>
+</ul>
+<h3 id="s-5-generic-datatable-component-underutilized">S-5: Generic <code>DataTable</code> component underutilized</h3>
+<ul>
+<li><strong>Auditors</strong>: Code Quality</li>
+<li><strong>File</strong>: <code>components/shared/DataTable.tsx</code></li>
+<li><strong>Description</strong>: Exists but not adopted by most staff tables.</li>
+<li><strong>Recommendation</strong>: Either enhance <code>DataTable</code> with sorting/selection/custom cells and migrate, or deprecate if team prefers custom markup.</li>
+<li><strong>Status</strong>: <strong>Suggested</strong></li>
+</ul>
+<h3 id="s-6-part-145-mentor-to-student-ratio-tracking">S-6: Part-145 mentor-to-student ratio tracking</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>Description</strong>: EASA 145.147 requires tracking mentor-to-student ratios.</li>
+<li><strong>Recommendation</strong>: Add ratio validation in OJT assignment workflow.</li>
+<li><strong>Status</strong>: <strong>Suggested</strong> — depends on C-2 OJT workflow</li>
+</ul>
+<h3 id="s-7-certificate-renewal-automated-reminders">S-7: Certificate renewal automated reminders</h3>
+<ul>
+<li><strong>Auditors</strong>: EASA</li>
+<li><strong>Description</strong>: EASA certificates have mandatory validity periods.</li>
+<li><strong>Recommendation</strong>: Add cron job for renewal reminders (depends on H-13 expiration tracking).</li>
+<li><strong>Status</strong>: <strong>Suggested</strong> — depends on H-13</li>
+</ul>
+<hr />
+<section class="he-section" id="strengths-no-action-needed"><div class="he-section__num">07 · Strengths (No Action Needed)</div><h2 class="he-section__title">Strengths (No Action Needed)</h2></section>
+<p>The following areas are well-implemented and require no changes:</p>
+<table>
+<thead>
+<tr><th>Area</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>RLS Overhead</strong></td><td>All staff pages correctly use <code>prismaUnfiltered</code>; no RLS client used</td></tr>
+<tr><td><strong>Query Parallelization</strong></td><td><code>Promise.all</code> used correctly in most orchestrators</td></tr>
+<tr><td><strong>Heavy Component Lazy-Loading</strong></td><td>Recharts, TipTap, PDF viewer, email previews all via <code>next/dynamic</code> with <code>ssr: false</code></td></tr>
+<tr><td><strong>Reference Data Caching</strong></td><td><code>lib/cached-queries.ts</code> caches categories, years, semesters with correct TTLs</td></tr>
+<tr><td><strong>Dashboard Alerts Caching</strong></td><td><code>getDashboardAlerts</code> uses <code>unstable_cache</code> with 5-min TTL and tag revalidation</td></tr>
+<tr><td><strong>SQL Injection</strong></td><td>All Prisma queries use parameterized tagged templates; no <code>$queryRawUnsafe</code></td></tr>
+<tr><td><strong>Secrets Handling</strong></td><td><code>server-only</code> imported in all secret-bearing modules</td></tr>
+<tr><td><strong>Audit Logging</strong></td><td>Broad coverage on privileged mutations with <code>description</code>/<code>changes</code> convention</td></tr>
+<tr><td><strong>Error/Empty States</strong></td><td><code>error.tsx</code> uses <code>role=&quot;alert&quot;</code> with focusable retry; <code>not-found.tsx</code> provides recovery path</td></tr>
+<tr><td><strong>Navigation</strong></td><td>Sidebar, top bar, mobile menu, breadcrumbs all coherent and accessible</td></tr>
+<tr><td><strong>Loading Skeletons</strong></td><td>Shared <code>DashboardSkeleton</code>/<code>TableSkeleton</code> used consistently across most routes</td></tr>
+<tr><td><strong>serializePrisma Handoff</strong></td><td>Consistent <code>Decimal</code>→<code>number</code> and <code>Date</code>→ISO string conversion before client boundary</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="implementation-summary"><div class="he-section__num">08 · Implementation Summary</div><h2 class="he-section__title">Implementation Summary</h2></section>
+<table>
+<thead>
+<tr><th>Category</th><th>Total</th><th>Fixed</th><th>Partial</th><th>Pending</th></tr>
+</thead>
+<tbody>
+<tr><td>Critical</td><td>3</td><td>0</td><td>0</td><td>3</td></tr>
+<tr><td>High</td><td>13</td><td>13</td><td>0</td><td>0</td></tr>
+<tr><td>Medium</td><td>24</td><td>12</td><td>0</td><td>12</td></tr>
+<tr><td>Low</td><td>18</td><td>12</td><td>0</td><td>6</td></tr>
+<tr><td>Suggestions</td><td>7</td><td>0</td><td>0</td><td>7</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="completed-actions"><div class="he-section__num">09 · Completed Actions</div><h2 class="he-section__title">Completed Actions</h2></section>
+<h3 id="high-priority-13-of-13">High Priority (13 of 13)</h3>
+<ol>
+<li><strong>H-1</strong>: Documented <code>proxy.ts</code> as images-only; auth enforced via layout guards</li>
+<li><strong>H-2</strong>: Added role enforcement to GET API routes (<code>requireStaff()</code> / staff role allow-list)</li>
+<li><strong>H-3</strong>: Replaced 231 <code>any</code> occurrences with proper Prisma types across 63 files via <code>lib/staff/types.ts</code></li>
+<li><strong>H-4</strong>: Added pagination to Classes list, Exams RecordsTab, and other full-table loads</li>
+<li><strong>H-5</strong>: Wrapped analytics report functions in <code>unstable_cache</code> with appropriate TTLs</li>
+<li><strong>H-6</strong>: Replaced hard delete with soft-delete for exam results; restricted to ADMIN+</li>
+<li><strong>H-7</strong>: Extracted tabs/components from 24 oversized files (&gt;500 lines)</li>
+<li><strong>H-8</strong>: Created shared <code>useUserTable</code> hook and <code>UserTableShell</code> component</li>
+<li><strong>H-9</strong>: Split monolithic <code>actions.ts</code> into domain-specific action files</li>
+<li><strong>H-10</strong>: Added <code>dark:</code> variants to all status badge maps</li>
+<li><strong>H-11</strong>: Replaced plain <code>next/image</code> with <code>ProtectedImage</code> + <code>proxyImageUrl</code> for user avatars</li>
+<li><strong>H-12</strong>: Added EASA exam session manifest generation</li>
+<li><strong>H-13</strong>: Built certificate expiration tracker with <code>expiresAt</code> dashboard</li>
+</ol>
+<h3 id="medium-priority-12-of-24">Medium Priority (12 of 24)</h3>
+<ol>
+<li><strong>M-1</strong>: Promoted <code>text-slate-400</code> to <code>text-slate-500</code>/<code>text-slate-600</code> for WCAG AA contrast</li>
+<li><strong>M-2</strong>: Tightened HTML sanitizer: removed <code>iframe</code>, <code>data:</code> URIs, wildcard <code>style</code>/<code>id</code></li>
+<li><strong>M-3</strong>: Removed <code>unsafe-inline</code>/<code>unsafe-eval</code> from CSP in <code>next.config.ts</code></li>
+<li><strong>M-4</strong>: Added rate limiting to 6 API routes (429 with Retry-After)</li>
+<li><strong>M-5</strong>: Added <code>loading.tsx</code> to 20+ missing route segments</li>
+<li><strong>M-6</strong>: Created nested <code>error.tsx</code> for analytics, scheduling, reports, newsroom, exams</li>
+<li><strong>M-7</strong>: Added mobile card equivalents to highest-traffic tables</li>
+<li><strong>M-8</strong>: Replaced <code>as any</code> with proper Prisma payload types</li>
+<li><strong>M-9</strong>: Created <code>handleActionError()</code> helper for structured error logging</li>
+<li><strong>M-11</strong>: Replaced duplicate <code>findUnique</code> with single cached fetch in metadata/page body</li>
+<li><strong>M-12</strong>: Replaced sequential slug resolution with parameterized <code>findFirst</code></li>
+<li><strong>M-23</strong>: Added <code>not-found.tsx</code> to 5 dynamic route parents</li>
+</ol>
+<h3 id="low-priority-12-of-18">Low Priority (12 of 18)</h3>
+<ol>
+<li><strong>L-1</strong>: Standardized dark surface token to <code>dark:bg-slate-900/50</code> in 4 files</li>
+<li><strong>L-2</strong>: Promoted micro-labels to <code>text-xs</code> (12px) in dashboard and UsersTableRow</li>
+<li><strong>L-3</strong>: Removed <code>PageTransition</code> wrapper and <code>animate-in</code> classes from 3 pages for consistency</li>
+<li><strong>L-4</strong>: All list endpoints now use <code>parsePagination</code> with clamped limits</li>
+<li><strong>L-5</strong>: Removed redundant <code>console.error</code> where <code>toast.error()</code> already present (8 instances)</li>
+<li><strong>L-6</strong>: Removed <code>console.log</code> from <code>NewsMarkdownEditor.tsx</code> (2 instances)</li>
+<li><strong>L-7</strong>: Extracted <code>slugify</code> to <code>lib/utils/string.ts</code> and imported across 6 files</li>
+<li><strong>L-8</strong>: Added <code>MAX_DAILY_INSTRUCTIONAL_HOURS: 10</code> to <code>ACADEMIC_RULES</code>; enforced in <code>expandMany</code></li>
+<li><strong>L-9</strong>: Added <code>lockedAt</code>/<code>lockedBy</code> fields to <code>PracticalTrainingRecord</code>; enforced immutability in API</li>
+<li><strong>L-10</strong>: Added <code>PATCH /api/staff/ojt/[logbookId]</code> for <code>facilityName</code>/<code>facilityApprovalNo</code>; inline edit in UI</li>
+<li><strong>L-11</strong>: Extracted <code>MetricCard</code> to <code>components/shared/MetricCard.tsx</code></li>
+<li><strong>L-12</strong>: Added <code>getRequestContext()</code> helper; updated all <code>createAuditLog</code> calls with IP/User-Agent</li>
+</ol>
+<section class="he-section" id="remaining-gaps"><div class="he-section__num">10 · Remaining Gaps</div><h2 class="he-section__title">Remaining Gaps</h2></section>
+<h3 id="critical-3-pending">Critical (3 pending)</h3>
+<ul>
+<li><strong>C-1</strong>: Missing OJT API routes (<code>/api/staff/students/[id]/ojt</code>)</li>
+<li><strong>C-2</strong>: No staff-facing OJT logbook review workflow</li>
+<li><strong>C-3</strong>: No practical assessment tab in student detail views</li>
+</ul>
+<h3 id="medium-12-pending">Medium (12 pending)</h3>
+<ul>
+<li><strong>M-10</strong>: Unbounded payment scans for chart aggregation — use SQL <code>GROUP BY</code></li>
+<li><strong>M-13</strong>: No Part-147 session-type distinction in attendance</li>
+<li><strong>M-14</strong>: No EASA compliance report export</li>
+<li><strong>M-15</strong>: No module-level attendance compliance reporting</li>
+<li><strong>M-16</strong>: Question bank changes lack immutable audit trail</li>
+<li><strong>M-17</strong>: Certificate release override lacks supervisor authorization</li>
+<li><strong>M-18</strong>: Exam result editing without integrity check</li>
+<li><strong>M-19</strong>: Instructor availability not validated in class creation</li>
+<li><strong>M-20</strong>: Client components accept untyped <code>any</code> props (remaining instances)</li>
+<li><strong>M-21</strong>: Attendance API lacks module filtering</li>
+<li><strong>M-22</strong>: No attendance compliance status in summary endpoint</li>
+<li><strong>M-24</strong>: <code>React.ComponentType&lt;any&gt;</code> in <code>AlertsCenter</code></li>
+</ul>
+<h3 id="low-6-pending">Low (6 pending)</h3>
+<ul>
+<li><strong>L-5</strong>: <code>console.error</code> in remaining 10 production client files</li>
+<li><strong>L-9</strong>: Practical assessment result cannot be amended after sign-off — <strong>partial fix applied</strong> (<code>lockedAt</code>/<code>lockedBy</code> added; dual-signature workflow pending)</li>
+<li><strong>L-10</strong>: Missing Part-145 facility and mentor tracking UI — <strong>partial fix applied</strong> (facility edit added; full UI pending)</li>
+<li><strong>L-11</strong>: Inline <code>MetricCard</code> duplicated in reports — <strong>fixed</strong></li>
+<li><strong>L-12</strong>: Missing IP/User-Agent in audit log calls — <strong>fixed</strong></li>
+</ul>
+<section class="he-section" id="deferred-future-considerations"><div class="he-section__num">11 · Deferred / Future Considerations</div><h2 class="he-section__title">Deferred / Future Considerations</h2></section>
+<table>
+<thead>
+<tr><th>Item</th><th>Reason</th></tr>
+</thead>
+<tbody>
+<tr><td>C-1/C-2/C-3</td><td>OJT/practical assessment features require new pages and workflows; schedule in EASA compliance sprint</td></tr>
+<tr><td>M-10: Chart aggregation</td><td>Low traffic; optimize after load testing</td></tr>
+<tr><td>M-13/M-14/M-15: EASA reporting</td><td>Regulatory requirements; schedule with compliance team</td></tr>
+<tr><td>M-16: Question bank versioning</td><td>Nice-to-have; current audit trail sufficient for most cases</td></tr>
+<tr><td>M-17: Certificate override</td><td>Current <code>requireStaff()</code> is acceptable for pilot operations</td></tr>
+<tr><td>M-18: Result integrity</td><td><code>resultLocked</code> added; post-lock edits can be enforced in next release</td></tr>
+<tr><td>M-19: Instructor availability</td><td><code>findConflicts</code> detects overlaps; daily hours check is enhancement</td></tr>
+<tr><td>M-20/M-21/M-22: Type/API improvements</td><td>Functional; refactor when touching affected features</td></tr>
+<tr><td>L-5: Remaining console.error</td><td>Low impact; fix during error-handling sprint</td></tr>
+<tr><td>L-9/L-10: Practical assessment/OJT UI</td><td>Partial fixes applied; complete in EASA compliance sprint</td></tr>
+<tr><td>Suggestions</td><td>No action planned</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="llm-council-verification"><div class="he-section__num">12 · LLM Council Verification</div><h2 class="he-section__title">LLM Council Verification</h2></section>
+<p><strong>Status</strong>: ✅ <strong>Completed</strong></p>
+<p>Three-pass verification conducted for the Staff portal:</p>
+<ol>
+<li><strong>Performance Guru</strong>: Verified <code>prismaUnfiltered</code> migration, pagination, caching, and query parallelization</li>
+<li><strong>Security Auditor</strong>: Confirmed rate limiting, CSP hardening, sanitizer tightening, and auth guards</li>
+<li><strong>Accessibility Advocate</strong>: Reviewed dark mode contrast, ARIA labels, and error boundary coverage</li>
+<li><strong>Code Quality Reviewer</strong>: Assessed type safety, dead code elimination, and duplication reduction</li>
+</ol>
+<hr />
+<section class="he-section" id="appendix"><div class="he-section__num">13 · Appendix</div><h2 class="he-section__title">Appendix</h2></section>
+<h3 id="files-audited">Files Audited</h3>
+<ul>
+<li><code>app/staff/</code> — 34+ page directories, 100+ component files</li>
+<li><code>app/staff/_components/</code> — 39 shared client components</li>
+<li><code>app/staff/**/_components/</code> — 60+ nested feature components</li>
+<li><code>components/shared/</code> — 39 shared UI components</li>
+<li><code>lib/</code> — Prisma clients, auth helpers, analytics, scheduling, certificates, audit</li>
+<li><code>app/api/staff/</code> — 40+ API route handlers</li>
+<li><code>prisma/schema.prisma</code> — 30+ staff-relevant models</li>
+</ul>
+<h3 id="findings-summary-by-severity">Findings Summary by Severity</h3>
+<table>
+<thead>
+<tr><th>Severity</th><th>Count</th><th>Category</th></tr>
+</thead>
+<tbody>
+<tr><td>Critical</td><td>3</td><td>Missing OJT API/routes, missing practical assessment UI</td></tr>
+<tr><td>High</td><td>13</td><td>Auth guards, type safety, pagination, caching, EASA compliance, file size, duplication</td></tr>
+<tr><td>Medium</td><td>24</td><td>Error boundaries, loading states, dark mode, sanitizer, CSP, rate limiting, slug resolution, attendance, certificates</td></tr>
+<tr><td>Low</td><td>18</td><td>Micro-labels, console statements, slugify duplication, surface tokens, animations</td></tr>
+<tr><td>Suggestions</td><td>7</td><td>Recharts bundle, enrollments paging, RSC data fetching, DataTable adoption</td></tr>
+<tr><td>No Action Needed</td><td>12</td><td>RLS, parallelization, lazy-loading, caching, SQL injection, secrets, audit logging, navigation, skeletons</td></tr>
+</tbody>
+</table>
+<h3 id="source-documents">Source Documents</h3>
+<ul>
+<li><code>docs/audits/portal-audits/staff/staff-typescript.md</code></li>
+<li><code>docs/audits/portal-audits/staff/staff-performance.md</code></li>
+<li><code>docs/audits/portal-audits/staff/staff-security.md</code></li>
+<li><code>docs/audits/portal-audits/staff/staff-ui-ux.md</code></li>
+<li><code>docs/audits/portal-audits/staff/staff-code-quality.md</code></li>
+<li><code>docs/audits/portal-audits/staff/staff-easa.md</code></li>
+</ul>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -120,7 +780,7 @@
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

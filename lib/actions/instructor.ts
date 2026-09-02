@@ -1,6 +1,6 @@
 'use server'
 
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import type { AttendanceStatus } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
@@ -19,7 +19,7 @@ export async function getInstructorDashboardData() {
   const now = new Date()
 
   // 1. Fetch Today's Classes
-  const todaysClasses = await prisma.class.findMany({
+  const todaysClasses = await prismaUnfiltered.class.findMany({
     where: {
       instructorId,
       startDate: {
@@ -38,7 +38,7 @@ export async function getInstructorDashboardData() {
   })
 
   // 2. Fetch Active Cohorts
-  const activeCohorts = await prisma.course.findMany({
+  const activeCohorts = await prismaUnfiltered.course.findMany({
     where: {
       classes: {
         some: {
@@ -55,10 +55,21 @@ export async function getInstructorDashboardData() {
   })
 
   // 3. Stats
-  const totalStudents = distinctStudents.length
+  const enrollmentsForCount = await prismaUnfiltered.enrollment.findMany({
+    where: {
+      course: {
+        classes: {
+          some: { instructorId },
+        },
+      },
+      status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] },
+    },
+    select: { userId: true },
+  })
+  const totalStudents = new Set(enrollmentsForCount.map(e => e.userId)).size
 
   // 4. Pending Grades Count
-  const pendingGradesCount = await prisma.grade.count({
+  const pendingGradesCount = await prismaUnfiltered.grade.count({
     where: {
       gradedBy: instructorId,
       score: 0,
@@ -67,7 +78,7 @@ export async function getInstructorDashboardData() {
 
   // 5. Enriched Unified Notices (News + Events)
   const [news, upcomingExams, adminEvents] = await Promise.all([
-    prisma.newsArticle.findMany({
+    prismaUnfiltered.newsArticle.findMany({
       where: { status: 'PUBLISHED' },
       orderBy: { publishedAt: 'desc' },
       take: 5,
@@ -78,7 +89,7 @@ export async function getInstructorDashboardData() {
         slug: true,
       },
     }),
-    prisma.examEvent.findMany({
+    prismaUnfiltered.examEvent.findMany({
       where: {
         status: { in: ['OPEN', 'CONFIRMED', 'DRAFT'] },
         // Show exams that haven't ended yet
@@ -92,7 +103,7 @@ export async function getInstructorDashboardData() {
         startDate: true,
       },
     }),
-    prisma.adminCalendarEvent.findMany({
+    prismaUnfiltered.adminCalendarEvent.findMany({
       where: {
         visibleTo: { in: ['ALL', 'INSTRUCTORS'] },
         // Show events that are upcoming or currently active
@@ -137,7 +148,7 @@ export async function getInstructorDashboardData() {
   ].sort((a, b) => b.date.getTime() - a.date.getTime())
 
   // 6. Pending Grading Details
-  const pendingGradingDetails = await prisma.grade.findMany({
+  const pendingGradingDetails = await prismaUnfiltered.grade.findMany({
     where: {
       gradedBy: instructorId,
       score: 0,
@@ -190,7 +201,7 @@ export async function getInstructorSchedule(startDate?: Date, endDate?: Date) {
   const rangeEnd = endDate || endOfWeek(now, { weekStartsOn: 1 })
 
   return serializePrisma(
-    await prisma.class.findMany({
+    await prismaUnfiltered.class.findMany({
       where: {
         instructorId,
         startDate: {
@@ -224,7 +235,7 @@ export async function submitGrade(data: { gradeId: string; score: number; commen
 
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
-  const updatedGrade = await prisma.grade.update({
+  const updatedGrade = await prismaUnfiltered.grade.update({
     where: { id: data.gradeId },
     data: {
       score: data.score,
@@ -247,7 +258,7 @@ export async function getPendingGradingCount() {
 
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
-  return await prisma.grade.count({
+  return await prismaUnfiltered.grade.count({
     where: {
       gradedBy: instructorId,
       score: 0,
@@ -262,7 +273,7 @@ export async function getGradingQueue() {
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   return serializePrisma(
-    await prisma.grade.findMany({
+    await prismaUnfiltered.grade.findMany({
       where: {
         gradedBy: instructorId,
         score: 0,
@@ -288,7 +299,7 @@ export async function getGradingHistory() {
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   return serializePrisma(
-    await prisma.grade.findMany({
+    await prismaUnfiltered.grade.findMany({
       where: {
         gradedBy: instructorId,
         score: { gt: 0 },
@@ -315,7 +326,7 @@ export async function getMyClasses() {
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   return serializePrisma(
-    await prisma.class.findMany({
+    await prismaUnfiltered.class.findMany({
       where: {
         instructorId,
       },
@@ -352,35 +363,12 @@ export async function getClassData(classId: string) {
   )
 }
 
-export async function getClassData(classId: string) {
-  const session = await getAuthSession()
-  if (!session || session.user.role !== 'INSTRUCTOR') return null
-
-  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
-
-  return serializePrisma(
-    await prismaUnfiltered.class.findUnique({
-      where: { id: classId, instructorId },
-      include: {
-        course: {
-          include: {
-            enrollments: {
-              where: { status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
-              include: { user: { include: { profile: true } } },
-            },
-          },
-        },
-      },
-    })
-  )
-}
-
 export async function getClassAttendance(classId: string, date?: Date) {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return null
 
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
-  const classData = await prisma.class.findUnique({
+  const classData = await prismaUnfiltered.class.findUnique({
     where: { id: classId, instructorId },
     include: {
       course: {
@@ -398,7 +386,7 @@ export async function getClassAttendance(classId: string, date?: Date) {
 
   const targetDate = date || new Date()
 
-  const records = await prisma.attendanceRecord.findMany({
+  const records = await prismaUnfiltered.attendanceRecord.findMany({
     where: {
       classId,
       date: {
@@ -430,7 +418,7 @@ export async function recordAttendance(data: {
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   return serializePrisma(
-    await prisma.attendanceRecord.upsert({
+    await prismaUnfiltered.attendanceRecord.upsert({
       where: {
         classId_userId_date: {
           classId: data.classId,
@@ -461,7 +449,7 @@ export async function getCourseDetails(courseId: string) {
   if (!session || session.user.role !== 'INSTRUCTOR') return null
 
   return serializePrisma(
-    await prisma.course.findUnique({
+    await prismaUnfiltered.course.findUnique({
       where: { id: courseId },
       include: {
         classes: {
@@ -488,7 +476,7 @@ export async function getInstructorResources() {
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   // 1. Fetch assigned courses (Dynamic Academic Resources)
-  const assignedCourses = await prisma.course.findMany({
+  const assignedCourses = await prismaUnfiltered.course.findMany({
     where: {
       classes: {
         some: {
@@ -507,7 +495,7 @@ export async function getInstructorResources() {
   })
 
   // 2. Fetch General Resources from Database
-  const generalResources = await prisma.generalResource.findMany({
+  const generalResources = await prismaUnfiltered.generalResource.findMany({
     where: {
       showToInstructors: true,
     },
@@ -553,7 +541,7 @@ export async function getInstructorStudents() {
 
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
-  const enrollments = await prisma.enrollment.findMany({
+  const enrollments = await prismaUnfiltered.enrollment.findMany({
     where: {
       course: {
         classes: {
@@ -611,7 +599,7 @@ export async function getInstructorFormerStudents() {
 
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
-  const enrollments = await prisma.enrollment.findMany({
+  const enrollments = await prismaUnfiltered.enrollment.findMany({
     where: {
       course: {
         classes: {
@@ -665,7 +653,7 @@ export async function getStudentDetails(userId: string) {
 
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
-  const student = await prisma.user.findUnique({
+  const student = await prismaUnfiltered.user.findUnique({
     where: { id: userId },
     include: {
       profile: true,
@@ -700,7 +688,7 @@ export async function getInstructorProfile() {
     throw new Error('Unauthorized')
   }
 
-  const profile = await prisma.user.findUnique({
+  const profile = await prismaUnfiltered.user.findUnique({
     where: { id: session.user.id },
     select: {
       id: true,
@@ -763,7 +751,7 @@ export async function updateInstructorProfile(data: UpdateProfileData) {
   const { personal, emergency } = data
 
   // Update Profile table
-  await prisma.profile.update({
+  await prismaUnfiltered.profile.update({
     where: { userId: session.user.id },
     data: {
       firstName: personal.firstName,
@@ -812,7 +800,7 @@ export async function createInternalGrade(data: {
   const percentage = (data.score / data.maxScore) * 100
   const letterGrade = calculateLetterGrade(percentage)
 
-  const grade = await prisma.grade.create({
+  const grade = await prismaUnfiltered.grade.create({
     data: {
       userId: data.userId,
       enrollmentId: data.enrollmentId,

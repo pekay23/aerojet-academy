@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -14,11 +14,22 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import InterviewEvaluationForm from './InterviewEvaluationForm'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 export default function InterviewOutcomesTable({ data }: { data: any[] }) {
   const router = useRouter()
   const [processing, setProcessing] = useState<string | null>(null)
   const [evaluatingApp, setEvaluatingApp] = useState<{ id: string; name: string } | null>(null)
+
+  const sortableData = useMemo(
+    () =>
+      data.map((row) => ({
+        ...row,
+        _slotDate: row.slot?.date ? new Date(row.slot.date).getTime() : 0,
+      })),
+    [data]
+  )
+  const { items: sortedData, requestSort, sortConfig } = useSort(sortableData)
 
   const handleOutcome = async (
     applicationId: string,
@@ -67,23 +78,23 @@ export default function InterviewOutcomesTable({ data }: { data: any[] }) {
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
             <tr>
-              <th className="px-4 py-3 font-medium">Candidate</th>
-              <th className="px-4 py-3 font-medium">Programme</th>
-              <th className="px-4 py-3 font-medium">Slot & Time</th>
-              <th className="px-4 py-3 font-medium">Status</th>
+              <SortHeader label="Candidate" sortKey="applicantName" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" />
+              <SortHeader label="Programme" sortKey="programmeChoice" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" />
+              <SortHeader label="Slot & Time" sortKey="_slotDate" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" />
+              <SortHeader label="Status" sortKey="stage" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" align="center" />
               <th className="px-4 py-3 font-medium">Evaluate</th>
               <th className="px-4 py-3 font-medium text-right">Record Outcome</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-            {data.length === 0 ? (
+            {sortedData.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-8 text-center text-slate-500">
                   No candidates pending interviews right now.
                 </td>
               </tr>
             ) : (
-              data.map((row) => (
+              sortedData.map((row) => (
                 <tr
                   key={row.id}
                   className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"

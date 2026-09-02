@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStudent } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler } from '@/lib/api/response'
 

@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Tests Plan for SEB &amp; Certificates · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,11 +27,15 @@
 <header>
   <p class="he-eyebrow">Plans</p>
   <h1 class="he-title">Tests Plan for SEB &amp; Certificates</h1>
-  <p class="he-deck"><p>describe('verifySebRequestHash', () =&gt; { test('returns true for valid hash', () =&gt; { const pair = generateBekPair() const hash = verifySebRequestHash('expected', pair, 'url', 3600) // ... test hash verification logic })…</p>
-</p>
+  <p class="he-deck">describe('verifySebRequestHash', () =&gt; { test('returns true for valid hash', () =&gt; { const pair = generateBekPair() const hash = verifySebRequestHash('expected', pair, 'url', 3600) // ... test hash verification logic })…</p>
 </header>
-<section class="he-section" id="objective"><div class="he-section__num">01 · Objective</div><h2 class="he-section__title">Objective</h2>Add comprehensive test coverage for the SEB config system and certificate generation.<section class="he-section" id="test-categories"><div class="he-section__num">02 · Test Categories</div><h2 class="he-section__title">Test Categories</h2><h3 id="1-seb-config-unit-tests">1. SEB Config Unit Tests</h3>File: <code>tests/unit/lib/seb-config.test.ts</code>describe('generateBekPair', () => {
-  test('generates valid BEK pair with correct lengths', () => {
+<section class="he-section" id="objective"><div class="he-section__num">01 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Add comprehensive test coverage for the SEB config system and certificate generation.</p>
+<section class="he-section" id="test-categories"><div class="he-section__num">02 · Test Categories</div><h2 class="he-section__title">Test Categories</h2></section>
+<h3 id="1-seb-config-unit-tests">1. SEB Config Unit Tests</h3>
+<p><strong>File:</strong> <code>tests/unit/lib/seb-config.test.ts</code></p>
+<pre><code class="language-ts">describe('generateBekPair', () =&gt; {
+  test('generates valid BEK pair with correct lengths', () =&gt; {
     const pair = generateBekPair()
     expect(pair.publicKey).toHaveLength(64) // 32 bytes hex
     expect(pair.privateKey).toHaveLength(128) // 64 bytes hex
@@ -38,54 +43,77 @@
   })
 })
 
-describe('verifySebRequestHash', () => {
-  test('returns true for valid hash', () => {
+describe('verifySebRequestHash', () =&gt; {
+  test('returns true for valid hash', () =&gt; {
     const pair = generateBekPair()
     const hash = verifySebRequestHash('expected', pair, 'url', 3600)
     // ... test hash verification logic
   })
 })
 
-describe('generateSebConfig', () => {
-  test('generates valid ZIP with config.json', () => {
+describe('generateSebConfig', () =&gt; {
+  test('generates valid ZIP with config.json', () =&gt; {
     const zip = generateSebConfig({...})
     // Verify ZIP structure
   })
 })
-<h3 id="2-seb-api-integration-tests">2. SEB API Integration Tests</h3>File: <code>tests/integration/api/seb-config.test.ts</code>describe('GET /api/staff/exams/internal/sessions/[id]/seb-config', () => {
-  test('returns .seb file for valid session with SEB required', async () => {
+</code></pre>
+<h3 id="2-seb-api-integration-tests">2. SEB API Integration Tests</h3>
+<p><strong>File:</strong> <code>tests/integration/api/seb-config.test.ts</code></p>
+<pre><code class="language-ts">describe('GET /api/staff/exams/internal/sessions/[id]/seb-config', () =&gt; {
+  test('returns .seb file for valid session with SEB required', async () =&gt; {
     // Setup: create bank, class schedule with sebRequired=true, session
     // Request: GET /api/staff/exams/internal/sessions/[id]/seb-config?sessionId=xxx
     // Assert: 200, Content-Type: application/octet-stream, .seb file
   })
 
-  test('returns 403 when SEB not required', async () => {
+  test('returns 403 when SEB not required', async () =&gt; {
     // Setup: class schedule with sebRequired=false
     // Assert: 403
   })
 })
-<h3 id="3-seb-validation-middleware-tests">3. SEB Validation Middleware Tests</h3>File: <code>tests/unit/lib/seb-validation.test.ts</code>describe('validateSebRequest', () => {
-  test('passes for valid SEB request', () => {})
-  test('fails for missing header', () => {})
-  test('fails for invalid hash', () => {})
+</code></pre>
+<h3 id="3-seb-validation-middleware-tests">3. SEB Validation Middleware Tests</h3>
+<p><strong>File:</strong> <code>tests/unit/lib/seb-validation.test.ts</code></p>
+<pre><code class="language-ts">describe('validateSebRequest', () =&gt; {
+  test('passes for valid SEB request', () =&gt; {})
+  test('fails for missing header', () =&gt; {})
+  test('fails for invalid hash', () =&gt; {})
 })
-<h3 id="4-certificate-generation-unit-tests">4. Certificate Generation Unit Tests</h3>File: <code>tests/unit/lib/certificates/generator.test.ts</code>describe('generateCertificate', () => {
-  test('renders template with correct variables', () => {})
-  test('generates valid PDF', () => {})
-  test('stores PDF in Supabase', () => {})
+</code></pre>
+<h3 id="4-certificate-generation-unit-tests">4. Certificate Generation Unit Tests</h3>
+<p><strong>File:</strong> <code>tests/unit/lib/certificates/generator.test.ts</code></p>
+<pre><code class="language-ts">describe('generateCertificate', () =&gt; {
+  test('renders template with correct variables', () =&gt; {})
+  test('generates valid PDF', () =&gt; {})
+  test('stores PDF in Supabase', () =&gt; {})
 })
-<h3 id="5-certificate-api-tests">5. Certificate API Tests</h3>File: <code>tests/integration/api/certificates.test.ts</code>describe('POST /api/certificates', () => {
-  test('creates certificate when enabled', async () => {})
-  test('returns 403 when disabled', async () => {})
+</code></pre>
+<h3 id="5-certificate-api-tests">5. Certificate API Tests</h3>
+<p><strong>File:</strong> <code>tests/integration/api/certificates.test.ts</code></p>
+<pre><code class="language-ts">describe('POST /api/certificates', () =&gt; {
+  test('creates certificate when enabled', async () =&gt; {})
+  test('returns 403 when disabled', async () =&gt; {})
 })
 
-describe('GET /api/certificates/verify/[id]', () => {
-  test('returns certificate details', async () => {})
+describe('GET /api/certificates/verify/[id]', () =&gt; {
+  test('returns certificate details', async () =&gt; {})
 })
-<h3 id="6-e2e-tests">6. E2E Tests</h3>File: <code>tests/e2e/seb-certificates.spec.ts</code>test('staff can download SEB config', async ({ page }) => {})
-test('student sees download button when SEB required', async ({ page }) => {})
-test('certificate is generated after exam submission', async ({ page }) => {})
-<section class="he-section" id="test-data-setup"><div class="he-section__num">03 · Test Data Setup</div><h2 class="he-section__title">Test Data Setup</h2>Seed helper in <code>tests/helpers/seb-fixtures.ts</code>Mock Supabase storage for certificate testsMock PDF generation for unit tests<section class="he-section" id="commands"><div class="he-section__num">04 · Commands</div><h2 class="he-section__title">Commands</h2># Run SEB tests
+</code></pre>
+<h3 id="6-e2e-tests">6. E2E Tests</h3>
+<p><strong>File:</strong> <code>tests/e2e/seb-certificates.spec.ts</code></p>
+<pre><code class="language-ts">test('staff can download SEB config', async ({ page }) =&gt; {})
+test('student sees download button when SEB required', async ({ page }) =&gt; {})
+test('certificate is generated after exam submission', async ({ page }) =&gt; {})
+</code></pre>
+<section class="he-section" id="test-data-setup"><div class="he-section__num">03 · Test Data Setup</div><h2 class="he-section__title">Test Data Setup</h2></section>
+<ul>
+<li>Seed helper in <code>tests/helpers/seb-fixtures.ts</code></li>
+<li>Mock Supabase storage for certificate tests</li>
+<li>Mock PDF generation for unit tests</li>
+</ul>
+<section class="he-section" id="commands"><div class="he-section__num">04 · Commands</div><h2 class="he-section__title">Commands</h2></section>
+<pre><code class="language-bash"># Run SEB tests
 bun run test --run tests/unit/lib/seb-config.test.ts
 bun run test --run tests/integration/api/seb-config.test.ts
 
@@ -95,6 +123,7 @@ bun run test --run tests/integration/api/certificates.test.ts
 
 # Run E2E
 bun run test:e2e tests/e2e/seb-certificates.spec.ts
+</code></pre>
 
 </main>
 
@@ -115,7 +144,7 @@ bun run test:e2e tests/e2e/seb-certificates.spec.ts
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

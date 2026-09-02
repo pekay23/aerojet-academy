@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Feasibility: On-Premise Deployable Training Portal (Product) · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +27,34 @@
 <header>
   <p class="he-eyebrow">Plans</p>
   <h1 class="he-title">Feasibility: On-Premise Deployable Training Portal (Product)</h1>
-  <p class="he-deck"><p><strong>Goal:</strong> Productize the Aerojet Academy portal into a resellable/subscribable training management system that organizations can: 1.</p>
-</p>
+  <p class="he-deck"><strong>Goal:</strong> Productize the Aerojet Academy portal into a resellable/subscribable training management system that organizations can: 1.</p>
 </header>
-<section class="he-section" id="context"><div class="he-section__num">01 · Context</div><h2 class="he-section__title">Context</h2>Goal: Productize the Aerojet Academy portal into a resellable/subscribable training management system that organizations can:Run on their local on-premise network with their own databaseOptionally sync to cloud for remote/general accessBe white-labeled and configured per organizationThis is a separate project — Aerojet Academy stays as-is; the product is forked and remodeled.<section class="he-section" id="verdict-highly-feasible"><div class="he-section__num">02 · Verdict: Highly Feasible</div><h2 class="he-section__title">Verdict: Highly Feasible</h2>AspectFeasibilityNotesOn-premise deploymentEasy<code>output: 'standalone'</code> already set; Docker-readyLocal PostgreSQLEasySwap Neon connection string for local PostgresWhite-labelingMediumExtract branding into config/theme systemCloud syncMedium-HardPostgreSQL logical replication or API syncMulti-tenancyMediumDecide: single-tenant per install vs. multi-tenant SaaSSubscription/licensingMediumAdd license key validation layer<section class="he-section" id="architecture-on-premise-cloud-sync"><div class="he-section__num">03 · Architecture: On-Premise + Cloud Sync</div><h2 class="he-section__title">Architecture: On-Premise + Cloud Sync</h2>┌─────────────────────────────────────────────────────┐
+<section class="he-section" id="context"><div class="he-section__num">01 · Context</div><h2 class="he-section__title">Context</h2></section>
+<p><strong>Goal:</strong> Productize the Aerojet Academy portal into a resellable/subscribable training management system that organizations can:</p>
+<ol>
+<li>Run on their <strong>local on-premise network</strong> with their own database</li>
+<li>Optionally <strong>sync to cloud</strong> for remote/general access</li>
+<li>Be white-labeled and configured per organization</li>
+</ol>
+<p>This is a <strong>separate project</strong> — Aerojet Academy stays as-is; the product is forked and remodeled.</p>
+<hr />
+<section class="he-section" id="verdict-highly-feasible"><div class="he-section__num">02 · Verdict: Highly Feasible</div><h2 class="he-section__title">Verdict: Highly Feasible</h2></section>
+<table>
+<thead>
+<tr><th>Aspect</th><th>Feasibility</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>On-premise deployment</td><td><strong>Easy</strong></td><td><code>output: 'standalone'</code> already set; Docker-ready</td></tr>
+<tr><td>Local PostgreSQL</td><td><strong>Easy</strong></td><td>Swap Neon connection string for local Postgres</td></tr>
+<tr><td>White-labeling</td><td><strong>Medium</strong></td><td>Extract branding into config/theme system</td></tr>
+<tr><td>Cloud sync</td><td><strong>Medium-Hard</strong></td><td>PostgreSQL logical replication or API sync</td></tr>
+<tr><td>Multi-tenancy</td><td><strong>Medium</strong></td><td>Decide: single-tenant per install vs. multi-tenant SaaS</td></tr>
+<tr><td>Subscription/licensing</td><td><strong>Medium</strong></td><td>Add license key validation layer</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="architecture-on-premise-cloud-sync"><div class="he-section__num">03 · Architecture: On-Premise + Cloud Sync</div><h2 class="he-section__title">Architecture: On-Premise + Cloud Sync</h2></section>
+<pre><code>┌─────────────────────────────────────────────────────┐
 │  CUSTOMER'S LOCAL NETWORK                           │
 │                                                     │
 │  ┌──────────────┐    ┌──────────────────────────┐  │
@@ -49,24 +74,197 @@
                       │  - Central admin panel      │
                       │  - License validation       │
                       └─────────────────────────────┘
-<section class="he-section" id="what-needs-to-change-fork-scope"><div class="he-section__num">04 · What Needs to Change (Fork Scope)</div><h2 class="he-section__title">What Needs to Change (Fork Scope)</h2><h3 id="1-remove-aerojet-specific-dependencies">1. Remove Aerojet-Specific Dependencies</h3>CurrentReplace WithNeon PostgreSQL (cloud)Local PostgreSQL (customer installs)Supabase Auth (if any)Self-hosted NextAuth (already using it)Resend (email)Configurable SMTP (Nodemailer)Uploadthing (files)Local file storage (<code>/uploads/</code>) or configurable S3Stripe (payments)Optional / configurable payment gatewayVercel deploymentDocker container / <code>node server.js</code>reCAPTCHAOptional / self-hosted rate limiting<h3 id="2-configuration-system">2. Configuration System</h3>Create a <code>portal.config.ts</code> (or <code>.env</code>-driven) that controls:PORTAL_NAME="Aviation Training Academy"
-PORTAL_LOGO="/branding/logo.png"
-PORTAL_DOMAIN="training.customer.com"
-PORTAL_PRIMARY_COLOR="#003366"
-PORTAL_SMTP_HOST="mail.customer.com"
-PORTAL_STORAGE_PROVIDER="local"  # or "s3"
+</code></pre>
+<hr />
+<section class="he-section" id="what-needs-to-change-fork-scope"><div class="he-section__num">04 · What Needs to Change (Fork Scope)</div><h2 class="he-section__title">What Needs to Change (Fork Scope)</h2></section>
+<h3 id="1-remove-aerojet-specific-dependencies">1. Remove Aerojet-Specific Dependencies</h3>
+<table>
+<thead>
+<tr><th>Current</th><th>Replace With</th></tr>
+</thead>
+<tbody>
+<tr><td>Neon PostgreSQL (cloud)</td><td>Local PostgreSQL (customer installs)</td></tr>
+<tr><td>Supabase Auth (if any)</td><td>Self-hosted NextAuth (already using it)</td></tr>
+<tr><td>Resend (email)</td><td>Configurable SMTP (Nodemailer)</td></tr>
+<tr><td>Uploadthing (files)</td><td>Local file storage (<code>/uploads/</code>) or configurable S3</td></tr>
+<tr><td>Stripe (payments)</td><td>Optional / configurable payment gateway</td></tr>
+<tr><td>Vercel deployment</td><td>Docker container / <code>node server.js</code></td></tr>
+<tr><td>reCAPTCHA</td><td>Optional / self-hosted rate limiting</td></tr>
+</tbody>
+</table>
+<h3 id="2-configuration-system">2. Configuration System</h3>
+<p>Create a <code>portal.config.ts</code> (or <code>.env</code>-driven) that controls:</p>
+<pre><code>PORTAL_NAME=&quot;Aviation Training Academy&quot;
+PORTAL_LOGO=&quot;/branding/logo.png&quot;
+PORTAL_DOMAIN=&quot;training.customer.com&quot;
+PORTAL_PRIMARY_COLOR=&quot;#003366&quot;
+PORTAL_SMTP_HOST=&quot;mail.customer.com&quot;
+PORTAL_STORAGE_PROVIDER=&quot;local&quot;  # or &quot;s3&quot;
 PORTAL_CLOUD_SYNC_ENABLED=true
-PORTAL_CLOUD_SYNC_URL="https://sync.yourproduct.com"
-PORTAL_LICENSE_KEY="lic_xxxx"
-<h3 id="3-database-local-postgresql">3. Database: Local PostgreSQL</h3>Ship a <code>docker-compose.yml</code> with PostgreSQL + the appKeep the SAME Prisma schema (PostgreSQL → PostgreSQL, no SQLite)RLS works identically on local PostgresCustomer just runs <code>docker compose up</code><h3 id="4-cloud-sync-strategy">4. Cloud Sync Strategy</h3>Option A: PostgreSQL Logical Replication (Recommended)Built into PostgreSQL — no custom code neededLocal DB publishes changes → Cloud DB subscribesBi-directional with conflict resolution (via <code>pglogical</code> or Postgres 16+ bi-directional)Customer configures sync in admin panelOption B: Application-Level API SyncBackground job sends new/updated records to cloud APICloud pushes changes back downMore control over what syncs, but more code to writeBetter for selective sync (e.g., only sync grades/attendance, not financial data)Recommended: Start with Option A for full database sync, add Option B later for selective/filtered sync.<h3 id="5-licensing-subscription">5. Licensing / Subscription</h3>License key validation on app startupPhone-home check (when online): validate key with your license serverOffline grace period (30 days without validation)Feature gates by license tier (e.g., Basic: 50 students, Pro: unlimited)Admin dashboard on YOUR side to manage customer licenses<h3 id="6-deployment-packaging">6. Deployment Packaging</h3>For customers:training-portal/
+PORTAL_CLOUD_SYNC_URL=&quot;https://sync.yourproduct.com&quot;
+PORTAL_LICENSE_KEY=&quot;lic_xxxx&quot;
+</code></pre>
+<h3 id="3-database-local-postgresql">3. Database: Local PostgreSQL</h3>
+<ul>
+<li>Ship a <code>docker-compose.yml</code> with PostgreSQL + the app</li>
+<li>Keep the SAME Prisma schema (PostgreSQL → PostgreSQL, no SQLite)</li>
+<li>Data access is enforced by application-level auth guards and explicit query filters, not PostgreSQL RLS policies</li>
+<li>Customer just runs <code>docker compose up</code></li>
+</ul>
+<h3 id="4-cloud-sync-strategy">4. Cloud Sync Strategy</h3>
+<p><strong>Option A: PostgreSQL Logical Replication (Recommended)</strong></p>
+<ul>
+<li>Built into PostgreSQL — no custom code needed</li>
+<li>Local DB publishes changes → Cloud DB subscribes</li>
+<li>Bi-directional with conflict resolution (via <code>pglogical</code> or Postgres 16+ bi-directional)</li>
+<li>Customer configures sync in admin panel</li>
+</ul>
+<p><strong>Option B: Application-Level API Sync</strong></p>
+<ul>
+<li>Background job sends new/updated records to cloud API</li>
+<li>Cloud pushes changes back down</li>
+<li>More control over what syncs, but more code to write</li>
+<li>Better for selective sync (e.g., only sync grades/attendance, not financial data)</li>
+</ul>
+<p><strong>Recommended: Start with Option A</strong> for full database sync, add Option B later for selective/filtered sync.</p>
+<h3 id="5-licensing-subscription">5. Licensing / Subscription</h3>
+<ul>
+<li>License key validation on app startup</li>
+<li>Phone-home check (when online): validate key with your license server</li>
+<li>Offline grace period (30 days without validation)</li>
+<li>Feature gates by license tier (e.g., Basic: 50 students, Pro: unlimited)</li>
+<li>Admin dashboard on YOUR side to manage customer licenses</li>
+</ul>
+<h3 id="6-deployment-packaging">6. Deployment Packaging</h3>
+<p><strong>For customers:</strong></p>
+<pre><code>training-portal/
 ├── docker-compose.yml      # PostgreSQL + App + Redis (optional)
 ├── .env.example            # Customer fills in their config
 ├── data/                   # Persistent volumes (DB, uploads)
 ├── branding/               # Customer's logo, colors
 └── README.md               # Setup guide
-Customer runs:docker compose up -d
+</code></pre>
+<p>Customer runs:</p>
+<pre><code class="language-bash">docker compose up -d
 # → App at http://localhost:3000 (or their domain)
-Or for Windows servers without Docker:Bundle as NSIS installer with embedded Node.js + PostgreSQLInstalls as a Windows ServiceTray icon with start/stop/open browserAuto-updates from your server<section class="he-section" id="implementation-phases"><div class="he-section__num">05 · Implementation Phases</div><h2 class="he-section__title">Implementation Phases</h2><h3 id="phase-1-fork-decouple-2-3-weeks">Phase 1: Fork & Decouple (2-3 weeks)</h3>Fork codebase into new repoReplace hardcoded Aerojet branding with config-driven valuesReplace Neon adapter with standard <code>pg</code> adapter (local Postgres)Replace Resend with Nodemailer (configurable SMTP)Replace Uploadthing with local file storage (<code>multer</code> or similar)Remove/make-optional: Stripe, reCAPTCHA, SupabaseCreate <code>docker-compose.yml</code> for local deploymentCreate setup wizard (first-run admin account creation)<h3 id="phase-2-white-label-system-2-weeks">Phase 2: White-Label System (2 weeks)</h3>Theme configuration (colors, logo, name) via admin panel or configEmail templates driven by branding configConfigurable portal name, domain, support contactCustom login page branding<h3 id="phase-3-licensing-2-weeks">Phase 3: Licensing (2 weeks)</h3>License key generation system (your admin panel)Key validation in the app (startup + periodic)Feature gates by tierOffline grace periodSubscription expiry handling (read-only mode)<h3 id="phase-4-cloud-sync-3-4-weeks">Phase 4: Cloud Sync (3-4 weeks)</h3>PostgreSQL logical replication setup guideOR: API-based selective sync engineSync status dashboard in admin panelConflict resolution strategy (last-write-wins with timestamps)Remote access portal (cloud-hosted, reads from synced DB)<h3 id="phase-5-installer-distribution-2-weeks">Phase 5: Installer & Distribution (2 weeks)</h3>Docker-based deployment (primary)Optional: Windows installer (NSIS + embedded Node.js + PostgreSQL)Auto-update mechanismHealth monitoring / status pageBackup/restore tooling<h3 id="phase-6-product-polish-2-weeks">Phase 6: Product Polish (2 weeks)</h3>Setup documentationCustomer onboarding guideAdmin guide (managing users, courses, exams)API documentation (for integrations)Demo instanceTotal: ~13-15 weeks for a production-ready product.<section class="he-section" id="key-decisions-to-make"><div class="he-section__num">06 · Key Decisions to Make</div><h2 class="he-section__title">Key Decisions to Make</h2>Single-tenant or multi-tenant?Single-tenant (recommended for on-premise): Each customer gets their own instanceMulti-tenant: One cloud instance serves multiple orgs (more complex, but SaaS-friendly)What syncs to cloud?Everything (full DB replication) — simpler but more bandwidthSelective (only grades, attendance, announcements) — more control, less riskPricing model?Per-student seat licensingFlat monthly/annual subscription by tierOne-time purchase + maintenance feeTarget customer tech level?Docker-literate IT teams → ship Docker ComposeNon-technical → ship Windows installer with GUI setup wizard<section class="he-section" id="what-stays-the-same"><div class="he-section__num">07 · What Stays the Same</div><h2 class="he-section__title">What Stays the Same</h2>These work identically on-premise with local PostgreSQL:Prisma ORM + schemaRow-Level Security (RLS)NextAuth credentials/2FA/passkeysAll staff/student/applicant portalsExam system, grading, attendanceMessaging, notificationsAcademic calendarDashboard analytics<section class="he-section" id="summary"><div class="he-section__num">08 · Summary</div><h2 class="he-section__title">Summary</h2>This is a productization effort, not an "offline app" challenge. The core app is already architected well for this:Standalone output mode ✓PostgreSQL (same local or cloud) ✓Self-contained auth (NextAuth, no external IdP required) ✓No hard dependency on Vercel runtime ✓The main work is decoupling external services (Neon, Resend, Uploadthing, Stripe) and adding configuration/licensing layers. The database and app logic port directly.
+</code></pre>
+<p><strong>Or for Windows servers without Docker:</strong></p>
+<ul>
+<li>Bundle as NSIS installer with embedded Node.js + PostgreSQL</li>
+<li>Installs as a Windows Service</li>
+<li>Tray icon with start/stop/open browser</li>
+<li>Auto-updates from your server</li>
+</ul>
+<hr />
+<section class="he-section" id="implementation-phases"><div class="he-section__num">05 · Implementation Phases</div><h2 class="he-section__title">Implementation Phases</h2></section>
+<h3 id="phase-1-fork-amp-decouple-2-3-weeks">Phase 1: Fork &amp; Decouple (2-3 weeks)</h3>
+<ul>
+<li>Fork codebase into new repo</li>
+<li>Replace hardcoded Aerojet branding with config-driven values</li>
+<li>Replace Neon adapter with standard <code>pg</code> adapter (local Postgres)</li>
+<li>Replace Resend with Nodemailer (configurable SMTP)</li>
+<li>Replace Uploadthing with local file storage (<code>multer</code> or similar)</li>
+<li>Remove/make-optional: Stripe, reCAPTCHA, Supabase</li>
+<li>Create <code>docker-compose.yml</code> for local deployment</li>
+<li>Create setup wizard (first-run admin account creation)</li>
+</ul>
+<h3 id="phase-2-white-label-system-2-weeks">Phase 2: White-Label System (2 weeks)</h3>
+<ul>
+<li>Theme configuration (colors, logo, name) via admin panel or config</li>
+<li>Email templates driven by branding config</li>
+<li>Configurable portal name, domain, support contact</li>
+<li>Custom login page branding</li>
+</ul>
+<h3 id="phase-3-licensing-2-weeks">Phase 3: Licensing (2 weeks)</h3>
+<ul>
+<li>License key generation system (your admin panel)</li>
+<li>Key validation in the app (startup + periodic)</li>
+<li>Feature gates by tier</li>
+<li>Offline grace period</li>
+<li>Subscription expiry handling (read-only mode)</li>
+</ul>
+<h3 id="phase-4-cloud-sync-3-4-weeks">Phase 4: Cloud Sync (3-4 weeks)</h3>
+<ul>
+<li>PostgreSQL logical replication setup guide</li>
+<li>OR: API-based selective sync engine</li>
+<li>Sync status dashboard in admin panel</li>
+<li>Conflict resolution strategy (last-write-wins with timestamps)</li>
+<li>Remote access portal (cloud-hosted, reads from synced DB)</li>
+</ul>
+<h3 id="phase-5-installer-amp-distribution-2-weeks">Phase 5: Installer &amp; Distribution (2 weeks)</h3>
+<ul>
+<li>Docker-based deployment (primary)</li>
+<li>Optional: Windows installer (NSIS + embedded Node.js + PostgreSQL)</li>
+<li>Auto-update mechanism</li>
+<li>Health monitoring / status page</li>
+<li>Backup/restore tooling</li>
+</ul>
+<h3 id="phase-6-product-polish-2-weeks">Phase 6: Product Polish (2 weeks)</h3>
+<ul>
+<li>Setup documentation</li>
+<li>Customer onboarding guide</li>
+<li>Admin guide (managing users, courses, exams)</li>
+<li>API documentation (for integrations)</li>
+<li>Demo instance</li>
+</ul>
+<p><strong>Total: ~13-15 weeks</strong> for a production-ready product.</p>
+<hr />
+<section class="he-section" id="key-decisions-to-make"><div class="he-section__num">06 · Key Decisions to Make</div><h2 class="he-section__title">Key Decisions to Make</h2></section>
+<ol>
+<li>
+<p><strong>Single-tenant or multi-tenant?</strong></p>
+<ul>
+<li>Single-tenant (recommended for on-premise): Each customer gets their own instance</li>
+<li>Multi-tenant: One cloud instance serves multiple orgs (more complex, but SaaS-friendly)</li>
+</ul>
+</li>
+<li>
+<p><strong>What syncs to cloud?</strong></p>
+<ul>
+<li>Everything (full DB replication) — simpler but more bandwidth</li>
+<li>Selective (only grades, attendance, announcements) — more control, less risk</li>
+</ul>
+</li>
+<li>
+<p><strong>Pricing model?</strong></p>
+<ul>
+<li>Per-student seat licensing</li>
+<li>Flat monthly/annual subscription by tier</li>
+<li>One-time purchase + maintenance fee</li>
+</ul>
+</li>
+<li>
+<p><strong>Target customer tech level?</strong></p>
+<ul>
+<li>Docker-literate IT teams → ship Docker Compose</li>
+<li>Non-technical → ship Windows installer with GUI setup wizard</li>
+</ul>
+</li>
+</ol>
+<hr />
+<section class="he-section" id="what-stays-the-same"><div class="he-section__num">07 · What Stays the Same</div><h2 class="he-section__title">What Stays the Same</h2></section>
+<p>These work identically on-premise with local PostgreSQL:</p>
+<ul>
+<li>Prisma ORM + schema</li>
+<li>Application-level auth guards and explicit query filters</li>
+<li>NextAuth credentials/2FA/passkeys</li>
+<li>All staff/student/applicant portals</li>
+<li>Exam system, grading, attendance</li>
+<li>Messaging, notifications</li>
+<li>Academic calendar</li>
+<li>Dashboard analytics</li>
+</ul>
+<hr />
+<section class="he-section" id="summary"><div class="he-section__num">08 · Summary</div><h2 class="he-section__title">Summary</h2></section>
+<p>This is a <strong>productization</strong> effort, not an &quot;offline app&quot; challenge. The core app is already architected well for this:</p>
+<ul>
+<li>Standalone output mode ✓</li>
+<li>PostgreSQL (same local or cloud) ✓</li>
+<li>Self-contained auth (NextAuth, no external IdP required) ✓</li>
+<li>No hard dependency on Vercel runtime ✓</li>
+</ul>
+<p>The main work is <strong>decoupling external services</strong> (Neon, Resend, Uploadthing, Stripe) and adding <strong>configuration/licensing layers</strong>. The database and app logic port directly.</p>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -96,7 +294,7 @@ Or for Windows servers without Docker:Bundle as NSIS installer with embedded Nod
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

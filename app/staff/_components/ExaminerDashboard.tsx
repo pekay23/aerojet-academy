@@ -1,6 +1,10 @@
+'use client'
+
+import { useMemo } from 'react'
 import { Calendar, Users, ClipboardCheck, Clock, BookOpen } from 'lucide-react'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface ExaminerDashboardProps {
   examinerName: string
@@ -9,6 +13,15 @@ interface ExaminerDashboardProps {
 }
 
 export default function ExaminerDashboard({ examinerName, nextSitting, recentSittings }: ExaminerDashboardProps) {
+  const sortable = useMemo(
+    () =>
+      recentSittings.map((s) => ({
+        ...s,
+        _date: s.startTime ? new Date(s.startTime).getTime() : 0,
+      })),
+    [recentSittings]
+  )
+  const { items: sortedSittings, requestSort, sortConfig } = useSort(sortable)
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -100,22 +113,22 @@ export default function ExaminerDashboard({ examinerName, nextSitting, recentSit
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:bg-slate-800/50">
               <tr>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4">Event / Session</th>
-                <th className="px-6 py-4">Students</th>
-                <th className="px-6 py-4">Status</th>
+                <SortHeader label="Date" sortKey="_date" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
+                <SortHeader label="Event / Session" sortKey="event.name" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
+                <SortHeader label="Students" sortKey="currentMemberCount" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" align="right" />
+                <SortHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" align="center" />
                 <th className="px-6 py-4 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {recentSittings.length === 0 ? (
+              {sortedSittings.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-xs text-slate-400">
                     No past sittings found in the record.
                   </td>
                 </tr>
               ) : (
-                recentSittings.map((s) => (
+                sortedSittings.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-medium">{format(new Date(s.startTime), 'MMM d, yyyy')}</td>
                     <td className="px-6 py-4">

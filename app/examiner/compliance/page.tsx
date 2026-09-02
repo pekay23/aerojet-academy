@@ -1,10 +1,32 @@
 import { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { requireExaminer } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { ShieldCheck, CheckCircle2, Clock, FileText, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns'
 
 export const metadata: Metadata = { title: 'Compliance | Examiner Portal' }
+
+const getCachedComplianceCounts = (examinerId: string) =>
+  unstable_cache(
+    async () => {
+      const [completedSittings, upcomingSittings] = await Promise.all([
+        prismaUnfiltered.examSitting.count({
+          where: { examinerId, status: 'COMPLETED' },
+        }),
+        prismaUnfiltered.examSitting.count({
+          where: {
+            examinerId,
+            status: { in: ['DRAFT', 'OPEN', 'SCHEDULED', 'CONFIRMED'] },
+            startTime: { gte: new Date() },
+          },
+        }),
+      ])
+      return { completedSittings, upcomingSittings }
+    },
+    ['examiner-compliance-counts', examinerId],
+    { revalidate: 300, tags: ['examiner-compliance', `examiner-${examinerId}`] }
+  )()
 
 export default async function ExaminerCompliancePage() {
   const user = await requireExaminer()
@@ -30,18 +52,7 @@ export default async function ExaminerCompliancePage() {
     )
   }
 
-  const [completedSittings, upcomingSittings] = await Promise.all([
-    prismaUnfiltered.examSitting.count({
-      where: { examinerId: examiner.id, status: 'COMPLETED' },
-    }),
-    prismaUnfiltered.examSitting.count({
-      where: {
-        examinerId: examiner.id,
-        status: { in: ['DRAFT', 'OPEN', 'SCHEDULED', 'CONFIRMED'] },
-        startTime: { gte: new Date() },
-      },
-    }),
-  ])
+  const { completedSittings, upcomingSittings } = await getCachedComplianceCounts(examiner.id)
 
   const fullName = examiner.user.profile
     ? `${examiner.user.profile.firstName} ${examiner.user.profile.lastName}`

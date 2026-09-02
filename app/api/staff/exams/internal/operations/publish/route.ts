@@ -6,8 +6,6 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
 import { getCertificatesEnabled, createCertificate } from '@/lib/certificates/generator'
 import { getBankRules } from '@/lib/internal-exam/engine'
-import { getCertificatesEnabled, createCertificate } from '@/lib/certificates/generator'
-import { getBankRules } from '@/lib/internal-exam/engine'
 
 const publishSchema = z.object({
   sessionIds: z.array(z.string()).min(1).max(500),
@@ -36,7 +34,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       status: { in: ['COMPLETED', 'TIMED_OUT'] },
       isPublished: false,
     },
-    select: { id: true, studentId: true, bankId: true, percentage: true, passed: true },
+    select: {
+      id: true,
+      studentId: true,
+      bankId: true,
+      percentage: true,
+      passed: true,
+      bank: { select: { certificateEnabled: true } },
+    },
   })
 
   if (candidates.length === 0) {
@@ -61,11 +66,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     },
   })
 
-  // Auto-generate certificates for students who passed (feature-gated)
+  // Auto-generate certificates for students who passed (feature-gated).
+  // Requires both the global toggle AND the per-bank certificateEnabled flag.
   const certificatesEnabled = await getCertificatesEnabled()
   let certificatesGenerated = 0
   if (certificatesEnabled) {
-    const passingSessions = candidates.filter((c) => c.passed)
+    const passingSessions = candidates.filter((c) => c.passed && c.bank.certificateEnabled)
     const certPromises: Promise<any>[] = []
 
     for (const c of passingSessions) {

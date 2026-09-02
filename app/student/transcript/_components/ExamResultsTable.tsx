@@ -32,12 +32,12 @@ export default function ExamResultsTable({ results }: { results: ExamResult[] })
     <table className="w-full text-sm">
       <thead>
         <tr className="border-b border-slate-100 text-left dark:border-slate-800">
-          <SortHeader label="Module" sortKey="moduleCode" currentSort={sortConfig} onSort={requestSort} className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-          <SortHeader label="Category" sortKey="examCategory" currentSort={sortConfig} onSort={requestSort} className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-          <SortHeader label="Attempt" sortKey="attemptType" currentSort={sortConfig} onSort={requestSort} className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-          <SortHeader label="Score" sortKey="percentage" currentSort={sortConfig} onSort={requestSort} align="center" className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-          <SortHeader label="Result" sortKey="passed" currentSort={sortConfig} onSort={requestSort} align="center" className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-          <SortHeader label="Date" sortKey="createdAt" currentSort={sortConfig} onSort={requestSort} align="center" className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
+          <SortHeader label="Module" sortKey="moduleCode" currentSort={sortConfig} onSort={requestSort} className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
+          <SortHeader label="Category" sortKey="examCategory" currentSort={sortConfig} onSort={requestSort} className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
+          <SortHeader label="Attempt" sortKey="attemptType" currentSort={sortConfig} onSort={requestSort} className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
+          <SortHeader label="Score" sortKey="percentage" currentSort={sortConfig} onSort={requestSort} align="center" className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
+          <SortHeader label="Result" sortKey="passed" currentSort={sortConfig} onSort={requestSort} align="center" className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
+          <SortHeader label="Date" sortKey="createdAt" currentSort={sortConfig} onSort={requestSort} align="center" className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
         </tr>
       </thead>
       <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -72,7 +72,7 @@ export default function ExamResultsTable({ results }: { results: ExamResult[] })
         ))}
         {items.length === 0 && (
           <tr>
-            <td colSpan={6} className="px-3 py-6 text-center text-sm text-slate-400">
+            <td colSpan={6} className="px-3 py-6 text-center text-sm text-slate-500">
               No exam records.
             </td>
           </tr>

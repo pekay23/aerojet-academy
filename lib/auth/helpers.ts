@@ -187,3 +187,11 @@ export async function requireExaminer() {
   }
   return session.user
 }
+
+export async function requireSuperAdmin() {
+  const session = await getAuthSession()
+  if (!session || session.user.role !== 'SUPER_ADMIN') {
+    throw new Error('Unauthorized')
+  }
+  return session.user
+}

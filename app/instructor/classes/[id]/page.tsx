@@ -10,9 +10,18 @@ import {
   Calendar,
 } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
+import type { Prisma } from '@prisma/client'
+
+type GradeRow = Prisma.GradeGetPayload<{
+  include: { user: { include: { profile: true } } }
+}>
+type AttendanceRow = Prisma.AttendanceRecordGetPayload<{
+  include: { user: { include: { profile: true } } }
+}>
+type ResourceRow = Prisma.GeneralResourceGetPayload<Record<string, never>>
 
 export const metadata: Metadata = { title: 'Class Detail | Instructor Portal' }
 
@@ -35,11 +44,11 @@ export default async function Page({
     return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
   }
 
-  const allClasses = await prisma.class.findMany({ select: { id: true, name: true } });
+  const allClasses = await prismaUnfiltered.class.findMany({ select: { id: true, name: true } });
   const matchedClass = allClasses.find(c => slugify(c.name) === id);
   const targetId = matchedClass ? matchedClass.id : id;
 
-  const classData = await prisma.class.findUnique({
+  const classData = await prismaUnfiltered.class.findUnique({
     where: { id: targetId },
     include: {
       course: {
@@ -61,13 +70,13 @@ export default async function Page({
   const enrollments = course.enrollments || []
 
   // Only fetch tab-specific data for the active tab
-  let grades: any[] = []
-  let attendanceRecords: any[] = []
-  let resources: any[] = []
+  let grades: GradeRow[] = []
+  let attendanceRecords: AttendanceRow[] = []
+  let resources: ResourceRow[] = []
   let attendanceStats = { rate: 0, present: 0, late: 0, absent: 0, total: 0 }
 
   if (activeTab === 'grades') {
-    grades = await prisma.grade.findMany({
+    grades = await prismaUnfiltered.grade.findMany({
       where: { enrollment: { courseId: course.id } },
       include: { user: { include: { profile: true } } },
       orderBy: { assessmentDate: 'desc' },
@@ -75,21 +84,21 @@ export default async function Page({
   }
 
   if (activeTab === 'attendance') {
-    attendanceRecords = await prisma.attendanceRecord.findMany({
+    attendanceRecords = await prismaUnfiltered.attendanceRecord.findMany({
       where: { classId: id },
       include: { user: { include: { profile: true } } },
       orderBy: { date: 'desc' },
       take: 50,
     })
-    const present = attendanceRecords.filter((r: any) => r.status === 'PRESENT').length
-    const late = attendanceRecords.filter((r: any) => r.status === 'LATE').length
-    const absent = attendanceRecords.filter((r: any) => r.status === 'ABSENT').length
+    const present = attendanceRecords.filter((r) => r.status === 'PRESENT').length
+    const late = attendanceRecords.filter((r) => r.status === 'LATE').length
+    const absent = attendanceRecords.filter((r) => r.status === 'ABSENT').length
     const total = attendanceRecords.length
     attendanceStats = { rate: total > 0 ? Math.round((present / total) * 100) : 0, present, late, absent, total }
   }
 
   if (activeTab === 'materials') {
-    resources = await prisma.generalResource.findMany({
+    resources = await prismaUnfiltered.generalResource.findMany({
       where: { showToInstructors: true },
       orderBy: { updatedAt: 'desc' },
       take: 10,

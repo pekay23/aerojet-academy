@@ -2,6 +2,15 @@ import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { apiPaginated, apiUnauthorized, parsePagination } from '@/lib/api/response'
+import { buildOrderBy } from '@/lib/utils/build-order-by'
+
+const ALLOWED_SORT_KEYS = {
+  name: 'profile.lastName',
+  role: 'role',
+  status: 'status',
+  joined: 'createdAt',
+} as const
+type SortKey = keyof typeof ALLOWED_SORT_KEYS
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession()
@@ -16,6 +25,11 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get('search') || ''
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '25')
+  const orderBy = buildOrderBy<SortKey>(
+    { sort: searchParams.get('sort'), order: searchParams.get('order') },
+    ALLOWED_SORT_KEYS,
+    { createdAt: 'desc' }
+  )
 
   const where: any = {}
   if (role !== 'all') where.role = role
@@ -61,7 +75,7 @@ export async function GET(req: NextRequest) {
               }
             : {}),
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy,
       skip: (page - 1) * limit,
       take: limit,
     }),

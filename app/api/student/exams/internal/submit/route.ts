@@ -3,6 +3,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getBankRules, isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import { calculateScore } from '@/lib/internal-exam/grading'
 import { z } from 'zod'
 
 const submitSchema = z.object({
@@ -56,17 +57,20 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Grade answers and update everything in a single transaction
   const result = await prismaUnfiltered.$transaction(async (tx) => {
-    let score = 0
-    let totalPoints = 0
+    const responses = answers.map(a => ({ questionId: a.questionId, selectedAnswer: a.selectedAnswer }))
+    const gradableAnswers = examSession.answers.map(a => ({
+      questionId: a.questionId,
+      correctAnswer: a.question.correctAnswer,
+      points: a.question.points,
+    }))
 
-    // Grade each answer
+    const rules = await getBankRules(examSession.bankId)
+    const { score, totalPoints, percentage, passed } = calculateScore(responses, gradableAnswers, rules.passMarkPct)
+
     for (const ans of examSession.answers) {
       const studentAnswer = answers.find(a => a.questionId === ans.questionId)
       const isCorrect = studentAnswer?.selectedAnswer === ans.question.correctAnswer
       const pointsAwarded = isCorrect ? ans.question.points : 0
-
-      score += pointsAwarded
-      totalPoints += ans.question.points
 
       await tx.internalExamAnswer.update({
         where: { id: ans.id },
@@ -78,11 +82,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         },
       })
     }
-
-    const percentage = totalPoints > 0 ? Math.round((score / totalPoints) * 100 * 10) / 10 : 0
-    const rules = await getBankRules(examSession.bankId)
-    const passed = percentage >= rules.passMarkPct
-
     // Single-attempt policy: `checkEligibility` blocks any retake of a
     // non-VOIDED COMPLETED/TIMED_OUT session, and only an admin void
     // clears the block. We deliberately do NOT compute retakeEligibleAt

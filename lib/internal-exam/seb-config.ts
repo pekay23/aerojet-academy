@@ -40,6 +40,7 @@ export interface BekPair {
   privateKey: string
   configKey: string
   createdAt?: string
+  expiresAt?: string
 }
 
 export interface BankSebConfig {
@@ -153,9 +154,16 @@ export function generateBekPair(): BekPair {
   const publicKey = crypto.randomBytes(32).toString('hex')
   const privateKey = crypto.randomBytes(64).toString('hex')
   const configKey = crypto.randomBytes(16).toString('hex')
-  const createdAt = new Date().toISOString()
+  const createdAt = new Date()
+  const expiresAt = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000)
 
-  return { publicKey, privateKey, configKey, createdAt }
+  return {
+    publicKey,
+    privateKey,
+    configKey,
+    createdAt: createdAt.toISOString(),
+    expiresAt: expiresAt.toISOString(),
+  }
 }
 
 /**

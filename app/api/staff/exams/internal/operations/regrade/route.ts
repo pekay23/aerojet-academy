@@ -3,6 +3,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getBankRules } from '@/lib/internal-exam/engine'
+import { calculateScore } from '@/lib/internal-exam/grading'
 import { createAuditLog } from '@/lib/audit/logger'
 import { z } from 'zod'
 
@@ -45,17 +46,26 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     const oldPct = session.percentage
 
-    // Get pass mark from engine rules
     const rules = await getBankRules(session.bankId)
 
-    let totalScore = 0
-    let totalPoints = 0
+    const responses = session.answers.map(a => ({
+      questionId: a.question.id,
+      selectedAnswer: a.selectedAnswer || '',
+    }))
+    const gradableAnswers = session.answers.map(a => ({
+      questionId: a.question.id,
+      correctAnswer: a.question.correctAnswer,
+      points: a.question.points,
+    }))
 
-    // Re-evaluate each answer
+    const { score: totalScore, totalPoints, percentage: newPct, passed } = calculateScore(
+      responses,
+      gradableAnswers,
+      rules.passMarkPct,
+    )
+
     for (const answer of session.answers) {
       const question = answer.question
-      totalPoints += question.points
-
       const wasCorrect = answer.isCorrect
       const isNowCorrect =
         answer.selectedAnswer !== null &&
@@ -68,13 +78,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           data: { isCorrect: isNowCorrect, pointsAwarded },
         })
       }
-
-      totalScore += pointsAwarded
     }
-
-    const newPct = totalPoints > 0 ? Math.round((totalScore / totalPoints) * 100) : 0
-    const passed = newPct >= rules.passMarkPct
-
     // Update session scores. Re-check status atomically in the DB so a
     // session that flips to IN_PROGRESS/VOIDED between the guard above and
     // the write is skipped — updateMany is non-throwing on zero matching rows.

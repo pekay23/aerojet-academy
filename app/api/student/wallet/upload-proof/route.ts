@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     const eurAmt = eurEquivalent ? parseFloat(eurEquivalent) : parsedAmount
     const rate = eurEquivalent ? (parsedAmount / parseFloat(eurEquivalent)) : 1
 
-    const payment = await prisma.payment.create({
+    const payment = await prismaUnfiltered.payment.create({
       data: {
         userId,
         amount: eurAmt,
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     // Optionally record FileUpload if needed for the system
     if (filename && proofUrl) {
-      await prisma.fileUpload.create({
+      await prismaUnfiltered.fileUpload.create({
         data: {
           userId,
           url: proofUrl,

@@ -10,7 +10,7 @@ import {
   X,
   Siren,
 } from 'lucide-react'
-import { dismissStaffNotification } from '@/app/staff/actions'
+import { dismissStaffNotification } from '@/app/staff/actions/index'
 import { Notification } from '@prisma/client'
 import Link from 'next/link'
 

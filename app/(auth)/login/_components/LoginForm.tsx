@@ -6,6 +6,7 @@ import { signIn, getSession } from 'next-auth/react'
 import Link from 'next/link'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck, Fingerprint } from 'lucide-react'
+import { useFormErrorAnnouncer } from '@/hooks/useFormErrorAnnouncer'
 
 export default function LoginForm() {
   const router = useRouter()
@@ -18,6 +19,10 @@ export default function LoginForm() {
   const [totpCode, setTotpCode] = useState('')
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false)
   const [supportsConditionalUI, setSupportsConditionalUI] = useState(false)
+  const { announcerRef, getFieldErrorProps, ErrorMessage } = useFormErrorAnnouncer({
+    errors: error ? { _global: error } : {},
+    touched: error ? { _global: true } : {},
+  })
 
   // Complete passkey login after browser returns a credential (shared by button + conditional UI)
   const completePasskeyLogin = useCallback(async (credential: any) => {
@@ -199,8 +204,9 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <div ref={announcerRef} aria-live="polite" aria-atomic="true" className="sr-only" />
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert">
           {error}
         </div>
       )}

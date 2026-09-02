@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Data Flow · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -28,7 +29,8 @@
   <h1 class="he-title">Data Flow</h1>
   
 </header>
-<section class="he-section" id="registration-activation"><div class="he-section__num">01 · Registration → Activation</div><h2 class="he-section__title">Registration → Activation</h2>User registers (public form)
+<section class="he-section" id="registration-activation"><div class="he-section__num">01 · Registration → Activation</div><h2 class="he-section__title">Registration → Activation</h2></section>
+<pre><code>User registers (public form)
   → Creates User (APPLICANT, PENDING)
   → Generates registrationCode (AERO-YYYY-XXXXXX)
   → User uploads payment proof
@@ -37,7 +39,9 @@
   → Generates academyEmail, tempPassword
   → Status → ACTIVE
   → Email sent with credentials
-<section class="he-section" id="applicant-student-promotion"><div class="he-section__num">02 · Applicant → Student Promotion</div><h2 class="he-section__title">Applicant → Student Promotion</h2>Applicant purchases course
+</code></pre>
+<section class="he-section" id="applicant-student-promotion"><div class="he-section__num">02 · Applicant → Student Promotion</div><h2 class="he-section__title">Applicant → Student Promotion</h2></section>
+<pre><code>Applicant purchases course
   → Creates Enrollment (PENDING) + Payment (PENDING)
   → Staff approves enrollment
   → If role == APPLICANT:
@@ -45,19 +49,24 @@
     → Creates StudentProfile + Wallet
     → Role → STUDENT
     → Email sent
-<section class="he-section" id="exam-pool-lifecycle"><div class="he-section__num">03 · Exam Pool Lifecycle</div><h2 class="he-section__title">Exam Pool Lifecycle</h2>Staff creates ExamEvent → creates ExamPools
+</code></pre>
+<section class="he-section" id="exam-pool-lifecycle"><div class="he-section__num">03 · Exam Pool Lifecycle</div><h2 class="he-section__title">Exam Pool Lifecycle</h2></section>
+<pre><code>Staff creates ExamEvent → creates ExamPools
   → Status: OPEN
   → Students join (€300 reserved per join)
   → At 23 members: NEAR_FULL
   → At 25 members: auto-CONFIRMED (funds captured)
   → Can accept up to 28 members
-  → Cron: if <25 at T-21 days → FAILED (funds released)
+  → Cron: if &lt;25 at T-21 days → FAILED (funds released)
   → Staff can manually confirm via Go/No-Go
-<section class="he-section" id="wallet-operations"><div class="he-section__num">04 · Wallet Operations</div><h2 class="he-section__title">Wallet Operations</h2>TOP_UP:    balance += amount
+</code></pre>
+<section class="he-section" id="wallet-operations"><div class="he-section__num">04 · Wallet Operations</div><h2 class="he-section__title">Wallet Operations</h2></section>
+<pre><code>TOP_UP:    balance += amount
 RESERVE:   reservedBalance += amount (available decreases)
 CAPTURE:   balance -= amount, reservedBalance -= amount
 RELEASE:   reservedBalance -= amount (available increases)
 REFUND:    balance += amount
+</code></pre>
 
 </main>
 
@@ -72,7 +81,7 @@ REFUND:    balance += amount
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

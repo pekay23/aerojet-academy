@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
@@ -16,9 +17,15 @@ import {
   normalizeCategoryCode,
 } from '@/lib/easa/category-selection'
 import { isSEBRequest } from '@/lib/middleware/seb-detection'
-import { validateSebRequest } from '@/lib/middleware/seb-validation'
+import { SebValidationError, validateSebRequest } from '@/lib/middleware/seb-validation'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { rateLimitByUser } from '@/lib/security/rate-limit'
 import { z } from 'zod'
+
+interface QuestionOrderEntry {
+  id: string
+  [key: string]: unknown
+}
 
 const startSchema = z.object({
   bankId: z.string().min(1),
@@ -42,6 +49,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Only enrolled students may take internal exams', 403)
   }
 
+  // Rate limit: 5 exam starts per minute per user
+  const rateLimitResult = rateLimitByUser(session.user.id, 5, 60000)
+  if (!rateLimitResult.allowed) {
+    return apiError('Too many exam start requests. Please wait a moment and try again.', 429)
+  }
+
   const body = await req.json()
   const parsed = startSchema.safeParse(body)
   if (!parsed.success) {
@@ -60,10 +73,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       isActive: true,
       categoryCode: true,
       categoryConfig: true,
+      reviewState: true,
     },
   })
   if (!bank) return apiError('Exam bank not found', 404)
   if (!bank.isActive) return apiError('This exam bank is not currently active', 403)
+  if (bank.reviewState !== 'APPROVED') {
+    return apiError('This exam bank has not been approved for student use', 403)
+  }
 
   // Verify student is enrolled in the course this bank belongs to
   const enrollment = await prismaUnfiltered.enrollment.findFirst({
@@ -159,6 +176,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         },
       })
 
+      if (schedule?.sebRequired) {
+        try {
+          await validateSebRequest(supervisedSession.id, req)
+        } catch (err) {
+          if (err instanceof SebValidationError) {
+            return apiError(err.message, err.statusCode)
+          }
+          throw err
+        }
+      }
+
       await prismaUnfiltered.internalExamAnswer.createMany({
         data: questionIds.map(qId => ({
           sessionId: supervisedSession.id,
@@ -211,9 +239,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       // Apply stored question order if present
       let questions = allQuestions
       if (placeholderSession.questionOrder && Array.isArray(placeholderSession.questionOrder)) {
-        const orderMap = new Map(placeholderSession.questionOrder.map((q: any) => [q.id, q]))
-        questions = placeholderSession.questionOrder
-          .map((q: any) => allQuestions.find(aq => aq.id === q.id))
+        const order = placeholderSession.questionOrder as QuestionOrderEntry[]
+        const orderMap = new Map(order.map((q) => [q.id, q]))
+        questions = order
+          .map((q) => allQuestions.find(aq => aq.id === q.id))
           .filter((q): q is NonNullable<typeof allQuestions[number]> => q != null)
       }
 
@@ -236,7 +265,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Check for an existing in-progress session (allow resume)
-  const existingSessionWhere: any = {
+   const existingSessionWhere: Prisma.InternalExamSessionWhereInput = {
     studentId: session.user.id,
     bankId,
     status: 'IN_PROGRESS',
@@ -263,12 +292,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     // Apply stored question order if present
     let questions = allQuestions
-    if (existingSession.questionOrder && Array.isArray(existingSession.questionOrder)) {
-      const orderMap = new Map(existingSession.questionOrder.map((q: any) => [q.id, q]))
-      questions = existingSession.questionOrder
-        .map((q: any) => allQuestions.find(aq => aq.id === q.id))
-        .filter(Boolean)
-    }
+      if (existingSession.questionOrder && Array.isArray(existingSession.questionOrder)) {
+        const order = existingSession.questionOrder as QuestionOrderEntry[]
+        const orderMap = new Map(order.map((q) => [q.id, q]))
+        questions = order
+          .map((q) => allQuestions.find(aq => aq.id === q.id))
+          .filter(Boolean)
+      }
 
     return apiSuccess({
       sessionId: existingSession.id,
@@ -343,6 +373,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       userAgent: req.headers.get('user-agent') || null,
     },
   })
+
+  if (schedule?.sebRequired) {
+    try {
+      await validateSebRequest(examSession.id, req)
+    } catch (err) {
+      if (err instanceof SebValidationError) {
+        return apiError(err.message, err.statusCode)
+      }
+      throw err
+    }
+  }
 
   // Create blank answer records in randomised order
   await prismaUnfiltered.internalExamAnswer.createMany({

@@ -5,33 +5,8 @@ import { requireExaminer } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { unstable_cache } from 'next/cache'
+import { parsePagination } from '@/lib/api/response'
 import ResultsEntry from './_components/ResultsEntry'
-import { SortableTh } from '@/components/ui/sortable-th'
-import { buildOrderBy } from '@/lib/utils/build-order-by'
-import { Prisma } from '@prisma/client'
-import { format } from 'date-fns'
-
-const HISTORY_SORT_KEYS = {
-  candidate: 'user.profile.lastName',
-  session: 'exam.examComponent.course.code',
-  score: 'score',
-  grade: 'grade',
-  recorded: 'createdAt',
-} as const
-type HistorySortKey = keyof typeof HISTORY_SORT_KEYS
-import { SortableTh } from '@/components/ui/sortable-th'
-import { buildOrderBy } from '@/lib/utils/build-order-by'
-import { Prisma } from '@prisma/client'
-import { format } from 'date-fns'
-
-const HISTORY_SORT_KEYS = {
-  candidate: 'user.profile.lastName',
-  session: 'exam.examComponent.course.code',
-  score: 'score',
-  grade: 'grade',
-  recorded: 'createdAt',
-} as const
-type HistorySortKey = keyof typeof HISTORY_SORT_KEYS
 
 export const metadata: Metadata = { title: 'Results Entry | Examiner Portal' }
 export const dynamic = 'force-dynamic'
@@ -78,14 +53,22 @@ const getCachedResultsHistory = (examinerId: string) =>
     { revalidate: 300, tags: ['examiner-results-history', `examiner-${examinerId}`] }
   )()
 
-export default async function ExaminerResultsPage() {
+export default async function ExaminerResultsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; limit?: string; skip?: string }>
+}) {
   const user = await requireExaminer()
+  const sp = await searchParams
+  const { page, limit, skip } = parsePagination(new URLSearchParams(sp as Record<string, string>))
 
   const examiner = await prismaUnfiltered.examiner.findUnique({
     where: { userId: user.id },
     include: {
       sittings: {
         orderBy: { startTime: 'desc' },
+        skip,
+        take: limit,
         include: {
           event: { select: { name: true } },
           examComponent: { include: { course: { select: { code: true, name: true } } } },

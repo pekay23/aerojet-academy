@@ -19,7 +19,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { EnrollmentStatus } from '@/types/enums'
-import { EnrollmentStatus } from '@/types/enums'
+import { SortableTh } from '@/components/ui/sortable-th'
 
 type EnrollmentWithDetails = {
   id: string
@@ -164,11 +164,11 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                   )}
                 </button>
               </TableHead>
-              <TableHead>Student</TableHead>
-              <TableHead>Course</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Enrolled Date</TableHead>
-              <TableHead>Amount Paid</TableHead>
+              <SortableTh sortKey="student" label="Student" />
+              <SortableTh sortKey="course" label="Course" />
+              <SortableTh sortKey="status" label="Status" />
+              <SortableTh sortKey="enrolledAt" label="Enrolled Date" />
+              <SortableTh sortKey="amount" label="Amount Paid" align="right" />
             </TableRow>
           </TableHeader>
           <TableBody>

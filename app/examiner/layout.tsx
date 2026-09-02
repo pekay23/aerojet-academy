@@ -26,6 +26,9 @@ export default async function ExaminerLayout({ children }: { children: React.Rea
 
   return (
     <div className="flex min-h-screen bg-slate-50/50 dark:bg-slate-950">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white">
+        Skip to main content
+      </a>
       <Heartbeat />
       <AppTour
         hasCompletedTour={dbUser?.hasCompletedTour ?? false}
@@ -38,7 +41,7 @@ export default async function ExaminerLayout({ children }: { children: React.Rea
           <BreadcrumbNav />
           <TourTrigger title="Take a tour of your examiner portal" />
         </div>
-        <div className="mx-auto max-w-[1920px] animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="mx-auto max-w-[1920px] animate-in fade-in slide-in-from-bottom-4 duration-500 motion-reduce:animate-none motion-reduce:transition-none">
           {children}
         </div>
       </main>

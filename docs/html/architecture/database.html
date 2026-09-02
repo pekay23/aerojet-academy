@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Database Schema · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -28,7 +29,58 @@
   <h1 class="he-title">Database Schema</h1>
   
 </header>
-<section class="he-section" id="core-models"><div class="he-section__num">01 · Core Models</div><h2 class="he-section__title">Core Models</h2>User — All portal users (applicant, student, instructor, staff, admin)Profile — Personal info (name, phone, nationality, address)StudentProfile — Student-specific (studentId, enrollmentType)InstructorProfile — Instructor-specific (specialization, license)<section class="he-section" id="academic"><div class="he-section__num">02 · Academic</div><h2 class="he-section__title">Academic</h2>Course — Training programmes (6 types)Enrollment — User-course relationshipsClass — Scheduled sessions with instructorGrade — Assessment resultsAttendanceRecord — Class attendance tracking<section class="he-section" id="exams"><div class="he-section__num">03 · Exams</div><h2 class="he-section__title">Exams</h2>ExamEvent — Exam sessions (date range, status, go/no-go)ExamPool — Candidate pools within events (25-28 members)PoolMembership — Student-pool join recordsExamBooking — Individual exam bookingsExamResult — Exam outcomes<section class="he-section" id="financial"><div class="he-section__num">04 · Financial</div><h2 class="he-section__title">Financial</h2>Wallet — Student e-wallet (balance, reservedBalance)WalletTransaction — All wallet movements (TOP_UP, RESERVE, PAYMENT, RELEASE)Payment — Payment records (registration, course, exam, top-up)<section class="he-section" id="facilities"><div class="he-section__num">05 · Facilities</div><h2 class="he-section__title">Facilities</h2>Classroom — Physical rooms/labs with <code>name</code>, <code>type</code>, <code>capacity</code>, and <code>layout</code> (Json — grid definition with rows, cols, and cell types)Seat — Individual seats within a classroom. Fields: <code>row</code>, <code>col</code>, <code>label</code> (auto-generated A1, A2, B1…). Unique constraint <code>@@unique([classroomId, row, col])</code>. Created/synced automatically when a floor plan layout is saved<section class="he-section" id="exams-additions"><div class="he-section__num">06 · Exams (additions)</div><h2 class="he-section__title">Exams (additions)</h2>ExamSittingAssignment — Links students to exam sittings. <code>seatId</code> foreign key (optional) references <code>Seat</code> for exam seating assignments<section class="he-section" id="system"><div class="he-section__num">07 · System</div><h2 class="he-section__title">System</h2>Notification — In-app notificationsAuditLog — All system actionsFileUpload — Uploaded files trackingSystemSetting — Key-value admin-editable settings (registration fees, exam pricing, payment splits, email config, class seating assignments as <code>class_seating_{classId}</code> keys)PaymentMethod — Bank transfer details (account name, number, SWIFT, branch)<section class="he-section" id="user-additions"><div class="he-section__num">08 · User (additions)</div><h2 class="he-section__title">User (additions)</h2><code>twoFactorSecret</code> — Encrypted TOTP secret for 2FA (nullable)<code>twoFactorEnabled</code> — Boolean flag indicating if 2FA is active (default false)
+<section class="he-section" id="core-models"><div class="he-section__num">01 · Core Models</div><h2 class="he-section__title">Core Models</h2></section>
+<ul>
+<li><strong>User</strong> — All portal users (applicant, student, instructor, staff, admin)</li>
+<li><strong>Profile</strong> — Personal info (name, phone, nationality, address)</li>
+<li><strong>StudentProfile</strong> — Student-specific (studentId, enrollmentType)</li>
+<li><strong>InstructorProfile</strong> — Instructor-specific (specialization, license)</li>
+</ul>
+<section class="he-section" id="academic"><div class="he-section__num">02 · Academic</div><h2 class="he-section__title">Academic</h2></section>
+<ul>
+<li><strong>Course</strong> — Training programmes (6 types)</li>
+<li><strong>Enrollment</strong> — User-course relationships</li>
+<li><strong>Class</strong> — Scheduled sessions with instructor</li>
+<li><strong>Grade</strong> — Assessment results</li>
+<li><strong>AttendanceRecord</strong> — Class attendance tracking</li>
+</ul>
+<section class="he-section" id="exams"><div class="he-section__num">03 · Exams</div><h2 class="he-section__title">Exams</h2></section>
+<ul>
+<li><strong>ExamEvent</strong> — Exam sessions (date range, status, go/no-go)</li>
+<li><strong>ExamPool</strong> — Candidate pools within events (25-28 members)</li>
+<li><strong>PoolMembership</strong> — Student-pool join records</li>
+<li><strong>ExamBooking</strong> — Individual exam bookings</li>
+<li><strong>ExamResult</strong> — Exam outcomes</li>
+</ul>
+<section class="he-section" id="financial"><div class="he-section__num">04 · Financial</div><h2 class="he-section__title">Financial</h2></section>
+<ul>
+<li><strong>Wallet</strong> — Student e-wallet (balance, reservedBalance)</li>
+<li><strong>WalletTransaction</strong> — All wallet movements (TOP_UP, RESERVE, PAYMENT, RELEASE)</li>
+<li><strong>Payment</strong> — Payment records (registration, course, exam, top-up)</li>
+</ul>
+<section class="he-section" id="facilities"><div class="he-section__num">05 · Facilities</div><h2 class="he-section__title">Facilities</h2></section>
+<ul>
+<li><strong>Classroom</strong> — Physical rooms/labs with <code>name</code>, <code>type</code>, <code>capacity</code>, and <code>layout</code> (Json — grid definition with rows, cols, and cell types)</li>
+<li><strong>Seat</strong> — Individual seats within a classroom. Fields: <code>row</code>, <code>col</code>, <code>label</code> (auto-generated A1, A2, B1…). Unique constraint <code>@@unique([classroomId, row, col])</code>. Created/synced automatically when a floor plan layout is saved</li>
+</ul>
+<section class="he-section" id="exams-additions"><div class="he-section__num">06 · Exams (additions)</div><h2 class="he-section__title">Exams (additions)</h2></section>
+<ul>
+<li><strong>ExamSittingAssignment</strong> — Links students to exam sittings. <code>seatId</code> foreign key (optional) references <code>Seat</code> for exam seating assignments</li>
+</ul>
+<section class="he-section" id="system"><div class="he-section__num">07 · System</div><h2 class="he-section__title">System</h2></section>
+<ul>
+<li><strong>Notification</strong> — In-app notifications</li>
+<li><strong>AuditLog</strong> — All system actions</li>
+<li><strong>FileUpload</strong> — Uploaded files tracking</li>
+<li><strong>SystemSetting</strong> — Key-value admin-editable settings (registration fees, exam pricing, payment splits, email config, class seating assignments as <code>class_seating_{classId}</code> keys)</li>
+<li><strong>PaymentMethod</strong> — Bank transfer details (account name, number, SWIFT, branch)</li>
+</ul>
+<section class="he-section" id="user-additions"><div class="he-section__num">08 · User (additions)</div><h2 class="he-section__title">User (additions)</h2></section>
+<ul>
+<li><code>twoFactorSecret</code> — Encrypted TOTP secret for 2FA (nullable)</li>
+<li><code>twoFactorEnabled</code> — Boolean flag indicating if 2FA is active (default false)</li>
+</ul>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -46,7 +98,7 @@
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

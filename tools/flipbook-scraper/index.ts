@@ -28,16 +28,22 @@ async function main() {
     await scraper.login();
     await scraper.navigateToModule();
 
-    const totalPages = await scraper.detectTotalPages();
-    console.log(`\n  Detected ${totalPages} pages\n`);
+    let totalPages = args.pages ? parseInt(args.pages, 10) : 0;
+    if (totalPages > 0) {
+      console.log(`\n  Using specified page count: ${totalPages}\n`);
+    } else {
+      totalPages = await scraper.detectTotalPages();
+      console.log(`\n  Detected ${totalPages} pages\n`);
+    }
 
     if (totalPages === 0) {
-      console.error(' Could not detect total pages. Check your flipbook selectors.');
+      console.error(' Could not detect total pages. Use --pages N to specify manually.');
       await scraper.cleanup();
       process.exit(1);
     }
 
-    await scraper.captureAllPages(totalPages);
+    const startPage = args['start-page'] ? parseInt(args['start-page'], 10) : 1;
+    await scraper.captureAllPages(totalPages, startPage);
 
     if (!args.imagesOnly) {
       const pdfPath = await scraper.saveAsPdf();
@@ -79,6 +85,8 @@ function parseArgs() {
     password: args.password as string | undefined,
     output: args.output as string | undefined,
     name: args.name as string | undefined,
+    pages: args.pages as string | undefined,
+    startPage: args['start-page'] as string | undefined,
     imagesOnly: args['images-only'] || false,
     headless: args.headless !== 'false',
   };
@@ -149,14 +157,15 @@ Usage:
   bun run tools/flipbook-scraper/index.ts [options]
 
 Options:
-  --url <url>           Direct URL to the flipbook module
-  --username <user>     Login username/email
-  --password <pass>     Login password
-  --name <name>         Document name (used for folder/filename)
-  --output <dir>        Output directory (default: ./flipbook-output)
-  --config <path>       Path to full JSON config file
-  --images-only         Skip PDF conversion, save images only
-  --headless <bool>     Run browser headless (default: true)
+   --url <url>           Direct URL to the flipbook module
+   --username <user>     Login username/email
+   --password <pass>     Login password
+   --name <name>         Document name (used for folder/filename)
+   --output <dir>        Output directory (default: ./flipbook-output)
+   --pages <number>      Manually specify total pages (overrides detection)
+   --config <path>       Path to full JSON config file
+   --images-only         Skip PDF conversion, save images only
+   --headless <bool>     Run browser headless (default: true)
 
 Examples:
   bun run tools/flipbook-scraper/index.ts \\
