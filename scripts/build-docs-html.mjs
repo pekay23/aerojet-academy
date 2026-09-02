@@ -53,6 +53,10 @@ function slugify(text) {
     .replace(/^-|-$/g, '')
 }
 
+function relativeHref(from, to) {
+  return path.relative(from, to).replaceAll('\\', '/')
+}
+
 // ── Marked renderer overrides ────────────────────────────────────────────
 // We extend marked to:
 //   - rewrite *.md → *.html in internal links
@@ -202,7 +206,7 @@ function stripHeader(md) {
 }
 
 // ── Page template ────────────────────────────────────────────────────────
-function pageHtml({ title, eyebrow, deckHtml, body, toc, project, basePathToHtml, isIndex }) {
+function pageHtml({ title, eyebrow, deckHtml, body, toc, project, basePathToHtml, isIndex, currentPath }) {
   const nav = `
 <nav class="he-nav">
   <a class="he-nav__brand" href="${basePathToHtml}index.html">${escapeHtml(project)} <small>docs</small></a>
@@ -716,6 +720,7 @@ ${standalone}
     project,
     basePathToHtml: './',
     isIndex: true,
+    currentPath: path.join(OUT, 'index.html'),
   })
   await fs.writeFile(path.join(OUT, 'index.html'), html, 'utf8')
 }
