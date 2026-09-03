@@ -25,8 +25,8 @@ export default async function StaffLayout({ children }: { children: React.ReactN
 
   const user = session.user
 
-  // Run both queries in parallel; use prismaUnfiltered to bypass RLS transaction overhead
-  const [dbUser, welcomeMessages, internalExamEnabled] = await Promise.all([
+  // Run all queries in parallel; use prismaUnfiltered to bypass RLS transaction overhead
+  const [dbUser, welcomeMessages, internalExamEnabled, dashboardAlerts, registrationConfigData] = await Promise.all([
     prismaUnfiltered.user.findUnique({
       where: { id: user.id },
       select: {
@@ -38,6 +38,8 @@ export default async function StaffLayout({ children }: { children: React.ReactN
     }),
     getWelcomeMessages(prismaUnfiltered, user.role),
     isInternalExamSystemEnabled(),
+    getDashboardAlerts(),
+    getRegistrationConfig(),
   ])
 
   if (
@@ -65,7 +67,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
       <AppTour
         hasCompletedTour={dbUser.hasCompletedTour}
         userRole={userRole}
-        data={{ staffAlerts, unreadNotifications }}
+        data={{ staffAlerts: dashboardAlerts, unreadNotifications: 0 }}
       />
       <StaffSidebar
         userName={fullName}
@@ -96,7 +98,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           welcomeMessages={welcomeMessages}
           userName={firstName}
         />
-        {!registrationConfig.isOpen && (
+        {!registrationConfigData?.isOpen && (
           <div className="flex flex-col justify-between gap-2 border-b border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:px-6 lg:px-8">
             <div className="flex items-start gap-3 sm:items-center">
               <div className="mt-0.5 shrink-0 sm:mt-0">

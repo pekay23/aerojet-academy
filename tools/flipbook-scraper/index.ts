@@ -102,6 +102,7 @@ function parseArgs() {
     imagesOnly: args['images-only'] || false,
     headless: args.headless !== 'false',
     captureMethod: args['capture-method'] as 'interception' | 'screenshot' | undefined,
+    inspectState: args['inspect-state'] || false,
   }
 }
 
