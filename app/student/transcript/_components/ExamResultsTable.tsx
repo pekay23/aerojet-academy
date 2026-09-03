@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 
 interface ExamResult {
   moduleCode: string | null
-  percentage: number | Decimal | null
+  percentage: number | null
   passed: boolean
   examCategory: string | null
   attemptType: string | null
@@ -15,8 +15,6 @@ interface ExamResult {
     examComponent: { course: { code: string; name: string } | null } | null
   } | null
 }
-
-import type { Decimal } from '@prisma/client/runtime/library'
 
 function moduleName(r: ExamResult) {
   return r.exam?.examComponent?.course?.name ?? r.moduleCode ?? '—'
@@ -32,12 +30,51 @@ export default function ExamResultsTable({ results }: { results: ExamResult[] })
     <table className="w-full text-sm">
       <thead>
         <tr className="border-b border-slate-100 text-left dark:border-slate-800">
-          <SortHeader label="Module" sortKey="moduleCode" currentSort={sortConfig} onSort={requestSort} className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
-          <SortHeader label="Category" sortKey="examCategory" currentSort={sortConfig} onSort={requestSort} className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
-          <SortHeader label="Attempt" sortKey="attemptType" currentSort={sortConfig} onSort={requestSort} className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
-          <SortHeader label="Score" sortKey="percentage" currentSort={sortConfig} onSort={requestSort} align="center" className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
-          <SortHeader label="Result" sortKey="passed" currentSort={sortConfig} onSort={requestSort} align="center" className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
-          <SortHeader label="Date" sortKey="createdAt" currentSort={sortConfig} onSort={requestSort} align="center" className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase" />
+          <SortHeader
+            label="Module"
+            sortKey="moduleCode"
+            currentSort={sortConfig}
+            onSort={requestSort}
+            className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase"
+          />
+          <SortHeader
+            label="Category"
+            sortKey="examCategory"
+            currentSort={sortConfig}
+            onSort={requestSort}
+            className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase"
+          />
+          <SortHeader
+            label="Attempt"
+            sortKey="attemptType"
+            currentSort={sortConfig}
+            onSort={requestSort}
+            className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase"
+          />
+          <SortHeader
+            label="Score"
+            sortKey="percentage"
+            currentSort={sortConfig}
+            onSort={requestSort}
+            align="center"
+            className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase"
+          />
+          <SortHeader
+            label="Result"
+            sortKey="passed"
+            currentSort={sortConfig}
+            onSort={requestSort}
+            align="center"
+            className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase"
+          />
+          <SortHeader
+            label="Date"
+            sortKey="createdAt"
+            currentSort={sortConfig}
+            onSort={requestSort}
+            align="center"
+            className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase"
+          />
         </tr>
       </thead>
       <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -53,7 +90,7 @@ export default function ExamResultsTable({ results }: { results: ExamResult[] })
             <td className="px-3 py-2 text-xs text-slate-500">
               {(r.attemptType || 'FIRST').replace(/_/g, ' ')}
             </td>
-            <td className="px-3 py-2 text-center tabular-nums font-mono">
+            <td className="px-3 py-2 text-center font-mono tabular-nums">
               {r.percentage != null ? `${r.percentage}%` : '—'}
             </td>
             <td className="px-3 py-2 text-center">
@@ -65,7 +102,7 @@ export default function ExamResultsTable({ results }: { results: ExamResult[] })
                 {r.passed ? 'Pass' : 'Fail'}
               </span>
             </td>
-            <td className="px-3 py-2 text-center tabular-nums text-xs text-slate-500">
+            <td className="px-3 py-2 text-center text-xs text-slate-500 tabular-nums">
               {format(r.exam?.examDate ?? r.createdAt, 'MMM d, yyyy')}
             </td>
           </tr>

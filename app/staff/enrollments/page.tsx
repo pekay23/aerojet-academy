@@ -6,7 +6,7 @@ import EnrollmentsTable from './_components/EnrollmentsTable'
 import SearchInput from '@/components/SearchInput'
 import { Metadata } from 'next'
 import { Prisma } from '@prisma/client'
-import type { EnrollmentWithDetails } from '@/lib/staff/enrollments/_components/EnrollmentsTable'
+import type { EnrollmentWithDetails } from './_components/EnrollmentsTable'
 import { buildOrderBy } from '@/lib/utils/build-order-by'
 
 export const metadata: Metadata = { title: 'Enrollments | Staff Portal' }
@@ -95,13 +95,7 @@ export default async function EnrollmentsPage({
         </div>
       </div>
 
-      <EnrollmentsTable
-        enrollments={serializedEnrollments}
-        page={page}
-        perPage={limit}
-        total={total}
-        query={query}
-      />
+      <EnrollmentsTable enrollments={serializedEnrollments} />
     </div>
   )
 }

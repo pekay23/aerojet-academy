@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { requireStaff } from '@/lib/auth/helpers'
+import { requireStaff, getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { notFound } from 'next/navigation'
 import LogbookDetail from './_components/LogbookDetail'
@@ -14,6 +14,7 @@ export default async function LogbookDetailPage({
 }) {
   await requireStaff()
   const { logbookId } = await params
+  const session = await getAuthSession()
 
   const [logbook, ataChapters, staffMembers] = await Promise.all([
     prismaUnfiltered.oJTLogbook.findUnique({
@@ -23,6 +24,7 @@ export default async function LogbookDetailPage({
           select: {
             studentId: true,
             programmeChoice: true,
+            userId: true,
             user: {
               select: {
                 email: true,
@@ -38,7 +40,7 @@ export default async function LogbookDetailPage({
         },
         entries: {
           include: {
-            ataChapter: { select: { code: true, title: true, category: true } },
+            ataChapter: { select: { id: true, code: true, title: true, category: true } },
           },
           orderBy: { date: 'desc' },
         },
@@ -68,7 +70,9 @@ export default async function LogbookDetailPage({
     hoursByType[e.maintenanceType] = (hoursByType[e.maintenanceType] || 0) + e.durationHours
   }
   const coveredChapters = new Set(logbook.entries.map((e) => e.ataChapterId))
-  const signedCount = logbook.entries.filter((e) => e.supervisorSignature && e.studentSignature).length
+  const signedCount = logbook.entries.filter(
+    (e) => e.supervisorSignature && e.studentSignature
+  ).length
   const startDate = logbook.startDate
   const monthsExperience = Math.floor(
     (Date.now() - startDate.getTime()) / (30.44 * 24 * 60 * 60 * 1000)
@@ -96,6 +100,7 @@ export default async function LogbookDetailPage({
       date: e.date.toISOString(),
       aircraftType: e.aircraftType,
       aircraftRegistration: e.aircraftRegistration,
+      ataChapterId: e.ataChapter.id,
       ataChapter: e.ataChapter,
       taskDescription: e.taskDescription,
       workOrderReference: e.workOrderReference,
@@ -124,6 +129,14 @@ export default async function LogbookDetailPage({
       signedEntries: signedCount,
       unsignedEntries: logbook.entries.length - signedCount,
     },
+    mentorAssignments: logbook.mentorAssignments.map((m) => ({
+      id: m.id,
+      mentorId: m.mentorId,
+      assignedDate: m.assignedDate.toISOString(),
+      endDate: m.endDate?.toISOString() ?? null,
+      isPrimary: m.isPrimary,
+      notes: m.notes,
+    })),
   }
 
   const ataOptions = ataChapters.map((ch) => ({
@@ -144,6 +157,8 @@ export default async function LogbookDetailPage({
       logbook={serialised}
       ataChapters={ataOptions}
       supervisors={supervisorOptions}
+      staffId={logbook.studentProfile.userId}
+      mentorAssignments={serialised.mentorAssignments}
     />
   )
 }

@@ -15,6 +15,7 @@ import {
   placeExamBookingInStandardPool,
 } from '@/lib/enrollment/exams'
 import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import {
@@ -1037,7 +1038,8 @@ export async function bookStandaloneExamAction(params: {
     return { success: true, usedBundle: result.usedBundle }
   } catch (error: unknown) {
     console.error('bookStandaloneExamAction error:', error)
-    return { error: error.message || 'Failed to book exam.' }
+    const message = error instanceof Error ? error.message : 'Failed to book exam.'
+    return { error: message }
   }
 }
 
