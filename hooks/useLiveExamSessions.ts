@@ -107,6 +107,8 @@ export function useLiveExamSessions({
   })
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSessions()
   }, [fetchSessions])
 

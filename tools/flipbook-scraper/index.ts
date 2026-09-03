@@ -38,6 +38,22 @@ async function main() {
     await scraper.login()
     await scraper.navigateToModule()
 
+    if (args.inspectState) {
+      const statePath = path.join(config.outputDir, 'flipbook-state.json')
+      await scraper.inspectState(statePath)
+      console.log(`\n  State dump written to: ${statePath}`)
+      await scraper.cleanup()
+      process.exit(0)
+    }
+
+    if (args.traceBook) {
+      const tracePath = path.join(config.outputDir, 'flipbook-trace.json')
+      await scraper.traceBook(tracePath)
+      console.log(`\n  Trace written to: ${tracePath}`)
+      await scraper.cleanup()
+      process.exit(0)
+    }
+
     let totalPages = args.pages ? parseInt(args.pages, 10) : 0
     if (totalPages > 0) {
       console.log(`\n  Using specified page count: ${totalPages}\n`)
@@ -103,6 +119,7 @@ function parseArgs() {
     headless: args.headless !== 'false',
     captureMethod: args['capture-method'] as 'interception' | 'screenshot' | undefined,
     inspectState: args['inspect-state'] || false,
+    traceBook: args['trace-book'] || false,
   }
 }
 
@@ -181,7 +198,9 @@ Usage:
      --images-only         Skip PDF conversion, save images only
      --headless <bool>     Run browser headless (default: true)
      --capture-method <method> Capture method: interception or screenshot (default: interception)
-     --diagnose            Run headed, max 5 pages, skip PDF, log interception details
+      --diagnose            Run headed, max 5 pages, skip PDF, log interception details
+      --inspect-state       Dump flipbook JS state to flipbook-state.json and exit
+      --trace-book          Monkey-patch FLIPBOOK prototypes to trace page-to-image mappings
 
 Examples:
   bun run tools/flipbook-scraper/index.ts \\

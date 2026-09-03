@@ -27,10 +27,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     bankId: url.searchParams.get('bankId') ?? undefined,
   })
   if (!parsed.success) {
-    return apiError(
-      `Invalid query: status must be one of ${STATUS_VALUES.join(' | ')}`,
-      400
-    )
+    return apiError(`Invalid query: status must be one of ${STATUS_VALUES.join(' | ')}`, 400)
   }
   const { status, bankId } = parsed.data
 
@@ -115,7 +112,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       voidedAt: s.voidedAt?.toISOString() || null,
       voidReason: s.voidReason,
       answerCount: s._count.answers,
-      violationCount: s._count.violations,
       violationCount: s._count.violations,
       reports: s.reports.map((r) => ({
         id: r.id,

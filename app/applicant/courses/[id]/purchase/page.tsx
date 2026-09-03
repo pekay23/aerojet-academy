@@ -82,9 +82,7 @@ export default async function PurchasePage({ params }: Props) {
     : []
   const examPrice =
     examComponents.length > 0
-      ? Math.min(
-          ...examComponents.map((component: ExamComponent) => Number(component.poolPrice || 300))
-        )
+      ? Math.min(...examComponents.map((component) => Number(component.poolPrice || 300)))
       : 300
 
   if (isExamOnly) {

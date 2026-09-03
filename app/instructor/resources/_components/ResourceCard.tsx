@@ -5,6 +5,8 @@ import { FileText, FileCode, Archive, ExternalLink, Download, Clock } from 'luci
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
+const MotionDiv = motion.div
+
 interface Resource {
   id: string
   name: string
@@ -72,7 +74,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
         {/* Title */}
         <div className="mb-4 flex-1">
           {resource.courseCode && (
-            <span className="mb-1 text-[10px] font-black text-aerojet-sky uppercase">
+            <span className="text-aerojet-sky mb-1 text-[10px] font-black uppercase">
               {resource.courseCode}
             </span>
           )}

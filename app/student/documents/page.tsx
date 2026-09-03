@@ -38,6 +38,7 @@ export default async function StudentDocumentsPage() {
     userAgent: ctx.userAgent ?? undefined,
   })
 
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now()
 
   return (

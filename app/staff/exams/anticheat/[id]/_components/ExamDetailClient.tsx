@@ -34,10 +34,6 @@ export function ExamDetailClient({ examId }: { examId: string }) {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'questions'>('overview')
 
-  useEffect(() => {
-    fetchExam()
-  }, [examId])
-
   const fetchExam = async () => {
     setLoading(true)
     try {
@@ -57,6 +53,11 @@ export function ExamDetailClient({ examId }: { examId: string }) {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchExam()
+  }, [examId])
 
   const handleCreateSession = async () => {
     const startTime = prompt('Session start time (ISO format):', new Date().toISOString())

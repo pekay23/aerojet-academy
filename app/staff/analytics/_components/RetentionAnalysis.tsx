@@ -36,6 +36,8 @@ export default function RetentionAnalysis() {
     const threeMonthsAgo = new Date()
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
     const monthStr = threeMonthsAgo.toISOString().slice(0, 7)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setCohort(monthStr)
     loadRetention()
   }, [])

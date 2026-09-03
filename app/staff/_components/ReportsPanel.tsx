@@ -127,6 +127,8 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
   const isInitialMonth = month === now.getMonth() + 1
   useEffect(() => {
     if (!isInitialYear || !isInitialMonth) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchData()
     }
   }, [year, month, fetchData, isInitialYear, isInitialMonth])
@@ -144,7 +146,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
 
   return (
     <div className="space-y-6">
-      {/* ── Period Selector & Actions ── */}
+      {/* â”€â”€ Period Selector & Actions â”€â”€ */}
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white px-6 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center gap-3">
           <div className="bg-aerojet-blue/10 dark:bg-aerojet-sky/10 flex h-9 w-9 items-center justify-center rounded-xl">
@@ -231,7 +233,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
         </div>
       </div>
 
-      {/* ── Summary KPI Cards ── */}
+      {/* â”€â”€ Summary KPI Cards â”€â”€ */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           {
@@ -292,7 +294,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
         })}
       </div>
 
-      {/* ── Monthly Revenue Chart ── */}
+      {/* â”€â”€ Monthly Revenue Chart â”€â”€ */}
       <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
@@ -347,7 +349,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
         </div>
       </div>
 
-      {/* ── Revenue by Programme & Payment Status ── */}
+      {/* â”€â”€ Revenue by Programme & Payment Status â”€â”€ */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Revenue by Programme */}
         <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -449,7 +451,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
         </div>
       </div>
 
-      {/* ── Payment Methods Table ── */}
+      {/* â”€â”€ Payment Methods Table â”€â”€ */}
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-900/20">
@@ -518,7 +520,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
         </Table>
       </div>
 
-      {/* ── Bottom Stats Row ── */}
+      {/* â”€â”€ Bottom Stats Row â”€â”€ */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20">

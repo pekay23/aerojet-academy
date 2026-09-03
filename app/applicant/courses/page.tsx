@@ -9,7 +9,7 @@ import TrackedImpression from '@/components/shared/TrackedImpression'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { getCatalogVisibility, resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
-import PageTransition from '@/components/shared/PageTransition'
+import { PageTransition } from '@/components/shared/PageTransition'
 
 export const metadata: Metadata = { title: 'Browse Courses | Applicant Portal' }
 export const dynamic = 'force-dynamic'

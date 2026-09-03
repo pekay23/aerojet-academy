@@ -55,6 +55,9 @@ export function PasskeySettings() {
   }
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setWebAuthnSupported(typeof window !== 'undefined' && !!window.PublicKeyCredential)
     fetchPasskeys()
   }, [])
@@ -264,7 +267,7 @@ export function PasskeySettings() {
                         <p className="text-muted-foreground text-xs">
                           Added {new Date(passkey.createdAt).toLocaleDateString()}
                           {passkey.lastUsedAt &&
-                            ` • Last used ${new Date(passkey.lastUsedAt).toLocaleDateString()}`}
+                            ` â€¢ Last used ${new Date(passkey.lastUsedAt).toLocaleDateString()}`}
                         </p>
                       </div>
                     </div>

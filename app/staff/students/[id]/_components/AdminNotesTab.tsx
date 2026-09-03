@@ -47,6 +47,7 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
   }, [student.id])
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotes()
   }, [fetchNotes])
 

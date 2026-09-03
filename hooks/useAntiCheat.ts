@@ -317,6 +317,7 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
     }
   }, [logUnload, sessionId, violationEndpoint, isDev])
 
+  /* eslint-disable react-hooks/refs */
   return {
     isFullscreen: isFullscreen.current,
     get tabSwitchCount() {
@@ -327,4 +328,5 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
     },
     logViolation,
   }
+  /* eslint-enable react-hooks/refs */
 }

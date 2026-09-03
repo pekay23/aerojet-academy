@@ -37,6 +37,42 @@ export default function SecureExamClient({ sessionId }: { sessionId: string }) {
   const [error, setError] = useState<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const handleSubmit = useCallback(
+    async (autoSubmitted = false) => {
+      if (submitting) return
+      setSubmitting(true)
+
+      try {
+        const res = await fetch('/api/student/exams/internal/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            answers: Object.entries(answers).map(([questionId, selectedAnswer]) => ({
+              questionId,
+              selectedAnswer,
+            })),
+            autoSubmitted,
+          }),
+        })
+
+        const json = await res.json()
+        if (json.success) {
+          toast.success(autoSubmitted ? 'Exam auto-submitted due to violation' : 'Exam submitted successfully')
+          router.push(`/student/exams/internal/results/${sessionId}`)
+        } else {
+          toast.error(json.error || 'Failed to submit exam')
+          setSubmitting(false)
+        }
+      } catch {
+        toast.error('Failed to submit exam')
+        setSubmitting(false)
+      }
+    },
+    [sessionId, answers, submitting, router]
+  )
+
   const { logViolation, isFullscreen, tabSwitchCount, devToolsDetected } = useAntiCheat({
     sessionId,
     enforceFullscreen: true,
@@ -96,41 +132,6 @@ export default function SecureExamClient({ sessionId }: { sessionId: string }) {
       if (timerRef.current) clearInterval(timerRef.current)
     }
   }, [data, submitting])
-
-  const handleSubmit = useCallback(
-    async (autoSubmitted = false) => {
-      if (submitting) return
-      setSubmitting(true)
-
-      try {
-        const res = await fetch('/api/student/exams/internal/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId,
-            answers: Object.entries(answers).map(([questionId, selectedAnswer]) => ({
-              questionId,
-              selectedAnswer,
-            })),
-            autoSubmitted,
-          }),
-        })
-
-        const json = await res.json()
-        if (json.success) {
-          toast.success(autoSubmitted ? 'Exam auto-submitted due to violation' : 'Exam submitted successfully')
-          router.push(`/student/exams/internal/results/${sessionId}`)
-        } else {
-          toast.error(json.error || 'Failed to submit exam')
-          setSubmitting(false)
-        }
-      } catch {
-        toast.error('Failed to submit exam')
-        setSubmitting(false)
-      }
-    },
-    [sessionId, answers, submitting, router]
-  )
 
   if (loading) {
     return (

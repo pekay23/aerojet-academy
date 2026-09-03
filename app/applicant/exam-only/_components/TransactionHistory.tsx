@@ -171,7 +171,9 @@ export default function TransactionHistory({ transactions, payments }: Transacti
             const transactionType = isPayment ? '' : (item as Transaction).type
             const status = isPayment ? item.status : transactionType
             const config =
-              (statusConfig as StatusConfig)[status] || (statusConfig as StatusConfig).PENDING
+              (status in statusConfig
+                ? statusConfig[status as keyof typeof statusConfig]
+                : statusConfig.PENDING) || statusConfig.PENDING
             const StatusIcon = config.icon
             const isCredit =
               isPayment || transactionType === 'TOP_UP' || transactionType === 'REFUND'

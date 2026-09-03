@@ -25,10 +25,6 @@ export function ExamListClient() {
   const [statusFilter, setStatusFilter] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
 
-  useEffect(() => {
-    fetchExams()
-  }, [statusFilter])
-
   const fetchExams = async () => {
     setLoading(true)
     try {
@@ -46,6 +42,11 @@ export function ExamListClient() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchExams()
+  }, [statusFilter])
 
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

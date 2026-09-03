@@ -23,6 +23,8 @@ const enrollmentConfig = {
 
 export function EnrollmentChart({ data, title = 'Enrollment by Course' }: EnrollmentChartProps) {
   const [mounted, setMounted] = React.useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
   return (

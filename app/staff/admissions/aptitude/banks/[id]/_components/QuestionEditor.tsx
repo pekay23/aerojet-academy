@@ -60,6 +60,7 @@ export default function QuestionEditor({ bankId, isCreating, onCancelCreate }: Q
 
   useEffect(() => {
     if (isCreating && !editingId) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       setEditingId('NEW')
       setForm({
         category: 'MATH',
@@ -238,9 +239,9 @@ export default function QuestionEditor({ bankId, isCreating, onCancelCreate }: Q
               <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-400">
                 <span className="rounded bg-slate-200 px-1.5 py-0.5 text-slate-600 dark:bg-slate-800 dark:text-slate-300">Q{questions.length - i}</span>
                 <span className="text-aerojet-blue">{q.category.replace('_', ' ')}</span>
-                <span>•</span>
+                <span>â€¢</span>
                 <span>{q.questionType.replace('_', ' ')}</span>
-                <span>•</span>
+                <span>â€¢</span>
                 <span className={q.difficulty === 'EASY' ? 'text-green-500' : q.difficulty === 'HARD' ? 'text-red-500' : 'text-amber-500'}>{q.difficulty}</span>
               </div>
               <p className="mt-2 text-sm font-medium text-slate-800 dark:text-slate-200">{q.text}</p>

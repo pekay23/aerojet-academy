@@ -13,7 +13,6 @@
 import { test, expect, Page, Route } from '@playwright/test'
 import type { Response } from '@playwright/test'
 import * as fs from 'fs'
-import * as fs from 'fs'
 
 const SCREENSHOT_DIR = 'tests/e2e/portal-explore-screenshots'
 
@@ -91,12 +90,7 @@ const PORTALS: PortalConfig[] = [
     email: 'examiner@aerojet-academy.com',
     password: 'REDACTED_PASSWORD',
     dashboardUrl: '/examiner',
-    pathsToVisit: [
-      '/examiner',
-      '/examiner/exams',
-      '/examiner/schedule',
-      '/examiner/results',
-    ],
+    pathsToVisit: ['/examiner', '/examiner/exams', '/examiner/schedule', '/examiner/results'],
   },
 ]
 
@@ -110,7 +104,13 @@ interface IssueRecord {
 
 const issues: IssueRecord[] = []
 
-function logIssue(portal: string, url: string, type: IssueRecord['type'], message: string, context?: string) {
+function logIssue(
+  portal: string,
+  url: string,
+  type: IssueRecord['type'],
+  message: string,
+  context?: string
+) {
   const record = { portal, url, type, message: message.slice(0, 500), context }
   issues.push(record)
   console.log(`[${type.toUpperCase()}] ${portal} @ ${url}: ${message.slice(0, 200)}`)
@@ -148,26 +148,47 @@ async function loginViaApi(page: Page, portal: PortalConfig): Promise<boolean> {
 
   // Check for session cookie
   const cookies = await page.context().cookies()
-  const hasSession = cookies.some(c => c.name.includes('next-auth'))
+  const hasSession = cookies.some((c) => c.name.includes('next-auth'))
   return hasSession
 }
 
 async function setupConsoleAndNetworkCapture(page: Page, portal: PortalConfig) {
-  page.on('console', msg => {
+  page.on('console', (msg) => {
     const text = msg.text()
     const location = msg.location()
 
     // Skip warnings and info in production
     if (msg.type() === 'error') {
-      logIssue(portal.name, page.url(), 'console-error', text, location ? `${location.url}:${location.lineNumber}` : undefined)
-    } else if (msg.type() === 'warning' && (text.includes(' hydration') || text.includes('Hydration'))) {
-      logIssue(portal.name, page.url(), 'hydration-error', text, location ? `${location.url}:${location.lineNumber}` : undefined)
+      logIssue(
+        portal.name,
+        page.url(),
+        'console-error',
+        text,
+        location ? `${location.url}:${location.lineNumber}` : undefined
+      )
+    } else if (
+      msg.type() === 'warning' &&
+      (text.includes(' hydration') || text.includes('Hydration'))
+    ) {
+      logIssue(
+        portal.name,
+        page.url(),
+        'hydration-error',
+        text,
+        location ? `${location.url}:${location.lineNumber}` : undefined
+      )
     } else if (text.includes('Minified React error') || text.includes('React Error')) {
-      logIssue(portal.name, page.url(), 'react-error', text, location ? `${location.url}:${location.lineNumber}` : undefined)
+      logIssue(
+        portal.name,
+        page.url(),
+        'react-error',
+        text,
+        location ? `${location.url}:${location.lineNumber}` : undefined
+      )
     }
   })
 
-  page.on('pageerror', error => {
+  page.on('pageerror', (error) => {
     const msg = error.message
     const stack = error.stack || ''
     logIssue(portal.name, page.url(), 'react-error', msg, stack.slice(0, 300))
@@ -226,9 +247,14 @@ async function explorePortal(page: Page, portal: PortalConfig) {
       })
 
       // Check for error boundaries
-      const errorText = await page.locator('text=/Error|Error Boundary|Something went wrong/i').count()
+      const errorText = await page
+        .locator('text=/Error|Error Boundary|Something went wrong/i')
+        .count()
       if (errorText > 0) {
-        const errorContent = await page.locator('text=/Error|Error Boundary|Something went wrong/i').first().textContent()
+        const errorContent = await page
+          .locator('text=/Error|Error Boundary|Something went wrong/i')
+          .first()
+          .textContent()
         logIssue(portal.name, path, 'console-error', `Error boundary detected: ${errorContent}`)
       }
     } catch (err: any) {

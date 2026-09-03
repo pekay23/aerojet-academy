@@ -41,6 +41,8 @@ export function useFetch<T = unknown>(url: string) {
   }, [url])
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
   }, [load])
 

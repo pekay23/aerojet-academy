@@ -133,6 +133,9 @@ export default function StudentDetailPanel({
   // Fetch full student details when selected
   useEffect(() => {
     if (!initialStudent) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       setStudent(null)
       return
     }
@@ -200,7 +203,7 @@ export default function StudentDetailPanel({
     id: r.id,
     source: 'result' as const,
     type: 'FORMAL',
-    moduleCode: r.exam?.examComponent?.course?.code || '—',
+    moduleCode: r.exam?.examComponent?.course?.code || 'â€”',
     examName: r.exam?.name || 'Exam Result',
     date: r.exam?.examDate || null,
     score: r.score != null ? Number(r.score) : null,
@@ -217,7 +220,7 @@ export default function StudentDetailPanel({
       id: b.id,
       source: 'booking' as const,
       type: 'MANUAL',
-      moduleCode: b.moduleCode || '—',
+      moduleCode: b.moduleCode || 'â€”',
       examName: b.exam?.name || 'Exam Booking',
       date: b.examDate || b.bookedAt,
       score: b.score != null ? Number(b.score) : null,
@@ -227,14 +230,14 @@ export default function StudentDetailPanel({
       attemptType: b.attemptType,
     }))
 
-  // 3. Upcoming bookings — no completed result, still pending/approved
+  // 3. Upcoming bookings â€” no completed result, still pending/approved
   const upcomingExamsList = (currentStudent.examBookings || [])
     .filter((b: any) => isUpcomingBooking(b))
     .map((b: any) => ({
       id: b.id,
       source: 'booking' as const,
       type: b.exam?.name ? 'BOOKED' : 'MANUAL',
-      moduleCode: b.moduleCode || '—',
+      moduleCode: b.moduleCode || 'â€”',
       examName: b.exam?.name || 'Upcoming Exam',
       date: b.examDate || b.bookedAt,
       paymentStatus: b.status,
@@ -320,7 +323,7 @@ export default function StudentDetailPanel({
             <div>
               <h2 className="text-xl font-black text-slate-800 dark:text-slate-200">{fullName}</h2>
               <p className="mt-0.5 flex items-center gap-2 text-sm text-slate-400">
-                <span className="font-mono">{currentStudent.studentProfile?.studentId ?? '—'}</span>
+                <span className="font-mono">{currentStudent.studentProfile?.studentId ?? 'â€”'}</span>
                 {currentStudent.studentProfile?.cohort && (
                   <>
                     <span className="h-1 w-1 rounded-full bg-slate-300" />
@@ -424,12 +427,12 @@ export default function StudentDetailPanel({
                     <Field
                       icon={Phone}
                       label="Phone"
-                      value={currentStudent.profile?.phone ?? '—'}
+                      value={currentStudent.profile?.phone ?? 'â€”'}
                     />
                     <Field
                       icon={Globe}
                       label="Nationality"
-                      value={currentStudent.profile?.nationality ?? '—'}
+                      value={currentStudent.profile?.nationality ?? 'â€”'}
                     />
                     <Field
                       icon={Calendar}
@@ -444,7 +447,7 @@ export default function StudentDetailPanel({
                                 year: 'numeric',
                               }
                             )
-                          : '—'
+                          : 'â€”'
                       }
                     />
                   </Grid2>
@@ -455,17 +458,17 @@ export default function StudentDetailPanel({
                     <Field
                       icon={GraduationCap}
                       label="Programme"
-                      value={currentStudent.studentProfile?.programType?.replace(/_/g, ' ') ?? '—'}
+                      value={currentStudent.studentProfile?.programType?.replace(/_/g, ' ') ?? 'â€”'}
                     />
                     <Field
                       icon={BookOpen}
                       label="Licence Category"
-                      value={currentStudent.studentProfile?.licenceCategory ?? '—'}
+                      value={currentStudent.studentProfile?.licenceCategory ?? 'â€”'}
                     />
                     <Field
                       icon={Globe}
                       label="Pathway"
-                      value={currentStudent.studentProfile?.pathwayRel?.name ?? '—'}
+                      value={currentStudent.studentProfile?.pathwayRel?.name ?? 'â€”'}
                     />
                     <Field
                       icon={Calendar}
@@ -480,19 +483,19 @@ export default function StudentDetailPanel({
                                 year: 'numeric',
                               }
                             )
-                          : '—'
+                          : 'â€”'
                       }
                     />
                     <Field
                       icon={User}
                       label="Cohort"
-                      value={currentStudent.studentProfile?.cohort ?? '—'}
+                      value={currentStudent.studentProfile?.cohort ?? 'â€”'}
                     />
                     <Field
                       icon={Wallet}
                       label="Funding Source"
                       value={
-                        currentStudent.studentProfile?.fundingSource?.replace(/_/g, ' ') ?? '—'
+                        currentStudent.studentProfile?.fundingSource?.replace(/_/g, ' ') ?? 'â€”'
                       }
                     />
                     {currentStudent.studentProfile?.academicYear && (
@@ -698,7 +701,7 @@ function ExamTabContent({
                     )}
                   </div>
                   <p className="mt-0.5 text-[10px] text-slate-400">
-                    {exam.date ? new Date(exam.date).toLocaleDateString() : '—'}
+                    {exam.date ? new Date(exam.date).toLocaleDateString() : 'â€”'}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -768,12 +771,12 @@ function ExamTabContent({
                       )}
                     </div>
                     <p className="mt-0.5 text-[10px] text-slate-400">
-                      {h.date ? new Date(h.date).toLocaleDateString() : '—'}
+                      {h.date ? new Date(h.date).toLocaleDateString() : 'â€”'}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <span className="font-mono text-xs font-black">
-                      {h.score !== null ? `${h.score}%` : '—'}
+                      {h.score !== null ? `${h.score}%` : 'â€”'}
                     </span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${

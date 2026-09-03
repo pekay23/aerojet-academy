@@ -93,7 +93,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext)
     },
   })
 
-  return new Response(stream, {
+  return new NextResponse(stream, {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { SessionType, SittingStatus } from '@prisma/client'
+import { SessionType, SittingStatus, Prisma } from '@prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
@@ -23,7 +23,15 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
           where: { status: { notIn: ['CANCELLED'] } },
           include: {
             user: { select: { id: true, name: true, email: true } },
-            booking: { select: { id: true, moduleCode: true, bookingType: true, guaranteedSeat: true, demandStatus: true } },
+            booking: {
+              select: {
+                id: true,
+                moduleCode: true,
+                bookingType: true,
+                guaranteedSeat: true,
+                demandStatus: true,
+              },
+            },
           },
           orderBy: { assignedAt: 'asc' },
         },
@@ -36,7 +44,10 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
 
     return NextResponse.json({ sitting })
   } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to fetch sitting' }, { status: 500 })
+    return NextResponse.json(
+      { error: error?.message || 'Failed to fetch sitting' },
+      { status: 500 }
+    )
   }
 }
 
@@ -61,7 +72,10 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     if (typeof body.dayNumber === 'number' && body.dayNumber >= 1) {
       data.dayNumber = body.dayNumber
     }
-    if (typeof body.sessionType === 'string' && Object.values(SessionType).includes(body.sessionType as SessionType)) {
+    if (
+      typeof body.sessionType === 'string' &&
+      Object.values(SessionType).includes(body.sessionType as SessionType)
+    ) {
       data.sessionType = body.sessionType as SessionType
     }
     if (typeof body.capacity === 'number' && body.capacity >= 1) {
@@ -73,7 +87,10 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     if (typeof body.notes === 'string') {
       data.notes = body.notes.trim() || null
     }
-    if (typeof body.status === 'string' && Object.values(SittingStatus).includes(body.status as SittingStatus)) {
+    if (
+      typeof body.status === 'string' &&
+      Object.values(SittingStatus).includes(body.status as SittingStatus)
+    ) {
       data.status = body.status as SittingStatus
     }
     if (body.startTime) {
@@ -102,7 +119,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       entity: 'ExamSitting',
       entityId: id,
       userId: staff.id,
-      details: { changes: data, eventId: sitting.eventId },
+      details: { changes: data as Prisma.InputJsonValue, eventId: sitting.eventId },
     })
 
     revalidatePath(`/staff/exams/events/${sitting.eventId}`)

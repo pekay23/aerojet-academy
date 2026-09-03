@@ -61,10 +61,12 @@ export default function CourseCategoriesPage() {
   }
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCategories()
   }, [])
 
-  // ── CREATE ────────────────────────────────────────────────────────────────
+  // â”€â”€ CREATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newName) return
@@ -93,7 +95,7 @@ export default function CourseCategoriesPage() {
     }
   }
 
-  // ── EDIT ──────────────────────────────────────────────────────────────────
+  // â”€â”€ EDIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const openEdit = (cat: DbCourseCategory) => {
     setEditTarget(cat)
     setEditName(cat.name.replace(/_/g, ' '))
@@ -126,7 +128,7 @@ export default function CourseCategoriesPage() {
     }
   }
 
-  // ── DELETE ────────────────────────────────────────────────────────────────
+  // â”€â”€ DELETE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleDelete = async () => {
     if (!deleteTarget) return
 
@@ -150,7 +152,7 @@ export default function CourseCategoriesPage() {
     }
   }
 
-  // ── RENDER ────────────────────────────────────────────────────────────────
+  // â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="mx-auto max-w-[1800px]">
       {/* Header */}
@@ -167,7 +169,7 @@ export default function CourseCategoriesPage() {
               Course Categories
             </h1>
             <p className="text-slate-500 dark:text-slate-400">
-              {categories.length} {categories.length === 1 ? 'category' : 'categories'} •{' '}
+              {categories.length} {categories.length === 1 ? 'category' : 'categories'} â€¢{' '}
               {categories.reduce((sum, c) => sum + (c._count?.courses ?? 0), 0)} courses total
             </p>
           </div>
@@ -296,7 +298,7 @@ export default function CourseCategoriesPage() {
                     href={`/staff/courses?category=${cat.id}`}
                     className="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-sky transition-all duration-150 ease-out hover:bg-aerojet-sky/10 hover:shadow-sm"
                   >
-                    View courses →
+                    View courses â†’
                   </Link>
                 </div>
               </div>
@@ -305,7 +307,7 @@ export default function CourseCategoriesPage() {
         )}
       </div>
 
-      {/* ── Edit Dialog ─────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Edit Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
         <DialogContent>
           <form onSubmit={handleEdit}>
@@ -344,7 +346,7 @@ export default function CourseCategoriesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Delete Confirm Dialog ────────────────────────────────────────────── */}
+      {/* â”€â”€ Delete Confirm Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
@@ -354,7 +356,7 @@ export default function CourseCategoriesPage() {
               <strong>{deleteTarget?.name.replace(/_/g, ' ')}</strong>? This cannot be undone.
               {(deleteTarget?._count?.courses ?? 0) > 0 && (
                 <span className="mt-2 block rounded-lg bg-red-50 px-3 py-2 text-xs font-bold text-red-700 dark:bg-red-900/20 dark:text-red-400">
-                  ⚠ This category has {deleteTarget?._count?.courses} course(s). You must reassign
+                  âš  This category has {deleteTarget?._count?.courses} course(s). You must reassign
                   them before deleting.
                 </span>
               )}

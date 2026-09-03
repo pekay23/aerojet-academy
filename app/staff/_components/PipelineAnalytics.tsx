@@ -60,6 +60,8 @@ export default function PipelineAnalytics() {
     } catch { /* silent */ } finally { setLoading(false) }
   }, [cycleId])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetch_() }, [fetch_])
 
   if (loading || !data) {

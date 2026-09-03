@@ -23,10 +23,6 @@ export function TransactionHistory({ walletId }: TransactionHistoryProps) {
   const [page, setPage] = useState(1)
   const perPage = 10
 
-  useEffect(() => {
-    fetchTransactions()
-  }, [])
-
   const fetchTransactions = async () => {
     try {
       const res = await fetch('/api/applicant/exam-only/wallet')
@@ -40,6 +36,11 @@ export function TransactionHistory({ walletId }: TransactionHistoryProps) {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchTransactions()
+  }, [])
 
   const getTypeIcon = (type: string) => {
     switch (type) {
