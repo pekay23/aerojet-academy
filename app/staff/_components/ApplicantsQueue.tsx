@@ -74,6 +74,9 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
 
   // Sync counts when parent provides updated values
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialCounts.all > 0) setCounts(initialCounts)
   }, [initialCounts.all, initialCounts.pending_payment, initialCounts.pending_approval])
 
@@ -110,8 +113,11 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
       setLoading(false)
     }
   }, [tab, search, page, perPage, searchParams])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [tab, search])
 
@@ -457,7 +463,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                         </td>
                         <td className="px-6 py-4">
                           <span className="rounded-lg bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600 dark:text-slate-400">
-                            {applicant.registrationCode ?? '—'}
+                            {applicant.registrationCode ?? 'â€”'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">

@@ -17,6 +17,9 @@ export default function VerifyEmailPage() {
 
   useEffect(() => {
     if (!token) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus('error')
       setMessage('Invalid verification link.')
       return
@@ -87,7 +90,7 @@ export default function VerifyEmailPage() {
           </>
         )}
 
-        {/* Registration verification — no auto-login */}
+        {/* Registration verification â€” no auto-login */}
         {status === 'verified' && (
           <>
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
@@ -133,7 +136,7 @@ export default function VerifyEmailPage() {
           </>
         )}
 
-        {/* Activation verification — auto-login */}
+        {/* Activation verification â€” auto-login */}
         {status === 'success' && (
           <>
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">

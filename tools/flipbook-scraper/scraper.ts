@@ -64,6 +64,74 @@ export class FlipbookScraper {
 
     this.page = await this.context.newPage()
     await this.setupImageInterception()
+    await this.patchFlipbookPrototypes()
+  }
+
+  private async patchFlipbookPrototypes() {
+    if (!this.page) return
+
+    await this.page.evaluate(() => {
+      const w = window as any
+      if (!w.FLIPBOOK) return
+
+      const originalCreateBook = w.FLIPBOOK.Main?.prototype?.createBook
+      const originalFetchAndCacheImage = w.FLIPBOOK.Main?.prototype?.fetchAndCacheImage
+      const originalGetCurrentPageNumber = w.FLIPBOOK.Book?.prototype?.getCurrentPageNumber
+      const originalLoadPage = w.FLIPBOOK.Main?.prototype?.loadPage
+      const originalUpdateCurrentPage = w.FLIPBOOK.Main?.prototype?.updateCurrentPage
+      const originalGoToPage = w.FLIPBOOK.Main?.prototype?.goToPage
+
+      const calls: any[] = []
+
+      if (originalCreateBook) {
+        w.FLIPBOOK.Main.prototype.createBook = function (...args: any[]) {
+          calls.push({ method: 'createBook', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          const ret = originalCreateBook.apply(this, args)
+          if (this && this.book) {
+            ;(window as any).__flipbookBookInstance = this.book
+          }
+          return ret
+        }
+      }
+
+      if (originalFetchAndCacheImage) {
+        w.FLIPBOOK.Main.prototype.fetchAndCacheImage = function (...args: any[]) {
+          calls.push({ method: 'fetchAndCacheImage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalFetchAndCacheImage.apply(this, args)
+        }
+      }
+
+      if (originalGetCurrentPageNumber) {
+        w.FLIPBOOK.Book.prototype.getCurrentPageNumber = function (...args: any[]) {
+          const pageNum = originalGetCurrentPageNumber.apply(this, args)
+          calls.push({ method: 'getCurrentPageNumber', returned: pageNum })
+          return pageNum
+        }
+      }
+
+      if (originalLoadPage) {
+        w.FLIPBOOK.Main.prototype.loadPage = function (...args: any[]) {
+          calls.push({ method: 'loadPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalLoadPage.apply(this, args)
+        }
+      }
+
+      if (originalUpdateCurrentPage) {
+        w.FLIPBOOK.Main.prototype.updateCurrentPage = function (...args: any[]) {
+          calls.push({ method: 'updateCurrentPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalUpdateCurrentPage.apply(this, args)
+        }
+      }
+
+      if (originalGoToPage) {
+        w.FLIPBOOK.Main.prototype.goToPage = function (...args: any[]) {
+          calls.push({ method: 'goToPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalGoToPage.apply(this, args)
+        }
+      }
+
+      ;(window as any).__flipbookTraceCalls = calls
+    })
   }
 
   private async setupImageInterception() {
@@ -131,10 +199,22 @@ export class FlipbookScraper {
     this.report({ status: 'navigating', message: 'Navigating to module...' })
     await this.page.goto(this.config.moduleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 })
 
-    // Wait for Real3D Flipbook to initialize
     this.report({
       status: 'navigating',
-      message: 'Waiting for flipbook to load (this can take 45s)...',
+      message: 'Waiting for flipbook library to load...',
+    })
+
+    await this.page.waitForFunction(() => (window as any).FLIPBOOK !== undefined, { timeout: 60000 }).catch(() => {})
+
+    this.report({
+      status: 'navigating',
+      message: 'FLIPBOOK loaded. Applying prototype patches...',
+    })
+    await this.patchFlipbookPrototypes()
+
+    this.report({
+      status: 'navigating',
+      message: 'Waiting for flipbook to initialize (this can take 45s)...',
     })
     await this.page.waitForTimeout(45000)
   }
@@ -498,6 +578,313 @@ export class FlipbookScraper {
 
   getCapturedImages(): string[] {
     return [...this.capturedImages]
+  }
+
+  async inspectState(outputPath: string) {
+    if (!this.page) throw new Error('Browser not initialized')
+
+    const state = await this.page.evaluate(() => {
+      const w = window as any
+      const result: any = {
+        url: location.href,
+        timestamp: new Date().toISOString(),
+        globals: {},
+        flipbook: null,
+        dom: {
+          images: [],
+          backgroundImages: [],
+          canvases: [],
+          pageIndicators: [],
+          containers: [],
+        },
+        interceptedUrls: [],
+      }
+
+      const knownGlobals = [
+        'FLIPBOOK', 'flipbook', 'Flipbook', 'turnjs', 'turn', 'real3d', 'Real3D',
+        'flipbookData', 'flipbookOptions', 'totalPages', 'currentPage',
+      ]
+
+      for (const key of knownGlobals) {
+        if (w[key] !== undefined) {
+          try {
+            result.globals[key] = JSON.parse(JSON.stringify(w[key], (k, v) => {
+              if (typeof v === 'function') return '[function]'
+              if (v instanceof HTMLElement) return '[HTMLElement]'
+              if (v instanceof HTMLImageElement) return '[HTMLImageElement]'
+              if (v instanceof HTMLCanvasElement) return '[HTMLCanvasElement]'
+              return v
+            }))
+          } catch {
+            result.globals[key] = '[unserializable]'
+          }
+        }
+      }
+
+      if (w.FLIPBOOK) {
+        try {
+          result.flipbook = JSON.parse(JSON.stringify(w.FLIPBOOK, (k, v) => {
+            if (typeof v === 'function') return '[function]'
+            if (v instanceof HTMLElement) return '[HTMLElement]'
+            if (v instanceof HTMLImageElement) return '[HTMLImageElement]'
+            if (v instanceof HTMLCanvasElement) return '[HTMLCanvasElement]'
+            if (v && typeof v === 'object' && v.constructor && v.constructor.name) {
+              return { __type: v.constructor.name, keys: Object.keys(v) }
+            }
+            return v
+          }))
+        } catch {
+          result.flipbook = '[serialization-failed]'
+          result.flipbookKeys = Object.keys(w.FLIPBOOK).map((k: string) => {
+            const fb = (w.FLIPBOOK as Record<string, any>)[k]
+            return {
+              key: k,
+              type: typeof fb,
+              constructor: fb?.constructor?.name,
+              keys: fb && typeof fb === 'object' ? Object.keys(fb).slice(0, 50) : [],
+              hasOptions: !!fb?.options,
+              hasPages: !!fb?.pages,
+              hasTotalPages: fb?.totalPages != null,
+              hasCurrentPage: fb?.currentPage != null,
+              hasImages: !!fb?.images,
+              hasCache: !!fb?.cache,
+              hasSources: !!fb?.sources,
+            }
+          })
+        }
+
+        result.flipbookPrototypes = {
+          Main: w.FLIPBOOK.Main?.prototype ? Object.keys(w.FLIPBOOK.Main.prototype) : [],
+          Book: w.FLIPBOOK.Book?.prototype ? Object.keys(w.FLIPBOOK.Book.prototype) : [],
+        }
+
+        result.flipbookStaticKeys = {
+          Main: w.FLIPBOOK.Main ? Object.keys(w.FLIPBOOK.Main).slice(0, 50) : [],
+          Book: w.FLIPBOOK.Book ? Object.keys(w.FLIPBOOK.Book).slice(0, 50) : [],
+        }
+      }
+
+      const allGlobals = Object.keys(w).filter(k => !['document', 'navigator', 'location', 'history', 'screen', 'performance', 'localStorage', 'sessionStorage', 'crypto', 'fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource', 'webkitStorageInfo', 'chrome', 'opera', 'safari', 'phantom', '_phantom', 'callPhantom', '__phantomas', 'domAutomation', 'domAutomationController'].includes(k))
+      result.allGlobalKeys = allGlobals.slice(0, 200)
+
+      const webglContexts: any[] = []
+      document.querySelectorAll('canvas').forEach((canvas) => {
+        const ctx = canvas.getContext('webgl') || canvas.getContext('webgl2') || canvas.getContext('experimental-webgl')
+        if (ctx) {
+          const gl = ctx as any
+          webglContexts.push({
+            id: canvas.id,
+            className: canvas.className,
+            width: canvas.width,
+            height: canvas.height,
+            vendor: gl.getParameter ? gl.getParameter(gl.VENDOR) : null,
+            renderer: gl.getParameter ? gl.getParameter(gl.RENDERER) : null,
+            version: gl.getParameter ? gl.getParameter(gl.VERSION) : null,
+            textures: gl.getParameter ? gl.getParameter(gl.MAX_TEXTURE_SIZE) : null,
+          })
+        }
+      })
+      result.webglContexts = webglContexts
+
+      result.dataAttributes = Array.from(document.querySelectorAll('[data-src], [data-lazy], [data-original], [data-page], [data-flipbook], [data-book]')).map((el) => ({
+        tag: el.tagName.toLowerCase(),
+        id: el.id,
+        className: el.className,
+        dataSrc: (el as any).dataset.src || null,
+        dataLazy: (el as any).dataset.lazy || null,
+        dataOriginal: (el as any).dataset.original || null,
+        dataPage: (el as any).dataset.page || null,
+        dataFlipbook: (el as any).dataset.flipbook || null,
+        dataBook: (el as any).dataset.book || null,
+      })).slice(0, 50)
+
+      const flipbookInstances: any[] = []
+      const seen = new WeakSet()
+
+      function scanObject(obj: any, path: string, depth: number) {
+        if (!obj || typeof obj !== 'object' || depth > 5 || seen.has(obj)) return
+        seen.add(obj)
+
+        if (obj instanceof HTMLElement) {
+          for (const key of Object.keys(obj)) {
+            try {
+              const val = (obj as any)[key]
+              if (val && typeof val === 'object' && val.constructor?.name === 'Main') {
+                flipbookInstances.push({ type: 'Main', path: `${path}.${key}`, keys: Object.keys(val).slice(0, 30) })
+              }
+              if (val && typeof val === 'object' && val.constructor?.name === 'Book') {
+                flipbookInstances.push({ type: 'Book', path: `${path}.${key}`, keys: Object.keys(val).slice(0, 30) })
+              }
+            } catch {}
+          }
+          return
+        }
+
+        const keys = Object.keys(obj).slice(0, 30)
+        for (const key of keys) {
+          try {
+            const val = (obj as any)[key]
+            if (val && typeof val === 'object') {
+              const name = val.constructor?.name
+              if (name === 'Main' || name === 'Book') {
+                flipbookInstances.push({ type: name, path: `${path}.${key}`, keys: Object.keys(val).slice(0, 30) })
+              }
+              scanObject(val, `${path}.${key}`, depth + 1)
+            }
+          } catch {}
+        }
+      }
+
+      scanObject(window, 'window', 0)
+      result.flipbookInstances = flipbookInstances.slice(0, 20)
+
+      return result
+    })
+
+    await fs.writeFile(outputPath, JSON.stringify(state, null, 2), 'utf-8')
+    return state
+  }
+
+  async traceBook(outputPath: string) {
+    if (!this.page) throw new Error('Browser not initialized')
+
+    const trace = await this.page.evaluate(() => {
+      const w = window as any
+      const result: any = {
+        url: location.href,
+        timestamp: new Date().toISOString(),
+        prototypes: {},
+        monkeyPatches: [],
+        calls: [],
+        bookInstance: null,
+      }
+
+      if (!w.FLIPBOOK) {
+        return { error: 'FLIPBOOK not found on window' }
+      }
+
+      result.prototypes.Main = w.FLIPBOOK.Main?.prototype ? Object.keys(w.FLIPBOOK.Main.prototype) : []
+      result.prototypes.Book = w.FLIPBOOK.Book?.prototype ? Object.keys(w.FLIPBOOK.Book.prototype) : []
+
+      const originalCreateBook = w.FLIPBOOK.Main?.prototype?.createBook
+      const originalFetchAndCacheImage = w.FLIPBOOK.Main?.prototype?.fetchAndCacheImage
+      const originalGetCurrentPageNumber = w.FLIPBOOK.Book?.prototype?.getCurrentPageNumber
+      const originalLoadPage = w.FLIPBOOK.Main?.prototype?.loadPage
+      const originalUpdateCurrentPage = w.FLIPBOOK.Main?.prototype?.updateCurrentPage
+      const originalGoToPage = w.FLIPBOOK.Main?.prototype?.goToPage
+      const originalInitJpg = w.FLIPBOOK.Main?.prototype?.initJpg
+      const originalInitPdf = w.FLIPBOOK.Main?.prototype?.initPdf
+      const originalInitPageHTML = w.FLIPBOOK.Main?.prototype?.initPageHTML
+      const originalStart = w.FLIPBOOK.Main?.prototype?.start
+      const originalOnBookCreated = w.FLIPBOOK.Main?.prototype?.onBookCreated
+
+      let bookInstance: any = null
+      const calls: any[] = []
+
+      if (originalStart) {
+        w.FLIPBOOK.Main.prototype.start = function (...args: any[]) {
+          calls.push({ method: 'start', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalStart.apply(this, args)
+        }
+        result.monkeyPatches.push('start')
+      }
+
+      if (originalCreateBook) {
+        w.FLIPBOOK.Main.prototype.createBook = function (...args: any[]) {
+          calls.push({ method: 'createBook', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          const ret = originalCreateBook.apply(this, args)
+          if (this && this.book) {
+            bookInstance = this.book
+            result.bookInstance = {
+              constructor: this.book.constructor?.name,
+              keys: Object.keys(this.book).slice(0, 50),
+            }
+          }
+          return ret
+        }
+        result.monkeyPatches.push('createBook')
+      }
+
+      if (originalOnBookCreated) {
+        w.FLIPBOOK.Main.prototype.onBookCreated = function (...args: any[]) {
+          calls.push({ method: 'onBookCreated', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalOnBookCreated.apply(this, args)
+        }
+        result.monkeyPatches.push('onBookCreated')
+      }
+
+      if (originalInitJpg) {
+        w.FLIPBOOK.Main.prototype.initJpg = function (...args: any[]) {
+          calls.push({ method: 'initJpg', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalInitJpg.apply(this, args)
+        }
+        result.monkeyPatches.push('initJpg')
+      }
+
+      if (originalInitPdf) {
+        w.FLIPBOOK.Main.prototype.initPdf = function (...args: any[]) {
+          calls.push({ method: 'initPdf', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalInitPdf.apply(this, args)
+        }
+        result.monkeyPatches.push('initPdf')
+      }
+
+      if (originalInitPageHTML) {
+        w.FLIPBOOK.Main.prototype.initPageHTML = function (...args: any[]) {
+          calls.push({ method: 'initPageHTML', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalInitPageHTML.apply(this, args)
+        }
+        result.monkeyPatches.push('initPageHTML')
+      }
+
+      if (originalFetchAndCacheImage) {
+        w.FLIPBOOK.Main.prototype.fetchAndCacheImage = function (...args: any[]) {
+          calls.push({ method: 'fetchAndCacheImage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalFetchAndCacheImage.apply(this, args)
+        }
+        result.monkeyPatches.push('fetchAndCacheImage')
+      }
+
+      if (originalLoadPage) {
+        w.FLIPBOOK.Main.prototype.loadPage = function (...args: any[]) {
+          calls.push({ method: 'loadPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalLoadPage.apply(this, args)
+        }
+        result.monkeyPatches.push('loadPage')
+      }
+
+      if (originalUpdateCurrentPage) {
+        w.FLIPBOOK.Main.prototype.updateCurrentPage = function (...args: any[]) {
+          calls.push({ method: 'updateCurrentPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalUpdateCurrentPage.apply(this, args)
+        }
+        result.monkeyPatches.push('updateCurrentPage')
+      }
+
+      if (originalGetCurrentPageNumber) {
+        w.FLIPBOOK.Book.prototype.getCurrentPageNumber = function (...args: any[]) {
+          const pageNum = originalGetCurrentPageNumber.apply(this, args)
+          calls.push({ method: 'getCurrentPageNumber', returned: pageNum })
+          return pageNum
+        }
+        result.monkeyPatches.push('getCurrentPageNumber')
+      }
+
+      if (originalGoToPage) {
+        w.FLIPBOOK.Main.prototype.goToPage = function (...args: any[]) {
+          calls.push({ method: 'goToPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+          return originalGoToPage.apply(this, args)
+        }
+        result.monkeyPatches.push('goToPage')
+      }
+
+      result.calls = calls.slice(0, 200)
+
+      return result
+    })
+
+    await fs.writeFile(outputPath, JSON.stringify(trace, null, 2), 'utf-8')
+    return trace
   }
 }
 

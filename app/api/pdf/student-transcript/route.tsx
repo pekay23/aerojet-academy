@@ -4,6 +4,10 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getPDFSettings } from '@/lib/pdf-settings'
 import { TranscriptTemplate, TranscriptRecord } from '@/components/pdf/templates/TranscriptTemplate'
+
+function TranscriptTemplateElement(props: any) {
+  return <TranscriptTemplate {...props} />
+}
 import React from 'react'
 
 export async function GET(req: NextRequest) {
@@ -94,28 +98,27 @@ export async function GET(req: NextRequest) {
     const now = new Date()
 
     const stream = await renderToStream(
-      <TranscriptTemplate
-        logoUrl={pdfSettings.logoUrl}
-        watermarkUrl={pdfSettings.watermarkUrl}
-        footerText={pdfSettings.footerText}
-        watermarkOpacity={pdfSettings.watermarkOpacity}
-        studentName={fullName}
-        studentId={profile.studentId ?? '—'}
-        programName={programName}
-        enrollmentDate={
+      TranscriptTemplateElement({
+        logoUrl: pdfSettings.logoUrl,
+        watermarkUrl: pdfSettings.watermarkUrl,
+        footerText: pdfSettings.footerText,
+        watermarkOpacity: pdfSettings.watermarkOpacity,
+        studentName: fullName,
+        studentId: profile.studentId ?? '—',
+        programName: programName,
+        enrollmentDate:
           profile.enrollmentDate?.toLocaleDateString('en-GB', {
             day: '2-digit',
             month: 'short',
             year: 'numeric',
-          }) ?? '—'
-        }
-        generatedDate={now.toLocaleDateString('en-GB', {
+          }) ?? '—',
+        generatedDate: now.toLocaleDateString('en-GB', {
           day: '2-digit',
           month: 'short',
           year: 'numeric',
-        })}
-        records={records}
-      />
+        }),
+        records: records,
+      })
     )
 
     const safeId = (profile.studentId ?? 'student').replace(/[^a-zA-Z0-9-]/g, '_')

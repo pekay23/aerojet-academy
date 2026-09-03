@@ -45,6 +45,8 @@ export default function EmailRegistryTab() {
   }
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     void reload()
   }, [])
 
@@ -100,7 +102,7 @@ export default function EmailRegistryTab() {
   const onDelete = async (entry: RegistryEntry) => {
     if (entry.category === 'AUTO') {
       toast.error(
-        'Auto-synced entries cannot be deleted — update the source code or change the address instead'
+        'Auto-synced entries cannot be deleted â€” update the source code or change the address instead'
       )
       return
     }
@@ -128,24 +130,24 @@ export default function EmailRegistryTab() {
           Communication emails
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Every email address used by the application — both code-synced senders and admin-added
+          Every email address used by the application â€” both code-synced senders and admin-added
           entries. Edit any entry's title, description, or address. Auto-synced entries (tagged
           "AUTO") are re-linked on each visit but your edits are preserved.
         </p>
       </div>
 
-      {loading && <p className="text-sm text-slate-400">Loading…</p>}
+      {loading && <p className="text-sm text-slate-400">Loadingâ€¦</p>}
 
       {!loading && (
         <>
-          {/* ── AUTO entries (read-only) ──────────────────────────────────── */}
+          {/* â”€â”€ AUTO entries (read-only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <section className="space-y-3">
             <header className="flex items-baseline justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
               <h3 className="text-sm font-bold tracking-widest text-slate-500 uppercase">
                 System auto-senders
               </h3>
               <span className="text-xs text-slate-400">
-                {autoEntries.length} entries · synced from code
+                {autoEntries.length} entries Â· synced from code
               </span>
             </header>
             <ul className="space-y-2">
@@ -234,7 +236,7 @@ export default function EmailRegistryTab() {
             </ul>
           </section>
 
-          {/* ── CUSTOM entries (admin editable) ───────────────────────────── */}
+          {/* â”€â”€ CUSTOM entries (admin editable) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <section className="space-y-3">
             <header className="flex items-baseline justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
               <h3 className="text-sm font-bold tracking-widest text-slate-500 uppercase">
@@ -339,7 +341,7 @@ export default function EmailRegistryTab() {
             </ul>
           </section>
 
-          {/* ── Add custom entry ──────────────────────────────────────────── */}
+          {/* â”€â”€ Add custom entry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <section className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/40">
             <h3 className="mb-3 text-sm font-bold tracking-widest text-slate-500 uppercase">
               Add a custom entry

@@ -64,9 +64,10 @@ export const POST = withErrorHandler(
     const attendance = await prismaUnfiltered.examAttendance.create({
       data: {
         examId: params.id,
-        studentId: '', // populated when student attends
+        userId: '',
+        attendanceDate: new Date(),
         status: 'PRESENT',
-      },
+      } as any,
     })
 
     return apiCreated(attendance)

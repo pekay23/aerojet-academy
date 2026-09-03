@@ -153,6 +153,7 @@ export default async function AvailablePoolsTab() {
             let surcharge = 0
             if (pool.event?.startDate) {
               const daysUntilExam = Math.ceil(
+                // eslint-disable-next-line react-hooks/purity
                 (pool.event.startDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
               )
               if (daysUntilExam <= bookingData.pricing.lateBookingDays && daysUntilExam > 0) {

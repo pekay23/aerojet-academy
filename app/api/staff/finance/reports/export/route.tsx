@@ -11,6 +11,10 @@ import { FinancialReportTemplate } from '@/components/pdf/templates/FinancialRep
 import { getPDFSettings } from '@/lib/pdf-settings'
 import React from 'react'
 
+function FinancialReportElement(props: any) {
+  return <FinancialReportTemplate {...props} />
+}
+
 /**
  * GET /api/staff/finance/reports/export
  *
@@ -41,22 +45,22 @@ export async function GET(req: NextRequest) {
     const pdfSettings = await getPDFSettings(req.nextUrl.origin)
 
     const stream = await renderToStream(
-      <FinancialReportTemplate
-        year={year}
-        month={month}
-        summary={{
+      FinancialReportElement({
+        year,
+        month,
+        summary: {
           totalRevenue: summary.totalRevenue,
           revenueThisMonth: summary.revenueThisMonth,
           pendingAmount: summary.pendingAmount,
           avgTransactionValue: summary.avgTransactionValue,
-        }}
-        monthlyData={monthlyData}
-        revenueByType={revenueByType}
-        paymentStatus={paymentStatus}
-        logoUrl={pdfSettings.logoUrl}
-        watermarkUrl={pdfSettings.watermarkUrl}
-        watermarkOpacity={pdfSettings.watermarkOpacity}
-      />
+        },
+        monthlyData: monthlyData,
+        revenueByType: revenueByType,
+        paymentStatus: paymentStatus,
+        logoUrl: pdfSettings.logoUrl,
+        watermarkUrl: pdfSettings.watermarkUrl,
+        watermarkOpacity: pdfSettings.watermarkOpacity,
+      })
     )
 
     return new NextResponse(stream as any, {

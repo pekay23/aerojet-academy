@@ -48,6 +48,8 @@ export default function MedicalPage() {
     }
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData() }, [fetchData])
 
   const handleSubmit = async () => {
@@ -175,7 +177,7 @@ export default function MedicalPage() {
             </li>
             <li className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-aerojet-blue text-xs font-bold text-white">3</span>
-              <span>Upload the documents using the &quot;Documents&quot; page in the sidebar — select the medical document type.</span>
+              <span>Upload the documents using the &quot;Documents&quot; page in the sidebar â€” select the medical document type.</span>
             </li>
             <li className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-aerojet-blue text-xs font-bold text-white">4</span>

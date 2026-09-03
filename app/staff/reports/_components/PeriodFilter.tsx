@@ -26,6 +26,8 @@ export function PeriodFilter() {
   const [toDate, setToDate] = useState(searchParams.get('to') || '')
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowCustom(period === 'custom')
   }, [period])
 

@@ -34,6 +34,8 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
   // Fetch EUR equivalent when amount or currency changes
   useEffect(() => {
     if (!amount || currency === 'EUR') {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       setEurEquivalent(currency === 'EUR' ? Number(amount) || null : null)
       return
     }

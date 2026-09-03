@@ -147,7 +147,9 @@ export default function SupervisedExamInterface({
   }, [sessionId, logActivity])
 
   const submitExamRef = useRef(submitExam)
-  submitExamRef.current = submitExam
+  useEffect(() => {
+    submitExamRef.current = submitExam
+  }, [submitExam])
 
   useEffect(() => {
     if (timeLeft <= 0 && session && !isSubmitted) {

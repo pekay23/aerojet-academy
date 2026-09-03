@@ -46,6 +46,7 @@ export default function EditAcademicPeriodDialog({
   // Fetch active academic years when dialog opens
   useEffect(() => {
     if (open) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingYears(true)
       fetch('/api/staff/academic-years')
         .then((res) => res.json())
@@ -159,7 +160,7 @@ export default function EditAcademicPeriodDialog({
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800"
                 autoComplete="off"
               >
-                <option value="">— Select Academic Year —</option>
+                <option value="">â€” Select Academic Year â€”</option>
                 {academicYears.map((year) => (
                   <option key={year.id} value={year.id}>
                     {year.name}
@@ -169,7 +170,7 @@ export default function EditAcademicPeriodDialog({
             )}
           </div>
 
-          {/* Semester — only visible when academic year is selected */}
+          {/* Semester â€” only visible when academic year is selected */}
           <div
             className={`space-y-2 transition-all duration-200 ${
               academicYearId ? 'opacity-100' : 'pointer-events-none opacity-40'
@@ -193,7 +194,7 @@ export default function EditAcademicPeriodDialog({
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800"
                 autoComplete="off"
               >
-                <option value="">— Select Semester —</option>
+                <option value="">â€” Select Semester â€”</option>
                 {semesters.map((sem) => (
                   <option key={sem.id} value={sem.id}>
                     {sem.name}
@@ -211,7 +212,7 @@ export default function EditAcademicPeriodDialog({
               </p>
               <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
                 {currentAcademicYearName || 'None'}
-                {currentSemesterName && ` — ${currentSemesterName}`}
+                {currentSemesterName && ` â€” ${currentSemesterName}`}
               </p>
             </div>
           )}

@@ -52,7 +52,7 @@ export const SCROLL_OFFSET = 96
  * Build a step with scroll-to behavior baked in. Every sidebar/topbar target
  * gets `scrollOffset` so the page scrolls the element past the sticky topbar
  * (96px) before the highlight appears. Scrolling is enabled by default in
- * react-joyride — `scrollOffset` controls the distance from the element.
+ * react-joyride â€” `scrollOffset` controls the distance from the element.
  */
 
 export function stepWithScroll(step: Omit<Step, 'key'> & { target: string }): Step {
@@ -70,7 +70,7 @@ export function stepWithScroll(step: Omit<Step, 'key'> & { target: string }): St
  *
  * Content is state-driven: where `context` carries live data (wallet balance,
  * unread counts, staff alerts, pending grading, pending exam reports) it is
- * surfaced directly — the tour points at *reliable information*, not just UI
+ * surfaced directly â€” the tour points at *reliable information*, not just UI
  * labels.
  */
 export function getSteps(role: string | undefined, ctx: TourData | undefined): Step[] {
@@ -84,9 +84,9 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
 
   const moneyFmt = (n: number) => new Intl.NumberFormat('en-US').format(n)
 
-  /* ────────────────────────────────────────────────────────────── */
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   /*  Common steps used by every portal                               */
-  /* ────────────────────────────────────────────────────────────── */
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   const commonStart: Step[] = [
     {
       target: 'body',
@@ -97,7 +97,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
           </p>
           <p className="text-sm text-slate-600">
             Let&apos;s take a quick tour of your portal. Each step highlights a
-            feature and the <strong>key information</strong> it carries — not
+            feature and the <strong>key information</strong> it carries â€” not
             just what it does.
           </p>
         </div>
@@ -161,7 +161,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
     placement: 'center',
   })
 
-  // ── STUDENT ─────────────────────────────────────────────────────────────
+  // â”€â”€ STUDENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (role === 'STUDENT') {
     const walletContent = (
       <div className="space-y-1 text-left">
@@ -189,7 +189,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
           <div className="space-y-1 text-left">
             <p className="font-bold">Dashboard</p>
             <p className="text-sm text-slate-600">
-              Your study overview — deadlines, wallet status, and quick links to
+              Your study overview â€” deadlines, wallet status, and quick links to
               what needs doing today.
             </p>
           </div>
@@ -235,7 +235,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
             <p className="font-bold">Progress</p>
             <p className="text-sm text-slate-600">
               Grades, transcript, certificates, and license progress. Results are
-              released per exam schedule — check back after the published date.
+              released per exam schedule â€” check back after the published date.
             </p>
           </div>
         ),
@@ -265,7 +265,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
             </p>
             {unread > 0 ? (
               <p className="text-sm font-bold text-amber-600">
-                {unread} unread — check for deadlines
+                {unread} unread â€” check for deadlines
               </p>
             ) : null}
           </div>
@@ -279,10 +279,10 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
     ]
   }
 
-  // ── STAFF (ADMIN / SUPER_ADMIN) ─────────────────────────────────────────
+  // â”€â”€ STAFF (ADMIN / SUPER_ADMIN) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(role || '')) {
     const alertLines = alerts.length
-      ? alerts.map((a) => `• ${a.title}`).join('\n')
+      ? alerts.map((a) => `â€¢ ${a.title}`).join('\n')
       : 'No critical alerts right now.'
 
     return [
@@ -293,7 +293,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
           <div className="space-y-1 text-left">
             <p className="font-bold">Staff Dashboard</p>
             <p className="text-sm text-slate-600">
-              Live alerts surface at a glance — payments awaiting reconciliation,
+              Live alerts surface at a glance â€” payments awaiting reconciliation,
               overdue GDPR requests, fraud-flagged referrals, and expiring exam
               bundles.
             </p>
@@ -379,7 +379,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
     ]
   }
 
-  // ── INSTRUCTOR ──────────────────────────────────────────────────────────
+  // â”€â”€ INSTRUCTOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (role === 'INSTRUCTOR') {
     return [
       ...commonStart,
@@ -389,7 +389,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
           <div className="space-y-1 text-left">
             <p className="font-bold">Dashboard</p>
             <p className="text-sm text-slate-600">
-              Your teaching overview — upcoming classes, schedule, and grading
+              Your teaching overview â€” upcoming classes, schedule, and grading
               workload.
             </p>
           </div>
@@ -446,7 +446,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
     ]
   }
 
-  // ── EXAMINER ────────────────────────────────────────────────────────────
+  // â”€â”€ EXAMINER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (role === 'EXAMINER') {
     return [
       ...commonStart,
@@ -457,7 +457,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
             <p className="font-bold">Results Entry</p>
             <p className="text-sm text-slate-600">
               Enter and submit candidate results. Results are locked once
-              published — review before submitting.
+              published â€” review before submitting.
             </p>
           </div>
         ),
@@ -508,7 +508,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
     ]
   }
 
-  // ── APPLICANT / DEFAULT ─────────────────────────────────────────────────
+  // â”€â”€ APPLICANT / DEFAULT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const stageLabel = appStage ? `Current stage: ${appStage}` : 'Check the sidebar for your current step.'
   return [
     ...commonStart,
@@ -545,7 +545,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
           <p className="font-bold">Documents</p>
           <p className="text-sm text-slate-600">
             Upload required documents. Incomplete documents delay your
-            application — flagged here with expiry dates.
+            application â€” flagged here with expiry dates.
           </p>
         </div>
       ),
@@ -579,7 +579,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
           </p>
           {unread > 0 ? (
             <p className="text-sm font-bold text-amber-600">
-              {unread} unread — action required
+              {unread} unread â€” action required
             </p>
           ) : null}
         </div>
@@ -601,7 +601,7 @@ export function getSteps(role: string | undefined, ctx: TourData | undefined): S
  * always pass.
  *
  * Uses `getComputedStyle(el).display` rather than `offsetParent` /
- * `getBoundingClientRect()` — jsdom (and some SSR contexts) do not compute
+ * `getBoundingClientRect()` â€” jsdom (and some SSR contexts) do not compute
  * layout, so those APIs return zeroed values. `getComputedStyle` works reliably.
  */
 export function filterLiveSteps(steps: Step[]): Step[] {
@@ -630,6 +630,8 @@ export default function AppTour({ hasCompletedTour, userRole, data }: Props) {
   const tourStartedRef = useRef(false)
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
 
     const trackTourStart = () => {

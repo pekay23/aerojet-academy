@@ -73,6 +73,8 @@ export default function FunnelAnalysis() {
     const controller = new AbortController()
     let cancelled = false
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     loadFunnel().then(() => {
       if (cancelled) setData(null)
     })

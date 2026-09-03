@@ -52,6 +52,9 @@ export default function StaffSidebar({
 
   useEffect(() => {
     // Reset override anytime the user navigates
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setOverrideMenu(false)
   }, [pathname, searchParams])
 

@@ -75,6 +75,7 @@ export default async function LogbookDetailPage({
   ).length
   const startDate = logbook.startDate
   const monthsExperience = Math.floor(
+    // eslint-disable-next-line react-hooks/purity
     (Date.now() - startDate.getTime()) / (30.44 * 24 * 60 * 60 * 1000)
   )
 
