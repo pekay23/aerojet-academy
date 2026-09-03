@@ -34,12 +34,6 @@ describe('LogbookPreview', () => {
         toolsUsed: 'Torque wrench set',
         partNumbersUsed: null,
         safetyPrecautions: 'Wear safety glasses',
-        toolsUsed: 'Torque wrench set',
-        partNumbersUsed: null,
-        safetyPrecautions: 'Wear safety glasses',
-        toolsUsed: 'Torque wrench set',
-        partNumbersUsed: null,
-        safetyPrecautions: 'Wear safety glasses',
         competencyRating: 4,
       },
     ],
@@ -59,12 +53,16 @@ describe('LogbookPreview', () => {
 
   it('renders in staff mode', () => {
     render(<LogbookPreview logbook={mockLogbook} mode="staff" />)
-    expect(screen.getByText('Printable preview of the official Aerojet OJT logbook layout.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Printable preview of the official Aerojet OJT logbook layout.')
+    ).toBeInTheDocument()
   })
 
   it('renders in student mode', () => {
     render(<LogbookPreview logbook={mockLogbook} mode="student" />)
-    expect(screen.getByText('Protected portal preview of your official Aerojet OJT logbook.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Protected portal preview of your official Aerojet OJT logbook.')
+    ).toBeInTheDocument()
   })
 
   it('shows page navigation', () => {

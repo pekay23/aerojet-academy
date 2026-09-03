@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { verifyTOTP, base32Decode, generateSecret, generateCode } from '@/lib/auth/totp'
+import { verifyTOTP, base32Decode, generateCode } from '@/lib/auth/totp'
+import { generateSecret } from 'otplib'
 
 describe('base32Decode', () => {
   it('decodes valid base32 strings', () => {
@@ -43,7 +44,7 @@ describe('generateSecret', () => {
   })
 
   it('returns a base32 string of specified byte length', () => {
-    const secret = generateSecret(32)
+    const secret = generateSecret({ length: 32 })
     expect(secret.length).toBeGreaterThan(0)
     expect(secret).toMatch(/^[A-Z2-7]+$/)
   })
