@@ -28,6 +28,8 @@ export class FlipbookScraper {
   private interceptedRequests = 0
   private interceptedErrors = 0
   private interceptedBytes = 0
+  private pageImageCandidates: Buffer[] = []
+  private pageImageIndex = 0
 
   constructor(
     private config: FlipbookConfig,
@@ -318,8 +320,9 @@ export class FlipbookScraper {
 
         // 5. FLIPBOOK current page
         const flipbookPage = (window as any).FLIPBOOK
-          ? Object.values((window as any).FLIPBOOK).find((fb: any) => fb?.currentPage != null)
-              ?.currentPage
+          ? Object.values((window as any).FLIPBOOK as Record<string, any>).find(
+              (fb: any) => fb?.currentPage != null
+            )?.currentPage
           : null
 
         const best = candidates
