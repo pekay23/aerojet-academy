@@ -65,7 +65,7 @@ export const POST = withErrorHandler(
       data: {
         examId: params.id,
         studentId: '', // populated when student attends
-        status: 'SCHEDULED',
+        status: 'PRESENT',
       },
     })
 
