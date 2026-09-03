@@ -58,7 +58,7 @@ export default async function ExamManifestPage({
       id: a.id,
       userId: a.userId,
       seatId: a.seatId,
-      attendanceStatus: a.attendanceStatus,
+      attendanceStatus: a.attendanceStatus ?? '',
       user: {
         profile: a.user.profile,
         email: a.user.email,
@@ -70,7 +70,7 @@ export default async function ExamManifestPage({
     <div className="mx-auto max-w-[1400px] space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             Exam Manifest
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

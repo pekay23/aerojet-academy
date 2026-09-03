@@ -1,7 +1,20 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Pencil, Trash2, Plus, Loader2, AlertCircle, Upload, X, CheckSquare, Square, RotateCcw, Eye, EyeOff } from 'lucide-react'
+import {
+  Pencil,
+  Trash2,
+  Plus,
+  Loader2,
+  AlertCircle,
+  Upload,
+  X,
+  CheckSquare,
+  Square,
+  RotateCcw,
+  Eye,
+  EyeOff,
+} from 'lucide-react'
 
 interface Question {
   id: string
@@ -32,7 +45,10 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
   const [showBulkImport, setShowBulkImport] = useState(false)
   const [bulkText, setBulkText] = useState('')
   const [bulkImporting, setBulkImporting] = useState(false)
-  const [importResult, setImportResult] = useState<{ count: number; errors: { row: number; message: string }[] } | null>(null)
+  const [importResult, setImportResult] = useState<{
+    count: number
+    errors: { row: number; message: string }[]
+  } | null>(null)
 
   // Selection state for bulk operations
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -112,7 +128,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
   }
 
   const handleSave = async () => {
-    if (!form.text || !form.correctAnswer || form.options.some(o => !o.trim())) return
+    if (!form.text || !form.correctAnswer || form.options.some((o) => !o.trim())) return
     setSaving(true)
     try {
       const isNew = editingId === 'NEW'
@@ -122,7 +138,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
 
       const payload = {
         text: form.text,
-        options: form.options.map(o => o.trim()),
+        options: form.options.map((o) => o.trim()),
         correctAnswer: form.correctAnswer,
         subTopic: form.subTopic || undefined,
         difficulty: form.difficulty,
@@ -157,8 +173,14 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
     if (!deleteTarget) return
     setDeleting(true)
     try {
-      await fetch(`/api/staff/exams/internal/banks/${bankId}/questions/${deleteTarget}`, { method: 'DELETE' })
-      setSelectedIds(prev => { const n = new Set(prev); n.delete(deleteTarget); return n })
+      await fetch(`/api/staff/exams/internal/banks/${bankId}/questions/${deleteTarget}`, {
+        method: 'DELETE',
+      })
+      setSelectedIds((prev) => {
+        const n = new Set(prev)
+        n.delete(deleteTarget)
+        return n
+      })
       fetchQuestions()
     } finally {
       setDeleting(false)
@@ -179,7 +201,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
     setDeleting(true)
     try {
       await Promise.all(
-        Array.from(selectedIds).map(id =>
+        Array.from(selectedIds).map((id) =>
           fetch(`/api/staff/exams/internal/banks/${bankId}/questions/${id}`, { method: 'DELETE' })
         )
       )
@@ -195,7 +217,9 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
   const handleRestore = async (id: string) => {
     setRestoring(id)
     try {
-      await fetch(`/api/staff/exams/internal/banks/${bankId}/questions/${id}/restore`, { method: 'POST' })
+      await fetch(`/api/staff/exams/internal/banks/${bankId}/questions/${id}/restore`, {
+        method: 'POST',
+      })
       fetchQuestions()
     } finally {
       setRestoring(null)
@@ -203,7 +227,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
   }
 
   const toggleSelect = (id: string) => {
-    setSelectedIds(prev => {
+    setSelectedIds((prev) => {
       const n = new Set(prev)
       if (n.has(id)) n.delete(id)
       else n.add(id)
@@ -215,7 +239,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
     if (selectedIds.size === questions.length) {
       setSelectedIds(new Set())
     } else {
-      setSelectedIds(new Set(questions.map(q => q.id)))
+      setSelectedIds(new Set(questions.map((q) => q.id)))
     }
   }
 
@@ -233,21 +257,33 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
     setBulkImporting(true)
     setImportResult(null)
     try {
-      const items = bulkText.split('\n').filter(line => line.trim()).map(line => {
-        const parts = line.split('|')
-        const text = (parts[0] || '').trim()
-        const optionA = (parts[1] || '').trim()
-        const optionB = (parts[2] || '').trim()
-        const optionC = (parts[3] || '').trim()
-        const options = [optionA, optionB, optionC].filter(Boolean)
-        const correctAnswer = (parts[4] || '').trim()
-        const subTopic = (parts[5] || '').trim() || undefined
-        const difficulty = (parts[6] || 'MEDIUM').trim() as 'EASY' | 'MEDIUM' | 'HARD'
-        const points = parseInt((parts[7] || '1').trim()) || 1
-        const syllabusRef = (parts[8] || '').trim() || undefined
-        const explanation = (parts[9] || '').trim() || undefined
-        return { text, options, correctAnswer, subTopic, difficulty, points, syllabusRef, explanation }
-      })
+      const items = bulkText
+        .split('\n')
+        .filter((line) => line.trim())
+        .map((line) => {
+          const parts = line.split('|')
+          const text = (parts[0] || '').trim()
+          const optionA = (parts[1] || '').trim()
+          const optionB = (parts[2] || '').trim()
+          const optionC = (parts[3] || '').trim()
+          const options = [optionA, optionB, optionC].filter(Boolean)
+          const correctAnswer = (parts[4] || '').trim()
+          const subTopic = (parts[5] || '').trim() || undefined
+          const difficulty = (parts[6] || 'MEDIUM').trim() as 'EASY' | 'MEDIUM' | 'HARD'
+          const points = parseInt((parts[7] || '1').trim()) || 1
+          const syllabusRef = (parts[8] || '').trim() || undefined
+          const explanation = (parts[9] || '').trim() || undefined
+          return {
+            text,
+            options,
+            correctAnswer,
+            subTopic,
+            difficulty,
+            points,
+            syllabusRef,
+            explanation,
+          }
+        })
 
       const res = await fetch(`/api/staff/exams/internal/banks/${bankId}/questions`, {
         method: 'POST',
@@ -268,7 +304,11 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
   }
 
   if (loading) {
-    return <div className="flex py-12 justify-center"><Loader2 className="h-6 w-6 animate-spin text-slate-400" /></div>
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+      </div>
+    )
   }
 
   return (
@@ -294,7 +334,10 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
             </div>
             <div className="mt-6 flex gap-3">
               <button
-                onClick={() => { setShowDeleteModal(false); setDeleteTarget(null) }}
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setDeleteTarget(null)
+                }}
                 className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
               >
                 Cancel
@@ -313,49 +356,69 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
 
       {editingId && (
         <div className="rounded-2xl border border-blue-200 bg-blue-50/30 p-5 dark:border-blue-900/30 dark:bg-blue-900/10">
-          <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-slate-500">
+          <h3 className="mb-4 text-sm font-black tracking-widest text-slate-500 uppercase">
             {editingId === 'NEW' ? 'New Question' : 'Edit Question'}
           </h3>
           <div className="space-y-4">
             <div>
-              <label htmlFor="question-text" className="mb-1 block text-xs font-bold uppercase text-slate-500">Question Text *</label>
+              <label
+                htmlFor="question-text"
+                className="mb-1 block text-xs font-bold text-slate-500 uppercase"
+              >
+                Question Text *
+              </label>
               <textarea
                 id="question-text"
                 value={form.text}
-                onChange={e => setForm({ ...form, text: e.target.value })}
+                onChange={(e) => setForm({ ...form, text: e.target.value })}
                 rows={3}
-                className="w-full rounded-lg border border-slate-200 p-3 text-sm focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 p-3 text-sm focus:ring-2"
                 placeholder="Enter question text..."
               />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
-                <label htmlFor="option-a" className="mb-1 block text-xs font-bold uppercase text-slate-500">Option A *</label>
+                <label
+                  htmlFor="option-a"
+                  className="mb-1 block text-xs font-bold text-slate-500 uppercase"
+                >
+                  Option A *
+                </label>
                 <input
                   id="option-a"
                   value={form.options[0]}
-                  onChange={e => handleOptionChange(0, e.target.value)}
+                  onChange={(e) => handleOptionChange(0, e.target.value)}
                   className="w-full rounded-lg border border-slate-200 p-2 text-sm"
                   placeholder="Option A"
                 />
               </div>
               <div>
-                <label htmlFor="option-b" className="mb-1 block text-xs font-bold uppercase text-slate-500">Option B *</label>
+                <label
+                  htmlFor="option-b"
+                  className="mb-1 block text-xs font-bold text-slate-500 uppercase"
+                >
+                  Option B *
+                </label>
                 <input
                   id="option-b"
                   value={form.options[1]}
-                  onChange={e => handleOptionChange(1, e.target.value)}
+                  onChange={(e) => handleOptionChange(1, e.target.value)}
                   className="w-full rounded-lg border border-slate-200 p-2 text-sm"
                   placeholder="Option B"
                 />
               </div>
               <div>
-                <label htmlFor="option-c" className="mb-1 block text-xs font-bold uppercase text-slate-500">Option C *</label>
+                <label
+                  htmlFor="option-c"
+                  className="mb-1 block text-xs font-bold text-slate-500 uppercase"
+                >
+                  Option C *
+                </label>
                 <input
                   id="option-c"
                   value={form.options[2]}
-                  onChange={e => handleOptionChange(2, e.target.value)}
+                  onChange={(e) => handleOptionChange(2, e.target.value)}
                   className="w-full rounded-lg border border-slate-200 p-2 text-sm"
                   placeholder="Option C"
                 />
@@ -363,18 +426,25 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
             </div>
 
             <fieldset className="rounded-lg border border-slate-200 p-3">
-              <legend className="text-xs font-bold uppercase text-slate-500">Correct Answer *</legend>
+              <legend className="text-xs font-bold text-slate-500 uppercase">
+                Correct Answer *
+              </legend>
               <div className="flex gap-3">
                 {['A', 'B', 'C'].map((label, i) => (
-                  <label key={label} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 cursor-pointer hover:bg-slate-50">
+                  <label
+                    key={label}
+                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50"
+                  >
                     <input
                       type="radio"
                       name="correctAnswer"
                       checked={form.correctAnswer === form.options[i]}
                       onChange={() => setForm({ ...form, correctAnswer: form.options[i] })}
-                      className="h-4 w-4 text-aerojet-blue"
+                      className="text-aerojet-blue h-4 w-4"
                     />
-                    <span className="text-sm font-medium">{label}: {form.options[i] || '—'}</span>
+                    <span className="text-sm font-medium">
+                      {label}: {form.options[i] || '—'}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -382,43 +452,69 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <label htmlFor="sub-topic" className="mb-1 block text-xs font-bold uppercase text-slate-500">Sub-Topic</label>
+                <label
+                  htmlFor="sub-topic"
+                  className="mb-1 block text-xs font-bold text-slate-500 uppercase"
+                >
+                  Sub-Topic
+                </label>
                 <input
                   id="sub-topic"
                   value={form.subTopic}
-                  onChange={e => setForm({ ...form, subTopic: e.target.value })}
+                  onChange={(e) => setForm({ ...form, subTopic: e.target.value })}
                   className="w-full rounded-lg border border-slate-200 p-2 text-sm"
                   placeholder="e.g. Electricity"
                 />
               </div>
               <div>
-                <label htmlFor="difficulty" className="mb-1 block text-xs font-bold uppercase text-slate-500">Difficulty</label>
+                <label
+                  htmlFor="difficulty"
+                  className="mb-1 block text-xs font-bold text-slate-500 uppercase"
+                >
+                  Difficulty
+                </label>
                 <select
                   id="difficulty"
                   value={form.difficulty}
-                  onChange={e => setForm({ ...form, difficulty: e.target.value as 'EASY' | 'MEDIUM' | 'HARD' })}
+                  onChange={(e) =>
+                    setForm({ ...form, difficulty: e.target.value as 'EASY' | 'MEDIUM' | 'HARD' })
+                  }
                   className="w-full rounded-lg border border-slate-200 p-2 text-sm"
                 >
-                  {DIFFICULTIES.map(d => <option key={d} value={d}>{d}</option>)}
+                  {DIFFICULTIES.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
-                <label htmlFor="points" className="mb-1 block text-xs font-bold uppercase text-slate-500">Points</label>
+                <label
+                  htmlFor="points"
+                  className="mb-1 block text-xs font-bold text-slate-500 uppercase"
+                >
+                  Points
+                </label>
                 <input
                   id="points"
                   type="number"
                   min={1}
                   value={form.points}
-                  onChange={e => setForm({ ...form, points: parseInt(e.target.value) || 1 })}
+                  onChange={(e) => setForm({ ...form, points: parseInt(e.target.value) || 1 })}
                   className="w-full rounded-lg border border-slate-200 p-2 text-sm"
                 />
               </div>
               <div>
-                <label htmlFor="syllabus-ref" className="mb-1 block text-xs font-bold uppercase text-slate-500">Syllabus Ref</label>
+                <label
+                  htmlFor="syllabus-ref"
+                  className="mb-1 block text-xs font-bold text-slate-500 uppercase"
+                >
+                  Syllabus Ref
+                </label>
                 <input
                   id="syllabus-ref"
                   value={form.syllabusRef}
-                  onChange={e => setForm({ ...form, syllabusRef: e.target.value })}
+                  onChange={(e) => setForm({ ...form, syllabusRef: e.target.value })}
                   className="w-full rounded-lg border border-slate-200 p-2 text-sm"
                   placeholder="e.g. 3.2.1"
                 />
@@ -426,16 +522,23 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
             </div>
 
             <div>
-              <label htmlFor="explanation" className="mb-1 block text-xs font-bold uppercase text-slate-500">Explanation (shown after exam)</label>
+              <label
+                htmlFor="explanation"
+                className="mb-1 block text-xs font-bold text-slate-500 uppercase"
+              >
+                Explanation (shown after exam)
+              </label>
               <textarea
                 id="explanation"
                 value={form.explanation}
-                onChange={e => setForm({ ...form, explanation: e.target.value })}
+                onChange={(e) => setForm({ ...form, explanation: e.target.value })}
                 rows={3}
-                className="w-full rounded-lg border border-slate-200 p-3 text-sm focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 p-3 text-sm focus:ring-2"
                 placeholder="Explain why the correct answer is correct and why the others are wrong..."
               />
-              <p className="mt-1 text-[10px] text-slate-400">Optional. Students can choose to view this after their exam is published.</p>
+              <p className="mt-1 text-[10px] text-slate-400">
+                Optional. Students can choose to view this after their exam is published.
+              </p>
             </div>
 
             <div className="flex items-center justify-between">
@@ -443,16 +546,21 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
                 <input
                   type="checkbox"
                   checked={form.isActive}
-                  onChange={e => setForm({ ...form, isActive: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-aerojet-blue focus:ring-aerojet-blue"
+                  onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                  className="text-aerojet-blue focus:ring-aerojet-blue h-4 w-4 rounded border-slate-300"
                 />
                 Active
               </label>
               <div className="flex gap-3">
                 <button
                   onClick={handleSave}
-                  disabled={saving || !form.text || !form.correctAnswer || form.options.some(o => !o.trim())}
-                  className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+                  disabled={
+                    saving ||
+                    !form.text ||
+                    !form.correctAnswer ||
+                    form.options.some((o) => !o.trim())
+                  }
+                  className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Question'}
                 </button>
@@ -471,15 +579,17 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h3 className="text-lg font-black text-slate-800 dark:text-white">
-            Questions ({questions.filter(q => q.isActive).length})
+            Questions ({questions.filter((q) => q.isActive).length})
           </h3>
-          {questions.some(q => !q.isActive) && (
+          {questions.some((q) => !q.isActive) && (
             <button
               onClick={() => setShowRetired(!showRetired)}
               className="flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400"
             >
               {showRetired ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-              {showRetired ? 'Hide Retired' : `Show Retired (${questions.filter(q => !q.isActive).length})`}
+              {showRetired
+                ? 'Hide Retired'
+                : `Show Retired (${questions.filter((q) => !q.isActive).length})`}
             </button>
           )}
         </div>
@@ -493,7 +603,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
           </button>
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-blue-700"
+            className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-white hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
             Add Question
@@ -504,37 +614,57 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
       {showBulkImport && (
         <div className="rounded-2xl border border-blue-200 bg-blue-50/30 p-5 dark:border-blue-900/30 dark:bg-blue-900/10">
           <div className="mb-3 flex items-center justify-between">
-            <h4 className="text-sm font-black uppercase tracking-widest text-slate-500">Bulk Import</h4>
-            <button onClick={() => { setShowBulkImport(false); setImportResult(null) }} className="text-slate-400 hover:text-slate-600">
+            <h4 className="text-sm font-black tracking-widest text-slate-500 uppercase">
+              Bulk Import
+            </h4>
+            <button
+              onClick={() => {
+                setShowBulkImport(false)
+                setImportResult(null)
+              }}
+              className="text-slate-400 hover:text-slate-600"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
           <p className="mb-3 text-xs text-slate-500">
-            Paste one question per line. Format: <code className="rounded bg-slate-200 px-1 py-0.5 text-[10px]">Question text | Option A | Option B | Option C | Correct Answer | Sub-Topic | Difficulty | Points | Syllabus Ref | Explanation</code>
+            Paste one question per line. Format:{' '}
+            <code className="rounded bg-slate-200 px-1 py-0.5 text-[10px]">
+              Question text | Option A | Option B | Option C | Correct Answer | Sub-Topic |
+              Difficulty | Points | Syllabus Ref | Explanation
+            </code>
           </p>
           <textarea
             value={bulkText}
-            onChange={e => setBulkText(e.target.value)}
+            onChange={(e) => setBulkText(e.target.value)}
             rows={8}
-            className="mb-3 w-full rounded-lg border border-slate-200 p-3 text-xs font-mono focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20"
+            className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 mb-3 w-full rounded-lg border border-slate-200 p-3 font-mono text-xs focus:ring-2"
             placeholder={`What is the maximum voltage for a DC circuit? | 50V | 100V | 150V | 50V | Electrical fundamentals | EASY | 1 | 3.1.1 | DC circuits are limited to 50V for safety`}
           />
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-400">{bulkText.split('\n').filter(l => l.trim()).length} lines</span>
+            <span className="text-[10px] text-slate-400">
+              {bulkText.split('\n').filter((l) => l.trim()).length} lines
+            </span>
             <button
               onClick={handleBulkImport}
               disabled={bulkImporting || !bulkText.trim()}
-              className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+              className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {bulkImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Import Questions'}
             </button>
           </div>
           {importResult && (
-            <div className={`mt-3 rounded-lg p-3 text-xs ${importResult.errors.length > 0 ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700'}`}>
+            <div
+              className={`mt-3 rounded-lg p-3 text-xs ${importResult.errors.length > 0 ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700'}`}
+            >
               <p className="font-bold">{importResult.count} questions imported successfully</p>
               {importResult.errors.length > 0 && (
                 <ul className="mt-1 list-inside list-disc">
-                  {importResult.errors.map((err, i) => <li key={i}>Row {err.row}: {err.message}</li>)}
+                  {importResult.errors.map((err, i) => (
+                    <li key={i}>
+                      Row {err.row}: {err.message}
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
@@ -546,7 +676,10 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
         <div className="py-12 text-center">
           <AlertCircle className="mx-auto mb-3 h-10 w-10 text-slate-300" />
           <p className="text-sm font-bold text-slate-400">No questions in this bank yet.</p>
-          <button onClick={handleCreate} className="mt-3 text-xs font-bold text-aerojet-blue hover:underline">
+          <button
+            onClick={handleCreate}
+            className="text-aerojet-blue mt-3 text-xs font-bold hover:underline"
+          >
             Add your first question
           </button>
         </div>
@@ -562,7 +695,6 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
           onRestore={handleRestore}
-          bankId={bankId}
         />
       )}
     </div>
@@ -593,8 +725,8 @@ function QuestionList({
   onDelete: (id: string) => void
   onRestore: (id: string) => void
 }) {
-  const activeQuestions = questions.filter(q => q.isActive)
-  const retiredQuestions = questions.filter(q => !q.isActive)
+  const activeQuestions = questions.filter((q) => q.isActive)
+  const retiredQuestions = questions.filter((q) => !q.isActive)
   const displayQuestions = showRetired ? [...activeQuestions, ...retiredQuestions] : activeQuestions
 
   return (
@@ -626,7 +758,9 @@ function QuestionList({
           ) : (
             <Square className="h-4 w-4" />
           )}
-          {selectedIds.size === displayQuestions.length && displayQuestions.length > 0 ? 'Deselect All' : 'Select All'}
+          {selectedIds.size === displayQuestions.length && displayQuestions.length > 0
+            ? 'Deselect All'
+            : 'Select All'}
         </button>
         <span className="text-xs text-slate-400">
           ({selectedIds.size} of {displayQuestions.length})
@@ -652,16 +786,13 @@ function QuestionList({
               !q.isActive
                 ? 'border-amber-200 bg-amber-50/30 opacity-75 dark:border-amber-900/30 dark:bg-amber-900/10'
                 : selectedIds.has(q.id)
-                ? 'border-blue-300 bg-blue-50/50 dark:border-blue-700 dark:bg-blue-900/20'
-                : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50'
+                  ? 'border-blue-300 bg-blue-50/50 dark:border-blue-700 dark:bg-blue-900/20'
+                  : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50'
             }`}
           >
             <div className="flex items-start gap-3">
               {q.isActive ? (
-                <button
-                  onClick={() => onToggleSelect(q.id)}
-                  className="mt-1 flex-shrink-0"
-                >
+                <button onClick={() => onToggleSelect(q.id)} className="mt-1 flex-shrink-0">
                   {selectedIds.has(q.id) ? (
                     <CheckSquare className="h-4 w-4 text-blue-600" />
                   ) : (
@@ -675,18 +806,36 @@ function QuestionList({
               )}
               <div className="flex-1">
                 <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-400">
-                  <span className={`rounded px-1.5 py-0.5 ${
-                    q.status === 'APPROVED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                    q.status === 'REJECTED' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
-                    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                  }`}>{q.status}</span>
+                  <span
+                    className={`rounded px-1.5 py-0.5 ${
+                      q.status === 'APPROVED'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                        : q.status === 'REJECTED'
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                          : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                    }`}
+                  >
+                    {q.status}
+                  </span>
                   <span>{q.difficulty}</span>
                   <span>•</span>
                   <span>{q.points} pts</span>
-                  {q.subTopic && <><span>•</span><span>{q.subTopic}</span></>}
-                  {!q.isActive && <><span>•</span><span className="text-red-500">RETIRED</span></>}
+                  {q.subTopic && (
+                    <>
+                      <span>•</span>
+                      <span>{q.subTopic}</span>
+                    </>
+                  )}
+                  {!q.isActive && (
+                    <>
+                      <span>•</span>
+                      <span className="text-red-500">RETIRED</span>
+                    </>
+                  )}
                 </div>
-                <p className="mt-1.5 text-sm font-medium text-slate-800 dark:text-slate-200">{q.text}</p>
+                <p className="mt-1.5 text-sm font-medium text-slate-800 dark:text-slate-200">
+                  {q.text}
+                </p>
                 <div className="mt-1.5 flex flex-wrap gap-3 text-xs text-slate-500">
                   <span>A: {q.options[0]}</span>
                   <span>B: {q.options[1]}</span>
@@ -694,7 +843,9 @@ function QuestionList({
                   <span className="font-bold text-emerald-600">Ans: {q.correctAnswer}</span>
                 </div>
                 {q.explanation && (
-                  <p className="mt-1.5 text-xs text-slate-400 italic line-clamp-2">{q.explanation}</p>
+                  <p className="mt-1.5 line-clamp-2 text-xs text-slate-400 italic">
+                    {q.explanation}
+                  </p>
                 )}
               </div>
             </div>

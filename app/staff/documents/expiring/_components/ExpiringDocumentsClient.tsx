@@ -45,8 +45,6 @@ interface License {
   expiresAt: string | null
   ratingClass: string | null
   validityPeriodMonths: number | null
-  issuedAt: string | null
-  issuedBy: string | null
   licenseCategory: { code: string; name: string } | null
   studentProfile: {
     studentId: string
@@ -70,12 +68,35 @@ function daysUntil(dateStr: string | null): number | null {
 }
 
 function urgencyBadge(days: number | null) {
-  if (days === null) return { label: 'Unknown', className: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' }
-  if (days < 0) return { label: 'Expired', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' }
-  if (days <= 14) return { label: 'Critical', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' }
-  if (days <= 30) return { label: 'Urgent', className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' }
-  if (days <= 60) return { label: 'Soon', className: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' }
-  return { label: 'Upcoming', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' }
+  if (days === null)
+    return {
+      label: 'Unknown',
+      className: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+    }
+  if (days < 0)
+    return {
+      label: 'Expired',
+      className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    }
+  if (days <= 14)
+    return {
+      label: 'Critical',
+      className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    }
+  if (days <= 30)
+    return {
+      label: 'Urgent',
+      className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    }
+  if (days <= 60)
+    return {
+      label: 'Soon',
+      className: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    }
+  return {
+    label: 'Upcoming',
+    className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  }
 }
 
 export default function ExpiringDocumentsClient({ documents, licenses, windowDays }: Props) {
@@ -135,7 +156,9 @@ export default function ExpiringDocumentsClient({ documents, licenses, windowDay
       {tab === 'documents' && (
         <div className="rounded-2xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900">
           {filteredDocs.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-500">No documents expiring within {window} days.</div>
+            <div className="p-8 text-center text-sm text-slate-500">
+              No documents expiring within {window} days.
+            </div>
           ) : (
             <Table>
               <TableHeader>
@@ -161,7 +184,9 @@ export default function ExpiringDocumentsClient({ documents, licenses, windowDay
                               ? `${doc.user.profile.firstName} ${doc.user.profile.lastName}`
                               : doc.user.email}
                           </p>
-                          <p className="text-xs text-slate-500">{doc.user.studentProfile?.studentId || doc.user.email}</p>
+                          <p className="text-xs text-slate-500">
+                            {doc.user.studentProfile?.studentId || doc.user.email}
+                          </p>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -175,16 +200,28 @@ export default function ExpiringDocumentsClient({ documents, licenses, windowDay
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm">{doc.expiresAt ? new Date(doc.expiresAt).toLocaleDateString() : '—'}</span>
+                          <span className="text-sm">
+                            {doc.expiresAt ? new Date(doc.expiresAt).toLocaleDateString() : '—'}
+                          </span>
                           {days !== null && (
-                            <span className={cn('text-xs font-bold', days < 0 ? 'text-red-600' : 'text-slate-500')}>
+                            <span
+                              className={cn(
+                                'text-xs font-bold',
+                                days < 0 ? 'text-red-600' : 'text-slate-500'
+                              )}
+                            >
                               ({days < 0 ? `${Math.abs(days)}d overdue` : `${days}d`})
                             </span>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className={cn('rounded-full px-2 py-1 text-[10px] font-black', badge.className)}>
+                        <span
+                          className={cn(
+                            'rounded-full px-2 py-1 text-[10px] font-black',
+                            badge.className
+                          )}
+                        >
                           {badge.label}
                         </span>
                       </TableCell>
@@ -209,7 +246,9 @@ export default function ExpiringDocumentsClient({ documents, licenses, windowDay
       {tab === 'licenses' && (
         <div className="rounded-2xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900">
           {filteredLicenses.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-500">No licenses expiring within {window} days.</div>
+            <div className="p-8 text-center text-sm text-slate-500">
+              No licenses expiring within {window} days.
+            </div>
           ) : (
             <Table>
               <TableHeader>
@@ -240,7 +279,9 @@ export default function ExpiringDocumentsClient({ documents, licenses, windowDay
                       </TableCell>
                       <TableCell>
                         <div>
-                          <p className="font-medium text-slate-900 dark:text-slate-100">{lic.licenseCategory?.name}</p>
+                          <p className="font-medium text-slate-900 dark:text-slate-100">
+                            {lic.licenseCategory?.name}
+                          </p>
                           <p className="text-xs text-slate-500">{lic.licenseCategory?.code}</p>
                         </div>
                       </TableCell>
@@ -248,20 +289,34 @@ export default function ExpiringDocumentsClient({ documents, licenses, windowDay
                         <Badge variant="outline">{lic.ratingClass || '—'}</Badge>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">{lic.validFrom ? new Date(lic.validFrom).toLocaleDateString() : '—'}</span>
+                        <span className="text-sm">
+                          {lic.validFrom ? new Date(lic.validFrom).toLocaleDateString() : '—'}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm">{lic.expiresAt ? new Date(lic.expiresAt).toLocaleDateString() : '—'}</span>
+                          <span className="text-sm">
+                            {lic.expiresAt ? new Date(lic.expiresAt).toLocaleDateString() : '—'}
+                          </span>
                           {days !== null && (
-                            <span className={cn('text-xs font-bold', days < 0 ? 'text-red-600' : 'text-slate-500')}>
+                            <span
+                              className={cn(
+                                'text-xs font-bold',
+                                days < 0 ? 'text-red-600' : 'text-slate-500'
+                              )}
+                            >
                               ({days < 0 ? `${Math.abs(days)}d overdue` : `${days}d`})
                             </span>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className={cn('rounded-full px-2 py-1 text-[10px] font-black', badge.className)}>
+                        <span
+                          className={cn(
+                            'rounded-full px-2 py-1 text-[10px] font-black',
+                            badge.className
+                          )}
+                        >
                           {badge.label}
                         </span>
                       </TableCell>

@@ -59,7 +59,7 @@ async function fetchDashboardSettings(
 }
 
 function buildRevenueTimeline(
-  approvedPayments: { amount: any; approvedAt: Date | null }[],
+  approvedPayments: { amount: number; approvedAt: string | null }[],
   targetMonthlyRevenue: number
 ) {
   const now = new Date()

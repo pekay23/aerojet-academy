@@ -215,7 +215,9 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                                       </span>
                                     </td>
                                     <td className="py-2 text-right text-slate-400">
-                                      {new Date(grade.assessmentDate).toLocaleDateString('en-GB')}
+                                      {grade.assessmentDate
+                                        ? new Date(grade.assessmentDate).toLocaleDateString('en-GB')
+                                        : '—'}
                                     </td>
                                   </tr>
                                 ))}
@@ -277,10 +279,12 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                 {attendanceRecords.slice(0, 20).map((record: AttendanceRecord) => (
                   <tr key={record.id}>
                     <td className="px-4 py-2 text-slate-500">
-                      {new Date(record.date).toLocaleDateString('en-GB', {
-                        day: 'numeric',
-                        month: 'short',
-                      })}
+                      {record.date
+                        ? new Date(record.date).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                          })
+                        : '—'}
                     </td>
                     <td className="px-4 py-2 text-slate-700 dark:text-slate-300">
                       {record.class?.course?.name || record.class?.name || '—'}
@@ -331,7 +335,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                   </button>
                 </div>
 
-                {expandedOjt === fte.id && fte.ojtPeriods?.length > 0 && (
+                {expandedOjt === fte.id && fte.ojtPeriods && fte.ojtPeriods.length > 0 && (
                   <div className="space-y-3 p-4">
                     {fte.ojtPeriods.map((ojt: OjtPeriod) => (
                       <div

@@ -3,10 +3,27 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import {
-  ChevronLeft, ChevronRight, Loader2, AlertTriangle,
-  CheckCircle2, Send, XCircle, Menu, X, Flag,
-  Hourglass, Maximize, ShieldAlert, Bookmark, Clock,
-  BarChart3, RefreshCw, ArrowLeft, BookOpen, Download, Lock,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  AlertTriangle,
+  CheckCircle2,
+  Send,
+  XCircle,
+  Menu,
+  X,
+  Flag,
+  Hourglass,
+  Maximize,
+  ShieldAlert,
+  Bookmark,
+  Clock,
+  BarChart3,
+  RefreshCw,
+  ArrowLeft,
+  BookOpen,
+  Download,
+  Lock,
   Eye,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -79,7 +96,11 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
-  const [result, setResult] = useState<{ score: number; correctCount: number; total: number } | null>(null)
+  const [result, setResult] = useState<{
+    score: number
+    correctCount: number
+    total: number
+  } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -104,7 +125,11 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const logViolation = useCallback(
-    async (type: string, detail?: string, opts?: { severity?: 'WARNING' | 'NOTICE' | 'CRITICAL' }) => {
+    async (
+      type: string,
+      detail?: string,
+      opts?: { severity?: 'WARNING' | 'NOTICE' | 'CRITICAL' }
+    ) => {
       void fetch('/api/staff/exams/internal/preview/violations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -121,9 +146,13 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
           ...(opts?.severity ? { severity: opts.severity } : {}),
         }),
       })
-      toast.warning(`Violation logged: ${type}`, { duration: 4000, position: 'bottom-right', dismissible: true })
+      toast.warning(`Violation logged: ${type}`, {
+        duration: 4000,
+        position: 'bottom-right',
+        dismissible: true,
+      })
     },
-    [data?.bank.id],
+    [data?.bank.id]
   )
 
   const loadPreview = async () => {
@@ -191,7 +220,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   const toggleFlag = useCallback(async (questionId: string, flagged: boolean) => {
     setFlagging(questionId)
     try {
-      setFlaggedQuestions(prev => {
+      setFlaggedQuestions((prev) => {
         const next = new Set(prev)
         if (flagged) next.add(questionId)
         else next.delete(questionId)
@@ -203,7 +232,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   }, [])
 
   const selectAnswer = (questionId: string, answer: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: answer }))
+    setAnswers((prev) => ({ ...prev, [questionId]: answer }))
   }
 
   const handleSubmit = async (auto = false) => {
@@ -212,7 +241,9 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     if (timerRef.current) clearInterval(timerRef.current)
 
     const answeredCount = Object.keys(answers).length
-    const correctCount = data!.questions.filter(q => answers[q.questionId] === q.correctAnswer).length
+    const correctCount = data!.questions.filter(
+      (q) => answers[q.questionId] === q.correctAnswer
+    ).length
     const score = Math.round((correctCount / data!.questions.length) * 100)
 
     setResult({ score, correctCount, total: data!.questions.length })
@@ -248,8 +279,11 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     let warned = false
     const onVisibility = () => {
       if (document.hidden) {
-        setTabSwitchCount(p => p + 1)
-        if (!warned) { warned = true; void logViolation('TAB_SWITCH', 'Tab switched during preview') }
+        setTabSwitchCount((p) => p + 1)
+        if (!warned) {
+          warned = true
+          void logViolation('TAB_SWITCH', 'Tab switched during preview')
+        }
       } else warned = false
     }
     document.addEventListener('visibilitychange', onVisibility)
@@ -294,7 +328,9 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
       }
       if (!submitting) {
         e.preventDefault()
-        void logViolation('KEYBOARD_SHORTCUT', `Auto-submit triggered by key: ${e.key}`, { severity: 'CRITICAL' })
+        void logViolation('KEYBOARD_SHORTCUT', `Auto-submit triggered by key: ${e.key}`, {
+          severity: 'CRITICAL',
+        })
         void handleSubmit(true)
       }
     }
@@ -305,47 +341,73 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   // Network detection
   useEffect(() => {
     if (!data || result || showConfirm) return
-    const onNet = () => void logViolation('NETWORK_DISCONNECT', `Network ${navigator.onLine ? 'restored' : 'lost'} during preview`)
+    const onNet = () =>
+      void logViolation(
+        'NETWORK_DISCONNECT',
+        `Network ${navigator.onLine ? 'restored' : 'lost'} during preview`
+      )
     window.addEventListener('online', onNet)
     window.addEventListener('offline', onNet)
-    return () => { window.removeEventListener('online', onNet); window.removeEventListener('offline', onNet) }
+    return () => {
+      window.removeEventListener('online', onNet)
+      window.removeEventListener('offline', onNet)
+    }
   }, [data, result, logViolation, showConfirm])
 
   // Page unload
   useEffect(() => {
     if (!data || result || showConfirm) return
-    const onUnload = () => void fetch('/api/staff/exams/internal/preview/violations', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store', keepalive: true,
-      body: JSON.stringify({ bankId: data.bank.id, type: 'EXAM_INTERFACE_UNLOAD',
-        detail: 'Staff navigated away or closed preview during active mode',
-        deviceInfo: { userAgent: navigator.userAgent, platform: (navigator as any).platform } }),
-    })
+    const onUnload = () =>
+      void fetch('/api/staff/exams/internal/preview/violations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        keepalive: true,
+        body: JSON.stringify({
+          bankId: data.bank.id,
+          type: 'EXAM_INTERFACE_UNLOAD',
+          detail: 'Staff navigated away or closed preview during active mode',
+          deviceInfo: { userAgent: navigator.userAgent, platform: (navigator as any).platform },
+        }),
+      })
     document.addEventListener('beforeunload', onUnload)
     document.addEventListener('pagehide', onUnload)
-    return () => { document.removeEventListener('beforeunload', onUnload); document.removeEventListener('pagehide', onUnload) }
+    return () => {
+      document.removeEventListener('beforeunload', onUnload)
+      document.removeEventListener('pagehide', onUnload)
+    }
   }, [data, result, showConfirm])
 
   // Timer countdown
   useEffect(() => {
     if (!data || result) return
     timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) { clearInterval(timerRef.current!); handleSubmit(true); return 0 }
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!)
+          handleSubmit(true)
+          return 0
+        }
         return prev - 1
       })
     }, 1000)
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
   }, [data, result])
 
   // Cleanup on unmount
-  useEffect(() => () => {
-    document.body.classList.remove('exam-lockdown')
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
-  }, [])
+  useEffect(
+    () => () => {
+      document.body.classList.remove('exam-lockdown')
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
+    },
+    []
+  )
 
   const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60), s = secs % 60
+    const m = Math.floor(secs / 60),
+      s = secs % 60
     return `${m}:${s.toString().padStart(2, '0')}`
   }
 
@@ -354,12 +416,19 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     setReportSubmitting(true)
     try {
       await fetch('/api/staff/exams/internal/preview/violations', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bankId: data?.bank.id, type: 'DEVTOOLS_DETECTED', detail: reportReason.trim() }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bankId: data?.bank.id,
+          type: 'DEVTOOLS_DETECTED',
+          detail: reportReason.trim(),
+        }),
       })
       setReportSubmitted(true)
       setReportReason('')
-    } finally { setReportSubmitting(false) }
+    } finally {
+      setReportSubmitting(false)
+    }
   }
 
   const handleSubmitQuestionReport = async () => {
@@ -367,20 +436,26 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     setQuestionReportSubmitting(true)
     try {
       await fetch('/api/staff/exams/internal/preview/violations', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bankId: data?.bank.id, type: 'DEVTOOLS_DETECTED',
-          detail: `Question ${showQuestionReport}: ${questionReportReason.trim()}` }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bankId: data?.bank.id,
+          type: 'DEVTOOLS_DETECTED',
+          detail: `Question ${showQuestionReport}: ${questionReportReason.trim()}`,
+        }),
       })
-      setReportedQuestions(prev => new Set([...prev, showQuestionReport]))
+      setReportedQuestions((prev) => new Set([...prev, showQuestionReport]))
       setShowQuestionReport(null)
       setQuestionReportReason('')
-    } finally { setQuestionReportSubmitting(false) }
+    } finally {
+      setQuestionReportSubmitting(false)
+    }
   }
 
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-aerojet-blue" />
+        <Loader2 className="text-aerojet-blue h-10 w-10 animate-spin" />
       </div>
     )
   }
@@ -404,12 +479,14 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           >
             {banks.map((bank) => (
-              <option key={bank.id} value={bank.id}>{bank.name} ({bank.courseCode})</option>
+              <option key={bank.id} value={bank.id}>
+                {bank.name} ({bank.courseCode})
+              </option>
             ))}
           </select>
           <button
             onClick={loadPreview}
-            className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold text-white"
           >
             <BookOpen className="h-3.5 w-3.5" />
             Load Preview
@@ -449,10 +526,15 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           >
             {banks.map((bank) => (
-              <option key={bank.id} value={bank.id}>{bank.name} ({bank.courseCode})</option>
+              <option key={bank.id} value={bank.id}>
+                {bank.name} ({bank.courseCode})
+              </option>
             ))}
           </select>
-          <button onClick={loadPreview} className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90">
+          <button
+            onClick={loadPreview}
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold text-white"
+          >
             <BookOpen className="h-3.5 w-3.5" /> Reload
           </button>
         </div>
@@ -473,9 +555,14 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-2xl dark:border-slate-800 dark:bg-slate-900">
             <ShieldAlert className="mx-auto mb-4 h-16 w-16 text-amber-500" />
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Enter Preview Mode</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              Enter Preview Mode
+            </h2>
             <p className="mt-2 text-sm text-slate-500">This preview runs in lockdown mode.</p>
-            <button onClick={enterFullscreen} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-8 py-3 text-sm font-bold text-white">
+            <button
+              onClick={enterFullscreen}
+              className="bg-aerojet-blue mt-6 inline-flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-bold text-white"
+            >
               <Maximize className="h-4 w-4" /> Enter Fullscreen
             </button>
           </div>
@@ -490,10 +577,15 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           >
             {banks.map((bank) => (
-              <option key={bank.id} value={bank.id}>{bank.name} ({bank.courseCode})</option>
+              <option key={bank.id} value={bank.id}>
+                {bank.name} ({bank.courseCode})
+              </option>
             ))}
           </select>
-          <button onClick={loadPreview} className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90">
+          <button
+            onClick={loadPreview}
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold text-white"
+          >
             <RefreshCw className="h-3.5 w-3.5" /> Reload
           </button>
           {selectedBankId && (
@@ -502,42 +594,74 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
               disabled={downloadingSeb === selectedBankId}
               className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              {downloadingSeb === selectedBankId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+              {downloadingSeb === selectedBankId ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Download className="h-3.5 w-3.5" />
+              )}
               Download SEB Config
             </button>
           )}
-          <span className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold ${timeLeft < 120 ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}>
+          <span
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold ${timeLeft < 120 ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}
+          >
             <Clock className="h-4 w-4" /> {formatTime(timeLeft)}
           </span>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-            <span className="text-xs font-bold uppercase text-slate-400">Question {currentIndex + 1} of {questions.length}</span>
-            <span className={`rounded-lg px-2.5 py-1 text-[10px] font-bold ${DIFFICULTY_COLORS[currentQ.difficulty] || ''}`}>{currentQ.difficulty}</span>
+            <span className="text-xs font-bold text-slate-400 uppercase">
+              Question {currentIndex + 1} of {questions.length}
+            </span>
+            <span
+              className={`rounded-lg px-2.5 py-1 text-[10px] font-bold ${DIFFICULTY_COLORS[currentQ.difficulty] || ''}`}
+            >
+              {currentQ.difficulty}
+            </span>
           </div>
-          <p className="text-base font-medium text-slate-900 dark:text-slate-100">{currentQ.text}</p>
+          <p className="text-base font-medium text-slate-900 dark:text-slate-100">
+            {currentQ.text}
+          </p>
           <div className="mt-6 space-y-2">
             {currentQ.options.map((opt, i) => {
               const selected = answers[currentQ.questionId] === opt
               return (
-                <button key={i} onClick={() => selectAnswer(currentQ.questionId, opt)} className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left ${selected ? 'border-aerojet-blue bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'}`}>
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-600 dark:bg-slate-800">{optionLabels[i]}</span>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{opt}</span>
+                <button
+                  key={i}
+                  onClick={() => selectAnswer(currentQ.questionId, opt)}
+                  className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left ${selected ? 'border-aerojet-blue bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'}`}
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-600 dark:bg-slate-800">
+                    {optionLabels[i]}
+                  </span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {opt}
+                  </span>
                 </button>
               )
             })}
           </div>
           <div className="mt-6 flex items-center justify-between">
-            <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0} className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-slate-600 disabled:opacity-40 dark:bg-slate-900 dark:text-slate-300">
+            <button
+              onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+              disabled={currentIndex === 0}
+              className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-slate-600 disabled:opacity-40 dark:bg-slate-900 dark:text-slate-300"
+            >
               <ChevronLeft className="h-4 w-4" /> Previous
             </button>
             {currentIndex < questions.length - 1 ? (
-              <button onClick={() => setCurrentIdx(currentIndex + 1)} className="flex items-center gap-2 rounded-lg bg-aerojet-blue px-4 py-2 text-sm font-bold text-white">
+              <button
+                onClick={() => setCurrentIndex(currentIndex + 1)}
+                className="bg-aerojet-blue flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white"
+              >
                 Next <ChevronRight className="h-4 w-4" />
               </button>
             ) : (
-              <button onClick={() => setShowConfirm(true)} className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white">
+              <button
+                onClick={() => setShowConfirm(true)}
+                className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white"
+              >
                 <Send className="h-4 w-4" /> Submit
               </button>
             )}
@@ -549,10 +673,22 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
             <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-amber-500" />
-            <h3 className="text-center text-xl font-black text-slate-900 dark:text-white">Submit Preview?</h3>
+            <h3 className="text-center text-xl font-black text-slate-900 dark:text-white">
+              Submit Preview?
+            </h3>
             <div className="mt-4 flex gap-3">
-              <button onClick={() => setShowConfirm(false)} className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">Cancel</button>
-              <button onClick={() => handleSubmit(false)} className="flex-1 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white">Confirm</button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleSubmit(false)}
+                className="flex-1 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white"
+              >
+                Confirm
+              </button>
             </div>
           </div>
         </div>
