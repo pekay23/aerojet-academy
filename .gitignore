@@ -99,13 +99,13 @@ node_modules/
 # flipbook scraper output
 /flipbook-output
 
-  # Tauri / Rust build artifacts
-  /tools/flipbook-app/src-tauri/target/
-  
-  # Lock files for tools (not needed in source)
-  /tools/flipbook-app/bun.lock
-  /tools/flipbook-app/src-tauri/Cargo.lock
-  
-  # .NET user files
-  /tools/flipbook-wpf-app/*.csproj.user
-  /tools/flipbook-wpf-app/**/*.csproj.user
+# Tauri / Rust build artifacts
+/tools/flipbook-app/src-tauri/target/
+
+# Lock files for tools (not needed in source)
+/tools/flipbook-app/bun.lock
+/tools/flipbook-app/src-tauri/Cargo.lock
+
+# .NET user files
+/tools/flipbook-wpf-app/*.csproj.user
+/tools/flipbook-wpf-app/**/*.csproj.user
