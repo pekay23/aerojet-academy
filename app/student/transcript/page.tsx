@@ -71,6 +71,11 @@ export default async function TranscriptPage() {
     getLicenseProgress(session.user.id),
   ])
 
+  const resultsNumber = results.map((r) => ({
+    ...r,
+    percentage: r.percentage ? Number(r.percentage) : null,
+  }))
+
   const fullName = profile?.user.profile
     ? `${profile.user.profile.firstName} ${profile.user.profile.lastName}`
     : (profile?.user.email ?? 'Student')
@@ -129,7 +134,7 @@ export default async function TranscriptPage() {
 
         {/* Exam results */}
         <Section title="Examination Record">
-          <ExamResultsTable results={results} />
+          <ExamResultsTable results={resultsNumber} />
         </Section>
 
         {showEnrollments && (

@@ -21,7 +21,7 @@ import { format } from 'date-fns'
 import { EnrollmentStatus } from '@/types/enums'
 import { SortableTh } from '@/components/ui/sortable-th'
 
-type EnrollmentWithDetails = {
+export type EnrollmentWithDetails = {
   id: string
   status: string
   amountPaid: number | null
@@ -206,7 +206,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col text-sm">
-                      <span className="font-bold text-aerojet-blue dark:text-white">
+                      <span className="text-aerojet-blue font-bold dark:text-white">
                         {enrollment.user.profile
                           ? [
                               enrollment.user.profile.firstName,

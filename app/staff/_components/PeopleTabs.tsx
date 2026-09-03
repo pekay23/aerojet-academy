@@ -9,6 +9,7 @@ import ApplicantsQueue from './ApplicantsQueue'
 import StudentsTable from './StudentsTable'
 import InstructorsTable from './InstructorsTable'
 import ExaminersTable from './ExaminersTable'
+import type { ApplicantSummary, ApplicantCounts } from '@/lib/types/staff'
 
 const TAB_DEFS = [
   { key: 'all', label: 'All Users', icon: Users },
@@ -76,9 +77,11 @@ export default function PeopleTabs({
   const tabs = TAB_DEFS.map((t) => ({
     ...t,
     badge:
-      t.key === 'applicants' ? counts.applicantAll :
-      t.key === 'examiners' ? counts.examinerAll :
-      undefined,
+      t.key === 'applicants'
+        ? counts.applicantAll
+        : t.key === 'examiners'
+          ? counts.examinerAll
+          : undefined,
   }))
 
   const applicantCounts = {
@@ -97,7 +100,7 @@ export default function PeopleTabs({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
+        <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
           People
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -117,9 +120,9 @@ export default function PeopleTabs({
         {currentTab === 'all' && <UsersTable initialTotal={counts.total} />}
         {currentTab === 'applicants' && (
           <ApplicantsQueue
-            initialApplicants={initialApplicants ?? []}
-            initialTotal={initialTotal ?? 0}
-            initialCounts={initialApplicantCounts ?? { all: 0, pending_payment: 0, pending_approval: 0 }}
+            initialCounts={
+              initialApplicantCounts ?? { all: 0, pending_payment: 0, pending_approval: 0 }
+            }
           />
         )}
         {currentTab === 'students' && <StudentsTable initialCounts={studentCounts} />}

@@ -49,7 +49,7 @@ export default async function CertificatesPage({
   if (isFullTime && !hasAccess) {
     const [milestoneStatus, wallet, accessLevel] = await Promise.all([
       getEnrollmentMilestoneStatus(session.user.id),
-      prisma.wallet.findUnique({
+      prismaUnfiltered.wallet.findUnique({
         where: { userId: session.user.id },
         select: { availableBalance: true, reservedBalance: true, currency: true },
       }),
@@ -63,7 +63,7 @@ export default async function CertificatesPage({
     }
 
     return (
-      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             My Certificates
@@ -103,7 +103,7 @@ export default async function CertificatesPage({
     r.exam?.examComponent?.course?.code ?? r.moduleCode ?? '—'
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
           My Certificates
@@ -236,21 +236,19 @@ export default async function CertificatesPage({
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                         {courseName(r)}
                       </td>
-                      <td className="px-4 py-3 text-center tabular-nums font-mono font-black">
+                      <td className="px-4 py-3 text-center font-mono font-black tabular-nums">
                         {r.percentage != null ? `${r.percentage}%` : '—'}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span
                           className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                            r.passed
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-red-100 text-red-700'
+                            r.passed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
                           }`}
                         >
                           {r.passed ? 'Pass' : 'Fail'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center tabular-nums text-xs text-slate-500">
+                      <td className="px-4 py-3 text-center text-xs text-slate-500 tabular-nums">
                         {format(r.exam?.examDate ?? r.createdAt, 'MMM d, yyyy')}
                       </td>
                     </tr>
@@ -267,8 +265,7 @@ export default async function CertificatesPage({
                 No exam scores yet
               </h3>
               <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                Your Academy transcript will populate here as the Academy uploads your exam
-                results.
+                Your Academy transcript will populate here as the Academy uploads your exam results.
               </p>
             </div>
           )}

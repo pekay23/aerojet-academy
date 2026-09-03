@@ -29,7 +29,11 @@ export interface UseAntiCheatReturn {
   isFullscreen: boolean
   tabSwitchCount: number
   devToolsDetected: boolean
-  logViolation: (type: string, detail?: string, opts?: { severity?: 'WARNING' | 'NOTICE' | 'CRITICAL' }) => Promise<void>
+  logViolation: (
+    type: string,
+    detail?: string,
+    opts?: { severity?: 'WARNING' | 'NOTICE' | 'CRITICAL' }
+  ) => Promise<void>
 }
 
 export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
@@ -54,7 +58,11 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
   const isDev = process.env.NODE_ENV === 'development'
 
   const logViolation = useCallback(
-    async (type: string, detail?: string, opts?: { severity?: 'WARNING' | 'NOTICE' | 'CRITICAL' }) => {
+    async (
+      type: string,
+      detail?: string,
+      opts?: { severity?: 'WARNING' | 'NOTICE' | 'CRITICAL' }
+    ) => {
       try {
         await fetch(violationEndpoint, {
           method: 'POST',
@@ -195,16 +203,18 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
 
     // ─── DevTools detection (heuristic) ───
     if (detectDevTools) {
-      const devToolsCheckInterval: NodeJS.Timeout = setInterval(checkDevTools, 2000)
-
       const checkDevTools = () => {
         const threshold = 160
-        const devToolsOpen = window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold
+        const devToolsOpen =
+          window.outerWidth - window.innerWidth > threshold ||
+          window.outerHeight - window.innerHeight > threshold
         if (devToolsOpen && !devToolsDetected.current) {
           devToolsDetected.current = true
           void logViolation('DEVTOOLS_OPEN', 'Developer tools detected', { severity: 'CRITICAL' })
         }
       }
+
+      const devToolsCheckInterval: NodeJS.Timeout = setInterval(checkDevTools, 2000)
 
       return () => clearInterval(devToolsCheckInterval)
     }
@@ -222,7 +232,9 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
         if (event.data?.type === 'HELLO' && event.data?.sessionId === sessionId) {
           if (!multiTabDetected.current) {
             multiTabDetected.current = true
-            void logViolation('MULTI_TAB', 'Multiple tabs detected for the same exam session', { severity: 'CRITICAL' })
+            void logViolation('MULTI_TAB', 'Multiple tabs detected for the same exam session', {
+              severity: 'CRITICAL',
+            })
           }
         }
       }
@@ -246,7 +258,9 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
           if (last && Date.now() - parseInt(last, 10) < 2000) {
             if (!multiTabDetected.current) {
               multiTabDetected.current = true
-              void logViolation('MULTI_TAB', 'Multiple tabs detected via localStorage heartbeat', { severity: 'CRITICAL' })
+              void logViolation('MULTI_TAB', 'Multiple tabs detected via localStorage heartbeat', {
+                severity: 'CRITICAL',
+              })
             }
           }
         } catch {
@@ -305,8 +319,12 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
 
   return {
     isFullscreen: isFullscreen.current,
-    get tabSwitchCount() { return tabSwitchCount.current },
-    get devToolsDetected() { return devToolsDetected.current },
+    get tabSwitchCount() {
+      return tabSwitchCount.current
+    },
+    get devToolsDetected() {
+      return devToolsDetected.current
+    },
     logViolation,
   }
 }
