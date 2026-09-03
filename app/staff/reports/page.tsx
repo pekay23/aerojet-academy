@@ -1,7 +1,6 @@
 import { PageTransition } from '@/components/shared/PageTransition'
 import Link from 'next/link'
-import { PageTransition } from '@/components/shared/PageTransition'
-import Link from 'next/link'
+
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import {
@@ -43,7 +42,7 @@ import {
   YoYRevenueChart,
   YoYEnrollmentChart,
   YoYPassRateChart,
-  YoYStudentChart
+  YoYStudentChart,
 } from './_components/YoYCharts'
 import {
   EnrollmentChart,
@@ -52,7 +51,7 @@ import {
   AttendanceChart,
   ExamTrendChart,
   ScoreDistributionChart,
-  Sparkline
+  Sparkline,
 } from './_components/ReportCharts'
 export const metadata: Metadata = { title: 'Reports | Staff Portal' }
 

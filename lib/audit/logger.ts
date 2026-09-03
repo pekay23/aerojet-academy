@@ -30,6 +30,9 @@ export enum AuditAction {
   EXAM_SESSION_RESUMED = 'EXAM_SESSION_RESUMED',
   EXAM_SESSION_SUPERVISE = 'EXAM_SESSION_SUPERVISE',
   EXAM_SCHEDULE_CREATED = 'EXAM_SCHEDULE_CREATED',
+  EXAM_CREATED = 'EXAM_CREATED',
+  EXAM_UPDATED = 'EXAM_UPDATED',
+  EXAM_DELETED = 'EXAM_DELETED',
   EXAM_SCHEDULE_UPDATED = 'EXAM_SCHEDULE_UPDATED',
   EXAM_SCHEDULE_DELETED = 'EXAM_SCHEDULE_DELETED',
   EXAM_QUESTION_CREATED = 'EXAM_QUESTION_CREATED',
@@ -47,6 +50,7 @@ export enum AuditAction {
 
 interface AuditLogParams {
   userId?: string
+  targetUserId?: string
   action: string
   entity?: string
   entityId?: string
@@ -57,7 +61,13 @@ interface AuditLogParams {
   details?: Prisma.InputJsonValue // For backward compatibility
 }
 
-function computeHash(previousHash: string | null, action: string, entityId: string | undefined, changes: Prisma.InputJsonValue, timestamp: Date): string {
+function computeHash(
+  previousHash: string | null,
+  action: string,
+  entityId: string | undefined,
+  changes: Prisma.InputJsonValue,
+  timestamp: Date
+): string {
   const data = [
     previousHash || '',
     action,
@@ -84,7 +94,13 @@ export async function logAuditEvent(params: AuditLogParams, tx?: Prisma.Transact
     })
 
     const previousHash = lastEntry?.hash || null
-    const hash = computeHash(previousHash, params.action, params.entityId, params.changes || params.details, timestamp)
+    const hash = computeHash(
+      previousHash,
+      params.action,
+      params.entityId,
+      params.changes ?? params.details ?? {},
+      timestamp
+    )
 
     return await client.auditLog.create({
       data: {

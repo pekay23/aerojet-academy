@@ -3,7 +3,13 @@ import crypto from 'crypto'
 import { Prisma } from '@prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
-function computeHash(previousHash: string | null, action: string, entityId: string | undefined, changes: Prisma.InputJsonValue, timestamp: string): string {
+function computeHash(
+  previousHash: string | null,
+  action: string,
+  entityId: string | null | undefined,
+  changes: Prisma.InputJsonValue,
+  timestamp: string
+): string {
   const data = [
     previousHash || '',
     action,
@@ -73,7 +79,7 @@ export async function verifyAuditChain(): Promise<ChainVerificationResult> {
       entry.previousHash,
       entry.action,
       entry.entityId,
-      entry.changes,
+      entry.changes as Prisma.InputJsonValue,
       entry.createdAt.toISOString()
     )
 
@@ -83,7 +89,7 @@ export async function verifyAuditChain(): Promise<ChainVerificationResult> {
         totalEntries: entries.length,
         brokenAtIndex: i,
         brokenReason: `Hash mismatch at entry ${entry.id}: expected ${expectedHash}, got ${entry.hash}`,
-        lastValidHash: previousHash,
+        lastValidHash: previousHash ?? undefined,
       }
     }
 
@@ -93,7 +99,7 @@ export async function verifyAuditChain(): Promise<ChainVerificationResult> {
   return {
     valid: true,
     totalEntries: entries.length,
-    lastValidHash: previousHash || undefined,
+    lastValidHash: previousHash ?? undefined,
   }
 }
 
@@ -145,7 +151,7 @@ export async function verifyArchiveChain(): Promise<ChainVerificationResult> {
       entry.previousHash,
       entry.action,
       entry.entityId,
-      entry.changes,
+      entry.changes as Prisma.InputJsonValue,
       entry.originalCreatedAt.toISOString()
     )
 
@@ -155,7 +161,7 @@ export async function verifyArchiveChain(): Promise<ChainVerificationResult> {
         totalEntries: entries.length,
         brokenAtIndex: i,
         brokenReason: `Hash mismatch at archive entry ${entry.id}: expected ${expectedHash}, got ${entry.hash}`,
-        lastValidHash: previousHash,
+        lastValidHash: previousHash ?? undefined,
       }
     }
 
@@ -165,6 +171,6 @@ export async function verifyArchiveChain(): Promise<ChainVerificationResult> {
   return {
     valid: true,
     totalEntries: entries.length,
-    lastValidHash: previousHash || undefined,
+    lastValidHash: previousHash ?? undefined,
   }
 }

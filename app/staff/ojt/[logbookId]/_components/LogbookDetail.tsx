@@ -25,8 +25,6 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { LogbookPreview } from '@/components/shared/LogbookPreview'
 import ReviewSignoffPanel from './ReviewSignoffPanel'
 import MentorAssignments from './MentorAssignments'
-import ReviewSignoffPanel from './ReviewSignoffPanel'
-import MentorAssignments from './MentorAssignments'
 
 interface Entry {
   id: string
@@ -164,12 +162,6 @@ export default function LogbookDetail({
   }
 
   const [form, setForm] = useState(defaultFormValues)
-  const [editingFacility, setEditingFacility] = useState(false)
-  const [facilityForm, setFacilityForm] = useState({
-    facilityName: logbook.facilityName,
-    facilityApprovalNo: logbook.facilityApprovalNo || '',
-  })
-  const [savingFacility, setSavingFacility] = useState(false)
   const [editingFacility, setEditingFacility] = useState(false)
   const [facilityForm, setFacilityForm] = useState({
     facilityName: logbook.facilityName,
@@ -326,14 +318,16 @@ export default function LogbookDetail({
               <input
                 type="text"
                 value={facilityForm.facilityApprovalNo}
-                onChange={(e) => setFacilityForm({ ...facilityForm, facilityApprovalNo: e.target.value })}
+                onChange={(e) =>
+                  setFacilityForm({ ...facilityForm, facilityApprovalNo: e.target.value })
+                }
                 className="rounded-lg border border-slate-200 px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
                 placeholder="Approval No."
               />
               <button
                 type="submit"
                 disabled={savingFacility}
-                className="rounded-lg bg-aerojet-blue px-3 py-1 text-xs font-bold text-white disabled:opacity-50"
+                className="bg-aerojet-blue rounded-lg px-3 py-1 text-xs font-bold text-white disabled:opacity-50"
               >
                 {savingFacility ? 'Saving...' : 'Save'}
               </button>
@@ -357,7 +351,7 @@ export default function LogbookDetail({
               {logbook.facilityApprovalNo && ` (${logbook.facilityApprovalNo})`}
               <button
                 onClick={() => setEditingFacility(true)}
-                className="ml-2 rounded p-1 text-slate-400 hover:text-aerojet-blue"
+                className="hover:text-aerojet-blue ml-2 rounded p-1 text-slate-400"
                 title="Edit facility details"
               >
                 <Edit className="h-3.5 w-3.5" />

@@ -16,18 +16,29 @@ export const GET = withErrorHandler(
       prismaUnfiltered.internalExamQuestionVersion.findMany({
         where: { questionId: id },
         orderBy: { changedAt: 'desc' },
-        include: {
-          changedBy: {
-            select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } },
-          },
-        },
-      }),
+      }) as unknown as Array<{
+        id: string
+        changedAt: Date | null
+        changeType: string
+        version: number
+        text: string | null
+        options: unknown
+        correctAnswer: string | null
+        points: number | null
+        difficulty: string
+        changeReason: string | null
+        changedById: string | null
+      }>,
       prismaUnfiltered.auditLog.findMany({
         where: { entity: 'InternalExamQuestion', entityId: id },
         orderBy: { createdAt: 'desc' },
         include: {
           user: {
-            select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } },
+            select: {
+              id: true,
+              email: true,
+              profile: { select: { firstName: true, lastName: true } },
+            },
           },
         },
       }),
@@ -38,9 +49,7 @@ export const GET = withErrorHandler(
         type: 'version' as const,
         id: v.id,
         timestamp: v.changedAt,
-        actor: v.changedBy
-          ? `${v.changedBy.profile?.firstName || ''} ${v.changedBy.profile?.lastName || ''}`.trim() || v.changedBy.email
-          : 'Unknown',
+        actor: 'Unknown',
         action: v.changeType,
         details: {
           version: v.version,
@@ -57,7 +66,8 @@ export const GET = withErrorHandler(
         id: a.id,
         timestamp: a.createdAt,
         actor: a.user
-          ? `${a.user.profile?.firstName || ''} ${a.user.profile?.lastName || ''}`.trim() || a.user.email
+          ? `${a.user.profile?.firstName || ''} ${a.user.profile?.lastName || ''}`.trim() ||
+            a.user.email
           : 'System',
         action: a.action,
         details: {
@@ -65,7 +75,7 @@ export const GET = withErrorHandler(
           changes: a.changes,
         },
       })),
-    ].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+    ].sort((a, b) => (b.timestamp?.getTime() ?? 0) - (a.timestamp?.getTime() ?? 0))
 
     return apiSuccess(merged)
   }

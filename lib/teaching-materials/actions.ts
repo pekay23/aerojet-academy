@@ -5,7 +5,6 @@ import { requireInstructor } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { buildStoragePath, getSignedUrl, uploadToStorage } from '@/lib/storage/supabase-storage'
 import { createAuditLog } from '@/lib/audit/logger'
-import { createAuditLog } from '@/lib/audit/logger'
 
 /**
  * Audit 6b — instructor teaching-materials management. Materials are scoped to
@@ -55,9 +54,7 @@ export async function uploadTeachingMaterial(formData: FormData) {
     const title = String(formData.get('title') ?? '').trim()
     const courseId = String(formData.get('courseId') ?? '').trim()
     const visibility = (String(formData.get('visibility') ?? 'CLASS') || 'CLASS') as
-      | 'CLASS'
-      | 'COURSE'
-      | 'ALL_STUDENTS'
+      'CLASS' | 'COURSE' | 'ALL_STUDENTS'
     const file = formData.get('file')
     if (!title) return { error: 'A title is required.' }
     if (!(file instanceof File) || file.size === 0) return { error: 'A file is required.' }

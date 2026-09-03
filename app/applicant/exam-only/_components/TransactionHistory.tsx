@@ -41,15 +41,25 @@ interface TransactionHistoryProps {
   payments: Payment[]
 }
 
-interface Transaction {
-  APPROVED: { color: 'text-green-600', bg: 'bg-green-50', icon: CheckCircle2, label: 'Approved' },
-  PENDING: { color: 'text-orange-600', bg: 'bg-orange-50', icon: Clock, label: 'Pending' },
-  REJECTED: { color: 'text-red-600', bg: 'bg-red-50', icon: XCircle, label: 'Rejected' },
-  COMPLETED: { color: 'text-green-600', bg: 'bg-green-50', icon: CheckCircle2, label: 'Completed' },
-  FAILED: { color: 'text-red-600', bg: 'bg-red-50', icon: XCircle, label: 'Failed' },
-  TOP_UP: { color: 'text-green-600', bg: 'bg-green-50', icon: ArrowUpRight, label: 'Credit' },
-  DEBIT: { color: 'text-red-600', bg: 'bg-red-50', icon: ArrowDownRight, label: 'Debit' },
-  RESERVE: { color: 'text-orange-600', bg: 'bg-orange-50', icon: Clock, label: 'Reserved' },
+interface StatusConfig {
+  APPROVED: {
+    color: 'text-green-600'
+    bg: 'bg-green-50'
+    icon: typeof CheckCircle2
+    label: 'Approved'
+  }
+  PENDING: { color: 'text-orange-600'; bg: 'bg-orange-50'; icon: typeof Clock; label: 'Pending' }
+  REJECTED: { color: 'text-red-600'; bg: 'bg-red-50'; icon: typeof XCircle; label: 'Rejected' }
+  COMPLETED: {
+    color: 'text-green-600'
+    bg: 'bg-green-50'
+    icon: typeof CheckCircle2
+    label: 'Completed'
+  }
+  FAILED: { color: 'text-red-600'; bg: 'bg-red-50'; icon: typeof XCircle; label: 'Failed' }
+  TOP_UP: { color: 'text-green-600'; bg: 'bg-green-50'; icon: typeof ArrowUpRight; label: 'Credit' }
+  DEBIT: { color: 'text-red-600'; bg: 'bg-red-50'; icon: typeof ArrowDownRight; label: 'Debit' }
+  RESERVE: { color: 'text-orange-600'; bg: 'bg-orange-50'; icon: typeof Clock; label: 'Reserved' }
 }
 
 export default function TransactionHistory({ transactions, payments }: TransactionHistoryProps) {
@@ -57,6 +67,22 @@ export default function TransactionHistory({ transactions, payments }: Transacti
   const [showCancelModal, setShowCancelModal] = useState<string | null>(null)
   const [cancelReason, setCancelReason] = useState('')
   const [cancelling, setCancelling] = useState(false)
+
+  const statusConfig: StatusConfig = {
+    APPROVED: { color: 'text-green-600', bg: 'bg-green-50', icon: CheckCircle2, label: 'Approved' },
+    PENDING: { color: 'text-orange-600', bg: 'bg-orange-50', icon: Clock, label: 'Pending' },
+    REJECTED: { color: 'text-red-600', bg: 'bg-red-50', icon: XCircle, label: 'Rejected' },
+    COMPLETED: {
+      color: 'text-green-600',
+      bg: 'bg-green-50',
+      icon: CheckCircle2,
+      label: 'Completed',
+    },
+    FAILED: { color: 'text-red-600', bg: 'bg-red-50', icon: XCircle, label: 'Failed' },
+    TOP_UP: { color: 'text-green-600', bg: 'bg-green-50', icon: ArrowUpRight, label: 'Credit' },
+    DEBIT: { color: 'text-red-600', bg: 'bg-red-50', icon: ArrowDownRight, label: 'Debit' },
+    RESERVE: { color: 'text-orange-600', bg: 'bg-orange-50', icon: Clock, label: 'Reserved' },
+  }
 
   const handleCancelPayment = async (paymentId: string) => {
     if (!cancelReason || cancelReason.trim().length < 10) {
@@ -144,7 +170,8 @@ export default function TransactionHistory({ transactions, payments }: Transacti
             const isPayment = item.itemType === 'payment'
             const transactionType = isPayment ? '' : (item as Transaction).type
             const status = isPayment ? item.status : transactionType
-            const config = statusConfig[status] || statusConfig.PENDING
+            const config =
+              (statusConfig as StatusConfig)[status] || (statusConfig as StatusConfig).PENDING
             const StatusIcon = config.icon
             const isCredit =
               isPayment || transactionType === 'TOP_UP' || transactionType === 'REFUND'

@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
 import PathwayPaymentForm from './_components/PathwayPaymentForm'
 import MilestoneTracker from './_components/MilestoneTracker'
 import { AlertCircle, FileText, Info, CheckCircle2, Wallet, ArrowRight } from 'lucide-react'
@@ -10,7 +10,10 @@ import Link from 'next/link'
 export const metadata: Metadata = { title: 'Complete Enrollment | Applicant Portal' }
 export const dynamic = 'force-dynamic'
 
-const PRICING: Record<string, { year1: number; total: number; name: string; years: number }> = {
+const PATHWAY_PRICING: Record<
+  string,
+  { year1: number; total: number; name: string; years: number }
+> = {
   FULL_TIME_4YEAR: {
     year1: 8500,
     total: 32000,
@@ -98,7 +101,9 @@ export default async function PathwayPage() {
 
   // If enrollment exists and seat is confirmed, show milestone tracker
   if (enrollment) {
-    const seatMilestone = enrollment.milestones.find((m) => m.milestoneType === 'SEAT_CONFIRMATION')
+    const seatMilestone = enrollment.milestones.find(
+      (m: (typeof enrollment.milestones)[number]) => m.milestoneType === 'SEAT_CONFIRMATION'
+    )
     const seatPaid = seatMilestone?.status === 'PAID'
 
     if (seatPaid) {
@@ -132,7 +137,8 @@ export default async function PathwayPage() {
 
           {/* Next Step Alert */}
           {enrollment.milestones.some(
-            (m) => m.milestoneType === 'SEM1_DUE' && m.status === 'DUE'
+            (m: (typeof enrollment.milestones)[number]) =>
+              m.milestoneType === 'SEM1_DUE' && m.status === 'DUE'
           ) && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-900/30 dark:bg-amber-900/10">
               <div className="flex items-start gap-4">
@@ -148,8 +154,10 @@ export default async function PathwayPage() {
                   <p className="mt-2 text-sm font-bold text-amber-800 dark:text-amber-300">
                     Amount due: {currency}{' '}
                     {Number(
-                      enrollment.milestones.find((m) => m.milestoneType === 'SEM1_DUE')
-                        ?.amountDue ?? 0
+                      enrollment.milestones.find(
+                        (m: (typeof enrollment.milestones)[number]) =>
+                          m.milestoneType === 'SEM1_DUE'
+                      )?.amountDue ?? 0
                     ).toLocaleString()}
                   </p>
                 </div>
@@ -185,7 +193,7 @@ export default async function PathwayPage() {
 
           {/* Milestone Tracker */}
           <MilestoneTracker
-            milestones={enrollment.milestones.map((m) => ({
+            milestones={enrollment.milestones.map((m: (typeof enrollment.milestones)[number]) => ({
               id: m.id,
               milestoneType: m.milestoneType,
               yearNumber: m.yearNumber,

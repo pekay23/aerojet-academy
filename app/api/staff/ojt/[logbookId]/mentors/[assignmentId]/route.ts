@@ -20,8 +20,10 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx?: RouteContex
   if (!rl.allowed) {
     return apiError('Too many requests', 429)
   }
-  if (!ctx?.params?.logbookId || !ctx?.params?.assignmentId) return apiError('IDs required')
-  const { logbookId, assignmentId } = ctx.params
+  const resolvedParams = await ctx?.params
+  if (!resolvedParams?.logbookId || !resolvedParams?.assignmentId) return apiError('IDs required')
+  const logbookId = String(resolvedParams.logbookId)
+  const assignmentId = String(resolvedParams.assignmentId)
   const body = await req.json()
   const parsed = updateMentorSchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid input', 400)
@@ -45,7 +47,8 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx?: RouteContex
   const data: Record<string, unknown> = {}
   if (parsed.data.isPrimary !== undefined) data.isPrimary = parsed.data.isPrimary
   if (parsed.data.notes !== undefined) data.notes = parsed.data.notes
-  if (parsed.data.endDate !== undefined) data.endDate = parsed.data.endDate ? new Date(parsed.data.endDate) : null
+  if (parsed.data.endDate !== undefined)
+    data.endDate = parsed.data.endDate ? new Date(parsed.data.endDate) : null
 
   const updated = await prismaUnfiltered.oJTMentorAssignment.update({
     where: { id: assignmentId },
@@ -70,8 +73,11 @@ export const DELETE = withErrorHandler(async (req: NextRequest, ctx?: RouteConte
   if (!rl.allowed) {
     return apiError('Too many requests', 429)
   }
-  if (!ctx?.params?.logbookId || !ctx?.params?.assignmentId) return apiError('IDs required')
-  const { logbookId, assignmentId } = ctx.params
+  if (!ctx?.params) return apiError('IDs required')
+  const resolvedParams = await ctx.params
+  if (!resolvedParams.logbookId || !resolvedParams.assignmentId) return apiError('IDs required')
+  const logbookId = String(resolvedParams.logbookId)
+  const assignmentId = String(resolvedParams.assignmentId)
 
   const assignment = await prismaUnfiltered.oJTMentorAssignment.findUnique({
     where: { id: assignmentId },

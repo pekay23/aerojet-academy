@@ -220,6 +220,14 @@ export interface SerializedStudent {
   updatedAt: string
   profile: SerializedProfile | null
   studentProfile: SerializedStudentProfile | null
+  instructorProfile: {
+    employeeId: string
+    department: string | null
+    specialization: string | null
+    qualifications: string | null
+  } | null
+  staffProfile: { employeeId: string; department: string | null } | null
+  emailVerified: string | null
   wallet: SerializedWallet | null
   walletTransactions: SerializedWalletTransaction[]
   enrollments: SerializedEnrollment[]
@@ -268,6 +276,75 @@ export interface SerializedPaymentCard {
     email: string
     profile: { firstName: string; lastName: string } | null
   }
+}
+
+export interface MonthlyRevenueItem {
+  month: string
+  revenue: number
+  count: number
+}
+
+export interface RevenueByProgrammeItem {
+  name: string
+  value: number
+  percentage: number
+}
+
+export interface PaymentStatusBreakdownItem {
+  status: string
+  count: number
+  amount: number
+  percentage: number
+}
+
+export interface PaymentMethodBreakdownItem {
+  method: string
+  count: number
+  amount: number
+  percentage: number
+}
+
+export interface ExamHistoryItem {
+  id: string
+  source: 'result' | 'booking'
+  type: string
+  moduleCode: string
+  examName: string
+  date: string | Date | null
+  score: number | null
+  passed?: boolean
+  result?: string | null
+  examCategory?: string | null
+  attemptType?: string | null
+  paymentStatus?: string
+  isConsolidated?: boolean
+}
+
+export interface ApplicantSummary {
+  id: string
+  email: string
+  registrationCode?: string | null
+  registrationPaid: boolean
+  status: string
+  createdAt: string
+  profile?: {
+    firstName: string
+    middleName?: string | null
+    lastName: string
+    phone?: string | null
+    nationality?: string | null
+    dateOfBirth?: string | null
+    idDocumentUrl?: string | null
+    profilePhotoUrl?: string | null
+  } | null
+  payments?: any[]
+}
+
+export interface ApplicantCounts {
+  all: number
+  pending_payment: number
+  pending_approval: number
+  [key: string]: number
 }
 
 export interface SerializedTransactionRow {

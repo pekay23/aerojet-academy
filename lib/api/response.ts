@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { serializePrisma } from '@/lib/utils/serialization'
+import { validateBody } from '@/lib/validation/schemas'
+
+// ---------------------------------------------------------------------------
+// ROUTE CONTEXT TYPE
+// ---------------------------------------------------------------------------
+
+export interface RouteContext {
+  params: Promise<Record<string, string | string[]>>
+}
 
 // ---------------------------------------------------------------------------
 // STANDARD RESPONSE TYPES
@@ -23,7 +32,9 @@ interface ApiResponse<T = unknown> {
 // ---------------------------------------------------------------------------
 
 export function apiSuccess<T>(data: T, status: number = 200): NextResponse {
-  return NextResponse.json({ success: true, data: serializePrisma(data) } as ApiResponse<T>, { status })
+  return NextResponse.json({ success: true, data: serializePrisma(data) } as ApiResponse<T>, {
+    status,
+  })
 }
 
 export function apiCreated<T>(data: T): NextResponse {
@@ -58,10 +69,13 @@ export function apiPaginated<T>(
 // ERROR RESPONSES
 // ---------------------------------------------------------------------------
 
-export function apiError(error: string, status: number = 400, data?: Record<string, any>): NextResponse {
+export function apiError(
+  error: string,
+  status: number = 400,
+  data?: Record<string, any>
+): NextResponse {
   return NextResponse.json({ success: false, error, ...data } as ApiResponse, { status })
 }
-
 
 export function apiUnauthorized(message: string = 'Authentication required'): NextResponse {
   return apiError(message, 401)
@@ -93,10 +107,7 @@ export function apiServerError(message: string = 'Internal server error'): NextR
 // ERROR HANDLER WRAPPER
 // ---------------------------------------------------------------------------
 
-export type RouteHandler = (
-  req: NextRequest,
-  ctx?: any
-) => Promise<NextResponse>
+export type RouteHandler = (req: NextRequest, ctx?: any) => Promise<NextResponse>
 
 export function withErrorHandler(handler: RouteHandler) {
   return async (req: NextRequest, ctx: any) => {
@@ -149,3 +160,6 @@ export function parseSorting(searchParams: URLSearchParams, defaultField: string
 export function parseSearch(searchParams: URLSearchParams) {
   return searchParams.get('search') || undefined
 }
+
+// Re-export validateBody for API routes that import it from here
+export { validateBody } from '@/lib/validation/schemas'

@@ -399,6 +399,10 @@ export const attachProofSchema = z.object({
   proofUrl: z.string().url('Valid proof URL required'),
 })
 
+export const payMilestoneSchema = z.object({
+  milestoneId: z.string().min(1, 'Milestone ID is required'),
+})
+
 export const staffBookExamSchema = z.object({
   bookingType: z.enum(['INDIVIDUAL', 'TWIN_PACK', 'FOUR_PACK', 'RESIT']),
   moduleIds: z.array(z.string().cuid()).min(1).max(4),

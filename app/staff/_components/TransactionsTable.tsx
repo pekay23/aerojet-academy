@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table'
 import { SortableTh } from '@/components/ui/sortable-th'
 import SearchInput from '@/components/SearchInput'
+import { SerializedTransactionRow, SerializedTransactionRelated } from '@/lib/types/staff'
 
 interface TransactionsTableProps {
   currencySymbol: string
@@ -75,7 +76,12 @@ export default function TransactionsTable({
   const paymentDataMap = new Map<string, any>(
     (related?.payments || []).map((p: any) => [
       p.id,
-      { reconciled: p.reconciled, originalCurrency: p.paymentCurrency, originalAmount: p.originalAmount, status: p.status },
+      {
+        reconciled: p.reconciled,
+        originalCurrency: p.paymentCurrency,
+        originalAmount: p.originalAmount,
+        status: p.status,
+      },
     ])
   )
   const examBookingStatusByReference = new Map<string, any>(
@@ -103,20 +109,28 @@ export default function TransactionsTable({
   const DEBIT_TYPES = ['CAPTURE', 'PAYMENT', 'RESERVE', 'DEBIT']
 
   const getTypeColor = (type: string) => {
-    if (CREDIT_TYPES.includes(type)) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
-    if (['CAPTURE', 'PAYMENT'].includes(type)) return 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
-    if (type === 'RESERVE') return 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+    if (CREDIT_TYPES.includes(type))
+      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+    if (['CAPTURE', 'PAYMENT'].includes(type))
+      return 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+    if (type === 'RESERVE')
+      return 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
     return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
   }
 
   const getReferenceDisplay = (tx: SerializedTransactionRow) => {
-    const typeLabel = tx.referenceType ? tx.referenceType.replace(/_/g, ' ') : `${tx.type.replace(/_/g, ' ')} Transaction`
+    const typeLabel = tx.referenceType
+      ? tx.referenceType.replace(/_/g, ' ')
+      : `${tx.type.replace(/_/g, ' ')} Transaction`
     let refId: string
     if (tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId) {
       refId = `ENR-${tx.referenceId.slice(-6).toUpperCase()}`
     } else if (tx.referenceType === 'EXAM_BOOKING' && tx.referenceId) {
-      const booking = examBookingStatusByReference.get(tx.referenceId) || examBookingStatusByReference.get(tx.id)
-      refId = booking?.moduleCode ? `${booking.moduleCode}` : `EXM-${(tx.referenceId || tx.id).slice(-6).toUpperCase()}`
+      const booking =
+        examBookingStatusByReference.get(tx.referenceId) || examBookingStatusByReference.get(tx.id)
+      refId = booking?.moduleCode
+        ? `${booking.moduleCode}`
+        : `EXM-${(tx.referenceId || tx.id).slice(-6).toUpperCase()}`
     } else if (tx.referenceType === 'PAYMENT_ID' && tx.referenceId) {
       refId = `PAY-${tx.referenceId.slice(-6).toUpperCase()}`
     } else if (tx.referenceId) {
@@ -129,7 +143,11 @@ export default function TransactionsTable({
 
   const getStatusStyle = (status: string) => {
     const n = status.toUpperCase()
-    if (['PAID', 'APPROVED', 'COMPLETED', 'CONFIRMED', 'RECONCILED', 'POSTED'].some((s) => n.includes(s)))
+    if (
+      ['PAID', 'APPROVED', 'COMPLETED', 'CONFIRMED', 'RECONCILED', 'POSTED'].some((s) =>
+        n.includes(s)
+      )
+    )
       return 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'
     if (['PENDING', 'RESERVED', 'DUE', 'POOLED', 'SCHEDULED'].some((s) => n.includes(s)))
       return 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400'
@@ -138,15 +156,20 @@ export default function TransactionsTable({
     return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
   }
 
-  const getTransactionStatus = (tx: SerializedTransactionRow, paymentData: SerializedTransactionRelated['payments'][0] | null | undefined) => {
+  const getTransactionStatus = (
+    tx: SerializedTransactionRow,
+    paymentData: SerializedTransactionRelated['payments'][0] | null | undefined
+  ) => {
     if (tx.referenceType === 'PAYMENT_ID')
       return paymentData?.reconciled ? 'Reconciled' : paymentData?.status || 'Pending Settlement'
     if (tx.referenceType === 'EXAM_BOOKING') {
       const booking = tx.referenceId
-        ? examBookingStatusByReference.get(tx.referenceId) || examBookingStatusByReference.get(tx.id)
+        ? examBookingStatusByReference.get(tx.referenceId) ||
+          examBookingStatusByReference.get(tx.id)
         : examBookingStatusByReference.get(tx.id)
       if (booking?.result) return booking.result
-      if (booking?.demandStatus && booking.demandStatus !== 'DEMAND_CAPTURED') return booking.demandStatus.replace(/_/g, ' ')
+      if (booking?.demandStatus && booking.demandStatus !== 'DEMAND_CAPTURED')
+        return booking.demandStatus.replace(/_/g, ' ')
       if (booking?.status) return booking.status
     }
     if (tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId)
@@ -155,14 +178,16 @@ export default function TransactionsTable({
     if (ms) return ms
     const mls = milestoneStatusByTxn.get(tx.id)
     if (mls) return mls
-    if (tx.referenceType?.includes('WALLET_TOP')) return tx.type === 'TOP_UP' ? 'Completed' : 'Pending'
+    if (tx.referenceType?.includes('WALLET_TOP'))
+      return tx.type === 'TOP_UP' ? 'Completed' : 'Pending'
     if (tx.type === 'RESERVE') return 'Reserved'
-    if (CREDIT_TYPES.includes(tx.type) || ['CAPTURE', 'PAYMENT'].includes(tx.type)) return 'Completed'
+    if (CREDIT_TYPES.includes(tx.type) || ['CAPTURE', 'PAYMENT'].includes(tx.type))
+      return 'Completed'
     if (tx.type === 'ADJUSTMENT') return 'Posted'
     return tx.type.replace(/_/g, ' ')
   }
 
-return (
+  return (
     <div className="space-y-6">
       <div className="flex items-center justify-end">
         <div className="w-72">
@@ -189,20 +214,28 @@ return (
             {loading ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center">
-                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-aerojet-blue" />
+                  <Loader2 className="text-aerojet-blue mx-auto h-6 w-6 animate-spin" />
                 </TableCell>
               </TableRow>
             ) : data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center font-bold text-slate-500 dark:text-slate-400">
+                <TableCell
+                  colSpan={5}
+                  className="h-24 text-center font-bold text-slate-500 dark:text-slate-400"
+                >
                   No transactions found.
                 </TableCell>
               </TableRow>
             ) : (
               data.map((tx) => {
                 const user = tx.wallet.user
-                const userName = user.profile ? `${user.profile.firstName} ${user.profile.lastName}` : user.email
-                const paymentData = tx.referenceType === 'PAYMENT_ID' ? (paymentDataMap.get(tx.referenceId!) ?? null) : null
+                const userName = user.profile
+                  ? `${user.profile.firstName} ${user.profile.lastName}`
+                  : user.email
+                const paymentData =
+                  tx.referenceType === 'PAYMENT_ID'
+                    ? (paymentDataMap.get(tx.referenceId!) ?? null)
+                    : null
                 const reference = getReferenceDisplay(tx)
                 const statusLabel = getTransactionStatus(tx, paymentData)
                 const isCredit = CREDIT_TYPES.includes(tx.type)
@@ -214,8 +247,12 @@ return (
                   >
                     <TableCell className="px-6 py-5">
                       <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 dark:text-slate-100">{userName}</span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">{user.email}</span>
+                        <span className="font-bold text-slate-900 dark:text-slate-100">
+                          {userName}
+                        </span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          {user.email}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-5">
@@ -230,31 +267,39 @@ return (
                       <div className="flex flex-col">
                         <span
                           className={`text-sm font-black ${
-                            isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'
+                            isCredit
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-slate-900 dark:text-slate-100'
                           }`}
                         >
                           {isCredit ? '+' : '-'}
                           {symbol}
                           {Number(tx.amount).toFixed(2)}
                         </span>
-                        {paymentData?.originalCurrency && paymentData.originalCurrency !== symbol && (
-                          <span className="text-[10px] font-medium text-slate-400">
-                            ({paymentData.originalCurrency} {paymentData.originalAmount?.toFixed(2)})
-                          </span>
-                        )}
+                        {paymentData?.originalCurrency &&
+                          paymentData.originalCurrency !== symbol && (
+                            <span className="text-[10px] font-medium text-slate-400">
+                              ({paymentData.originalCurrency}{' '}
+                              {paymentData.originalAmount?.toFixed(2)})
+                            </span>
+                          )}
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-5">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{reference.type}</span>
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                            {reference.type}
+                          </span>
                           <span
                             className={`flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold ${getStatusStyle(statusLabel)}`}
                           >
                             {statusLabel}
                           </span>
                         </div>
-                        <span className="text-[10px] font-medium text-slate-400">{reference.id}</span>
+                        <span className="text-[10px] font-medium text-slate-400">
+                          {reference.id}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-5 text-xs text-slate-500">
@@ -267,7 +312,13 @@ return (
           </TableBody>
         </Table>
       </div>
-      <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+      <TablePagination
+        page={page}
+        perPage={perPage}
+        total={total}
+        onPageChange={setPage}
+        onPerPageChange={setPerPage}
+      />
     </div>
   )
 }

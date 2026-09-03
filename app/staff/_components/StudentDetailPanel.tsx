@@ -21,6 +21,7 @@ import UserActionsMenu from './UserActionsMenu'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import ManualWalletAdjustmentDialog from '../users/[id]/_components/ManualWalletAdjustmentDialog'
 import { UserStatus, EnrollmentStatus, PaymentStatus } from '@/types/enums'
+import type { ExamHistoryItem } from '@/lib/types/staff'
 
 interface Student {
   id: string
@@ -106,9 +107,16 @@ interface Props {
   onCurrencyChange?: (currency: string) => void
 }
 
-
 function slugify(text: string) {
-  return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+  return (
+    text
+      ?.toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-') || ''
+  )
 }
 
 export default function StudentDetailPanel({
@@ -179,31 +187,32 @@ export default function StudentDetailPanel({
 
   // Helper: check if a booking status means it's still upcoming/pending
   const UPCOMING_STATUSES = ['APPROVED', 'PENDING', 'CONFIRMED']
-  const isUpcomingBooking = (booking: Student['examBookings'][number]) =>
-    !isCompletedResult(booking.result) && 
-    booking.score == null && 
-    (UPCOMING_STATUSES.includes(booking.status) || (!booking.result && booking.status !== 'COMPLETED'))
+  const isUpcomingBooking = (booking: NonNullable<Student['examBookings']>[number]) =>
+    !isCompletedResult(booking.result) &&
+    booking.score == null &&
+    (UPCOMING_STATUSES.includes(booking.status) ||
+      (!booking.result && booking.status !== 'COMPLETED'))
 
   // ---- Build separate lists ----
 
   // 1. Exam Results from the ExamResult table (formal grades)
-  const formalResults = (currentStudent.examResults || []).map((r) => ({
+  const formalResults: ExamHistoryItem[] = (currentStudent.examResults || []).map((r) => ({
     id: r.id,
     source: 'result' as const,
     type: 'FORMAL',
-    moduleCode: r.moduleCode || r.exam?.examComponent?.course?.code || '—',
+    moduleCode: r.exam?.examComponent?.course?.code || '—',
     examName: r.exam?.name || 'Exam Result',
-    date: r.exam?.examDate || r.createdAt,
+    date: r.exam?.examDate || null,
     score: r.score != null ? Number(r.score) : null,
     passed: r.passed,
     result: r.passed ? 'PASS' : 'FAIL',
-    examCategory: r.examCategory,
-    attemptType: r.attemptType,
   }))
 
   // 2. Completed bookings (have a definitive result like pass/fail, or a score)
   const completedBookings = (currentStudent.examBookings || [])
-    .filter((b: any) => isCompletedResult(b.result) || (b.score != null && b.status === 'COMPLETED'))
+    .filter(
+      (b: any) => isCompletedResult(b.result) || (b.score != null && b.status === 'COMPLETED')
+    )
     .map((b: any) => ({
       id: b.id,
       source: 'booking' as const,
@@ -249,8 +258,10 @@ export default function StudentDetailPanel({
         !usedResultIds.has(r.id) &&
         r.moduleCode?.toUpperCase() === booking.moduleCode?.toUpperCase() &&
         ((r.attemptType || 'FIRST') === (booking.attemptType || 'FIRST') ||
-         r.attemptType === 'MIGRATED' || booking.attemptType === 'MIGRATED' ||
-         !r.attemptType || !booking.attemptType)
+          r.attemptType === 'MIGRATED' ||
+          booking.attemptType === 'MIGRATED' ||
+          !r.attemptType ||
+          !booking.attemptType)
     )
 
     if (matchingResult) {
@@ -286,7 +297,7 @@ export default function StudentDetailPanel({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-1 flex-col overflow-y-auto bg-white dark:bg-slate-900 lg:static lg:z-0 lg:flex lg:bg-slate-50 dark:lg:bg-slate-800/50 ${
+      className={`fixed inset-0 z-50 flex flex-1 flex-col overflow-y-auto bg-white lg:static lg:z-0 lg:flex lg:bg-slate-50 dark:bg-slate-900 dark:lg:bg-slate-800/50 ${
         student ? 'flex' : 'hidden'
       }`}
       style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.08) transparent' }}
@@ -295,7 +306,7 @@ export default function StudentDetailPanel({
       <div className="border-b border-slate-100 bg-white px-8 pt-8 pb-0 dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-6 flex items-start justify-between">
           <div className="flex items-center gap-5">
-            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-aerojet-blue text-xl font-black text-white">
+            <div className="bg-aerojet-blue relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-xl font-black text-white">
               {currentStudent.profile?.profilePhotoUrl ? (
                 <img
                   src={currentStudent.profile.profilePhotoUrl}
@@ -324,7 +335,7 @@ export default function StudentDetailPanel({
                   {currentStudent.status}
                 </span>
                 {currentStudent.studentProfile?.programType && (
-                  <span className="rounded-full bg-aerojet-blue/10 px-2 py-0.5 text-[10px] font-black text-aerojet-blue uppercase">
+                  <span className="bg-aerojet-blue/10 text-aerojet-blue rounded-full px-2 py-0.5 text-[10px] font-black uppercase">
                     {currentStudent.studentProfile.programType.replace(/_/g, ' ')}
                   </span>
                 )}
@@ -341,7 +352,7 @@ export default function StudentDetailPanel({
             />
             <a
               href={`/staff/students/${slugify(currentStudent.profile ? `${currentStudent.profile.firstName} ${currentStudent.profile.lastName}` : currentStudent.email.split('@')[0])}`}
-              className="flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-widest text-slate-500 uppercase shadow-sm transition-all hover:border-aerojet-sky hover:text-aerojet-sky dark:border-slate-700 dark:bg-slate-800"
+              className="hover:border-aerojet-sky hover:text-aerojet-sky flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-widest text-slate-500 uppercase shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800"
               title="Open Full Profile"
             >
               <ExternalLink className="h-3 w-3" />
@@ -369,7 +380,7 @@ export default function StudentDetailPanel({
               {tab === t && (
                 <motion.div
                   layoutId="student-detail-underline"
-                  className="absolute bottom-0 left-0 h-0.5 w-full bg-aerojet-blue"
+                  className="bg-aerojet-blue absolute bottom-0 left-0 h-0.5 w-full"
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -383,7 +394,7 @@ export default function StudentDetailPanel({
       <div className="space-y-6 px-8 py-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-aerojet-blue" />
+            <Loader2 className="text-aerojet-blue h-8 w-8 animate-spin" />
             <p className="mt-2 text-sm font-bold text-slate-400">Loading student details...</p>
           </div>
         ) : (
@@ -480,7 +491,9 @@ export default function StudentDetailPanel({
                     <Field
                       icon={Wallet}
                       label="Funding Source"
-                      value={currentStudent.studentProfile?.fundingSource?.replace(/_/g, ' ') ?? '—'}
+                      value={
+                        currentStudent.studentProfile?.fundingSource?.replace(/_/g, ' ') ?? '—'
+                      }
                     />
                     {currentStudent.studentProfile?.academicYear && (
                       <Field
@@ -496,7 +509,7 @@ export default function StudentDetailPanel({
                 <Section title="Wallet Summary">
                   <div className="grid grid-cols-2 gap-3">
                     <div
-                      className={`rounded-xl p-3 ${(Number(currentStudent.wallet?.availableBalance ?? 0)) >= 0 ? 'border border-emerald-100 bg-emerald-50' : 'border border-red-100 bg-red-50'}`}
+                      className={`rounded-xl p-3 ${Number(currentStudent.wallet?.availableBalance ?? 0) >= 0 ? 'border border-emerald-100 bg-emerald-50' : 'border border-red-100 bg-red-50'}`}
                     >
                       <div className="flex items-center justify-between">
                         <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
@@ -532,7 +545,7 @@ export default function StudentDetailPanel({
                         onCurrencyChange={onCurrencyChange}
                         size="sm"
                         amountClassName={
-                          (Number(currentStudent.wallet?.availableBalance ?? 0)) >= 0
+                          Number(currentStudent.wallet?.availableBalance ?? 0) >= 0
                             ? 'text-emerald-700!'
                             : 'text-red-600!'
                         }
@@ -593,10 +606,7 @@ export default function StudentDetailPanel({
             )}
 
             {tab === 'Exams' && (
-              <ExamTabContent
-                upcomingExams={upcomingExamsList}
-                allExamHistory={allExamHistory}
-              />
+              <ExamTabContent upcomingExams={upcomingExamsList} allExamHistory={allExamHistory} />
             )}
           </>
         )}
@@ -628,7 +638,11 @@ function ExamTabContent({
   const filters: { key: ExamFilter; label: string; count: number }[] = [
     { key: 'ALL', label: 'All', count: allExamHistory.length + upcomingExams.length },
     { key: 'PASSED', label: 'Passed', count: allExamHistory.filter((h) => h.passed).length },
-    { key: 'FAILED', label: 'Failed', count: allExamHistory.filter((h) => !h.passed && h.result !== 'ABSENT').length },
+    {
+      key: 'FAILED',
+      label: 'Failed',
+      count: allExamHistory.filter((h) => !h.passed && h.result !== 'ABSENT').length,
+    },
     { key: 'PENDING', label: 'Pending', count: upcomingExams.length },
   ]
 
@@ -665,18 +679,20 @@ function ExamTabContent({
                     <span className="font-bold text-slate-800 dark:text-slate-200">
                       {exam.moduleCode}
                     </span>
-                    <span className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase bg-blue-100 text-blue-600">
+                    <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 uppercase">
                       {exam.type}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 truncate text-xs text-slate-500">
                     <span>{exam.examName}</span>
                     {exam.examCategory && (
-                      <span className={`shrink-0 rounded-full px-1 py-0.5 text-[8px] font-bold ${
-                        exam.examCategory === 'INTERNAL' 
-                          ? 'bg-amber-100/50 text-amber-700' 
-                          : 'bg-blue-100/50 text-blue-700'
-                      }`}>
+                      <span
+                        className={`shrink-0 rounded-full px-1 py-0.5 text-[8px] font-bold ${
+                          exam.examCategory === 'INTERNAL'
+                            ? 'bg-amber-100/50 text-amber-700'
+                            : 'bg-blue-100/50 text-blue-700'
+                        }`}
+                      >
                         {exam.examCategory === 'INTERNAL' ? 'INT' : 'EASA'}
                       </span>
                     )}
@@ -686,14 +702,18 @@ function ExamTabContent({
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                    exam.paymentStatus === PaymentStatus.APPROVED || exam.paymentStatus === PaymentStatus.COMPLETED
-                      ? 'bg-blue-100 text-blue-700'
-                      : exam.paymentStatus === PaymentStatus.REJECTED
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-amber-100 text-amber-700'
-                  }`}>
-                    {exam.paymentStatus === PaymentStatus.APPROVED || exam.paymentStatus === PaymentStatus.COMPLETED
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
+                      exam.paymentStatus === PaymentStatus.APPROVED ||
+                      exam.paymentStatus === PaymentStatus.COMPLETED
+                        ? 'bg-blue-100 text-blue-700'
+                        : exam.paymentStatus === PaymentStatus.REJECTED
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-amber-100 text-amber-700'
+                    }`}
+                  >
+                    {exam.paymentStatus === PaymentStatus.APPROVED ||
+                    exam.paymentStatus === PaymentStatus.COMPLETED
                       ? 'UPCOMING'
                       : exam.paymentStatus === PaymentStatus.REJECTED
                         ? 'REJECTED'
@@ -736,11 +756,13 @@ function ExamTabContent({
                     <div className="flex items-center gap-1.5 truncate text-xs text-slate-500">
                       <span>{h.examName}</span>
                       {h.examCategory && (
-                        <span className={`shrink-0 rounded-full px-1 py-0.5 text-[8px] font-bold ${
-                          h.examCategory === 'INTERNAL' 
-                            ? 'bg-amber-100/50 text-amber-700' 
-                            : 'bg-blue-100/50 text-blue-700'
-                        }`}>
+                        <span
+                          className={`shrink-0 rounded-full px-1 py-0.5 text-[8px] font-bold ${
+                            h.examCategory === 'INTERNAL'
+                              ? 'bg-amber-100/50 text-amber-700'
+                              : 'bg-blue-100/50 text-blue-700'
+                          }`}
+                        >
                           {h.examCategory === 'INTERNAL' ? 'INT' : 'EASA'}
                         </span>
                       )}
@@ -757,7 +779,10 @@ function ExamTabContent({
                       className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
                         h.passed
                           ? 'bg-emerald-100 text-emerald-700'
-                          : h.result === 'ABSENT' || h.result === 'SCORED' || h.result === 'PENDING' || h.result === 'BOOKED'
+                          : h.result === 'ABSENT' ||
+                              h.result === 'SCORED' ||
+                              h.result === 'PENDING' ||
+                              h.result === 'BOOKED'
                             ? 'bg-slate-100 text-slate-500'
                             : 'bg-red-100 text-red-700'
                       }`}
@@ -790,7 +815,15 @@ function Grid2({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-4">{children}</div>
 }
 
-function Field({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
+function Field({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  value: string
+}) {
   return (
     <div className="rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
       <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase">
@@ -801,7 +834,13 @@ function Field({ icon: Icon, label, value }: { icon: React.ComponentType<{ class
   )
 }
 
-function EmptyState({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
+function EmptyState({
+  icon: Icon,
+  message,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  message: string
+}) {
   return (
     <div className="flex flex-col items-center justify-center py-10 text-center">
       <Icon className="mb-2 h-8 w-8 text-slate-200" />

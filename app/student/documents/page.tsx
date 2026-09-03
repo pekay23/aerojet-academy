@@ -7,9 +7,6 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { proxyImageUrl } from '@/lib/storage/signed-url'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 import { getRequestContext } from '@/lib/server/request-context'
-import { proxyImageUrl } from '@/lib/storage/signed-url'
-import { AuditAction, createAuditLog } from '@/lib/audit/logger'
-import { getRequestContext } from '@/lib/server/request-context'
 
 export const metadata: Metadata = {
   title: 'My Documents | Student Portal',
@@ -44,7 +41,7 @@ export default async function StudentDocumentsPage() {
   const now = Date.now()
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
           My Documents
@@ -67,9 +64,7 @@ export default async function StudentDocumentsPage() {
           {documents.map((d) => {
             const expired = d.expiresAt && d.expiresAt.getTime() < now
             const expiringSoon =
-              d.expiresAt &&
-              !expired &&
-              d.expiresAt.getTime() - now < 1000 * 60 * 60 * 24 * 30
+              d.expiresAt && !expired && d.expiresAt.getTime() - now < 1000 * 60 * 60 * 24 * 30
             const hasThumbnail = isImageUrl(d.fileUrl)
             return (
               <div
@@ -94,7 +89,10 @@ export default async function StudentDocumentsPage() {
                     </span>
                   </div>
                 )}
-                <h3 className="mt-3 line-clamp-1 font-black text-slate-900 dark:text-slate-100" title={d.title}>
+                <h3
+                  className="mt-3 line-clamp-1 font-black text-slate-900 dark:text-slate-100"
+                  title={d.title}
+                >
                   {d.title}
                 </h3>
                 <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
@@ -103,16 +101,11 @@ export default async function StudentDocumentsPage() {
                 {d.expiresAt && (
                   <p
                     className={`mt-2 flex items-center gap-1 text-xs ${
-                      expired
-                        ? 'text-red-600'
-                        : expiringSoon
-                          ? 'text-amber-600'
-                          : 'text-slate-400'
+                      expired ? 'text-red-600' : expiringSoon ? 'text-amber-600' : 'text-slate-400'
                     }`}
                   >
                     {(expired || expiringSoon) && <AlertTriangle className="h-3.5 w-3.5" />}
-                    {expired ? 'Expired' : 'Expires'}{' '}
-                    {d.expiresAt.toLocaleDateString('en-GB')}
+                    {expired ? 'Expired' : 'Expires'} {d.expiresAt.toLocaleDateString('en-GB')}
                   </p>
                 )}
                 <a

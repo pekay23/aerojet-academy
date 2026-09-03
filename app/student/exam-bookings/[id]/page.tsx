@@ -19,7 +19,7 @@ import {
   Armchair,
 } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import ChangeModuleModal from '../_components/ChangeModuleModal'
 
 export const metadata: Metadata = {
@@ -87,25 +87,18 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   if (booking.userId !== session.user.id) redirect('/student/exams')
 
   const bundle = await prismaUnfiltered.examBundle.findFirst({
-    where: { userId: session.user.id, status: 'ACTIVE' }
+    where: { userId: session.user.id, status: 'ACTIVE' },
   })
   const hasFreeChanges = bundle ? bundle.freeModuleChanges > bundle.usedModuleChanges : false
 
   const status = statusConfig[booking.status] || statusConfig.PENDING
   const StatusIcon = status.icon
   const moduleCode =
-    booking.moduleCode ||
-    booking.examComponent?.course?.code ||
-    booking.course?.code ||
-    'N/A'
-  const moduleName =
-    booking.examComponent?.course?.name ||
-    booking.course?.name ||
-    ''
-
+    booking.moduleCode || booking.examComponent?.course?.code || booking.course?.code || 'N/A'
+  const moduleName = booking.examComponent?.course?.name || booking.course?.name || ''
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-3xl space-y-8 duration-700">
       {/* Header */}
       <div>
         <Link
@@ -134,7 +127,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       </div>
 
       {/* Booking Info */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
         <h2 className="mb-6 text-xs font-black tracking-widest text-slate-400 uppercase">
           Booking Information
         </h2>
@@ -183,14 +176,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               <p className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
                 {moduleCode}
               </p>
-              {moduleName && (
-                <p className="text-xs text-slate-400">{moduleName}</p>
-              )}
+              {moduleName && <p className="text-xs text-slate-400">{moduleName}</p>}
               {booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && (
-                <ChangeModuleModal 
-                  bookingId={booking.id} 
-                  currentModuleCode={moduleCode} 
-                  hasFreeChanges={hasFreeChanges} 
+                <ChangeModuleModal
+                  bookingId={booking.id}
+                  currentModuleCode={moduleCode}
+                  hasFreeChanges={hasFreeChanges}
                 />
               )}
             </div>
@@ -228,7 +219,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       </div>
 
       {/* Payment Section */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
         <h2 className="mb-6 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
           <CreditCard className="h-3.5 w-3.5" />
           Payment Details
@@ -238,7 +229,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
               Amount Paid
             </p>
-            <p className="mt-1 text-xl font-black tabular-nums text-slate-900 dark:text-slate-100">
+            <p className="mt-1 text-xl font-black text-slate-900 tabular-nums dark:text-slate-100">
               &euro;{Number(booking.amountPaid).toFixed(2)}
             </p>
           </div>
@@ -247,7 +238,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                 Transaction Reference
               </p>
-              <p className="mt-1 text-sm font-mono font-bold text-slate-700 dark:text-slate-300">
+              <p className="mt-1 font-mono text-sm font-bold text-slate-700 dark:text-slate-300">
                 {booking.walletTransaction.id.slice(-12).toUpperCase()}
               </p>
             </div>
@@ -265,7 +256,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
       {/* Bundle Information (audit 4d) */}
       {booking.bundle && (
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
           <h2 className="mb-6 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
             <Package className="h-3.5 w-3.5" />
             Bundle
@@ -290,11 +281,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 Free Resits Left
               </p>
               <p className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
-                {Math.max(
-                  0,
-                  booking.bundle.freeResitsIncluded - booking.bundle.usedFreeResits
-                )}{' '}
-                of {booking.bundle.freeResitsIncluded}
+                {Math.max(0, booking.bundle.freeResitsIncluded - booking.bundle.usedFreeResits)} of{' '}
+                {booking.bundle.freeResitsIncluded}
               </p>
             </div>
           </div>
@@ -303,13 +291,13 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
       {/* Sitting / Venue (audit 4d) */}
       {booking.sittingAssignments && booking.sittingAssignments.length > 0 && (
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
           <h2 className="mb-6 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
             <MapPin className="h-3.5 w-3.5" />
             Sitting &amp; Venue
           </h2>
           <div className="space-y-4">
-            {booking.sittingAssignments.map((sa) => (
+            {booking.sittingAssignments.map((sa: any) => (
               <div
                 key={sa.id}
                 className="grid gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-5 sm:grid-cols-3 dark:border-slate-800 dark:bg-slate-800/30"
@@ -345,7 +333,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       )}
 
       {/* Preparation checklist (audit 4d) */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
         <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
           <ListChecks className="h-3.5 w-3.5" />
           Exam Day Checklist
@@ -368,13 +356,13 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
       {/* Pool Information */}
       {booking.poolMemberships && booking.poolMemberships.length > 0 && (
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
           <h2 className="mb-6 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
             <Users className="h-3.5 w-3.5" />
             Pool Information
           </h2>
           <div className="space-y-4">
-            {booking.poolMemberships.map((membership) => (
+            {booking.poolMemberships.map((membership: any) => (
               <div
                 key={membership.id}
                 className="rounded-2xl border border-slate-100 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-800/30"
@@ -411,7 +399,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           </div>
         </div>
       )}
-
 
       {/* Booked At footer */}
       <div className="text-center text-xs font-medium text-slate-400">

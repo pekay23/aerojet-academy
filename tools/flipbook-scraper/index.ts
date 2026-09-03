@@ -1,84 +1,96 @@
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { FlipbookScraper, ScrapeProgress } from './scraper';
-import { FlipbookConfig } from './config';
+import * as fs from 'fs/promises'
+import * as path from 'path'
+import { FlipbookScraper, ScrapeProgress } from './scraper'
+import { FlipbookConfig } from './config'
 
 async function main() {
-  const args = parseArgs();
+  const args = parseArgs()
 
   if (args.help) {
-    printHelp();
-    process.exit(0);
+    printHelp()
+    process.exit(0)
   }
 
-  const config = await loadConfig(args);
+  const config = await loadConfig(args)
 
-  console.log(`\n Flipbook Scraper`);
-  console.log(`==================`);
-  console.log(`Document: ${config.documentName}`);
-  console.log(`Output:   ${config.outputDir}`);
-  console.log(`URL:      ${config.moduleUrl}\n`);
+  if (args.diagnose) {
+    config.headless = false
+  }
+
+  console.log(`\n Flipbook Scraper`)
+  console.log(`==================`)
+  console.log(`Document: ${config.documentName}`)
+  console.log(`Output:   ${config.outputDir}`)
+  console.log(`URL:      ${config.moduleUrl}`)
+  console.log(`Mode:     ${config.captureMethod}`)
+  if (args.diagnose) {
+    console.log(`Diagnose: ON (max 5 pages, headed, no PDF)\n`)
+  } else {
+    console.log('')
+  }
 
   const scraper = new FlipbookScraper(config, (progress: ScrapeProgress) => {
-    printProgress(progress);
-  });
+    printProgress(progress)
+  })
 
   try {
-    await scraper.initialize();
-    await scraper.login();
-    await scraper.navigateToModule();
+    await scraper.initialize()
+    await scraper.login()
+    await scraper.navigateToModule()
 
-    let totalPages = args.pages ? parseInt(args.pages, 10) : 0;
+    let totalPages = args.pages ? parseInt(args.pages, 10) : 0
     if (totalPages > 0) {
-      console.log(`\n  Using specified page count: ${totalPages}\n`);
+      console.log(`\n  Using specified page count: ${totalPages}\n`)
     } else {
-      totalPages = await scraper.detectTotalPages();
-      console.log(`\n  Detected ${totalPages} pages\n`);
+      totalPages = await scraper.detectTotalPages()
+      console.log(`\n  Detected ${totalPages} pages\n`)
     }
 
     if (totalPages === 0) {
-      console.error(' Could not detect total pages. Use --pages N to specify manually.');
-      await scraper.cleanup();
-      process.exit(1);
+      console.error(' Could not detect total pages. Use --pages N to specify manually.')
+      await scraper.cleanup()
+      process.exit(1)
     }
 
-    const startPage = args['start-page'] ? parseInt(args['start-page'], 10) : 1;
-    await scraper.captureAllPages(totalPages, startPage);
+    const effectivePages = args.diagnose ? Math.min(totalPages, 5) : totalPages
+    const startPage = args.startPage ? parseInt(args.startPage, 10) : 1
+    await scraper.captureAllPages(effectivePages, startPage)
 
-    if (!args.imagesOnly) {
-      const pdfPath = await scraper.saveAsPdf();
-      console.log(`\n  PDF saved: ${pdfPath}`);
+    if (!args.imagesOnly && !args.diagnose) {
+      const pdfPath = await scraper.saveAsPdf()
+      console.log(`\n  PDF saved: ${pdfPath}`)
     }
 
-    console.log(`\n  Done! ${scraper.getCapturedImages().length} pages saved.`);
+    console.log(`\n  Done! ${scraper.getCapturedImages().length} pages saved.`)
   } catch (error) {
-    console.error(`\n  Error: ${error instanceof Error ? error.message : error}`);
-    process.exit(1);
+    console.error(`\n  Error: ${error instanceof Error ? error.message : error}`)
+    process.exit(1)
   } finally {
-    await scraper.cleanup();
+    await scraper.cleanup()
   }
 }
 
 function parseArgs() {
-  const args: Record<string, string | boolean> = {};
-  const argv = process.argv.slice(2);
+  const args: Record<string, string | boolean> = {}
+  const argv = process.argv.slice(2)
 
   for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
+    const arg = argv[i]
     if (arg.startsWith('--')) {
-      const key = arg.slice(2);
-      const next = argv[i + 1];
+      const key = arg.slice(2)
+      const next = argv[i + 1]
       if (next && !next.startsWith('--')) {
-        args[key] = next;
-        i++;
+        args[key] = next
+        i++
       } else {
-        args[key] = true;
+        args[key] = true
       }
     }
   }
 
   return {
     help: args.help || false,
+    diagnose: args.diagnose || false,
     config: args.config as string | undefined,
     url: args.url as string | undefined,
     username: args.username as string | undefined,
@@ -89,23 +101,24 @@ function parseArgs() {
     startPage: args['start-page'] as string | undefined,
     imagesOnly: args['images-only'] || false,
     headless: args.headless !== 'false',
-  };
+    captureMethod: args['capture-method'] as 'interception' | 'screenshot' | undefined,
+  }
 }
 
 async function loadConfig(args: ReturnType<typeof parseArgs>): Promise<FlipbookConfig> {
   if (args.config) {
-    const configPath = path.resolve(args.config);
-    const content = await fs.readFile(configPath, 'utf-8');
-    const parsed = JSON.parse(content);
-    return parsed as FlipbookConfig;
+    const configPath = path.resolve(args.config)
+    const content = await fs.readFile(configPath, 'utf-8')
+    const parsed = JSON.parse(content)
+    return parsed as FlipbookConfig
   }
 
-  const presetPath = path.join(__dirname, 'presets', 'suntech.json');
-  let preset: Partial<FlipbookConfig> = {};
+  const presetPath = path.join(__dirname, 'presets', 'suntech.json')
+  let preset: Partial<FlipbookConfig> = {}
 
   try {
-    const content = await fs.readFile(presetPath, 'utf-8');
-    preset = JSON.parse(content);
+    const content = await fs.readFile(presetPath, 'utf-8')
+    preset = JSON.parse(content)
   } catch {
     // no preset found, use defaults
   }
@@ -134,19 +147,18 @@ async function loadConfig(args: ReturnType<typeof parseArgs>): Promise<FlipbookC
     pageLoadDelay: preset.pageLoadDelay || 2000,
     headless: args.headless,
     imageFormat: preset.imageFormat || 'jpeg',
+    captureMethod: args.captureMethod || preset.captureMethod || 'interception',
     pdfOptions: preset.pdfOptions || {
       pageSize: 'a4',
       margin: 0,
     },
-  };
+  }
 }
 
 function printProgress(progress: ScrapeProgress) {
-  const prefix = `[${progress.status.toUpperCase()}]`;
-  const pageInfo = progress.totalPages
-    ? ` (${progress.currentPage}/${progress.totalPages})`
-    : '';
-  console.log(`  ${prefix}${pageInfo} ${progress.message}`);
+  const prefix = `[${progress.status.toUpperCase()}]`
+  const pageInfo = progress.totalPages ? ` (${progress.currentPage}/${progress.totalPages})` : ''
+  console.log(`  ${prefix}${pageInfo} ${progress.message}`)
 }
 
 function printHelp() {
@@ -156,16 +168,19 @@ Flipbook Scraper - Download flipbook pages and convert to PDF
 Usage:
   bun run tools/flipbook-scraper/index.ts [options]
 
-Options:
-   --url <url>           Direct URL to the flipbook module
-   --username <user>     Login username/email
-   --password <pass>     Login password
-   --name <name>         Document name (used for folder/filename)
-   --output <dir>        Output directory (default: ./flipbook-output)
-   --pages <number>      Manually specify total pages (overrides detection)
-   --config <path>       Path to full JSON config file
-   --images-only         Skip PDF conversion, save images only
-   --headless <bool>     Run browser headless (default: true)
+ Options:
+     --url <url>           Direct URL to the flipbook module
+     --username <user>     Login username/email
+     --password <pass>     Login password
+     --name <name>         Document name (used for folder/filename)
+     --output <dir>        Output directory (default: ./flipbook-output)
+      --pages <number>      Manually specify total pages (overrides detection)
+      --start-page <number> Start capturing from this page (for resuming)
+      --config <path>       Path to full JSON config file
+     --images-only         Skip PDF conversion, save images only
+     --headless <bool>     Run browser headless (default: true)
+     --capture-method <method> Capture method: interception or screenshot (default: interception)
+     --diagnose            Run headed, max 5 pages, skip PDF, log interception details
 
 Examples:
   bun run tools/flipbook-scraper/index.ts \\
@@ -175,7 +190,7 @@ Examples:
     --name "EASA-Module-8-Basic-Aerodynamics"
 
   bun run tools/flipbook-scraper/index.ts --config my-config.json
-`);
+`)
 }
 
-main();
+main()

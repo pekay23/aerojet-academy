@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { apiCreated, apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
+import {
+  apiCreated,
+  apiSuccess,
+  apiError,
+  withErrorHandler,
+  RouteContext,
+} from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { z } from 'zod'
 import { rateLimitByUser } from '@/lib/security/rate-limit'
@@ -21,8 +27,9 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
   if (!rl.allowed) {
     return apiError('Too many requests', 429)
   }
-  if (!ctx?.params?.logbookId) return apiError('Logbook ID required')
-  const logbookId = ctx.params.logbookId
+  const resolvedParams = await ctx?.params
+  if (!resolvedParams?.logbookId) return apiError('Logbook ID required')
+  const logbookId = String(resolvedParams.logbookId)
   const body = await req.json()
   const parsed = mentorSchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid input', 400)
@@ -41,12 +48,15 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
   })
 
   if (currentAssignments >= MAX_MENTOR_STUDENT_RATIO) {
-    return apiError(`Mentor has reached the maximum allowed student assignments (${MAX_MENTOR_STUDENT_RATIO}).`, 400)
+    return apiError(
+      `Mentor has reached the maximum allowed student assignments (${MAX_MENTOR_STUDENT_RATIO}).`,
+      400
+    )
   }
 
   if (parsed.data.isPrimary) {
     const existingPrimary = await prismaUnfiltered.oJTMentorAssignment.findFirst({
-      where: { logbookId, isPrimary: true },
+      where: { logbookId: String(logbookId), isPrimary: true },
       select: { id: true },
     })
     if (existingPrimary) {
@@ -59,7 +69,7 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
 
   const assignment = await prismaUnfiltered.oJTMentorAssignment.create({
     data: {
-      logbookId,
+      logbookId: String(logbookId),
       mentorId: parsed.data.mentorId,
       assignedDate: new Date(),
       isPrimary: parsed.data.isPrimary,
@@ -73,7 +83,12 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
     entity: 'OJTMentorAssignment',
     entityId: assignment.id,
     description: `Mentor ${parsed.data.mentorId} assigned to logbook ${logbookId}`,
-    changes: { mentorId: parsed.data.mentorId, isPrimary: parsed.data.isPrimary, notes: parsed.data.notes, currentAssignments: currentAssignments + 1 },
+    changes: {
+      mentorId: parsed.data.mentorId,
+      isPrimary: parsed.data.isPrimary,
+      notes: parsed.data.notes,
+      currentAssignments: currentAssignments + 1,
+    },
   })
 
   return apiCreated(assignment)

@@ -1,8 +1,16 @@
 import { NextRequest } from 'next/server'
-import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler, validateBody, apiCreated } from '@/lib/api/response'
+import { requireStaff, getClientIp } from '@/lib/auth/helpers'
+import {
+  apiSuccess,
+  apiError,
+  withErrorHandler,
+  apiCreated,
+  parsePagination,
+} from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
+import { validateBody } from '@/lib/validation/schemas'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 const createExamSchema = z.object({
   name: z.string().min(1),
@@ -18,18 +26,11 @@ const createExamSchema = z.object({
  * GET /api/exams — list exams
  */
 export const GET = withErrorHandler(async (req: NextRequest) => {
-  const session = await requireStaff()
-  const url = new URL(req.url)
-  const status = url.searchParams.get('status')
-  const page = parseInt(url.searchParams.get('page') || '1')
-  const limit = parseInt(url.searchParams.get('limit') || '20')
-
-  const where: any = {}
-  if (status) where.status = status
+  await requireStaff()
+  const { page, limit, skip } = parsePagination(req.nextUrl.searchParams)
 
   const [exams, total] = await Promise.all([
     prismaUnfiltered.exam.findMany({
-      where,
       select: {
         id: true,
         name: true,
@@ -41,10 +42,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         updatedAt: true,
       },
       orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
+      skip,
       take: limit,
     }),
-    prismaUnfiltered.exam.count({ where }),
+    prismaUnfiltered.exam.count(),
   ])
 
   return apiSuccess({
@@ -57,8 +58,16 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
  * POST /api/exams — create exam
  */
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  const session = await requireStaff()
-  const data = await validateBody(req, createExamSchema)
+  const staff = await requireStaff()
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return apiError('Invalid JSON body', 400)
+  }
+  const result = validateBody(createExamSchema, body)
+  if (!result.success) return apiError(result.error || 'Invalid input', 400)
+  const data = result.data
 
   const exam = await prismaUnfiltered.exam.create({
     data: {
@@ -70,6 +79,24 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       duration: data.duration,
       passingScore: data.passingScore,
     },
+  })
+
+  await createAuditLog({
+    action: AuditAction.EXAM_CREATED,
+    entity: 'Exam',
+    entityId: exam.id,
+    userId: staff.id,
+    description: `Created exam "${exam.name}" scheduled for ${exam.examDate.toISOString()}`,
+    details: {
+      name: exam.name,
+      examComponentId: exam.examComponentId,
+      eventId: exam.eventId,
+      examDate: exam.examDate.toISOString(),
+      duration: exam.duration,
+      passingScore: exam.passingScore.toString(),
+    },
+    ipAddress: getClientIp(req),
+    userAgent: req.headers.get('user-agent') ?? undefined,
   })
 
   return apiCreated(exam)

@@ -6,8 +6,12 @@ import PortalHeader from '@/components/layouts/PortalHeader'
 import TourTrigger from '@/components/Tour/TourTrigger'
 import AppTour from '@/components/Tour/AppTour'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import type { User } from '@prisma/client'
 import ForcePasswordChange from './_components/ForcePasswordChange'
-import { resolveEffectiveEnrollmentType, resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
+import {
+  resolveEffectiveEnrollmentType,
+  resolveEffectivePathwayCode,
+} from '@/lib/enrollment/pathway'
 import { getPipelineStageConfig, isPipelineEnabled } from '@/lib/admissions/state-machine'
 
 export const dynamic = 'force-dynamic'
@@ -26,6 +30,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
       status: true,
       role: true,
       mustChangePassword: true,
+      hasCompletedTour: true,
       programmeChoice: true,
       profile: { select: { firstName: true, lastName: true } },
       studentProfile: {
@@ -51,7 +56,8 @@ export default async function ApplicantLayout({ children }: { children: React.Re
 
   const profile = dbUser.profile
   const studentProfile = dbUser.studentProfile
-  const hasFullTimeEnrollment = (dbUser.fullTimeEnrollments?.length ?? 0) > 0 ? { id: dbUser.fullTimeEnrollments[0].id } : null
+  const hasFullTimeEnrollment =
+    (dbUser.fullTimeEnrollments?.length ?? 0) > 0 ? { id: dbUser.fullTimeEnrollments[0].id } : null
 
   const effectivePathwayCode = resolveEffectivePathwayCode({
     pathwayCode: studentProfile?.pathwayRel?.code,
@@ -64,7 +70,8 @@ export default async function ApplicantLayout({ children }: { children: React.Re
     programmeChoice: dbUser.programmeChoice,
   })
 
-  const hasPathway = !!effectivePathwayCode || !!studentProfile?.pathwayId || !!hasFullTimeEnrollment
+  const hasPathway =
+    !!effectivePathwayCode || !!studentProfile?.pathwayId || !!hasFullTimeEnrollment
   const isExamOnly = effectiveEnrollmentType === 'EXAM_ONLY'
   const pipelineEnabled = await isPipelineEnabled()
   const applicationStage = dbUser.application?.stage ?? null
@@ -77,7 +84,10 @@ export default async function ApplicantLayout({ children }: { children: React.Re
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white"
+      >
         Skip to main content
       </a>
       <ApplicantSidebar
@@ -91,9 +101,16 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         enabledStageGroups={enabledStageGroups}
       />
       <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
-      <main id="main-content" className="relative pt-16 lg:pt-0 min-h-screen min-w-0 flex-1 overflow-x-hidden">
+      <main
+        id="main-content"
+        className="relative min-h-screen min-w-0 flex-1 overflow-x-hidden pt-16 lg:pt-0"
+      >
         <div className="mx-auto max-w-[1920px] p-4 pt-16 sm:p-8 lg:px-8 lg:py-6 lg:pt-10">
-          <PortalHeader actions={<TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />}>
+          <PortalHeader
+            actions={
+              <TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />
+            }
+          >
             <BreadcrumbNav />
           </PortalHeader>
           {children}

@@ -70,7 +70,6 @@ export default function StaffSidebar({
       icon: Users,
       badge: (counts.applicants ?? 0) > 0 ? counts.applicants : undefined,
       tourId: 'group-people',
-      tourId: 'group-people',
       children: [
         { label: 'All Users', href: '/users' },
         { label: 'Applicants Queue', href: '/users?tab=applicants' },
@@ -118,7 +117,6 @@ export default function StaffSidebar({
       icon: ClipboardList,
       badge: (counts.enrollments ?? 0) > 0 ? counts.enrollments : undefined,
       tourId: 'group-operations',
-      tourId: 'group-operations',
       children: [
         { label: 'Course Enrollments', href: '/enrollments' },
         { label: 'Exam Management', href: '/exams' },
@@ -160,7 +158,6 @@ export default function StaffSidebar({
       icon: CreditCard,
       badge: (counts.payments ?? 0) > 0 ? counts.payments : undefined,
       tourId: 'group-financials',
-      tourId: 'group-financials',
       children: [
         { label: 'Recent Payments', href: '/payments' },
         { label: 'Financial Reports', href: '/finance' },
@@ -196,7 +193,6 @@ export default function StaffSidebar({
         { label: 'Retention policies', href: '/settings/retention' },
         { label: 'Permissions (RBAC)', href: '/admin/permissions' },
       ],
-      tourId: 'group-governance',
       tourId: 'group-governance',
     },
   ]

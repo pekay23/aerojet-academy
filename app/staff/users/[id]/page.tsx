@@ -21,7 +21,6 @@ import { Metadata } from 'next'
 import { PathwayCode } from './_components/EditPathwayDialog'
 import { UserStatus, UserRole, EnrollmentStatus } from '@/types/enums'
 import type { SerializedFullTimeEnrollmentForOjt, SerializedStudent } from '@/lib/staff/types'
-import type { SerializedFullTimeEnrollmentForOjt, SerializedStudent } from '@/lib/staff/types'
 
 export const metadata: Metadata = { title: 'User Details | Staff Portal' }
 
@@ -100,7 +99,9 @@ export default async function UserProfilePage({ params }: Props) {
   })
 
   if (!userRaw) notFound()
-  const user = serializePrisma(userRaw) as unknown as SerializedStudent as unknown as SerializedStudent
+  const user = serializePrisma(
+    userRaw
+  ) as unknown as SerializedStudent as unknown as SerializedStudent
 
   // Fetch OJT + exam components in parallel (both independent of each other)
   const [ftEnrollmentsRaw, examComponentsRaw] = await Promise.all([
@@ -136,7 +137,8 @@ export default async function UserProfilePage({ params }: Props) {
     : user.email[0].toUpperCase()
 
   const statusColors: Record<string, string> = {
-    [UserStatus.ACTIVE]: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+    [UserStatus.ACTIVE]:
+      'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
     [UserStatus.PENDING]: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
     [UserStatus.SUSPENDED]: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
     [UserStatus.ARCHIVED]: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400',
@@ -148,7 +150,8 @@ export default async function UserProfilePage({ params }: Props) {
     [UserRole.ADMIN]: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
     [UserRole.STAFF]: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
     [UserRole.INSTRUCTOR]: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-    [UserRole.STUDENT]: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+    [UserRole.STUDENT]:
+      'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
     [UserRole.APPLICANT]: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
   }
 
@@ -158,14 +161,14 @@ export default async function UserProfilePage({ params }: Props) {
       <div className="mb-6">
         <Link
           href="/staff/users"
-          className="mb-4 inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-bold text-slate-400 transition-all duration-150 ease-out hover:bg-slate-100 hover:text-aerojet-blue dark:hover:bg-slate-800/60 dark:text-slate-500 dark:hover:text-blue-400"
+          className="hover:text-aerojet-blue mb-4 inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-bold text-slate-400 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-800/60 dark:hover:text-blue-400"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Users
         </Link>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-6">
             <div className="relative">
-              <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-aerojet-blue text-3xl font-black text-white shadow-lg shadow-blue-900/10 transition-all hover:shadow-xl dark:bg-blue-600">
+              <div className="bg-aerojet-blue relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl text-3xl font-black text-white shadow-lg shadow-blue-900/10 transition-all hover:shadow-xl dark:bg-blue-600">
                 {user.profile?.profilePhotoUrl ? (
                   <ProtectedImage
                     src={proxyImageUrl(user.profile.profilePhotoUrl, 'profile-photos')}
@@ -185,7 +188,7 @@ export default async function UserProfilePage({ params }: Props) {
               />
             </div>
             <div>
-              <h1 className="mb-2 text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+              <h1 className="text-aerojet-blue mb-2 text-3xl font-black tracking-tight dark:text-white">
                 {fullName}
               </h1>
               <div className="flex items-center gap-3">
@@ -255,7 +258,7 @@ export default async function UserProfilePage({ params }: Props) {
                   {user.academyEmail ? 'Academy Email' : 'Email Address'}
                 </p>
                 <div className="flex items-center gap-2 font-bold break-all text-slate-700 dark:text-slate-300">
-                  <Mail className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
+                  <Mail className="text-aerojet-sky h-4 w-4 dark:text-blue-400" />
                   {user.academyEmail || user.email}
                 </div>
               </div>
@@ -265,7 +268,7 @@ export default async function UserProfilePage({ params }: Props) {
                     Personal Email
                   </p>
                   <div className="flex items-center gap-2 font-bold break-all text-slate-700 dark:text-slate-300">
-                    <Mail className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
+                    <Mail className="text-aerojet-sky h-4 w-4 dark:text-blue-400" />
                     {user.personalEmail}
                   </div>
                 </div>
@@ -275,7 +278,7 @@ export default async function UserProfilePage({ params }: Props) {
                   Phone Number
                 </p>
                 <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-                  <Phone className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
+                  <Phone className="text-aerojet-sky h-4 w-4 dark:text-blue-400" />
                   {user.profile?.phone ?? '—'}
                 </div>
               </div>
@@ -284,7 +287,7 @@ export default async function UserProfilePage({ params }: Props) {
                   Nationality
                 </p>
                 <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-                  <Globe className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
+                  <Globe className="text-aerojet-sky h-4 w-4 dark:text-blue-400" />
                   {user.profile?.nationality ?? '—'}
                 </div>
               </div>
@@ -293,7 +296,7 @@ export default async function UserProfilePage({ params }: Props) {
                   Date of Birth
                 </p>
                 <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-                  <Calendar className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
+                  <Calendar className="text-aerojet-sky h-4 w-4 dark:text-blue-400" />
                   {user.profile?.dateOfBirth
                     ? new Date(user.profile.dateOfBirth).toLocaleDateString()
                     : '—'}
@@ -345,7 +348,9 @@ export default async function UserProfilePage({ params }: Props) {
                     </p>
                     <EditPathwayDialog
                       userId={user.id}
-                      currentPathway={(user.studentProfile?.pathwayRel?.code as PathwayCode) || null}
+                      currentPathway={
+                        (user.studentProfile?.pathwayRel?.code as PathwayCode) || null
+                      }
                       isLocked={user.studentProfile?.studyPathwayLocked || false}
                     />
                   </div>
@@ -362,9 +367,9 @@ export default async function UserProfilePage({ params }: Props) {
                     </p>
                     <EditAcademicPeriodDialog
                       userId={user.id}
-                      currentAcademicYearId={user.studentProfile?.academicYearId}
+                      currentAcademicYearId={user.studentProfile?.academicYear?.id}
                       currentAcademicYearName={user.studentProfile?.academicYear?.name}
-                      currentSemesterId={user.studentProfile?.semesterId}
+                      currentSemesterId={user.studentProfile?.semester?.id}
                       currentSemesterName={user.studentProfile?.semester?.name}
                     />
                   </div>
@@ -379,34 +384,40 @@ export default async function UserProfilePage({ params }: Props) {
               studentId={user.id}
               studentName={fullName}
               examComponents={examComponents}
-              enrollments={(user.enrollments || []).map((e) => ({
-                id: e.id,
-                status: e.status,
-                completedAt: e.completedAt ?? null,
-                course: e.course,
-                academicYear: e.academicYear ?? null,
-                semester: e.semester ?? null,
-              })) as any}
-              examBookings={(user.examBookings || []).map((b) => ({
-                id: b.id,
-                moduleCode: b.moduleCode,
-                result: b.result,
-                score: b.score,
-                percentage: b.percentage,
-                attemptType: b.attemptType,
-                examDate: b.examDate,
-                status: b.status,
-                examCategory: b.examCategory,
-              })) as any}
-              studentProfile={user.studentProfile ? {
-                studentId: user.studentProfile.studentId ?? '',
-                enrollmentStatus: user.studentProfile.enrollmentStatus ?? '',
-                fundingSource: user.studentProfile.fundingSource ?? '',
-                currentYearNumber: user.studentProfile.currentYearNumber ?? 0,
-                currentSemesterNumber: user.studentProfile.currentSemesterNumber ?? 0,
-                programmeChoice: user.studentProfile.programmeChoice ?? null,
-                enrollmentType: user.studentProfile.enrollmentType ?? null,
-              } : null}
+              enrollments={
+                (user.enrollments || []).map((e) => ({
+                  id: e.id,
+                  status: e.status,
+                  completedAt: e.completedAt ?? null,
+                  course: e.course,
+                })) as any
+              }
+              examBookings={
+                (user.examBookings || []).map((b) => ({
+                  id: b.id,
+                  moduleCode: b.moduleCode,
+                  result: b.result,
+                  score: b.score,
+                  percentage: b.percentage,
+                  attemptType: b.attemptType,
+                  examDate: b.examDate,
+                  status: b.status,
+                  examCategory: b.examCategory,
+                })) as any
+              }
+              studentProfile={
+                user.studentProfile
+                  ? {
+                      studentId: user.studentProfile.studentId ?? '',
+                      enrollmentStatus: user.studentProfile.enrollmentStatus ?? '',
+                      fundingSource: user.studentProfile.fundingSource ?? '',
+                      currentYearNumber: user.studentProfile.currentYearNumber ?? 0,
+                      currentSemesterNumber: user.studentProfile.currentSemesterNumber ?? 0,
+                      programmeChoice: user.studentProfile.programmeChoice ?? null,
+                      enrollmentType: user.studentProfile.enrollmentType ?? null,
+                    }
+                  : null
+              }
             />
           )}
 

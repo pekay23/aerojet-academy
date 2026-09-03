@@ -1,7 +1,5 @@
 import 'server-only'
 
-import 'server-only'
-
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
@@ -14,7 +12,6 @@ import PrintButton from './PrintButton'
 import { PageTransition } from '@/components/shared/PageTransition'
 import ExamResultsTable from './_components/ExamResultsTable'
 import EnrolmentTable from './_components/EnrolmentTable'
-import PageTransition from '@/components/shared/PageTransition'
 
 export const metadata: Metadata = {
   title: 'Academic Transcript | Student Portal',
@@ -86,83 +83,86 @@ export default async function TranscriptPage() {
   return (
     <PageTransition>
       <div className="space-y-6 print:space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-blue-800 text-3xl font-black tracking-tight dark:text-white print:text-2xl">
-            Academic Transcript
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {isExamOnly || isModular
-              ? 'Summary of your EASA examination results. This is not an official EASA certificate.'
-              : 'Academy-issued record. This is not an official EASA certificate. No grade-point average is computed — this is an EASA Part-147 training record.'}
-          </p>
-        </div>
-        <PrintButton />
-      </div>
-
-      {/* Identity */}
-      <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-100 bg-white p-5 text-sm sm:grid-cols-4 dark:border-slate-800 dark:bg-slate-900">
-        <Field label="Name" value={fullName} />
-        <Field label="Student ID" value={profile?.studentId ?? '—'} />
-        <Field
-          label="Pathway"
-          value={profile?.pathwayRel?.name ?? profile?.enrollmentType ?? '—'}
-        />
-        {isFullTime && (
-          <Field
-            label="Current Term"
-            value={`Year ${profile?.currentYearNumber ?? 1}, Sem ${profile?.currentSemesterNumber ?? 1}`}
-          />
-        )}
-        <Field
-          label="Enrolled"
-          value={profile?.enrollmentDate?.toLocaleDateString('en-GB') ?? '—'}
-        />
-        <Field
-          label="Graduated"
-          value={profile?.graduationDate?.toLocaleDateString('en-GB') ?? '—'}
-        />
-        {isFullTime && (
-          <Field
-            label="Attendance"
-            value={attendance.total > 0 ? `${attendance.percentage}%` : 'N/A'}
-          />
-        )}
-      </div>
-
-      {/* Exam results */}
-      <Section title="Examination Record">
-        <ExamResultsTable results={results} />
-      </Section>
-
-      {showEnrollments && (
-        <Section title="Course Enrolment Record">
-          <EnrolmentTable enrollments={enrollments} />
-        </Section>
-      )}
-
-      {showLicenseProgress && licenseProgress.length > 0 && (
-        <Section title="License Progress">
-          <div className="space-y-2">
-            {licenseProgress.map((lp) => (
-              <div key={lp.licenseCategoryId} className="flex items-center justify-between text-sm">
-                <span className="font-bold">
-                  {lp.code} — {lp.name}
-                </span>
-                <span className="text-slate-500">
-                  {lp.passedCount}/{lp.totalRequired} modules ({lp.percentage}%)
-                </span>
-              </div>
-            ))}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white print:text-2xl">
+              Academic Transcript
+            </h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {isExamOnly || isModular
+                ? 'Summary of your EASA examination results. This is not an official EASA certificate.'
+                : 'Academy-issued record. This is not an official EASA certificate. No grade-point average is computed — this is an EASA Part-147 training record.'}
+            </p>
           </div>
-        </Section>
-      )}
+          <PrintButton />
+        </div>
 
-      <p className="text-xs text-slate-400 print:mt-6">
-        Generated {new Date().toLocaleString('en-GB')} · Aerojet Aviation Training Academy (EASA
-        Part-147)
-      </p>
-    </div>
+        {/* Identity */}
+        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-100 bg-white p-5 text-sm sm:grid-cols-4 dark:border-slate-800 dark:bg-slate-900">
+          <Field label="Name" value={fullName} />
+          <Field label="Student ID" value={profile?.studentId ?? '—'} />
+          <Field
+            label="Pathway"
+            value={profile?.pathwayRel?.name ?? profile?.enrollmentType ?? '—'}
+          />
+          {isFullTime && (
+            <Field
+              label="Current Term"
+              value={`Year ${profile?.currentYearNumber ?? 1}, Sem ${profile?.currentSemesterNumber ?? 1}`}
+            />
+          )}
+          <Field
+            label="Enrolled"
+            value={profile?.enrollmentDate?.toLocaleDateString('en-GB') ?? '—'}
+          />
+          <Field
+            label="Graduated"
+            value={profile?.graduationDate?.toLocaleDateString('en-GB') ?? '—'}
+          />
+          {isFullTime && (
+            <Field
+              label="Attendance"
+              value={attendance.total > 0 ? `${attendance.percentage}%` : 'N/A'}
+            />
+          )}
+        </div>
+
+        {/* Exam results */}
+        <Section title="Examination Record">
+          <ExamResultsTable results={results} />
+        </Section>
+
+        {showEnrollments && (
+          <Section title="Course Enrolment Record">
+            <EnrolmentTable enrollments={enrollments} />
+          </Section>
+        )}
+
+        {showLicenseProgress && licenseProgress.length > 0 && (
+          <Section title="License Progress">
+            <div className="space-y-2">
+              {licenseProgress.map((lp) => (
+                <div
+                  key={lp.licenseCategoryId}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <span className="font-bold">
+                    {lp.code} — {lp.name}
+                  </span>
+                  <span className="text-slate-500">
+                    {lp.passedCount}/{lp.totalRequired} modules ({lp.percentage}%)
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        <p className="text-xs text-slate-400 print:mt-6">
+          Generated {new Date().toLocaleString('en-GB')} · Aerojet Aviation Training Academy (EASA
+          Part-147)
+        </p>
+      </div>
     </PageTransition>
   )
 }

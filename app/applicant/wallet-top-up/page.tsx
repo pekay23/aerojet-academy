@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 import PathwayPaymentForm from '../pathway/_components/PathwayPaymentForm'
 import { Info, Wallet } from 'lucide-react'
