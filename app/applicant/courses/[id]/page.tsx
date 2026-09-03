@@ -15,7 +15,8 @@ import {
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
-import { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
+import type { ExamComponent, StudentLicenseTarget } from '@prisma/client'
 
 export const metadata: Metadata = { title: 'Course Details | Applicant Portal' }
 
@@ -30,14 +31,23 @@ export default async function CourseDetailsPage({ params }: Props) {
   const { id } = await params
   const userId = session.user.id
 
-  
   function slugify(text: string) {
-    return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+    return (
+      text
+        ?.toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-') || ''
+    )
   }
 
-  const allCourses = await prismaUnfiltered.course.findMany({ select: { id: true, name: true, code: true } });
-  const matchedCourse = allCourses.find(c => slugify(c.name) === id || slugify(c.code) === id);
-  const targetId = matchedCourse ? matchedCourse.id : id;
+  const allCourses = await prismaUnfiltered.course.findMany({
+    select: { id: true, name: true, code: true },
+  })
+  const matchedCourse = allCourses.find((c) => slugify(c.name) === id || slugify(c.code) === id)
+  const targetId = matchedCourse ? matchedCourse.id : id
 
   const [course, enrollment] = await Promise.all([
     prismaUnfiltered.course.findUnique({
@@ -95,20 +105,24 @@ export default async function CourseDetailsPage({ params }: Props) {
   const canAffordPool = balance >= lowestPoolPrice
 
   const targetLicenseCodes = studentProfile?.licenseTargets
-    .map((lt) => lt.licenseCategory.code)
+    .map((lt: StudentLicenseTarget) => lt.licenseCategory.code)
     .join(', ')
 
   const isRequiredForTarget = await prisma.licenseModuleRequirement.findFirst({
     where: {
       courseId: targetId,
       licenseCategory: {
-        code: { in: studentProfile?.licenseTargets.map((lt) => lt.licenseCategory.code) || [] },
+        code: {
+          in:
+            studentProfile?.licenseTargets.map((lt: LicenseTarget) => lt.licenseCategory.code) ||
+            [],
+        },
       },
     },
   })
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-5xl space-y-8 duration-700">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Link
@@ -119,10 +133,10 @@ export default async function CourseDetailsPage({ params }: Props) {
             Back to Courses
           </Link>
           <div className="mt-4 flex items-center gap-3">
-            <span className="font-mono text-xs font-black tracking-widest text-aerojet-sky">
+            <span className="text-aerojet-sky font-mono text-xs font-black tracking-widest">
               {course.code}
             </span>
-            <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+            <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
               {course.name}
             </h1>
           </div>
@@ -138,7 +152,9 @@ export default async function CourseDetailsPage({ params }: Props) {
             <div className="flex flex-col items-end gap-2">
               <Link
                 href={
-                  canAffordPool ? `/applicant/courses/${targetId}/purchase` : '/applicant/wallet-top-up'
+                  canAffordPool
+                    ? `/applicant/courses/${targetId}/purchase`
+                    : '/applicant/wallet-top-up'
                 }
                 className={`inline-flex items-center justify-center rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all active:scale-95 ${
                   canAffordPool
@@ -158,7 +174,7 @@ export default async function CourseDetailsPage({ params }: Props) {
           ) : (
             <Link
               href={`/applicant/courses/${targetId}/purchase`}
-              className="inline-flex items-center justify-center rounded-xl bg-aerojet-blue px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-900/10 transition-all hover:bg-[#003875] active:scale-95"
+              className="bg-aerojet-blue inline-flex items-center justify-center rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-900/10 transition-all hover:bg-[#003875] active:scale-95"
             >
               Enroll Now
               <ChevronRight className="ml-1 h-4 w-4" />
@@ -182,7 +198,7 @@ export default async function CourseDetailsPage({ params }: Props) {
 
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-aerojet-sky">
+              <div className="text-aerojet-sky mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
                 <FileText className="h-5 w-5" />
               </div>
               <h3 className="font-bold text-slate-900 dark:text-slate-100">Syllabus</h3>
@@ -194,7 +210,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   href={course.syllabusUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center text-sm font-bold text-aerojet-blue hover:underline"
+                  className="text-aerojet-blue mt-4 inline-flex items-center text-sm font-bold hover:underline"
                 >
                   Download Syllabus
                   <ChevronRight className="h-4 w-4" />
@@ -220,7 +236,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                     href={course.materialsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center text-sm font-bold text-aerojet-blue hover:underline dark:text-aerojet-sky"
+                    className="text-aerojet-blue dark:text-aerojet-sky mt-4 inline-flex items-center text-sm font-bold hover:underline"
                   >
                     View Materials
                     <ChevronRight className="h-4 w-4" />
@@ -252,7 +268,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   course.prerequisites.map((code) => (
                     <span
                       key={code}
-                      className="rounded-lg border border-blue-100 bg-white px-3 py-1.5 text-xs font-black text-aerojet-blue shadow-sm dark:bg-slate-900"
+                      className="text-aerojet-blue rounded-lg border border-blue-100 bg-white px-3 py-1.5 text-xs font-black shadow-sm dark:bg-slate-900"
                     >
                       {code}
                     </span>
@@ -271,13 +287,13 @@ export default async function CourseDetailsPage({ params }: Props) {
                 <h3 className="font-bold text-slate-900 dark:text-slate-100">Available Exams</h3>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                {examComponents.map((comp) => (
+                {examComponents.map((comp: ExamComponent) => (
                   <div
                     key={comp.id}
                     className="flex flex-col gap-2 rounded-xl border border-white bg-white/50 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] font-black tracking-widest text-aerojet-sky">
+                      <span className="text-aerojet-sky font-mono text-[10px] font-black tracking-widest">
                         {comp.code}
                       </span>
                       <span className="text-[10px] font-bold text-slate-400">
@@ -296,7 +312,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                       </div>
                       <div className="text-right">
                         <p className="text-[9px] font-bold text-slate-400 uppercase">Individual</p>
-                        <p className="text-sm font-black text-aerojet-blue dark:text-blue-400">
+                        <p className="text-aerojet-blue text-sm font-black dark:text-blue-400">
                           EUR {Number(comp.individualPrice).toLocaleString()}
                         </p>
                       </div>
@@ -352,7 +368,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   {isExamOnly ? 'Pool seat from' : 'Price'}
                 </p>
                 <div className="mt-1 flex items-baseline gap-1">
-                  <span className="text-xl font-black text-aerojet-blue dark:text-blue-400">
+                  <span className="text-aerojet-blue text-xl font-black dark:text-blue-400">
                     {course.currency}{' '}
                     {isExamOnly
                       ? lowestPoolPrice.toLocaleString()

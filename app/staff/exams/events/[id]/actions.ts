@@ -7,7 +7,6 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 import { scheduleEventSittings } from '@/lib/exams/scheduler'
 import { handleActionError } from '@/lib/staff/errors'
-import { handleActionError } from '@/lib/staff/errors'
 
 export async function setEventOverride(eventId: string, status: EventOverrideStatus) {
   const session = await getAuthSession()

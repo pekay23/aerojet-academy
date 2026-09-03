@@ -15,8 +15,6 @@ import { getRegistrationConfig } from '@/lib/settings'
 import { isPipelineEnabled, transitionApplication } from '@/lib/admissions/state-machine'
 import { ApplicationStage } from '@prisma/client'
 import { trackRegistration, trackReferralClick } from '@/lib/analytics/events'
-import { trackRegistration, trackReferralClick } from '@/lib/analytics/events'
-import { trackRegistration } from '@/lib/analytics/events'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const config = await getRegistrationConfig()
@@ -122,12 +120,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       select: { id: true },
     })
     if (application) {
-      transitionApplication(
-        application.id,
-        ApplicationStage.PAYMENT_PENDING,
-        user.id,
-        { metadata: { trigger: 'registration' } }
-      ).catch(console.error)
+      transitionApplication(application.id, ApplicationStage.PAYMENT_PENDING, user.id, {
+        metadata: { trigger: 'registration' },
+      }).catch(console.error)
     }
   }
 

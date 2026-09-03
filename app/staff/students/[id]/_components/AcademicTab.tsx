@@ -13,6 +13,55 @@ import {
   XCircle,
 } from 'lucide-react'
 
+interface Grade {
+  id: string
+  assessmentName: string
+  assessmentType: string
+  score: number | string
+  maxScore: number | string
+  percentage: number | string
+  grade?: string | null
+  assessmentDate: string | Date
+}
+
+interface Enrollment {
+  id: string
+  status: string
+  enrolledAt?: string | null
+  approvedAt?: string | null
+  completedAt?: string | null
+  course?: { name: string; code: string } | null
+  grades?: Grade[]
+}
+
+interface AttendanceRecord {
+  id: string
+  date: string | Date
+  status: string
+  minutesLate?: number | null
+  class?: { name?: string; course?: { name?: string } } | null
+}
+
+interface OjtPeriod {
+  id: string
+  companyName: string
+  companyAddress?: string | null
+  supervisorName?: string | null
+  status: string
+  hoursCompleted: number
+  hoursRequired: number
+  startDate?: string | null
+  endDate?: string | null
+}
+
+interface FullTimeEnrollment {
+  id: string
+  currentYearNumber?: number | null
+  status: string
+  programme?: { name: string } | null
+  ojtPeriods?: OjtPeriod[]
+}
+
 interface Props {
   student: any
   onRefresh: () => void
@@ -22,9 +71,9 @@ export default function AcademicTab({ student, onRefresh }: Props) {
   const [expandedEnrollment, setExpandedEnrollment] = useState<string | null>(null)
   const [expandedOjt, setExpandedOjt] = useState<string | null>(null)
 
-  const enrollments = student.enrollments || []
-  const attendanceRecords = student.attendanceRecords || []
-  const fullTimeEnrollments = student.fullTimeEnrollments || []
+  const enrollments: Enrollment[] = student.enrollments || []
+  const attendanceRecords: AttendanceRecord[] = student.attendanceRecords || []
+  const fullTimeEnrollments: FullTimeEnrollment[] = student.fullTimeEnrollments || []
 
   // Calculate attendance stats
   const attendanceStats = {
@@ -42,12 +91,12 @@ export default function AcademicTab({ student, onRefresh }: Props) {
           <EmptyState message="No course enrollments" />
         ) : (
           <div className="space-y-3">
-            {enrollments.map((enrollment) => {
+            {enrollments.map((enrollment: Enrollment) => {
               const isExpanded = expandedEnrollment === enrollment.id
               const grades = enrollment.grades || []
               const avgGrade =
                 grades.length > 0
-                  ? grades.reduce((sum: number, g) => sum + Number(g.percentage || 0), 0) /
+                  ? grades.reduce((sum: number, g: Grade) => sum + Number(g.percentage || 0), 0) /
                     grades.length
                   : null
 
@@ -137,7 +186,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                                {grades.map((grade) => (
+                                {grades.map((grade: Grade) => (
                                   <tr key={grade.id}>
                                     <td className="py-2">
                                       <span className="font-medium text-slate-700 dark:text-slate-300">
@@ -225,7 +274,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {attendanceRecords.slice(0, 20).map((record) => (
+                {attendanceRecords.slice(0, 20).map((record: AttendanceRecord) => (
                   <tr key={record.id}>
                     <td className="px-4 py-2 text-slate-500">
                       {new Date(record.date).toLocaleDateString('en-GB', {
@@ -260,7 +309,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
       {fullTimeEnrollments.length > 0 && (
         <Section title="On-The-Job Training (OJT)" icon={User}>
           <div className="space-y-3">
-            {fullTimeEnrollments.map((fte) => (
+            {fullTimeEnrollments.map((fte: FullTimeEnrollment) => (
               <div
                 key={fte.id}
                 className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
@@ -276,7 +325,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                   </div>
                   <button
                     onClick={() => setExpandedOjt(expandedOjt === fte.id ? null : fte.id)}
-                    className="flex items-center gap-1 text-xs font-bold text-aerojet-blue"
+                    className="text-aerojet-blue flex items-center gap-1 text-xs font-bold"
                   >
                     {expandedOjt === fte.id ? 'Hide' : 'View'} OJT Periods
                   </button>
@@ -284,7 +333,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
 
                 {expandedOjt === fte.id && fte.ojtPeriods?.length > 0 && (
                   <div className="space-y-3 p-4">
-                    {fte.ojtPeriods.map((ojt) => (
+                    {fte.ojtPeriods.map((ojt: OjtPeriod) => (
                       <div
                         key={ojt.id}
                         className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50"

@@ -1,0 +1,281 @@
+<Window x:Class="FlipbookWpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Flipbook Scraper"
+        Height="780" Width="940"
+        Background="{StaticResource BgBrush}"
+        WindowStartupLocation="CenterScreen"
+        MinHeight="700" MinWidth="860">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,16">
+            <TextBlock Text="Flipbook Scraper" FontSize="26" FontWeight="Bold" />
+            <TextBlock Text="Download flipbook pages to PDF" Foreground="{StaticResource MutedBrush}" FontSize="13" Margin="0,4,0,0" />
+        </StackPanel>
+
+        <!-- Mode tabs -->
+        <Border Grid.Row="1" Background="{StaticResource PanelBrush}" CornerRadius="8" Padding="0" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton x:Name="SuntechTab" Content="Suntech Preset" GroupName="Mode"
+                             IsChecked="True" Margin="0" Padding="18,12"
+                             Foreground="{StaticResource TextBrush}" FontWeight="SemiBold"
+                             Checked="ModeChanged" />
+                <RadioButton x:Name="GeneralTab" Content="General Mode" GroupName="Mode"
+                             Margin="0" Padding="18,12"
+                             Foreground="{StaticResource TextBrush}" FontWeight="SemiBold"
+                             Checked="ModeChanged" />
+            </StackPanel>
+        </Border>
+
+        <!-- Config panel + progress -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="360" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Configuration form -->
+            <Border Grid.Column="0" Background="{StaticResource PanelBrush}" CornerRadius="8" Padding="20" Margin="0,0,12,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <!-- Suntech panel -->
+                        <StackPanel x:Name="SuntechPanel" Visibility="Visible">
+                            <TextBlock Text="Suntech Configuration" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,14" />
+
+                            <Label Content="Module URL" />
+                            <TextBox x:Name="SuntechModuleUrl" Margin="0,0,0,10"
+                                     Text="https://courses.suntech-bc.com/module/" />
+
+                            <Label Content="Username" />
+                            <TextBox x:Name="SuntechUsername" Margin="0,0,0,10" />
+
+                            <Label Content="Password" />
+                            <PasswordBox x:Name="SuntechPassword" Margin="0,0,0,10" />
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Page Count (0 = auto)" />
+                                <TextBox Grid.Row="1" Grid.Column="0" x:Name="SuntechPageCount" Text="0" />
+
+                                <Label Grid.Row="0" Grid.Column="2" Content="Page Load Delay (ms)" />
+                                <TextBox Grid.Row="1" Grid.Column="2" x:Name="SuntechDelay" Text="4000" />
+
+                                <Label Grid.Row="2" Grid.Column="0" Content="Document Name" />
+                                <TextBox Grid.Row="3" Grid.Column="0" x:Name="SuntechDocumentName" Text="Suntech-Flipbook" />
+
+                                <Label Grid.Row="2" Grid.Column="2" Content="Capture Method" />
+                                <ComboBox Grid.Row="3" Grid.Column="2" x:Name="SuntechCaptureMethod">
+                                    <ComboBoxItem Content="Image Interception" IsSelected="True" />
+                                    <ComboBoxItem Content="Screenshot" />
+                                </ComboBox>
+                            </Grid>
+
+                            <Label Content="Output Directory" />
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="SuntechOutputDir" Grid.Column="0" />
+                                <Button Grid.Column="1" Content="Browse..." Margin="8,0,0,0" Padding="12,6" Click="BrowseOutputDir_Click" />
+                            </Grid>
+
+                            <CheckBox x:Name="SuntechHeadless" Content="Run browser in background (headless)" IsChecked="True" Margin="0,4,0,0" />
+                        </StackPanel>
+
+                        <!-- General panel -->
+                        <StackPanel x:Name="GeneralPanel" Visibility="Collapsed">
+                            <TextBlock Text="General Configuration" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,14" />
+
+                            <Label Content="Target URL (page with the flipbook)" />
+                            <TextBox x:Name="GeneralModuleUrl" Margin="0,0,0,10" />
+
+                            <CheckBox x:Name="GeneralLoginRequired" Content="Site requires login" IsChecked="False" Margin="0,0,0,10" />
+
+                            <StackPanel Visibility="{Binding ElementName=GeneralLoginRequired, Path=IsChecked, Converter={StaticResource BoolToVis}}">
+                                <Label Content="Login URL" />
+                                <TextBox x:Name="GeneralLoginUrl" Margin="0,0,0,10" />
+
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="Username" />
+                                    <TextBox Grid.Row="1" Grid.Column="0" x:Name="GeneralUsername" />
+                                    <Label Grid.Row="0" Grid.Column="2" Content="Password" />
+                                    <PasswordBox Grid.Row="1" Grid.Column="2" x:Name="GeneralPassword" />
+                                </Grid>
+
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="Username Field Selector" />
+                                    <TextBox Grid.Row="1" Grid.Column="0" x:Name="GeneralUserSelector" Text="input[name='username']" />
+                                    <Label Grid.Row="0" Grid.Column="2" Content="Password Field Selector" />
+                                    <TextBox Grid.Row="1" Grid.Column="2" x:Name="GeneralPassSelector" Text="input[name='password']" />
+                                    <Label Grid.Row="2" Grid.Column="0" Content="Submit Button Selector" />
+                                    <TextBox Grid.Row="3" Grid.Column="0" x:Name="GeneralSubmitSelector" Text="button[type='submit']" />
+                                </Grid>
+                            </StackPanel>
+
+                            <Label Content="Image CSS Selector (selects the page image element)" />
+                            <TextBox x:Name="GeneralImageSelector" Text=".flipbook img, img" Margin="0,0,0,10" />
+
+                            <Label Content="Container CSS Selector (for screenshot fallback)" />
+                            <TextBox x:Name="GeneralContainerSelector" Text=".flipbook-container" Margin="0,0,0,10" />
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Navigation Method" />
+                                <ComboBox Grid.Row="1" Grid.Column="0" x:Name="GeneralNavMethod">
+                                    <ComboBoxItem Content="Arrow Keys" IsSelected="True" />
+                                    <ComboBoxItem Content="Next Button Click" />
+                                </ComboBox>
+
+                                <Label Grid.Row="0" Grid.Column="2" Content="Capture Method" />
+                                <ComboBox Grid.Row="1" Grid.Column="2" x:Name="GeneralCaptureMethod">
+                                    <ComboBoxItem Content="Image Interception" IsSelected="True" />
+                                    <ComboBoxItem Content="Screenshot" />
+                                </ComboBox>
+
+                                <Label Grid.Row="2" Grid.Column="0" Content="Next Button Selector" />
+                                <TextBox Grid.Row="3" Grid.Column="0" x:Name="GeneralNextSelector" Text=".next-page" />
+                                <Label Grid.Row="2" Grid.Column="2" Content="Page Count (0 = auto)" />
+                                <TextBox Grid.Row="3" Grid.Column="2" x:Name="GeneralPageCount" Text="0" />
+                            </Grid>
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Page Load Delay (ms)" />
+                                <TextBox Grid.Row="1" Grid.Column="0" x:Name="GeneralDelay" Text="2000" />
+
+                                <Label Grid.Row="0" Grid.Column="2" Content="PDF Page Size" />
+                                <ComboBox Grid.Row="1" Grid.Column="2" x:Name="GeneralPageSize">
+                                    <ComboBoxItem Content="Fit to Image" IsSelected="True" />
+                                    <ComboBoxItem Content="A4" />
+                                    <ComboBoxItem Content="Letter" />
+                                </ComboBox>
+
+                                <Label Grid.Row="2" Grid.Column="0" Content="Document Name" />
+                                <TextBox Grid.Row="3" Grid.Column="0" x:Name="GeneralDocumentName" Text="Flipbook-Export" />
+
+                                <Label Grid.Row="2" Grid.Column="2" Content="Image Format" />
+                                <ComboBox Grid.Row="3" Grid.Column="2" x:Name="GeneralImageFormat">
+                                    <ComboBoxItem Content="jpeg" IsSelected="True" />
+                                    <ComboBoxItem Content="png" />
+                                </ComboBox>
+                            </Grid>
+
+                            <Label Content="Output Directory" />
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="GeneralOutputDir" Grid.Column="0" />
+                                <Button Grid.Column="1" Content="Browse..." Margin="8,0,0,0" Padding="12,6" Click="BrowseOutputDir_Click" />
+                            </Grid>
+
+                            <CheckBox x:Name="GeneralHeadless" Content="Run browser in background (headless)" IsChecked="True" />
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Progress panel -->
+            <Border Grid.Column="1" Background="{StaticResource PanelBrush}" CornerRadius="8" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Progress" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12" />
+
+                    <TextBlock Text="Status" Foreground="{StaticResource MutedBrush}" />
+                    <TextBlock x:Name="StatusText" Text="Idle" FontSize="14" FontWeight="SemiBold" Margin="0,2,0,12" />
+
+                    <TextBlock Text="Current Page" Foreground="{StaticResource MutedBrush}" />
+                    <TextBlock x:Name="CurrentPageText" Text="0 / 0" FontSize="22" FontWeight="Bold" Margin="0,2,0,12" />
+
+                    <ProgressBar x:Name="ProgressBar" Height="14" Minimum="0" Maximum="100" Value="0"
+                                 Background="#1A1A28" Foreground="{StaticResource AccentBrush}"
+                                 BorderThickness="0" />
+
+                    <TextBlock Text="Message" Foreground="{StaticResource MutedBrush}" Margin="0,16,0,0" />
+                    <Border Background="#1A1A28" CornerRadius="6" Padding="10" Margin="0,4,0,0" MinHeight="80">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="240">
+                            <TextBlock x:Name="LogText" TextWrapping="Wrap" FontFamily="Consolas"
+                                       FontSize="12" Foreground="{StaticResource TextBrush}"
+                                       Text="Ready to scrape." />
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button x:Name="StartButton" Content="Start" MinWidth="120" Click="Start_Click" />
+            <Button x:Name="StopButton" Content="Stop" MinWidth="120" Margin="10,0,0,0"
+                    Style="{StaticResource DangerButton}"
+                    Visibility="{Binding IsRunning, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InvBoolToVis}}"
+                    IsEnabled="False" Click="Stop_Click" />
+            <Button x:Name="OpenOutputButton" Content="Open Output Folder" MinWidth="160" Margin="10,0,0,0"
+                    Click="OpenOutput_Click" />
+        </StackPanel>
+
+        <!-- Footer hint -->
+        <TextBlock Grid.Row="4" x:Name="FooterText"
+                   Text="Tip: First run installs Playwright browsers via 'playwright install chromium'."
+                   Foreground="{StaticResource MutedBrush}" FontSize="11" Margin="0,12,0,0" />
+    </Grid>
+</Window>

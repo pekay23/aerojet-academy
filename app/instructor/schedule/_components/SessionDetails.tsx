@@ -3,6 +3,9 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Video, MapPin, Clock, BookOpen, Users, FileText, Trash2, Edit } from 'lucide-react'
 
+const MotionDiv = motion.div
+const MotionAside = motion.aside
+
 interface SessionDetailsProps {
   session: any
   isOpen: boolean
@@ -45,7 +48,7 @@ export default function SessionDetails({ session, isOpen, onClose }: SessionDeta
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
                     </span>
-                    <span className="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-300 uppercase">
+                    <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-300">
                       Live Logic Pending
                     </span>
                   </div>

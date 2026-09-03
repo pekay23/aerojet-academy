@@ -8,7 +8,8 @@ import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
 import CoursePaymentUploadForm from '../../_components/CoursePaymentUploadForm'
 import { getActivePaymentMethods } from '@/lib/payment-methods'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
-import { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
+import type { ExamComponent } from '@prisma/client'
 
 export const metadata: Metadata = { title: 'Purchase Course | Applicant Portal' }
 
@@ -81,7 +82,9 @@ export default async function PurchasePage({ params }: Props) {
     : []
   const examPrice =
     examComponents.length > 0
-      ? Math.min(...examComponents.map((component) => Number(component.poolPrice || 300)))
+      ? Math.min(
+          ...examComponents.map((component: ExamComponent) => Number(component.poolPrice || 300))
+        )
       : 300
 
   if (isExamOnly) {
@@ -96,7 +99,7 @@ export default async function PurchasePage({ params }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-2xl space-y-8 duration-700">
       <div>
         <Link
           href={`/applicant/courses/${id}`}
@@ -105,7 +108,7 @@ export default async function PurchasePage({ params }: Props) {
           <ArrowLeft className="h-4 w-4" />
           Back to Course Details
         </Link>
-        <h1 className="mt-4 text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+        <h1 className="text-aerojet-blue mt-4 text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
           {isExamOnly ? 'Book Exam' : 'Purchase Course'}
         </h1>
         <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -143,7 +146,7 @@ export default async function PurchasePage({ params }: Props) {
               <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 {isExamOnly ? 'Pool seat from' : 'Total Amount'}
               </span>
-              <span className="font-mono text-lg font-black text-aerojet-blue dark:text-blue-400">
+              <span className="text-aerojet-blue font-mono text-lg font-black dark:text-blue-400">
                 {course.currency}{' '}
                 {isExamOnly ? examPrice.toLocaleString() : Number(course.price).toLocaleString()}
               </span>

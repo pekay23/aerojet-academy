@@ -1,12 +1,12 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { apiError, withErrorHandler } from '@/lib/api/response'
+import { apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getBankRules, isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 
 export const runtime = 'nodejs'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext) => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
   if (!(await isInternalExamSystemEnabled())) {
@@ -74,7 +74,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           ? Math.max(0, Math.floor((effectiveExpiresAt.getTime() - Date.now()) / 1000))
           : 0
 
-        send(`event: tick\ndata: ${JSON.stringify({ timeRemaining: totalTimeSecs, expiresAt: effectiveExpiresAt?.toISOString() ?? null })}\n\n`)
+        send(
+          `event: tick\ndata: ${JSON.stringify({ timeRemaining: totalTimeSecs, expiresAt: effectiveExpiresAt?.toISOString() ?? null })}\n\n`
+        )
 
         if (totalTimeSecs <= 0) {
           clearInterval(timerInterval)

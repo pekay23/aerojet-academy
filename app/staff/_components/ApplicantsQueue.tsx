@@ -21,6 +21,7 @@ import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import ApplicantDetailDrawer from './ApplicantDetailDrawer'
 import { SortableTh } from '@/components/ui/sortable-th'
+import type { ApplicantCounts } from '@/lib/types/staff'
 
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
@@ -178,7 +179,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={loadApplicants}
+              onClick={fetchApplicants}
               className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"
             >
               <RefreshCw className="h-3.5 w-3.5" />
@@ -198,7 +199,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                     const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
                     if (res.success) {
                       toast.success(`Approved ${ids.length} applicants`)
-                      loadApplicants()
+                      fetchApplicants()
                     } else toast.error(res.error)
                   },
                 },
@@ -216,7 +217,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                         const res = await bulkDeleteUsers(ids)
                         if (res.success) {
                           toast.success(`Permanently deleted ${ids.length} applicants`)
-                          loadApplicants()
+                          fetchApplicants()
                         } else toast.error(res.error)
                       },
                     }
@@ -448,7 +449,9 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                               <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                                 {fullName}
                               </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">{applicant.email}</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {applicant.email}
+                              </p>
                             </div>
                           </div>
                         </td>

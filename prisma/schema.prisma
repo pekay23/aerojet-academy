@@ -118,6 +118,8 @@ model User {
   createdTuitionRuns          TuitionRun[]              @relation("CreatedTuitionRuns")
   wallet                      Wallet?
   withdrawalRequests          WithdrawalRequest[]
+  /// @deprecated No longer used, preserved for historical data
+  requiresAlternativeProctoring Boolean?
 
   @@index([email])
   @@index([academyEmail])
@@ -516,6 +518,8 @@ model AttendanceRecord {
   recordedBy  String?
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  /// @deprecated No longer used, preserved for historical data
+  sessionType String           @default("")
   class       Class            @relation(fields: [classId], references: [id], onDelete: Cascade)
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -547,6 +551,8 @@ model Grade {
   updatedAt      DateTime      @updatedAt
   deletedAt      DateTime?
   category       GradeCategory @default(INTERNAL_CA)
+  /// @deprecated No longer used, preserved for historical data
+  resultLocked   Boolean?
   enrollment     Enrollment    @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -978,6 +984,8 @@ model ExamResult {
   sourceNotes       String?
   examCategory      ExamCategory @default(OFFICIAL_EASA)
   deletedAt         DateTime?
+  /// @deprecated No longer used, preserved for historical data
+  resultLocked      Boolean?
   exam              Exam?        @relation(fields: [examId], references: [id], onDelete: Cascade)
   user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -1110,6 +1118,8 @@ model AuditLog {
   createdAt    DateTime @default(now())
   previousHash String?
   hash         String?
+  /// @deprecated Replaced by hash chain, preserved for historical data
+  entryHash    String?
   user         User?    @relation(fields: [userId], references: [id])
 
   @@index([userId])
@@ -1958,12 +1968,46 @@ model InternalExamAnswer {
   isCorrect      Boolean?
   pointsAwarded  Int                  @default(0)
   answeredAt     DateTime             @default(now())
+  /// @deprecated No longer used, preserved for historical data
+  flaggedForReview Boolean?
   question       InternalExamQuestion @relation(fields: [questionId], references: [id])
   session        InternalExamSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, questionId])
   @@index([sessionId])
   @@map("internal_exam_answers")
+}
+
+/// @deprecated Question versioning no longer used, preserved for historical data
+model InternalExamQuestionVersion {
+  id         String   @id @default(cuid())
+  questionId String
+  version    Int
+  content    Json?
+  createdAt  DateTime @default(now())
+  /// @deprecated Preserved for historical data
+  changeReason String?
+  /// @deprecated Preserved for historical data
+  changeType   String           @default("")
+  /// @deprecated Preserved for historical data
+  changedAt    DateTime?
+  /// @deprecated Preserved for historical data
+  changedById  String?
+  /// @deprecated Preserved for historical data
+  correctAnswer String?
+  /// @deprecated Preserved for historical data
+  difficulty   String           @default("")
+  /// @deprecated Preserved for historical data
+  isActive     Boolean?
+  /// @deprecated Preserved for historical data
+  options      Json?
+  /// @deprecated Preserved for historical data
+  points       Int?
+  /// @deprecated Preserved for historical data
+  text         String?
+
+  @@index([questionId])
+  @@map("internal_exam_question_versions")
 }
 
 model InternalExamBank {
@@ -2918,6 +2962,7 @@ enum NotificationType {
   SUCCESS
   WARNING
   ERROR
+  CRITICAL
   POOL_UPDATE
   PAYMENT_UPDATE
   EXAM_REMINDER
@@ -3487,6 +3532,7 @@ enum EmailRegistryCategory {
 enum InternalExamBankReviewState {
   DRAFT
   PENDING_REVIEW
+  PENDING_ADMIN_REVIEW
   APPROVED
   REJECTED
 }

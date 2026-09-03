@@ -17,7 +17,6 @@ import {
 } from 'lucide-react'
 import { LogbookPreview } from '@/components/shared/LogbookPreview'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
-import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface Entry {
   id: string
@@ -78,7 +77,6 @@ export default function StudentLogbook({ data }: { data: LogbookData }) {
   const router = useRouter()
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null)
   const [signing, setSigning] = useState<string | null>(null)
-  const { items, requestSort, sortConfig } = useSort(data.entries, { key: 'date', order: 'desc' })
   const { items, requestSort, sortConfig } = useSort(data.entries, { key: 'date', order: 'desc' })
 
   const handleSign = async (entryId: string) => {
@@ -193,13 +191,58 @@ export default function StudentLogbook({ data }: { data: LogbookData }) {
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
             <tr>
-              <SortHeader label="Date" sortKey="date" currentSort={sortConfig} onSort={requestSort} align="right" className="px-4 py-3 font-medium" />
-              <SortHeader label="Aircraft" sortKey="aircraftType" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" />
-              <SortHeader label="ATA" sortKey="ataChapter.code" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" />
-              <SortHeader label="Task" sortKey="taskDescription" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" />
-              <SortHeader label="Type" sortKey="maintenanceType" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" />
-              <SortHeader label="Hours" sortKey="durationHours" currentSort={sortConfig} onSort={requestSort} align="right" className="px-4 py-3 font-medium" />
-              <SortHeader label="Signed" sortKey="supervisorSignature" currentSort={sortConfig} onSort={requestSort} align="center" className="px-4 py-3 font-medium" />
+              <SortHeader
+                label="Date"
+                sortKey="date"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                align="right"
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="Aircraft"
+                sortKey="aircraftType"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="ATA"
+                sortKey="ataChapter.code"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="Task"
+                sortKey="taskDescription"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="Type"
+                sortKey="maintenanceType"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="Hours"
+                sortKey="durationHours"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                align="right"
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="Signed"
+                sortKey="supervisorSignature"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                align="center"
+                className="px-4 py-3 font-medium"
+              />
               <th className="w-10 px-4 py-3"></th>
             </tr>
           </thead>
@@ -218,7 +261,7 @@ export default function StudentLogbook({ data }: { data: LogbookData }) {
                     onClick={() => setExpandedEntry(expandedEntry === entry.id ? null : entry.id)}
                     className="cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
                   >
-                    <td className="px-4 py-3 text-right tabular-nums font-medium text-slate-700 dark:text-slate-300">
+                    <td className="px-4 py-3 text-right font-medium text-slate-700 tabular-nums dark:text-slate-300">
                       {format(new Date(entry.date), 'MMM d, yyyy')}
                     </td>
                     <td className="px-4 py-3">
@@ -242,7 +285,7 @@ export default function StudentLogbook({ data }: { data: LogbookData }) {
                         {entry.maintenanceType.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums font-bold text-slate-800 dark:text-white">
+                    <td className="px-4 py-3 text-right font-bold text-slate-800 tabular-nums dark:text-white">
                       {entry.durationHours}h
                     </td>
                     <td className="px-4 py-3 text-center">

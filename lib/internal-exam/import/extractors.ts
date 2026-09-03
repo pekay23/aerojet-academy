@@ -50,10 +50,7 @@ function parseOptionLine(line: string): { label: string; text: string } | null {
 }
 
 function detectCorrectAnswer(text: string): string | null {
-  const patterns = [
-    /(?:Answer|Correct|✓|✔|Right answer)[\s:]+([A-F])/i,
-    /(?:=>|→)\s*([A-F])$/i,
-  ]
+  const patterns = [/(?:Answer|Correct|✓|✔|Right answer)[\s:]+([A-F])/i, /(?:=>|→)\s*([A-F])$/i]
   for (const p of patterns) {
     const m = text.match(p)
     if (m) return m[1].toUpperCase()
@@ -66,7 +63,8 @@ export function detectConfidence(q: ExtractedQuestion): number {
   if (q.text.length > 20) score += 0.3
   if (q.options.length >= 3) score += 0.3
   if (q.correctAnswer) score += 0.2
-  if (q.options.some((o) => o.toLowerCase().includes(q.correctAnswer?.toLowerCase() || ''))) score += 0.2
+  if (q.options.some((o) => o.toLowerCase().includes(q.correctAnswer?.toLowerCase() || '')))
+    score += 0.2
   return Math.min(1, score)
 }
 
@@ -112,7 +110,7 @@ export async function extractFromJson(content: string): Promise<ExtractedQuestio
   return arr.map((q: RawQuestion) => {
     const question: ExtractedQuestion = {
       text: q.text || '',
-      options: Array.isArray(q.options) ? q.options : [],
+      options: Array.isArray(q.options) ? (q.options as string[]) : [],
       correctAnswer: q.correctAnswer || q.correct_answer || '',
       subTopic: q.subTopic || q.sub_topic,
       difficulty: q.difficulty,

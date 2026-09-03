@@ -52,11 +52,11 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase">
+                <span className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase">
                   {cls.course.code}
                 </span>
                 <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-slate-700" />
-                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase">
+                <span className="text-[10px] font-bold text-slate-400 uppercase dark:text-slate-300">
                   {cls.semester} {cls.academicYear}
                 </span>
               </div>
@@ -108,7 +108,7 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
         <div className="mt-auto flex gap-2">
           <Link
             href={`/instructor/attendance/${cls.id}`}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-aerojet-sky py-3 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
+            className="bg-aerojet-sky hover:bg-aerojet-blue flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-[10px] font-black tracking-widest text-white uppercase transition-all"
           >
             <ClipboardCheck className="h-3.5 w-3.5" />
             Attendance
@@ -121,6 +121,6 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
           </Link>
         </div>
       </div>
-    </MotionDiv>
+    </motion.div>
   )
 }

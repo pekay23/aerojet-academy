@@ -14,8 +14,12 @@ import AlertsCenter from './_components/AlertsCenter'
 import { getDashboardAlerts } from '@/lib/analytics/dashboard-alerts'
 import { UserStatus, UserRole, PaymentStatus, PoolStatus } from '@/types/enums'
 import type { SerializedPaymentCard } from '@/lib/staff/types'
-import type { SerializedPaymentCard } from '@/lib/staff/types'
-import { COUNTABLE_MEMBERSHIP_STATUSES, TERMINAL_POOL_STATUSES, UPCOMING_EVENT_STATUSES, LIVE_POOL_STATUSES } from '@/lib/utils/constants'
+import {
+  COUNTABLE_MEMBERSHIP_STATUSES,
+  TERMINAL_POOL_STATUSES,
+  UPCOMING_EVENT_STATUSES,
+  LIVE_POOL_STATUSES,
+} from '@/lib/utils/constants'
 import {
   Users,
   UserCheck,
@@ -26,13 +30,28 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
 
-async function fetchDashboardSettings(tx: Parameters<Parameters<typeof prismaUnfiltered.$transaction>[0]>[0]) {
+async function fetchDashboardSettings(
+  tx: Parameters<Parameters<typeof prismaUnfiltered.$transaction>[0]>[0]
+) {
   const settings = await tx.systemSetting.findMany({
     where: { key: { in: ['course_currency', 'target_monthly_revenue'] } },
   })
-  const map = new Map(settings.map(s => [s.key, s.value]))
+  const map = new Map(settings.map((s) => [s.key, s.value]))
   const currency = map.get('course_currency') || 'EUR'
   const targetMonthlyRevenue = Number(map.get('target_monthly_revenue') || '50000')
   const { getCurrencySymbol } = await import('@/lib/currency')
@@ -41,7 +60,7 @@ async function fetchDashboardSettings(tx: Parameters<Parameters<typeof prismaUnf
 
 function buildRevenueTimeline(
   approvedPayments: { amount: any; approvedAt: Date | null }[],
-  targetMonthlyRevenue: number,
+  targetMonthlyRevenue: number
 ) {
   const now = new Date()
   const revenueByMonth: Record<string, number> = {}
@@ -65,14 +84,18 @@ function buildRevenueTimeline(
   }))
 }
 
-function computeUserStats(userStatusCounts: { role: string; status: string; _count: { _all: number } }[]) {
-  const sumBy = (filter: (u: typeof userStatusCounts[number]) => boolean) =>
+function computeUserStats(
+  userStatusCounts: { role: string; status: string; _count: { _all: number } }[]
+) {
+  const sumBy = (filter: (u: (typeof userStatusCounts)[number]) => boolean) =>
     userStatusCounts.filter(filter).reduce((acc, u) => acc + (u._count._all ?? 0), 0)
 
   return {
-    totalUsers: sumBy(u => u.status === UserStatus.ACTIVE),
-    pendingApplicants: sumBy(u => u.role === UserRole.APPLICANT && u.status === UserStatus.PENDING),
-    activeStudents: sumBy(u => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE),
+    totalUsers: sumBy((u) => u.status === UserStatus.ACTIVE),
+    pendingApplicants: sumBy(
+      (u) => u.role === UserRole.APPLICANT && u.status === UserStatus.PENDING
+    ),
+    activeStudents: sumBy((u) => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE),
   }
 }
 
@@ -80,9 +103,15 @@ function computeEventStats(activeEventRaw: any) {
   if (!activeEventRaw) return null
   return {
     name: activeEventRaw.name,
-    totalSeatsFilled: activeEventRaw.pools.reduce((sum: number, p: any) => sum + p._count.memberships, 0),
+    totalSeatsFilled: activeEventRaw.pools.reduce(
+      (sum: number, p: any) => sum + p._count.memberships,
+      0
+    ),
     totalCapacity: activeEventRaw.pools.reduce((sum: number, p: any) => sum + p.maxCandidates, 0),
-    totalConfirmedRevenue: activeEventRaw.examBookings.reduce((sum: number, b: any) => sum + Number(b.amountPaid || 0), 0),
+    totalConfirmedRevenue: activeEventRaw.examBookings.reduce(
+      (sum: number, b: any) => sum + Number(b.amountPaid || 0),
+      0
+    ),
     targetRevenue: Number(activeEventRaw.minRevenueTarget),
     paymentDeadline: activeEventRaw.paymentDeadline,
   }
@@ -387,10 +416,7 @@ export default async function StaffDashboardPage() {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {data.recentPendingPayments.map((payment: SerializedPaymentCard) => (
-              <PaymentApprovalCard
-                key={payment.id}
-                payment={payment}
-              />
+              <PaymentApprovalCard key={payment.id} payment={payment} />
             ))}
           </div>
         </div>

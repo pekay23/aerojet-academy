@@ -37,7 +37,7 @@ export interface Occurrence {
 
 const DAY_ABBR = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-export export function parseDays(s: string | null | undefined): Set<string> {
+export function parseDays(s: string | null | undefined): Set<string> {
   if (!s) return new Set()
   return new Set(s.split(/[,;]/).map((x) => x.trim().slice(0, 3).toUpperCase()))
 }
@@ -64,7 +64,8 @@ export function expandClass(
   windowEnd: Date
 ): Occurrence[] {
   const out: Occurrence[] = []
-  const rangeEnd = cls.recurrenceUntil && cls.recurrenceUntil < windowEnd ? cls.recurrenceUntil : windowEnd
+  const rangeEnd =
+    cls.recurrenceUntil && cls.recurrenceUntil < windowEnd ? cls.recurrenceUntil : windowEnd
   const span = Math.max(0, cls.endDate.getTime() - cls.startDate.getTime())
   const startTime = timeOfDay(cls.startDate)
 
@@ -85,11 +86,15 @@ export function expandClass(
 
   const allowedDays = parseDays(cls.recurrenceDays ?? '')
   const stepDays =
-    cls.recurrenceType === 'DAILY' ? 1
-    : cls.recurrenceType === 'WEEKLY' ? 7
-    : cls.recurrenceType === 'BIWEEKLY' ? 14
-    : cls.recurrenceType === 'MONTHLY' ? 30
-    : 1
+    cls.recurrenceType === 'DAILY'
+      ? 1
+      : cls.recurrenceType === 'WEEKLY'
+        ? 7
+        : cls.recurrenceType === 'BIWEEKLY'
+          ? 14
+          : cls.recurrenceType === 'MONTHLY'
+            ? 30
+            : 1
 
   // Iterate day-by-day from the later of (cls.startDate, windowStart)
   let cursor = startOfDay(cls.startDate > windowStart ? cls.startDate : windowStart)
@@ -115,7 +120,9 @@ export function expandClass(
     }
     // Advance: for WEEKLY/BIWEEKLY with day-of-week filter, step daily but
     // rely on dayAllowed to skip; for DAILY/MONTHLY use stepDays.
-    cursor = new Date(cursor.getTime() + (cls.recurrenceType === 'MONTHLY' ? stepDays : 1) * 86400000)
+    cursor = new Date(
+      cursor.getTime() + (cls.recurrenceType === 'MONTHLY' ? stepDays : 1) * 86400000
+    )
   }
   return out
 }

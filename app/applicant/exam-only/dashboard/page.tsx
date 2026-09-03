@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Dashboard | Exam-Only Portal' }
 export const dynamic = 'force-dynamic'
@@ -98,10 +98,10 @@ export default async function ExamOnlyDashboardPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
       {/* Welcome Card */}
       <div className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Welcome, {firstName}
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -114,13 +114,13 @@ export default async function ExamOnlyDashboardPage() {
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800">
-              <Wallet className="h-5 w-5 text-aerojet-blue dark:text-slate-300" />
+              <Wallet className="text-aerojet-blue h-5 w-5 dark:text-slate-300" />
             </div>
-            <h2 className="text-lg font-black text-aerojet-blue dark:text-white">Wallet Balance</h2>
+            <h2 className="text-aerojet-blue text-lg font-black dark:text-white">Wallet Balance</h2>
           </div>
           <Link
             href="/applicant/wallet-top-up"
-            className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#001d42]"
+            className="bg-aerojet-blue inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#001d42]"
           >
             <CreditCard className="h-4 w-4" />
             Top Up
@@ -131,22 +131,18 @@ export default async function ExamOnlyDashboardPage() {
             <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
               Total Balance
             </p>
-            <p className="mt-1 text-xl font-black text-aerojet-blue dark:text-white">
+            <p className="text-aerojet-blue mt-1 text-xl font-black dark:text-white">
               {formatCurrency(balance)}
             </p>
           </div>
           <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
-            <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
-              Available
-            </p>
+            <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Available</p>
             <p className="mt-1 text-xl font-black text-green-600 dark:text-green-400">
               {formatCurrency(available)}
             </p>
           </div>
           <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
-            <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
-              Reserved
-            </p>
+            <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Reserved</p>
             <p className="mt-1 text-xl font-black text-amber-600 dark:text-amber-400">
               {formatCurrency(reserved)}
             </p>
@@ -179,16 +175,16 @@ export default async function ExamOnlyDashboardPage() {
           <Link
             key={label}
             href={href}
-            className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-aerojet-sky hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
+            className="group hover:border-aerojet-sky flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 transition-colors group-hover:bg-aerojet-blue dark:bg-slate-800/50">
+            <div className="group-hover:bg-aerojet-blue flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 transition-colors dark:bg-slate-800/50">
               <Icon className="h-5 w-5 text-slate-400 transition-colors group-hover:text-white" />
             </div>
             <div className="flex-1">
               <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{label}</span>
               <p className="text-xs text-slate-400 dark:text-slate-500">{description}</p>
             </div>
-            <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-aerojet-sky" />
+            <ArrowRight className="group-hover:text-aerojet-sky h-4 w-4 text-slate-300" />
           </Link>
         ))}
       </div>
@@ -198,11 +194,9 @@ export default async function ExamOnlyDashboardPage() {
         <div className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800">
-              <Package className="h-5 w-5 text-aerojet-blue dark:text-slate-300" />
+              <Package className="text-aerojet-blue h-5 w-5 dark:text-slate-300" />
             </div>
-            <h2 className="text-lg font-black text-aerojet-blue dark:text-white">
-              Upcoming Exams
-            </h2>
+            <h2 className="text-aerojet-blue text-lg font-black dark:text-white">Upcoming Exams</h2>
           </div>
           <div className="space-y-3">
             {activeBundles.map((booking) => (
@@ -244,15 +238,15 @@ export default async function ExamOnlyDashboardPage() {
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800">
-              <Clock className="h-5 w-5 text-aerojet-blue dark:text-slate-300" />
+              <Clock className="text-aerojet-blue h-5 w-5 dark:text-slate-300" />
             </div>
-            <h2 className="text-lg font-black text-aerojet-blue dark:text-white">
+            <h2 className="text-aerojet-blue text-lg font-black dark:text-white">
               Recent Bookings
             </h2>
           </div>
           <Link
             href="/applicant/exam-only"
-            className="text-xs font-bold text-aerojet-sky hover:underline"
+            className="text-aerojet-sky text-xs font-bold hover:underline"
           >
             View All
           </Link>
@@ -266,7 +260,7 @@ export default async function ExamOnlyDashboardPage() {
             </p>
             <Link
               href="/applicant/exam-only"
-              className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-aerojet-sky hover:underline"
+              className="text-aerojet-sky mt-3 inline-flex items-center gap-2 text-xs font-bold hover:underline"
             >
               Book your first exam <ArrowRight className="h-3 w-3" />
             </Link>

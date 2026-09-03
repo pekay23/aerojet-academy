@@ -3,7 +3,6 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { UploadThingError } from 'uploadthing/server'
 import { recordFileUpload } from '@/lib/storage/file-upload-record'
 import { trackDocumentUpload } from '@/lib/analytics/events'
-import { trackDocumentUpload } from '@/lib/analytics/events'
 
 const f = createUploadthing()
 
@@ -181,13 +180,19 @@ export const ourFileRouter = {
 
   examQuestionImport: f({
     'text/plain': { maxFileSize: '16MB', maxFileCount: 1 },
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': { maxFileSize: '16MB', maxFileCount: 1 },
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': {
+      maxFileSize: '16MB',
+      maxFileCount: 1,
+    },
     'application/pdf': { maxFileSize: '16MB', maxFileCount: 1 },
     'application/json': { maxFileSize: '16MB', maxFileCount: 1 },
   })
     .middleware(async ({ req }) => {
       const session = await getAuthSession()
-      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(session.user.role)) {
+      if (
+        !session ||
+        !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(session.user.role)
+      ) {
         throw new UploadThingError('Unauthorized')
       }
       return { userId: session.user.id }

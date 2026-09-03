@@ -7,7 +7,7 @@ import crypto from 'crypto'
 
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
 
-export export function base32Decode(encoded: string): Buffer {
+export function base32Decode(encoded: string): Buffer {
   let bits = ''
   for (const char of encoded.toUpperCase().replace(/[=\s]/g, '')) {
     const val = BASE32_ALPHABET.indexOf(char)
@@ -21,7 +21,7 @@ export export function base32Decode(encoded: string): Buffer {
   return Buffer.from(bytes)
 }
 
-export export function generateCode(secret: string, counter: number): string {
+export function generateCode(secret: string, counter: number): string {
   const key = base32Decode(secret)
   const counterBuf = Buffer.alloc(8)
   counterBuf.writeUInt32BE(Math.floor(counter / 0x100000000), 0)

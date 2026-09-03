@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   Search,
   Filter,
@@ -14,6 +14,8 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+
+const MotionDiv = motion.div
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -61,8 +63,6 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
   const [score, setScore] = useState<string>('')
   const [comments, setComments] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState(25)
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
 
@@ -120,12 +120,12 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
             placeholder="Search by student, assessment, or module..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-14 rounded-2xl border-slate-100 bg-white pl-11 text-sm font-medium shadow-sm transition-all focus:border-aerojet-sky focus:ring-4 focus:ring-blue-50/50 dark:border-slate-800 dark:bg-slate-900"
+            className="focus:border-aerojet-sky h-14 rounded-2xl border-slate-100 bg-white pl-11 text-sm font-medium shadow-sm transition-all focus:ring-4 focus:ring-blue-50/50 dark:border-slate-800 dark:bg-slate-900"
           />
         </div>
 
         <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-500 uppercase">
-          <ClipboardCheck className="h-4 w-4 text-aerojet-sky" />
+          <ClipboardCheck className="text-aerojet-sky h-4 w-4" />
           <span>{filteredQueue.length} Pending Submissions</span>
         </div>
       </div>
@@ -134,7 +134,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
       <div className="grid gap-4">
         <AnimatePresence mode="popLayout">
           {filteredQueue.length > 0 ? (
-            paged.map((item) => (
+            paged.map((item: PendingGrade) => (
               <MotionDiv
                 key={item.id}
                 layout
@@ -143,16 +143,16 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="group overflow-hidden rounded-3xl border-slate-100 bg-white transition-all hover:border-aerojet-sky/30 hover:shadow-xl hover:shadow-blue-500/5 dark:border-slate-800 dark:bg-slate-900">
+                <Card className="group hover:border-aerojet-sky/30 overflow-hidden rounded-3xl border-slate-100 bg-white transition-all hover:shadow-xl hover:shadow-blue-500/5 dark:border-slate-800 dark:bg-slate-900">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row md:items-center">
                       {/* Left: Module Info */}
                       <div className="flex items-center gap-4 border-b border-slate-50 p-6 md:w-64 md:border-r md:border-b-0 dark:border-slate-800/50">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/20">
-                          <BookOpen className="h-6 w-6 text-aerojet-sky" />
+                          <BookOpen className="text-aerojet-sky h-6 w-6" />
                         </div>
                         <div>
-                          <p className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase">
+                          <p className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase">
                             {item.enrollment.course.code}
                           </p>
                           <h4 className="line-clamp-1 text-sm font-black text-slate-900 dark:text-white">
@@ -192,7 +192,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
 
                           <Button
                             onClick={() => setSelectedGrade(item)}
-                            className="rounded-xl bg-aerojet-blue px-6 font-black text-white hover:bg-[#003a7c] dark:bg-blue-600 dark:hover:bg-blue-700"
+                            className="bg-aerojet-blue rounded-xl px-6 font-black text-white hover:bg-[#003a7c] dark:bg-blue-600 dark:hover:bg-blue-700"
                           >
                             Grade Now
                             <ChevronRight className="ml-2 h-4 w-4" />
@@ -219,7 +219,13 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
       </div>
 
       {total > 0 && (
-        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+        <TablePagination
+          page={page}
+          perPage={perPage}
+          total={total}
+          onPageChange={setPage}
+          onPerPageChange={setPerPage}
+        />
       )}
 
       {/* Grading Dialog */}
@@ -282,7 +288,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
                   value={comments}
                   onChange={(e) => setComments(e.target.value)}
                   placeholder="Provide constructive feedback for the student..."
-                  className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-medium focus:border-aerojet-sky focus:ring-4 focus:ring-blue-50/50 focus:outline-none dark:border-slate-800 dark:bg-slate-900"
+                  className="focus:border-aerojet-sky w-full rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-medium focus:ring-4 focus:ring-blue-50/50 focus:outline-none dark:border-slate-800 dark:bg-slate-900"
                 />
               </div>
             </div>
@@ -291,7 +297,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
               <Button
                 onClick={handleGradeSubmit}
                 disabled={isSubmitting || !score}
-                className="h-14 w-full rounded-2xl bg-aerojet-sky text-base font-black text-white hover:bg-[#3b8dcd] disabled:opacity-50"
+                className="bg-aerojet-sky h-14 w-full rounded-2xl text-base font-black text-white hover:bg-[#3b8dcd] disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">

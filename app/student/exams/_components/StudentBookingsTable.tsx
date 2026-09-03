@@ -9,8 +9,6 @@ import { toast } from 'sonner'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 import { payPendingExamBooking } from '@/app/student/actions'
 import { PaymentStatus } from '@/types/enums'
-import { PaymentStatus } from '@/types/enums'
-import { PaymentStatus } from '@/types/enums'
 
 interface BookingRecord {
   id: string
@@ -101,14 +99,17 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                 <td className="px-6 py-4">
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-bold uppercase ${
-                      booking.status === PaymentStatus.APPROVED || booking.status === PaymentStatus.COMPLETED
+                      booking.status === PaymentStatus.APPROVED ||
+                      booking.status === PaymentStatus.COMPLETED
                         ? 'bg-emerald-50 text-emerald-700'
-                        : booking.status === PaymentStatus.CANCELLED || booking.status === PaymentStatus.REJECTED
+                        : booking.status === PaymentStatus.CANCELLED ||
+                            booking.status === PaymentStatus.REJECTED
                           ? 'bg-red-50 text-red-700'
                           : 'bg-amber-50 text-amber-700'
                     }`}
                   >
-                    {(booking.status === PaymentStatus.APPROVED || booking.status === PaymentStatus.COMPLETED) ? (
+                    {booking.status === PaymentStatus.APPROVED ||
+                    booking.status === PaymentStatus.COMPLETED ? (
                       <CreditCard className="h-3 w-3" aria-hidden="true" />
                     ) : (
                       <Clock className="h-3 w-3" aria-hidden="true" />
@@ -122,9 +123,7 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                       {booking.amountPaid > 0 ? (
                         <>€{booking.amountPaid.toFixed(2)}</>
                       ) : booking.bookingGroupRef ? (
-                        <span className="text-xs text-slate-400 uppercase italic">
-                          Bundle Seat
-                        </span>
+                        <span className="text-xs text-slate-400 uppercase italic">Bundle Seat</span>
                       ) : (
                         <>€0.00</>
                       )}
@@ -133,7 +132,7 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                       <button
                         onClick={() => handlePay(booking.id)}
                         disabled={isPaying === booking.id}
-                        className="rounded-lg bg-primary px-3 py-1 text-xs font-bold text-white transition-all hover:bg-primary/90 disabled:opacity-50"
+                        className="bg-primary hover:bg-primary/90 rounded-lg px-3 py-1 text-xs font-bold text-white transition-all disabled:opacity-50"
                       >
                         {isPaying === booking.id
                           ? 'Processing...'

@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
 import { Eye, Clock, Calendar, User as UserIcon, ArrowLeft } from 'lucide-react'
 import ShareButtons from '../_components/ShareButtons'
 import { getBaseUrl } from '@/lib/utils/url'
@@ -152,7 +152,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
       />
 
       {/* Immersive Hero Section */}
-      <div className="relative h-[60vh] min-h-[400px] w-full overflow-hidden sm:h-[70vh]">
+      <div className="relative h-[60vh] min-h-100 w-full overflow-hidden sm:h-[70vh]">
         {article.coverImage ? (
           <>
             <Image

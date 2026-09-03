@@ -5,7 +5,13 @@ import { requireInstructor } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
-import { extractFromTxt, extractFromJson, extractFromDocx, extractFromPdf, detectConfidence } from '@/lib/internal-exam/import/extractors'
+import {
+  extractFromTxt,
+  extractFromJson,
+  extractFromDocx,
+  extractFromPdf,
+  detectConfidence,
+} from '@/lib/internal-exam/import/extractors'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 
@@ -25,15 +31,20 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   const body = await req.json()
-  const { fileUrl, fileName, bankId } = body as { fileUrl: string; fileName: string; bankId: string }
+  const { fileUrl, fileName, bankId } = body as {
+    fileUrl: string
+    fileName: string
+    bankId: string
+  }
 
   const bank = await prismaUnfiltered.internalExamBank.findFirst({
     where: { id: bankId },
-    include: { instructorAssignments: { where: { instructorId: user.id } } },
+    include: { instructors: { where: { instructorId: user.id } } },
   })
   if (!bank) return apiError('Bank not found', 404)
-  const grant = bank.instructorAssignments.find((a) => a.instructorId === user.id)
-  if (!grant?.canEdit) return apiError('You do not have permission to import questions into this bank', 403)
+  const grant = bank.instructors.find((a: { instructorId: string }) => a.instructorId === user.id)
+  if (!grant?.canEdit)
+    return apiError('You do not have permission to import questions into this bank', 403)
 
   const fileRes = await fetch(fileUrl)
   if (!fileRes.ok) return apiError('Failed to fetch uploaded file', 400)
@@ -58,7 +69,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     })
   )
 
-  const duplicateCount = questions.filter((q) => existingHashes.has(questionHash(q.text, q.options))).length
+  const duplicateCount = questions.filter((q) =>
+    existingHashes.has(questionHash(q.text, q.options))
+  ).length
   const lowConfidenceCount = questions.filter((q) => detectConfidence(q) < 0.5).length
 
   await createAuditLog({

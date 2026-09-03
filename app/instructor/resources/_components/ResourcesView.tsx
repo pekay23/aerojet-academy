@@ -3,6 +3,9 @@
 import React, { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+
+const MotionDiv = motion.div
+import { BookOpen, GraduationCap, ClipboardList, Shield, Search, Filter } from 'lucide-react'
 import ResourceCard from './ResourceCard'
 
 interface Resource {

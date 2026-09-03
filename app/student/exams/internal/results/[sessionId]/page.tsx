@@ -60,10 +60,6 @@ export default function ExamResultsPage() {
   const [showExplanations, setShowExplanations] = useState(false)
   const [certificate, setCertificate] = useState<CertificateInfo | null>(null)
   const [certLoading, setCertLoading] = useState(false)
-  const [certificate, setCertificate] = useState<CertificateInfo | null>(null)
-  const [certLoading, setCertLoading] = useState(false)
-  const [certificate, setCertificate] = useState<CertificateInfo | null>(null)
-  const [certLoading, setCertLoading] = useState(false)
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -97,7 +93,9 @@ export default function ExamResultsPage() {
       <div className="mx-auto max-w-lg py-12">
         <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center dark:border-red-800 dark:bg-red-900/20">
           <XCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
-          <p className="text-lg font-black text-slate-900 dark:text-white">{error || 'Results not available'}</p>
+          <p className="text-lg font-black text-slate-900 dark:text-white">
+            {error || 'Results not available'}
+          </p>
           <button
             onClick={() => router.push('/student/exams/internal')}
             className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-800 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-800/90"
@@ -115,9 +113,12 @@ export default function ExamResultsPage() {
       <div className="mx-auto max-w-lg py-12">
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-800 dark:bg-amber-900/10">
           <Clock className="mx-auto mb-4 h-12 w-12 text-amber-500" />
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white">Results Pending Review</h2>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+            Results Pending Review
+          </h2>
           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            Your answers have been recorded. Results are pending admin review and will be published to your profile once confirmed.
+            Your answers have been recorded. Results are pending admin review and will be published
+            to your profile once confirmed.
           </p>
           <button
             onClick={() => router.push('/student/exams/internal')}
@@ -131,20 +132,20 @@ export default function ExamResultsPage() {
     )
   }
 
-  const answeredCount = data.questions.filter(q => q.studentAnswer !== null).length
-  const correctCount = data.questions.filter(q => q.isCorrect).length
+  const answeredCount = data.questions.filter((q) => q.studentAnswer !== null).length
+  const correctCount = data.questions.filter((q) => q.isCorrect).length
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 py-8">
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push('/student/exams/internal')}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 hover:text-aerojet-blue dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+          className="hover:text-aerojet-blue flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-blue-800 dark:text-white sm:text-3xl">
+          <h1 className="text-2xl font-black tracking-tight text-blue-800 sm:text-3xl dark:text-white">
             Exam Results
           </h1>
           <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -154,21 +155,37 @@ export default function ExamResultsPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className={`rounded-2xl border p-5 text-center ${data.passed ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/10' : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/10'}`}>
-          <p className="text-3xl font-black text-slate-900 dark:text-white">{data.percentage?.toFixed(1)}%</p>
+        <div
+          className={`rounded-2xl border p-5 text-center ${data.passed ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/10' : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/10'}`}
+        >
+          <p className="text-3xl font-black text-slate-900 dark:text-white">
+            {data.percentage?.toFixed(1)}%
+          </p>
           <p className="text-xs font-bold text-slate-500">Score</p>
-          <div className={`mt-2 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${data.passed ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
-            {data.passed ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
+          <div
+            className={`mt-2 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${data.passed ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}
+          >
+            {data.passed ? (
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            ) : (
+              <XCircle className="h-3.5 w-3.5" />
+            )}
             {data.passed ? 'PASSED' : 'FAILED'}
           </div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-3xl font-black text-slate-900 dark:text-white">{data.score}/{data.totalPoints}</p>
+          <p className="text-3xl font-black text-slate-900 dark:text-white">
+            {data.score}/{data.totalPoints}
+          </p>
           <p className="text-xs font-bold text-slate-500">Points</p>
-          <p className="mt-2 text-xs text-slate-400">{answeredCount} answered, {correctCount} correct</p>
+          <p className="mt-2 text-xs text-slate-400">
+            {answeredCount} answered, {correctCount} correct
+          </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-3xl font-black text-slate-900 dark:text-white">{data.questions.length}</p>
+          <p className="text-3xl font-black text-slate-900 dark:text-white">
+            {data.questions.length}
+          </p>
           <p className="text-xs font-bold text-slate-500">Questions</p>
           <p className="mt-2 text-xs text-slate-400">Pass mark: {data.passMarkPct ?? 75}%</p>
         </div>
@@ -176,7 +193,9 @@ export default function ExamResultsPage() {
 
       <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
         <div>
-          <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Review Options</h3>
+          <h3 className="text-sm font-black tracking-widest text-slate-400 uppercase">
+            Review Options
+          </h3>
           <p className="text-xs text-slate-500">Choose what to reveal in the breakdown below</p>
         </div>
         <div className="flex gap-3">
@@ -240,7 +259,9 @@ export default function ExamResultsPage() {
                 )}
               </div>
 
-              <p className="mt-3 text-sm font-medium text-slate-800 dark:text-slate-200">{q.text}</p>
+              <p className="mt-3 text-sm font-medium text-slate-800 dark:text-slate-200">
+                {q.text}
+              </p>
 
               <div className="mt-3 grid gap-2 sm:grid-cols-3">
                 {q.options.map((opt, idx) => {
@@ -253,12 +274,14 @@ export default function ExamResultsPage() {
                         isCorrectAnswer
                           ? 'border-green-300 bg-green-100 font-bold text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-200'
                           : isStudentAnswer && !isCorrectAnswer
-                          ? 'border-red-300 bg-red-100 font-bold text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200'
-                          : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'
+                            ? 'border-red-300 bg-red-100 font-bold text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200'
+                            : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'
                       }`}
                     >
                       <span className="font-bold">{optionLabels[idx]}:</span> {opt}
-                      {isStudentAnswer && <span className="ml-1 text-[10px] text-slate-400">(your answer)</span>}
+                      {isStudentAnswer && (
+                        <span className="ml-1 text-[10px] text-slate-400">(your answer)</span>
+                      )}
                     </div>
                   )
                 })}
@@ -266,14 +289,16 @@ export default function ExamResultsPage() {
 
               {showAnswers && !q.isCorrect && (
                 <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3 text-sm dark:border-green-800 dark:bg-green-900/10">
-                  <span className="font-bold text-green-700 dark:text-green-300">Correct answer: </span>
+                  <span className="font-bold text-green-700 dark:text-green-300">
+                    Correct answer:{' '}
+                  </span>
                   <span className="text-green-800 dark:text-green-200">{q.correctAnswer}</span>
                 </div>
               )}
 
               {showExplanations && q.explanation && (
                 <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                  <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-amber-600 uppercase dark:text-amber-400">
                     <Lightbulb className="h-4 w-4" />
                     Explanation
                   </div>

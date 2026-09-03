@@ -29,7 +29,10 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UploadButton } from '@/lib/uploads/uploadthing'
 import { PROGRAMMES } from '@/lib/utils/constants'
-import { internalExamRegistrationSchema, type InternalExamRegistrationInput } from '@/lib/validation/schemas'
+import {
+  internalExamRegistrationSchema,
+  type InternalExamRegistrationInput,
+} from '@/lib/validation/schemas'
 import { format } from 'date-fns'
 
 interface PreExamFormProps {
@@ -72,7 +75,7 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
       consentIdentity: false,
       consentProcessing: false,
     },
-  })
+  } as any)
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true)
@@ -195,7 +198,7 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {PROGRAMMES.map(p => (
+                        {PROGRAMMES.map((p) => (
                           <SelectItem key={p.value} value={p.value}>
                             {p.label}
                           </SelectItem>
@@ -220,15 +223,13 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
                         onChange={(e) => {
                           const modules = e.target.value
                             .split(',')
-                            .map(m => m.trim())
+                            .map((m) => m.trim())
                             .filter(Boolean)
                           field.onChange(modules)
                         }}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Enter module codes separated by commas.
-                    </FormDescription>
+                    <FormDescription>Enter module codes separated by commas.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -271,7 +272,7 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
                     <img
                       src={photoUrl}
                       alt="Candidate preview"
-                      className="h-16 w-16 rounded-full object-cover border"
+                      className="h-16 w-16 rounded-full border object-cover"
                     />
                   )}
                   <UploadButton
@@ -288,7 +289,8 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
                       toast.error(`Upload failed: ${error.message}`)
                     }}
                     appearance={{
-                      button: 'bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl',
+                      button:
+                        'bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl',
                       allowedContent: 'text-slate-500 text-xs mt-1',
                     }}
                   />
@@ -308,7 +310,7 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {ID_DOCUMENT_TYPES.map(t => (
+                        {ID_DOCUMENT_TYPES.map((t) => (
                           <SelectItem key={t.value} value={t.value}>
                             {t.label}
                           </SelectItem>
@@ -342,12 +344,9 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
                 control={form.control}
                 name="consentTruthfulness"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem className="flex flex-row items-start space-y-0 space-x-3">
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-sm font-medium">
@@ -366,17 +365,12 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
                 control={form.control}
                 name="consentMonitoring"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem className="flex flex-row items-start space-y-0 space-x-3">
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="text-sm font-medium">
-                        Consent to monitoring
-                      </FormLabel>
+                      <FormLabel className="text-sm font-medium">Consent to monitoring</FormLabel>
                       <FormDescription className="text-xs">
                         I consent to being monitored during the examination for integrity purposes.
                       </FormDescription>
@@ -390,19 +384,17 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
                 control={form.control}
                 name="consentIdentity"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem className="flex flex-row items-start space-y-0 space-x-3">
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-sm font-medium">
                         Consent to identity capture
                       </FormLabel>
                       <FormDescription className="text-xs">
-                        I consent to the capture and processing of my identity data for exam verification.
+                        I consent to the capture and processing of my identity data for exam
+                        verification.
                       </FormDescription>
                     </div>
                     <FormMessage />
@@ -414,12 +406,9 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
                 control={form.control}
                 name="consentProcessing"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem className="flex flex-row items-start space-y-0 space-x-3">
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-sm font-medium">
