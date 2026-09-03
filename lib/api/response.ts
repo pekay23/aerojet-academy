@@ -110,7 +110,7 @@ export function apiServerError(message: string = 'Internal server error'): NextR
 export type RouteHandler = (req: NextRequest, ctx?: any) => Promise<NextResponse>
 
 export function withErrorHandler(handler: RouteHandler) {
-  return async (req: NextRequest, ctx: any) => {
+  return async (req: NextRequest, ctx?: any) => {
     try {
       // In Next.js 15, we need to await params if it's a promise
       const params = ctx?.params ? await ctx.params : undefined

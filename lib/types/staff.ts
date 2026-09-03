@@ -26,6 +26,9 @@ export interface SerializedStudentProfile {
   pathwayRel?: { code: string; name: string } | null
   academicYear?: { id: string; name: string } | null
   semester?: { id: string; name: string } | null
+  licenseTargets?: Array<{
+    licenseCategory: { name?: string | null; code?: string | null } | null
+  }>
 }
 
 export interface SerializedWallet {
@@ -44,6 +47,7 @@ export interface SerializedWalletTransaction {
   referenceId: string | null
   proofUrl: string | null
   staffName: string | null
+  createdBy?: string | null
   balanceBefore: number | null
   balanceAfter: number | null
   reservedBefore: number | null
@@ -59,6 +63,7 @@ export interface SerializedEnrollment {
   status: string
   amountPaid: number | null
   enrolledAt: string
+  createdAt?: string
   completedAt: string | null
   course: {
     id: string
@@ -72,6 +77,7 @@ export interface SerializedEnrollment {
     registrationFee: number
     profile: SerializedProfile | null
   }
+  grades?: SerializedGrade[]
 }
 
 export interface SerializedExamBooking {
@@ -90,6 +96,15 @@ export interface SerializedExamBooking {
   eventName: string | null
   sittingLabel: string | null
   attendanceStatus: string | null
+  bookedAt?: string | null
+  createdAt?: string
+  course?: { name: string; code: string } | null
+  exam?: {
+    examComponent?: {
+      course?: { name: string; code: string } | null
+    } | null
+  } | null
+  event?: { name: string } | null
 }
 
 export interface SerializedExamResult {
@@ -103,6 +118,12 @@ export interface SerializedExamResult {
   sourceNotes: string | null
   certificateUrl: string | null
   examCategory: string | null
+  createdAt?: string
+  exam?: {
+    examComponent?: {
+      course?: { code: string; name: string } | null
+    } | null
+  } | null
 }
 
 export interface SerializedExamBundle {
@@ -113,12 +134,15 @@ export interface SerializedExamBundle {
   amountPaid: number
   status: string
   validUntil: string | null
+  createdAt?: string
 }
 
 export interface SerializedPayment {
   id: string
   amount: number
   currency: string
+  paymentCurrency?: string | null
+  originalAmount?: number | null
   status: string
   referenceType: string
   referenceCode: string | null
@@ -226,7 +250,7 @@ export interface SerializedStudent {
     specialization: string | null
     qualifications: string | null
   } | null
-  staffProfile: { employeeId: string; department: string | null } | null
+  staffProfile: { employeeId: string; department: string | null; position?: string | null } | null
   emailVerified: string | null
   wallet: SerializedWallet | null
   walletTransactions: SerializedWalletTransaction[]
@@ -235,14 +259,70 @@ export interface SerializedStudent {
   examResults: SerializedExamResult[]
   examBundles: SerializedExamBundle[]
   payments: SerializedPayment[]
-  attendanceRecords: unknown[]
-  fullTimeEnrollments: unknown[]
-  modularEnrollments: unknown[]
-  grades: unknown[]
+  attendanceRecords: SerializedAttendanceRecord[]
+  fullTimeEnrollments: SerializedFullTimeEnrollment[]
+  modularEnrollments: SerializedModularEnrollment[]
+  grades: SerializedGrade[]
   studentId?: string | null
   paymentApprovedBy?: string | null
   referralsReceived?: unknown[]
   referralsMade?: unknown[]
+  isAmbassador?: boolean
+}
+
+export interface SerializedFullTimeEnrollment {
+  id: string
+  currentYearNumber?: number | null
+  status: string
+  startDate?: string | null
+  createdAt?: string | null
+  programme?: { code: string; name: string } | null
+  milestones?: SerializedMilestone[]
+  ojtPeriods?: SerializedOjtPeriod[]
+  academicYear?: string | null
+}
+
+export interface SerializedModularEnrollment {
+  id: string
+  createdAt?: string | null
+  package?: { name: string } | null
+  status?: string
+  amountPaid?: number
+}
+
+export interface SerializedAttendanceRecord {
+  id: string
+  date?: string | null
+  createdAt?: string | null
+  status?: string
+  minutesLate?: number | null
+  class?: {
+    name?: string | null
+    course?: { code: string } | null
+  } | null
+}
+
+export interface SerializedGrade {
+  id: string
+  assessmentName?: string
+  assessmentType?: string
+  score: number
+  maxScore: number
+  percentage: number
+  grade?: string | null
+  assessmentDate?: string | null
+  createdAt?: string | null
+}
+
+export interface SerializedMilestone {
+  id: string
+  milestoneType?: string
+  yearNumber: number
+  amountDue: number
+  dueDate?: string | null
+  paidAt?: string | null
+  status?: string
+  createdAt?: string | null
 }
 
 export interface SerializedOjtPeriod {

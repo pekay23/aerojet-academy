@@ -79,7 +79,9 @@ describe('Student Actions', () => {
 
       const result = await enrollInCourse('course-1')
 
-      expect(result.error).toBe('You are already enrolled or have a pending enrollment for this course.')
+      expect(result.error).toBe(
+        'You are already enrolled or have a pending enrollment for this course.'
+      )
     })
 
     it('returns error when user is not active', async () => {
@@ -139,7 +141,7 @@ describe('Student Actions', () => {
   describe('changePassword', () => {
     it('returns error when current password is incorrect', async () => {
       const { compare } = await import('bcryptjs')
-      vi.mocked(compare).mockResolvedValue(false)
+      ;(vi.mocked(compare) as any).mockResolvedValue(false)
 
       prismaMock.user.findUnique.mockResolvedValue({
         id: 'student-1',

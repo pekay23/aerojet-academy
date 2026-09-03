@@ -11,7 +11,7 @@ function getEnvCreds(
   emailEnv: string | undefined,
   passwordEnv: string | undefined,
   fallbackEmail: string,
-  fallbackPassword: string,
+  fallbackPassword: string
 ): TestCredentials {
   const email = emailEnv || fallbackEmail
   const password = passwordEnv || fallbackPassword
@@ -19,7 +19,7 @@ function getEnvCreds(
   if (!emailEnv || !passwordEnv) {
     if (!fallbackWarningShown) {
       console.warn(
-        '[e2e/auth] Using fallback test credentials. Set E2E_*_EMAIL / E2E_*_PASSWORD env vars for production runs.',
+        '[e2e/auth] Using fallback test credentials. Set E2E_*_EMAIL / E2E_*_PASSWORD env vars for production runs.'
       )
       fallbackWarningShown = true
     }
@@ -33,7 +33,7 @@ export function getStudentCredentials(): TestCredentials {
     process.env.E2E_STUDENT_EMAIL,
     process.env.E2E_STUDENT_PASSWORD,
     'student@aerojet-academy.com',
-    'Student@2026',
+    'Student@2026'
   )
 }
 
@@ -42,7 +42,7 @@ export function getStaffCredentials(): TestCredentials {
     process.env.E2E_STAFF_EMAIL,
     process.env.E2E_STAFF_PASSWORD,
     'staff@aerojet-academy.com',
-    'Staff@2026',
+    'Staff@2026'
   )
 }
 
@@ -51,7 +51,7 @@ export function getAdminCredentials(): TestCredentials {
     process.env.E2E_ADMIN_EMAIL,
     process.env.E2E_ADMIN_PASSWORD,
     'admin@aerojet-academy.com',
-    'Admin@2026',
+    'Admin@2026'
   )
 }
 
@@ -60,7 +60,7 @@ export function getInstructorCredentials(): TestCredentials {
     process.env.E2E_INSTRUCTOR_EMAIL,
     process.env.E2E_INSTRUCTOR_PASSWORD,
     'instructor@aerojet-academy.com',
-    'Instructor@2026',
+    'Instructor@2026'
   )
 }
 
@@ -69,7 +69,16 @@ export function getApplicantCredentials(): TestCredentials {
     process.env.E2E_APPLICANT_EMAIL,
     process.env.E2E_APPLICANT_PASSWORD,
     'applicant@aerojet-academy.com',
-    'Applicant@2026',
+    'Applicant@2026'
+  )
+}
+
+export function getExaminerCredentials(): TestCredentials {
+  return getEnvCreds(
+    process.env.E2E_EXAMINER_EMAIL,
+    process.env.E2E_EXAMINER_PASSWORD,
+    'examiner@aerojet-academy.com',
+    'Examiner@2026'
   )
 }
 
@@ -106,9 +115,9 @@ export async function loginAsExaminer(page: Page) {
 }
 
 export async function waitForDashboard(page: Page, expectedText?: string) {
-  const matcher = expectedText
-    ? new RegExp(expectedText, 'i')
-    : /Dashboard|Welcome/i
+  const matcher = expectedText ? new RegExp(expectedText, 'i') : /Dashboard|Welcome/i
   await expect(page.locator('body')).toContainText(matcher, { timeout: 30000 })
-  await expect(page.locator('nav, [role="navigation"], aside').first()).toBeVisible({ timeout: 15000 })
+  await expect(page.locator('nav, [role="navigation"], aside').first()).toBeVisible({
+    timeout: 15000,
+  })
 }
