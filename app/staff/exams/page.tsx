@@ -144,124 +144,143 @@ async function EventsTab({ query }: { query?: string }) {
     ])
 
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="w-full max-w-sm">
-            <SearchInput id="exams-events-search" placeholder="Search events..." />
-          </div>
-          <div className="flex gap-3">
-            <GroupCharterModal
-              events={charterEvents}
-              modules={charterModules}
-            />
-            <Link
-              href="/staff/exams/events/create"
-              className="flex shrink-0 items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
-            >
-              <Plus className="h-4 w-4" />
-              Create Event
-            </Link>
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-bold text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
-                <tr>
-                  <th className="px-6 py-4">Event</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Date & Venue</th>
-                  <th className="px-6 py-4">Pools / Candidates</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {events.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center">
-                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
-                        <Calendar className="h-6 w-6 text-slate-300" />
-                      </div>
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                        No exam events found
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Create your first exam event to start managing bookings.
-                      </p>
-                    </td>
-                  </tr>
-                ) : (
-                  events.map((event) => {
-                    const totalCandidates = event.pools.reduce(
-                      (acc, pool) => acc + pool.currentMemberCount,
-                      0
-                    )
-                    const totalCapacity = event.pools.reduce(
-                      (acc, pool) => acc + pool.maxCandidates,
-                      0
-                    )
-
-                    return (
-                      <tr
-                        key={event.id}
-                        className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
-                      >
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-slate-900 dark:text-slate-100">
-                            {event.name}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${
-                              event.status === 'OPEN'
-                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                                : event.status === 'CONFIRMED'
-                                  ? 'bg-blue-50 text-blue-600 border border-blue-100'
-                                  : event.status === 'DRAFT'
-                                    ? 'bg-slate-50 text-slate-500 border border-slate-100'
-                                    : 'bg-red-50 text-red-600 border border-red-100'
-                            }`}
-                          >
-                            {event.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                            <Calendar className="h-3.5 w-3.5 text-aerojet-blue" />
-                            {format(new Date(event.startDate), 'MMM d')} –{' '}
-                            {format(new Date(event.endDate), 'MMM d, yyyy')}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="font-medium text-slate-700">{event._count.pools} Pools</div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
-                            {totalCandidates} / {totalCapacity} Pool Occupancy
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <Link
-                            href={`/staff/exams/events/${event.id}`}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-600 shadow-sm transition-all hover:border-aerojet-blue/30 hover:bg-aerojet-blue/5 hover:text-aerojet-blue dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-blue/50"
-                          >
-                            Manage
-                          </Link>
-                        </td>
-                      </tr>
-                    )
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      // eslint-disable-next-line react-hooks/error-boundaries
+      <EventsTabContent
+        events={events}
+        charterEvents={charterEvents}
+        charterModules={charterModules}
+      />
     )
   } catch (error) {
     console.error('[EventsTab] Error:', error)
     return <DataUnavailableError />
   }
+}
+
+function EventsTabContent({
+  events,
+  charterEvents,
+  charterModules,
+}: {
+  events: any
+  charterEvents: any
+  charterModules: any
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <div className="w-full max-w-sm">
+          <SearchInput id="exams-events-search" placeholder="Search events..." />
+        </div>
+        <div className="flex gap-3">
+          <GroupCharterModal
+            events={charterEvents}
+            modules={charterModules}
+          />
+          <Link
+            href="/staff/exams/events/create"
+            className="flex shrink-0 items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
+          >
+            <Plus className="h-4 w-4" />
+            Create Event
+          </Link>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 text-xs font-bold text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
+              <tr>
+                <th className="px-6 py-4">Event</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Date & Venue</th>
+                <th className="px-6 py-4">Pools / Candidates</th>
+                <th className="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {events.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
+                      <Calendar className="h-6 w-6 text-slate-300" />
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      No exam events found
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Create your first exam event to start managing bookings.
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                events.map((event: any) => {
+                  const totalCandidates = event.pools.reduce(
+                    (acc: number, pool: any) => acc + pool.currentMemberCount,
+                    0
+                  )
+                  const totalCapacity = event.pools.reduce(
+                    (acc: number, pool: any) => acc + pool.maxCandidates,
+                    0
+                  )
+
+                  return (
+                    <tr
+                      key={event.id}
+                      className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-900 dark:text-slate-100">
+                          {event.name}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${
+                            event.status === 'OPEN'
+                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                              : event.status === 'CONFIRMED'
+                                ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                                : event.status === 'DRAFT'
+                                  ? 'bg-slate-50 text-slate-500 border border-slate-100'
+                                  : 'bg-red-50 text-red-600 border border-red-100'
+                          }`}
+                        >
+                          {event.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+                          <Calendar className="h-3.5 w-3.5 text-aerojet-blue" />
+                          {format(new Date(event.startDate), 'MMM d')} –{' '}
+                          {format(new Date(event.endDate), 'MMM d, yyyy')}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-slate-700">{event._count.pools} Pools</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                          {totalCandidates} / {totalCapacity} Pool Occupancy
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Link
+                          href={`/staff/exams/events/${event.id}`}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-600 shadow-sm transition-all hover:border-aerojet-blue/30 hover:bg-aerojet-blue/5 hover:text-aerojet-blue dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-blue/50"
+                        >
+                          Manage
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 /* ─── Bookings Tab ─── */
@@ -305,15 +324,20 @@ async function BookingsTab({ query }: { query?: string }) {
 
     const serialized = serializePrisma(bookings)
 
-    return (
-      <div className="space-y-6">
-        <ExamBookingsTable bookings={serialized} />
-      </div>
-    )
+    // eslint-disable-next-line react-hooks/error-boundaries
+    return <BookingsTabContent bookings={serialized} />
   } catch (error) {
     console.error('[BookingsTab] Error:', error)
     return <DataUnavailableError />
   }
+}
+
+function BookingsTabContent({ bookings }: { bookings: any }) {
+  return (
+    <div className="space-y-6">
+      <ExamBookingsTable bookings={bookings} />
+    </div>
+  )
 }
 
 /* ─── Results Tab ─── */
@@ -338,7 +362,7 @@ async function ResultsTab({ query }: { query?: string }) {
         },
       },
       orderBy: { createdAt: 'desc' },
-      take: 300, 
+      take: 300,
     }).then(res => serializePrisma(res))
 
     // Unify results
@@ -354,135 +378,140 @@ async function ResultsTab({ query }: { query?: string }) {
       certificateUrl: r.certificateUrl,
     })).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-end">
-          <div className="w-full max-w-sm">
-            <SearchInput id="exams-results-search" placeholder="Search students, exams, or modules..." />
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-bold text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
-                <tr>
-                  <th className="px-6 py-4">Student</th>
-                  <th className="px-6 py-4">Module / Exam</th>
-                  <th className="px-6 py-4 text-center">Dates</th>
-                  <th className="px-6 py-4 text-center">Score</th>
-                  <th className="px-6 py-4 text-center">Type</th>
-                  <th className="px-6 py-4">Result</th>
-                  <th className="px-6 py-4 text-right"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {allResults.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center">
-                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
-                        <Trophy className="h-6 w-6 text-slate-300" />
-                      </div>
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                        No results found
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {query
-                          ? 'Try adjusting your search terms.'
-                          : 'Results will appear here once exams are completed and graded.'}
-                      </p>
-                    </td>
-                  </tr>
-                ) : (
-                  allResults.map((result) => (
-                    <tr
-                      key={result.id}
-                      className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue">
-                            {result.user.profile?.firstName?.charAt(0)}
-                            {result.user.profile?.lastName?.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="font-bold text-slate-900 dark:text-slate-100">
-                              {result.user.profile?.firstName} {result.user.profile?.lastName}
-                            </div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400">
-                              {result.user.email}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <BookOpen className="h-4 w-4 text-aerojet-blue" />
-                          <span className="font-medium text-slate-700">
-                            {result.moduleCode} - {result.examName}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex flex-col items-center justify-center gap-0.5">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                            <Calendar className="h-3 w-3 text-aerojet-blue" />
-                            {result.date ? format(new Date(result.date), 'MMM d, yyyy') : '—'}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="font-bold text-slate-900 dark:text-slate-100">
-                          {result.score !== null ? `${result.score}%` : '—'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span
-                          className={`inline-flex rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase ${
-                            result.type === 'FORMAL'
-                              ? 'bg-blue-50 text-blue-600'
-                              : 'bg-slate-100 text-slate-500'
-                          }`}
-                        >
-                          {result.type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
-                            result.passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                          }`}
-                        >
-                          {result.passed ? 'PASS' : 'FAIL'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        {result.certificateUrl ? (
-                          <a
-                            href={result.certificateUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-aerojet-blue shadow-sm transition-all hover:border-aerojet-blue/30 hover:bg-aerojet-blue/5 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-blue/50"
-                          >
-                            Certificate
-                          </a>
-                        ) : (
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">N/A</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    )
+    // eslint-disable-next-line react-hooks/error-boundaries
+    return <ResultsTabContent allResults={allResults} query={query} />
   } catch (error) {
     console.error('[ResultsTab] Error:', error)
     return <DataUnavailableError />
   }
+}
+
+function ResultsTabContent({ allResults, query }: { allResults: any; query?: string }) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-end">
+        <div className="w-full max-w-sm">
+          <SearchInput id="exams-results-search" placeholder="Search students, exams, or modules..." />
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 text-xs font-bold text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
+              <tr>
+                <th className="px-6 py-4">Student</th>
+                <th className="px-6 py-4">Module / Exam</th>
+                <th className="px-6 py-4 text-center">Dates</th>
+                <th className="px-6 py-4 text-center">Score</th>
+                <th className="px-6 py-4 text-center">Type</th>
+                <th className="px-6 py-4">Result</th>
+                <th className="px-6 py-4 text-right"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {allResults.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
+                      <Trophy className="h-6 w-6 text-slate-300" />
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      No results found
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {query
+                        ? 'Try adjusting your search terms.'
+                        : 'Results will appear here once exams are completed and graded.'}
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                allResults.map((result: any) => (
+                  <tr
+                    key={result.id}
+                    className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue">
+                          {result.user.profile?.firstName?.charAt(0)}
+                          {result.user.profile?.lastName?.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-900 dark:text-slate-100">
+                            {result.user.profile?.firstName} {result.user.profile?.lastName}
+                          </div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                            {result.user.email}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-aerojet-blue" />
+                        <span className="font-medium text-slate-700">
+                          {result.moduleCode} - {result.examName}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex flex-col items-center justify-center gap-0.5">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+                          <Calendar className="h-3 w-3 text-aerojet-blue" />
+                          {result.date ? format(new Date(result.date), 'MMM d, yyyy') : '—'}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="font-bold text-slate-900 dark:text-slate-100">
+                        {result.score !== null ? `${result.score}%` : '—'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span
+                        className={`inline-flex rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase ${
+                          result.type === 'FORMAL'
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {result.type}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
+                          result.passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        }`}
+                      >
+                        {result.passed ? 'PASS' : 'FAIL'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      {result.certificateUrl ? (
+                        <a
+                          href={result.certificateUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-aerojet-blue shadow-sm transition-all hover:border-aerojet-blue/30 hover:bg-aerojet-blue/5 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-blue/50"
+                        >
+                          Certificate
+                        </a>
+                      ) : (
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">N/A</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 /* ─── Records Tab (Server Component Wrapper) ─── */
@@ -590,7 +619,7 @@ async function RecordsTabServer({ query }: { query?: string }) {
           ? b.result?.toLowerCase() === 'pass'
           : null,
         isMigrated: b.result?.toUpperCase() === 'MIGRATED',
-        migrationRef: null, 
+        migrationRef: null,
         examCategory: b.examCategory as ExamCategory,
         examDate: effectiveExamDate,
         dateDisplay: effectiveExamDate ? format(new Date(effectiveExamDate), 'MMM d, yyyy') : dateDisplayKind,
@@ -615,10 +644,10 @@ async function RecordsTabServer({ query }: { query?: string }) {
       if (existingIndex !== -1) {
         unifiedRecords[existingIndex] = {
           ...unifiedRecords[existingIndex],
-          id: `result_${r.id}`, 
+          id: `result_${r.id}`,
           score: r.score != null ? Number(r.score) : unifiedRecords[existingIndex].score,
           passed: r.passed,
-          source: 'result', 
+          source: 'result',
           result: r.passed ? 'PASS' : 'FAIL',
           displayResult: r.passed ? 'PASS' : 'FAIL',
           displayResultKind: r.passed ? 'PASS' : 'FAIL',
@@ -635,10 +664,10 @@ async function RecordsTabServer({ query }: { query?: string }) {
           if (b.userId !== r.userId) return false
           const bModule = (b.moduleCode || '').trim().toUpperCase()
           const rModuleNorm = rModule.trim()
-          if (!rModuleNorm) return false 
+          if (!rModuleNorm) return false
           return bModule === rModuleNorm || bModule.includes(rModuleNorm) || rModuleNorm.includes(bModule)
         })
-        
+
         unifiedRecords.push({
           ...r,
           id: `result_${r.id}`,
@@ -650,7 +679,7 @@ async function RecordsTabServer({ query }: { query?: string }) {
           examDate: r.createdAt,
           dateDisplayKind: 'DATE',
           dateDisplay: format(new Date(r.createdAt), 'MMM d, yyyy'),
-          bookingType: matchingBooking?.bookingType || 'INDIVIDUAL', 
+          bookingType: matchingBooking?.bookingType || 'INDIVIDUAL',
           isMigrated: !!r.migrationRef,
           migrationRef: r.migrationRef,
           examCategory: r.examCategory || matchingBooking?.examCategory || 'OFFICIAL_EASA',
@@ -664,10 +693,11 @@ async function RecordsTabServer({ query }: { query?: string }) {
       const dateB = new Date(b.examDate || b.createdAt).getTime()
       if (dateB !== dateA) return dateB - dateA
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    }).slice(0, 2000) 
+    }).slice(0, 2000)
 
     const serialized = serializePrisma(finalRecords)
 
+    // eslint-disable-next-line react-hooks/error-boundaries
     return <RecordsTab records={serialized} modules={modules} />
   } catch (error) {
     console.error('[RecordsTabServer] Error:', error)

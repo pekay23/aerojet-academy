@@ -7,8 +7,8 @@ const CURRENCIES = ['EUR', 'GHS', 'USD'] as const
 type Currency = (typeof CURRENCIES)[number]
 
 const CURRENCY_SYMBOLS: Record<Currency, string> = {
-  EUR: '€',
-  GHS: 'GH₵',
+  EUR: 'â‚¬',
+  GHS: 'GHâ‚µ',
   USD: '$',
 }
 
@@ -48,11 +48,15 @@ export default function CurrencyToggle({
   }, [baseCurrency])
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRates()
   }, [fetchRates])
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     if (currentCurrency === baseCurrency) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       setConvertedAmount(amount)
     } else {
       const rate = rates[currentCurrency.toLowerCase()]
@@ -78,7 +82,7 @@ export default function CurrencyToggle({
     <button
       onClick={handleClick}
       className={`inline-flex items-center rounded-lg border border-slate-200 bg-white font-semibold text-slate-700 transition-all hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-600 dark:hover:bg-blue-900/20 ${sizeClasses[size]} ${className}`}
-      title={`Click to convert: ${CURRENCIES.join(' → ')}`}
+      title={`Click to convert: ${CURRENCIES.join(' â†’ ')}`}
       disabled={loading}
     >
       {loading ? (

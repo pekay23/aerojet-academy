@@ -8,20 +8,22 @@ import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { z } from 'zod'
 
-const questionSchema = z.object({
-  text: z.string().min(1),
-  options: z.array(z.string()).min(3).max(3),
-  correctAnswer: z.string(),
-  subTopic: z.string().optional(),
-  difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']).default('MEDIUM'),
-  points: z.number().min(1).default(1),
-  syllabusRef: z.string().optional(),
-  knowledgeLevel: z.number().int().min(1).max(3).optional(),
-  explanation: z.string().optional(),
-}).refine((data) => data.options.includes(data.correctAnswer), {
-  message: 'correctAnswer must be one of the provided options',
-  path: ['correctAnswer'],
-})
+const questionSchema = z
+  .object({
+    text: z.string().min(1),
+    options: z.array(z.string()).min(3).max(3),
+    correctAnswer: z.string(),
+    subTopic: z.string().optional(),
+    difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']).default('MEDIUM'),
+    points: z.number().min(1).default(1),
+    syllabusRef: z.string().optional(),
+    knowledgeLevel: z.number().int().min(1).max(3).optional(),
+    explanation: z.string().optional(),
+  })
+  .refine((data) => data.options.includes(data.correctAnswer), {
+    message: 'correctAnswer must be one of the provided options',
+    path: ['correctAnswer'],
+  })
 
 export const GET = withErrorHandler(
   async (req: NextRequest, ctx: { params: Promise<{ bankId: string; questionId: string }> }) => {
@@ -37,11 +39,6 @@ export const GET = withErrorHandler(
     const versions = await prismaUnfiltered.internalExamQuestionVersion.findMany({
       where: { questionId },
       orderBy: { changedAt: 'desc' },
-      include: {
-        changedBy: {
-          select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } },
-        },
-      },
     })
 
     return apiSuccess(versions)
@@ -66,7 +63,21 @@ export const PUT = withErrorHandler(
 
     const existing = await prismaUnfiltered.internalExamQuestion.findUnique({
       where: { id: questionId },
-      select: { id: true, bankId: true, submittedById: true, text: true, options: true, correctAnswer: true, subTopic: true, difficulty: true, points: true, syllabusRef: true, knowledgeLevel: true, explanation: true, isActive: true },
+      select: {
+        id: true,
+        bankId: true,
+        submittedById: true,
+        text: true,
+        options: true,
+        correctAnswer: true,
+        subTopic: true,
+        difficulty: true,
+        points: true,
+        syllabusRef: true,
+        knowledgeLevel: true,
+        explanation: true,
+        isActive: true,
+      },
     })
     if (!existing) return apiError('Question not found', 404)
     if (existing.bankId !== bankId) return apiError('Question does not belong to this bank', 400)
@@ -77,12 +88,16 @@ export const PUT = withErrorHandler(
     const body = await req.json()
     const parsed = questionSchema.safeParse(body)
     if (!parsed.success) {
-      return apiError(parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join('; '), 400)
+      return apiError(
+        parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join('; '),
+        400
+      )
     }
 
     const changedFields: string[] = []
     if (existing.text !== parsed.data.text) changedFields.push('text')
-    if (JSON.stringify(existing.options) !== JSON.stringify(parsed.data.options)) changedFields.push('options')
+    if (JSON.stringify(existing.options) !== JSON.stringify(parsed.data.options))
+      changedFields.push('options')
     if (existing.correctAnswer !== parsed.data.correctAnswer) changedFields.push('correctAnswer')
     if (existing.subTopic !== parsed.data.subTopic) changedFields.push('subTopic')
     if (existing.difficulty !== parsed.data.difficulty) changedFields.push('difficulty')
@@ -95,9 +110,10 @@ export const PUT = withErrorHandler(
       return apiSuccess({ ...existing, versions: [] })
     }
 
-    const nextVersion = (await prismaUnfiltered.internalExamQuestionVersion.count({
-      where: { questionId },
-    })) + 1
+    const nextVersion =
+      (await prismaUnfiltered.internalExamQuestionVersion.count({
+        where: { questionId },
+      })) + 1
 
     await prismaUnfiltered.internalExamQuestionVersion.create({
       data: {
@@ -183,7 +199,18 @@ export const DELETE = withErrorHandler(
 
     const existing = await prismaUnfiltered.internalExamQuestion.findUnique({
       where: { id: questionId },
-      select: { id: true, bankId: true, submittedById: true, text: true, options: true, correctAnswer: true, points: true, difficulty: true, isActive: true, explanation: true },
+      select: {
+        id: true,
+        bankId: true,
+        submittedById: true,
+        text: true,
+        options: true,
+        correctAnswer: true,
+        points: true,
+        difficulty: true,
+        isActive: true,
+        explanation: true,
+      },
     })
     if (!existing) return apiError('Question not found', 404)
     if (existing.bankId !== bankId) return apiError('Question does not belong to this bank', 400)
@@ -191,9 +218,10 @@ export const DELETE = withErrorHandler(
       return apiForbidden('You do not have permission to retire this question')
     }
 
-    const nextVersion = (await prismaUnfiltered.internalExamQuestionVersion.count({
-      where: { questionId },
-    })) + 1
+    const nextVersion =
+      (await prismaUnfiltered.internalExamQuestionVersion.count({
+        where: { questionId },
+      })) + 1
 
     await prismaUnfiltered.internalExamQuestionVersion.create({
       data: {

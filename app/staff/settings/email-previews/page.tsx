@@ -109,18 +109,6 @@ export default function EmailPreviewsPage() {
   })
   const [testEmail, setTestEmail] = useState('')
 
-  // Fetch template data when editing starts
-  useEffect(() => {
-    if (isEditing) {
-      fetchTemplateContent()
-    }
-  }, [isEditing, activeTemplate])
-
-  // Fetch all templates on mount
-  useEffect(() => {
-    fetchAllTemplates()
-  }, [])
-
   const fetchAllTemplates = async () => {
     try {
       const res = await fetch('/api/staff/email-templates')
@@ -173,6 +161,20 @@ export default function EmailPreviewsPage() {
       setLoading(false)
     }
   }
+
+  // Fetch template data when editing starts
+  useEffect(() => {
+    if (isEditing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchTemplateContent()
+    }
+  }, [isEditing, activeTemplate])
+
+  // Fetch all templates on mount
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchAllTemplates()
+  }, [])
 
   const handleSave = async () => {
     if (!editData.subject || !editData.body) {

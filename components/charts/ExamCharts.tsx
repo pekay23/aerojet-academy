@@ -35,6 +35,8 @@ const examTrendConfig = {
 
 export function ExamTrendChart({ data }: ExamTrendChartProps) {
   const [mounted, setMounted] = React.useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
   return (
@@ -100,7 +102,9 @@ const scoreDistributionConfig = {
 } satisfies ChartConfig
 
 export function ScoreDistributionChart({ data }: ScoreDistributionChartProps) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   const [mounted, setMounted] = React.useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
   return (

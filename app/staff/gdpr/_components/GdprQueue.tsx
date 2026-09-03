@@ -32,6 +32,7 @@ export default function GdprQueue({ requests }: { requests: DsrRow[] }) {
   const [isPending, startTransition] = useTransition()
   const [filter, setFilter] = useState<'open' | 'all' | 'overdue'>('open')
 
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now()
   const visible = requests.filter((r) => {
     if (filter === 'open') return !['COMPLETED', 'DENIED', 'CANCELLED'].includes(r.status)

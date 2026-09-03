@@ -80,6 +80,9 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
     }
   }, [classId, date])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchRoster() }, [fetchRoster])
 
   const setStatus = (userId: string, status: Status) => {

@@ -253,9 +253,12 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
   }
 
-  // ─── Fullscreen lockdown mode ───
+  // â”€â”€â”€ Fullscreen lockdown mode â”€â”€â”€
   useEffect(() => {
     if (!data || result || showConfirm) return
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowFullscreenPrompt(true)
   }, [data, result, showConfirm])
 

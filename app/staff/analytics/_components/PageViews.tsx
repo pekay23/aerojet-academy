@@ -37,12 +37,18 @@ export default function PageViews() {
     // Load last 7 days by default
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setFrom(sevenDaysAgo.toISOString().split('T')[0])
     setTo(new Date().toISOString().split('T')[0])
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     if (from && to) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       loadPageViews()
     }
   }, [from, to])

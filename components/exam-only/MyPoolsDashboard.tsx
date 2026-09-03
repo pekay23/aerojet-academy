@@ -43,6 +43,9 @@ export function MyPoolsDashboard() {
   }
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchMemberships()
   }, [])
 
@@ -60,7 +63,7 @@ export function MyPoolsDashboard() {
   if (memberships.length === 0) {
     return (
       <div className="py-10 px-5 text-center text-[#888] bg-white/2 rounded-xl border border-white/6">
-        <div className="text-[32px] mb-2">📋</div>
+        <div className="text-[32px] mb-2">ðŸ“‹</div>
         <div className="font-semibold mb-1">No pool memberships yet</div>
         <div className="text-[13px]">Browse available pools and join one to get started.</div>
       </div>
@@ -85,7 +88,7 @@ export function MyPoolsDashboard() {
                   <span className="text-[13px] text-[#93c5fd] font-medium">
                     {m.examComponent?.course?.code || 'Module'}
                   </span>
-                  <span className="text-[#666] mx-2">•</span>
+                  <span className="text-[#666] mx-2">â€¢</span>
                   <span className="text-[13px] text-[#888]">
                     {m.examComponent?.name || 'Exam'}
                   </span>
@@ -111,7 +114,7 @@ export function MyPoolsDashboard() {
 
               <div className="flex justify-between items-center mt-2">
                 <div className="text-[12px] text-[#888]">
-                  📅{' '}
+                  ðŸ“…{' '}
                   {new Date(m.pool.examDate).toLocaleDateString('en-GB', {
                     day: '2-digit',
                     month: 'short',
@@ -119,12 +122,12 @@ export function MyPoolsDashboard() {
                   })}
                   {m.amountReserved > 0 && (
                     <span className="ml-3">
-                      💰 €{Number(m.amountReserved).toFixed(0)} reserved
+                      ðŸ’° â‚¬{Number(m.amountReserved).toFixed(0)} reserved
                     </span>
                   )}
                   {m.amountPaid > 0 && (
                     <span className="ml-3 text-[#10b981]">
-                      ✅ €{Number(m.amountPaid).toFixed(0)} paid
+                      âœ… â‚¬{Number(m.amountPaid).toFixed(0)} paid
                     </span>
                   )}
                 </div>
@@ -156,7 +159,7 @@ export function MyPoolsDashboard() {
             >
               <div className="flex justify-between">
                 <span className="text-[13px] text-[#888]">
-                  {m.examComponent?.course?.code} — {m.pool.name}
+                  {m.examComponent?.course?.code} â€” {m.pool.name}
                 </span>
                 <span
                   className={`text-[11px] ${

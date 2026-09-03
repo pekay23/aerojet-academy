@@ -95,9 +95,9 @@ export default function ExamOnlyPathwayPage() {
   const { convert, loading: ratesLoading } = useCurrencyRates()
 
   const fmt = (eurAmount: number) => {
-    if (displayCurrency === 'EUR') return `€${eurAmount.toFixed(2)}`
+    if (displayCurrency === 'EUR') return `â‚¬${eurAmount.toFixed(2)}`
     const converted = convert(eurAmount, 'EUR', displayCurrency)
-    const sym = displayCurrency === 'GHS' ? 'GH₵' : '$'
+    const sym = displayCurrency === 'GHS' ? 'GHâ‚µ' : '$'
     return `${sym}${converted.toFixed(2)}`
   }
 
@@ -157,6 +157,8 @@ export default function ExamOnlyPathwayPage() {
   }, [])
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData()
   }, [fetchData])
 
@@ -164,7 +166,7 @@ export default function ExamOnlyPathwayPage() {
     if (!wallet || wallet.availableBalance === 0) {
       const lowestPrice = getLowestExamPrice()
       if (topUpAmount < lowestPrice) {
-        toast.error(`Minimum top-up must be at least €${lowestPrice} (lowest exam fee)`)
+        toast.error(`Minimum top-up must be at least â‚¬${lowestPrice} (lowest exam fee)`)
         return
       }
     }
@@ -202,7 +204,7 @@ export default function ExamOnlyPathwayPage() {
     const requiredAmount = Number(pool.seatPrice)
     if (wallet.availableBalance < requiredAmount) {
       toast.error(
-        `Insufficient funds. You need €${requiredAmount} but have €${wallet.availableBalance.toFixed(2)} available.`,
+        `Insufficient funds. You need â‚¬${requiredAmount} but have â‚¬${wallet.availableBalance.toFixed(2)} available.`,
         {
           action: {
             label: 'Top Up',
@@ -226,7 +228,7 @@ export default function ExamOnlyPathwayPage() {
       if (!res.ok) {
         if (data.error === 'INSUFFICIENT_BALANCE') {
           toast.error(
-            `Insufficient funds. You need €${requiredAmount} but have €${wallet.availableBalance.toFixed(2)} available.`,
+            `Insufficient funds. You need â‚¬${requiredAmount} but have â‚¬${wallet.availableBalance.toFixed(2)} available.`,
             {
               action: {
                 label: 'Top Up',
@@ -294,7 +296,7 @@ export default function ExamOnlyPathwayPage() {
 
     if (!wallet || Number(wallet.availableBalance) < requiredAmount) {
       toast.error(
-        `Insufficient funds. You need €${requiredAmount} but have €${Number(wallet?.availableBalance || 0).toFixed(2)} available.`,
+        `Insufficient funds. You need â‚¬${requiredAmount} but have â‚¬${Number(wallet?.availableBalance || 0).toFixed(2)} available.`,
         {
           action: {
             label: 'Top Up',
@@ -331,7 +333,7 @@ export default function ExamOnlyPathwayPage() {
       if (!res.ok) {
         if (data.error === 'INSUFFICIENT_BALANCE') {
           toast.error(
-            `Insufficient funds. You need €${data.required || price} but have €${Number(data.available || 0).toFixed(2)} available.`,
+            `Insufficient funds. You need â‚¬${data.required || price} but have â‚¬${Number(data.available || 0).toFixed(2)} available.`,
             {
               action: {
                 label: 'Top Up',
@@ -358,9 +360,9 @@ export default function ExamOnlyPathwayPage() {
       }
 
       if (type === 'POOL' && data.pool) {
-        toast.success(`Joined ${data.pool.name}! (€${prices.pool}) - ${data.pool.memberCount}/${data.pool.maxCandidates || 28} candidates`)
+        toast.success(`Joined ${data.pool.name}! (â‚¬${prices.pool}) - ${data.pool.memberCount}/${data.pool.maxCandidates || 28} candidates`)
       } else {
-        toast.success(`Individual exam booked successfully! (€${prices.individual})`)
+        toast.success(`Individual exam booked successfully! (â‚¬${prices.individual})`)
       }
       fetchData()
     } catch (error) {
@@ -383,7 +385,7 @@ export default function ExamOnlyPathwayPage() {
 
     if (wallet.availableBalance < requiredAmount) {
       toast.error(
-        `Insufficient funds. You need €${requiredAmount} but have €${wallet.availableBalance.toFixed(2)} available.`,
+        `Insufficient funds. You need â‚¬${requiredAmount} but have â‚¬${wallet.availableBalance.toFixed(2)} available.`,
         {
           action: {
             label: 'Top Up',

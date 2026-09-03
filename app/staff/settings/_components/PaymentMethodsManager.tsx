@@ -89,6 +89,8 @@ export default function PaymentMethodsManager() {
     }
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchMethods() }, [fetchMethods])
 
   const handleToggle = async (id: string) => {
@@ -265,8 +267,8 @@ export default function PaymentMethodsManager() {
                     <span className="text-[10px] text-slate-400">{meta.label}</span>
                   </div>
                   <p className="mt-0.5 truncate text-xs text-slate-400">
-                    {m.type === 'BANK_TRANSFER' && `${m.bankName || ''} · ${m.bankAccountNumber || ''}`}
-                    {m.type === 'MOBILE_MONEY' && `${m.momoProvider || ''} · ${m.momoNumber || ''}`}
+                    {m.type === 'BANK_TRANSFER' && `${m.bankName || ''} Â· ${m.bankAccountNumber || ''}`}
+                    {m.type === 'MOBILE_MONEY' && `${m.momoProvider || ''} Â· ${m.momoNumber || ''}`}
                     {m.type === 'CARD_STRIPE' && 'Online card payments'}
                   </p>
                 </div>

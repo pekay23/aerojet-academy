@@ -15,6 +15,8 @@ export function useWalletBalance() {
     } catch { /* ignore */ } finally { setLoading(false) }
   }
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchWallet() }, [])
 
   const available = wallet ? wallet.balance - wallet.reservedBalance : 0

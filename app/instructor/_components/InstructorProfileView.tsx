@@ -88,9 +88,9 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
           nationality: formData.profile.nationality ?? null,
         },
         emergency: {
-          name: formData.profile.emergencyContactName ?? null,
-          phone: formData.profile.emergencyContactPhone ?? null,
-          relation: formData.profile.emergencyContactRelation ?? null,
+          name: formData.profile.emergencyContactName || '',
+          phone: formData.profile.emergencyContactPhone || '',
+          relation: formData.profile.emergencyContactRelation || '',
         },
       })
 

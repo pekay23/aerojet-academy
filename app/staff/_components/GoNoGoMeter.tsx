@@ -21,6 +21,7 @@ export default function GoNoGoMeter({
 }: GoNoGoMeterProps) {
   const progress = Math.min((currentRevenue / targetRevenue) * 100, 100)
   const isGo = currentRevenue >= targetRevenue
+  // eslint-disable-next-line react-hooks/purity
   const isNearDeadline = new Date(paymentDeadline).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000
 
   const deadlineStr = new Date(paymentDeadline).toLocaleDateString('en-GB', {

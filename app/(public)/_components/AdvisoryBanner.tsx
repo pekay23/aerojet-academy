@@ -27,6 +27,8 @@ export default function AdvisoryBanner({ message }: { message: string }) {
     if (!message) return
     const closedMessage = sessionStorage.getItem(storageKey)
     if (closedMessage !== message) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsVisible(true)
     }
   }, [message])

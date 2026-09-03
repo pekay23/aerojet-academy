@@ -16,7 +16,7 @@ import {
 import { getAuthSession } from '@/lib/auth/helpers'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
-import type { ExamComponent, StudentLicenseTarget } from '@prisma/client'
+import type { ExamComponent } from '@prisma/client'
 
 export const metadata: Metadata = { title: 'Course Details | Applicant Portal' }
 
@@ -105,7 +105,7 @@ export default async function CourseDetailsPage({ params }: Props) {
   const canAffordPool = balance >= lowestPoolPrice
 
   const targetLicenseCodes = studentProfile?.licenseTargets
-    .map((lt: StudentLicenseTarget) => lt.licenseCategory.code)
+    .map((lt) => lt.licenseCategory.code)
     .join(', ')
 
   const isRequiredForTarget = await prisma.licenseModuleRequirement.findFirst({
@@ -113,9 +113,7 @@ export default async function CourseDetailsPage({ params }: Props) {
       courseId: targetId,
       licenseCategory: {
         code: {
-          in:
-            studentProfile?.licenseTargets.map((lt: LicenseTarget) => lt.licenseCategory.code) ||
-            [],
+          in: studentProfile?.licenseTargets.map((lt) => lt.licenseCategory.code) || [],
         },
       },
     },

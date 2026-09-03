@@ -19,7 +19,7 @@ import {
 } from '@/lib/admissions/constants'
 import type { ApplicationStage } from '@prisma/client'
 import PipelineTracker from './_components/PipelineTracker'
-import PageTransition from '@/components/shared/PageTransition'
+import { PageTransition } from '@/components/shared/PageTransition'
 
 export const metadata: Metadata = { title: 'Application Status | Applicant Portal' }
 export const dynamic = 'force-dynamic'

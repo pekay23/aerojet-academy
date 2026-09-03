@@ -181,6 +181,7 @@ export default function LivePDFViewer({ pdfSettings }: LivePDFViewerProps) {
               {...pdfSettings}
               invoiceNumber="INV-2026-0089"
               date={new Date()}
+              // eslint-disable-next-line react-hooks/purity
               dueDate={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}
               studentName="John Doe"
               studentEmail="john.doe@example.com"

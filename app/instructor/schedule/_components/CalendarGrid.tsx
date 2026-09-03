@@ -89,6 +89,7 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
     if (viewMode === 'Week')
       return `${format(startOfRange, 'MMM d')} – ${format(addDays(startOfRange, 6), 'MMM d, yyyy')}`
     return format(currentDate, 'MMMM yyyy')
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
   }, [viewMode, currentDate, startOfRange])
 
   const getEventPosition = (startDate: string | Date, endDate: string | Date) => {

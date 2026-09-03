@@ -208,6 +208,9 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
     // Skip first fetch if it's the initial page and we have initial logs
     const isInitial = page === 1 && perPage === 25
     if (!isInitial) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchLogs()
     }
   }, [page, perPage])

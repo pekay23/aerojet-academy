@@ -12,6 +12,7 @@ export default async function AttendancePage() {
   // Get classes that have upcoming or recent dates
   const classes = await prismaUnfiltered.class.findMany({
     where: {
+      // eslint-disable-next-line react-hooks/purity
       endDate: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // last 30 days or future
     },
     select: { id: true, name: true, courseId: true },

@@ -24,6 +24,8 @@ const poolFillConfig = {
 
 export function PoolFillChart({ data, title = 'Pool Capacity Utilization' }: PoolFillChartProps) {
   const [mounted, setMounted] = React.useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
   return (

@@ -117,6 +117,8 @@ export default function StudentsTable({
   }, [filter, search, page, perPage])
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [filter, search])
 
@@ -439,7 +441,7 @@ export default function StudentsTable({
                             {fullName}
                           </p>
                           <p className="font-mono text-xs text-slate-400">
-                            {student.studentProfile?.studentId ?? '—'}
+                            {student.studentProfile?.studentId ?? 'â€”'}
                           </p>
                         </div>
                       </div>

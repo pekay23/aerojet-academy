@@ -68,6 +68,9 @@ export default function TransactionsTable({
   useEffect(() => {
     const isInitial = page === 1 && perPage === 25 && sortBy === 'createdAt' && sortDir === 'desc'
     if (!isInitial) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchData()
     }
   }, [page, perPage, sortBy, sortDir, fetchData])

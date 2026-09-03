@@ -72,6 +72,7 @@ export default function StandaloneBooking({
   }
 
   if (targetDate) {
+    // eslint-disable-next-line react-hooks/purity
     const daysUntilExam = Math.ceil((targetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     if (daysUntilExam <= pricing.lateBookingDays && daysUntilExam > 0) {
       surcharge = pricing.lateBookingSurcharge

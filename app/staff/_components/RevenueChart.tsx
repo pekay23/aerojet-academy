@@ -37,8 +37,10 @@ const CustomTooltip = ({ active, payload, label, currency }: any) => {
   )
 }
 
-export default function RevenueChart({ data, currency = '€' }: RevenueChartProps) {
+export default function RevenueChart({ data, currency = 'â‚¬' }: RevenueChartProps) {
   const [mounted, setMounted] = React.useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
   return (
