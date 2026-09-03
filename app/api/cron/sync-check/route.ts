@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
         entityId: 'neon-supabase',
         description: `Neon↔Supabase drift detected — worst ${(result.worstDriftPct * 100).toFixed(2)}%`,
         changes: {
-          rows: result.rows.filter((r) => r.alarmed),
+          rows: JSON.parse(JSON.stringify(result.rows.filter((r) => r.alarmed))),
         },
       })
       await notifyStaff(

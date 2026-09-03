@@ -102,7 +102,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError(`This exam bank is configured for category ${bankCategoryCode}.`, 400)
   }
   if (selectedCategoryCode && !categoryMatchesTarget(selectedCategoryCode, targetCategories)) {
-    return apiError(`Category ${selectedCategoryCode} is not part of your selected licence pathway.`, 403)
+    return apiError(
+      `Category ${selectedCategoryCode} is not part of your selected licence pathway.`,
+      403
+    )
   }
 
   // Class-schedule validation if classId is provided
@@ -128,9 +131,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       return apiError('Exam has not started yet', 403)
     }
 
-    const effectiveEnd = schedule.allowLateStart && schedule.scheduledEnd
-      ? new Date(schedule.scheduledEnd.getTime() + 15 * 60 * 1000)
-      : schedule.scheduledEnd
+    const effectiveEnd =
+      schedule.allowLateStart && schedule.scheduledEnd
+        ? new Date(schedule.scheduledEnd.getTime() + 15 * 60 * 1000)
+        : schedule.scheduledEnd
 
     if (effectiveEnd && now > effectiveEnd) {
       return apiError('Exam not available outside scheduled window', 403)
@@ -188,7 +192,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       }
 
       await prismaUnfiltered.internalExamAnswer.createMany({
-        data: questionIds.map(qId => ({
+        data: questionIds.map((qId) => ({
           sessionId: supervisedSession.id,
           questionId: qId,
         })),
@@ -200,7 +204,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         entity: 'InternalExamSession',
         entityId: supervisedSession.id,
         description: `Supervised exam session prepared for candidate requiring alternative proctoring`,
-        details: { bankId, classId, studentEmail: userRecord.email, questionCount: questionIds.length },
+        details: {
+          bankId,
+          classId,
+          studentEmail: userRecord.email,
+          questionCount: questionIds.length,
+        },
       })
 
       return apiSuccess({
@@ -242,8 +251,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         const order = placeholderSession.questionOrder as QuestionOrderEntry[]
         const orderMap = new Map(order.map((q) => [q.id, q]))
         questions = order
-          .map((q) => allQuestions.find(aq => aq.id === q.id))
-          .filter((q): q is NonNullable<typeof allQuestions[number]> => q != null)
+          .map((q) => allQuestions.find((aq) => aq.id === q.id))
+          .filter((q): q is NonNullable<(typeof allQuestions)[number]> => q != null)
       }
 
       return apiSuccess({
@@ -265,7 +274,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Check for an existing in-progress session (allow resume)
-   const existingSessionWhere: Prisma.InternalExamSessionWhereInput = {
+  const existingSessionWhere: Prisma.InternalExamSessionWhereInput = {
     studentId: session.user.id,
     bankId,
     status: 'IN_PROGRESS',
@@ -292,13 +301,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     // Apply stored question order if present
     let questions = allQuestions
-      if (existingSession.questionOrder && Array.isArray(existingSession.questionOrder)) {
-        const order = existingSession.questionOrder as QuestionOrderEntry[]
-        const orderMap = new Map(order.map((q) => [q.id, q]))
-        questions = order
-          .map((q) => allQuestions.find(aq => aq.id === q.id))
-          .filter(Boolean)
-      }
+    if (existingSession.questionOrder && Array.isArray(existingSession.questionOrder)) {
+      const order = existingSession.questionOrder as QuestionOrderEntry[]
+      const orderMap = new Map(order.map((q) => [q.id, q]))
+      questions = order
+        .map((q) => allQuestions.find((aq) => aq.id === q.id))
+        .filter((q): q is NonNullable<(typeof allQuestions)[number]> => q != null)
+    }
 
     return apiSuccess({
       sessionId: existingSession.id,
@@ -345,10 +354,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   })
 
   // Build randomised paper (shuffled question order + shuffled options)
-  const { paper: randomisedQuestions, questionOrder } = buildRandomizedPaper(
+  const { paper: randomisedQuestions, questionOrder } = await buildRandomizedPaper(
     rawQuestions.map((q) => ({
       ...q,
-      options: Array.isArray(q.options) ? q.options.filter((o): o is string => typeof o === 'string') : [],
+      options: Array.isArray(q.options)
+        ? q.options.filter((o): o is string => typeof o === 'string')
+        : [],
     }))
   )
 
@@ -387,7 +398,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Create blank answer records in randomised order
   await prismaUnfiltered.internalExamAnswer.createMany({
-    data: questionOrder.map(qId => ({
+    data: questionOrder.map((qId: string) => ({
       sessionId: examSession.id,
       questionId: qId,
     })),

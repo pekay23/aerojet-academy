@@ -12,64 +12,75 @@ const updateSchema = z.object({
   canPublish: z.boolean().optional(),
 })
 
-export const PUT = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ bankId: string; id: string }> }) => {
-  const session = await requireStaff()
-  const { bankId, id } = await ctx.params
-  const body = updateSchema.safeParse(await req.json())
-  if (!body.success) return apiError(body.error.issues.map(i => i.message).join('; '), 400)
+export const PUT = withErrorHandler(
+  async (req: NextRequest, ctx: { params: Promise<{ bankId: string; id: string }> }) => {
+    const session = await requireStaff()
+    const { bankId, id } = await ctx.params
+    const body = updateSchema.safeParse(await req.json())
+    if (!body.success) return apiError(body.error.issues.map((i) => i.message).join('; '), 400)
 
-  const existing = await prismaUnfiltered.internalExamBankInstructor.findFirst({
-    where: { id, bankId },
-  })
-  if (!existing) return apiNotFound('Assignment not found')
+    const existing = await prismaUnfiltered.internalExamBankInstructor.findFirst({
+      where: { id, bankId },
+    })
+    if (!existing) return apiNotFound('Assignment not found')
 
-  const updated = await prismaUnfiltered.internalExamBankInstructor.update({
-    where: { id },
-    data: body.data,
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          profile: { select: { firstName: true, lastName: true } },
-          instructorProfile: { select: { employeeId: true } },
+    const updated = await prismaUnfiltered.internalExamBankInstructor.update({
+      where: { id },
+      data: body.data,
+      include: {
+        instructor: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                profile: { select: { firstName: true, lastName: true } },
+              },
+            },
+          },
         },
       },
-    },
-  })
+    } as any)
 
-  await createAuditLog({
-    userId: session.id,
-    action: AuditAction.EXAM_BANK_INSTRUCTOR_UPDATED,
-    entity: 'InternalExamBankInstructor',
-    entityId: id,
-    description: `Updated permissions for instructor assignment ${id}`,
-    changes: { before: existing, after: body.data },
-  })
+    await createAuditLog({
+      userId: session.id,
+      action: AuditAction.EXAM_BANK_INSTRUCTOR_UPDATED,
+      entity: 'InternalExamBankInstructor',
+      entityId: id,
+      description: `Updated permissions for instructor assignment ${id}`,
+      changes: { before: existing, after: body.data },
+    })
 
-  return apiSuccess(updated)
-})
+    return apiSuccess(updated)
+  }
+)
 
-export const DELETE = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ bankId: string; id: string }> }) => {
-  const session = await requireStaff()
-  const { bankId, id } = await ctx.params
+export const DELETE = withErrorHandler(
+  async (req: NextRequest, ctx: { params: Promise<{ bankId: string; id: string }> }) => {
+    const session = await requireStaff()
+    const { bankId, id } = await ctx.params
 
-  const existing = await prismaUnfiltered.internalExamBankInstructor.findFirst({
-    where: { id, bankId },
-    include: { user: { select: { instructorProfile: { select: { employeeId: true } } } } },
-  })
-  if (!existing) return apiNotFound('Assignment not found')
+    const existing = await prismaUnfiltered.internalExamBankInstructor.findFirst({
+      where: { id, bankId },
+      include: {
+        instructor: {
+          include: { user: { select: { instructorProfile: { select: { employeeId: true } } } } },
+        },
+      },
+    })
+    if (!existing) return apiNotFound('Assignment not found')
 
-  await prismaUnfiltered.internalExamBankInstructor.delete({ where: { id } })
+    await prismaUnfiltered.internalExamBankInstructor.delete({ where: { id } })
 
-  await createAuditLog({
-    userId: session.id,
-    action: AuditAction.EXAM_BANK_INSTRUCTOR_REVOKED,
-    entity: 'InternalExamBankInstructor',
-    entityId: id,
-    description: `Revoked instructor ${existing.user.instructorProfile?.employeeId || id} from bank ${bankId}`,
-    changes: { instructorId: existing.instructorId, bankId },
-  })
+    await createAuditLog({
+      userId: session.id,
+      action: AuditAction.EXAM_BANK_INSTRUCTOR_REVOKED,
+      entity: 'InternalExamBankInstructor',
+      entityId: id,
+      description: `Revoked instructor ${existing.instructor.user.instructorProfile?.employeeId || id} from bank ${bankId}`,
+      changes: { instructorId: existing.instructorId, bankId },
+    })
 
-  return apiSuccess({ deleted: true })
-})
+    return apiSuccess({ deleted: true })
+  }
+)

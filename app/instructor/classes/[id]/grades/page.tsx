@@ -3,11 +3,10 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ChevronLeft, ClipboardCheck } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getClassAttendance } from '@/lib/actions/instructor'
 
 export const metadata: Metadata = { title: 'Class Grades | Instructor Portal' }
-export const dynamic = 'force-dynamic'
 export const dynamic = 'force-dynamic'
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -30,16 +29,16 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   })
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
       <div>
         <Link
           href="/instructor/classes"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-300 dark:text-slate-300 uppercase transition-colors hover:text-aerojet-sky"
+          className="hover:text-aerojet-sky mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors dark:text-slate-300"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes
         </Link>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Class Grades
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -105,7 +104,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                           {grade.assessmentType}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right text-sm font-bold tabular-nums text-slate-700 dark:text-slate-300">
+                      <td className="px-6 py-4 text-right text-sm font-bold text-slate-700 tabular-nums dark:text-slate-300">
                         {Number(grade.score)} / {Number(grade.maxScore)}
                       </td>
                       <td className="px-6 py-4 text-right">

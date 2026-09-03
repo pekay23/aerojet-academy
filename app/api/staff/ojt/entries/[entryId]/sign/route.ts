@@ -18,8 +18,9 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
   if (!rl.allowed) {
     return apiError('Too many requests', 429)
   }
-  if (!ctx?.params?.entryId) return apiError('Entry ID required')
-  const entryId = ctx.params.entryId
+  const resolvedParams = await ctx?.params
+  if (!resolvedParams?.entryId) return apiError('Entry ID required')
+  const entryId = String(resolvedParams.entryId)
   const body = await req.json()
   const parsed = signSchema.safeParse(body)
 

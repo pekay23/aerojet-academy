@@ -11,8 +11,6 @@ import {
   sendActivationEmail,
 } from '@/lib/email/service'
 import { trackPayment } from '@/lib/analytics/events'
-import { trackPayment } from '@/lib/analytics/events'
-import { trackPayment } from '@/lib/analytics/events'
 import {
   hashPassword,
   generateToken,
@@ -138,10 +136,10 @@ export const POST = withErrorHandler(
 
         if (programme && programme.programmeYears.length > 0) {
           const programmeCode = programme.code
-          
+
           // Validate pathway restriction
-          const { allowed, error, severity } = await import('@/lib/enrollment/validation').then(v => 
-            v.validateFullTimeProgrammeEnrollment(payment.userId, programmeCode)
+          const { allowed, error, severity } = await import('@/lib/enrollment/validation').then(
+            (v) => v.validateFullTimeProgrammeEnrollment(payment.userId, programmeCode)
           )
 
           const force = body.ignorePathwayRestrictions === true
@@ -150,7 +148,7 @@ export const POST = withErrorHandler(
             console.error(`Enrollment blocked: ${error}`)
             return apiError(error || 'Student is not eligible for this programme.', 400, {
               needsOverride: severity === 'WARNING',
-              warning: error
+              warning: error,
             })
           }
 
@@ -361,7 +359,12 @@ export const POST = withErrorHandler(
       })
 
       // Analytics tracking (non-blocking)
-      trackPayment(Number(payment.amount), payment.currency || 'EUR', payment.id, payment.userId).catch(console.error)
+      trackPayment(
+        Number(payment.amount),
+        payment.currency || 'EUR',
+        payment.id,
+        payment.userId
+      ).catch(console.error)
 
       return apiSuccess({ message: 'Payment approved' })
     } else {

@@ -5,7 +5,6 @@ import { Calendar, Users, Save, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { submitExaminerResults } from '../actions'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
-import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface Assignment {
   id: string
@@ -40,12 +39,6 @@ interface ResultEntry {
   absent: boolean
 }
 
-interface ResultEntry {
-  assignmentId: string
-  score: number | null
-  absent: boolean
-}
-
 export default function ResultsEntry({
   sittings,
   existingResults,
@@ -67,8 +60,10 @@ export default function ResultsEntry({
   const [scores, setScores] = useState<Record<string, string>>({})
   const [absent, setAbsent] = useState<Record<string, boolean>>({})
   const [isPending, startTransition] = useTransition()
-  const { items, requestSort, sortConfig } = useSort(sitting.assignments, { key: 'user.profile.lastName', order: 'asc' })
-  const { items, requestSort, sortConfig } = useSort(sitting.assignments, { key: 'user.profile.lastName', order: 'asc' })
+  const { items, requestSort, sortConfig } = useSort(sitting.assignments, {
+    key: 'user.profile.lastName',
+    order: 'asc',
+  })
 
   const clampScore = (value: string): string => {
     const num = Number(value)
@@ -85,28 +80,30 @@ export default function ResultsEntry({
 
   const save = () => {
     if (!sitting) return
-    const entries = sitting.assignments.map((a) => {
-      const raw = scores[a.id]
-      const name = a.user.profile
-        ? `${a.user.profile.firstName} ${a.user.profile.lastName}`
-        : a.userId
+    const entries = sitting.assignments
+      .map((a) => {
+        const raw = scores[a.id]
+        const name = a.user.profile
+          ? `${a.user.profile.firstName} ${a.user.profile.lastName}`
+          : a.userId
 
-      if (raw !== undefined && raw !== '') {
-        const parsed = Number(raw)
-        if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) {
-          toast.error(`Score for ${name} must be between 0 and 100.`)
-          return null
+        if (raw !== undefined && raw !== '') {
+          const parsed = Number(raw)
+          if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) {
+            toast.error(`Score for ${name} must be between 0 and 100.`)
+            return null
+          }
         }
-      }
 
-      const num = raw !== undefined && raw !== '' ? Number(raw) : NaN
-      const clamped = Number.isNaN(num) ? null : Math.max(0, Math.min(100, num))
-      return {
-        assignmentId: a.id,
-        absent: !!absent[a.id],
-        score: clamped,
-      }
-    }).filter((e): e is ResultEntry => e !== null)
+        const num = raw !== undefined && raw !== '' ? Number(raw) : NaN
+        const clamped = Number.isNaN(num) ? null : Math.max(0, Math.min(100, num))
+        return {
+          assignmentId: a.id,
+          absent: !!absent[a.id],
+          score: clamped,
+        }
+      })
+      .filter((e): e is ResultEntry => e !== null)
 
     const hasData = entries.some((e) => e.absent || e.score != null)
     if (!hasData) {
@@ -179,11 +176,44 @@ export default function ResultsEntry({
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/80 text-left dark:border-slate-800 dark:bg-slate-900/50">
-              <SortHeader label="Candidate" sortKey="user.profile.lastName" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-              <SortHeader label="Module" sortKey="booking.moduleCode" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-              <SortHeader label="Existing" sortKey="id" currentSort={sortConfig} onSort={requestSort} align="center" className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-              <SortHeader label="Score (%)" sortKey="id" currentSort={sortConfig} onSort={requestSort} align="center" className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-              <SortHeader label="Absent" sortKey="id" currentSort={sortConfig} onSort={requestSort} align="center" className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
+              <SortHeader
+                label="Candidate"
+                sortKey="user.profile.lastName"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+              />
+              <SortHeader
+                label="Module"
+                sortKey="booking.moduleCode"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+              />
+              <SortHeader
+                label="Existing"
+                sortKey="id"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                align="center"
+                className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+              />
+              <SortHeader
+                label="Score (%)"
+                sortKey="id"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                align="center"
+                className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+              />
+              <SortHeader
+                label="Absent"
+                sortKey="id"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                align="center"
+                className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+              />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -203,9 +233,7 @@ export default function ResultsEntry({
                     {ex ? (
                       <span
                         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                          ex.passed
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-red-100 text-red-700'
+                          ex.passed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
                         }`}
                       >
                         <CheckCircle2 className="h-3 w-3" /> {ex.score ?? '—'}%
@@ -223,9 +251,7 @@ export default function ResultsEntry({
                       inputMode="numeric"
                       disabled={absent[a.id]}
                       value={scores[a.id] ?? ''}
-                      onChange={(e) =>
-                        setScores((s) => ({ ...s, [a.id]: e.target.value }))
-                      }
+                      onChange={(e) => setScores((s) => ({ ...s, [a.id]: e.target.value }))}
                       onBlur={() => handleBlur(a.id, scores[a.id] ?? '')}
                       placeholder={ex?.score != null ? String(ex.score) : '—'}
                       aria-label={`Score for ${a.user.profile ? `${a.user.profile.firstName} ${a.user.profile.lastName}` : a.userId}`}
@@ -236,9 +262,7 @@ export default function ResultsEntry({
                     <input
                       type="checkbox"
                       checked={!!absent[a.id]}
-                      onChange={(e) =>
-                        setAbsent((s) => ({ ...s, [a.id]: e.target.checked }))
-                      }
+                      onChange={(e) => setAbsent((s) => ({ ...s, [a.id]: e.target.checked }))}
                       aria-label={`Mark ${a.user.profile ? `${a.user.profile.firstName} ${a.user.profile.lastName}` : a.userId} as absent`}
                       className="h-4 w-4 rounded border-slate-300"
                     />
@@ -268,7 +292,7 @@ export default function ResultsEntry({
         <button
           onClick={save}
           disabled={isPending || sitting.assignments.length === 0}
-          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90 disabled:opacity-50"
+          className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-colors disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {isPending ? 'Saving…' : `Save Results — Day ${sitting.dayNumber}`}

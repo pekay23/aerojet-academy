@@ -15,6 +15,13 @@ import {
   Clock,
   XCircle,
   Calendar,
+  User,
+  Hash,
+  Sparkles,
+  RefreshCw,
+  Plus,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -157,7 +164,13 @@ function StatusBadge({ status }: { status: string }) {
     REJECTED: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
   }
   return (
-    <Badge variant="outline" className={cn('rounded-full border-transparent text-[10px] font-bold', map[status] || 'bg-slate-100 text-slate-600')}>
+    <Badge
+      variant="outline"
+      className={cn(
+        'rounded-full border-transparent text-[10px] font-bold',
+        map[status] || 'bg-slate-100 text-slate-600'
+      )}
+    >
       {status.replace(/_/g, ' ')}
     </Badge>
   )
@@ -170,7 +183,12 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
     HARD: 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
   }
   return (
-    <span className={cn('inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase', map[difficulty] || 'bg-slate-100 text-slate-600')}>
+    <span
+      className={cn(
+        'inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase',
+        map[difficulty] || 'bg-slate-100 text-slate-600'
+      )}
+    >
       {difficulty}
     </span>
   )
@@ -186,23 +204,54 @@ function ScoreBar({ value, className }: { value: number | null; className?: stri
         ? 'bg-amber-500'
         : 'bg-red-500'
   return (
-    <div className={cn('h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700', className)}>
-      <div className={cn('h-full rounded-full transition-all', color)} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
+    <div
+      className={cn(
+        'h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700',
+        className
+      )}
+    >
+      <div
+        className={cn('h-full rounded-full transition-all', color)}
+        style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+      />
     </div>
   )
 }
 
 function SessionStatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
-    IN_PROGRESS: { label: 'Active', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', icon: <Clock className="h-3 w-3" /> },
-    COMPLETED: { label: 'Finished', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300', icon: <CheckCircle2 className="h-3 w-3" /> },
-    TIMED_OUT: { label: 'Timeout', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', icon: <XCircle className="h-3 w-3" /> },
-    VOIDED: { label: 'Voided', cls: 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300', icon: <AlertCircle className="h-3 w-3" /> },
-    NOT_STARTED: { label: 'Not started', cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300', icon: <Clock className="h-3 w-3" /> },
+    IN_PROGRESS: {
+      label: 'Active',
+      cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+      icon: <Clock className="h-3 w-3" />,
+    },
+    COMPLETED: {
+      label: 'Finished',
+      cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+      icon: <CheckCircle2 className="h-3 w-3" />,
+    },
+    TIMED_OUT: {
+      label: 'Timeout',
+      cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+      icon: <XCircle className="h-3 w-3" />,
+    },
+    VOIDED: {
+      label: 'Voided',
+      cls: 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+      icon: <AlertCircle className="h-3 w-3" />,
+    },
+    NOT_STARTED: {
+      label: 'Not started',
+      cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+      icon: <Clock className="h-3 w-3" />,
+    },
   }
   const s = map[status] || map.NOT_STARTED
   return (
-    <Badge variant="outline" className={cn('gap-1 rounded-full border-transparent text-[10px] font-bold', s.cls)}>
+    <Badge
+      variant="outline"
+      className={cn('gap-1 rounded-full border-transparent text-[10px] font-bold', s.cls)}
+    >
       {s.icon}
       {s.label}
     </Badge>
@@ -211,7 +260,8 @@ function SessionStatusBadge({ status }: { status: string }) {
 
 function authorName(a?: AuthorRef | null) {
   if (!a) return 'Unknown'
-  if (a.profile?.firstName || a.profile?.lastName) return `${a.profile.firstName || ''} ${a.profile.lastName || ''}`.trim()
+  if (a.profile?.firstName || a.profile?.lastName)
+    return `${a.profile.firstName || ''} ${a.profile.lastName || ''}`.trim()
   return a.name || 'Unknown'
 }
 
@@ -227,7 +277,7 @@ function MyQuestionsTab() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [limit] = useState(10)
+  const [limit, setLimit] = useState(10)
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
@@ -253,7 +303,7 @@ function MyQuestionsTab() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <BookOpen className="h-4 w-4 text-aerojet-sky" /> My Questions
+          <BookOpen className="text-aerojet-sky h-4 w-4" /> My Questions
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -267,10 +317,12 @@ function MyQuestionsTab() {
               <button
                 key={q.id}
                 onClick={() => q.bankId && router.push(`/instructor/exams/banks/${q.bankId}`)}
-                className="flex w-full items-center justify-between gap-4 rounded-xl border border-slate-100 p-4 text-left transition-colors hover:border-aerojet-sky/40 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+                className="hover:border-aerojet-sky/40 flex w-full items-center justify-between gap-4 rounded-xl border border-slate-100 p-4 text-left transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
               >
                 <div className="min-w-0">
-                  <p className="line-clamp-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{q.text}</p>
+                  <p className="line-clamp-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    {q.text}
+                  </p>
                   <p className="mt-1 text-xs text-slate-500">{q.bank?.name || 'Unassigned bank'}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -280,7 +332,13 @@ function MyQuestionsTab() {
                 </div>
               </button>
             ))}
-            <TablePagination page={page} perPage={limit} total={total} onPageChange={setPage} />
+            <TablePagination
+              page={page}
+              perPage={limit}
+              total={total}
+              onPageChange={setPage}
+              onPerPageChange={setLimit}
+            />
           </div>
         )}
       </CardContent>
@@ -294,13 +352,15 @@ function MyBanksTab() {
   const [banks, setBanks] = useState<Bank[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [limit] = useState(10)
+  const [limit, setLimit] = useState(10)
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetchPaginated<Bank>(`/api/instructor/exams/banks?scope=mine&page=${page}&limit=${limit}`)
+      const res = await fetchPaginated<Bank>(
+        `/api/instructor/exams/banks?scope=mine&page=${page}&limit=${limit}`
+      )
       setBanks(res.data)
       setTotal(res.total)
     } catch {
@@ -324,7 +384,7 @@ function MyBanksTab() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Library className="h-4 w-4 text-aerojet-sky" /> My Banks
+          <Library className="text-aerojet-sky h-4 w-4" /> My Banks
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -338,7 +398,7 @@ function MyBanksTab() {
               <button
                 key={b.id}
                 onClick={() => router.push(`/instructor/exams/banks/${b.id}`)}
-                className="rounded-2xl border border-slate-100 p-5 text-left transition-all hover:border-aerojet-sky/40 hover:shadow-md dark:border-slate-800"
+                className="hover:border-aerojet-sky/40 rounded-2xl border border-slate-100 p-5 text-left transition-all hover:shadow-md dark:border-slate-800"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -346,23 +406,37 @@ function MyBanksTab() {
                     <p className="text-xs text-slate-500">{b.course?.name || '—'}</p>
                   </div>
                   {b.pendingCount ? (
-                    <Badge variant="outline" className="rounded-full border-amber-200 bg-amber-50 text-amber-700">
+                    <Badge
+                      variant="outline"
+                      className="rounded-full border-amber-200 bg-amber-50 text-amber-700"
+                    >
                       {b.pendingCount} review
                     </Badge>
                   ) : null}
                 </div>
                 <div className="mt-4 flex items-center gap-4 text-xs text-slate-500">
                   <span>
-                    <strong className="text-slate-700 dark:text-slate-200">{b.poolHealth?.questionCount ?? 0}</strong> approved
+                    <strong className="text-slate-700 dark:text-slate-200">
+                      {b.poolHealth?.questionCount ?? 0}
+                    </strong>{' '}
+                    approved
                   </span>
                   <span>
                     Pool{' '}
-                    <strong className={healthCls[b.poolHealth?.health || 'RED']}>{b.poolHealth?.health ?? 'RED'}</strong>
+                    <strong className={healthCls[b.poolHealth?.health || 'RED']}>
+                      {b.poolHealth?.health ?? 'RED'}
+                    </strong>
                   </span>
                 </div>
               </button>
             ))}
-            <TablePagination page={page} perPage={limit} total={total} onPageChange={setPage} />
+            <TablePagination
+              page={page}
+              perPage={limit}
+              total={total}
+              onPageChange={setPage}
+              onPerPageChange={setLimit}
+            />
           </div>
         )}
       </CardContent>
@@ -393,13 +467,7 @@ const QUESTION_SORT_OPTIONS: { value: QuestionSortKey; label: string }[] = [
 ]
 
 /** Per-bank question panel — renders inside an expanded module card. */
-function BankQuestionPanel({
-  bankId,
-  instructorId,
-}: {
-  bankId: string
-  instructorId: string
-}) {
+function BankQuestionPanel({ bankId, instructorId }: { bankId: string; instructorId: string }) {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
   const [sort, setSort] = useState<QuestionSortKey>('recent')
@@ -503,9 +571,7 @@ function BankQuestionPanel({
       {loading ? (
         <TableSkeleton rows={4} />
       ) : visible.length === 0 ? (
-        <p className="py-6 text-center text-xs text-slate-400">
-          No questions match your filters.
-        </p>
+        <p className="py-6 text-center text-xs text-slate-400">No questions match your filters.</p>
       ) : (
         <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-950/30">
           {visible.map((q) => (
@@ -553,7 +619,7 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
   const [banks, setBanks] = useState<Bank[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [limit] = useState(20)
+  const [limit, setLimit] = useState(20)
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [creatingFor, setCreatingFor] = useState<string | null>(null)
@@ -613,7 +679,7 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Layers className="h-4 w-4 text-aerojet-sky" /> Module Bank
+          <Layers className="text-aerojet-sky h-4 w-4" /> Module Bank
         </CardTitle>
         <p className="mt-1 text-xs text-slate-500">
           One bank per module. Click a module to expand and browse its question bank.
@@ -645,12 +711,12 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
                       )}
                       disabled={isBankless}
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-aerojet-sky dark:bg-blue-900/20">
+                      <div className="text-aerojet-sky flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20">
                         <Layers className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase">
+                          <span className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase">
                             {b.course?.code}
                           </span>
                           <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
@@ -677,7 +743,7 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
                         <Button
                           size="sm"
                           variant="default"
-                          className="h-8 rounded-lg bg-aerojet-sky px-3 text-xs"
+                          className="bg-aerojet-sky h-8 rounded-lg px-3 text-xs"
                           disabled={creatingFor === b.id}
                           onClick={() => createBank(b.id, b.courseId!)}
                         >
@@ -697,10 +763,7 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
                             approved
                           </span>
                           <span className="text-xs text-slate-500">
-                            Pool{' '}
-                            <strong className={healthCls[health]}>
-                              {health}
-                            </strong>
+                            Pool <strong className={healthCls[health]}>{health}</strong>
                           </span>
                           <button
                             type="button"
@@ -725,7 +788,13 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
                 </div>
               )
             })}
-            <TablePagination page={page} perPage={limit} total={total} onPageChange={setPage} />
+            <TablePagination
+              page={page}
+              perPage={limit}
+              total={total}
+              onPageChange={setPage}
+              onPerPageChange={setLimit}
+            />
           </div>
         )}
       </CardContent>
@@ -739,13 +808,15 @@ function MyClassesTab() {
   const [classes, setClasses] = useState<ClassItem[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [limit] = useState(10)
+  const [limit, setLimit] = useState(10)
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetchPaginated<ClassItem>(`/api/instructor/exams/classes?page=${page}&limit=${limit}`)
+      const res = await fetchPaginated<ClassItem>(
+        `/api/instructor/exams/classes?page=${page}&limit=${limit}`
+      )
       setClasses(res.data)
       setTotal(res.total)
     } catch {
@@ -763,7 +834,7 @@ function MyClassesTab() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <GraduationCap className="h-4 w-4 text-aerojet-sky" /> My Classes
+          <GraduationCap className="text-aerojet-sky h-4 w-4" /> My Classes
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -777,7 +848,7 @@ function MyClassesTab() {
               <button
                 key={c.id}
                 onClick={() => router.push(`/instructor/exams/classes/${c.id}/monitor`)}
-                className="rounded-2xl border border-slate-100 p-5 text-left transition-all hover:border-aerojet-sky/40 hover:shadow-md dark:border-slate-800"
+                className="hover:border-aerojet-sky/40 rounded-2xl border border-slate-100 p-5 text-left transition-all hover:shadow-md dark:border-slate-800"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{c.name}</p>
@@ -788,16 +859,28 @@ function MyClassesTab() {
                 <p className="text-xs text-slate-500">{c.course?.name || '—'}</p>
                 <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
                   <span>
-                    <strong className="text-slate-700 dark:text-slate-200">{c.enrolledCount}</strong> enrolled
+                    <strong className="text-slate-700 dark:text-slate-200">
+                      {c.enrolledCount}
+                    </strong>{' '}
+                    enrolled
                   </span>
                   <span>
-                    <strong className="text-slate-700 dark:text-slate-200">{c.scheduledExamsCount}</strong> scheduled
+                    <strong className="text-slate-700 dark:text-slate-200">
+                      {c.scheduledExamsCount}
+                    </strong>{' '}
+                    scheduled
                   </span>
                   <span>{formatDate(c.startDate)}</span>
                 </div>
               </button>
             ))}
-            <TablePagination page={page} perPage={limit} total={total} onPageChange={setPage} />
+            <TablePagination
+              page={page}
+              perPage={limit}
+              total={total}
+              onPageChange={setPage}
+              onPerPageChange={setLimit}
+            />
           </div>
         )}
       </CardContent>
@@ -811,13 +894,13 @@ function ClassScheduleTab() {
   const [classes, setClasses] = useState<(ClassItem & { schedules: ClassSchedule[] })[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [limit] = useState(10)
+  const [limit, setLimit] = useState(10)
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetchPaginated<(ClassItem & { schedules: ClassSchedule[] })>(
+      const res = await fetchPaginated<ClassItem & { schedules: ClassSchedule[] }>(
         `/api/instructor/exams/classes?page=${page}&limit=${limit}`
       )
       setClasses(res.data)
@@ -837,7 +920,7 @@ function ClassScheduleTab() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Calendar className="h-4 w-4 text-aerojet-sky" /> Class Schedule
+          <Calendar className="text-aerojet-sky h-4 w-4" /> Class Schedule
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -855,7 +938,9 @@ function ClassScheduleTab() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{c.name}</p>
-                    <p className="text-xs text-slate-500">{c.course?.name || '—'} · {c.enrolledCount} enrolled</p>
+                    <p className="text-xs text-slate-500">
+                      {c.course?.name || '—'} · {c.enrolledCount} enrolled
+                    </p>
                   </div>
                   <button
                     onClick={() => router.push(`/instructor/exams/classes/${c.id}/monitor`)}
@@ -865,7 +950,9 @@ function ClassScheduleTab() {
                   </button>
                 </div>
                 {c.schedules.length === 0 ? (
-                  <p className="mt-3 text-xs text-slate-400">No exams scheduled for this class yet.</p>
+                  <p className="mt-3 text-xs text-slate-400">
+                    No exams scheduled for this class yet.
+                  </p>
                 ) : (
                   <div className="mt-3 space-y-2">
                     {c.schedules.map((s) => (
@@ -873,9 +960,12 @@ function ClassScheduleTab() {
                         key={s.id}
                         className="flex flex-wrap items-center gap-3 rounded-xl bg-slate-50 px-4 py-2.5 dark:bg-slate-800/50"
                       >
-                        <div className="flex-1 min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                            {s.bankName} {s.bankModuleCode && <span className="font-mono text-slate-400">({s.bankModuleCode})</span>}
+                            {s.bankName}{' '}
+                            {s.bankModuleCode && (
+                              <span className="font-mono text-slate-400">({s.bankModuleCode})</span>
+                            )}
                           </p>
                           <p className="text-[10px] text-slate-500">
                             {s.bankMcqCount} questions · {s.sebRequired ? 'SEB required' : 'No SEB'}
@@ -898,7 +988,13 @@ function ClassScheduleTab() {
                 )}
               </div>
             ))}
-            <TablePagination page={page} perPage={limit} total={total} onPageChange={setPage} />
+            <TablePagination
+              page={page}
+              perPage={limit}
+              total={total}
+              onPageChange={setPage}
+              onPerPageChange={setLimit}
+            />
           </div>
         )}
       </CardContent>
@@ -912,7 +1008,10 @@ function LiveMonitorTab() {
   const [sessions, setSessions] = useState<MonitorSession[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
-  const { items, requestSort, sortConfig } = useSort(sessions, { key: 'student.name', order: 'asc' })
+  const { items, requestSort, sortConfig } = useSort(sessions, {
+    key: 'student.name',
+    order: 'asc',
+  })
 
   useEffect(() => {
     void fetchPaginated<ClassItem>('/api/instructor/exams/classes?page=1&limit=50')
@@ -950,11 +1049,13 @@ function LiveMonitorTab() {
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Radio className="h-4 w-4 text-aerojet-sky" /> Live Monitor
+            <Radio className="text-aerojet-sky h-4 w-4" /> Live Monitor
           </CardTitle>
           <div className="flex items-center gap-2">
             <Select value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger className="w-56"><SelectValue placeholder="Select class" /></SelectTrigger>
+              <SelectTrigger className="w-56">
+                <SelectValue placeholder="Select class" />
+              </SelectTrigger>
               <SelectContent>
                 {classes.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
@@ -964,7 +1065,11 @@ function LiveMonitorTab() {
               </SelectContent>
             </Select>
             {selectedClass ? (
-              <Button variant="outline" size="sm" onClick={() => router.push(`/instructor/exams/classes/${selectedClass}/monitor`)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/instructor/exams/classes/${selectedClass}/monitor`)}
+              >
                 Open full monitor
               </Button>
             ) : null}
@@ -982,32 +1087,73 @@ function LiveMonitorTab() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400 dark:border-slate-800">
-                  <SortHeader label="Student" sortKey="student.name" currentSort={sortConfig} onSort={requestSort} className="py-2 pr-4" />
-                  <SortHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} align="center" className="py-2 pr-4" />
-                  <SortHeader label="Progress" sortKey="percentage" currentSort={sortConfig} onSort={requestSort} align="right" className="py-2 pr-4" />
-                  <SortHeader label="Time Left" sortKey="timeRemaining" currentSort={sortConfig} onSort={requestSort} align="right" className="py-2 pr-4" />
-                  <SortHeader label="Score" sortKey="score" currentSort={sortConfig} onSort={requestSort} align="right" className="py-2" />
+                <tr className="border-b border-slate-100 text-left text-xs tracking-wide text-slate-400 uppercase dark:border-slate-800">
+                  <SortHeader
+                    label="Student"
+                    sortKey="student.name"
+                    currentSort={sortConfig}
+                    onSort={requestSort}
+                    className="py-2 pr-4"
+                  />
+                  <SortHeader
+                    label="Status"
+                    sortKey="status"
+                    currentSort={sortConfig}
+                    onSort={requestSort}
+                    align="center"
+                    className="py-2 pr-4"
+                  />
+                  <SortHeader
+                    label="Progress"
+                    sortKey="percentage"
+                    currentSort={sortConfig}
+                    onSort={requestSort}
+                    align="right"
+                    className="py-2 pr-4"
+                  />
+                  <SortHeader
+                    label="Time Left"
+                    sortKey="timeRemaining"
+                    currentSort={sortConfig}
+                    onSort={requestSort}
+                    align="right"
+                    className="py-2 pr-4"
+                  />
+                  <SortHeader
+                    label="Score"
+                    sortKey="score"
+                    currentSort={sortConfig}
+                    onSort={requestSort}
+                    align="right"
+                    className="py-2"
+                  />
                 </tr>
               </thead>
               <tbody>
                 {items.map((s) => (
-                  <tr key={s.id} className="border-b border-slate-50 last:border-0 dark:border-slate-800/50">
+                  <tr
+                    key={s.id}
+                    className="border-b border-slate-50 last:border-0 dark:border-slate-800/50"
+                  >
                     <td className="py-3 pr-4">
-                      <p className="truncate font-medium text-slate-800 dark:text-slate-100">{s.student.name}</p>
+                      <p className="truncate font-medium text-slate-800 dark:text-slate-100">
+                        {s.student.name}
+                      </p>
                       <p className="truncate text-xs text-slate-400">{s.bank.name}</p>
                     </td>
-                    <td className="py-3 pr-4 text-center"><SessionStatusBadge status={s.status} /></td>
-                    <td className="py-3 pr-4 w-40 tabular-nums">
+                    <td className="py-3 pr-4 text-center">
+                      <SessionStatusBadge status={s.status} />
+                    </td>
+                    <td className="w-40 py-3 pr-4 tabular-nums">
                       <ScoreBar value={s.percentage} />
                       <span className="mt-1 block text-xs text-slate-400">
                         {s.percentage != null ? `${s.percentage}%` : `${s.answerCount} answered`}
                       </span>
                     </td>
-                    <td className="py-3 pr-4 text-right tabular-nums text-slate-500">
+                    <td className="py-3 pr-4 text-right text-slate-500 tabular-nums">
                       {s.timeRemaining != null ? formatDuration(s.timeRemaining) : '—'}
                     </td>
-                    <td className="py-3 text-right tabular-nums font-semibold text-slate-700 dark:text-slate-200">
+                    <td className="py-3 text-right font-semibold text-slate-700 tabular-nums dark:text-slate-200">
                       {s.score != null ? `${s.score}/${s.totalPoints ?? '?'}` : '—'}
                     </td>
                   </tr>
@@ -1048,10 +1194,12 @@ export default function InstructorExamsDashboard({
       <Card>
         <CardContent className="flex flex-col items-center justify-center gap-3 py-20 text-center">
           <AlertCircle className="h-10 w-10 text-amber-500" />
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Internal Exams are disabled</h2>
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+            Internal Exams are disabled
+          </h2>
           <p className="max-w-md text-sm text-slate-500">
-            The internal exam system is not currently enabled. Contact an administrator to turn it on before
-            managing questions, banks, or live sessions.
+            The internal exam system is not currently enabled. Contact an administrator to turn it
+            on before managing questions, banks, or live sessions.
           </p>
         </CardContent>
       </Card>
@@ -1067,11 +1215,15 @@ export default function InstructorExamsDashboard({
 
   return (
     <div className="space-y-6">
-      <div data-tour-id="instructor-exams-header" className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div
+        data-tour-id="instructor-exams-header"
+        className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+      >
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white">Internal Exams</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Manage question banks, monitor live sessions, and review class performance, {instructorName}.
+            Manage question banks, monitor live sessions, and review class performance,{' '}
+            {instructorName}.
           </p>
         </div>
       </div>
@@ -1081,11 +1233,13 @@ export default function InstructorExamsDashboard({
           <Card key={s.label}>
             <CardContent className="flex items-center justify-between p-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{s.label}</p>
+                <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                  {s.label}
+                </p>
                 <p className="mt-1 text-2xl font-black text-slate-900 dark:text-white">{s.value}</p>
               </div>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20">
-                <s.icon className="h-4 w-4 text-aerojet-sky" />
+                <s.icon className="text-aerojet-sky h-4 w-4" />
               </div>
             </CardContent>
           </Card>
@@ -1094,20 +1248,50 @@ export default function InstructorExamsDashboard({
 
       <Tabs defaultValue="questions" data-tour-id="instructor-exams-tabs" className="space-y-4">
         <TabsList className="flex h-auto flex-wrap gap-1 bg-slate-100 p-1 dark:bg-slate-800">
-          <TabsTrigger value="questions" className="gap-1.5"><BookOpen className="h-4 w-4" />My Questions</TabsTrigger>
-          <TabsTrigger value="banks" className="gap-1.5"><Library className="h-4 w-4" />My Banks</TabsTrigger>
-          <TabsTrigger value="module" className="gap-1.5"><Layers className="h-4 w-4" />Module Bank</TabsTrigger>
-          <TabsTrigger value="classes" className="gap-1.5"><GraduationCap className="h-4 w-4" />My Classes</TabsTrigger>
-          <TabsTrigger value="schedule" className="gap-1.5"><Calendar className="h-4 w-4" />Schedule</TabsTrigger>
-          <TabsTrigger value="monitor" className="gap-1.5"><Radio className="h-4 w-4" />Live Monitor</TabsTrigger>
+          <TabsTrigger value="questions" className="gap-1.5">
+            <BookOpen className="h-4 w-4" />
+            My Questions
+          </TabsTrigger>
+          <TabsTrigger value="banks" className="gap-1.5">
+            <Library className="h-4 w-4" />
+            My Banks
+          </TabsTrigger>
+          <TabsTrigger value="module" className="gap-1.5">
+            <Layers className="h-4 w-4" />
+            Module Bank
+          </TabsTrigger>
+          <TabsTrigger value="classes" className="gap-1.5">
+            <GraduationCap className="h-4 w-4" />
+            My Classes
+          </TabsTrigger>
+          <TabsTrigger value="schedule" className="gap-1.5">
+            <Calendar className="h-4 w-4" />
+            Schedule
+          </TabsTrigger>
+          <TabsTrigger value="monitor" className="gap-1.5">
+            <Radio className="h-4 w-4" />
+            Live Monitor
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="questions"><MyQuestionsTab /></TabsContent>
-        <TabsContent value="banks"><MyBanksTab /></TabsContent>
-        <TabsContent value="module"><ModuleBankTab instructorId={instructorId} /></TabsContent>
-        <TabsContent value="classes"><MyClassesTab /></TabsContent>
-        <TabsContent value="schedule"><ClassScheduleTab /></TabsContent>
-        <TabsContent value="monitor"><LiveMonitorTab /></TabsContent>
+        <TabsContent value="questions">
+          <MyQuestionsTab />
+        </TabsContent>
+        <TabsContent value="banks">
+          <MyBanksTab />
+        </TabsContent>
+        <TabsContent value="module">
+          <ModuleBankTab instructorId={instructorId} />
+        </TabsContent>
+        <TabsContent value="classes">
+          <MyClassesTab />
+        </TabsContent>
+        <TabsContent value="schedule">
+          <ClassScheduleTab />
+        </TabsContent>
+        <TabsContent value="monitor">
+          <LiveMonitorTab />
+        </TabsContent>
       </Tabs>
     </div>
   )

@@ -7,7 +7,6 @@ import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { z } from 'zod'
 import { rateLimitByUser } from '@/lib/security/rate-limit'
-import { z } from 'zod'
 
 const competencySchema = z.object({
   rating: z.number().int().min(1).max(5),
@@ -19,8 +18,9 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
   if (!rl.allowed) {
     return apiError('Too many requests', 429)
   }
-  if (!ctx?.params?.entryId) return apiError('Entry ID required')
-  const entryId = ctx.params.entryId
+  const resolvedParams = await ctx?.params
+  if (!resolvedParams?.entryId) return apiError('Entry ID required')
+  const entryId = String(resolvedParams.entryId)
   const body = await req.json()
   const parsed = competencySchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid rating', 400)

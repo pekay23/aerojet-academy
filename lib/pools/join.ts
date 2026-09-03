@@ -12,7 +12,6 @@ import { resolveStandardPoolForJoin } from './assignment'
 import { reserveFunds } from '@/lib/wallet/operations'
 import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 import { trackEvent } from '@/lib/analytics/events'
-import { trackEvent } from '@/lib/analytics/events'
 
 // Simple string hash to generate two 32-bit integers for PG advisory locks
 function getLockKeys(str: string): [number, number] {

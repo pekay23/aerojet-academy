@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   Search,
   History,
@@ -13,6 +13,8 @@ import {
   Clock,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+
+const MotionDiv = motion.div
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -62,8 +64,6 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
   const [score, setScore] = useState<string>('')
   const [comments, setComments] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState(25)
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
 
@@ -125,12 +125,12 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
             placeholder="Search history by student, assessment, or module..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-14 rounded-2xl border-slate-100 bg-white pl-11 text-sm font-medium shadow-sm transition-all focus:border-aerojet-sky focus:ring-4 focus:ring-blue-50/50 dark:border-slate-800 dark:bg-slate-900"
+            className="focus:border-aerojet-sky h-14 rounded-2xl border-slate-100 bg-white pl-11 text-sm font-medium shadow-sm transition-all focus:ring-4 focus:ring-blue-50/50 dark:border-slate-800 dark:bg-slate-900"
           />
         </div>
 
         <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-500 uppercase">
-          <History className="h-4 w-4 text-aerojet-sky" />
+          <History className="text-aerojet-sky h-4 w-4" />
           <span>{total} Graded Assessments</span>
         </div>
       </div>
@@ -148,12 +148,12 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="group overflow-hidden rounded-3xl border-slate-100 bg-white transition-all hover:border-aerojet-sky/30 hover:shadow-xl hover:shadow-blue-500/5 dark:border-slate-800 dark:bg-slate-900">
+                <Card className="group hover:border-aerojet-sky/30 overflow-hidden rounded-3xl border-slate-100 bg-white transition-all hover:shadow-xl hover:shadow-blue-500/5 dark:border-slate-800 dark:bg-slate-900">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row md:items-center">
                       {/* Left: Score Badge */}
                       <div className="flex flex-col items-center justify-center gap-1 border-b border-slate-50 p-6 md:w-32 md:border-r md:border-b-0 dark:border-slate-800/50">
-                        <span className="text-2xl font-black text-aerojet-sky">{item.score}%</span>
+                        <span className="text-aerojet-sky text-2xl font-black">{item.score}%</span>
                         <span className="text-[10px] font-black text-slate-400 uppercase">
                           Score
                         </span>
@@ -162,7 +162,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
                       {/* Middle: Content */}
                       <div className="flex-1 space-y-2 p-6">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase">
+                          <p className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase">
                             {item.enrollment.course.code}
                           </p>
                           <span className="text-slate-200">|</span>
@@ -189,7 +189,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
                           <Button
                             variant="outline"
                             onClick={() => openEditModal(item)}
-                            className="rounded-xl border-slate-100 font-bold transition-all hover:border-aerojet-sky hover:bg-blue-50 hover:text-aerojet-sky dark:border-slate-800 dark:hover:bg-blue-900/20"
+                            className="hover:border-aerojet-sky hover:text-aerojet-sky rounded-xl border-slate-100 font-bold transition-all hover:bg-blue-50 dark:border-slate-800 dark:hover:bg-blue-900/20"
                           >
                             <Edit2 className="mr-2 h-4 w-4" />
                             Edit Grade
@@ -216,7 +216,13 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
       </div>
 
       {total > 0 && (
-        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+        <TablePagination
+          page={page}
+          perPage={perPage}
+          total={total}
+          onPageChange={setPage}
+          onPerPageChange={setPerPage}
+        />
       )}
 
       {/* Edit Grading Dialog */}
@@ -277,7 +283,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
                   value={comments}
                   onChange={(e) => setComments(e.target.value)}
                   placeholder="Update your feedback for the student..."
-                  className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-medium focus:border-aerojet-sky focus:ring-4 focus:ring-blue-50/50 focus:outline-none dark:border-slate-800 dark:bg-slate-900"
+                  className="focus:border-aerojet-sky w-full rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-medium focus:ring-4 focus:ring-blue-50/50 focus:outline-none dark:border-slate-800 dark:bg-slate-900"
                 />
               </div>
             </div>
@@ -286,7 +292,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
               <Button
                 onClick={handleEditSubmit}
                 disabled={isSubmitting || !score}
-                className="h-14 w-full rounded-2xl bg-aerojet-blue text-base font-black text-white hover:bg-[#003a7c] disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
+                className="bg-aerojet-blue h-14 w-full rounded-2xl text-base font-black text-white hover:bg-[#003a7c] disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">

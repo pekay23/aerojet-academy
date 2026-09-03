@@ -22,115 +22,122 @@ const patchSchema = z.object({
   reviewNote: z.string().optional(),
 })
 
-export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
-  await requireStaff()
-  const { id: sessionId } = await ctx.params
+export const GET = withErrorHandler(
+  async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+    await requireStaff()
+    const { id: sessionId } = await ctx.params
 
-  const searchParams = new URL(req.url).searchParams
-  const { page, limit, skip } = parsePagination(searchParams)
-  const { sortBy, sortOrder } = parseSorting(searchParams)
-  const search = parseSearch(searchParams)
+    const searchParams = new URL(req.url).searchParams
+    const { page, limit, skip } = parsePagination(searchParams)
+    const { sortBy, sortOrder } = parseSorting(searchParams)
+    const search = parseSearch(searchParams)
 
-  const where: Record<string, unknown> = {
-    sessionId,
-    ...(search
-      ? {
-          OR: [
-            { type: { contains: search } },
-            { detail: { contains: search } },
-            { reviewOutcome: { contains: search } },
-          ],
-        }
-      : {}),
-  }
-
-  const [violations, total] = await Promise.all([
-    prismaUnfiltered.internalExamViolation.findMany({
-      where,
-      orderBy: { [sortBy]: sortOrder },
-      skip,
-      take: limit,
-      include: {
-        student: {
-          select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } },
-        },
-      },
-    }),
-    prismaUnfiltered.internalExamViolation.count({ where }),
-  ])
-
-  return apiPaginated(
-    violations.map((v) => ({
-      id: v.id,
-      type: v.type,
-      severity: v.severity,
-      detail: v.detail,
-      deviceInfo: v.deviceInfo,
-      reviewOutcome: v.reviewOutcome,
-      reviewNote: v.reviewNote,
-      reviewedAt: v.reviewedAt?.toISOString() ?? null,
-      reviewedBy: v.reviewedBy ?? null,
-      createdAt: v.createdAt.toISOString(),
-      student: v.student
+    const where: Record<string, unknown> = {
+      sessionId,
+      ...(search
         ? {
-            id: v.student.id,
-            name: v.student.profile
-              ? `${v.student.profile.firstName} ${v.student.profile.lastName}`
-              : v.student.email,
-            email: v.student.email,
+            OR: [
+              { type: { contains: search } },
+              { detail: { contains: search } },
+              { reviewOutcome: { contains: search } },
+            ],
           }
-        : null,
-    })),
-    total,
-    page,
-    limit
-  )
-})
+        : {}),
+    }
 
-export const PATCH = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
-  const staff = await requireStaff()
-  const { id: sessionId } = await ctx.params
+    const [violations, total] = await Promise.all([
+      prismaUnfiltered.internalExamViolation.findMany({
+        where,
+        orderBy: { [sortBy]: sortOrder },
+        skip,
+        take: limit,
+        include: {
+          student: {
+            select: {
+              id: true,
+              email: true,
+              profile: { select: { firstName: true, lastName: true } },
+            },
+          },
+        },
+      }),
+      prismaUnfiltered.internalExamViolation.count({ where }),
+    ])
 
-  const body = await req.json()
-  const parsed = patchSchema.safeParse(body)
-  if (!parsed.success) {
-    return apiError(parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join('; '), 400)
+    return apiPaginated(
+      violations.map((v) => ({
+        id: v.id,
+        type: v.type,
+        severity: v.severity,
+        detail: v.detail,
+        deviceInfo: v.deviceInfo,
+        reviewOutcome: v.reviewOutcome,
+        reviewedAt: v.reviewedAt?.toISOString() ?? null,
+        reviewedBy: v.reviewedBy ?? null,
+        createdAt: v.createdAt.toISOString(),
+        student: v.student
+          ? {
+              id: v.student.id,
+              name: v.student.profile
+                ? `${v.student.profile.firstName} ${v.student.profile.lastName}`
+                : v.student.email,
+              email: v.student.email,
+            }
+          : null,
+      })),
+      total,
+      page,
+      limit
+    )
   }
+)
 
-  const { violationId, violationIds, outcome, reviewNote } = parsed.data
+export const PATCH = withErrorHandler(
+  async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+    const staff = await requireStaff()
+    const { id: sessionId } = await ctx.params
 
-  const ids = violationId
-    ? [violationId]
-    : violationIds
-      ? [...violationIds]
-      : []
+    const body = await req.json()
+    const parsed = patchSchema.safeParse(body)
+    if (!parsed.success) {
+      return apiError(
+        parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join('; '),
+        400
+      )
+    }
 
-  if (ids.length === 0) return apiError('violationId or violationIds is required')
+    const { violationId, violationIds, outcome, reviewNote } = parsed.data
 
-  const found = await prismaUnfiltered.internalExamViolation.findMany({
-    where: { id: { in: ids }, sessionId },
-    select: { id: true },
-  })
-  if (found.length !== ids.length) return apiError('One or more violations not found for this session', 404)
+    const ids = violationId ? [violationId] : violationIds ? [...violationIds] : []
 
-  const updated = await prismaUnfiltered.internalExamViolation.updateMany({
-    where: { id: { in: ids }, sessionId },
-    data: {
-      reviewOutcome: outcome,
-      reviewNote: reviewNote || null,
-      reviewedBy: staff.id,
-      reviewedAt: new Date(),
-    },
-  })
+    if (ids.length === 0) return apiError('violationId or violationIds is required')
 
-  await createAuditLog({
-    userId: staff.id,
-    action: AuditAction.EXAM_VIOLATION_REVIEWED,
-    entity: 'InternalExamViolation',
-    entityId: sessionId,
-    description: `Reviewed ${updated.count} violation(s) — outcome: ${outcome} by staff ${staff.id}`,
-    changes: { violationIds: ids, outcome, reviewNote: reviewNote || null },
-  })
+    const found = await prismaUnfiltered.internalExamViolation.findMany({
+      where: { id: { in: ids }, sessionId },
+      select: { id: true },
+    })
+    if (found.length !== ids.length)
+      return apiError('One or more violations not found for this session', 404)
 
-  return apiSuccess({ updated: updated.count, outcome })
-})
+    const updated = await prismaUnfiltered.internalExamViolation.updateMany({
+      where: { id: { in: ids }, sessionId },
+      data: {
+        reviewOutcome: outcome,
+        reviewNote: reviewNote || null,
+        reviewedBy: staff.id,
+        reviewedAt: new Date(),
+      },
+    })
+
+    await createAuditLog({
+      userId: staff.id,
+      action: AuditAction.EXAM_VIOLATION_REVIEWED,
+      entity: 'InternalExamViolation',
+      entityId: sessionId,
+      description: `Reviewed ${updated.count} violation(s) — outcome: ${outcome} by staff ${staff.id}`,
+      changes: { violationIds: ids, outcome, reviewNote: reviewNote || null },
+    })
+
+    return apiSuccess({ updated: updated.count, outcome })
+  }
+)

@@ -13,7 +13,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { canAccessClasses, resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 
 interface PageProps {
@@ -25,11 +25,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const session = await getAuthSession()
   if (!session) return { title: 'Course Materials' }
 
-  const enrollments = await prismaUnfiltered.enrollment.findMany({ where: { userId: session.user.id }, include: { course: true } });
-  const enrollment = enrollments.find(e => 
-    e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug ||
-    e.id === slug || e.courseId === slug
-  );
+  const enrollments = await prismaUnfiltered.enrollment.findMany({
+    where: { userId: session.user.id },
+    include: { course: true },
+  })
+  const enrollment = enrollments.find(
+    (e: any) =>
+      e.course.name
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-') === slug ||
+      e.id === slug ||
+      e.courseId === slug
+  )
   return { title: enrollment ? `Resources: ${enrollment.course.name}` : 'Course Materials' }
 }
 
@@ -38,7 +48,8 @@ export default async function MaterialsPage({ params }: PageProps) {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const allEnrollments = await prismaUnfiltered.enrollment.findMany({ where: { userId: session.user.id },
+  const allEnrollments = await prismaUnfiltered.enrollment.findMany({
+    where: { userId: session.user.id },
     include: {
       course: true,
       user: {
@@ -55,10 +66,17 @@ export default async function MaterialsPage({ params }: PageProps) {
     },
   })
 
-  const enrollment = allEnrollments.find(e => 
-    e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug ||
-    e.id === slug || e.courseId === slug
-  );
+  const enrollment = allEnrollments.find(
+    (e: any) =>
+      e.course.name
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-') === slug ||
+      e.id === slug ||
+      e.courseId === slug
+  )
 
   if (!enrollment || enrollment.userId !== session.user.id) {
     notFound()
@@ -82,7 +100,7 @@ export default async function MaterialsPage({ params }: PageProps) {
   const allowClasses = canAccessClasses(enrollmentType)
 
   return (
-    <div className="mx-auto max-w-5xl space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-5xl space-y-10 duration-700">
       {/* Header */}
       <div className="space-y-4">
         <Link

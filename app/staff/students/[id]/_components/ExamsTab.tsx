@@ -23,6 +23,11 @@ import BookExamForStudentDialog from './BookExamForStudentDialog'
 import AddExamRecordDialog from './AddExamRecordDialog'
 import CertificateReleaseControl from './CertificateReleaseControl'
 import { deriveBookingDisplayResult } from '@/lib/exams/fulfillment'
+import type {
+  SerializedExamBooking,
+  SerializedExamComponent,
+  SerializedExamBundle,
+} from '@/lib/types/staff'
 
 const EXAM_FILTERS = [
   { key: 'all', label: 'All' },
@@ -86,15 +91,17 @@ export default function ExamsTab({
         courseId: b.course?.id || null,
         score: b.score != null ? Number(b.score) : null,
         percentage: b.percentage != null ? Number(b.percentage) : null,
-        result: (b.result?.toUpperCase().includes('MIGRATE') || b.result?.toUpperCase().includes('HISTORICAL'))
-          ? null
-          : deriveBookingDisplayResult({
-              result: b.result,
-              demandStatus: b.demandStatus,
-              executedAt: b.executedAt,
-              rolloverToEventId: b.rolloverToEventId,
-              status: b.status,
-            }),
+        result:
+          b.result?.toUpperCase().includes('MIGRATE') ||
+          b.result?.toUpperCase().includes('HISTORICAL')
+            ? null
+            : deriveBookingDisplayResult({
+                result: b.result,
+                demandStatus: b.demandStatus,
+                executedAt: b.executedAt,
+                rolloverToEventId: b.rolloverToEventId,
+                status: b.status,
+              }),
         passed: b.result?.toLowerCase() === 'pass',
         status:
           (b.result != null && b.result !== '' && !b.result.toUpperCase().includes('MIGRATE')) ||
@@ -102,13 +109,18 @@ export default function ExamsTab({
             ? 'COMPLETED'
             : b.status,
         bookingType: b.bookingType,
-        attemptType: (b.attemptType?.toUpperCase().includes('MIGRATE') || b.attemptType?.toUpperCase().includes('HISTORICAL')) ? null : b.attemptType,
+        attemptType:
+          b.attemptType?.toUpperCase().includes('MIGRATE') ||
+          b.attemptType?.toUpperCase().includes('HISTORICAL')
+            ? null
+            : b.attemptType,
         isResit: b.isResit || (b.attemptType?.toUpperCase().startsWith('RESIT') ?? false),
         eventName: b.event?.name,
         bookedAt: b.bookedAt,
         amountPaid: Number(b.amountPaid || 0),
         examCategory: b.examCategory,
-        attendanceStatus: b.examAttendance?.status || b.sittingAssignments?.[0]?.attendanceStatus || null,
+        attendanceStatus:
+          b.examAttendance?.status || b.sittingAssignments?.[0]?.attendanceStatus || null,
         sittingLabel: b.sittingAssignments?.[0]?.sitting
           ? `Day ${b.sittingAssignments[0].sitting.dayNumber} ${b.sittingAssignments[0].sitting.sessionType}`
           : null,
@@ -122,9 +134,9 @@ export default function ExamsTab({
         (rec) =>
           rec.source === 'booking' &&
           rec.moduleCode?.toUpperCase() === rModuleCode.toUpperCase() &&
-          ((rec.attemptType || 'FIRST') === (r.attemptType || 'FIRST'))
+          (rec.attemptType || 'FIRST') === (r.attemptType || 'FIRST')
       )
-      
+
       if (existingBooking) {
         // Consolidate: Merge the score from ExamResult into the booking
         existingBooking.score = Number(r.score)
@@ -137,29 +149,31 @@ export default function ExamsTab({
         existingBooking.sourceNotes = r.sourceNotes
         existingBooking.examCategory = r.examCategory || existingBooking.examCategory
         // Treat "migrated" or "historical" results as pending for UI display purposes
-        if (existingBooking.result?.toUpperCase().includes('MIGRATE') || 
-            existingBooking.result?.toUpperCase().includes('HISTORICAL')) {
+        if (
+          existingBooking.result?.toUpperCase().includes('MIGRATE') ||
+          existingBooking.result?.toUpperCase().includes('HISTORICAL')
+        ) {
           existingBooking.result = null
         }
 
         const rType = r.attemptType?.toUpperCase() || ''
         const bType = existingBooking.attemptType?.toUpperCase() || ''
-        
-        const isPlaceholder = (s: string) => 
+
+        const isPlaceholder = (s: string) =>
           s.includes('MIGRATE') || s.includes('HISTORICAL') || s === '—'
-        
+
         if (rType && !isPlaceholder(rType)) {
           existingBooking.attemptType = r.attemptType
           existingBooking.isResit = r.attemptType.startsWith('RESIT')
         } else if (!bType || isPlaceholder(bType)) {
-           if (rType && !isPlaceholder(rType)) {
-             existingBooking.attemptType = r.attemptType
-             existingBooking.isResit = r.attemptType.startsWith('RESIT')
-           } else if (r.attemptType) {
-             // Fallback to result's attempt type even if it's a placeholder, 
-             // but only if booking has nothing better
-             existingBooking.attemptType = r.attemptType
-           }
+          if (rType && !isPlaceholder(rType)) {
+            existingBooking.attemptType = r.attemptType
+            existingBooking.isResit = r.attemptType.startsWith('RESIT')
+          } else if (r.attemptType) {
+            // Fallback to result's attempt type even if it's a placeholder,
+            // but only if booking has nothing better
+            existingBooking.attemptType = r.attemptType
+          }
         }
       } else {
         records.push({
@@ -174,7 +188,11 @@ export default function ExamsTab({
           passed: r.passed,
           status: 'COMPLETED',
           bookingType: null,
-          attemptType: (r.attemptType?.toUpperCase().includes('MIGRATE') || r.attemptType?.toUpperCase().includes('HISTORICAL')) ? null : r.attemptType,
+          attemptType:
+            r.attemptType?.toUpperCase().includes('MIGRATE') ||
+            r.attemptType?.toUpperCase().includes('HISTORICAL')
+              ? null
+              : r.attemptType,
           isResit: r.attemptType ? r.attemptType.toUpperCase().startsWith('RESIT') : false,
           eventName: null,
           sourceNotes: r.sourceNotes,
@@ -262,7 +280,8 @@ export default function ExamsTab({
       ).length,
       completed: allExamRecords.filter((r) => r.status === 'COMPLETED').length,
       internal: allExamRecords.filter((r) => r.examCategory === 'INTERNAL').length,
-      official: allExamRecords.filter((r) => r.examCategory === 'OFFICIAL_EASA' || !r.examCategory).length,
+      official: allExamRecords.filter((r) => r.examCategory === 'OFFICIAL_EASA' || !r.examCategory)
+        .length,
     }),
     [allExamRecords]
   )
@@ -277,10 +296,11 @@ export default function ExamsTab({
         moduleCode: editData.moduleCode || undefined,
         attemptType: editData.attemptType || undefined,
         bookingType: editData.bookingType || undefined,
-        examCategory: editData.examCategory || undefined,
-        resultIdToSync: record.resultId || undefined,
+        examCategory:
+          (editData.examCategory as 'INTERNAL' | 'OFFICIAL_EASA' | undefined) || undefined,
+        resultIdToSync: (record as { resultId?: string }).resultId || undefined,
       })
-      if (res.error) {
+      if ('error' in res && res.error) {
         toast.error(res.error)
       } else {
         toast.success('Exam record updated')
@@ -297,7 +317,7 @@ export default function ExamsTab({
     if (!confirm('Are you sure you want to delete this exam record?')) return
     try {
       const res = await deleteExamRecord(recordId)
-      if (res.error) {
+      if ('error' in res && res.error) {
         toast.error(res.error)
       } else {
         toast.success('Exam record deleted')
@@ -325,27 +345,29 @@ export default function ExamsTab({
 
   const handleQuickAddSave = async () => {
     if (!quickAddModule) return
-    
+
     const moduleCode = quickAddModule.course?.code || quickAddModule.code
     const courseId = quickAddModule.course?.id
-    
+
     try {
       const res = await fetch('/api/staff/students/' + student.id + '/exam-record', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          entries: [{
-            courseId,
-            moduleCode,
-            score: undefined,
-          }],
+          entries: [
+            {
+              courseId,
+              moduleCode,
+              score: undefined,
+            },
+          ],
           bookingType: 'INDIVIDUAL',
           examDate: undefined, // Leave date blank for admin to fill
           attemptType: 'FIRST',
           notes: 'Quick added from exam tab',
         }),
       })
-      
+
       const data = await res.json()
       if (res.ok && data.success) {
         toast.success('Module added! Click edit to add exam date and score.')
@@ -373,9 +395,7 @@ export default function ExamsTab({
   }, [examComponents])
 
   // Get list of modules that already have records
-  const existingModuleCodes = new Set(
-    allExamRecords.map((r) => r.moduleCode).filter(Boolean)
-  )
+  const existingModuleCodes = new Set(allExamRecords.map((r) => r.moduleCode).filter(Boolean))
 
   // Available modules to add (not yet in records)
   const availableModules = examComponents.filter(
@@ -440,7 +460,7 @@ export default function ExamsTab({
               <button
                 key={module.id}
                 onClick={() => handleQuickAdd(module)}
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:border-aerojet-blue hover:text-aerojet-blue dark:border-slate-600 dark:bg-slate-700"
+                className="hover:border-aerojet-blue hover:text-aerojet-blue flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-all dark:border-slate-600 dark:bg-slate-700"
               >
                 <Plus className="h-3 w-3" />
                 {module.course?.code || module.code}
@@ -462,9 +482,7 @@ export default function ExamsTab({
             <h3 className="mb-4 text-lg font-bold">
               Add {quickAddModule.course?.code || quickAddModule.code}
             </h3>
-            <p className="mb-4 text-sm text-slate-500">
-              Module: {quickAddModule.course?.name || quickAddModule.name}
-            </p>
+            <p className="mb-4 text-sm text-slate-500">Module: {quickAddModule.name}</p>
             <p className="mb-4 text-xs text-amber-600">
               You can add the exam date and score later by editing this record.
             </p>
@@ -477,7 +495,7 @@ export default function ExamsTab({
               </button>
               <button
                 onClick={handleQuickAddSave}
-                className="rounded-lg bg-aerojet-blue px-4 py-2 text-sm font-medium text-white"
+                className="bg-aerojet-blue rounded-lg px-4 py-2 text-sm font-medium text-white"
               >
                 Add Module
               </button>
@@ -495,7 +513,7 @@ export default function ExamsTab({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search module or exam..."
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800/50"
+            className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
           />
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -562,14 +580,17 @@ export default function ExamsTab({
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900/50">
                 <th
-                  className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
+                  className="hover:text-aerojet-blue cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase"
                   onClick={() => handleSort('moduleCode')}
                 >
                   <span className="flex items-center gap-1">
                     Module
-                    {sortBy === 'moduleCode' && (
-                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                    )}
+                    {sortBy === 'moduleCode' &&
+                      (sortOrder === 'asc' ? (
+                        <ArrowUp className="h-3 w-3" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" />
+                      ))}
                   </span>
                 </th>
                 <th className="px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
@@ -582,36 +603,45 @@ export default function ExamsTab({
                   Attempt
                 </th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
+                  className="hover:text-aerojet-blue cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase"
                   onClick={() => handleSort('examDate')}
                 >
                   <span className="flex items-center gap-1">
                     Date
-                    {sortBy === 'examDate' && (
-                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                    )}
+                    {sortBy === 'examDate' &&
+                      (sortOrder === 'asc' ? (
+                        <ArrowUp className="h-3 w-3" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" />
+                      ))}
                   </span>
                 </th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
+                  className="hover:text-aerojet-blue cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase"
                   onClick={() => handleSort('score')}
                 >
                   <span className="flex items-center justify-center gap-1">
                     Score
-                    {sortBy === 'score' && (
-                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                    )}
+                    {sortBy === 'score' &&
+                      (sortOrder === 'asc' ? (
+                        <ArrowUp className="h-3 w-3" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" />
+                      ))}
                   </span>
                 </th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
+                  className="hover:text-aerojet-blue cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase"
                   onClick={() => handleSort('result')}
                 >
                   <span className="flex items-center justify-center gap-1">
                     Result
-                    {sortBy === 'result' && (
-                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                    )}
+                    {sortBy === 'result' &&
+                      (sortOrder === 'asc' ? (
+                        <ArrowUp className="h-3 w-3" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" />
+                      ))}
                   </span>
                 </th>
                 <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
@@ -644,21 +674,25 @@ export default function ExamsTab({
                           </option>
                         ))}
                       </select>
-                    ) : (() => {
-                      const cid = record.courseId || courseLookup.get(record.moduleCode?.toUpperCase() || '')
-                      return cid ? (
-                        <a
-                          href={`/staff/courses/${cid}`}
-                          className="font-mono font-bold text-aerojet-blue hover:underline dark:text-aerojet-sky"
-                        >
-                          {record.moduleCode}
-                        </a>
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                          {record.moduleCode}
-                        </span>
-                      )
-                    })()}
+                    ) : (
+                      (() => {
+                        const cid =
+                          record.courseId ||
+                          courseLookup.get(record.moduleCode?.toUpperCase() || '')
+                        return cid ? (
+                          <a
+                            href={`/staff/courses/${cid}`}
+                            className="text-aerojet-blue dark:text-aerojet-sky font-mono font-bold hover:underline"
+                          >
+                            {record.moduleCode}
+                          </a>
+                        ) : (
+                          <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                            {record.moduleCode}
+                          </span>
+                        )
+                      })()
+                    )}
                   </td>
                   <td className="max-w-[200px] px-4 py-3 text-xs text-slate-500">
                     <div className="flex flex-col">
@@ -666,10 +700,14 @@ export default function ExamsTab({
                         {record.examName}
                       </span>
                       {record.eventName && (
-                        <span className="text-[10px] text-slate-400">Event: {record.eventName}</span>
+                        <span className="text-[10px] text-slate-400">
+                          Event: {record.eventName}
+                        </span>
                       )}
                       {record.sittingLabel && (
-                        <span className="text-[10px] text-slate-400">Sitting: {record.sittingLabel}</span>
+                        <span className="text-[10px] text-slate-400">
+                          Sitting: {record.sittingLabel}
+                        </span>
                       )}
                     </div>
                   </td>
@@ -677,18 +715,25 @@ export default function ExamsTab({
                     {editingId === record.id ? (
                       <select
                         value={editData.examCategory ?? record.examCategory ?? 'OFFICIAL_EASA'}
-                        onChange={(e) => setEditData((d) => ({ ...d, examCategory: e.target.value as 'INTERNAL' | 'OFFICIAL_EASA' }))}
+                        onChange={(e) =>
+                          setEditData((d) => ({
+                            ...d,
+                            examCategory: e.target.value as 'INTERNAL' | 'OFFICIAL_EASA',
+                          }))
+                        }
                         className="w-24 rounded border border-slate-200 px-1 py-0.5 text-[10px]"
                       >
                         <option value="OFFICIAL_EASA">OFFICIAL EASA</option>
                         <option value="INTERNAL">INTERNAL</option>
                       </select>
                     ) : (
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                        record.examCategory === 'INTERNAL' 
-                          ? 'bg-amber-100 text-amber-700' 
-                          : 'bg-blue-100 text-blue-700'
-                      }`}>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                          record.examCategory === 'INTERNAL'
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-blue-100 text-blue-700'
+                        }`}
+                      >
                         {record.examCategory === 'INTERNAL' ? 'INTERNAL' : 'OFFICIAL EASA'}
                       </span>
                     )}
@@ -697,7 +742,9 @@ export default function ExamsTab({
                     {editingId === record.id ? (
                       <select
                         value={editData.attemptType ?? record.attemptType ?? 'FIRST'}
-                        onChange={(e) => setEditData((d) => ({ ...d, attemptType: e.target.value }))}
+                        onChange={(e) =>
+                          setEditData((d) => ({ ...d, attemptType: e.target.value }))
+                        }
                         className="w-28 rounded border border-slate-200 px-2 py-1 text-xs"
                       >
                         <option value="FIRST">First Attempt</option>
@@ -706,11 +753,13 @@ export default function ExamsTab({
                         <option value="RESIT_3">Resit 3</option>
                       </select>
                     ) : (
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                        record.attemptType === 'FIRST' || !record.attemptType
-                          ? 'bg-slate-100 text-slate-500'
-                          : 'bg-amber-100 text-amber-700'
-                      }`}>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          record.attemptType === 'FIRST' || !record.attemptType
+                            ? 'bg-slate-100 text-slate-500'
+                            : 'bg-amber-100 text-amber-700'
+                        }`}
+                      >
                         {(record.attemptType || 'FIRST').replace(/_/g, ' ')}
                       </span>
                     )}
@@ -780,7 +829,9 @@ export default function ExamsTab({
                     {editingId === record.id ? (
                       <select
                         value={editData.bookingType ?? record.bookingType ?? 'INDIVIDUAL'}
-                        onChange={(e) => setEditData((d) => ({ ...d, bookingType: e.target.value }))}
+                        onChange={(e) =>
+                          setEditData((d) => ({ ...d, bookingType: e.target.value }))
+                        }
                         className="w-28 rounded border border-slate-200 px-2 py-1 text-xs"
                       >
                         <option value="INDIVIDUAL">Individual</option>
