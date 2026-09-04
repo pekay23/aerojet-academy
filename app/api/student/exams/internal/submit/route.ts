@@ -56,7 +56,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const finalStatus = isExpired ? 'TIMED_OUT' : 'COMPLETED'
 
   // Grade answers and update everything in a single transaction
-  const result = await prismaUnfiltered.$transaction(async (tx) => {
+  const _result = await prismaUnfiltered.$transaction(async (tx) => {
     const responses = answers.map(a => ({ questionId: a.questionId, selectedAnswer: a.selectedAnswer }))
     const gradableAnswers = examSession.answers.map(a => ({
       questionId: a.questionId,

@@ -24,7 +24,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 
-import { Metadata } from 'next'
+
 import { BookingType, ExamCategory } from '@prisma/client'
 
 interface ExamRecord {
@@ -126,7 +126,7 @@ async function EventsTab({ query }: { query?: string }) {
       orderBy: { startDate: 'desc' },
       take: 100,
     })
-    const demandByEvent = await getEventDemandSnapshots(eventsRaw.map((event) => event.id))
+    const _demandByEvent = await getEventDemandSnapshots(eventsRaw.map((event) => event.id))
 
     const events = serializePrisma(eventsRaw)
 

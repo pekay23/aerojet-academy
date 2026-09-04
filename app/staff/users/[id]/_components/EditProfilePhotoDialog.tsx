@@ -44,7 +44,7 @@ export default function EditProfilePhotoDialog({
       toast.success('Profile photo updated')
       setOpen(false)
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to save profile photo')
     }
   }

@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     })
     if (!article) return apiError('Not found', 404)
     return apiSuccess(article)
-  } catch (error) {
+  } catch (_error) {
     return apiError('Internal server error', 500)
   }
 }
@@ -108,7 +108,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     revalidatePath('/')
 
     return apiSuccess({ success: true })
-  } catch (error) {
+  } catch (_error) {
     return apiError('Internal server error', 500)
   }
 }

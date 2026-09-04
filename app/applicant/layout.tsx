@@ -6,7 +6,7 @@ import PortalHeader from '@/components/layouts/PortalHeader'
 import TourTrigger from '@/components/Tour/TourTrigger'
 import AppTour from '@/components/Tour/AppTour'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import type { User } from '@prisma/client'
+import type { _User } from '@prisma/client'
 import ForcePasswordChange from './_components/ForcePasswordChange'
 import {
   resolveEffectiveEnrollmentType,

@@ -109,7 +109,7 @@ export default function TransactionsTable({
   )
 
   const CREDIT_TYPES = ['TOP_UP', 'REFUND', 'RELEASE', 'CREDIT']
-  const DEBIT_TYPES = ['CAPTURE', 'PAYMENT', 'RESERVE', 'DEBIT']
+  const _DEBIT_TYPES = ['CAPTURE', 'PAYMENT', 'RESERVE', 'DEBIT']
 
   const getTypeColor = (type: string) => {
     if (CREDIT_TYPES.includes(type))

@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import Link from 'next/link'
+
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Loader2, DollarSign } from 'lucide-react'
@@ -57,7 +57,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
     if (!date) return ''
     try {
       return format(new Date(date), "yyyy-MM-dd'T'HH:mm")
-    } catch (e) {
+    } catch (_e) {
       console.error('Invalid date for input:', date)
       return ''
     }

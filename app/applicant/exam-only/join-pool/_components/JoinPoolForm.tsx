@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
@@ -13,6 +14,7 @@ interface JoinPoolFormProps {
 
 export default function JoinPoolForm({ poolId, poolName, seatPrice, disabled }: JoinPoolFormProps) {
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async () => {
     setLoading(true)
@@ -33,13 +35,13 @@ export default function JoinPoolForm({ poolId, poolName, seatPrice, disabled }: 
       if (data.promotedToStudent) {
         toast.success('Enrolled successfully! Redirecting to Student Portal...')
         setTimeout(() => {
-          window.location.href = '/student'
+          router.push('/student')
         }, 1500)
         return
       }
 
       toast.success(`Successfully joined ${poolName}! Funds have been reserved.`)
-      window.location.href = '/applicant/exam-bookings'
+      router.push('/applicant/exam-bookings')
     } catch {
       toast.error('Network error while joining booking')
     } finally {

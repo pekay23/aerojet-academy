@@ -163,7 +163,7 @@ export default function BookExamForStudentDialog({
       setOpen(false)
       resetForm()
       onSuccess()
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to book exam. Please try again.')
     } finally {
       setLoading(false)

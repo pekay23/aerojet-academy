@@ -94,7 +94,7 @@ export default async function BookingActionTab({
   if (!session) redirect('/login')
 
   const {
-    wallet,
+    wallet: _wallet,
     pricing,
     openEvents,
     upcomingExams,

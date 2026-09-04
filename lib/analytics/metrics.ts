@@ -3,9 +3,8 @@
 // auth-gated at the layout + proxy layers.
 import { unstable_cache } from 'next/cache'
 import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
-import { Prisma } from '@prisma/client'
-import { getCurrencySymbol, formatCurrency } from '@/lib/currency'
-import { subDays, subHours, subYears, startOfDay, endOfDay, differenceInMilliseconds } from 'date-fns'
+import { formatCurrency } from '@/lib/currency'
+import { subDays, subHours, subYears, differenceInMilliseconds } from 'date-fns'
 
 export const calculateFillRate = (current: number, max: number): number => {
   if (max === 0) return 0

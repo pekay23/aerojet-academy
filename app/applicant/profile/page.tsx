@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import ProfileForm from './_components/ProfileForm'
 import { PasskeySettings } from '@/app/staff/settings/_components/PasskeySettings'
 import { PageTransition } from '@/components/shared/PageTransition'

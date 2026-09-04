@@ -174,6 +174,7 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
             {qrCodeUrl && (
               <div className="flex justify-center">
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={qrCodeUrl} alt="2FA QR Code" className="h-48 w-48" />
                 </div>
               </div>

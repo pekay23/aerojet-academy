@@ -34,7 +34,7 @@ const BACKUP_MODELS = [
   'tuitionRun', 'tuitionBooking', 'emailTemplate', 'referral', 'adminNote'
 ] as const;
 
-type BackupModelKey = typeof BACKUP_MODELS[number];
+type _BackupModelKey = typeof BACKUP_MODELS[number];
 
 /**
  * Get a Prisma client connected to Supabase

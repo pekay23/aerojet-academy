@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 
 interface GoNoGoMeterProps {
   currentRevenue: number

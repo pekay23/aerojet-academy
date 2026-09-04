@@ -54,6 +54,7 @@ interface ResourceFormProps {
 }
 
 function getFileIcon(type: string) {
+  // eslint-disable-next-line jsx-a11y/alt-text
   if (type === 'IMG') return <Image className="h-4 w-4" />
   if (type === 'PDF') return <FileText className="h-4 w-4" />
   return <File className="h-4 w-4" />
@@ -107,7 +108,7 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
       await upsertResource(values)
       toast.success(values.id ? 'Resource updated' : 'Resource created')
       onSuccess()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Something went wrong')
     }
   }

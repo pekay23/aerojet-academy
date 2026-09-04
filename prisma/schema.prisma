@@ -285,6 +285,8 @@ model LicenseCategory {
   academicTerms  AcademicTerm[]
   requirements   LicenseModuleRequirement[]
   studentTargets StudentLicenseTarget[]
+  ojtLogbooks    OJTLogbook[]
+  registrations  InternalExamRegistration[] @relation("RegLicenceCategory")
 
   @@map("license_categories")
 }
@@ -908,6 +910,7 @@ model ExamSitting {
   updatedAt            DateTime                @updatedAt
   attendances          ExamAttendance[]
   assignments          ExamSittingAssignment[]
+  examResults          ExamResult[]
   event                ExamEvent               @relation(fields: [eventId], references: [id], onDelete: Cascade)
   examComponent        ExamComponent           @relation(fields: [examComponentId], references: [id])
   examiner             Examiner?               @relation(fields: [examinerId], references: [id])
@@ -918,6 +921,7 @@ model ExamSitting {
   @@index([examComponentId])
   @@index([dayNumber, sessionType])
   @@index([status])
+  @@index([eventId, status])
   @@map("exam_sittings")
 }
 
@@ -986,6 +990,8 @@ model ExamResult {
   deletedAt         DateTime?
   /// @deprecated No longer used, preserved for historical data
   resultLocked      Boolean?
+  sittingId         String?
+  sitting           ExamSitting? @relation(fields: [sittingId], references: [id])
   exam              Exam?        @relation(fields: [examId], references: [id], onDelete: Cascade)
   user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -993,6 +999,7 @@ model ExamResult {
   @@index([userId])
   @@index([moduleCode])
   @@index([deletedAt])
+  @@index([sittingId])
   @@map("exam_results")
 }
 
@@ -1282,6 +1289,7 @@ model AcademicYear {
   intakeCycles    IntakeCycle[]
   semesters       Semester[]
   studentProfiles StudentProfile[]
+  fullTimeEnrollments FullTimeEnrollment[]
 
   @@index([isActive])
   @@map("academic_years")
@@ -1349,7 +1357,8 @@ model FullTimeEnrollment {
   status            FullTimeEnrollmentStatus @default(PENDING_CONFIRMATION)
   currentYearNumber Int                      @default(1)
   startDate         DateTime                 @default(now())
-  academicYear      String?                  @default("2026/2027")
+  academicYearId    String
+  academicYear      AcademicYear             @relation(fields: [academicYearId], references: [id])
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
   programme         FullTimeProgramme        @relation(fields: [programmeId], references: [id])
@@ -1359,6 +1368,7 @@ model FullTimeEnrollment {
   milestones        PaymentMilestone[]
 
   @@unique([studentId, programmeId])
+  @@index([academicYearId])
   @@map("full_time_enrollments")
 }
 
@@ -2151,11 +2161,12 @@ model InternalExamSession {
    reports          InternalExamReport[]
    accessCodes      InternalExamAccessCode[]
    violations       InternalExamViolation[]
-   registrations    InternalExamRegistration[]
-   bank             InternalExamBank     @relation(fields: [bankId], references: [id])
+    registrations    InternalExamRegistration[]
+    bank             InternalExamBank     @relation(fields: [bankId], references: [id])
   class            Class?               @relation(fields: [classId], references: [id])
   sitting          ExamSitting?         @relation(fields: [sittingId], references: [id])
   student          User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  certificates     Certificate[]
 
   @@index([bankId])
   @@index([status])
@@ -2168,35 +2179,37 @@ model InternalExamSession {
 /// Pre-exam registration binding a candidate to an exam session.
 /// Created when an access code is validated; filled in by the pre-exam form.
 model InternalExamRegistration {
-  id                String   @id @default(cuid())
-  sessionId         String
-  userId            String
-  fullName          String?
-  dateOfBirth       DateTime?
-  nationality       String?
-  email             String?
-  phone             String?
-  licenceCategory   String?
-  modules           String[] @default([])
-  examDate          DateTime?
-  examLocation      String?
-  candidatePhoto    String?
-  idDocumentType    String?
-  idDocumentNumber  String?
-  consentTruthfulness Boolean @default(false)
-  consentMonitoring   Boolean @default(false)
-  consentIdentity     Boolean @default(false)
-  consentProcessing   Boolean @default(false)
-  status            String   @default("PENDING")
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  session InternalExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String              @id @default(cuid())
+  sessionId           String
+  userId              String
+  fullName            String?
+  dateOfBirth         DateTime?
+  nationality         String?
+  email               String?
+  phone               String?
+  licenceCategory     String?
+  licenceCategoryId   String?
+  licenceCategoryRef  LicenseCategory?    @relation("RegLicenceCategory", fields: [licenceCategoryId], references: [id])
+  examDate            DateTime?
+  examLocation        String?
+  candidatePhoto      String?
+  idDocumentType      String?
+  idDocumentNumber    String?
+  consentTruthfulness Boolean             @default(false)
+  consentMonitoring   Boolean             @default(false)
+  consentIdentity     Boolean             @default(false)
+  consentProcessing   Boolean             @default(false)
+  status              String              @default("PENDING")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  modules             String[]            @default([])
+  session             InternalExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, userId])
   @@index([userId])
   @@index([sessionId])
+  @@index([licenceCategoryId])
   @@map("internal_exam_registrations")
 }
 
@@ -2328,7 +2341,8 @@ model OJTLogbookEntry {
 model OJTLogbook {
   id                    String                @id @default(cuid())
   studentProfileId      String                @unique
-  licenceCategory       String
+  licenceCategoryId     String
+  licenceCategory       LicenseCategory       @relation(fields: [licenceCategoryId], references: [id])
   facilityName          String
   facilityApprovalNo    String?
   startDate             DateTime
@@ -2345,6 +2359,7 @@ model OJTLogbook {
   studentProfile        StudentProfile        @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
   mentorAssignments     OJTMentorAssignment[]
 
+  @@index([licenceCategoryId])
   @@map("ojt_logbooks")
 }
 
@@ -3512,6 +3527,7 @@ model Certificate {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   retentionCategory RetentionCategory @default(CERTIFICATE)
+  session       InternalExamSession? @relation(fields: [sessionId], references: [id])
   student       User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([studentId])

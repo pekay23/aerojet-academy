@@ -17,7 +17,7 @@ import {
   Clock,
   ChevronRight,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -98,7 +98,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
         toast.success('Profile updated successfully')
         setIsEditing(false)
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to update profile')
     } finally {
       setIsSubmitting(false)

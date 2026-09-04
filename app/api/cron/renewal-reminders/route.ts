@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { sendEmail } from '@/lib/email/sender'
-import { createAuditLog } from '@/lib/audit/logger'
 import { env } from '@/lib/env'
 
 export async function GET(req: NextRequest) {
@@ -101,7 +100,7 @@ export async function GET(req: NextRequest) {
 
     const reminderSet = new Set(existingReminders.map((r) => `${r.userId}:${r.title}`))
 
-    const fromEmail = process.env.FROM_EMAIL || 'Aerojet Academy <admissions@mail.aerojet-academy.com>'
+    const _fromEmail = process.env.FROM_EMAIL || 'Aerojet Academy <admissions@mail.aerojet-academy.com>'
 
     // Send document reminders
     for (const doc of expiringDocs) {

@@ -211,6 +211,7 @@ export function PDFBaseTemplate({
         <View fixed style={styles.headerContainer}>
           <View style={styles.header}>
             <View style={styles.headerLeft}>
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
               {logoUrl && <Image src={logoUrl} style={styles.headerLogo} />}
               {!logoUrl && (
                 <View style={styles.headerTextContainer}>
@@ -242,6 +243,7 @@ export function PDFBaseTemplate({
             opacity: watermarkOpacity,
           }}
         >
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
           {watermarkUrl && <Image src={watermarkUrl} style={{ width: 280, height: 280 }} />}
           <Text
             style={{

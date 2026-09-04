@@ -40,7 +40,7 @@ export default function TestInterface({ session }: TestInterfaceProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId: session.id, questionId, answer }),
       })
-    } catch (e) {
+    } catch (_e) {
       console.error('Failed to sync answer')
     }
   }

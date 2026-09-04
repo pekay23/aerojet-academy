@@ -19,6 +19,7 @@ import {
   KeyRound,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 interface Applicant {
   id: string
@@ -228,10 +229,11 @@ export default function ApplicantDetailDrawer({
           <div className="flex items-center gap-4 border-b border-slate-100 px-6 py-6 dark:border-slate-800">
             <div className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-aerojet-blue shadow-lg">
               {applicant.profile?.profilePhotoUrl ? (
-                <img
+                <Image
                   src={applicant.profile.profilePhotoUrl}
                   alt={fullName}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-xl font-black text-white">

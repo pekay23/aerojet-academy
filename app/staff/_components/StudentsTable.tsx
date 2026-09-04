@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import StudentDetailPanel from './StudentDetailPanel'
 import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
+import Image from 'next/image'
 
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
@@ -117,7 +118,7 @@ export default function StudentsTable({
   }, [filter, search, page, perPage])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [filter, search])
@@ -427,10 +428,11 @@ export default function StudentsTable({
 
                         <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
                           {student.profile?.profilePhotoUrl ? (
-                            <img
+                            <Image
                               src={student.profile.profilePhotoUrl}
                               alt={fullName}
-                              className="h-full w-full object-cover"
+                              fill
+                              className="object-cover"
                             />
                           ) : (
                             initials

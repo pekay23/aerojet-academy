@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { Plus, Users, MapPin, Building, Edit2, LayoutGrid } from 'lucide-react'
+import { Plus, Users, MapPin, Building, LayoutGrid } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 

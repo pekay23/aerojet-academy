@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
+import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { serializePrisma } from '@/lib/utils/serialization'
 
@@ -84,7 +84,7 @@ export const POST = withErrorHandler(
 
 // PATCH /api/staff/students/[id]/ojt — Update an OJT period
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, context?: { params: Record<string, string> }) => {
+  async (req: NextRequest, _context?: { params: Record<string, string> }) => {
     const staff = await requireStaff()
     const body = await req.json()
     const { ojtId, status, hoursCompleted, endDate, notes } = body

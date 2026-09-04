@@ -16,7 +16,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-react'
-import { DbCourse, DbCourseCategory } from '@/types/database'
+import { DbCourseCategory } from '@/types/database'
 import { compareNatural } from '@/lib/utils/natural-sort'
 import CourseActionsMenu from '../../_components/CourseActionsMenu'
 

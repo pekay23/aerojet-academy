@@ -29,7 +29,7 @@ export default function PoolsTab({
   joiningWaitlist,
   onJoinPool,
   onJoinWaitlist,
-  fmt,
+  _fmt,
   poolPrice,
 }: PoolsTabProps) {
   return (

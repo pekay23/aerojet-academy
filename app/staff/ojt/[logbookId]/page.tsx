@@ -14,7 +14,7 @@ export default async function LogbookDetailPage({
 }) {
   await requireStaff()
   const { logbookId } = await params
-  const session = await getAuthSession()
+  const _session = await getAuthSession()
 
   const [logbook, ataChapters, staffMembers] = await Promise.all([
     prismaUnfiltered.oJTLogbook.findUnique({

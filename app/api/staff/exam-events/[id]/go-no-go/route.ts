@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
-import { evaluateGoNoGo, executeGo, executeNoGo, executePostponement } from '@/lib/events/go-no-go'
+import { executeGo, executeNoGo, executePostponement } from '@/lib/events/go-no-go'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const POST = withErrorHandler(

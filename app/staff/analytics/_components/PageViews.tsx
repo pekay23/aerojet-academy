@@ -9,12 +9,16 @@ import { CalendarIcon, Eye } from 'lucide-react'
 import PageViewsTable from './PageViewsTable'
 
 export default function PageViews() {
-  const [from, setFrom] = useState('')
-  const [to, setTo] = useState('')
+  const [from, setFrom] = useState(() => {
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    return sevenDaysAgo.toISOString().split('T')[0]
+  })
+  const [to, setTo] = useState(() => new Date().toISOString().split('T')[0])
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
 
-  const loadPageViews = async () => {
+  const loadPageViews = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -31,27 +35,14 @@ export default function PageViews() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [from, to])
 
   useEffect(() => {
-    // Load last 7 days by default
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-    setFrom(sevenDaysAgo.toISOString().split('T')[0])
-    setTo(new Date().toISOString().split('T')[0])
-  }, [])
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
     if (from && to) {
   // eslint-disable-next-line react-hooks/set-state-in-effect
       loadPageViews()
     }
-  }, [from, to])
+  }, [from, to, loadPageViews])
 
   return (
     <div className="space-y-4">

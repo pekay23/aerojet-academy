@@ -525,7 +525,7 @@ export async function bulkUpdateExamCategory(
       relatedResults.forEach((r) => resultIds.add(r.id))
     }
 
-    const [bookingCount, resultCount] = await prismaUnfiltered.$transaction([
+    const [_bookingCount, _resultCount] = await prismaUnfiltered.$transaction([
       prismaUnfiltered.examBooking.updateMany({
         where: { id: { in: Array.from(bookingIds) } },
         data: { examCategory: category },

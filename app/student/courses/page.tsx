@@ -6,9 +6,6 @@ import {
   GraduationCap,
   Clock,
   ChevronRight,
-  AlertCircle,
-  PlayCircle,
-  Lock,
 } from 'lucide-react'
 import { Suspense } from 'react'
 
@@ -31,7 +28,7 @@ export default async function CoursesPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
+  const { isFullTime, isExamOnly, isModular: _isModular } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'courses')
 
   if (isFullTime && !hasAccess) {

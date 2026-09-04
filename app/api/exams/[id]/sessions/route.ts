@@ -16,7 +16,7 @@ const createSessionSchema = z.object({
 
 export const GET = withErrorHandler(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const session = await requireStaff()
+    const _session = await requireStaff()
     const url = new URL(req.url)
     const page = parseInt(url.searchParams.get('page') || '1')
     const limit = parseInt(url.searchParams.get('limit') || '20')
@@ -49,11 +49,11 @@ export const GET = withErrorHandler(
 
 export const POST = withErrorHandler(
   async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const session = await requireStaff()
+    const _session = await requireStaff()
     const body = await req.json()
     const result = validateBody(createSessionSchema, body)
     if (!result.success) return apiError(result.error || 'Invalid input', 400)
-    const data = result.data
+    const _data = result._data
 
     const exam = await prismaUnfiltered.exam.findUnique({
       where: { id: params.id },
@@ -74,7 +74,7 @@ export const POST = withErrorHandler(
   }
 )
 
-function generateAccessCode(): string {
+function _generateAccessCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   const segments = [8, 8, 8, 8]
   return segments

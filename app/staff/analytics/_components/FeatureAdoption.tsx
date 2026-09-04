@@ -32,7 +32,7 @@ export default function FeatureAdoption() {
       if (json.success) {
         setData(json.data)
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to load feature adoption')
     } finally {
       setLoading(false)

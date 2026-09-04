@@ -9,7 +9,7 @@ import CoursePaymentUploadForm from '../../_components/CoursePaymentUploadForm'
 import { getActivePaymentMethods } from '@/lib/payment-methods'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
-import type { ExamComponent } from '@prisma/client'
+
 
 export const metadata: Metadata = { title: 'Purchase Course | Applicant Portal' }
 

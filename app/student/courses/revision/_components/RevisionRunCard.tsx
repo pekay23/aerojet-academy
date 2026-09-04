@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, Users, CheckCircle2, Loader2, Info } from 'lucide-react'
+import { Calendar, Users, CheckCircle2, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -41,7 +41,7 @@ export default function RevisionRunCard({
       } else {
         toast.error(res.error)
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to book')
     } finally {
       setLoading(false)

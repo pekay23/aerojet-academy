@@ -224,7 +224,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   useEffect(() => {
     if (!data || result || data.status !== 'IN_PROGRESS') return
 
-    const onNetworkChange = (event: Event) => {
+    const onNetworkChange = (_event: Event) => {
       const online = navigator.onLine
       void logViolation('NETWORK_DISCONNECT', `Network ${online ? 'restored' : 'lost'} during exam`)
     }
@@ -267,7 +267,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     }
   }, [data, result, sessionId])
 
-  const handleSubmit = async (auto = false) => {
+  const handleSubmit = useCallback(async (auto = false) => {
     if (submitting) return
     setSubmitting(true)
 
@@ -296,7 +296,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
       setSubmitting(false)
       setShowConfirm(false)
     }
-  }
+  }, [submitting, answers, sessionId])
 
   // SSE timer from server-authoritative clock
   useEffect(() => {
@@ -370,7 +370,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [data?.rules.allowKeyboardAutoSubmit, result, submitting, showConfirm, answers])
+  }, [data?.rules.allowKeyboardAutoSubmit, result, submitting, showConfirm, answers, handleSubmit])
 
   const handleSubmitReport = async () => {
     if (!reportReason.trim() || reportSubmitting) return

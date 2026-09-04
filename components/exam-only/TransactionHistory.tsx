@@ -17,7 +17,7 @@ interface TransactionHistoryProps {
   walletId?: string
 }
 
-export function TransactionHistory({ walletId }: TransactionHistoryProps) {
+export function TransactionHistory({ _walletId }: TransactionHistoryProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [page, setPage] = useState(1)

@@ -6,19 +6,19 @@ import Image from 'next/image'
 import { toast } from 'sonner'
 import {
   User,
-  Phone,
-  MapPin,
-  Lock,
-  Bell,
+  _Phone,
+  _MapPin,
+  _Lock,
+  _Bell,
   Loader2,
   Save,
-  Shield,
+  _Shield,
   GraduationCap,
   BadgeCheck,
-  Calendar,
-  Mail,
+  _Calendar,
+  _Mail,
 } from 'lucide-react'
-import { updateStudentProfile, changePassword } from '@/app/student/actions'
+import { updateStudentProfile } from '@/app/student/actions'
 import { useProfileDirty } from './ProfileTabs'
 
 interface ProfileUser {

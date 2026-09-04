@@ -21,10 +21,10 @@ interface StaffNotificationCardProps {
 
 export default function StaffNotificationCard({ notification, onDismiss }: StaffNotificationCardProps) {
   const [isRead, setIsRead] = useState(notification.isRead)
-  const [isPending, startTransition] = useTransition()
+  const [isPending, _startTransition] = useTransition()
   const [isDismissing, startDismissTransition] = useTransition()
 
-  const handleMarkAsRead = () => {
+  const _handleMarkAsRead = () => {
     if (isRead || isPending) return
     setIsRead(true)
     // In a real implementation, you'd call a mark-as-read action here

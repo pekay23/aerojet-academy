@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
-import { CheckCircle2, RefreshCw } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
 import { UploadDropzone } from '@/lib/uploads/uploadthing'
 
 export default function UploadProofForm() {
@@ -12,7 +12,7 @@ export default function UploadProofForm() {
   const [registrationCode, setRegistrationCode] = useState('')
   const [uploading, setUploading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [receiptUrl, setReceiptUrl] = useState('')
+  const [_receiptUrl, setReceiptUrl] = useState('')
 
   useEffect(() => {
     const code = searchParams.get('code')

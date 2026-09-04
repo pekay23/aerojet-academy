@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,11 +9,15 @@ import { toast } from 'sonner'
 import RetentionHeatmap from './RetentionHeatmap'
 
 export default function RetentionAnalysis() {
-  const [cohort, setCohort] = useState('')
+  const [cohort, setCohort] = useState(() => {
+    const threeMonthsAgo = new Date()
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+    return threeMonthsAgo.toISOString().slice(0, 7)
+  })
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
 
-  const loadRetention = async () => {
+  const loadRetention = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -24,23 +28,20 @@ export default function RetentionAnalysis() {
       if (json.success) {
         setData(json.data)
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to load retention data')
     } finally {
       setLoading(false)
     }
-  }
+  }, [cohort])
 
+  const didInitRef = useRef(false)
   useEffect(() => {
-    // Load last 3 months by default
-    const threeMonthsAgo = new Date()
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
-    const monthStr = threeMonthsAgo.toISOString().slice(0, 7)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCohort(monthStr)
-    loadRetention()
-  }, [])
+    if (!didInitRef.current) {
+      didInitRef.current = true
+      loadRetention()
+    }
+  }, [loadRetention])
 
   return (
     <div className="space-y-4">

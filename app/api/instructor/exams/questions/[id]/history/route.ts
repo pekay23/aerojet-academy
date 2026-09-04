@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiForbidden, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiForbidden, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 

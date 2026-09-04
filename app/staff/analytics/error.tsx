@@ -1,6 +1,6 @@
 'use client'
 
-export default function SectionError({ error, reset }: { error: Error; reset: () => void }) {
+export default function SectionError({ _error, reset }: { _error: Error; reset: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
       <h2 className="text-lg font-black text-slate-900 dark:text-white">Something went wrong</h2>

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { MultiSelect } from '@/components/ui/multi-select'
 
 vi.mock('@/components/ui/badge', () => ({
@@ -10,7 +10,7 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
   DropdownMenu: ({ children }: any) => <div>{children}</div>,
   DropdownMenuTrigger: ({ children }: any) => <div>{children}</div>,
   DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
-  DropdownMenuCheckboxItem: ({ children, checked, ...props }: any) => (
+  DropdownMenuCheckboxItem: ({ children, _checked, ...props }: any) => (
     <div {...props}>{children}</div>
   ),
 }))

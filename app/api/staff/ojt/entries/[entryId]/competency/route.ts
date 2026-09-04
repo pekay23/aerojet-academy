@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'

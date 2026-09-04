@@ -125,7 +125,7 @@ export default function MilestoneTracker({ milestones, walletBalance, currency }
 
       {/* Milestone List */}
       <div className="space-y-3">
-        {milestones.map((m, idx) => {
+        {milestones.map((m, _idx) => {
           const canPay = m.status === 'DUE' || m.status === 'OVERDUE'
           const hasEnoughBalance = walletBalance >= m.amountDue
           const isPaying = paying === m.id

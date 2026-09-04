@@ -326,7 +326,7 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
   const matchedModules = new Set(semesters.flatMap((s) => s.enrollments.map((e) => e.course.code)))
   const unmatchedExams = examBookings.filter((b) => b.moduleCode && !matchedModules.has(b.moduleCode))
 
-  const totalCourses = enrollments.length
+  const _totalCourses = enrollments.length
   const totalExamsWithResults = examBookings.filter((b) => b.result?.toLowerCase() === 'pass' || b.result?.toLowerCase() === 'fail').length
   const upcomingExamsCount = examBookings.filter((b) => !b.result || !['pass', 'fail', 'absent'].includes(b.result.toLowerCase())).length
   const passedExams = examBookings.filter((b) => b.result?.toLowerCase() === 'pass').length

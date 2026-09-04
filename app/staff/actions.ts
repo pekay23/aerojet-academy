@@ -1,6 +1,6 @@
 'use server'
 
-import { getAuthSession, requireStaff } from '@/lib/auth/helpers'
+import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 import {
@@ -373,7 +373,7 @@ export async function updateExamBooking(
       })
       if (res && res.moduleCode) {
         const normModule = res.moduleCode.trim()
-        const updateRes = await prismaUnfiltered.examBooking.updateMany({
+        const _updateRes = await prismaUnfiltered.examBooking.updateMany({
           where: {
             userId: res.userId,
             OR: [
@@ -1013,7 +1013,7 @@ export async function bulkUpdateExamCategory(
     }
 
     // 4. Apply the update
-    const [bookingCount, resultCount] = await prismaUnfiltered.$transaction([
+    const [_bookingCount, _resultCount] = await prismaUnfiltered.$transaction([
       prismaUnfiltered.examBooking.updateMany({
         where: { id: { in: Array.from(bookingIds) } },
         data: { examCategory: category },

@@ -13,19 +13,19 @@ import {
   endOfMonth,
   eachDayOfInterval,
   getDay,
-  getHours,
-  getMinutes,
+  _getHours,
+  _getMinutes,
 } from 'date-fns'
 import {
   ChevronLeft,
   ChevronRight,
-  Calendar as CalendarIcon,
-  Clock,
+  Calendar as _CalendarIcon,
+  _Clock,
   Filter,
   Plus,
   BookOpen,
-  GraduationCap,
-  CalendarDays,
+  _GraduationCap,
+  _CalendarDays,
 } from 'lucide-react'
 import SessionDetails from './SessionDetails'
 import { cn } from '@/lib/utils'
@@ -107,7 +107,7 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
     return 'bg-[#F8FAFC] text-[#475569] border-l-4 border-[#94A3B8]'
   }
 
-  const getEventIcon = (category: string | null) => {
+  const getEventIcon = (_category: string | null) => {
     return <BookOpen className="h-4 w-4" />
   }
 

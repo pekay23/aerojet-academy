@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Calendar, Clock, Plus, Trash2, Edit3, CheckCircle2, XCircle, Shield, Lock } from 'lucide-react'
+import { Plus, Trash2, Edit3, CheckCircle2, XCircle, Shield, Lock } from 'lucide-react'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
 import { formatDateTime } from '@/lib/utils'
@@ -145,7 +145,7 @@ export default function ClassSchedulePage({ bankId }: { bankId: string }) {
     setSavingBankConfig(false)
   }
 
-  const alreadyScheduled = schedules.map((s) => s.classId)
+  const _alreadyScheduled = schedules.map((s) => s.classId)
 
   if (loading) return <TableSkeleton rows={8} />
 

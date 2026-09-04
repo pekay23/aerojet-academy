@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
-import CalendarGrid from './_components/CalendarGrid'
+
 import { subMonths, addMonths, startOfMonth, endOfMonth } from 'date-fns'
 
 export const metadata: Metadata = { title: 'Teaching Schedule | Instructor Portal' }

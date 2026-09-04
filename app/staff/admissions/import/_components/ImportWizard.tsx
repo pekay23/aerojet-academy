@@ -2,8 +2,8 @@
 
 import { useState, useRef } from 'react'
 import Papa from 'papaparse'
-import { CustomFieldDefinition, ProgrammeChoice, ApplicationStage } from '@prisma/client'
-import { Upload, ArrowRight, CheckCircle2, AlertTriangle, FileSpreadsheet } from 'lucide-react'
+import { CustomFieldDefinition } from '@prisma/client'
+import { ArrowRight, CheckCircle2, AlertTriangle, FileSpreadsheet } from 'lucide-react'
 
 type Step = 'UPLOAD' | 'MAP' | 'VALIDATE' | 'IMPORT'
 
@@ -102,7 +102,7 @@ export default function ImportWizard({ customFields }: { customFields: CustomFie
       } else {
         alert(data.error || 'Validation failed')
       }
-    } catch (e) {
+    } catch (_e) {
       alert('Error validating data')
     } finally {
       setIsImporting(false)
@@ -126,7 +126,7 @@ export default function ImportWizard({ customFields }: { customFields: CustomFie
       } else {
         alert(data.error || 'Import failed')
       }
-    } catch (e) {
+    } catch (_e) {
       alert('Error executing import')
     } finally {
       setIsImporting(false)

@@ -10,7 +10,7 @@ import {
   FileText,
   ExternalLink,
   Clock,
-  AlertTriangle,
+  _AlertTriangle,
 } from 'lucide-react'
 
 interface MedicalApp {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { MoreVertical, X, LucideIcon } from 'lucide-react'
+import { MoreVertical, LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export interface BulkAction {

@@ -34,7 +34,7 @@ describe('Chart', () => {
   })
 
   it('returns null when not active', () => {
-    const { container } = render(
+    const { _container } = render(
       <ChartContainer config={mockConfig}>
         <ChartTooltipContent active={false} payload={[]} />
       </ChartContainer>

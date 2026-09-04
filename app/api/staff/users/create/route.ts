@@ -4,7 +4,7 @@ import { getAuthSession, hashPassword } from '@/lib/auth/helpers'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
-import { UserRole, EnrollmentType } from '@prisma/client'
+import { EnrollmentType } from '@prisma/client'
 
 // Schema for user creation
 const createUserSchema = z.object({
@@ -19,7 +19,7 @@ const createUserSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     await requirePermission(PERMISSIONS.MANAGE_USERS)
-    const session = await getAuthSession()
+    const _session = await getAuthSession()
 
     const body = await req.json()
     const validation = createUserSchema.safeParse(body)

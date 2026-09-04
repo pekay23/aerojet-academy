@@ -40,7 +40,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext)
   if (!examSession) return apiError('Session not found', 404)
   if (examSession.studentId !== session.user.id) return apiError('Unauthorized', 403)
 
-  const rules = await getBankRules(examSession.bankId)
+  const _rules = await getBankRules(examSession.bankId)
 
   const encoder = new TextEncoder()
   const stream = new ReadableStream({

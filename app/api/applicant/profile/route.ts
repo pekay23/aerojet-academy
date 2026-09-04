@@ -4,7 +4,7 @@ import { requireApplicant } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { updateProfileSchema, validateBody } from '@/lib/validation/schemas'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   const user = await requireApplicant()
   const profile = await prisma.profile.findUnique({ where: { userId: user.id } })
   return apiSuccess(profile)
@@ -22,4 +22,3 @@ export const PATCH = withErrorHandler(async (req: NextRequest) => {
   })
   return apiSuccess(profile)
 })
-

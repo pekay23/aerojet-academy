@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { Wallet, Info } from 'lucide-react'
+import { Wallet } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
@@ -10,7 +10,7 @@ import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 /* ── Helper: fetch common booking data ── */
 async function getBookingData(userId: string) {
-  const [wallet, pricing, openEvents, upcomingExams, examComponents] = await Promise.all([
+  const [wallet, pricing, openEvents, _upcomingExams, examComponents] = await Promise.all([
     prisma.wallet.findUnique({ where: { userId } }),
     getExamPricingConfig(),
     prisma.examEvent.findMany({
@@ -77,7 +77,7 @@ export default async function ResitBookingTab() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const { wallet, pricing, balance, currency, currencySymbol, openEvents } = await getBookingData(session.user.id)
+  const { wallet: _wallet, pricing, balance, currency, currencySymbol, openEvents } = await getBookingData(session.user.id)
 
   const [failedResults, failedBookings] = await Promise.all([
     prisma.examResult.findMany({

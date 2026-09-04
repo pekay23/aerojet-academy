@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown, Loader2 } from 'lucide-react'
+import { ChevronUp, ChevronDown } from 'lucide-react'
 import { GroupedCourse } from './examOnlyTypes'
 
 interface BundleSelectionModalProps {
@@ -28,7 +28,7 @@ export default function BundleSelectionModal({
   fmt,
   twoSeatPrice,
   fourSeatPrice,
-  purchasingBundle,
+  _purchasingBundle,
 }: BundleSelectionModalProps) {
   if (!bundleType) return null
 

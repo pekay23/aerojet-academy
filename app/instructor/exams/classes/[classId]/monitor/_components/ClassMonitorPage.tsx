@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import {
   Play,
   XCircle,
@@ -11,7 +11,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
-  ShieldAlert,
+  _ShieldAlert,
   Send,
   Hourglass,
   Award,
@@ -102,7 +102,7 @@ export default function ClassMonitorPage({
   initialSessions: MonitorSession[]
 }) {
   const [sessions, setSessions] = useState<MonitorSession[]>(initialSessions)
-  const [loading, setLoading] = useState(false)
+  const [loading, _setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [expandedSession, setExpandedSession] = useState<string | null>(null)

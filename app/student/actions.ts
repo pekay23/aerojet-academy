@@ -4,10 +4,10 @@ import { Prisma } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import {
   joinPool,
-  confirmPool,
-  failPool,
-  getPoolWithDetails,
-  getAvailablePools,
+  _confirmPool,
+  _failPool,
+  _getPoolWithDetails,
+  _getAvailablePools,
 } from '@/lib/pools/operations'
 import {
   bookStandaloneExam,
@@ -17,7 +17,7 @@ import {
 import prisma from '@/lib/prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+
 import {
   UserStatus,
   UserRole,
@@ -26,7 +26,7 @@ import {
   MembershipStatus,
   PaymentStatus,
 } from '@/types/enums'
-import { trackReferralClick } from '@/lib/analytics/events'
+
 import { requireAuth, requireStudent } from '@/lib/auth/helpers'
 import { hash, compare } from 'bcryptjs'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
@@ -35,7 +35,7 @@ import { assertExamOnlyPathway } from '@/lib/pools/access-control'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import { chargeWallet } from '@/lib/wallet/operations'
 import { categoryMatchesTarget, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
-import { trackEnrollment } from '@/lib/analytics/events'
+
 
 export async function enrollInCourse(courseId: string) {
   const user = await requireStudent()

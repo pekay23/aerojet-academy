@@ -65,10 +65,10 @@ export default function PracticalAssessmentsClient({
   instructors: any[]
   ataChapters: any[]
 }) {
-  const router = useRouter()
+  const _router = useRouter()
   const confirmDialog = useConfirmDialog()
   const toast = useToast()
-  const [records, setRecords] = useState<RecordItem[]>(initialRecords as unknown as RecordItem[])
+  const [records, _setRecords] = useState<RecordItem[]>(initialRecords as unknown as RecordItem[])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isActionPending, setIsActionPending] = useState(false)
@@ -134,7 +134,7 @@ export default function PracticalAssessmentsClient({
         setIsModalOpen(false)
         window.location.reload()
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('An unexpected error occurred.')
     } finally {
       setIsActionPending(false)

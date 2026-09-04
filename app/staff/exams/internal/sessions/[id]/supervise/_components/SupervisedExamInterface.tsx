@@ -37,7 +37,7 @@ export default function SupervisedExamInterface({
   const [questions, setQuestions] = useState<ExamQuestion[]>([])
   const [savedAnswers, setSavedAnswers] = useState<Record<string, string>>({})
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const [_loading, _setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -85,7 +85,7 @@ export default function SupervisedExamInterface({
       setTimeLeft(sessionData.totalTimeSecs || 0)
       setIsSubmitted(false)
       logActivity('EXAM_STARTED', `Invigilator started supervised exam for ${studentName}`)
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to start exam')
     } finally {
       setIsStarting(false)
@@ -105,7 +105,7 @@ export default function SupervisedExamInterface({
       }
       setIsSubmitted(true)
       logActivity('EXAM_SUBMITTED', `Invigilator force-submitted exam for ${studentName}`)
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to submit exam')
     }
   }, [sessionId, studentName, logActivity])
@@ -125,7 +125,7 @@ export default function SupervisedExamInterface({
       }
       setTimeLeft((prev) => prev + extensionMinutes * 60)
       logActivity('TIME_EXTENDED', `Invigilator extended exam time by ${extensionMinutes} minutes for ${studentName}`)
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to extend time')
     } finally {
       setIsExtending(false)

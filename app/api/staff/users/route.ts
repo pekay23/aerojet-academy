@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { apiPaginated, apiUnauthorized, parsePagination } from '@/lib/api/response'
+import { apiPaginated, apiUnauthorized } from '@/lib/api/response'
 import { buildOrderBy } from '@/lib/utils/build-order-by'
 
 const ALLOWED_SORT_KEYS = {

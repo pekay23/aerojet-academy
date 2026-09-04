@@ -6,11 +6,11 @@
  */
 import { test, expect, Page } from '@playwright/test'
 import {
-  getStaffCredentials,
-  getStudentCredentials,
-  getInstructorCredentials,
-  getApplicantCredentials,
-  getExaminerCredentials,
+  _getStaffCredentials,
+  _getStudentCredentials,
+  _getInstructorCredentials,
+  _getApplicantCredentials,
+  _getExaminerCredentials,
 } from './helpers/auth'
 
 const SCREENSHOT_DIR = 'tests/e2e/tour-screenshots'
@@ -21,7 +21,7 @@ const SCREENSHOT_DIR = 'tests/e2e/tour-screenshots'
 const JOYRIDE_TOOLTIP = '.react-joyride__tooltip'
 const JOYRIDE_PRIMARY_BTN = '[data-testid="button-primary"]'
 const JOYRIDE_SKIP_BTN = '[data-testid="button-skip"]'
-const JOYRIDE_BACK_BTN = '[data-testid="button-back"]'
+const _JOYRIDE_BACK_BTN = '[data-testid="button-back"]'
 
 interface PortalConfig {
   role: string
@@ -64,11 +64,11 @@ async function loginViaApi(page: Page, portal: PortalConfig) {
     redirect: 'false',
   }).toString()
 
-  let response
+  let _response
   let attempt = 0
   while (attempt < 3) {
     try {
-      response = await page.request.post('/api/auth/callback/credentials', {
+      _response = await page.request.post('/api/auth/callback/credentials', {
         data: body,
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       })
@@ -140,7 +140,7 @@ async function captureTourScreenshots(page: Page, portalName: string) {
       await trigger.scrollIntoViewIfNeeded().catch(() => {})
       await trigger
         .click({ position: { x: 16, y: 16 } })
-        .catch(async (e) => {
+        .catch(async (_e) => {
           console.log(`[${portalName}] Click failed (overlay?), trying JS click`)
           await trigger.evaluate((el: HTMLElement) => el.click())
         })

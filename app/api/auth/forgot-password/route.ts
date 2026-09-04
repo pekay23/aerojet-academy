@@ -9,7 +9,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   let body: any
   try {
     body = await req.json()
-  } catch (e) {
+  } catch (_e) {
     return apiError('Invalid request body', 400)
   }
 

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import {
   BookOpen,
   Calendar,
-  Award,
+  _Award,
   Clock,
   User,
   ChevronDown,
@@ -67,7 +67,7 @@ interface Props {
   onRefresh: () => void
 }
 
-export default function AcademicTab({ student, onRefresh }: Props) {
+export default function AcademicTab({ student, _onRefresh }: Props) {
   const [expandedEnrollment, setExpandedEnrollment] = useState<string | null>(null)
   const [expandedOjt, setExpandedOjt] = useState<string | null>(null)
 

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import _prisma, { prismaUnfiltered } from '@/lib/_prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { badgeCountsCache } from './cache'
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const session = await getAuthSession()
     if (!session?.user) {

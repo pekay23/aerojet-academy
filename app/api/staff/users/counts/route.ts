@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { apiSuccess, apiUnauthorized, apiForbidden } from '@/lib/api/response'
+import { apiSuccess, apiUnauthorized } from '@/lib/api/response'
 import { unstable_cache } from 'next/cache'
 
 const getCachedCounts = unstable_cache(
@@ -36,7 +36,7 @@ const getCachedCounts = unstable_cache(
   { revalidate: 60 }
 )
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const session = await getAuthSession()
   if (!session) return apiUnauthorized()
 

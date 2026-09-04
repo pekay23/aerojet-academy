@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  AlertCircle,
+  _AlertCircle,
   BookOpen,
   Tag,
   Package,

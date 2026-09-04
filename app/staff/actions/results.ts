@@ -106,7 +106,7 @@ async function upsertExamBooking(tx: Prisma.TransactionClient, input: BookingInp
   const {
     userId, courseId, examComponentId, moduleCode, examDate, bookingType,
     attemptType, bookingStatus, result, score, percentage, examCategory,
-    bookingGroupRef, staffId
+    bookingGroupRef, _staffId
   } = input
 
   const existing = await tx.examBooking.findFirst({
@@ -175,7 +175,7 @@ function computeGrade(percentage: number | undefined): string {
 }
 
 async function upsertExamResult(tx: Prisma.TransactionClient, input: ResultInput): Promise<void> {
-  const { userId, moduleCode, attemptType, scoreVal, percentage, passed, grade, examCategory, notes, existingNotes, override } = input
+  const { userId, moduleCode, attemptType, scoreVal, percentage, passed, grade, examCategory, notes, existingNotes, _override } = input
 
   const existing = await tx.examResult.findFirst({
     where: { userId, moduleCode, attemptType },

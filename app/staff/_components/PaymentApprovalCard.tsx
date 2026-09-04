@@ -9,8 +9,8 @@ import {
   ExternalLink,
   Loader2,
   User,
-  Calendar,
-  DollarSign,
+  _Calendar,
+  _DollarSign,
 } from 'lucide-react'
 
 interface PaymentApprovalCardProps {

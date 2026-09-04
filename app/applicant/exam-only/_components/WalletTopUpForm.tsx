@@ -37,7 +37,7 @@ const FIXED_AMOUNTS = [300, 500, 1000, 2000]
 
 export default function WalletTopUpForm({
   minAmount,
-  currency = 'EUR',
+  _currency = 'EUR',
   paymentMethods = [],
 }: WalletTopUpFormProps) {
   const router = useRouter()

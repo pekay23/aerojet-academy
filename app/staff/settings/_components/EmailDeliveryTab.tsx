@@ -43,7 +43,7 @@ const STATUS_ICON: Record<Delivery['status'], React.ComponentType<{ className?: 
 }
 
 export default function EmailDeliveryTab() {
-  const router = useRouter()
+  const _router = useRouter()
   const [page, setPage] = useState<Page | null>(null)
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState<'all' | 'SUCCESS' | 'FAILED' | 'RETRYING'>('FAILED')
@@ -85,7 +85,7 @@ export default function EmailDeliveryTab() {
     void reload()
   }
 
-  const failedCount = page?.data.filter((d) => d.status === 'FAILED').length ?? 0
+  const _failedCount = page?.data.filter((d) => d.status === 'FAILED').length ?? 0
   const total = page?.meta.total ?? 0
 
   return (

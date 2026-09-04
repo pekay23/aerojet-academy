@@ -3,7 +3,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStudent } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler } from '@/lib/api/response'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   const user = await requireStudent()
 
   const [studentData, wallet, enrollments, poolMemberships, upcomingExams, notifications, totalAttendanceRecords, presentCount] =
@@ -36,7 +36,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const attendanceRate =
     totalAttendanceRecords > 0 ? Math.round((presentCount / totalAttendanceRecords) * 100) : 0
 
-  const { password, ...safe } = studentData!
+  const { _password, ...safe } = studentData!
   return apiSuccess({
     user: safe,
     wallet,

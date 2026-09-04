@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireExaminer } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { apiPaginated, apiError, apiSuccess, withErrorHandler } from '@/lib/api/response'
+import { apiPaginated, apiError, withErrorHandler } from '@/lib/api/response'
 import { parsePagination } from '@/lib/api/response'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {

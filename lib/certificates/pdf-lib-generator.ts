@@ -1,10 +1,5 @@
 import 'server-only'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
-import { prismaUnfiltered } from '@/lib/prisma/client'
-import { uploadToStorage, getSignedUrl } from '@/lib/storage/supabase-storage'
-import { createAuditLog, AuditAction } from '@/lib/audit/logger'
-import { getRequestContext } from '@/lib/server/request-context'
-import crypto from 'crypto'
 
 const STORAGE_BASE_PATH = 'certificates'
 

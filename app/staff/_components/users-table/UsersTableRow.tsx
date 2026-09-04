@@ -5,6 +5,7 @@ import { CheckSquare, Square } from 'lucide-react'
 import UserActionsMenu from '../UserActionsMenu'
 import type { User } from './types'
 import { ROLE_STYLE, STATUS_STYLE } from './types'
+import Image from 'next/image'
 
 export default function UsersTableRow({
   user,
@@ -56,10 +57,11 @@ export default function UsersTableRow({
         <div className="flex items-center gap-3">
           <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
             {user.profile?.profilePhotoUrl ? (
-              <img
+              <Image
                 src={user.profile.profilePhotoUrl}
                 alt={fullName}
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
               initials

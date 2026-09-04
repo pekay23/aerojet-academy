@@ -11,7 +11,7 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
 
 interface ExamTrendChartProps {

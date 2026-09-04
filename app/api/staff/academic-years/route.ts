@@ -4,9 +4,9 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
-    const session = await requireStaff()
+    const _session = await requireStaff()
 
     const academicYears = await prismaUnfiltered.academicYear.findMany({
       include: {

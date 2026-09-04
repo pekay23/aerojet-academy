@@ -61,7 +61,7 @@ export default async function EnrollmentsPage({
 
   const orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { createdAt: 'desc' })
 
-  const [enrollments, total] = await Promise.all([
+  const [enrollments, _total] = await Promise.all([
     prismaUnfiltered.enrollment.findMany({
       where: where as unknown as Prisma.EnrollmentWhereInput,
       orderBy: orderBy as unknown as Prisma.EnrollmentOrderByWithRelationInput,

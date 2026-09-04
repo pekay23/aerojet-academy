@@ -21,6 +21,7 @@ import UserActionsMenu from './UserActionsMenu'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import ManualWalletAdjustmentDialog from '../users/[id]/_components/ManualWalletAdjustmentDialog'
 import { UserStatus, EnrollmentStatus, PaymentStatus } from '@/types/enums'
+import Image from 'next/image'
 import type { ExamHistoryItem } from '@/lib/types/staff'
 
 interface Student {
@@ -133,8 +134,8 @@ export default function StudentDetailPanel({
   // Fetch full student details when selected
   useEffect(() => {
     if (!initialStudent) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
       setStudent(null)
       return
@@ -311,10 +312,11 @@ export default function StudentDetailPanel({
           <div className="flex items-center gap-5">
             <div className="bg-aerojet-blue relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-xl font-black text-white">
               {currentStudent.profile?.profilePhotoUrl ? (
-                <img
+                <Image
                   src={currentStudent.profile.profilePhotoUrl}
                   alt={fullName}
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               ) : (
                 initials

@@ -7,15 +7,15 @@ import {
   CreditCard,
   Clock,
   ArrowUpRight,
-  ArrowDownRight,
-  Building2,
+  _ArrowDownRight,
+  _Building2,
   Info,
-  Search,
-  Filter,
+  _Search,
+  _Filter,
   CheckCircle2,
   AlertTriangle,
   Target,
-  RefreshCw,
+  _RefreshCw,
   History,
 } from 'lucide-react'
 
@@ -187,7 +187,7 @@ export default async function WalletPage({
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   }
 
-  const isCredit = (type: string) => ['TOP_UP', 'RELEASE', 'REFUND', 'ADJUSTMENT'].includes(type)
+  const _isCredit = (type: string) => ['TOP_UP', 'RELEASE', 'REFUND', 'ADJUSTMENT'].includes(type)
 
   return (
     <WalletTabs studyMode={effectiveEnrollmentType}>

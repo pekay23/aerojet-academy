@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useCallback, useState, useTransition } from 'react'
 import { Search, Users, BookOpen, Calendar, Route, GraduationCap } from 'lucide-react'
 import { Input } from '@/components/ui/input'

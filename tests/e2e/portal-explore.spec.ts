@@ -10,7 +10,7 @@
  * Run: npx playwright test portal-explore --config=tests/e2e/tour-verification.config.ts
  */
 
-import { test, expect, Page, Route } from '@playwright/test'
+import { test, Page } from '@playwright/test'
 import type { Response } from '@playwright/test'
 import * as fs from 'fs'
 
@@ -265,7 +265,7 @@ async function explorePortal(page: Page, portal: PortalConfig) {
 
 test.describe('Portal Exploration & Issue Discovery', () => {
   test('explore all portals for issues', async ({ browser }) => {
-    const results: Record<string, any> = {}
+    const _results: Record<string, any> = {}
 
     for (const portal of PORTALS) {
       const context = await browser.newContext({

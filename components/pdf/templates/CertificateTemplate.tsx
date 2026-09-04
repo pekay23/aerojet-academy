@@ -338,6 +338,7 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
 
           {qrDataUrl && (
             <View style={{ alignItems: 'center', marginTop: 10 }}>
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
               <Image src={qrDataUrl} style={styles.qrCode} />
               <Text style={styles.qrLabel}>Scan to verify</Text>
             </View>

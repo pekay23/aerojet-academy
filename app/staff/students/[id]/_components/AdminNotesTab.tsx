@@ -21,7 +21,7 @@ interface Props {
   staffRole: string
 }
 
-export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }: Props) {
+export default function AdminNotesTab({ student, _onRefresh, staffId, staffRole }: Props) {
   const [notes, setNotes] = useState<AdminNote[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [newNote, setNewNote] = useState('')

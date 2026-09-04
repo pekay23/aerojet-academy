@@ -3,15 +3,15 @@
 import React, { useMemo, useState } from 'react'
 import {
   Search,
-  Filter,
+  _Filter,
   ClipboardCheck,
   User as UserIcon,
   BookOpen,
   Calendar,
   ChevronRight,
-  MoreVertical,
+  _MoreVertical,
   CheckCircle2,
-  AlertCircle,
+  _AlertCircle,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -103,7 +103,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
       setSelectedGrade(null)
       setScore('')
       setComments('')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to submit grade. Please try again.')
     } finally {
       setIsSubmitting(false)

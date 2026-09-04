@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireAuth } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, withErrorHandler } from '@/lib/api/response'
 
 // GET /api/applicant/aptitude/session
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   const user = await requireAuth()
 
   // Find active session

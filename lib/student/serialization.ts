@@ -8,7 +8,7 @@ import {
 } from './types'
 
 // Type definitions for Prisma objects with includes
-type CourseWithRelations = Prisma.CourseGetPayload<{
+type _CourseWithRelations = Prisma.CourseGetPayload<{
   include: {
     examComponents: { include: { course: true } }
   }

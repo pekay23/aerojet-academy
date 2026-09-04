@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -109,7 +109,7 @@ function LiveClock() {
 }
 
 export default function StaffTopBar({ initialCounts, welcomeMessages, userName }: StaffTopBarProps) {
-  const router = useRouter()
+  const _router = useRouter()
   const [welcomeMsg, setWelcomeMsg] = useState<string | null>(null)
   const [dismissingIds, setDismissingIds] = useState<Set<string>>(new Set())
 

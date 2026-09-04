@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import _prisma, { prismaUnfiltered } from '@/lib/_prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { serializePrisma } from '@/lib/utils/serialization'
 

@@ -2,12 +2,12 @@
 
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { revalidatePath } from 'next/cache'
-import { createAuditLog, AuditAction } from '@/lib/audit/logger'
-import { getRequestContext } from '@/lib/server/request-context'
+
+
+
 import { getRegistrationConfig, getExamsConfig } from '@/lib/settings'
 
-const DISMISSABLE_TITLES = new Set([
+const _DISMISSABLE_TITLES = new Set([
   'Pending Payments >7 Days',
   'Fraud Referrals Pending Review',
   'Expiring Exam Bundles',
@@ -269,7 +269,7 @@ export async function ensureSystemNotifications() {
     }
 
     return { success: true }
-  } catch (error) {
+  } catch (_error) {
     return { error: 'Failed to ensure system notifications' }
   }
 }

@@ -2,10 +2,10 @@ import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { Users, GraduationCap, BookOpen, Sparkles, Calendar, Route } from 'lucide-react'
+import { Users, GraduationCap, BookOpen, Sparkles, Calendar } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import Link from 'next/link'
+
 import ClassmatesFilters from './_components/ClassmatesFilters'
 
 export const metadata: Metadata = {

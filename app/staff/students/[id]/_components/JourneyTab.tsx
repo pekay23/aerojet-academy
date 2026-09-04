@@ -4,8 +4,8 @@ import { useMemo } from 'react'
 import type {
   SerializedExamResult,
   SerializedStudent,
-  SerializedPayment,
-  SerializedExamBooking,
+  _SerializedPayment,
+  _SerializedExamBooking,
 } from '@/lib/types/staff'
 import {
   UserPlus,
@@ -431,7 +431,7 @@ function buildTimeline(student: SerializedStudent): TimelineEvent[] {
         Programme: fte.programme?.name || fte.programme?.code || '—',
         Year: `Year ${fte.currentYearNumber}`,
         Status: fte.status?.replace(/_/g, ' ') || '—',
-        'Academic Year': fte.academicYear || '—',
+        'Academic Year': fte.academicYear?.name || '—',
       },
     })
 

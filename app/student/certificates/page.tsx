@@ -41,7 +41,7 @@ export default async function CertificatesPage({
   if (!session) redirect('/login')
 
   const params = await searchParams
-  const orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { createdAt: 'desc' })
+  const _orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { createdAt: 'desc' })
 
   const { isFullTime } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'courses')

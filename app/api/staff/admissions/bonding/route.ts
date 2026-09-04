@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiPaginated, apiError, withErrorHandler, parsePagination } from '@/lib/api/response'
+import { apiPaginated, withErrorHandler, parsePagination } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { BondingStatus, Prisma } from '@prisma/client'
 

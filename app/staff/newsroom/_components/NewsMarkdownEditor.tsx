@@ -20,23 +20,16 @@ import {
   ListOrdered,
   Image as ImageIcon,
   Music,
-  Video,
-  Type,
-  Loader2,
-  Quote,
-  Palette,
-  AlignCenter,
-  AlignLeft,
-  AlignRight,
-  Baseline,
-  Pilcrow,
-  CaseSensitive,
-  ArrowUpDown,
-  Eye,
   PenLine,
   Undo,
   Redo,
-  MoreHorizontal,
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Pilcrow,
+  CaseSensitive,
+  Quote,
+  Palette,
 } from 'lucide-react'
 import { UploadButton } from '@/lib/uploads/uploadthing'
 import { toast } from 'sonner'
@@ -528,7 +521,7 @@ export default function NewsMarkdownEditor({
                 setActiveMediaTab(null)
               }
             }}
-            onUploadError={(error: Error) => {
+            onUploadError={(_error: Error) => {
               toast.error(`Upload failed: ${error.message}`)
             }}
             appearance={{
@@ -578,7 +571,7 @@ export default function NewsMarkdownEditor({
                 setActiveMediaTab(null)
               }
             }}
-            onUploadError={(error: Error) => {
+            onUploadError={(_error: Error) => {
               toast.error('Audio upload failed')
             }}
             appearance={{

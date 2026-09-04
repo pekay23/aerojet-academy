@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { Toast, ToastTitle, ToastDescription, ToastClose, ToastAction, ToastViewport } from '@/components/ui/toast'
+import { Toast, ToastTitle, ToastDescription, ToastClose, ToastAction } from '@/components/ui/toast'
 
 vi.mock('@radix-ui/react-toast', () => ({
   Provider: ({ children }: any) => <div>{children}</div>,

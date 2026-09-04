@@ -6,7 +6,6 @@ import {
   BookOpen,
   CheckCircle2,
   XCircle,
-  Clock,
   Loader2,
   AlertTriangle,
   ArrowRight,
@@ -87,12 +86,10 @@ export default function InternalExamDashboard() {
   }, [])
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchProgress() }, [fetchProgress])
 
   useEffect(() => {
     const bankId = searchParams.get('bankId')
-  // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!bankId || !data?.bankProgress.some(bank => bank.bankId === bankId)) return
   // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowLobby(bankId)
@@ -147,7 +144,7 @@ export default function InternalExamDashboard() {
     )
   }
 
-  const now = new Date()
+  const _now = new Date()
   const dateFormatter = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
   const formatOptionalDate = (value: string | null) => value ? dateFormatter.format(new Date(value)) : 'Not recorded'
 

@@ -1,13 +1,13 @@
-import { Badge } from '@/components/ui/badge'
+
 import { cn } from '@/lib/utils'
 import {
   CheckCircle2,
   Clock,
   XCircle,
   FileBarChart2,
-  AlertCircle,
-  BookOpen,
-  Tag,
+  _AlertCircle,
+  _BookOpen,
+  _Tag,
 } from 'lucide-react'
 
 type StatusVariant = 'booking' | 'payment' | 'result' | 'visual'

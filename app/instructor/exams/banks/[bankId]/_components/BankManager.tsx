@@ -1,21 +1,21 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState } from 'react'
 import {
-  Plus,
+  _Plus,
   Search,
-  Edit3,
-  Trash2,
+  _Edit3,
+  _Trash2,
   Clock,
   CheckCircle2,
-  XCircle,
+  _XCircle,
   AlertCircle,
-  Save,
+  _Save,
   X,
   Settings,
 } from 'lucide-react'
-import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
-import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
+
+
 import { cn, formatDate } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -84,9 +84,9 @@ export default function BankManager({
   pendingCount,
   poolHealth,
   questions,
-  total,
-  page,
-  limit,
+  _total,
+  _page,
+  _limit,
   disabled,
 }: BankManagerProps) {
   const [search, setSearch] = useState('')

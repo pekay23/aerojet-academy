@@ -1,7 +1,7 @@
 'use server'
 
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { getAuthSession, requireStaff, requireAuth } from '@/lib/auth/helpers'
+import { requireStaff, requireAuth } from '@/lib/auth/helpers'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { revalidatePath } from 'next/cache'
 

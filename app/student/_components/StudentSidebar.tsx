@@ -1,26 +1,26 @@
 'use client'
 
 import DashboardSidebar from '@/components/layouts/DashboardSidebar'
-import type { SidebarLink, SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
+import type { SidebarLink } from '@/components/layouts/DashboardSidebar'
 import {
   LayoutDashboard,
   Wallet,
   BookOpen,
   FileCheck,
   ClipboardCheck,
-  CalendarCheck,
+  _CalendarCheck,
   Award,
   Bell,
   User,
   Users,
   Mail,
-  ScrollText,
+  _ScrollText,
   GraduationCap,
-  Armchair,
-  FileQuestion,
-  BookMarked,
+  _Armchair,
+  _FileQuestion,
+  _BookMarked,
   FolderOpen,
-  Calendar,
+  _Calendar,
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
 import { useBadgeCounts } from '@/hooks/useBadgeCounts'
