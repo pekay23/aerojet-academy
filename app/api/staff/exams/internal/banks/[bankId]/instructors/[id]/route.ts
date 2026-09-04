@@ -4,6 +4,7 @@ import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/r
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 
 const updateSchema = z.object({
   canEdit: z.boolean().optional(),
@@ -26,7 +27,7 @@ export const PUT = withErrorHandler(
 
     const updated = await prismaUnfiltered.internalExamBankInstructor.update({
       where: { id },
-      data: body.data,
+      data: body.data as Prisma.InternalExamBankInstructorUpdateInput,
       include: {
         instructor: {
           include: {
@@ -40,7 +41,7 @@ export const PUT = withErrorHandler(
           },
         },
       },
-    } as any)
+    })
 
     await createAuditLog({
       userId: session.id,

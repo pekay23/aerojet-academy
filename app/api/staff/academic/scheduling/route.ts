@@ -6,7 +6,7 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 // GET /api/staff/academic/scheduling
 // Fetch all pathways with their terms and course assignments
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   await requireStaff()
 
   const [pathways, licenseCategories] = await Promise.all([

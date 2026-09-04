@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import ThemeToggle from '@/components/shared/ThemeToggle'
+
 import { Bell, Mail, Moon, Sun, Monitor, Loader2, Save, Eye } from 'lucide-react'
 import { updateUserSettings } from '@/app/student/actions'
 import { toast } from 'sonner'

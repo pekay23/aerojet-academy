@@ -12,7 +12,7 @@ interface UseRealtimeExamMonitorOptions {
 
 const STUDENT_THROTTLE_MS = 5_000
 const DEBOUNCE_MS = 1_000
-const POLL_INTERVAL_MS = 15_000
+const _POLL_INTERVAL_MS = 15_000
 const RECONNECT_BACKOFF_MS = 5_000
 
 export function useRealtimeExamMonitor({

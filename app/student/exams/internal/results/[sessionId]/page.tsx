@@ -7,12 +7,10 @@ import {
   XCircle,
   Clock,
   Loader2,
-  AlertTriangle,
   ArrowLeft,
   Eye,
   EyeOff,
   Lightbulb,
-  Download,
 } from 'lucide-react'
 
 interface QuestionResult {
@@ -58,8 +56,8 @@ export default function ExamResultsPage() {
   const [error, setError] = useState<string | null>(null)
   const [showAnswers, setShowAnswers] = useState(false)
   const [showExplanations, setShowExplanations] = useState(false)
-  const [certificate, setCertificate] = useState<CertificateInfo | null>(null)
-  const [certLoading, setCertLoading] = useState(false)
+  const [_certificate, _setCertificate] = useState<CertificateInfo | null>(null)
+  const [_certLoading, _setCertLoading] = useState(false)
 
   useEffect(() => {
     const fetchResults = async () => {

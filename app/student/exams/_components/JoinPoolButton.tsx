@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { joinExamPool } from '@/app/student/actions'
 import { toast } from 'sonner'
-import { Loader2, ArrowRight, BookOpen, Wallet, AlertCircle, CheckCircle2, X } from 'lucide-react'
+import { Loader2, ArrowRight, BookOpen, AlertCircle, CheckCircle2, X } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
 
 interface ExamComponent {

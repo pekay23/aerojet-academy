@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { Users, UserPlus, Gift, Target, ArrowRight } from 'lucide-react'
+import { Users, UserPlus, Gift, Target } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import SetReferrerForm from './_components/SetReferrerForm'

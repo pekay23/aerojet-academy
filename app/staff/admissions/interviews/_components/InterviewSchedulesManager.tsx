@@ -7,7 +7,7 @@ import { format } from 'date-fns'
 
 export default function InterviewSchedulesManager({ initialSchedules }: { initialSchedules: any[] }) {
   const router = useRouter()
-  const [schedules, setSchedules] = useState(initialSchedules)
+  const [schedules, _setSchedules] = useState(initialSchedules)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   
   // New Schedule State

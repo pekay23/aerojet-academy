@@ -37,7 +37,6 @@ export default function SecureExamClient({ sessionId }: { sessionId: string }) {
   const [error, setError] = useState<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const handleSubmit = useCallback(
     async (autoSubmitted = false) => {
       if (submitting) return
@@ -73,7 +72,7 @@ export default function SecureExamClient({ sessionId }: { sessionId: string }) {
     [sessionId, answers, submitting, router]
   )
 
-  const { logViolation, isFullscreen, tabSwitchCount, devToolsDetected } = useAntiCheat({
+  const { logViolation, _isFullscreen, tabSwitchCount, devToolsDetected } = useAntiCheat({
     sessionId,
     enforceFullscreen: true,
     blockClipboard: true,
@@ -131,7 +130,7 @@ export default function SecureExamClient({ sessionId }: { sessionId: string }) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [data, submitting])
+  }, [data, submitting, handleSubmit])
 
   if (loading) {
     return (

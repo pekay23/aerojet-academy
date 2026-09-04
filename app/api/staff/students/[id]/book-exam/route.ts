@@ -23,7 +23,7 @@ export const POST = withErrorHandler(
     const { staffBookExamSchema, validateBody } = await import('@/lib/validation/schemas')
     const validation = validateBody(staffBookExamSchema, body)
     if (!validation.success) return apiError(validation.error)
-    const { bookingType, moduleIds, eventId, examDate, paymentMethod, notes, attemptType } = validation.data
+    const { bookingType, moduleIds, eventId, examDate, paymentMethod, _notes, attemptType } = validation.data
 
     // Validate module count per booking type
     const expectedModules: Record<string, number> = {

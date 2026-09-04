@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import {
   User,
   ClipboardCheck,
@@ -9,7 +9,7 @@ import {
   BookOpen,
   FileText,
   Route,
-  ClipboardList,
+  _ClipboardList,
 } from 'lucide-react'
 import MotionTabs from '@/components/ui/MotionTabs'
 

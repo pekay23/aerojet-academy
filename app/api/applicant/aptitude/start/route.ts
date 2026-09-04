@@ -7,7 +7,7 @@ import { selectQuestions } from '@/lib/aptitude/question-selector'
 import { addMinutes } from 'date-fns'
 
 // POST /api/applicant/aptitude/start
-export const POST = withErrorHandler(async (req: NextRequest) => {
+export const POST = withErrorHandler(async (_req: NextRequest) => {
   const user = await requireAuth()
 
   // 1. Check if user is eligible (at APTITUDE_PENDING)

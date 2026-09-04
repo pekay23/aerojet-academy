@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Video, MapPin, Clock, BookOpen, Users, FileText, Trash2, Edit } from 'lucide-react'
+import { X, Video, MapPin, BookOpen, Users, FileText, Edit } from 'lucide-react'
 
 const MotionDiv = motion.div
 const MotionAside = motion.aside

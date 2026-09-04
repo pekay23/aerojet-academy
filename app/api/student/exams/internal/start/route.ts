@@ -249,7 +249,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       let questions = allQuestions
       if (placeholderSession.questionOrder && Array.isArray(placeholderSession.questionOrder)) {
         const order = placeholderSession.questionOrder as QuestionOrderEntry[]
-        const orderMap = new Map(order.map((q) => [q.id, q]))
+        const _orderMap = new Map(order.map((q) => [q.id, q]))
         questions = order
           .map((q) => allQuestions.find((aq) => aq.id === q.id))
           .filter((q): q is NonNullable<(typeof allQuestions)[number]> => q != null)
@@ -303,7 +303,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     let questions = allQuestions
     if (existingSession.questionOrder && Array.isArray(existingSession.questionOrder)) {
       const order = existingSession.questionOrder as QuestionOrderEntry[]
-      const orderMap = new Map(order.map((q) => [q.id, q]))
+      const _orderMap = new Map(order.map((q) => [q.id, q]))
       questions = order
         .map((q) => allQuestions.find((aq) => aq.id === q.id))
         .filter((q): q is NonNullable<(typeof allQuestions)[number]> => q != null)

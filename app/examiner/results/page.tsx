@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { ClipboardCheck, ExternalLink, History } from 'lucide-react'
+import { ClipboardCheck, ExternalLink } from 'lucide-react'
 
 import { requireExaminer } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
@@ -11,7 +11,7 @@ import ResultsEntry from './_components/ResultsEntry'
 export const metadata: Metadata = { title: 'Results Entry | Examiner Portal' }
 export const dynamic = 'force-dynamic'
 
-const getCachedResultsHistory = (examinerId: string) =>
+const _getCachedResultsHistory = (examinerId: string) =>
   unstable_cache(
     async () => {
       const sittingIds = (
@@ -60,7 +60,7 @@ export default async function ExaminerResultsPage({
 }) {
   const user = await requireExaminer()
   const sp = await searchParams
-  const { page, limit, skip } = parsePagination(new URLSearchParams(sp as Record<string, string>))
+  const { _page, limit, skip } = parsePagination(new URLSearchParams(sp as Record<string, string>))
 
   const examiner = await prismaUnfiltered.examiner.findUnique({
     where: { userId: user.id },

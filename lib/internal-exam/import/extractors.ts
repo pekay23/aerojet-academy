@@ -24,7 +24,7 @@ export interface ExtractedQuestion {
   rawText: string
 }
 
-const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F']
+const _OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F']
 
 function splitQuestions(raw: string): string[] {
   const lines = raw.split(/\r?\n/).filter((l) => l.trim())

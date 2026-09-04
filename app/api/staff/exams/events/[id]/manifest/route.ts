@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiError, withErrorHandler } from '@/lib/api/response'
 
 export const GET = withErrorHandler(async (req: NextRequest, ctx: any) => {
   const _staff = await requireStaff()

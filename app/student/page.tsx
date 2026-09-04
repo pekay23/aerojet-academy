@@ -6,7 +6,7 @@ import {
   Calendar,
   Wallet,
   TrendingUp,
-  ArrowRight,
+  _ArrowRight,
   CheckCircle2,
   Package,
   AlertCircle,
@@ -17,7 +17,7 @@ import {
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import WelcomeBanner from '@/components/WelcomeBanner'
-import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
+import { getStudentStatus } from '@/lib/access-control'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
@@ -116,8 +116,8 @@ export default async function StudentDashboard() {
     )
   }
 
-  const { isFullTime, isExamOnly, isModular: isFlexible, enrollmentType, pathwayCode } = await getStudentStatus(userId)
-  const activePathway = profile.pathwayRel
+  const { isFullTime, isExamOnly, isModular: isFlexible, enrollmentType, _pathwayCode } = await getStudentStatus(userId)
+  const _activePathway = profile.pathwayRel
 
   // Activity data is already included in the consolidated query above
   const activityData = userData
@@ -127,6 +127,7 @@ export default async function StudentDashboard() {
         where: { studentId: userId },
         include: {
           programme: true,
+          academicYear: true,
           milestones: {
             where: { status: { in: ['DUE', 'OVERDUE'] } },
             orderBy: { dueDate: 'asc' },
@@ -137,7 +138,7 @@ export default async function StudentDashboard() {
     : null
 
   const upcomingExams = activityData?.examBookings || []
-  const poolMemberships = activityData?.poolMemberships || []
+  const _poolMemberships = activityData?._poolMemberships || []
   const currentPoolsCount = activityData?._count?.poolMemberships || 0
   const ftCourseEnrollmentCount = activityData?._count?.enrollments || 0
   const latestResultRecord = activityData?.examResults?.[0] || null
@@ -240,7 +241,7 @@ export default async function StudentDashboard() {
                         ID: {ftEnrollment.programme.code}
                       </span>
                       <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                        {ftEnrollment.academicYear || ''}
+                         {ftEnrollment.academicYear?.name || ''}
                       </span>
                     </div>
                     <h3 className="text-sm leading-tight font-bold text-slate-900 dark:text-slate-100">

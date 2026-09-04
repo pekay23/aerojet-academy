@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -16,7 +16,7 @@ import {
   ChevronDown,
   BarChart3,
   Users,
-  ClipboardList,
+  _ClipboardList,
 } from 'lucide-react'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
@@ -174,7 +174,7 @@ export default function ShortlistingTable({ data }: { data: ApplicationRow[] }) 
         setEditingScoreId(null)
         router.refresh()
       }
-    } catch (e) {
+    } catch (_e) {
       toast.error('Failed to load shortlist')
     }
   }

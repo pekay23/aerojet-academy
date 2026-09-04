@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation'
 
 export default function AddResourceButton() {
   const [open, setOpen] = useState(false)
-  const router = useRouter()
+  const _router = useRouter()
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

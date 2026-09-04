@@ -23,7 +23,7 @@ export async function evaluateGoNoGo(
  * Only pools that meet their own threshold are confirmed; underfilled pools can remain open
  * when the event is viable overall.
  */
-export async function executeGo(eventId: string, adminId: string) {
+export async function executeGo(eventId: string, _adminId: string) {
   const event = await prisma.examEvent.findUnique({
     where: { id: eventId },
     include: {
@@ -147,7 +147,7 @@ export async function executePostponement(
   eventId: string,
   newStartDate: Date,
   newEndDate: Date,
-  adminId: string
+  _adminId: string
 ) {
   const event = await prisma.examEvent.findUnique({
     where: { id: eventId },
@@ -250,7 +250,7 @@ export async function executePostponement(
 /**
  * Merge one pool into another.
  */
-export async function mergePools(sourcePoolId: string, targetPoolId: string, adminId: string) {
+export async function mergePools(sourcePoolId: string, targetPoolId: string, _adminId: string) {
   return prisma.$transaction(
     async (tx) => {
       const source = await tx.examPool.findUnique({

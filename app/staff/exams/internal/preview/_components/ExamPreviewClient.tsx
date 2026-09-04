@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
@@ -10,23 +10,23 @@ import {
   CheckCircle2,
   Send,
   XCircle,
-  Menu,
-  X,
-  Flag,
-  Hourglass,
+  _Menu,
+  _X,
+  _Flag,
+  _Hourglass,
   Maximize,
   ShieldAlert,
-  Bookmark,
+  _Bookmark,
   Clock,
-  BarChart3,
+  _BarChart3,
   RefreshCw,
-  ArrowLeft,
+  _ArrowLeft,
   BookOpen,
   Download,
-  Lock,
-  Eye,
+  _Lock,
+  _Eye,
 } from 'lucide-react'
-import Link from 'next/link'
+
 
 interface BankOption {
   id: string
@@ -52,7 +52,7 @@ interface PreviewQuestion {
   knowledgeLevel: number | null
 }
 
-interface BankRules {
+interface _BankRules {
   timePerQuestionSecs: number
   passMarkPct: number
   allowKeyboardAutoSubmit: boolean
@@ -105,23 +105,23 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [timeLeft, setTimeLeft] = useState(0)
-  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true)
-  const [showReport, setShowReport] = useState(false)
+  const [_isLeftPanelOpen, _setIsLeftPanelOpen] = useState(true)
+  const [_showReport, _setShowReport] = useState(false)
   const [reportReason, setReportReason] = useState('')
   const [reportSubmitting, setReportSubmitting] = useState(false)
-  const [reportSubmitted, setReportSubmitted] = useState(false)
+  const [_reportSubmitted, setReportSubmitted] = useState(false)
   const [showQuestionReport, setShowQuestionReport] = useState<string | null>(null)
   const [questionReportReason, setQuestionReportReason] = useState('')
   const [questionReportSubmitting, setQuestionReportSubmitting] = useState(false)
-  const [reportedQuestions, setReportedQuestions] = useState<Set<string>>(new Set())
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [tabSwitchCount, setTabSwitchCount] = useState(0)
+  const [_reportedQuestions, setReportedQuestions] = useState<Set<string>>(new Set())
+  const [_isFullscreen, setIsFullscreen] = useState(false)
+  const [_tabSwitchCount, setTabSwitchCount] = useState(0)
   const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false)
-  const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set())
-  const [showReviewLaterFilter, setShowReviewLaterFilter] = useState(false)
-  const [flagging, setFlagging] = useState<string | null>(null)
+  const [_flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set())
+  const [_showReviewLaterFilter, _setShowReviewLaterFilter] = useState(false)
+  const [_flagging, setFlagging] = useState<string | null>(null)
   const [downloadingSeb, setDownloadingSeb] = useState<string | null>(null)
-  const [showLobby, setShowLobby] = useState(false)
+  const [_showLobby, setShowLobby] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const logViolation = useCallback(
@@ -140,7 +140,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
           detail,
           deviceInfo: {
             userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-            platform: typeof navigator !== 'undefined' ? (navigator as any).platform : undefined,
+            platform: typeof navigator !== 'undefined' ? (navigator as Navigator & { platform?: string }).platform : undefined,
             language: typeof navigator !== 'undefined' ? navigator.language : undefined,
           },
           ...(opts?.severity ? { severity: opts.severity } : {}),
@@ -217,7 +217,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     }
   }, [])
 
-  const toggleFlag = useCallback(async (questionId: string, flagged: boolean) => {
+  const _toggleFlag = useCallback(async (questionId: string, flagged: boolean) => {
     setFlagging(questionId)
     try {
       setFlaggedQuestions((prev) => {
@@ -235,12 +235,12 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     setAnswers((prev) => ({ ...prev, [questionId]: answer }))
   }
 
-  const handleSubmit = async (auto = false) => {
+  const handleSubmit = async (_auto = false) => {
     if (submitting) return
     setSubmitting(true)
     if (timerRef.current) clearInterval(timerRef.current)
 
-    const answeredCount = Object.keys(answers).length
+    const _answeredCount = Object.keys(answers).length
     const correctCount = data!.questions.filter(
       (q) => answers[q.questionId] === q.correctAnswer
     ).length
@@ -256,9 +256,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   // â”€â”€â”€ Fullscreen lockdown mode â”€â”€â”€
   useEffect(() => {
     if (!data || result || showConfirm) return
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowFullscreenPrompt(true)
   }, [data, result, showConfirm])
 
@@ -311,6 +309,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   }, [data, result, logViolation, showConfirm])
 
   // Keyboard shortcuts + strict keypress auto-submit
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (!data?.config.allowKeyboardAutoSubmit || result || showConfirm) return
     const MODIFIERS = new Set(['Shift', 'Control', 'Alt', 'Meta'])
@@ -340,6 +339,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [data?.config.allowKeyboardAutoSubmit, result, showConfirm, logViolation])
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   // Network detection
   useEffect(() => {
@@ -370,7 +370,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
           bankId: data.bank.id,
           type: 'EXAM_INTERFACE_UNLOAD',
           detail: 'Staff navigated away or closed preview during active mode',
-          deviceInfo: { userAgent: navigator.userAgent, platform: (navigator as any).platform },
+          deviceInfo: { userAgent: navigator.userAgent, platform: (navigator as Navigator & { platform?: string }).platform },
         }),
       })
     document.addEventListener('beforeunload', onUnload)
@@ -382,6 +382,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   }, [data, result, showConfirm])
 
   // Timer countdown
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (!data || result) return
     timerRef.current = setInterval(() => {
@@ -398,6 +399,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
       if (timerRef.current) clearInterval(timerRef.current)
     }
   }, [data, result])
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   // Cleanup on unmount
   useEffect(
@@ -414,7 +416,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     return `${m}:${s.toString().padStart(2, '0')}`
   }
 
-  const handleSubmitReport = async () => {
+  const _handleSubmitReport = async () => {
     if (!reportReason.trim() || reportSubmitting) return
     setReportSubmitting(true)
     try {
@@ -434,7 +436,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     }
   }
 
-  const handleSubmitQuestionReport = async () => {
+  const _handleSubmitQuestionReport = async () => {
     if (!questionReportReason.trim() || questionReportSubmitting || !showQuestionReport) return
     setQuestionReportSubmitting(true)
     try {
@@ -516,7 +518,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
 
   const questions = data.questions
   const currentQ = questions[currentIndex]
-  const answeredCount = Object.keys(answers).length
+  const _answeredCount = Object.keys(answers).length
   const optionLabels = ['A', 'B', 'C']
 
   if (result) {

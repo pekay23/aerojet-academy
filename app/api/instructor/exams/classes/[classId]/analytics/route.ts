@@ -131,7 +131,7 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
     submittedAt: s.submittedAt?.toISOString() || null,
   }))
 
-  const payload = {
+  const _payload = {
     summary: {
       totalAttempts,
       completedSessions,

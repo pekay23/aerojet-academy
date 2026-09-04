@@ -17,9 +17,7 @@ export default function VerifyEmailPage() {
 
   useEffect(() => {
     if (!token) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus('error')
       setMessage('Invalid verification link.')
       return
@@ -119,7 +117,7 @@ export default function VerifyEmailPage() {
                   window.close()
                   // Fallback: If window.close() is blocked, redirect after a short delay
                   setTimeout(() => {
-                    window.location.href = '/'
+                    router.push('/')
                   }, 1000)
                 }}
                 className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-aerojet-sky"

@@ -155,7 +155,7 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: { params: Pro
       })
       created++
       details.push({ userId: enrollment.userId, status: 'created' })
-    } catch (err) {
+    } catch (_err) {
       failed++
       details.push({ userId: enrollment.userId, status: 'failed' })
     }

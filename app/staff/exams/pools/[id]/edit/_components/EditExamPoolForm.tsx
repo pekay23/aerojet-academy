@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Loader2, DollarSign, Users, Layers, AlertTriangle } from 'lucide-react'
+import { Loader2, DollarSign, Users, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -19,7 +19,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { toast } from '@/hooks/use-toast'
 import { createExamPoolSchema } from '@/lib/validation/schemas'
-import { ExamPool, ExamEvent } from '@prisma/client'
+
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { EASA_MODULE_CODES } from '@/lib/constants/easa-modules'

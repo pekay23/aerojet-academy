@@ -5,15 +5,15 @@ import { naturalCompare } from '@/lib/utils/array'
 import {
   Search,
   Plus,
-  Calendar,
+  _Calendar,
   CheckCircle2,
   XCircle,
   Clock,
   Edit,
   Trash2,
   FileCheck,
-  ShoppingCart,
-  Filter,
+  _ShoppingCart,
+  _Filter,
   ArrowUp,
   ArrowDown,
 } from 'lucide-react'

@@ -18,7 +18,7 @@ test.describe('Student Journey E2E', () => {
     await page.click('button[type="submit"]')
     await expect(page.locator('text=/Success|Account created|Check your email/i')).toBeVisible()
 
-    const creds = getStudentCredentials()
+    const _creds = getStudentCredentials()
     await loginAsStudent(page)
     await expect(page.locator('body')).toContainText(/Dashboard|Welcome/i, { timeout: 30000 })
   })

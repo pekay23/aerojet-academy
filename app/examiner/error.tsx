@@ -1,7 +1,7 @@
 'use client'
 
 export default function ExaminerError({
-  error,
+  _error,
   reset,
 }: {
   error: Error

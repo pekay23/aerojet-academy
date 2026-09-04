@@ -65,7 +65,7 @@ const STATUS_CONFIG = {
 export default function DocumentUploadForm({
   documentTypes,
   uploadedDocuments,
-  applicationId,
+  _applicationId,
   onRefresh,
 }: DocumentUploadFormProps) {
   const [uploading, setUploading] = useState<string | null>(null)
@@ -191,7 +191,7 @@ export default function DocumentUploadForm({
 function DocumentCard({
   docType,
   uploaded,
-  uploading,
+  _uploading,
   onUploaded,
 }: {
   docType: DocumentType

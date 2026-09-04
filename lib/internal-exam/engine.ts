@@ -162,8 +162,8 @@ export async function selectInternalExamQuestions(bankId: string, count: number)
 // ---------------------------------------------------------------------------
 
 export async function checkEligibility(studentId: string, bankId: string) {
-  const rules = await getBankRules(bankId)
-  const now = new Date()
+  const _rules = await getBankRules(bankId)
+  const _now = new Date()
 
   // Get previous sessions for this student + bank (exclude VOIDED)
   const sessions = await prismaUnfiltered.internalExamSession.findMany({

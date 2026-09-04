@@ -16,29 +16,29 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
+  _TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
 import { SortableTh } from '@/components/ui/sortable-th'
-import { buildOrderBy } from '@/lib/utils/build-order-by'
+
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { format } from 'date-fns'
-import Link from 'next/link'
-import SearchInput from '@/components/SearchInput'
+
+
 import { getCurrencySymbol } from '@/lib/currency'
 
 import {
-  DollarSign,
-  TrendingUp,
-  Calendar,
+  _DollarSign,
+  _TrendingUp,
+  _Calendar,
   Clock,
-  CheckCircle,
+  _CheckCircle,
   CheckCircle2,
-  XCircle,
-  AlertCircle,
-  ExternalLink,
+  _XCircle,
+  _AlertCircle,
+  _ExternalLink,
 } from 'lucide-react'
 import {
   getFinanceReportSummary,
@@ -47,7 +47,7 @@ import {
   getMonthlyRevenueData,
   getPaymentStatusBreakdown,
 } from '@/lib/analytics/reports'
-import { formatCurrency } from '@/lib/analytics/metrics'
+
 
 export const metadata: Metadata = { title: 'Finance | Staff Portal' }
 export const dynamic = 'force-dynamic'

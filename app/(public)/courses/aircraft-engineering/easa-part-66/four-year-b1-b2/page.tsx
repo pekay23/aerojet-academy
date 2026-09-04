@@ -7,12 +7,12 @@ import {
   Clock,
   BookOpen,
   Award,
-  Briefcase,
+  _Briefcase,
   Hammer,
-  ShieldCheck,
-  GraduationCap,
+  _ShieldCheck,
+  _GraduationCap,
 } from 'lucide-react'
-import ModuleGrid from '@/app/(public)/_components/ModuleGrid'
+
 import ModuleTabs from './ModuleTabs'
 import { getRegistrationConfig } from '@/lib/settings'
 

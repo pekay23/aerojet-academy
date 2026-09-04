@@ -20,7 +20,7 @@ export default function ThemeToggle({ isCollapsed = false }: { isCollapsed?: boo
     else setTheme('light')
   }
 
-  const renderIcon = () => {
+  const _renderIcon = () => {
     if (!mounted) return <div className="h-4 w-4 shrink-0" />
     if (theme === 'light') return <Sun className="h-4 w-4 shrink-0" />
     if (theme === 'dark') return <Moon className="h-4 w-4 shrink-0" />

@@ -34,7 +34,7 @@ export function ExamDetailClient({ examId }: { examId: string }) {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'questions'>('overview')
 
-  const fetchExam = async () => {
+  const fetchExam = useCallback(async () => {
     setLoading(true)
     try {
       const [examRes, sessionsRes] = await Promise.all([
@@ -46,18 +46,18 @@ export function ExamDetailClient({ examId }: { examId: string }) {
       const sessionsJson = await sessionsRes.json()
 
       if (examJson.success) setExam(examJson.data)
-      if (sessionsJson.success) setSessions(sessionsJson.data.sessions)
+      if (sessionsJson.success) setSessions(examJson.data.sessions)
     } catch {
       toast.error('Failed to load exam')
     } finally {
       setLoading(false)
     }
-  }
+  }, [examId])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchExam()
-  }, [examId])
+  }, [examId, fetchExam])
 
   const handleCreateSession = async () => {
     const startTime = prompt('Session start time (ISO format):', new Date().toISOString())

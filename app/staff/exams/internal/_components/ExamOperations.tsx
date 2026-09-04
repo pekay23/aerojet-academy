@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Loader2,
   RefreshCw,
-  Eye,
+  _Eye,
   XCircle,
   CheckCircle2,
   Clock,
-  AlertTriangle,
-  Send,
+  _AlertTriangle,
+  _Send,
   ChevronDown,
   ChevronRight,
   Flag,
@@ -19,8 +19,8 @@ import {
   Activity,
   Hourglass,
   RefreshCcw,
-  ShieldAlert,
-  Award,
+  _ShieldAlert,
+  _Award,
 } from 'lucide-react'
 import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
 import ViolationReviewPanel from './ViolationReviewPanel'
@@ -322,7 +322,7 @@ export default function ExamOperations() {
     })
   }
 
-  const handleExtend = async (sessionId: string) => {
+  const _handleExtend = async (sessionId: string) => {
     setConfirmState({
       open: true,
       title: 'Extend exam time?',
@@ -355,7 +355,7 @@ export default function ExamOperations() {
     })
   }
 
-  const handleForceSubmit = async (sessionId: string) => {
+  const _handleForceSubmit = async (sessionId: string) => {
     setConfirmState({
       open: true,
       title: 'Force submit this exam?',
@@ -388,7 +388,7 @@ export default function ExamOperations() {
     })
   }
 
-  const handleEndSession = async (sessionId: string) => {
+  const _handleEndSession = async (sessionId: string) => {
     setConfirmState({
       open: true,
       title: 'End this exam session?',

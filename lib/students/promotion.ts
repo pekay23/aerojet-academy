@@ -8,7 +8,7 @@ import type { EnrollmentType } from '@prisma/client'
  */
 export async function promoteToStudent(
   userId: string,
-  enrollmentType: EnrollmentType = 'MODULAR'
+  _enrollmentType: EnrollmentType = 'MODULAR'
 ): Promise<PromotionResult> {
   try {
     const result = await promoteApplicantToStudent(userId, userId)

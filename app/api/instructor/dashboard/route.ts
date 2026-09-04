@@ -5,7 +5,7 @@ import { apiSuccess, apiForbidden, withErrorHandler } from '@/lib/api/response'
 import { UserRole } from '@prisma/client'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   const user = await requireAuth()
   if (user.role !== UserRole.INSTRUCTOR) return apiForbidden('Instructor access required')
 

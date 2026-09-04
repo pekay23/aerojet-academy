@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { BellOff, X, Trash2 } from 'lucide-react'
+import { BellOff, Trash2 } from 'lucide-react'
 import TablePagination from '@/components/shared/TablePagination'
 import StaffNotificationCard from './StaffNotificationCard'
 import { Notification } from '@prisma/client'

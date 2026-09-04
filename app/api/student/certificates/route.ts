@@ -3,7 +3,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStudent } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler } from '@/lib/api/response'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   const user = await requireStudent()
   const passedExams = await prismaUnfiltered.examResult.findMany({
     where: { userId: user.id, passed: true },
@@ -17,4 +17,3 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   })
   return apiSuccess(passedExams)
 })
-

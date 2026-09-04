@@ -21,7 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  Filter,
+  _Filter,
   BookOpen,
   GraduationCap,
   CalendarDays,
@@ -82,7 +82,7 @@ const AUDIENCE_OPTIONS = [
 
 const COLOR_OPTIONS = ['#4A72E8', '#FF4F33', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4']
 
-function getEventStyles(source: string, color: string) {
+function getEventStyles(source: string, _color: string) {
   if (source === 'exam') return 'bg-[#FF4F33] text-white'
   if (source === 'class') return 'bg-[#EBF1FF] text-[#4A72E8]'
   return 'text-white'
@@ -132,7 +132,7 @@ function AudienceBadge({ visibleTo }: { visibleTo: string }) {
   )
 }
 
-export default function StaffCalendarGrid({ events, initialDate, currentUserId }: Props) {
+export default function StaffCalendarGrid({ events, initialDate, _currentUserId }: Props) {
   const [currentDate, setCurrentDate] = useState(initialDate || new Date())
   const [viewMode, setViewMode] = useState<'Month' | 'Week' | 'Day'>('Week')
   const [popupEvent, setPopupEvent] = useState<StaffCalendarEvent | null>(null)

@@ -3,7 +3,7 @@ import { requireExaminer } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   const user = await requireExaminer()
   const slots = await prismaUnfiltered.staffAvailability.findMany({
     where: { userId: user.id },

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, useMemo } from 'react'
-import { Plus, Edit2, Shield, Loader2, ArrowUp, ArrowDown, ArrowUpDown, ChevronDown } from 'lucide-react'
+import { Plus, Edit2, Loader2, ArrowUp, ArrowDown, ArrowUpDown, ChevronDown } from 'lucide-react'
 import { upsertATAChapter, toggleATAChapterStatus } from '../actions'
 
 interface ATAChapter {
@@ -21,7 +21,7 @@ export default function ATAChaptersClient({
 }: {
   initialChapters: ATAChapter[]
 }) {
-  const [chapters, setChapters] = useState(initialChapters)
+  const [chapters, _setChapters] = useState(initialChapters)
   const [isPending, startTransition] = useTransition()
   const [editingChapter, setEditingChapter] = useState<ATAChapter | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)

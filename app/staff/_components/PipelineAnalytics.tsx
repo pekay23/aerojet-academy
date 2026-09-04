@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   BarChart3,
-  TrendingUp,
-  Users,
-  CheckCircle2,
-  XCircle,
-  ArrowRight,
+  _TrendingUp,
+  _Users,
+  _CheckCircle2,
+  _XCircle,
+  _ArrowRight,
   Loader2,
 } from 'lucide-react'
 

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { createStudentPoolAction } from '@/app/student/actions'
 import { toast } from 'sonner'
-import { Loader2, ArrowRight, Users, Wallet, Calendar, Clock, X, Info, BookOpen } from 'lucide-react'
+import { Loader2, ArrowRight, Users, Wallet, Calendar, X, Info } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
 
 const MAX_MODULES = 4
@@ -109,7 +109,7 @@ export default function GroupBookingModal({
           setOpen(false)
           resetForm()
         }
-      } catch (err) {
+      } catch (_err) {
         toast.error('Something went wrong. Please try again.')
       }
     })

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+
 import { Search, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -25,7 +25,7 @@ interface UserSearchInputProps {
   disabled: boolean
 }
 
-export default function UserSearchInput({ onSelect, onTrack, loading, disabled }: UserSearchInputProps) {
+export default function UserSearchInput({ onSelect, onTrack, _loading, _disabled }: UserSearchInputProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [students, setStudents] = useState<Student[]>([])
@@ -43,7 +43,7 @@ export default function UserSearchInput({ onSelect, onTrack, loading, disabled }
       if (json.success) {
         setStudents(json.data)
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error('Search failed')
     } finally {
       setSearching(false)

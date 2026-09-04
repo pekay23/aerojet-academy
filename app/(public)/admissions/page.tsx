@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Hero from '../_components/Hero'
 import SectionReveal from '../_components/SectionReveal'
 import EnrollmentSteps from '../_components/EnrollmentSteps'
-import { ArrowRight, CheckCircle2, BookOpen, GraduationCap, HelpCircle } from 'lucide-react'
+import { ArrowRight, CheckCircle2, BookOpen, HelpCircle } from 'lucide-react'
 import { getRegistrationFeeInfo } from '@/lib/system-settings'
 import { getRegistrationConfig } from '@/lib/settings'
 

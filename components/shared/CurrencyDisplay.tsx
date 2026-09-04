@@ -148,7 +148,7 @@ export function CurrencyDisplay({
 }: CurrencyDisplayProps) {
   const [internalCurrency, setInternalCurrency] = useState(baseCurrency)
   const activeCurrency = controlledCurrency || internalCurrency
-  const { rates, sources, loading, convert } = useCurrencyRates()
+  const { _rates, sources, loading, convert } = useCurrencyRates()
 
   const handleCurrencyChange = useCallback(
     (newCurrency: string) => {

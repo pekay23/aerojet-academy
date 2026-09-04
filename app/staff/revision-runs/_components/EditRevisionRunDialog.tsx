@@ -78,7 +78,7 @@ export default function EditRevisionRunDialog({ run }: EditRevisionRunDialogProp
       } else {
         toast.error(res.error || 'Failed to update revision run')
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('An unexpected error occurred')
     } finally {
       setLoading(false)
@@ -103,7 +103,7 @@ export default function EditRevisionRunDialog({ run }: EditRevisionRunDialogProp
       } else {
         toast.error(res.error || 'Failed to delete revision run')
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('An unexpected error occurred')
     } finally {
       setDeleting(false)

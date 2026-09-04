@@ -2,7 +2,7 @@
 
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { UserStatus } from '@prisma/client'
+
 import { serializePrisma } from '@/lib/utils/serialization'
 
 interface FetchApplicantsParams {

@@ -11,7 +11,7 @@ const categorySchema = z.object({
 })
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  const staff = await requireStaff()
+  const _staff = await requireStaff()
 
   const body = await req.json()
   const validated = categorySchema.safeParse(body)

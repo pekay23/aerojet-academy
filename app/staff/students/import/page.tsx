@@ -154,7 +154,7 @@ export default function ImportStudentsPage() {
   const [parsedData, setParsedData] = useState<ImportStudent[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
-  const [sendingCredentials, setSendingCredentials] = useState<string | null>(null)
+  const [_sendingCredentials, _setSendingCredentials] = useState<string | null>(null)
 
   // Manual entry state
   const [manualStudents, setManualStudents] = useState<ImportStudent[]>([createEmptyStudent()])

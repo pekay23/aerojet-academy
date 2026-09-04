@@ -19,7 +19,7 @@ export async function getStudentPaymentAccessLevel(
     enrollment?: any
   }
 ): Promise<PaymentAccessLevel> {
-  const { isModular, isExamOnly, enrollmentType, pathwayCode } = await getStudentStatus(userId, preFetchedData?.profile)
+  const { isModular, isExamOnly, _enrollmentType: _enrollmentType, _pathwayCode: _pathwayCode } = await getStudentStatus(userId, preFetchedData?.profile)
 
   if (isModular || isExamOnly) {
     return 'FULL_ACCESS'
@@ -105,7 +105,7 @@ export async function getEnrollmentMilestoneStatus(
     enrollment?: any
   }
 ) {
-  const { isExamOnly, isModular, enrollmentType, pathwayCode } = await getStudentStatus(userId, preFetchedData?.profile)
+  const { isExamOnly, isModular, _enrollmentType: _enrollmentType2, _pathwayCode: _pathwayCode2 } = await getStudentStatus(userId, preFetchedData?.profile)
 
   if (isModular || isExamOnly) {
     const label = isExamOnly ? 'Exam-Only Pathway' : 'Modular Programme'

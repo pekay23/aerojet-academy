@@ -15,7 +15,7 @@ const MONTH_NAMES = [
 ];
 
 export async function generateFinancialPDF(data: any, year: number, month: number) {
-  const { summary, revenueByType, paymentMethods, monthlyData, paymentStatus } = data;
+  const { summary, revenueByType, _paymentMethods, monthlyData, paymentStatus } = data;
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 14;
@@ -99,7 +99,7 @@ export async function generateFinancialPDF(data: any, year: number, month: numbe
     margin: { left: margin, right: pageWidth / 2 + 5 },
   });
 
-  const lastY3 = (doc as any).lastAutoTable.finalY;
+  const _lastY3 = (doc as any).lastAutoTable.finalY;
   doc.text('Payment Status', pageWidth / 2 + 10, lastY2 + 15);
   const statusRows = paymentStatus.map((s: any) => [s.status, formatCurrency(s.amount), s.count.toString()]);
 

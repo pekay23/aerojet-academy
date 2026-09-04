@@ -14,9 +14,9 @@ import {
   Tag,
   Hourglass,
   Shield,
-  XCircle,
-  Eye,
-  Settings,
+  _XCircle,
+  _Eye,
+  _Settings,
 } from 'lucide-react'
 import CourseActionsMenu from '../../_components/CourseActionsMenu'
 import ExamComponentsSection from './_components/ExamComponentsSection'

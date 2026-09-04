@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle2, XCircle, AlertCircle, Calendar, History } from 'lucide-react'
+import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface HistoryRecord {
@@ -74,7 +74,7 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-stone-100 dark:divide-white/5">
-            {items.map((h, idx) => (
+            {items.map((h, _idx) => (
               <tr
                 key={h.id}
                 className="transition-colors hover:bg-stone-50 dark:hover:bg-slate-800/50"

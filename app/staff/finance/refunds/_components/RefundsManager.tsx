@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useTransition, useMemo } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useDebounce } from 'use-debounce'
 import { toast } from 'sonner'
 import { CheckCircle2, XCircle, ShieldCheck, Plus, Search, User as UserIcon } from 'lucide-react'
@@ -107,7 +107,7 @@ export default function RefundsManager({
             studentId: u.studentProfile?.studentId ?? null,
           }))
         )
-      } catch (e) {
+      } catch (_e) {
         if (!cancelled) setOptions([])
       } finally {
         if (!cancelled) setSearching(false)

@@ -1,5 +1,5 @@
-import { getAuthSession, requireStaff } from '@/lib/auth/helpers'
-import { redirect, notFound } from 'next/navigation'
+import { requireStaff } from '@/lib/auth/helpers'
+import { notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import EditClassForm from './EditClassForm'
 import { Metadata } from 'next'

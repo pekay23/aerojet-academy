@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn, getSession } from 'next-auth/react'
 import Link from 'next/link'
-import { startAuthentication } from '@simplewebauthn/browser'
+import { startAuthentication, type AuthenticationResponseJSON } from '@simplewebauthn/browser'
 import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck, Fingerprint } from 'lucide-react'
 import { useFormErrorAnnouncer } from '@/hooks/useFormErrorAnnouncer'
 
@@ -19,13 +19,13 @@ export default function LoginForm() {
   const [totpCode, setTotpCode] = useState('')
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false)
   const [supportsConditionalUI, setSupportsConditionalUI] = useState(false)
-  const { announcerRef, getFieldErrorProps, ErrorMessage } = useFormErrorAnnouncer({
+  const { announcerRef } = useFormErrorAnnouncer({
     errors: error ? { _global: error } : {},
     touched: error ? { _global: true } : {},
   })
 
   // Complete passkey login after browser returns a credential (shared by button + conditional UI)
-  const completePasskeyLogin = useCallback(async (credential: any) => {
+  const completePasskeyLogin = useCallback(async (credential: AuthenticationResponseJSON) => {
     const verifyRes = await fetch('/api/auth/passkey/login-verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -88,9 +88,9 @@ export default function LoginForm() {
         if (aborted) return
 
         await completePasskeyLogin(credential)
-      } catch (err: any) {
+      } catch (err: unknown) {
         // AbortError is normal when user navigates away or uses password instead
-        if (err.name !== 'AbortError' && !aborted) {
+        if (err instanceof Error && err.name !== 'AbortError' && !aborted) {
           console.debug('[ConditionalUI]', err.message)
         }
       }
@@ -121,8 +121,8 @@ export default function LoginForm() {
       let credential
       try {
         credential = await startAuthentication({ optionsJSON: options })
-      } catch (err: any) {
-        if (err.name === 'NotAllowedError') {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'NotAllowedError') {
           return // User cancelled
         }
         throw err
@@ -130,9 +130,9 @@ export default function LoginForm() {
 
       // 3. Verify and complete login
       await completePasskeyLogin(credential)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err)
-      setError(err.message || 'An error occurred during passkey login')
+      setError(err instanceof Error ? err.message : 'An error occurred during passkey login')
     } finally {
       setIsPasskeyLoading(false)
     }
@@ -189,8 +189,8 @@ export default function LoginForm() {
 
           // Use window.location for full page navigation after auth
           window.location.href = redirectMap[role || ''] ?? '/login'
-        } catch (err: any) {
-          setError(err.message || 'Something went wrong. Please try again.')
+        } catch (err: unknown) {
+          setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
         }
       })
     },

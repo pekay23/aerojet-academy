@@ -8,7 +8,7 @@ import {
   ShieldCheck,
   Loader2,
   Users,
-  Calendar,
+  _Calendar,
   Save,
   AlertTriangle,
 } from 'lucide-react'
@@ -45,7 +45,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
   const [students, setStudents] = useState<StudentRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [stats, setStats] = useState<{ total: number; present: number; rate: number } | null>(null)
+  const [_stats, setStats] = useState<{ total: number; present: number; rate: number } | null>(null)
 
   const fetchRoster = useCallback(async () => {
     if (!classId) return

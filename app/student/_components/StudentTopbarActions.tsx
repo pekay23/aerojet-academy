@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Bell, Mail, CheckCircle2, AlertTriangle, XCircle, Info, Siren } from 'lucide-react'
+import { Bell, Mail, CheckCircle2, AlertTriangle, XCircle, Info } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import {
   DropdownMenu,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useTransition } from 'react'
 import { Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { updateApplicantProfile } from '../../actions'

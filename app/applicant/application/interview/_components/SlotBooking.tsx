@@ -51,7 +51,7 @@ export default function SlotBooking({ currentSlot }: { currentSlot: Slot | null 
         const err = await res.json()
         setError(err.error || 'Failed to book slot')
       }
-    } catch (e) {
+    } catch (_e) {
       setError('An unexpected error occurred')
     } finally {
       setBooking(null)

@@ -13,7 +13,7 @@ import {
   BrainCircuit,
   ListChecks,
   CalendarDays,
-  type LucideIcon,
+  type _LucideIcon,
 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -66,7 +66,7 @@ export interface PipelineTrackerProps {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function getStageStatus(
+function _getStageStatus(
   milestoneStage: string,
   currentStage: string,
   activeStages: string[],
@@ -86,7 +86,7 @@ function getStageStatus(
   return 'upcoming'
 }
 
-function isMilestoneCompleted(
+function _isMilestoneCompleted(
   milestoneStage: string,
   currentStage: string,
   activeStages: string[]
@@ -97,7 +97,7 @@ function isMilestoneCompleted(
   return currentIdx > milestoneIdx
 }
 
-function isMilestoneCurrent(
+function _isMilestoneCurrent(
   milestoneStage: string,
   currentStage: string,
   activeStages: string[]
@@ -116,7 +116,7 @@ const TERMINAL_STAGES = ['REJECTED', 'WITHDRAWN']
 
 export default function PipelineTracker({
   currentStage,
-  previousStage,
+  _previousStage,
   programmeLabel,
   registrationCode,
   rejectionReason,
@@ -278,7 +278,7 @@ export default function PipelineTracker({
               {milestones.map((milestone, i) => {
                 const isCompleted = i < currentMilestoneIndex || isEnrolled
                 const isCurrent = i === currentMilestoneIndex && !isEnrolled
-                const isLast = i === milestones.length - 1
+                const _isLast = i === milestones.length - 1
 
                 return (
                   <div key={milestone.stage} className="relative flex flex-1 flex-col items-center">

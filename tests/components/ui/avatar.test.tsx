@@ -4,6 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
 vi.mock('@radix-ui/react-avatar', () => ({
   Root: ({ children, className, ...props }: any) => <div className={className} {...props}>{children}</div>,
+  // eslint-disable-next-line jsx-a11y/alt-text
   Image: ({ className, ...props }: any) => <img className={className} {...props} />,
   Fallback: ({ children, className, ...props }: any) => <div className={className} {...props}>{children}</div>,
 }))

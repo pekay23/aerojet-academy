@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import {
   getEasaComplianceReport,

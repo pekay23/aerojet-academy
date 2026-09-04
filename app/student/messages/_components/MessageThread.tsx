@@ -4,8 +4,8 @@ import { useState } from 'react'
 import {
   ChevronDown,
   ChevronRight,
-  User,
-  Clock,
+  _User,
+  _Clock,
   CornerDownRight,
   Send,
   Loader2,
@@ -111,7 +111,7 @@ function MessageBubble({
 
 export default function MessageThread({ thread, currentUserId }: MessageThreadProps) {
   const [expanded, setExpanded] = useState(thread.unreadCount > 0)
-  const [replyTo, setReplyTo] = useState<Message | null>(null)
+  const [_replyTo, setReplyTo] = useState<Message | null>(null)
   const [replyText, setReplyText] = useState('')
   const [sending, setSending] = useState(false)
   // Optimistic local unread count — zeroed immediately on open so the badge

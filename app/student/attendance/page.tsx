@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { Calendar, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react'
+import { Calendar, CheckCircle2, XCircle, Clock } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
@@ -22,7 +22,7 @@ export default async function AttendancePage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
+  const { isFullTime, _isExamOnly, _isModular } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'classes')
 
   if (isFullTime && !hasAccess) {

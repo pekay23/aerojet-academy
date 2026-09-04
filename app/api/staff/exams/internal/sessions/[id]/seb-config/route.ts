@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { withErrorHandler, apiSuccess, apiError } from '@/lib/api/response'
+import { withErrorHandler, apiError } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import {
   generateBekPair,
   buildSebConfig,
   generateSebConfig,
-  BekPair,
+  _BekPair,
   BankSebConfig,
 } from '@/lib/internal-exam/seb-config'
 

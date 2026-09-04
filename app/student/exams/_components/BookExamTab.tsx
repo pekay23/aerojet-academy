@@ -1,4 +1,4 @@
-import { Users, User, Layers, Wallet, Info } from 'lucide-react'
+import { Users, User, Layers, Info } from 'lucide-react'
 
 import AvailablePoolsTab from './AvailablePoolsTab'
 import BookingActionTab from './BookingActionTab'

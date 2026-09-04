@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Download, Eye, ChevronDown, ChevronUp, FileText } from 'lucide-react'
+import { Download, Eye, ChevronDown, FileText } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface Sitting {
@@ -27,7 +27,7 @@ interface Props {
   sittings: Sitting[]
 }
 
-export default function ManifestButton({ eventId, sittings }: Props) {
+export default function ManifestButton({ eventId, _sittings }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 

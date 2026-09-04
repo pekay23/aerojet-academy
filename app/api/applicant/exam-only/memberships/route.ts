@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireApplicant } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { apiError, withErrorHandler } from '@/lib/api/response'
+import { withErrorHandler } from '@/lib/api/response'
 
 export const GET = withErrorHandler(async () => {
   const user = await requireApplicant()

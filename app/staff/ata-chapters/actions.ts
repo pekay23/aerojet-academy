@@ -13,7 +13,7 @@ export async function upsertATAChapter(data: {
   sortOrder: number
   isActive: boolean
 }) {
-  const staff = await requireStaff()
+  const _staff = await requireStaff()
 
   try {
     if (data.id) {
@@ -49,7 +49,7 @@ export async function upsertATAChapter(data: {
 }
 
 export async function toggleATAChapterStatus(id: string, isActive: boolean) {
-  const staff = await requireStaff()
+  const _staff = await requireStaff()
 
   try {
     await prismaUnfiltered.aTAChapter.update({

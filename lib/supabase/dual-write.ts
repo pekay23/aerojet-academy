@@ -12,7 +12,7 @@
  */
 
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { getSupabaseAdmin, isBackupEnabled } from './client'
+import { isBackupEnabled } from './client'
 import { Prisma } from '@prisma/client'
 
 // All Prisma model names
@@ -112,7 +112,6 @@ export async function getSupabasePrismaClient() {
   cachedSupabasePrisma = new PrismaClient({ adapter })
   return cachedSupabasePrisma
 }
-
 
 /**
  * Transform data for Supabase (handle BigInt, Date, etc.)

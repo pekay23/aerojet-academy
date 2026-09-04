@@ -45,7 +45,7 @@ export const GET = withErrorHandler(async (_req: NextRequest) => {
 // POST — Pay registration fee from wallet
 // ---------------------------------------------------------------------------
 
-export const POST = withErrorHandler(async (req: NextRequest) => {
+export const POST = withErrorHandler(async (_req: NextRequest) => {
   const session = await getAuthSession()
   if (!session) throw new Error('Unauthorized')
 

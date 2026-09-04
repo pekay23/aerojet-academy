@@ -34,9 +34,9 @@ interface Props {
 
 export default function ProfileTab({
   student,
-  academicYears,
-  semesters,
-  studyPathways,
+  _academicYears,
+  _semesters,
+  _studyPathways,
   onRefresh,
 }: Props) {
   const profile = student.profile

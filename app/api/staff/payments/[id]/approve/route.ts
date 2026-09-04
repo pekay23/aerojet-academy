@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { requireStaff } from '@/lib/auth/helpers'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -17,7 +16,7 @@ import {
   generateTempPassword,
   generateAcademyEmail,
 } from '@/lib/auth/helpers'
-import { PaymentStatus, ProgrammeChoice } from '@prisma/client'
+import { PaymentStatus } from '@prisma/client'
 import { topUpWallet } from '@/lib/wallet/operations'
 import { shouldPromoteOnPayment, promoteApplicantToStudent } from '@/lib/enrollment/pathway'
 import { generateMilestonesForYear } from '@/lib/enrollment/full-time'
@@ -41,7 +40,7 @@ export const POST = withErrorHandler(
     let body: any
     try {
       body = await req.json()
-    } catch (e) {
+    } catch (_e) {
       return apiError('Invalid request body', 400)
     }
 

@@ -21,7 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  Filter,
+  _Filter,
   BookOpen,
   GraduationCap,
   CalendarDays,
@@ -63,7 +63,7 @@ interface Props {
   onDelete?: (dbId: string) => Promise<{ error?: string }>
 }
 
-const AUDIENCE_OPTIONS = [
+const _AUDIENCE_OPTIONS = [
   { value: 'ALL', label: 'Everyone', icon: Globe },
   { value: 'STUDENTS', label: 'Students Only', icon: UserCheck },
   { value: 'INSTRUCTORS', label: 'Instructors Only', icon: Users },
@@ -73,9 +73,9 @@ const AUDIENCE_OPTIONS = [
   { value: 'SPECIFIC_USER', label: 'Specific User', icon: UserCheck },
 ]
 
-const COLOR_OPTIONS = ['#4A72E8', '#FF4F33', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4']
+const _COLOR_OPTIONS = ['#4A72E8', '#FF4F33', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4']
 
-function getEventStyles(source: string, color: string) {
+function getEventStyles(source: string, _color: string) {
   if (source === 'exam') return 'bg-[#FF4F33] text-white'
   if (source === 'class') return 'bg-[#EBF1FF] text-[#4A72E8]'
   if (source === 'personal') return 'bg-amber-50 text-amber-700 border-l-4 border-amber-400'
@@ -85,7 +85,7 @@ function getEventStyles(source: string, color: string) {
 export default function AcademicCalendar({
   events,
   initialDate,
-  currentUserId,
+  _currentUserId,
   canCreate = false,
   onSave,
   onDelete,

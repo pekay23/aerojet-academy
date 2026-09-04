@@ -11,7 +11,7 @@ import {
   Users,
   BarChart3,
   Copy,
-  History,
+  _History,
   Edit3,
   X,
   Clock,
@@ -81,7 +81,7 @@ export default function ExamBankManager() {
   const [createSaving, setCreateSaving] = useState(false)
   const [courses, setCourses] = useState<{ id: string; name: string; code: string }[]>([])
   const [modules, setModules] = useState<{ code: string; name: string }[]>([])
-  const [retiringBankId, setRetiringBankId] = useState<string | null>(null)
+  const [_retiringBankId, setRetiringBankId] = useState<string | null>(null)
 
   const fetchBanks = useCallback(async () => {
     try {

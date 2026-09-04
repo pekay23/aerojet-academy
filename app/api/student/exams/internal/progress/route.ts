@@ -1,4 +1,3 @@
-import { NextRequest } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'

@@ -48,12 +48,10 @@ export default async function RegistrationFeePage() {
 
   // Determine if student has enough funds, considering currency conversion
   let availableInFeeCurrency = walletBalance
-  let conversionRate = 1
 
   if (wallet && walletCurrency !== feeCurrency) {
     const conversion = await convertCurrency(walletBalance, walletCurrency, feeCurrency)
     availableInFeeCurrency = conversion.convertedAmount
-    conversionRate = conversion.rate
   }
 
   const canPay = availableInFeeCurrency >= fee

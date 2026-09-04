@@ -18,7 +18,7 @@ export default function AptitudeTestLanding() {
   const router = useRouter()
   const [showModal, setShowModal] = useState(false)
   const [starting, setStarting] = useState(false)
-  const { data: sessionInfo, loading, error, refetch } = useFetch<AptitudeSession>('/api/applicant/aptitude/session')
+  const { data: sessionInfo, loading, _error, _refetch } = useFetch<AptitudeSession>('/api/applicant/aptitude/session')
 
   const handleStart = async () => {
     setStarting(true)
@@ -31,7 +31,7 @@ export default function AptitudeTestLanding() {
         toast.error(json.error || 'Failed to start test')
         setStarting(false)
       }
-    } catch (e) {
+    } catch (_e) {
       toast.error('An error occurred')
       setStarting(false)
     }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
-import TestInterface, { type TestQuestion } from '../_components/TestInterface'
+import TestInterface, { type _TestQuestion } from '../_components/TestInterface'
 import AntiCheatProvider from '../_components/AntiCheatProvider'
 
 export default function TakeTestPage() {

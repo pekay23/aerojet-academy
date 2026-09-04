@@ -17,7 +17,7 @@ export default function BankDetailPage({ params }: { params: Promise<{ id: strin
   const [bank, setBank] = useState<Bank | null>(null)
   const [loading, setLoading] = useState(true)
   const [showEditor, setShowEditor] = useState(false)
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [refreshKey, _setRefreshKey] = useState(0)
 
   const fetchBank = useCallback(async () => {
     try {

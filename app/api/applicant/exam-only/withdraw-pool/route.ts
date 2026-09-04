@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { requireApplicant } from '@/lib/auth/helpers'
-import { prismaUnfiltered } from '@/lib/prisma/client'
 import { withdrawFromPool } from '@/lib/pools/withdraw'
 import { apiError, withErrorHandler } from '@/lib/api/response'
 

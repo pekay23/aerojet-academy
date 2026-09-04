@@ -9,7 +9,7 @@ import { signOut } from 'next-auth/react'
 import { useTheme } from '@/components/shared/theme-provider'
 import {
   ChevronDown,
-  ChevronRight,
+  _ChevronRight,
   LogOut,
   Menu,
   X,
@@ -781,7 +781,7 @@ export default function DashboardSidebar({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const [_mounted, setMounted] = useState(false)
   const [openGroups, setOpenGroups] = useState<string[]>([])
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -811,7 +811,7 @@ export default function DashboardSidebar({
     )
   }
 
-  const getComparableUrl = (href: string) => {
+  const _getComparableUrl = (href: string) => {
     if (!href.includes('?')) return basePath + href
     return basePath + href
   }

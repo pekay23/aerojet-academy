@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { FileText, FileCode, Archive, ExternalLink, Download, Clock, BookOpen, GraduationCap, ClipboardList, Shield } from 'lucide-react'
+import { FileText, FileCode, Archive, ExternalLink, Download, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 

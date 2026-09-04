@@ -7,7 +7,7 @@ import type { ApprovalResult, ApprovalOptions } from './types'
 
 export async function approveApplicant(
   userId: string,
-  options: ApprovalOptions
+  _options: ApprovalOptions
 ): Promise<ApprovalResult<{ academyEmail: string; tempPassword: string }>> {
   try {
     const user = await prisma.user.findUnique({ where: { id: userId }, include: { profile: true } })

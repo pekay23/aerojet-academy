@@ -47,7 +47,7 @@ export function PasskeySettings() {
         const data = await res.json()
         setPasskeys(data.passkeys)
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to load passkeys')
     } finally {
       setIsLoading(false)
