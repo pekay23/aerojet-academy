@@ -23,7 +23,7 @@ export default function NewsCard({
   image,
   date,
   readTime,
-  viewCount,
+  _viewCount,
   index = 0,
   tags = [],
   excerpt,

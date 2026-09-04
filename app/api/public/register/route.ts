@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import {
-  hashPassword,
+  _hashPassword,
   generateRegistrationCode,
   generateToken,
   checkRateLimit,

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-export interface UseUserTableOptions<T> {
+export interface UseUserTableOptions<_T> {
   endpoint: string
   queryParams?: Record<string, string | undefined>
   initialPageSize?: number
@@ -77,11 +77,8 @@ export function useUserTable<T = Record<string, unknown>>(
     } finally {
       setLoading(false)
     }
-    // eslint-disable-next-line react-hooks/use-memo
-  }, [endpoint, search, page, perPage, JSON.stringify(queryParams)])
+  }, [endpoint, search, page, perPage, queryParams])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)

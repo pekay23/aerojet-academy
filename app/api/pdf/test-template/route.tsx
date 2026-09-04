@@ -229,7 +229,7 @@ export async function POST(req: NextRequest) {
   let params = {}
   try {
     params = await req.json()
-  } catch (e) {
+  } catch (_e) {
     // If not JSON or empty body, ignore
   }
   return generatePDFResponse(req, params)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Check, X, Loader2, AlertCircle } from 'lucide-react'
+import { Check, X, Loader2 } from 'lucide-react'
 
 interface Question {
   id: string

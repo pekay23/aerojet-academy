@@ -28,8 +28,8 @@ The implementation is **substantially complete** — Phases 1–4 are functional
 | Schema: session recovery fields (`lastActivityAt`, `timeExtensionSec`, `recoveredAt`, `supervised`, `questionOrder`) | ✅ Complete | `prisma/schema.prisma:2136-2158`, `:2152` |
 | Schema: `flaggedForReview` on answer | ✅ Complete | `prisma/schema.prisma:1963` |
 | `bun run db:push` (Neon) | ✅ Complete | Per session digest; schema reflects models |
-| `bun run db:push:supabase` (mirror) | ❌ Pending | Tracker correctly marks PENDING (network/Supabase reachability). Schema not mirrored to replica. |
-| Enable Realtime on `internal_exam_sessions` in Supabase Console | ❌ Pending | Tracker correctly marks PENDING. The RLS migration SQL exists (see below) but the table is not enabled in the console/publication in the live project. |
+| `bun run db:push:supabase` (mirror) | ✅ Complete | Schema mirrored to Supabase replica on 2026-09-04. Fixed 6 NULL `academicYearId` rows in Supabase before push. |
+| Enable Realtime on `internal_exam_sessions` in Supabase Console | ❌ Pending | Tracker correctly marks PENDING. The RLS migration SQL exists but the table is not enabled in the console/publication in the live project. |
 | RBAC: `requireBankAccess(bankId, capability)` | ✅ Complete | `lib/auth/permissions.ts:138` |
 | 6 permission keys (`EXAM_BANK_EDIT`, `EXAM_SESSION_MONITOR`, `EXAM_VIOLATION_REVIEW`, etc.) | ✅ Complete | `lib/auth/permission-registry.ts:29,31,34,57,59,62` |
 | 20 exam `AuditAction` values | ✅ Complete | `lib/audit/logger.ts:23-26` (+ more) |
@@ -95,13 +95,12 @@ The implementation is **substantially complete** — Phases 1–4 are functional
 
 1. **Phase 5 — EASA compliance guide doc** (`docs/guides/easa-exam-compliance.md`): create the deliverable referenced by Phase 5. Currently missing.
 2. **Phase 5 — Accessibility exception doc** (`ACCESSIBILITY.md`): create WCAG-waiver documentation for strict keypress + fullscreen lock + supervised pathway. Currently missing.
-3. **`bun run db:push:supabase`**: mirror schema to Supabase replica (blocked on network/Supabase reachability).
-4. **Enable Realtime on `internal_exam_sessions`** in Supabase Console + add to publication so the live monitor actually streams (the RLS migration SQL exists but the table is not enabled live).
-5. **Unit tests** for `requireBankAccess` and class-start idempotency (tracker PENDING).
-6. **Final LLM Council audit** against the MUST-FIX checklist (tracker PENDING).
-7. **Strict-keypress `inInput` guard** (`InternalExamInterface.tsx:422`): when the always-focused hidden input is active, `inInput` is true and auto-submit is skipped — contradicts §14 "any key submits." Either remove the `inInput` early-return for the auto-submit path or focus a non-input element.
-8. **Realtime RLS correctness**: `internal-exam-realtime-rls.sql` keys the instructor policy off `classes.instructorId = auth.uid()::text`, but `classes.instructorId` is a profile id (`ClassSession.instructorId → User` per plan §3.1). Confirm `auth.uid()` resolves to the profile id, not `User.id`, or the policy will silently match nothing (same camelCase/identity trap as the messages filter).
-9. **Execute the load test** against the defined thresholds (currently only defined, not run).
+3. **Enable Realtime on `internal_exam_sessions`** in Supabase Console + add to publication so the live monitor actually streams (the RLS migration SQL exists but the table is not enabled live).
+4. **Unit tests** for `requireBankAccess` and class-start idempotency (tracker PENDING).
+5. **Final LLM Council audit** against the MUST-FIX checklist (tracker PENDING).
+6. **Strict-keypress `inInput` guard** (`InternalExamInterface.tsx:422`): when the always-focused hidden input is active, `inInput` is true and auto-submit is skipped — contradicts §14 "any key submits." Either remove the `inInput` early-return for the auto-submit path or focus a non-input element.
+7. **Realtime RLS correctness**: `internal-exam-realtime-rls.sql` keys the instructor policy off `classes.instructorId = auth.uid()::text`, but `classes.instructorId` is a profile id (`ClassSession.instructorId → User` per plan §3.1). Confirm `auth.uid()` resolves to the profile id, not `User.id`, or the policy will silently match nothing (same camelCase/identity trap as the messages filter).
+8. **Execute the load test** against the defined thresholds (currently only defined, not run).
 
 ---
 

@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo, memo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
-import { TrendingDown, Users, Target, Activity, ArrowDown, Loader2 } from 'lucide-react'
+import { TrendingDown, Users, Target, Activity, ArrowDown } from 'lucide-react'
 
 interface FunnelChartProps {
   data: {
@@ -85,7 +85,7 @@ function clamp(value: number, min: number, max: number): number {
 
 const FunnelChart = memo(function FunnelChart({ data }: FunnelChartProps) {
   const [mounted, setMounted] = useState(false)
-  const steps = data?.steps ?? []
+  const steps = useMemo(() => data?.steps ?? [], [data])
 
   useEffect(() => {
     setMounted(true)

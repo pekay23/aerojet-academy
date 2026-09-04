@@ -7,13 +7,9 @@ import {
   DollarSign,
   Mail,
   Globe,
-  Sparkles,
-  Send,
   Calendar,
-  DatabaseBackup,
   Shield,
   ClipboardList,
-  AtSign,
   FileText,
 } from 'lucide-react'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
@@ -50,10 +46,10 @@ export default function SettingsTabs({ children }: { children: React.ReactNode }
   const searchParams = useSearchParams()
   const currentTab = searchParams.get('tab') || 'general'
 
-  const { isDirty, markDirty, markClean, confirmLeave, pendingTab, proceedLeave, cancelLeave } =
+  const { isDirty: _isDirty, markDirty, markClean, confirmLeave: _confirmLeave, pendingTab, proceedLeave, cancelLeave } =
     useUnsavedChanges()
 
-  const handleChange = useCallback(
+  const _handleChange = useCallback(
     (tab: string) => {
       router.push(`/staff/settings?tab=${tab}`, { scroll: false })
       // Reset dirty state when we actually navigate

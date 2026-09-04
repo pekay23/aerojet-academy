@@ -15,7 +15,6 @@
 
 import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
-import { POOL_NEAR_FULL_THRESHOLD } from './types'
 import { promoteNextFromWaitlist } from './waitlist'
 import { decrementPoolMemberCount } from './operations'
 import { creditToWallet } from '@/lib/wallet/operations'

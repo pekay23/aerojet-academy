@@ -4,19 +4,13 @@ import React, { useMemo, useState } from 'react'
 import {
   Search,
   History,
-  User as UserIcon,
-  BookOpen,
-  Calendar,
-  ChevronRight,
   Edit2,
-  CheckCircle2,
   Clock,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const MotionDiv = motion.div
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { format } from 'date-fns'
@@ -82,7 +76,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
   }, [initialHistory, searchQuery])
 
   const total = filteredHistory.length
-  const paged = filteredHistory.slice((page - 1) * perPage, page * perPage)
+  const _paged = filteredHistory.slice((page - 1) * perPage, page * perPage)
 
   const handleEditSubmit = async () => {
     if (!selectedGrade || !score) return
@@ -102,7 +96,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
       })
       toast.success(`Grade updated for ${selectedGrade.user.profile?.firstName || 'Student'}`)
       setSelectedGrade(null)
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to update grade. Please try again.')
     } finally {
       setIsSubmitting(false)

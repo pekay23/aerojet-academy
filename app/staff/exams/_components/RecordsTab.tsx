@@ -1,7 +1,7 @@
 'use client'
 /** Exam Records Dashboard with Pagination and Inline Editing */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import {
@@ -12,10 +12,10 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  User,
+  _User,
   FilePlus2,
-  AlertCircle,
-  Calendar,
+  _AlertCircle,
+  _Calendar,
   Award,
   BookOpen,
   ChevronLeft,
@@ -170,15 +170,15 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
   const [editDate, setEditDate] = useState('')
   const [editIsMigrated, setEditIsMigrated] = useState(false)
   const [editShowDropdown, setEditShowDropdown] = useState(false)
-  const [editCourseQuery, setEditCourseQuery] = useState('')
-  const [showEditCourseDropdown, setShowEditCourseDropdown] = useState(false)
+  const [_editCourseQuery, setEditCourseQuery] = useState('')
+  const [_showEditCourseDropdown, setShowEditCourseDropdown] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
 
   // Search filter
   const [tableFilter, setTableFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'OFFICIAL_EASA' | 'INTERNAL'>('ALL')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [isBulkUpdating, setIsBulkUpdating] = useState(false)
+  const [_isBulkUpdating, setIsBulkUpdating] = useState(false)
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)

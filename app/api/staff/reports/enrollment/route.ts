@@ -3,7 +3,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler } from '@/lib/api/response'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   await requireStaff()
 
   const [totalEnrollments, byStatus, byCourse, byMonth] = await Promise.all([
@@ -19,4 +19,3 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   return apiSuccess({ totalEnrollments, byStatus, byCourse, byMonth })
 })
-

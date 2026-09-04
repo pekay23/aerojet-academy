@@ -41,7 +41,7 @@ interface InstructorAssignmentPageProps {
   courseId: string
 }
 
-export default function InstructorAssignmentPage({ bankId, bankName, courseCode, courseId }: InstructorAssignmentPageProps) {
+export default function InstructorAssignmentPage({ bankId, bankName, courseCode, _courseId }: InstructorAssignmentPageProps) {
   const [assignments, setAssignments] = useState<InstructorAssignment[]>([])
   const [availableInstructors, setAvailableInstructors] = useState<InstructorOption[]>([])
   const [loading, setLoading] = useState(true)

@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { GraduationCap, Award, FileText, TrendingUp, AlertCircle } from 'lucide-react'
+import { Award, FileText, TrendingUp } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
@@ -22,7 +22,7 @@ export default async function GradesPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
+  const { isFullTime, isExamOnly, _isModular } = await getStudentStatus(session.user.id)
 
   // Exam-only students have no enrollment grades — redirect to transcript
   if (isExamOnly) {

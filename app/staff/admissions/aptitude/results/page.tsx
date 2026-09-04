@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
-import { CheckCircle2, XCircle, AlertTriangle, Clock, Ban, Loader2, RefreshCw } from 'lucide-react'
+import { CheckCircle2, XCircle, AlertTriangle, Clock, Ban, RefreshCw } from 'lucide-react'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface Session {

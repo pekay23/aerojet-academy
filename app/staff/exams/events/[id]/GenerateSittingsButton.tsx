@@ -39,7 +39,7 @@ export default function GenerateSittingsButton({ eventId }: Props) {
       }
       toast.success(result.message)
       setOpen(false)
-    } catch (error) {
+    } catch (_error) {
       toast.error('An unexpected error occurred')
     } finally {
       setLoading(false)

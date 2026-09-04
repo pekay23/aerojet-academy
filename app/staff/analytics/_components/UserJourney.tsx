@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { UserCheck, X, Mail, Calendar, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import UserJourneyTimeline from './UserJourneyTimeline'
 import UserSearchInput from './UserSearchInput'
+import Image from 'next/image'
 
 interface UserProfile {
   id: string
@@ -139,9 +140,11 @@ function UserProfileCard({ user }: { user: UserProfile }) {
         <div className="flex flex-col sm:flex-row">
           <div className="flex h-24 w-full items-center justify-center bg-gradient-to-br from-aerojet-blue/10 to-aerojet-sky/10 sm:h-auto sm:w-24 dark:from-aerojet-blue/20 dark:to-aerojet-sky/20">
             {user.avatarUrl ? (
-              <img
+              <Image
                 src={user.avatarUrl}
                 alt={fullName}
+                width={80}
+                height={80}
                 className="h-20 w-20 rounded-full object-cover ring-4 ring-white dark:ring-slate-900"
               />
             ) : (

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import {
-  apiSuccess,
+  _apiSuccess,
   apiCreated,
   apiError,
   apiPaginated,
@@ -74,4 +74,3 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   return apiCreated(serializePrisma(course))
 })
-

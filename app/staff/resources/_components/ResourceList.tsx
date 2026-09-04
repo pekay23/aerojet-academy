@@ -40,7 +40,7 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
       await deleteResource(id)
       setResources(resources.filter((r) => r.id !== id))
       toast.success('Resource deleted')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to delete resource')
     }
   }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { History, User, Calendar, Tag, ArrowRight, X } from 'lucide-react'
+import { History, User, Calendar, X } from 'lucide-react'
 
 interface Version {
   id: string
@@ -26,7 +26,7 @@ export default function QuestionVersions({ questionId }: { questionId: string })
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(false)
 
-  const fetchVersions = async () => {
+  const fetchVersions = useCallback(async () => {
     try {
       const res = await fetch(`/api/staff/exams/internal/questions/${questionId}/versions`)
       const json = await res.json()
@@ -34,11 +34,11 @@ export default function QuestionVersions({ questionId }: { questionId: string })
     } finally {
       setLoading(false)
     }
-  }
+  }, [questionId])
 
   useEffect(() => {
     if (expanded) fetchVersions()
-  }, [expanded, questionId])
+  }, [expanded, questionId, fetchVersions])
 
   if (!expanded) {
     return (
@@ -72,7 +72,7 @@ export default function QuestionVersions({ questionId }: { questionId: string })
         <p className="py-4 text-center text-xs text-slate-400">No version history available.</p>
       ) : (
         <div className="space-y-3">
-          {versions.map((v, i) => (
+          {versions.map((v, _i) => (
             <div
               key={v.id}
               className="rounded-lg border border-slate-100 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"

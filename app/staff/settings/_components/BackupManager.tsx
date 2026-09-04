@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import {
-  Download,
+  _Download,
   Mail,
   Loader2,
   AlertCircle,

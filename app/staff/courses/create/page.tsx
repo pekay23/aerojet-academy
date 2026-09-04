@@ -124,7 +124,7 @@ export default function CreateCoursePage() {
 
       toast.success('Course created successfully')
       router.push('/staff/courses')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to create course')
     } finally {
       setIsLoading(false)

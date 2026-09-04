@@ -1,4 +1,3 @@
-import { EnrollmentType, ProgrammeChoice } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
 import { resolveEffectiveEnrollmentType } from './pathway'
 

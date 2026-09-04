@@ -1,8 +1,8 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { format } from 'date-fns'
-import { ScrollText, User, Tag, Clock } from 'lucide-react'
+
+
 import { serializePrisma } from '@/lib/utils/serialization'
 import AuditLogTable from './_components/AuditLogTable'
 import { queryAuditLogs } from '@/lib/audit/logger'

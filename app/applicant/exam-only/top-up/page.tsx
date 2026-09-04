@@ -5,7 +5,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
 import WalletTopUpForm from '../_components/WalletTopUpForm'
 import TransactionHistory from '../_components/TransactionHistory'
-import { ArrowLeft, Wallet, Info, PiggyBank, Clock, ArrowRight, Shield } from 'lucide-react'
+import { ArrowLeft, Wallet, Info, PiggyBank, Clock, Shield } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Top Up Wallet | Exam Only Pathway' }
 export const dynamic = 'force-dynamic'

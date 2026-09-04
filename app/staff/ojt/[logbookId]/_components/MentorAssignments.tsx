@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { UserPlus, Trash2, Star, Pencil, X } from 'lucide-react'
+import { UserPlus, Trash2, Pencil, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface Mentor {
@@ -21,7 +21,7 @@ interface Props {
   staffId: string
 }
 
-export default function MentorAssignments({ logbookId, mentorAssignments, availableMentors, staffId }: Props) {
+export default function MentorAssignments({ logbookId, mentorAssignments, availableMentors, _staffId }: Props) {
   const router = useRouter()
   const [selectedMentor, setSelectedMentor] = useState('')
   const [loading, setLoading] = useState(false)

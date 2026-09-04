@@ -1,4 +1,4 @@
-import type { UserRole, UserStatus, EnrollmentStatus } from '@/types/enums'
+import type { UserRole, UserStatus } from '@/types/enums'
 
 export interface SerializedProfile {
   firstName: string
@@ -279,7 +279,7 @@ export interface SerializedFullTimeEnrollment {
   programme?: { code: string; name: string } | null
   milestones?: SerializedMilestone[]
   ojtPeriods?: SerializedOjtPeriod[]
-  academicYear?: string | null
+  academicYear?: { id: string; name: string } | null
 }
 
 export interface SerializedModularEnrollment {
@@ -461,6 +461,7 @@ export interface SerializedTransactionRelated {
   fullTimeEnrollments: Array<{
     id: string
     status: string
+    academicYear?: { id: string; name: string } | null
   }>
   modularEnrollments: Array<{
     id: string

@@ -28,7 +28,7 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: { param
 })
 
 export const POST = withErrorHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
-  const session = await requireStaff()
+  const _session = await requireStaff()
 
   const body = await req.json()
   const count = Math.min(Math.max(body.count || 10, 1), 100)
@@ -51,7 +51,7 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: { para
   return apiCreated({ generated: codes.count })
 })
 
-function generateAccessCode(): string {
+function _generateAccessCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   const segments = [8, 8, 8, 8]
   return segments.map(seg => {

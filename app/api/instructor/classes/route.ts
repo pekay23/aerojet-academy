@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireAuth } from '@/lib/auth/helpers'
-import { apiSuccess, apiForbidden, apiPaginated, withErrorHandler } from '@/lib/api/response'
+import { apiForbidden, apiPaginated, withErrorHandler } from '@/lib/api/response'
 import { parsePagination } from '@/lib/api/response'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { UserRole } from '@prisma/client'

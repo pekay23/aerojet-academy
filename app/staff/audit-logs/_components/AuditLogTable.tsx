@@ -15,7 +15,7 @@ import {
   Fingerprint,
   ExternalLink,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 type AuditLog = {
@@ -181,12 +181,13 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
 
   const sortableLogs = useMemo(
     () => logs.map((log) => ({ ...log, _userName: getUserNameValue(log) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [logs]
   )
   const { items: sortedLogs, requestSort, sortConfig } = useSort(sortableLogs)
   const paged = sortedLogs
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -201,19 +202,18 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, perPage])
 
   // Effect to handle page changes
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     // Skip first fetch if it's the initial page and we have initial logs
     const isInitial = page === 1 && perPage === 25
     if (!isInitial) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-      fetchLogs()
+        fetchLogs()
     }
-  }, [page, perPage])
+  }, [page, perPage, fetchLogs])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   function actionStyle(act: string) {
     if (

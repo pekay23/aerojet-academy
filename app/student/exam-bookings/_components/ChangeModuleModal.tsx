@@ -35,7 +35,7 @@ export default function ChangeModuleModal({ bookingId, currentModuleCode, hasFre
           toast.success(`Module successfully changed to ${newModuleCode}.`)
           setOpen(false)
         }
-      } catch (err) {
+      } catch (_err) {
         toast.error('Something went wrong. Please try again.')
       }
     })

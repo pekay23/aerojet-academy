@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Logo from '@/components/shared/Logo'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Search as SearchIcon, ArrowRight } from 'lucide-react'
+import { Menu, X, Search as _SearchIcon, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Accordion,
@@ -185,7 +185,7 @@ export default function PublicNav() {
   const headerClasses = `fixed left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled || mobileOpen || forceSolid ? 'bg-white/95 backdrop-blur-xl shadow-sm border-slate-100 dark:bg-slate-950/95 dark:border-slate-800' : 'bg-transparent border-transparent'}`
   const linkColorClasses =
     scrolled || mobileOpen || forceSolid ? 'text-slate-700 dark:text-slate-200' : 'text-white'
-  const activeLinkColorClasses =
+  const _activeLinkColorClasses =
     scrolled || mobileOpen || forceSolid ? 'text-public-secondary' : 'text-white'
 
   return (

@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { Mail, Send, Inbox, Sparkles } from 'lucide-react'
+import { Mail, Sparkles } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'

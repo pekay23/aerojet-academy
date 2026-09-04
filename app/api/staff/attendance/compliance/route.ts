@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAttendanceThreshold } from '@/lib/attendance'
 

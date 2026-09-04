@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
-import Link from 'next/link'
+
 import { notFound } from 'next/navigation'
-import { CheckCircle, XCircle, Download, Calendar, Shield } from 'lucide-react'
+import { CheckCircle, XCircle, Calendar, Shield } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Verify Certificate | Aerojet Academy' }
 

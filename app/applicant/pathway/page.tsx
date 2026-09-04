@@ -43,7 +43,7 @@ export default async function PathwayPage() {
       }),
       prismaUnfiltered.fullTimeEnrollment.findFirst({
         where: { studentId: userId },
-        include: { programme: true, milestones: { orderBy: { yearNumber: 'asc' } } },
+        include: { programme: true, academicYear: true, milestones: { orderBy: { yearNumber: 'asc' } } },
       }),
       prisma.systemSetting.findMany({ where: { key: 'course_currency' } }),
       prisma.wallet.findUnique({ where: { userId } }),
@@ -128,8 +128,8 @@ export default async function PathwayPage() {
                   Seat Confirmed
                 </h2>
                 <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
-                  Your place in <strong>{enrollment.programme.name}</strong> is secured. Year{' '}
-                  {enrollment.currentYearNumber} — {enrollment.academicYear || '2026/2027'}
+                   Your place in <strong>{enrollment.programme.name}</strong> is secured. Year{' '}
+                   {enrollment.currentYearNumber} — {enrollment.academicYear?.name || '2026/2027'}
                 </p>
               </div>
             </div>

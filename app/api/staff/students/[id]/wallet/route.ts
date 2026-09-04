@@ -258,7 +258,7 @@ export const POST = withErrorHandler(
       set_balance: 'Balance Update',
     }
     const actionLabel = actionLabels[action] || 'Update'
-    const adjustmentAmount = amount || targetBalance || 0
+    const _adjustmentAmount = amount || targetBalance || 0
 
     await prismaUnfiltered.notification.create({
       data: {

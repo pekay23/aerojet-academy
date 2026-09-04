@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Users, Calendar, MapPin, CreditCard, Loader2 } from 'lucide-react'
+import { ArrowLeft, Users, Calendar, MapPin, CreditCard } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { formatDate } from '@/lib/utils/date'

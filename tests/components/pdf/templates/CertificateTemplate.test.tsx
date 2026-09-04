@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { CertificateTemplate } from '@/components/pdf/templates/CertificateTemplate'
 
@@ -7,6 +7,7 @@ vi.mock('@react-pdf/renderer', () => ({
   Page: ({ children }: any) => <div>{children}</div>,
   View: ({ children }: any) => <div>{children}</div>,
   Text: ({ children }: any) => <span>{children}</span>,
+  // eslint-disable-next-line jsx-a11y/alt-text
   Image: (props: any) => <img {...props} />,
   StyleSheet: { create: () => ({}) },
 }))

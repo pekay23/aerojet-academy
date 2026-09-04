@@ -9,7 +9,7 @@ import {
   Calendar,
   Loader2,
   Check,
-  ChevronsUpDown,
+  _ChevronsUpDown,
 } from 'lucide-react'
 
 type AcademicYear = {
@@ -126,7 +126,7 @@ export default function BatchEnrollForm({
       }
 
       setResult({ created: data.created, skipped: data.skipped })
-    } catch (err) {
+    } catch (_err) {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)

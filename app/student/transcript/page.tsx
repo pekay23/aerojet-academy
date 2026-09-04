@@ -80,9 +80,9 @@ export default async function TranscriptPage() {
     ? `${profile.user.profile.firstName} ${profile.user.profile.lastName}`
     : (profile?.user.email ?? 'Student')
 
-  const moduleName = (r: (typeof results)[number]) =>
+  const _moduleName = (r: (typeof results)[number]) =>
     r.exam?.examComponent?.course?.name ?? r.moduleCode ?? '—'
-  const moduleCode = (r: (typeof results)[number]) =>
+  const _moduleCode = (r: (typeof results)[number]) =>
     r.exam?.examComponent?.course?.code ?? r.moduleCode ?? '—'
 
   return (

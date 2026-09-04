@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AlertTriangle, ShieldAlert, Eye, Filter } from 'lucide-react'
+import { AlertTriangle, ShieldAlert, Filter } from 'lucide-react'
 
 interface Violation {
   id: string

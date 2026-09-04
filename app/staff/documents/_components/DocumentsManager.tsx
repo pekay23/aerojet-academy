@@ -31,7 +31,7 @@ import {
 } from '@/lib/documents/actions'
 
 const DOCUMENT_TYPES = ['ID', 'MEDICAL', 'QUALIFICATION', 'CERTIFICATE', 'CONTRACT', 'OTHER']
-const STORAGE_PROVIDERS = ['UPLOADTHING', 'SUPABASE'] as const
+const _STORAGE_PROVIDERS = ['UPLOADTHING', 'SUPABASE'] as const
 
 interface Doc {
   id: string

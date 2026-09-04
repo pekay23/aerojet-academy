@@ -109,7 +109,7 @@ export default function TransactionHistory({ transactions, payments }: Transacti
       setShowCancelModal(null)
       setCancelReason('')
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Network error. Please try again.')
     } finally {
       setCancelling(false)

@@ -45,19 +45,15 @@ const DEFAULT_COUNTS: Counts = {
   examinerAll: 0,
 }
 
-interface PeopleTabsProps {
-  initialTab?: string
-}
-
 export default function PeopleTabs({
   initialTab,
-  initialApplicants,
-  initialTotal,
+  _initialApplicants,
+  _initialTotal,
   initialApplicantCounts,
 }: {
   initialTab?: string
-  initialApplicants?: ApplicantSummary[]
-  initialTotal?: number
+  _initialApplicants?: ApplicantSummary[]
+  _initialTotal?: number
   initialApplicantCounts?: ApplicantCounts
 }) {
   const router = useRouter()
@@ -83,12 +79,6 @@ export default function PeopleTabs({
           ? counts.examinerAll
           : undefined,
   }))
-
-  const applicantCounts = {
-    all: counts.applicantAll,
-    pending_payment: counts.applicantPendingPayment,
-    pending_approval: counts.applicantPendingApproval,
-  }
 
   const studentCounts = {
     all: counts.studentAll,

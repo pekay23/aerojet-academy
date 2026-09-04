@@ -134,12 +134,12 @@ export default function EmailPreviewsPage() {
 
         setAllTemplates(mergedTemplates)
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to load email templates')
     }
   }
 
-  const fetchTemplateContent = async () => {
+  const fetchTemplateContent = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch(`/api/staff/email-templates?name=${activeTemplate}`)
@@ -155,12 +155,12 @@ export default function EmailPreviewsPage() {
           setEditData({ subject: '', body: '' })
         }
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to load template')
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeTemplate])
 
   // Fetch template data when editing starts
   useEffect(() => {
@@ -168,7 +168,7 @@ export default function EmailPreviewsPage() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchTemplateContent()
     }
-  }, [isEditing, activeTemplate])
+  }, [isEditing, activeTemplate, fetchTemplateContent])
 
   // Fetch all templates on mount
   useEffect(() => {
@@ -203,7 +203,7 @@ export default function EmailPreviewsPage() {
       } else {
         toast.error('Failed to save template')
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Error saving template')
     } finally {
       setSaving(false)
@@ -222,7 +222,7 @@ export default function EmailPreviewsPage() {
       setIsEditing(false)
       const iframe = document.querySelector('iframe')
       if (iframe) iframe.src = iframe.src
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to reset')
     }
   }
@@ -249,7 +249,7 @@ export default function EmailPreviewsPage() {
       } else {
         toast.error('Failed to send test email', { id: toastId })
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Error sending test email', { id: toastId })
     } finally {
       setSendingTest(false)

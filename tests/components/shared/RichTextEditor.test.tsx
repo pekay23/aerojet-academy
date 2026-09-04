@@ -4,7 +4,7 @@ import RichTextEditor from '@/components/shared/RichTextEditor'
 
 vi.mock('next/dynamic', () => ({
   __esModule: true,
-  default: (loader: any) => {
+  default: (_loader: any) => {
     const Component = (props: any) => <div data-testid="rich-text-editor">{props.content}</div>
     Component.preload = vi.fn()
     return Component

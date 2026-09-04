@@ -1,7 +1,7 @@
 import 'server-only'
 import { prismaUnfiltered as defaultPrisma } from '@/lib/prisma/client'
-import { subDays, subMonths, startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns'
-import { AnalyticsEventName, AnalyticsEntity } from './events'
+import { subDays, subMonths, startOfDay, startOfMonth } from 'date-fns'
+import { AnalyticsEventName } from './events'
 
 // Allow injecting a prisma client for testing
 let prisma = defaultPrisma
@@ -137,7 +137,7 @@ function formatEventLabel(event: string): string {
 
 export async function getCohortRetention(cohortDate?: Date): Promise<RetentionCohort[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cohortRetention: any[] = []
+  const _cohortRetention: any[] = []
 
   // Get users who registered in the specified month
   const targetMonth = cohortDate

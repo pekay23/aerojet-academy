@@ -1,6 +1,5 @@
 'use client'
 
-import { School, ClipboardCheck, Plane } from 'lucide-react'
 import SectionReveal from './SectionReveal'
 
 const pathways = [

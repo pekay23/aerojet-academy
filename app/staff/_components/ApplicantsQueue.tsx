@@ -20,6 +20,7 @@ import { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers } from '../acti
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import ApplicantDetailDrawer from './ApplicantDetailDrawer'
+import Image from 'next/image'
 import { SortableTh } from '@/components/ui/sortable-th'
 import type { ApplicantCounts } from '@/lib/types/staff'
 
@@ -74,8 +75,8 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
 
   // Sync counts when parent provides updated values
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialCounts.all > 0) setCounts(initialCounts)
   }, [initialCounts.all, initialCounts.pending_payment, initialCounts.pending_approval])
@@ -113,9 +114,9 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
       setLoading(false)
     }
   }, [tab, search, page, perPage, searchParams])
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
   // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
@@ -442,10 +443,11 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                           <div className="flex items-center gap-3">
                             <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
                               {applicant.profile?.profilePhotoUrl ? (
-                                <img
+                                <Image
                                   src={applicant.profile.profilePhotoUrl}
                                   alt={fullName}
-                                  className="h-full w-full object-cover"
+                                  fill
+                                  className="object-cover"
                                 />
                               ) : (
                                 initials

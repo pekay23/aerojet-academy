@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { CalendarDays, Users, MapPin, Clock, BookOpen, Info } from 'lucide-react'
+import { CalendarDays, Users, MapPin, BookOpen, Info } from 'lucide-react'
 import { Suspense } from 'react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -94,7 +94,7 @@ async function PoolList() {
   const currency = await getSystemSetting('course_currency', 'EUR')
 
   const { getCurrencySymbol } = await import('@/lib/currency')
-  const symbol = getCurrencySymbol(currency)
+  const _symbol = getCurrencySymbol(currency)
 
   const pools = await prismaUnfiltered.examPool.findMany({
     where: {

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { createStudentPoolAction } from '@/app/student/actions'
 import { toast } from 'sonner'
-import { Loader2, Plus, ArrowRight, BookOpen, Wallet, Calendar, Clock, X, Info } from 'lucide-react'
+import { Loader2, Plus, ArrowRight, Wallet, Calendar, X, Info } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
 import { EASA_MODULES } from '@/lib/constants/easa-modules'
 
@@ -58,7 +58,7 @@ export default function CreatePoolModal({
           setModuleCode('')
           setExamDate('')
         }
-      } catch (err) {
+      } catch (_err) {
         toast.error('Something went wrong. Please try again.')
       }
     })

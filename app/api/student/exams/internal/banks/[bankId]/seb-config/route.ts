@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { withErrorHandler, apiError, apiSuccess } from '@/lib/api/response'
+import { withErrorHandler, apiError } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { buildSebConfig, generateSebConfig, BankSebConfig } from '@/lib/internal-exam/seb-config'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'

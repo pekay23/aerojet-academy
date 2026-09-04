@@ -29,14 +29,14 @@ import {
   addMonths,
   startOfMonth,
   endOfMonth,
-  eachDayOfInterval,
+  _eachDayOfInterval,
   addHours,
   subWeeks,
-  getHours,
-  getMinutes,
-  getDay,
+  _getHours,
+  _getMinutes,
+  _getDay,
   startOfWeek,
-  endOfWeek,
+  _endOfWeek,
 } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
@@ -67,8 +67,8 @@ interface CalendarGridProps {
   userId: string
 }
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const EVENT_COLORS = [
+const _WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const _EVENT_COLORS = [
   { value: '#3b82f6', label: 'Blue' },
   { value: '#10b981', label: 'Green' },
   { value: '#f59e0b', label: 'Amber' },
@@ -78,7 +78,7 @@ const EVENT_COLORS = [
   { value: '#06b6d4', label: 'Cyan' },
 ]
 
-const SOURCE_ICONS: Record<string, typeof BookOpen> = {
+const _SOURCE_ICONS: Record<string, typeof BookOpen> = {
   class: BookOpen,
   exam: GraduationCap,
   semester: CalendarDays,
@@ -229,7 +229,7 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
   }
 
   // Get events for selected date
-  const selectedEvents = selectedDate ? eventsByDate[selectedDate] || [] : []
+  const _selectedEvents = selectedDate ? eventsByDate[selectedDate] || [] : []
 
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1))
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1))

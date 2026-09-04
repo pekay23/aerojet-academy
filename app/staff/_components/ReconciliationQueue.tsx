@@ -2,18 +2,18 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
-  CheckCircle2,
+  _CheckCircle2,
   RefreshCw,
   Search,
   FileCheck,
   Calendar,
-  User,
+  _User,
   ExternalLink,
-  ChevronDown,
+  _ChevronDown,
   Loader2,
   AlertCircle,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { UploadDropzone } from '@/lib/uploads/uploadthing'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, FileImage, RefreshCw } from 'lucide-react'
+import { CheckCircle2, RefreshCw } from 'lucide-react'
 
 interface Props {
   courseId: string

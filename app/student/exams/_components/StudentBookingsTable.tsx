@@ -1,8 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Calendar, Clock, CreditCard, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
+import { Calendar, Clock, CreditCard } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'

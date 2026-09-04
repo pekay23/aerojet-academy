@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
@@ -12,6 +13,7 @@ interface JoinWaitlistFormProps {
 
 export default function JoinWaitlistForm({ poolId, poolName, disabled }: JoinWaitlistFormProps) {
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async () => {
     setLoading(true)
@@ -30,7 +32,7 @@ export default function JoinWaitlistForm({ poolId, poolName, disabled }: JoinWai
       }
 
       toast.success(`Added to waitlist for ${poolName}. You will be auto-promoted if a seat opens.`)
-      window.location.href = '/applicant/exam-bookings'
+      router.push('/applicant/exam-bookings')
     } catch {
       toast.error('Network error while joining waitlist')
     } finally {

@@ -1,7 +1,7 @@
 # Portal Audit & Implementation Tracker
 
-**Last Updated**: 2026-08-28
-**Status**: All 5 portals audited. All findings implemented. Verification complete — source passes type-check; test suite has pre-existing failures unrelated to audit work.
+**Last Updated**: 2026-09-04
+**Status**: All 5 portals audited. All 213 portal-specific findings implemented. Cross-portal schema migration complete (2026-09-04). ESLint `no-explicit-any` rule upgrade in progress by parallel agent.
 
 ---
 
@@ -357,6 +357,18 @@ A second audit pass was conducted across all 5 portals to identify cross-portal 
 | Replace remaining `any` casts | ⏸️ Minor casts remain in JSON field access patterns |
 | Add `error.tsx`/`not-found.tsx` to all segments | ⏸️ Parent boundaries provide coverage; per-segment boundaries are enhancement |
 | Dark mode contrast micro-fixes | ✅ Fixed 3 identified contrast issues |
+
+### Cross-Portal Schema Migration Complete (2026-09-04)
+
+| # | Migration | Status | Evidence |
+|---|-----------|--------|----------|
+| 1 | `FullTimeEnrollment.academicYearId` FK | ✅ Complete | `prisma/schema.prisma`; Neon + Supabase `db push` succeeded |
+| 2 | `OJTLogbook.licenceCategoryId` FK | ✅ Complete | `prisma/schema.prisma`; legacy `licenceCategory String` retained |
+| 3 | `ExamResult.sittingId` FK | ✅ Complete | `prisma/schema.prisma`; 32 existing results have no sitting assignments |
+| 4 | `Certificate.session` relation | ✅ Complete | `prisma/schema.prisma`; uses existing `sessionId` column |
+| 5 | `InternalExamRegistration.licenceCategoryId` FK | ✅ Complete | Optional FK for future use |
+| 6 | Reverse relations + indexes | ✅ Complete | `AcademicYear.fullTimeEnrollments`, `LicenseCategory.ojtLogbooks`/`registrations`, `ExamSitting.examResults`, `InternalExamSession.certificates` |
+| 7 | Application code updated | ✅ Complete | `app/api/staff/ojt/route.ts` resolves `LicenseCategory` by code; `app/api/staff/students/[id]/route.ts` includes `academicYear`; student/applicant pages updated |
 
 ### Audit Documentation Issues
 

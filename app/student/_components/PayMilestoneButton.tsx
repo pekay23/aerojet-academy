@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Wallet, Loader2, AlertCircle } from 'lucide-react'
+import { Wallet, Loader2 } from 'lucide-react'
 
 interface Props {
   milestoneId: string
@@ -36,7 +36,7 @@ export default function PayMilestoneButton({ milestoneId, amount, currency, labe
 
       toast.success('Payment successful!')
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error('A network error occurred.')
     } finally {
       setLoading(false)

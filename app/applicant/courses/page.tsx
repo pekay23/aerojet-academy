@@ -23,7 +23,7 @@ const categoryColor: Record<string, string> = {
   REVISION: 'bg-slate-50 text-slate-700 border-slate-200',
 }
 
-function slugify(text: string) {
+function _slugify(text: string) {
   return (
     text
       ?.toString()

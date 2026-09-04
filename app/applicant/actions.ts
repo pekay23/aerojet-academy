@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { getAuthSession, requireApplicant } from '@/lib/auth/helpers'
+import { requireApplicant } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 
 export async function updateApplicantProfile(formData: FormData) {

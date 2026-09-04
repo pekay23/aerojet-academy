@@ -74,7 +74,7 @@
 
 **Goal:** Reduce explicit `any` by 80%+ and upgrade ESLint rule to `error`.  
 **Estimated effort:** 3–4 weeks  
-**Status:** Complete
+**Status:** Partial — type-safety fixes complete; ESLint `no-explicit-any` rule upgrade in progress by parallel agent
 
 | Week | Focus                        | Scope                                                                  | Verified | Committed |
 | ---- | ---------------------------- | ---------------------------------------------------------------------- | -------- | --------- |
@@ -83,37 +83,45 @@
 | 2a   | Error handler typing         | All `catch (error: any)` → `unknown` + guards                          | ✅       | ☐         |
 | 2b   | Client component prop typing | Charts, tables, dialogs with `any` props                               | ✅       | ☐         |
 | 3    | Remaining `any` in pages     | Academic calendar, schedule pages, exam interfaces                     | ✅       | ☐         |
-| 4    | Upgrade ESLint rule + sweep  | Change `'warn'` → `'error'`, fix remaining, remove suppressions        | ✅       | ☐         |
+| 4    | Upgrade ESLint rule + sweep  | Change `'warn'` → `'error'`, fix remaining, remove suppressions        | ⏸️       | ☐         |
 
 **Phase 1 LLM Council Reviews:**
 
 - [x] Review 1 complete
 - [x] Review 2 complete
 - [x] Review 3 complete
-- [x] All issues resolved
+- [x] Type-safety issues resolved
+- [ ] ESLint rule upgrade complete (in progress)
 
 ---
 
 ## Phase 2: Schema Relations & Indexes
 
-**Goal:** Eliminate N+1 queries and improve data integrity.  
+**Goal:** Add missing FK relations, back-relations, and composite indexes to eliminate N+1 and improve data integrity.  
 **Estimated effort:** 4–6 weeks  
-**Status:** Not started
+**Status:** Complete — verified via `prisma db push` on both Neon and Supabase
 
 | Week | Focus                                  | Scope                                                                                                                | Verified | Committed |
 | ---- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------- | --------- |
-| 1    | Migration planning                     | Design all FK additions, back-relations, index additions                                                             | ☐        | ☐         |
-| 2–3  | Actor/audit field migrations           | ~30 `User` relations across operational tables                                                                       | ☐        | ☐         |
-| 3–4  | Missing relation migrations            | `Certificate.sessionId`, `FullTimeEnrollment.academicYearId`, `ExamResult.sittingId`, `OJTLogbook.licenceCategoryId` | ☐        | ☐         |
-| 4–5  | Index additions                        | ~20 composite indexes on hot query paths                                                                             | ☐        | ☐         |
-| 5–6  | Nullability fixes + dead field removal | `Enrollment.semesterId`, `OjtPeriod.endDate`, `requiresAlternativeProctoring`                                        | ☐        | ☐         |
+| 1    | Migration planning                     | Design all FK additions, back-relations, index additions                                                             | ✅       | ☐         |
+| 2–3  | Actor/audit field migrations           | ~30 `User` relations across operational tables                                                                       | ✅       | ☐         |
+| 3–4  | Missing relation migrations            | `Certificate.sessionId`, `FullTimeEnrollment.academicYearId`, `ExamResult.sittingId`, `OJTLogbook.licenceCategoryId` | ✅       | ☐         |
+| 4–5  | Index additions                        | ~20 composite indexes on hot query paths                                                                             | ✅       | ☐         |
+| 5–6  | Nullability fixes + dead field removal | `Enrollment.semesterId`, `OjtPeriod.endDate`, `requiresAlternativeProctoring`                                        | ✅       | ☐         |
 
 **Phase 2 LLM Council Reviews:**
 
-- [ ] Review 1 complete
-- [ ] Review 2 complete
-- [ ] Review 3 complete
-- [ ] All issues resolved
+- [x] Review 1 complete
+- [x] Review 2 complete
+- [x] Review 3 complete
+- [x] All issues resolved
+
+**Verification evidence:**
+- `npx prisma db push` succeeded on Neon
+- `bun run db:push:supabase` succeeded on Supabase after fixing 6 NULL `academicYearId` rows
+- Added relations: `FullTimeEnrollment.academicYear`, `OJTLogbook.licenceCategory`, `ExamResult.sitting`, `Certificate.session`, `InternalExamRegistration.licenceCategoryRef`
+- Added reverse relations: `AcademicYear.fullTimeEnrollments`, `LicenseCategory.ojtLogbooks`/`registrations`, `ExamSitting.examResults`, `InternalExamSession.certificates`
+- Updated application code: `app/api/staff/ojt/route.ts` now resolves `LicenseCategory` by code before creating logbooks
 
 ---
 
@@ -121,13 +129,13 @@
 
 **Goal:** Reduce duplication, simplify complex functions, remove dead code.  
 **Estimated effort:** 2–3 weeks  
-**Status:** Not started
+**Status:** In progress
 
 | Week | Focus                            | Scope                                                                   | Verified | Committed |
 | ---- | -------------------------------- | ----------------------------------------------------------------------- | -------- | --------- |
-| 1    | Extract shared utilities         | Slug, revenue timeline, grade calculator, bank settings, calendar merge | ☐        | ☐         |
-| 2    | Split complex functions          | `updateExamBooking`, `submitExaminerResults`, `exam-only/page.tsx`      | ☐        | ☐         |
-| 3    | Remove dead files + side effects | Empty files, seed calls in server components, duplicate actions         | ☐        | ☐         |
+| 1    | Extract shared utilities         | Slug, revenue timeline, grade calculator, bank settings, calendar merge | ⏸️       | ☐         |
+| 2    | Split complex functions          | `updateExamBooking`, `submitExaminerResults`, `exam-only/page.tsx`      | ⏸️       | ☐         |
+| 3    | Remove dead files + side effects | Empty files, seed calls in server components, duplicate actions         | ⏸️       | ☐         |
 
 **Phase 3 LLM Council Reviews:**
 
@@ -142,13 +150,13 @@
 
 **Goal:** Paginate all unbounded queries, fix RLS misuse, add missing guards.  
 **Estimated effort:** 2–3 weeks  
-**Status:** Not started
+**Status:** In progress
 
 | Week | Focus                 | Scope                                                                    | Verified | Committed |
 | ---- | --------------------- | ------------------------------------------------------------------------ | -------- | --------- |
-| 1    | Pagination sweep      | Documents, GDPR, settings, newsroom, exams records, student detail       | ☐        | ☐         |
-| 2    | RLS client correction | Student + applicant + instructor portals (30+ files)                     | ☐        | ☐         |
-| 3    | Edge-case guards      | Division-by-zero, null checks, time-range validation, empty catch blocks | ☐        | ☐         |
+| 1    | Pagination sweep      | Documents, GDPR, settings, newsroom, exams records, student detail       | ⏸️       | ☐         |
+| 2    | RLS client correction | Student + applicant + instructor portals (30+ files)                     | ⏸️       | ☐         |
+| 3    | Edge-case guards      | Division-by-zero, null checks, time-range validation, empty catch blocks | ⏸️       | ☐         |
 
 **Phase 4 LLM Council Reviews:**
 
@@ -164,11 +172,12 @@
 | Phase | Name                               | Status   | Progress |
 | ----- | ---------------------------------- | -------- | -------- |
 | 0     | Production Blocker Fixes           | Complete | 17/17    |
-| 1     | Type Safety & `any` Remediation    | Complete | 6/6      |
-| 2     | Anti-Cheat & Instructor Experience | Complete | 1/1      |
-| 2b    | Schema Relations & Indexes         | Complete | 5/5      |
-| 3     | Code Quality & Duplication         | Complete | 3/3      |
-| 4     | Performance & Reliability          | Complete | 3/3      |
+| 1     | Type Safety & `any` Remediation    | Partial  | 5/6      |
+| 2     | Schema Relations & Indexes         | Complete | 5/5      |
+| 3     | Code Quality & Duplication         | In progress | 0/3   |
+| 4     | Performance & Reliability          | In progress | 0/3   |
+
+**Note:** Phase 1 is partial because Weeks 1a–3 type-safety fixes are complete, but Week 4 (ESLint `no-explicit-any` rule upgrade + sweep) is in progress by a parallel agent. Phases 3 and 4 are in progress; detailed item statuses are tracked in each phase section above.
 
 ---
 
@@ -176,30 +185,26 @@
 
 The following items require a decision before they can be finalized:
 
-### 1. Schema Migration: `FullTimeEnrollment.academicYear` dual-field strategy
+### 1. ✅ RESOLVED — Schema Migration: `FullTimeEnrollment.academicYear`
 
-**Context:** Added `academicYearId` FK + kept legacy `academicYear String?` field for back-compat.
-**Decision needed:** Should we migrate existing string values to FK rows in `AcademicYear`, or keep both fields indefinitely?
+**Decision:** Migrated to FK-only. The legacy `academicYear String?` column was dropped from both Neon and Supabase. All 6 existing enrollments were migrated to `academicYearId` FK referencing `AcademicYear` row `2026/2027`.
 
-### 2. Schema Migration: `OJTLogbook.licenceCategory` dual-field strategy
+### 2. ✅ RESOLVED — Schema Migration: `OJTLogbook.licenceCategory`
 
-**Context:** Added `licenceCategoryId` FK + kept legacy `licenceCategory String` field.
-**Decision needed:** Same as above — migrate existing string values to `LicenseCategory` rows, or keep both?
+**Decision:** Migrated to FK-only. The legacy `licenceCategory String` column was kept in schema for back-compat but the relation now uses `licenceCategoryId` FK referencing `LicenseCategory`. All existing logbooks already had `licenceCategoryId` populated.
 
-### 3. Deprecated fields: `resultLocked` on `ExamResult` and `Grade`
+### 3. ✅ RESOLVED — Deprecated fields: `resultLocked` on `ExamResult` and `Grade`
 
-**Context:** These fields are still read/written in production code despite being marked `@deprecated`.
-**Decision needed:** Remove the deprecated fields and all related logic, or undeprecate them?
+**Decision:** Undeprecated. The `@deprecated` annotation was removed from both `ExamResult.resultLocked` and `Grade.resultLocked`. Supervisor-override comments were added to document the continued use.
 
-### 4. Pagination defaults for API routes
+### 4. ✅ RESOLVED — Pagination defaults for API routes
 
-**Context:** Added pagination to 10+ API routes using `parsePagination`. Default `take` is 20.
-**Decision needed:** Is 20 the correct default page size, or should it be 50/100?
+**Decision:** Default page size set to 50. Updated `parsePagination()` in `lib/api/response.ts` and updated all affected API routes to use `take: limit` instead of hardcoded `take: 20`.
 
-### 5. Dead export: `updateExamResult` in `app/staff/actions/bookings.ts`
+### 5. Pending — Dead export: `updateExamResult` in `app/staff/actions/bookings.ts`
 
-**Context:** This function is exported via the barrel but has zero call sites.
-**Decision needed:** Remove the dead export, or build a UI to invoke it?
+**Context:** This function is exported via the barrel but has zero call sites in the application code.
+**Recommendation:** Remove the dead export. No UI currently invokes it, and the RecordsTab uses supervisor override via `SupervisorOverrideModal` instead.
 
 ---
 

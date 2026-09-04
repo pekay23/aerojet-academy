@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Settings, Save, X } from 'lucide-react'
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Save, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { CustomFieldDefinition, CustomFieldType, CustomFieldTarget, ProgrammeChoice } from '@prisma/client'
+import { CustomFieldDefinition, CustomFieldType, CustomFieldTarget } from '@prisma/client'
 
 export default function CustomFieldsManager({ initialFields }: { initialFields: CustomFieldDefinition[] }) {
   const router = useRouter()
-  const [fields, setFields] = useState(initialFields)
+  const [_fields, _setFields] = useState(initialFields)
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<Partial<CustomFieldDefinition>>({})
@@ -41,7 +41,7 @@ export default function CustomFieldsManager({ initialFields }: { initialFields: 
         const error = await res.json()
         alert(error.error || 'Failed to save custom field')
       }
-    } catch (e) {
+    } catch (_e) {
       alert('An unexpected error occurred')
     }
   }
@@ -56,7 +56,7 @@ export default function CustomFieldsManager({ initialFields }: { initialFields: 
       } else {
         alert('Failed to delete custom field')
       }
-    } catch (e) {
+    } catch (_e) {
       alert('An unexpected error occurred')
     }
   }
@@ -192,7 +192,7 @@ export default function CustomFieldsManager({ initialFields }: { initialFields: 
                     try {
                       const parsed = JSON.parse(e.target.value)
                       setFormData({ ...formData, options: parsed })
-                    } catch (err) {
+                    } catch (_err) {
                       // Allow invalid state while typing, but don't save to state
                     }
                   }}

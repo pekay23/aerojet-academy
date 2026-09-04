@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trash2, UserCog, Mail, X, CheckCircle2, AlertTriangle, ShieldAlert, LucideIcon } from 'lucide-react'
-import { toast } from 'sonner'
+import { X, LucideIcon } from 'lucide-react'
+
 
 export interface BulkAction {
   label: string

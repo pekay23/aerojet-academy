@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, apiPaginated, withErrorHandler, RouteContext } from '@/lib/api/response'
+import { apiSuccess, apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 
 // Minimum Part 145 experience thresholds
-const MIN_EXPERIENCE = {
+const _MIN_EXPERIENCE = {
   B1_B2: 12, // months for B1/B2
   CAT_A: 6,  // months for Cat A
 }
@@ -64,10 +64,17 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContex
   if (existing) return apiError('Student already has an OJT logbook', 409)
 
   const logbook = await prismaUnfiltered.$transaction(async (tx) => {
+    const licenseCategory = await tx.licenseCategory.findUnique({
+      where: { code: parsed.data.licenceCategory },
+    })
+    if (!licenseCategory) {
+      return apiError('Invalid licence category', 400)
+    }
+
     const lb = await tx.oJTLogbook.create({
       data: {
         studentProfileId: parsed.data.studentProfileId,
-        licenceCategory: parsed.data.licenceCategory,
+        licenceCategoryId: licenseCategory.id,
         facilityName: parsed.data.facilityName,
         facilityApprovalNo: parsed.data.facilityApprovalNo || null,
         startDate: new Date(parsed.data.startDate),

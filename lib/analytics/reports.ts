@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
-import { subDays, startOfMonth, startOfYear } from 'date-fns'
+import { subDays } from 'date-fns'
 import { EnrollmentStatus } from '@prisma/client'
 
 /** Build a Prisma { gte, lt } range from optional year + month */

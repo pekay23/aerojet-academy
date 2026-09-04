@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma/client'
 import { requireAuth, verifyPassword, hashPassword } from '@/lib/auth/helpers'
 import { apiSuccess, apiForbidden, apiError, withErrorHandler } from '@/lib/api/response'
 import { changePasswordSchema, validateBody } from '@/lib/validation/schemas'
-import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { createAuditLog } from '@/lib/audit/logger'
 import { UserRole } from '@prisma/client'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {

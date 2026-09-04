@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, FileText, Calendar, Users, MoreVertical, Pencil, Trash2, Copy } from 'lucide-react'
+import { Plus, FileText, Calendar, Users, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface Exam {
@@ -25,7 +25,7 @@ export function ExamListClient() {
   const [statusFilter, setStatusFilter] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
 
-  const fetchExams = async () => {
+  const fetchExams = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -41,12 +41,12 @@ export function ExamListClient() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [statusFilter])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchExams()
-  }, [statusFilter])
+  }, [statusFilter, fetchExams])
 
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

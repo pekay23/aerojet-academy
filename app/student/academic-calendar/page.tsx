@@ -1,10 +1,10 @@
-import { Metadata } from 'next'
+
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getStudentStatus } from '@/lib/access-control'
-import { Calendar as CalendarIcon, Sparkles } from 'lucide-react'
+import { Calendar as _CalendarIcon } from 'lucide-react'
 import AcademicCalendar, { type UnifiedCalendarEvent } from '@/components/calendar/AcademicCalendar'
 import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '../actions'
 

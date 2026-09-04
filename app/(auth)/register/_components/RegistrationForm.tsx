@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, Info } from 'lucide-react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registerSchema } from '@/lib/validation/schemas'
 import type { z } from 'zod'
@@ -77,6 +78,7 @@ export default function RegistrationForm({
   fee?: string
 }) {
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registerSchema),
@@ -122,7 +124,7 @@ export default function RegistrationForm({
 
       if (res.ok) {
         toast.success('Application submitted successfully!')
-        window.location.href = '/register?success=true'
+        router.push('/register?success=true')
       } else {
         toast.error(responseData.error || 'Registration failed')
       }
@@ -267,6 +269,7 @@ export default function RegistrationForm({
                         return (
                           <SelectItem key={`nat-${n.name}`} value={n.name}>
                             <div className="flex items-center gap-2">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={`https://flagcdn.com/w20/${iso}.png`}
                                 srcSet={`https://flagcdn.com/w40/${iso}.png 2x`}
@@ -321,7 +324,8 @@ export default function RegistrationForm({
                           return (
                             <SelectItem key={`phone-${n.name}`} value={n.name}>
                               <div className="flex items-center gap-2">
-                                <img
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
                                   src={`https://flagcdn.com/w20/${iso}.png`}
                                   srcSet={`https://flagcdn.com/w40/${iso}.png 2x`}
                                   width="20"

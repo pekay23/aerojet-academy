@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Send, Loader2, Plus } from 'lucide-react' // Changed MailPlus to Plus as MailPlus might not be in older lucide versions
+import { Send, Loader2 } from 'lucide-react' // Changed MailPlus to Plus as MailPlus might not be in older lucide versions
 import { toast } from 'sonner'
 import { sendMessage } from '../../actions'
 

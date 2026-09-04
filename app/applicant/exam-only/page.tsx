@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import { Loader2, Package, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSession } from 'next-auth/react'
-import { CurrencyToggle, useCurrencyRates } from '@/components/shared/CurrencyDisplay'
+import { useCurrencyRates } from '@/components/shared/CurrencyDisplay'
 const PackagesTab = dynamic(() => import('./_components/PackagesTab'), {
   ssr: false,
   loading: () => (
@@ -72,17 +72,17 @@ export default function ExamOnlyPathwayPage() {
   const [wallet, setWallet] = useState<WalletInfo | null>(null)
   const [examComponents, setExamComponents] = useState<ExamComponent[]>([])
   const [pools, setPools] = useState<ExamPool[]>([])
-  const [memberships, setMemberships] = useState<PoolMembership[]>([])
-  const [bookings, setBookings] = useState<ExamBooking[]>([])
-  const [topUpAmount, setTopUpAmount] = useState<number>(DEFAULT_PRICES.pool)
-  const [processingPayment, setProcessingPayment] = useState(false)
+  const [_memberships, setMemberships] = useState<PoolMembership[]>([])
+  const [_bookings, setBookings] = useState<ExamBooking[]>([])
+  const [topUpAmount, _setTopUpAmount] = useState<number>(DEFAULT_PRICES.pool)
+  const [_processingPayment, setProcessingPayment] = useState(false)
   const [joiningPool, setJoiningPool] = useState<string | null>(null)
   const [joiningWaitlist, setJoiningWaitlist] = useState<string | null>(null)
   const [bookingExam, setBookingExam] = useState<string | null>(null)
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null)
   const [selectedModules, setSelectedModules] = useState<Record<string, string>>({})
-  const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([])
-  const [walletPayments, setWalletPayments] = useState<WalletPayment[]>([])
+  const [_walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([])
+  const [_walletPayments, setWalletPayments] = useState<WalletPayment[]>([])
   const [bundles, setBundles] = useState<ExamBundle[]>([])
   const [purchasingBundle, setPurchasingBundle] = useState<string | null>(null)
   const [selectedBundleType, setSelectedBundleType] = useState<'TWO_SEAT' | 'FOUR_SEAT' | null>(
@@ -91,8 +91,8 @@ export default function ExamOnlyPathwayPage() {
   const [bundleSelectedModules, setBundleSelectedModules] = useState<string[]>([])
   const [confirmingBooking, setConfirmingBooking] = useState<ConfirmationBooking | null>(null)
   const [prices, setPrices] = useState<ExamOnlyPrices>(DEFAULT_PRICES)
-  const [displayCurrency, setDisplayCurrency] = useState('EUR')
-  const { convert, loading: ratesLoading } = useCurrencyRates()
+  const [displayCurrency, _setDisplayCurrency] = useState('EUR')
+  const { convert, loading: _ratesLoading } = useCurrencyRates()
 
   const fmt = (eurAmount: number) => {
     if (displayCurrency === 'EUR') return `â‚¬${eurAmount.toFixed(2)}`
@@ -149,7 +149,7 @@ export default function ExamOnlyPathwayPage() {
           fourSeat: pricingRes?.bundles?.fourSeat?.price ?? DEFAULT_PRICES.fourSeat,
         })
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to load exam data. Please refresh the page.')
     } finally {
       setLoading(false)
@@ -157,12 +157,11 @@ export default function ExamOnlyPathwayPage() {
   }, [])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData()
   }, [fetchData])
 
-  const handleTopUp = async () => {
+  const _handleTopUp = async () => {
     if (!wallet || wallet.availableBalance === 0) {
       const lowestPrice = getLowestExamPrice()
       if (topUpAmount < lowestPrice) {
@@ -188,7 +187,7 @@ export default function ExamOnlyPathwayPage() {
 
       toast.success('Wallet top-up initiated. Upload your payment proof to complete.')
       router.push('/applicant/upload-proof?code=' + data.registrationCode)
-    } catch (error) {
+    } catch (_error) {
       toast.error('Network error during top-up')
     } finally {
       setProcessingPayment(false)
@@ -249,14 +248,14 @@ export default function ExamOnlyPathwayPage() {
 
         setTimeout(() => {
           toast.success('Redirecting to Student Portal...')
-          window.location.href = '/student'
+          router.push('/student')
         }, 1500)
         return
       }
 
       toast.success('Successfully joined booking! Funds have been reserved.')
       fetchData()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Network error while joining booking')
     } finally {
       setJoiningPool(null)
@@ -281,7 +280,7 @@ export default function ExamOnlyPathwayPage() {
 
       toast.success('Added to waitlist! You will be auto-promoted if a seat opens.')
       fetchData()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Network error while joining waitlist')
     } finally {
       setJoiningWaitlist(null)
@@ -354,7 +353,7 @@ export default function ExamOnlyPathwayPage() {
 
         setTimeout(() => {
           toast.success('Redirecting to Student Portal...')
-          window.location.href = '/student'
+          router.push('/student')
         }, 1500)
         return
       }
@@ -365,7 +364,7 @@ export default function ExamOnlyPathwayPage() {
         toast.success(`Individual exam booked successfully! (â‚¬${prices.individual})`)
       }
       fetchData()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Network error while booking exam')
     } finally {
       setBookingExam(null)
@@ -420,14 +419,14 @@ export default function ExamOnlyPathwayPage() {
 
         setTimeout(() => {
           toast.success('Redirecting to Student Portal...')
-          window.location.href = '/student'
+          router.push('/student')
         }, 1500)
         return
       }
 
       toast.success(`${bundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'} purchased successfully!`)
       fetchData()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Network error while purchasing package')
     } finally {
       setPurchasingBundle(null)

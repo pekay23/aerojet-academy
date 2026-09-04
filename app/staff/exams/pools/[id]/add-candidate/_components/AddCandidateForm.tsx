@@ -3,10 +3,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import Link from 'next/link'
+
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Loader2, Search, User, Check, X } from 'lucide-react'
+import { Loader2, Search, User, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -15,7 +15,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
+  _FormDescription,
 } from '@/components/ui/form'
 import {
   Select,
@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { ExamPool } from '@prisma/client'
+
 
 interface AddCandidateFormProps {
   pool: any // Using any to key into complex include if needed. Wait, passing standard type + explicit props is better.
@@ -66,7 +66,7 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
           if (res.ok) {
             setSearchResults(data)
           }
-        } catch (error) {
+        } catch (_error) {
           toast.error('Search failed')
         }
       } else {

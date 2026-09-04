@@ -7,6 +7,8 @@ vi.mock('@react-pdf/renderer', () => ({
   Page: ({ children }: any) => <div>{children}</div>,
   View: ({ children }: any) => <div>{children}</div>,
   Text: ({ children }: any) => <span>{children}</span>,
+  // eslint-disable-next-line jsx-a11y/alt-text
+  // eslint-disable-next-line @next/next/no-img-element
   Image: (props: any) => <img {...props} />,
   StyleSheet: { create: () => ({}) },
 }))

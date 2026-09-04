@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { Plus, Edit, Trash2, Globe, FileText, CheckCircle2, Clock, Sparkles } from 'lucide-react'
+import { Plus, Edit, Globe, FileText, CheckCircle2, Clock, Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
 import { SortableTh } from '@/components/ui/sortable-th'
 import { buildOrderBy } from '@/lib/utils/build-order-by'

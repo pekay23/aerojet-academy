@@ -1,7 +1,7 @@
 'use server'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { chargeWallet } from '@/lib/wallet/operations'
 import { revalidatePath } from 'next/cache'
 

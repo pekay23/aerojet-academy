@@ -2,12 +2,7 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import {
   ClipboardCheck,
-  Calendar,
   AlertCircle,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  MapPin,
   FileBarChart2,
   History as HistoryIcon,
   RefreshCcw,
@@ -32,9 +27,7 @@ import {
 } from '@/lib/exams/fulfillment'
 
 // The newly extracted tabs
-import AvailablePoolsTab from './_components/AvailablePoolsTab'
 import MyBookingsTab from './_components/MyBookingsTab'
-import BookingActionTab from './_components/BookingActionTab'
 import ResitBookingTab from './_components/ResitBookingTab'
 import BookExamTab from './_components/BookExamTab'
 import { UnifiedExamRecord } from '@/lib/student/types'

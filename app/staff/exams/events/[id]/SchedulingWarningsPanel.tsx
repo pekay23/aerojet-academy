@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useState } from 'react'
 import { AlertTriangle, Users, UserX, Box, ShieldAlert } from 'lucide-react'
 
 type ConflictType = 'CANDIDATE_OVERLAP' | 'EXAMINER_OVERLAP' | 'SPARE_CAPACITY' | 'UNSCHEDULED_GUARANTEED'

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { User, Mail, Phone, BookOpen, ChevronRight } from 'lucide-react'
+import { Mail, Phone, BookOpen, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { UserAvatar } from '@/components/shared/UserAvatar'
 import { motion } from 'framer-motion'

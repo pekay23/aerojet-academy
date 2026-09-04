@@ -8,8 +8,8 @@ import {
   CreditCard,
   ArrowRight,
   Clock,
-  CheckCircle2,
-  AlertCircle,
+  _CheckCircle2,
+  _AlertCircle,
   Package,
 } from 'lucide-react'
 

@@ -10,7 +10,7 @@ import {
   Send,
 } from 'lucide-react'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
-import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
+
 
 export interface Violation {
   id: string

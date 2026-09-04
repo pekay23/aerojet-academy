@@ -94,6 +94,7 @@ export const GET = withErrorHandler(
             where: { studentId: id },
             include: {
               programme: { select: { code: true, name: true } },
+              academicYear: true,
               ojtPeriods: { orderBy: { startDate: 'desc' } },
               milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
             },
@@ -107,10 +108,11 @@ export const GET = withErrorHandler(
     let fullTimeData = null
     if (full && ftEnrollmentsRaw.length > 0) {
       fullTimeData = ftEnrollmentsRaw.map((e) => {
-        const { programme, ojtPeriods, milestones, ...rest } = e
+        const { programme, ojtPeriods, milestones, academicYear, ...rest } = e
         return {
           ...rest,
           programme,
+          academicYear,
           ojtPeriods: ojtPeriods.map((o) => ({
             ...o,
             startDate: o.startDate.toISOString(),
@@ -123,7 +125,7 @@ export const GET = withErrorHandler(
       })
     }
 
-    const { password, ...safe } = student
+    const { _password, ...safe } = student
 
     return apiSuccess(serializePrisma({
       ...safe,

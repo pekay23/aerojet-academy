@@ -4,7 +4,6 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import type { TuitionRunStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { handleActionError } from '@/lib/staff/errors'
 
 /**
  * Assigns or unassigns a course to an academic term for a specific study pathway.

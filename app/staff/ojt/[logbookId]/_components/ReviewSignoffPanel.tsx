@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Star, CheckCircle2, Circle, Shield, UserCheck } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface Entry {
@@ -26,7 +26,7 @@ interface Props {
   staffId: string
 }
 
-export default function ReviewSignoffPanel({ entries, logbookId, staffId }: Props) {
+export default function ReviewSignoffPanel({ entries, _logbookId, _staffId }: Props) {
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [commentId, setCommentId] = useState<string | null>(null)

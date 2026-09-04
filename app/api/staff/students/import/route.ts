@@ -15,7 +15,7 @@ import {
   ProgrammeChoice,
   UserRole,
   UserStatus,
-  TransactionType,
+  _TransactionType,
   BookingType,
   PaymentStatus,
   FundingSource,
@@ -804,7 +804,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       skipped: results.skipped,
       errors: results.errors.length,
     },
-    credentials: results.credentials.map(({ temporaryPassword, ...rest }) => rest),
+    credentials: results.credentials.map(({ _temporaryPassword, ...rest }) => rest),
     errors: results.errors,
   })
 })

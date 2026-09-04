@@ -3,8 +3,8 @@
 import { requireStaff, requireAdmin } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
-import { BookingType, EnrollmentStatus, ExamCategory, PaymentStatus, UserStatus, UserRole } from '@prisma/client'
+
+import { BookingType, ExamCategory, PaymentStatus, UserRole } from '@prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 import { handleActionError } from '@/lib/staff/errors'
 import { getRequestContext } from '@/lib/server/request-context'
@@ -116,7 +116,7 @@ export async function updateExamBooking(
       })
       if (res && res.moduleCode) {
         const normModule = res.moduleCode.trim()
-        const updateRes = await prismaUnfiltered.examBooking.updateMany({
+        const _updateRes = await prismaUnfiltered.examBooking.updateMany({
           where: { 
             userId: res.userId, 
             OR: [
@@ -672,7 +672,7 @@ export async function bulkUpdateExamCategory(ids: string[], category: 'INTERNAL'
       relatedResults.forEach(r => resultIds.add(r.id))
     }
 
-    const [bookingCount, resultCount] = await prismaUnfiltered.$transaction([
+    const [_bookingCount, _resultCount] = await prismaUnfiltered.$transaction([
       prismaUnfiltered.examBooking.updateMany({
         where: { id: { in: Array.from(bookingIds) } },
         data: { examCategory: category },

@@ -4,7 +4,7 @@ import * as React from 'react'
 import {
   Area,
   AreaChart,
-  ResponsiveContainer,
+  _ResponsiveContainer,
   XAxis,
   YAxis,
   CartesianGrid,

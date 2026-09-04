@@ -2,7 +2,7 @@ import 'server-only'
 
 import { NextRequest } from 'next/server'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import { apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { z } from 'zod'

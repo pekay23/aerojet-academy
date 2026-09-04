@@ -45,14 +45,14 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
   const result = sessions.map((s) => {
     let correctCount = 0
     let totalPoints = 0
-    let earnedPoints = 0
+    let _earnedPoints = 0
 
     for (const answer of s.answers) {
       if (answer.question) {
         totalPoints += answer.question.points
         if (answer.selectedAnswer !== null && answer.selectedAnswer === answer.question.correctAnswer) {
           correctCount++
-          earnedPoints += answer.question.points
+          _earnedPoints += answer.question.points
         }
       }
     }

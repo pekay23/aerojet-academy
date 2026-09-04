@@ -5,8 +5,8 @@ import type { AttendanceStatus } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
 import { serializePrisma } from '@/lib/utils/serialization'
-import { revalidatePath, revalidateTag } from 'next/cache'
-import { calculateLetterGrade, isPassing } from '@/lib/utils/grading'
+import { revalidatePath } from 'next/cache'
+import { calculateLetterGrade } from '@/lib/utils/grading'
 import { getInstructorProfileIdOrThrow } from '@/lib/instructor/profile'
 
 export async function getInstructorDashboardData() {

@@ -112,7 +112,7 @@ export default function PDFSettingsForm({ values, pdfSettings }: PDFSettingsForm
       document.body.removeChild(a)
 
       setTimeout(() => URL.revokeObjectURL(url), 1000)
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to download PDF preview')
       alert('Failed to generate PDF preview. Please try again.')
     } finally {

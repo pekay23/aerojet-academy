@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { ExamAttendanceStatus, ExamCategory, Prisma } from '@prisma/client'
+import { ExamAttendanceStatus, ExamCategory } from '@prisma/client'
 import { requireExaminer } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'

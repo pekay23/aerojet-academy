@@ -7,7 +7,7 @@ import {
   Edit2,
   Trash2,
   Calendar,
-  MoreVertical,
+  _MoreVertical,
   Layers,
   CheckCircle,
   XCircle,
@@ -17,7 +17,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  _DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 
@@ -46,7 +46,7 @@ export default function AcademicCalendarManager({
   initialYears: AcademicYear[]
 }) {
   const router = useRouter()
-  const [years, setYears] = useState<AcademicYear[]>(initialYears)
+  const [_years, _setYears] = useState<AcademicYear[]>(initialYears)
 
   // Handlers for Add/Edit
   const [editingYear, setEditingYear] = useState<AcademicYear | null>(null)

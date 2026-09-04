@@ -3,7 +3,6 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
-import { CustomFieldType, CustomFieldTarget } from '@prisma/client'
 
 const FIELD_TYPES = ['TEXT', 'NUMBER', 'DATE', 'SELECT', 'MULTI_SELECT', 'FILE', 'BOOLEAN'] as const
 const FIELD_TARGETS = ['APPLICATION', 'STUDENT_PROFILE', 'USER'] as const

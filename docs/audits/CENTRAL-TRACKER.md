@@ -1,7 +1,7 @@
 # Central Audit, Issues & Fixes Tracker
 
-**Last Updated**: 2026-09-02 (Post-Implementation Verification)
-**Status**: All critical issues fixed. All remaining tasks complete. Final verification in progress.
+**Last Updated**: 2026-09-04 (Post-schema migration verification)
+**Status**: All critical issues fixed. Schema migration complete on Neon + Supabase. ESLint `no-explicit-any` rule upgrade in progress by parallel agent.
 
 ---
 
@@ -46,6 +46,19 @@
 | Instructor | 2 | ✅ All migrated |
 | Examiner | 3 | ✅ All migrated |
 | Applicant | 0 | N/A (card-based) |
+
+### Schema Migration Complete (2026-09-04)
+
+| # | Migration | Status | Details |
+|---|-----------|--------|---------|
+| 1 | `FullTimeEnrollment.academicYearId` FK | ✅ Complete | Added `academicYearId String` + `academicYear AcademicYear` relation; legacy `academicYear String?` dropped from Neon and Supabase; 6 existing enrollments migrated to FK |
+| 2 | `OJTLogbook.licenceCategoryId` FK | ✅ Complete | Added `licenceCategoryId String` + `licenceCategory LicenseCategory` relation; legacy `licenceCategory String` retained for back-compat; all existing logbooks already had FK populated |
+| 3 | `ExamResult.sittingId` FK | ✅ Complete | Added `sittingId String?` + `sitting ExamSitting?` relation; 32 existing results have no sitting assignments (expected) |
+| 4 | `Certificate.session` relation | ✅ Complete | Added `session InternalExamSession?` relation using existing `sessionId` column |
+| 5 | `InternalExamRegistration.licenceCategoryId` FK | ✅ Complete | Added optional `licenceCategoryId` + `licenceCategoryRef LicenseCategory?` relation for future use |
+| 6 | Reverse relations + indexes | ✅ Complete | Added `AcademicYear.fullTimeEnrollments`, `LicenseCategory.ojtLogbooks`/`registrations`, `ExamSitting.examResults`, `InternalExamSession.certificates`; composite indexes added |
+| 7 | Neon `db push` | ✅ Complete | `npx prisma db push` succeeded on `ep-wandering-wave-ahyik1io-pooler.c-3.us-east-1.aws.neon.tech` |
+| 8 | Supabase `db push:supabase` | ✅ Complete | `bun run db:push:supabase` succeeded on `aws-1-eu-west-1.pooler.supabase.com:5432` after fixing 6 NULL `academicYearId` rows |
 
 ### Portal Audit Findings Fixed
 
@@ -209,6 +222,8 @@
 | SEB Config | 2026-09-02 | 7 issues | 7/7 fixed |
 | Internal Exam | 2026-09-02 | 23 sections | 23/23 complete |
 | Anti-Cheat | 2026-09-02 | 13 features | 13/13 complete |
+| Schema Migration | 2026-09-04 | Neon + Supabase | 8 relations/indexes added; both `db push` and `db push:supabase` succeeded |
+| Integration Tests | 2026-09-04 | 6 test files | 52/52 passed |
 | Accessibility | 2026-09-02 | 10 requirements | 10/10 complete |
 | EASA Compliance | 2026-09-02 | 14 requirements | 14/14 complete |
 

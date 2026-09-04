@@ -9,7 +9,6 @@
  */
 
 import prisma from '@/lib/prisma/client'
-import { Prisma } from '@prisma/client'
 import { getExamPricingConfig } from './pricing-config'
 import { placeExamBookingInStandardPool } from '@/lib/enrollment/exams'
 

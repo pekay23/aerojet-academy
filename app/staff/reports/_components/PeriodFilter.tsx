@@ -26,8 +26,7 @@ export function PeriodFilter() {
   const [toDate, setToDate] = useState(searchParams.get('to') || '')
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowCustom(period === 'custom')
   }, [period])
 
@@ -132,12 +131,15 @@ export function PeriodFilter() {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 rounded-xl">
+          {/* eslint-disable-next-line @next/next/no-location-assign-relative-destination */}
           <DropdownMenuItem onClick={() => window.location.href = '/api/staff/export?type=students'}>
             Export Students CSV
           </DropdownMenuItem>
+          {/* eslint-disable-next-line @next/next/no-location-assign-relative-destination */}
           <DropdownMenuItem onClick={() => window.location.href = '/api/staff/export?type=pools'}>
             Export Exam Pools CSV
           </DropdownMenuItem>
+          {/* eslint-disable-next-line @next/next/no-location-assign-relative-destination */}
           <DropdownMenuItem onClick={() => window.location.href = '/api/staff/export?type=finances'}>
             Export Financials CSV
           </DropdownMenuItem>

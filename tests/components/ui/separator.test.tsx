@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { Separator } from '@/components/ui/separator'
 
 vi.mock('@radix-ui/react-separator', () => ({
-  Root: ({ className, orientation, decorative, ...props }: any) => (
+  Root: ({ className, orientation, _decorative, ...props }: any) => (
     <div className={className} data-orientation={orientation} {...props} />
   ),
 }))

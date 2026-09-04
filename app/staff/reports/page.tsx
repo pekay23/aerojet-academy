@@ -1,5 +1,3 @@
-import { PageTransition } from '@/components/shared/PageTransition'
-import Link from 'next/link'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
@@ -17,7 +15,6 @@ import {
 } from 'lucide-react'
 import { Metadata } from 'next'
 import { format } from 'date-fns'
-import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 import { Badge } from '@/components/ui/badge'
 import {

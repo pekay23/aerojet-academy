@@ -26,7 +26,7 @@ export default function SetReferrerForm() {
           toast.success('Referrer set successfully!')
           setInput('')
         }
-      } catch (err) {
+      } catch (_err) {
         toast.error('Something went wrong. Please try again.')
       }
     })

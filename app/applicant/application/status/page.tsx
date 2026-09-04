@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, Clock, User, CreditCard, ShieldCheck } from 'lucide-react'
+import { CheckCircle2, User, CreditCard, ShieldCheck } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
@@ -17,7 +17,7 @@ import {
   getMilestoneStages,
   getActiveStagesForConfig,
 } from '@/lib/admissions/constants'
-import type { ApplicationStage } from '@prisma/client'
+import type { _ApplicationStage } from '@prisma/client'
 import PipelineTracker from './_components/PipelineTracker'
 import { PageTransition } from '@/components/shared/PageTransition'
 

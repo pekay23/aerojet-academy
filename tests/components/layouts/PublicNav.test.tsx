@@ -20,7 +20,7 @@ vi.mock('framer-motion', () => ({
 
 vi.mock('@/components/shared/Logo', () => ({
   __esModule: true,
-  default: (props: any) => <div data-testid="logo">Logo</div>,
+  default: (_props: any) => <div data-testid="logo">Logo</div>,
 }))
 
 vi.mock('@/components/ui/button', () => ({

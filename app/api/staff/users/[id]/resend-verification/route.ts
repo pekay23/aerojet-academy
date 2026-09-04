@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff, generateToken } from '@/lib/auth/helpers'
 import { sendEmailVerificationEmail, sendActivationEmail } from '@/lib/email/service'

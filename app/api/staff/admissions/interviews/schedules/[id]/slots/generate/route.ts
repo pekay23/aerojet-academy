@@ -30,7 +30,7 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: { para
   const schedule = await prismaUnfiltered.interviewSchedule.findUnique({ where: { id } })
   if (!schedule) return apiError('Schedule not found', 404)
 
-  const config = await getInterviewConfig()
+  const _config = await getInterviewConfig()
 
   const start = new Date(dateStart)
   const end = new Date(dateEnd)
