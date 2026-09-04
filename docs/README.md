@@ -10,10 +10,12 @@ docs/
 ├── CHANGELOG.md                Version history (auto-bumped by pre-commit hook)
 ├── LLM_COUNCIL_FRAMEWORK.md    LLM Council evaluation framework reference
 ├── architecture/               System reference — API, database, security
-├── compliance/                 Regulatory compliance registers (ISO 27001, data protection)
 ├── guides/                     Operational how-tos
 ├── audits/                     Historical audit reports (date-prefixed)
+├── compliance/                 Regulatory compliance registers (ISO 27001, data protection)
 ├── plans/                      RFCs + implementation roadmaps
+├── design/                     Design system — tokens, typography, components
+├── operations/                 Branch strategy, CI/CD, deployment workflows
 └── html/                       Built HTML mirror + hand-authored visual reports
 ```
 
@@ -85,8 +87,8 @@ RFCs and implementation roadmaps. Use these to understand _why_ something was de
 bun run docs:html
 ```
 
-This regenerates every `.md` under `architecture/`, `compliance/`, `guides/`, `audits/`, `plans/`, and `design/` into a styled HTML file at `docs/html/<section>/<slug>.html`, then writes a fresh `docs/html/index.html` that links to all of them plus the hand-authored visual reports.
+This regenerates every `.md` under `architecture/`, `compliance/`, `guides/`, `audits/`, `plans/`, `design/`, and `operations/` into a styled HTML file at `docs/html/<section>/<slug>.html`, then writes a fresh `docs/html/index.html` that links to all of them plus the hand-authored visual reports.
 
 The build script lives at [scripts/build-docs-html.mjs](../scripts/build-docs-html.mjs) and uses [marked](https://marked.js.org/) for the Markdown → HTML conversion. Internal `.md` links are rewritten to `.html` automatically; source-code links (`../../app/...`) work as-is because the HTML mirror has the same depth as the Markdown tree.
 
-Hand-authored HTML at the root of `docs/html/` (e.g. `design-gap-audit.html`) is preserved across rebuilds — the generator only writes into the `architecture/`, `compliance/`, `guides/`, `audits/`, `plans/`, and `design/` subdirectories.
+Hand-authored HTML at the root of `docs/html/` (e.g. `design-gap-audit.html`) is preserved across rebuilds — the generator only writes into the `architecture/`, `compliance/`, `guides/`, `audits/`, `plans/`, `design/`, and `operations/` subdirectories.

@@ -4,22 +4,23 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Staff Portal — TypeScript, React &amp; Next.js Audit · Aerojet Academy</title>
-<link rel="stylesheet" href="../../../../design-tokens.css">
-<link rel="stylesheet" href="../../../../docs.css">
+<link rel="stylesheet" href="../../../design-tokens.css">
+<link rel="stylesheet" href="../../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="undefinedindex.html">Index</a>
-    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
-    <a href="undefinedguides/setup.html">Guides</a>
-    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="undefinedplans/future-plans.html">Plans</a>
-    <a href="undefineddesign-system.html">Design</a>
-    <a href="undefinedoperations/branch-strategy.html">Operations</a>
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -43,12 +44,12 @@
 <li><strong>Recommendation</strong>: Prioritize the highest-traffic surfaces. For each, define a narrow interface (e.g. <code>StudentDetail</code>, <code>TransactionRow</code>, <code>ScheduleEntry</code>) — many can be derived from Prisma via <code>Prisma.UserGetPayload&lt;{ include: ... }&gt;</code> or <code>Prisma.Enumerable&lt;...&gt;</code> rather than redeclared by hand. Enable <code>noImplicitAny</code> (if not already set) and add an ESLint <code>@typescript-eslint/no-explicit-any</code> rule with a gradual fix plan. The student detail tabs (<code>StudentDetailTabs.tsx</code>, <code>WalletTab.tsx</code>, <code>JourneyTab.tsx</code>, <code>ExamsTab.tsx</code>) are the highest-value target since they are rendered for every student view.</li>
 <li><strong>Code Reference</strong> (<code>students/[id]/_components/StudentDetailTabs.tsx</code>):
 <pre><code class="language-tsx">interface Props {
-  student: any          // ❌ should be SerializedStudent
+  student: any // ❌ should be SerializedStudent
   examComponents: any[] // ❌ should be ExamComponent[]
   upcomingEvents: any[] // ❌ should be ExamEvent[]
-  academicYears: any[]  // ❌ should be AcademicYear[]
-  semesters: any[]      // ❌ should be Semester[]
-  studyPathways: any[]  // ❌ should be StudyPathway[]
+  academicYears: any[] // ❌ should be AcademicYear[]
+  semesters: any[] // ❌ should be Semester[]
+  studyPathways: any[] // ❌ should be StudyPathway[]
   initialTab: string
 }
 </code></pre>
@@ -111,7 +112,9 @@
 <li><strong>Description</strong>: CLAUDE.md states: &quot;Every page directory MUST have a <code>loading.tsx</code>&quot;. An automated scan of all <code>page.tsx</code> directories under <code>app/staff</code> found <strong>20</strong> with no sibling <code>loading.tsx</code>: <code>admissions/aptitude/banks/[id]</code>, <code>classes/[id]</code>, <code>classes/[id]/edit</code>, <code>classes/[id]/roster</code>, <code>classes/[id]/seating</code>, <code>classrooms/[id]</code>, <code>courses/[id]</code>, <code>courses/[id]/edit</code>, <code>exams/events/[id]</code>, <code>exams/events/[id]/edit</code>, <code>exams/events/[id]/pools/create</code>, <code>exams/pools/[id]</code>, <code>exams/pools/[id]/add-candidate</code>, <code>exams/pools/[id]/edit</code>, <code>exams/sittings/[id]/seating</code>, <code>newsroom/[id]/edit</code>, <code>ojt/preview</code>, <code>ojt/[logbookId]</code>, <code>students/[id]</code>, <code>users/[id]</code>. Without a segment-level <code>loading.tsx</code>, navigation falls back to the root <code>app/staff/loading.tsx</code> full-screen spinner, defeating Suspense streaming and producing a coarser loading experience. The most impactful missing ones are <code>students/[id]</code> and <code>users/[id]</code> — the two most-visited detail pages.</li>
 <li><strong>Recommendation</strong>: Add a <code>loading.tsx</code> to each of the 20 directories, reusing the shared <code>DashboardSkeleton</code> / <code>TableSkeleton</code> from <code>components/shared/DashboardSkeleton.tsx</code> (already the established pattern — see <code>dashboard/loading.tsx</code>). A one-liner per route:
 <pre><code class="language-tsx">import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
-export default function Loading() { return &lt;TableSkeleton rows={8} /&gt; }
+export default function Loading() {
+  return &lt;TableSkeleton rows={8} /&gt;
+}
 </code></pre>
 </li>
 </ul>
@@ -170,7 +173,7 @@ export default function Loading() { return &lt;TableSkeleton rows={8} /&gt; }
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>
