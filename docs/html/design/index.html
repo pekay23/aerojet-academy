@@ -4,22 +4,23 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>design · Aerojet Academy</title>
-<link rel="stylesheet" href="../../design-tokens.css">
-<link rel="stylesheet" href="../../docs.css">
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
 </head>
 <body>
 <div class="he-shell ">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="undefinedindex.html">Index</a>
-    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
-    <a href="undefinedguides/setup.html">Guides</a>
-    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="undefinedplans/future-plans.html">Plans</a>
-    <a href="undefineddesign-system.html">Design</a>
-    <a href="undefinedoperations/branch-strategy.html">Operations</a>
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 
@@ -31,7 +32,7 @@
 </header>
 
 <nav class="he-bc" aria-label="Breadcrumb">
-  <a class="he-bc__item" href="../../index.html">Docs</a><span class="he-bc__sep">/</span><span class="he-bc__item">design</span>
+  <a class="he-bc__item" href="../index.html">Docs</a><span class="he-bc__sep">/</span><span class="he-bc__item">design</span>
 </nav>
 
 <div class="he-folder-controls">
@@ -54,6 +55,30 @@
   </thead>
   <tbody id="docs-table-body">
     
+    <tr data-date="2026-09-04" data-title="03 · Typography">
+      <td><a href="03-typography.html">03 · Typography</a></td>
+      <td>2026-09-04</td>
+      <td>All three are loaded via `next/font/google` with `display: 'swap'` and exposed as CSS variables on `&lt;html&gt;` (`app/layout</td>
+      <td><code>docs/design/03-typography.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="05 · Component library">
+      <td><a href="05-components.html">05 · Component library</a></td>
+      <td>2026-09-04</td>
+      <td>The component layer is split into three tiers…</td>
+      <td><code>docs/design/05-components.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="06 · Motion &amp; interaction">
+      <td><a href="06-motion.html">06 · Motion &amp; interaction</a></td>
+      <td>2026-09-04</td>
+      <td>The portal deliberately keeps motion **short, restrained, and purposeful** — no parallax, no scroll-jacking, no long rev</td>
+      <td><code>docs/design/06-motion.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Aerojet Academy · Design System">
+      <td><a href="README.html">Aerojet Academy · Design System</a></td>
+      <td>2026-09-04</td>
+      <td>This document is the **canonical reference** — every value below is extracted directly from the running app, not paraphr</td>
+      <td><code>docs/design/README.md</code></td>
+    </tr>
     <tr data-date="2026-09-01" data-title="01-foundations">
       <td><a href="01-foundations.html">01-foundations</a></td>
       <td>2026-09-01</td>
@@ -66,41 +91,17 @@
       <td>The Aerojet palette is split into three layers, all defined in `app/globals.css` and exported as Tailwind utilities thro</td>
       <td><code>docs/design/02-colors.md</code></td>
     </tr>
-    <tr data-date="2026-09-01" data-title="03 · Typography">
-      <td><a href="03-typography.html">03 · Typography</a></td>
-      <td>2026-09-01</td>
-      <td>All three are loaded via `next/font/google` with `display: 'swap'` and exposed as CSS variables on `&lt;html&gt;` (`app/layout</td>
-      <td><code>docs/design/03-typography.md</code></td>
-    </tr>
     <tr data-date="2026-09-01" data-title="04 · Sizing, spacing, layout">
       <td><a href="04-sizing.html">04 · Sizing, spacing, layout</a></td>
       <td>2026-09-01</td>
       <td>`--radius` is set to `0.5rem` (8px) in `app/globals.css`. The Tailwind config re-exports `lg/md/sm` in terms of that var</td>
       <td><code>docs/design/04-sizing.md</code></td>
     </tr>
-    <tr data-date="2026-09-01" data-title="05 · Component library">
-      <td><a href="05-components.html">05 · Component library</a></td>
-      <td>2026-09-01</td>
-      <td>The component layer is split into three tiers…</td>
-      <td><code>docs/design/05-components.md</code></td>
-    </tr>
-    <tr data-date="2026-09-01" data-title="06 · Motion &amp; interaction">
-      <td><a href="06-motion.html">06 · Motion &amp; interaction</a></td>
-      <td>2026-09-01</td>
-      <td>The portal deliberately keeps motion **short, restrained, and purposeful** — no parallax, no scroll-jacking, no long rev</td>
-      <td><code>docs/design/06-motion.md</code></td>
-    </tr>
     <tr data-date="2026-09-01" data-title="07 · Icons, illustrations, and imagery">
       <td><a href="07-icons-illustrations.html">07 · Icons, illustrations, and imagery</a></td>
       <td>2026-09-01</td>
       <td>**Library:** `lucide-react` (pinned to `1.8.0` in `package.json`).</td>
       <td><code>docs/design/07-icons-illustrations.md</code></td>
-    </tr>
-    <tr data-date="2026-09-01" data-title="Aerojet Academy · Design System">
-      <td><a href="README.html">Aerojet Academy · Design System</a></td>
-      <td>2026-09-01</td>
-      <td>This document is the **canonical reference** — every value below is extracted directly from the running app, not paraphr</td>
-      <td><code>docs/design/README.md</code></td>
     </tr>
   </tbody>
 </table>
@@ -131,7 +132,7 @@ function sortDocs(criteria) {
 
 
 <footer class="he-foot">
-  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

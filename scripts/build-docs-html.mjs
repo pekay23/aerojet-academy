@@ -34,6 +34,7 @@ const SECTIONS = [
   { dir: 'architecture', title: 'Architecture', blurb: 'System reference — API, database, security.' },
   { dir: 'guides',       title: 'Guides',       blurb: 'Operational how-tos — setup, deployment, handover.' },
   { dir: 'audits',       title: 'Audits',       blurb: 'Historical audit reports, newest first.' },
+  { dir: 'compliance',   title: 'Compliance',   blurb: 'Regulatory registers — ISO 27001, data protection, DPIA.' },
   { dir: 'plans',        title: 'Plans',        blurb: 'RFCs and implementation roadmaps.' },
   { dir: 'design',       title: 'Design',       blurb: 'Design system — tokens, typography, components.' },
   { dir: 'operations',   title: 'Operations',   blurb: 'Branch strategy, CI/CD, deployment workflows.' },
@@ -54,7 +55,8 @@ function slugify(text) {
 }
 
 function relativeHref(from, to) {
-  return path.relative(from, to).replaceAll('\\', '/')
+  const fromDir = path.dirname(from)
+  return path.relative(fromDir, to).replaceAll('\\', '/')
 }
 
 // ── Marked renderer overrides ────────────────────────────────────────────
@@ -212,12 +214,13 @@ function pageHtml({ title, eyebrow, deckHtml, body, toc, project, basePathToHtml
   <a class="he-nav__brand" href="${basePathToHtml}index.html">${escapeHtml(project)} <small>docs</small></a>
   <div class="he-nav__links">
     <a href="${basePathToHtml}index.html">Index</a>
-    <a href="${basePathToHtml}architecture/system-overview.html">Architecture</a>
-    <a href="${basePathToHtml}guides/setup.html">Guides</a>
-    <a href="${basePathToHtml}audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="${basePathToHtml}plans/future-plans.html">Plans</a>
-    <a href="${basePathToHtml}design-system.html">Design</a>
-    <a href="${basePathToHtml}operations/branch-strategy.html">Operations</a>
+    <a href="${basePathToHtml}architecture/index.html">Architecture</a>
+    <a href="${basePathToHtml}guides/index.html">Guides</a>
+    <a href="${basePathToHtml}audits/index.html">Audits</a>
+    <a href="${basePathToHtml}compliance/index.html">Compliance</a>
+    <a href="${basePathToHtml}plans/index.html">Plans</a>
+    <a href="${basePathToHtml}design/index.html">Design</a>
+    <a href="${basePathToHtml}operations/index.html">Operations</a>
   </div>
 </nav>`
 
@@ -423,7 +426,7 @@ async function walkMd(dir) {
 }
 
 // ── Build one MD file ────────────────────────────────────────────────────
-async function buildPage({ src, outPath, section, project }) {
+async function buildPage({ src, outPath, section, project, basePathToHtml }) {
   const md = await fs.readFile(src, 'utf8')
   const { title, deckMarkdown, eyebrow } = parseHeader(md, path.basename(src, '.md'), section)
   const toc = extractToc(md)
@@ -446,6 +449,7 @@ async function buildPage({ src, outPath, section, project }) {
     body,
     toc,
     project,
+    basePathToHtml: basePathToHtml ?? '../',
     currentPath: outPath,
     isIndex: false,
   })
@@ -528,6 +532,10 @@ async function buildFolderPage({ srcDir, outDir, project, folderTitle }) {
   const relToRoot = path.relative(DOCS, srcDir).replaceAll('\\', '/')
   const parts = relToRoot.split('/').filter(Boolean)
   const folderPagePath = path.join(outDir, 'index.html')
+  // basePathToHtml points from this folder page to docs/html/ root.
+  // One level of ./ for top-level section folders; ../ for nested subdirs.
+  const folderDepth = path.relative(OUT, outDir).split(path.sep).filter(Boolean).length
+  const basePathToHtml = folderDepth <= 0 ? './' : '../'.repeat(folderDepth)
   const breadcrumbItems = [{ label: 'Docs', href: relativeHref(folderPagePath, path.join(OUT, 'index.html')) }]
   for (let i = 0; i < parts.length; i++) {
     const ancestorPath = path.join(OUT, ...parts.slice(0, i + 1), 'index.html')
@@ -625,6 +633,7 @@ function sortDocs(criteria) {
     body,
     toc: [],
     project,
+    basePathToHtml,
     currentPath: path.join(outDir, 'index.html'),
     isIndex: true,
   })
@@ -660,10 +669,10 @@ async function buildIndex({ project, sectionResults }) {
 
       return `
 <section class="he-index-section" id="${s.dir}">
-  <div class="he-index-section__head">
+  <a class="he-index-section__head he-index-section__link" href="./${s.dir}/index.html">
     <h2>${escapeHtml(s.title)}</h2>
-    <p class="he-index-section__blurb">${escapeHtml(s.blurb)}</p>
-  </div>
+    <p class="he-index-section__blurb">${escapeHtml(s.blurb)} · Browse folder →</p>
+  </a>
   <div class="he-grid">${cards}
   </div>
 </section>`
@@ -714,7 +723,7 @@ ${standalone}
     title: 'Documentation',
     eyebrow: `${project} · docs`,
     deckHtml:
-      'All project documentation, organised by purpose. Markdown sources live in <code>docs/architecture</code>, <code>docs/guides</code>, <code>docs/audits</code>, <code>docs/plans</code>, <code>docs/design</code>, and <code>docs/operations</code>.',
+      'All project documentation, organised by purpose. Markdown sources live in <code>docs/architecture</code>, <code>docs/guides</code>, <code>docs/audits</code>, <code>docs/compliance</code>, <code>docs/plans</code>, <code>docs/design</code>, and <code>docs/operations</code>.',
     body,
     toc: [],
     project,

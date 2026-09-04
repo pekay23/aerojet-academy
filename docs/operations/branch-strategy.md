@@ -2,12 +2,12 @@
 
 ## Branches
 
-| Branch | Purpose | Protected |
-|--------|---------|-----------|
-| `main` | Production-ready code. Live on Vercel. | Yes |
-| `staging` | Pre-production testing. Deployed to Vercel preview/staging environment. | No |
-| `dev` | Integration branch for features. All feature branches merge here first. | No |
-| `feature/*` | Individual features (e.g., `feature/analytics-dashboard`). | No |
+| Branch      | Purpose                                                                 | Protected |
+| ----------- | ----------------------------------------------------------------------- | --------- |
+| `main`      | Production-ready code. Live on Vercel.                                  | Yes       |
+| `staging`   | Pre-production testing. Deployed to Vercel preview/staging environment. | No        |
+| `dev`       | Integration branch for features. All feature branches merge here first. | No        |
+| `feature/*` | Individual features (e.g., `feature/analytics-dashboard`).              | No        |
 
 ## Workflow
 
