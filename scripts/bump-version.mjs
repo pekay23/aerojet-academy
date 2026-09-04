@@ -36,6 +36,14 @@ function getLastTag(branch) {
 }
 
 function getStagedCommitMessage() {
+  const argPath = process.argv[2]
+  if (argPath && fs.existsSync(argPath)) {
+    return fs.readFileSync(argPath, 'utf8').trim()
+  }
+  const envPath = process.env.HUSKY_GIT_PARAMS
+  if (envPath && fs.existsSync(envPath)) {
+    return fs.readFileSync(envPath, 'utf8').trim()
+  }
   try {
     return fs.readFileSync('.git/COMMIT_EDITMSG', 'utf8').trim()
   } catch {
