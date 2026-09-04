@@ -92,3 +92,39 @@ This regenerates every `.md` under `architecture/`, `compliance/`, `guides/`, `a
 The build script lives at [scripts/build-docs-html.mjs](../scripts/build-docs-html.mjs) and uses [marked](https://marked.js.org/) for the Markdown → HTML conversion. Internal `.md` links are rewritten to `.html` automatically; source-code links (`../../app/...`) work as-is because the HTML mirror has the same depth as the Markdown tree.
 
 Hand-authored HTML at the root of `docs/html/` (e.g. `design-gap-audit.html`) is preserved across rebuilds — the generator only writes into the `architecture/`, `compliance/`, `guides/`, `audits/`, `plans/`, `design/`, and `operations/` subdirectories.
+
+## Versioning & Releases
+
+This project uses [release-it](https://github.com/release-it/release-it) with [Conventional Commits](https://www.conventionalcommits.org/) to bump versions per-branch. Each branch (`dev`, `staging`, `main`) versions independently with branch-prefixed tags (`dev/v1.0.105`, `staging/v1.0.106`, `main/v1.0.107`).
+
+### Bump rules
+
+Commits that **do** bump the version: `feat:`, `fix:`, `perf:`, `revert:`
+Commits that **do not** bump: `docs:`, `test:`, `chore:`, `ci:`, `build:`, `style:`, `refactor:`
+
+Bump severity: `BREAKING CHANGE` or `!` → major | `feat:` → minor | `fix:`/`perf:`/`revert:` → patch
+
+### Release commands
+
+```bash
+# Dry-run (preview what would be released)
+bun run release --dry-run
+
+# Release on dev
+bun run release:dev
+
+# Release on staging
+bun run release:staging
+
+# Release on main
+bun run release:main
+```
+
+Each command:
+
+1. Scans commits since the last tag on the current branch
+2. Skips the release entirely if only non-bump commits are present
+3. Runs `type-check` + `test` before bumping
+4. Bumps `package.json` version, updates `docs/CHANGELOG.md`, commits, tags as `<branch>/vX.Y.Z`, and pushes
+
+The pre-commit hook **no longer bumps versions** — it only runs `lint-staged`. Version bumps are explicit via `bun run release:*`.
