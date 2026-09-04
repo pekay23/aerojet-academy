@@ -4,22 +4,23 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Performance Audit Report — Aerojet Academy · Aerojet Academy</title>
-<link rel="stylesheet" href="../../design-tokens.css">
-<link rel="stylesheet" href="../../docs.css">
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="undefinedindex.html">Index</a>
-    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
-    <a href="undefinedguides/setup.html">Guides</a>
-    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="undefinedplans/future-plans.html">Plans</a>
-    <a href="undefineddesign-system.html">Design</a>
-    <a href="undefinedoperations/branch-strategy.html">Operations</a>
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -38,15 +39,15 @@
 <li><code>app/staff/students/[id]/page.tsx:34-43</code></li>
 </ul>
 <pre><code class="language-ts">const allUsers = await prisma.user.findMany({
-  select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } }
+  select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } },
 })
-const matchedUser = allUsers.find(u =&gt; slugify(name) === id)
+const matchedUser = allUsers.find((u) =&gt; slugify(name) === id)
 </code></pre>
 <p><strong>Impact:</strong> Every detail page loads the ENTIRE users table into Node.js memory just to resolve a slug. With 10,000 users, this alone could take 5-10 seconds and use 50MB+ RAM per request.</p>
 <p><strong>Fix:</strong> Add a <code>slug</code> column to the <code>Profile</code> model (or use a computed/stored generated column), index it, and query directly:</p>
 <pre><code class="language-ts">const user = await prisma.profile.findFirst({
   where: { slug: id },
-  select: { userId: true }
+  select: { userId: true },
 })
 </code></pre>
 <p>Or at minimum, do the filtering in SQL:</p>
@@ -247,12 +248,12 @@ const event = await prismaUnfiltered.examEvent.findUnique({  // full fetch with 
 <pre><code class="language-tsx">export default async function FinancePage() {
   return (
     &lt;&gt;
-      &lt;FinanceHeader /&gt;  {/* renders immediately */}
+      &lt;FinanceHeader /&gt; {/* renders immediately */}
       &lt;Suspense fallback={&lt;ChartSkeleton /&gt;}&gt;
-        &lt;OverviewCharts /&gt;  {/* streams when ready */}
+        &lt;OverviewCharts /&gt; {/* streams when ready */}
       &lt;/Suspense&gt;
       &lt;Suspense fallback={&lt;TableSkeleton /&gt;}&gt;
-        &lt;TransactionsTable /&gt;  {/* streams when ready */}
+        &lt;TransactionsTable /&gt; {/* streams when ready */}
       &lt;/Suspense&gt;
     &lt;/&gt;
   )
@@ -488,7 +489,7 @@ const event = await prismaUnfiltered.examEvent.findUnique({  // full fetch with 
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>
