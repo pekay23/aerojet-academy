@@ -36,10 +36,8 @@ function getLastTag(branch) {
 }
 
 function getStagedCommitMessage() {
-  const commitMsgFile = process.env.HUSKY_GIT_PARAMS || '.git/COMMIT_EDITMSG'
-  const fullPath = path.isAbsolute(commitMsgFile) ? commitMsgFile : path.join('.git', commitMsgFile)
   try {
-    return fs.readFileSync(fullPath, 'utf8').trim()
+    return fs.readFileSync('.git/COMMIT_EDITMSG', 'utf8').trim()
   } catch {
     return ''
   }
@@ -59,7 +57,7 @@ function getCommitsSinceTag(tag) {
       const subject = entries[i + 1]?.trim()
       const body = entries[i + 2]?.trim() || ''
       if (!hash || !subject) continue
-const typeMatch = subject.match(/^(\w+)(\([^)]*\))?(!)?\s*:/)
+      const typeMatch = subject.match(/^(\w+)(\([^)]*\))?(!)?\s*:/)
       const type = typeMatch ? typeMatch[1] : 'chore'
       const hasBreaking = body.includes('BREAKING CHANGE') || subject.includes('!')
       commits.push({ hash, subject, type, hasBreaking })
@@ -72,7 +70,7 @@ const typeMatch = subject.match(/^(\w+)(\([^)]*\))?(!)?\s*:/)
 
 function analyzeCurrentCommit(message) {
   const subject = message.split('\n')[0]
-  const typeMatch = subject.match(/^\w+\s+(\w+)(\([^)]*\))?(!)?\s*:/)
+  const typeMatch = subject.match(/^(\w+)(\([^)]*\))?(!)?\s*:/)
   const type = typeMatch ? typeMatch[1] : 'chore'
   const hasBreaking = message.includes('BREAKING CHANGE') || subject.includes('!')
   const body = message.slice(subject.length + 1)
