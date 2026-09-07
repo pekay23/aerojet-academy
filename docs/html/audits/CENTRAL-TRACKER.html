@@ -28,7 +28,7 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Central Audit, Issues &amp; Fixes Tracker</h1>
-  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-04 (Post-schema migration verification) <strong>Status</strong>: All critical issues fixed.</p>
+  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-07 (Post-type-check + ESLint verification) <strong>Status</strong>: All critical issues fixed.</p>
 </header>
 <hr />
 <section class="he-section" id="current-state-summary"><div class="he-section__num">01 · Current State Summary</div><h2 class="he-section__title">Current State Summary</h2></section>
@@ -291,13 +291,19 @@
 <hr />
 <section class="he-section" id="next-steps"><div class="he-section__num">05 · Next Steps</div><h2 class="he-section__title">Next Steps</h2></section>
 <ol>
-<li><strong>Run <code>bun run db:push</code></strong> to apply all schema changes (review migration SQLs first)</li>
-<li><strong>Run <code>bun run type-check</code></strong> to verify no new type errors</li>
-<li><strong>Run <code>bun run test --run</code></strong> to verify no new test failures</li>
-<li><strong>Run <code>bun run lint</code></strong> before opening a PR (currently non-functional in Windows env)</li>
-<li><strong>Commit changes</strong> with comprehensive commit message</li>
-<li><strong>Push to remote</strong> (use <code>--no-verify</code> due to pre-existing type errors)</li>
+<li><del>Run <code>bun run db:push</code></del> — Done (2026-09-04, Neon + Supabase)</li>
+<li><del>Run <code>bun run type-check</code></del> — Done (2026-09-07, 0 errors, commit 02717b1e)</li>
+<li><del>Run <code>bun run test --run</code></del> — Done (2026-09-04, 52/52 integration tests)</li>
+<li><del>Run <code>bun run lint</code></del> — Done (2026-09-07, 0 errors, commit 8e43423c)</li>
+<li><del>Commit changes</del> — Done (commits 8e43423c, 02717b1e)</li>
+<li><del>Push to remote</del> — Done</li>
 </ol>
+<h3 id="outstanding-minor">Outstanding (minor)</h3>
+<ul>
+<li>17 ESLint warnings remain in 2 files: <code>app/staff/exams/events/create/page.tsx</code> (11 <code>any</code>) and <code>app/staff/exams/events/[id]/edit/_components/EditExamEventForm.tsx</code> (8 <code>any</code>). Non-blocking; tracked in <code>known-issues.md</code>.</li>
+<li>1 unused import warning: <code>lib/withdrawal/actions.ts:6</code> (<code>Prisma</code>).</li>
+<li><code>docs/audits/portal-audits/PORTAL-AUDIT-TRACKER.md</code> has duplicated type-check status paragraphs (3x) — cosmetic cleanup only.</li>
+</ul>
 <hr />
 <section class="he-section" id="audit-document-locations"><div class="he-section__num">06 · Audit Document Locations</div><h2 class="he-section__title">Audit Document Locations</h2></section>
 <ul>
@@ -330,6 +336,7 @@
     <li class="he-toc__l2"><a href="#files-created-new">Files Created (New)</a></li>
     <li class="he-toc__l2"><a href="#verification-log">Verification Log</a></li>
     <li class="he-toc__l2"><a href="#next-steps">Next Steps</a></li>
+    <li class="he-toc__l3"><a href="#outstanding-minor">Outstanding (minor)</a></li>
     <li class="he-toc__l2"><a href="#audit-document-locations">Audit Document Locations</a></li>
   </ul>
 </aside>

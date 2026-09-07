@@ -112,20 +112,28 @@
 <hr />
 <section class="he-section" id="row-level-security-rls-strategy"><div class="he-section__num">02 · 🛡️ Row Level Security (RLS) Strategy</div><h2 class="he-section__title">🛡️ Row Level Security (RLS) Strategy</h2></section>
 <p>The system uses a hybrid security model:</p>
-<h3 id="nextjs-middleware">Next.js Middleware</h3>
-<p>Routes are protected at the edge via <code>middleware.ts</code>, verifying roles before the request even hits the server action.</p>
+<h3 id="route-protection-layered">Route Protection (Layered)</h3>
+<p>Route protection is enforced in three layers:</p>
+<ol>
+<li><strong>Edge proxy</strong> (<code>proxy.ts</code>) — images-only; gates <code>/api/images/*</code> (auth +
+hotlink/header protection). Does <strong>not</strong> gate portal routes.</li>
+<li><strong>Portal layouts</strong> — each portal's <code>layout.tsx</code> calls <code>requireStaff</code>/
+<code>requireInstructor</code>/<code>requireStudent</code>/etc. from <code>lib/auth/helpers.ts</code> as
+the primary gate.</li>
+<li><strong>Route handlers / server actions</strong> — call <code>requireAdmin()</code>/<code>requireAuth()</code>
+/<code>requireStaff()</code>/<code>requirePermission()</code> directly.</li>
+</ol>
+<p><code>middleware.ts</code> was renamed to <code>proxy.ts</code> per Next.js 16 naming conventions,
+but its scope is limited to image proxy — not portal route protection.</p>
 <h3 id="database-level-rls">Database-Level RLS</h3>
-<p>For direct database access (e.g., via the Neon Console, Supabase Dashboard, or external BI tools), RLS policies are active.</p>
-<ul>
-<li><strong>Policies</strong>:
-<ul>
-<li><code>Students can only view their own Wallet and Enrollments.</code></li>
-<li><code>Instructors can view classes they are assigned to.</code></li>
-<li><code>Staff have bypass permissions for administrative tables.</code></li>
-</ul>
-</li>
-<li><strong>Implementation</strong>: Policies use the <code>auth.uid()</code> function. In the Next.js app, we inject the user's ID into the session using a custom Prisma extension located in <code>lib/prisma/rls.ts</code>. This applies to both the primary Neon database and the redundant Supabase instance.</li>
-</ul>
+<p>For direct database access (e.g., via the Neon Console, Supabase Dashboard, or
+external BI tools), RLS policies are defined. The codebase also uses a dual
+Prisma client pattern: <code>prismaUnfiltered</code> (raw client, no RLS overhead) for
+portal code that is already auth-gated at the layout/handler layers, and the
+<code>prisma</code> default export (extended with soft-delete + RLS session variables)
+for defense-in-depth. Neon connections use the pooler (<code>*.pooler.region...</code>)
+in production; <code>@prisma/adapter-pg</code> with the standard <code>pg</code> driver is used on
+Vercel.</p>
 <hr />
 <section class="he-section" id="common-query-patterns"><div class="he-section__num">03 · 🚦 Common Query Patterns</div><h2 class="he-section__title">🚦 Common Query Patterns</h2></section>
 <h3 id="the-quotdashboard-bottleneckquot">The &quot;Dashboard Bottleneck&quot;</h3>
@@ -154,7 +162,7 @@
     <li class="he-toc__l3"><a href="#7-system-infrastructure">7. System &amp; Infrastructure</a></li>
     <li class="he-toc__l3"><a href="#7-system-infrastructure">7. System &amp; Infrastructure</a></li>
     <li class="he-toc__l2"><a href="#row-level-security-rls-strategy">🛡️ Row Level Security (RLS) Strategy</a></li>
-    <li class="he-toc__l3"><a href="#nextjs-middleware">Next.js Middleware</a></li>
+    <li class="he-toc__l3"><a href="#route-protection-layered">Route Protection (Layered)</a></li>
     <li class="he-toc__l3"><a href="#database-level-rls">Database-Level RLS</a></li>
     <li class="he-toc__l2"><a href="#common-query-patterns">🚦 Common Query Patterns</a></li>
     <li class="he-toc__l3"><a href="#the-dashboard-bottleneck">The &quot;Dashboard Bottleneck&quot;</a></li>
