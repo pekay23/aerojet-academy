@@ -161,7 +161,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
     "typescript": "6.0.2",
-    "vitest": "4.1.4"
+    "vitest": "4.1.11"
   },
   "engines": {
     "node": ">=20.x",
