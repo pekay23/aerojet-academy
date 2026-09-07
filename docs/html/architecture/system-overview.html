@@ -53,7 +53,7 @@ app/api/          → REST API + cron + UploadThing
 </code></pre>
 <section class="he-section" id="auth-enforcement-three-layers"><div class="he-section__num">03 · Auth enforcement (three layers)</div><h2 class="he-section__title">Auth enforcement (three layers)</h2></section>
 <ol>
-<li><strong>Edge proxy</strong> at <code>proxy.ts</code> — <code>ROUTE_ROLE_MAP</code> gates every <code>/staff</code>, <code>/instructor</code>, <code>/student</code>, <code>/examiner</code>, <code>/applicant</code> page and their <code>/api/*</code> siblings. Wrong-role users are redirected to their own portal; unauthenticated users get <code>/login?callbackUrl=…</code> (pages) or 401 JSON (API).</li>
+<li><strong>Edge proxy</strong> at <code>proxy.ts</code> — images-only gate. Handles <code>/api/images/*</code> auth, hotlink protection, and security headers. Does <strong>NOT</strong> enforce portal role authentication.</li>
 <li><strong>Portal layouts</strong> — each portal <code>layout.tsx</code> calls <code>requireStaff</code> / <code>requireInstructor</code> / etc. from <code>lib/auth/helpers.ts</code> as a second check and to pass the session into the tree.</li>
 <li><strong>Route handlers / server actions</strong> — call <code>requireAdmin()</code> / <code>requireAuth()</code> directly; thrown <code>'Unauthorized'</code> / <code>'Forbidden'</code> is converted to 401 / 403 by <code>withErrorHandler</code>.</li>
 </ol>

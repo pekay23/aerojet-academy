@@ -28,17 +28,24 @@
 <header>
   <p class="he-eyebrow">Architecture</p>
   <h1 class="he-title">Security Model</h1>
-  
+  <p class="he-deck">A missed check in any one layer is caught by the next.</p>
 </header>
 <section class="he-section" id="middleware-chain"><div class="he-section__num">01 · Middleware Chain</div><h2 class="he-section__title">Middleware Chain</h2></section>
-<pre><code>Request → proxy.ts
-  → Check if public route → allow
-  → Get JWT token
-  → Check account status (SUSPENDED/DEACTIVATED → login)
-  → Check mustChangePassword → redirect to change-password
-  → Check role matches portal prefix → forbid or allow
+<pre><code>Request → proxy.ts (edge proxy)
+  → Gates /api/images/* only (auth + hotlink/header protection)
+  → Sets image security headers
 </code></pre>
-<section class="he-section" id="role-based-access"><div class="he-section__num">02 · Role-Based Access</div><h2 class="he-section__title">Role-Based Access</h2></section>
+<blockquote class="he-pull">
+<p><strong>Note:</strong> <code>proxy.ts</code> is <strong>images-only</strong>. It does NOT enforce portal role authentication. The proxy is a Next.js 16 replacement for <code>middleware.ts</code> and handles image security exclusively.</p>
+</blockquote>
+<section class="he-section" id="auth-enforcement-three-layers"><div class="he-section__num">02 · Auth Enforcement (Three Layers)</div><h2 class="he-section__title">Auth Enforcement (Three Layers)</h2></section>
+<ol>
+<li><strong>Portal layouts</strong> — each portal <code>layout.tsx</code> calls <code>requireStaff</code> / <code>requireInstructor</code> / <code>requireStudent</code> / <code>requireApplicant</code> / <code>requireExaminer</code> from <code>lib/auth/helpers.ts</code> as the primary gate. Wrong-role users are redirected; unauthenticated users are sent to <code>/login</code>.</li>
+<li><strong>Route handlers / server actions</strong> — call <code>requireAdmin()</code> / <code>requireAuth()</code> / <code>requirePermission()</code> directly; thrown <code>'Unauthorized'</code> / <code>'Forbidden'</code> is converted to 401 / 403 by <code>withErrorHandler</code>.</li>
+<li><strong>API route guards</strong> — staff routes check <code>isStaff(role)</code> or <code>isAdmin(role)</code>; student routes verify <code>user.role === 'STUDENT'</code>; cron routes require <code>Authorization: Bearer ${CRON_SECRET}</code>.</li>
+</ol>
+<p>A missed check in any one layer is caught by the next.</p>
+<section class="he-section" id="role-based-access"><div class="he-section__num">03 · Role-Based Access</div><h2 class="he-section__title">Role-Based Access</h2></section>
 <table>
 <thead>
 <tr><th>Portal</th><th>Allowed Roles</th></tr>
@@ -50,7 +57,7 @@
 <tr><td>/instructor</td><td>INSTRUCTOR</td></tr>
 </tbody>
 </table>
-<section class="he-section" id="api-security"><div class="he-section__num">03 · API Security</div><h2 class="he-section__title">API Security</h2></section>
+<section class="he-section" id="api-security"><div class="he-section__num">04 · API Security</div><h2 class="he-section__title">API Security</h2></section>
 <ul>
 <li>All API routes verify session via <code>getServerSession()</code></li>
 <li>Staff routes check <code>isStaff(role)</code> or <code>isAdmin(role)</code></li>
@@ -58,13 +65,13 @@
 <li>Cron routes require <code>Authorization: Bearer ${CRON_SECRET}</code></li>
 <li>Webhooks verify signatures (Stripe) or tokens (UploadThing)</li>
 </ul>
-<section class="he-section" id="data-access-convention"><div class="he-section__num">04 · Data Access Convention</div><h2 class="he-section__title">Data Access Convention</h2></section>
+<section class="he-section" id="data-access-convention"><div class="he-section__num">05 · Data Access Convention</div><h2 class="he-section__title">Data Access Convention</h2></section>
 <ul>
 <li>All portal code uses <code>prismaUnfiltered</code> for database queries</li>
 <li>The <code>prisma</code> default export (with RLS/soft-delete extensions) is not used by active portal code</li>
 <li>Row-level ownership is enforced via explicit <code>userId</code> filters in query <code>where</code> clauses, not via PostgreSQL RLS policies</li>
 </ul>
-<section class="he-section" id="pool-join-race-condition-prevention"><div class="he-section__num">05 · Pool Join Race Condition Prevention</div><h2 class="he-section__title">Pool Join Race Condition Prevention</h2></section>
+<section class="he-section" id="pool-join-race-condition-prevention"><div class="he-section__num">06 · Pool Join Race Condition Prevention</div><h2 class="he-section__title">Pool Join Race Condition Prevention</h2></section>
 <pre><code class="language-sql">BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 SELECT * FROM &quot;ExamPool&quot; WHERE id = $1 FOR UPDATE;
 -- Validate capacity, module diversity, wallet balance
@@ -81,6 +88,7 @@ COMMIT;
   <p class="he-toc__label">On this page</p>
   <ul>
     <li class="he-toc__l2"><a href="#middleware-chain">Middleware Chain</a></li>
+    <li class="he-toc__l2"><a href="#auth-enforcement-three-layers">Auth Enforcement (Three Layers)</a></li>
     <li class="he-toc__l2"><a href="#role-based-access">Role-Based Access</a></li>
     <li class="he-toc__l2"><a href="#api-security">API Security</a></li>
     <li class="he-toc__l2"><a href="#data-access-convention">Data Access Convention</a></li>

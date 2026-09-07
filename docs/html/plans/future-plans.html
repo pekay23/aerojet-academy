@@ -30,7 +30,7 @@
   <h1 class="he-title">Future Plans</h1>
   <p class="he-deck">This document tracks planned features and improvements for the Aerojet Academy platform.</p>
 </header>
-<p><strong>Last audited:</strong> 2026-05-06 (bulk update)</p>
+<p><strong>Last audited:</strong> 2026-09-07</p>
 <hr />
 <section class="he-section" id="1-academy-class-management-redesign"><div class="he-section__num">01 · 🎓 1. Academy Class Management Redesign</div><h2 class="he-section__title">🎓 1. Academy Class Management Redesign</h2></section>
 <h3 id="student-amp-batch-enrollment">Student &amp; Batch Enrollment</h3>
@@ -132,7 +132,25 @@
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><del>Two-factor authentication for staff accounts</del> <em>(done 2026-05-13 — TOTP-based 2FA via otplib v5, Settings → Security tab, login flow 2FA interception)</em></li>
 </ul>
 <hr />
-<section class="he-section" id="7-pdf-template-system-amp-document-verification"><div class="he-section__num">07 · 📄 7. PDF Template System &amp;amp; Document Verification</div><h2 class="he-section__title">📄 7. PDF Template System &amp; Document Verification</h2></section>
+<hr />
+<section class="he-section" id="implemented-completed-after-last-audit"><div class="he-section__num">07 · ✅ Implemented (completed after last audit)</div><h2 class="he-section__title">✅ Implemented (completed after last audit)</h2></section>
+<p>The following features were planned or implied in earlier versions and are now fully built:</p>
+<table>
+<thead>
+<tr><th>Feature</th><th>Implementation</th><th>Date</th></tr>
+</thead>
+<tbody>
+<tr><td>PDF certificate generation</td><td><code>lib/certificates/generator.ts</code></td><td>2026-05</td></tr>
+<tr><td>QR code document verification</td><td><code>app/(public)/verify/[certificateId]/page.tsx</code>, <code>app/api/certificates/verify/[certificateId]/route.ts</code></td><td>2026-05</td></tr>
+<tr><td>SEB (Safe Exam Browser) integration</td><td><code>lib/exams/useAntiCheat.ts</code>, BEK rotation cron, student SEB download</td><td>2026-07</td></tr>
+<tr><td>Internal exam bank &amp; sessions</td><td><code>lib/exams/</code>, <code>app/staff/exams/</code>, exam question banks, sessions, operations</td><td>2026-06</td></tr>
+<tr><td>Newsroom (public + staff)</td><td><code>app/(public)/newsroom/</code>, <code>app/staff/newsroom/</code>, SEO, cover images, author attribution</td><td>2026-05</td></tr>
+<tr><td>Audit hash chain</td><td>Immutable audit log with chaining</td><td>2026-05</td></tr>
+<tr><td>LLM Council framework</td><td><code>agents/skills/llm-council/</code>, multi-persona evaluation system</td><td>2026-07</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="7-pdf-template-system-amp-document-verification"><div class="he-section__num">08 · 📄 7. PDF Template System &amp;amp; Document Verification</div><h2 class="he-section__title">📄 7. PDF Template System &amp; Document Verification</h2></section>
 <blockquote class="he-pull">
 <p><strong>Detailed plan:</strong> <a href="./pdf-template-system.html"><code>docs/plans/pdf-template-system.md</code></a></p>
 </blockquote>
@@ -152,10 +170,10 @@
 </ul>
 <h3 id="document-verification-qr-codes">Document Verification (QR Codes)</h3>
 <ul>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Unique verification code per generated document</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>QR code embedded in PDF footer/accreditation area</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Public <code>/verify/[code]</code> page — no auth required, shows document authenticity</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Verification record with recipient, document type, issue date, certificate number</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><del>Unique verification code per generated document</del> <em>(done 2026-05 — certificateId-based verification)</em></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><del>QR code embedded in PDF footer/accreditation area</del> <em>(done 2026-05 — QR rendered in certificate PDF)</em></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><del>Public <code>/verify/[code]</code> page — no auth required, shows document authenticity</del> <em>(done 2026-05 — <code>app/(public)/verify/[certificateId]/page.tsx</code>)</em></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><del>Verification record with recipient, document type, issue date, certificate number</del> <em>(done 2026-05 — <code>CertificateVerification</code> model + API route)</em></li>
 </ul>
 <h3 id="enhanced-preview">Enhanced Preview</h3>
 <ul>
@@ -164,7 +182,7 @@
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Live signature rendering in preview</li>
 </ul>
 <hr />
-<section class="he-section" id="priority-implementation-queue"><div class="he-section__num">08 · 📋 Priority Implementation Queue</div><h2 class="he-section__title">📋 Priority Implementation Queue</h2></section>
+<section class="he-section" id="priority-implementation-queue"><div class="he-section__num">09 · 📋 Priority Implementation Queue</div><h2 class="he-section__title">📋 Priority Implementation Queue</h2></section>
 <p>All remaining items ordered from <strong>quickest/easiest</strong> to <strong>longest/hardest</strong>.
 Use this queue to pick the next item to implement.</p>
 <h3 id="tier-1-quick-wins-under-1-hour-each">Tier 1 — Quick Wins (under 1 hour each)</h3>
@@ -232,7 +250,7 @@ Use this queue to pick the next item to implement.</p>
 </tbody>
 </table>
 <hr />
-<section class="he-section" id="hidden-features-to-unhide-later"><div class="he-section__num">09 · 🔒 Hidden Features (To Unhide Later)</div><h2 class="he-section__title">🔒 Hidden Features (To Unhide Later)</h2></section>
+<section class="he-section" id="hidden-features-to-unhide-later"><div class="he-section__num">10 · 🔒 Hidden Features (To Unhide Later)</div><h2 class="he-section__title">🔒 Hidden Features (To Unhide Later)</h2></section>
 <p>The following features are fully implemented but temporarily hidden. To re-enable, follow the steps below.</p>
 <h3 id="1-scheduled-pdf-reports-item-13">1. Scheduled PDF Reports (Item 13)</h3>
 <ul>
@@ -290,6 +308,7 @@ Use this queue to pick the next item to implement.</p>
     <li class="he-toc__l2"><a href="#6-security-compliance">🔐 6. Security &amp; Compliance</a></li>
     <li class="he-toc__l3"><a href="#audit-trail-enhancements">Audit Trail Enhancements</a></li>
     <li class="he-toc__l3"><a href="#access-control">Access Control</a></li>
+    <li class="he-toc__l2"><a href="#implemented-completed-after-last-audit">✅ Implemented (completed after last audit)</a></li>
     <li class="he-toc__l2"><a href="#7-pdf-template-system-document-verification">📄 7. PDF Template System &amp; Document Verification</a></li>
     <li class="he-toc__l3"><a href="#template-configuration">Template Configuration</a></li>
     <li class="he-toc__l3"><a href="#signature-management">Signature Management</a></li>
