@@ -1,14 +1,22 @@
 # Security Model
 
 ## Middleware Chain
+
 ```
-Request → proxy.ts
-  → Check if public route → allow
-  → Get JWT token
-  → Check account status (SUSPENDED/DEACTIVATED → login)
-  → Check mustChangePassword → redirect to change-password
-  → Check role matches portal prefix → forbid or allow
+Request → proxy.ts (edge proxy)
+  → Gates /api/images/* only (auth + hotlink/header protection)
+  → Sets image security headers
 ```
+
+> **Note:** `proxy.ts` is **images-only**. It does NOT enforce portal role authentication. The proxy is a Next.js 16 replacement for `middleware.ts` and handles image security exclusively.
+
+## Auth Enforcement (Three Layers)
+
+1. **Portal layouts** — each portal `layout.tsx` calls `requireStaff` / `requireInstructor` / `requireStudent` / `requireApplicant` / `requireExaminer` from `lib/auth/helpers.ts` as the primary gate. Wrong-role users are redirected; unauthenticated users are sent to `/login`.
+2. **Route handlers / server actions** — call `requireAdmin()` / `requireAuth()` / `requirePermission()` directly; thrown `'Unauthorized'` / `'Forbidden'` is converted to 401 / 403 by `withErrorHandler`.
+3. **API route guards** — staff routes check `isStaff(role)` or `isAdmin(role)`; student routes verify `user.role === 'STUDENT'`; cron routes require `Authorization: Bearer ${CRON_SECRET}`.
+
+A missed check in any one layer is caught by the next.
 
 ## Role-Based Access
 | Portal | Allowed Roles |

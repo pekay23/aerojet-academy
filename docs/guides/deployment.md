@@ -96,9 +96,21 @@ Supabase storage nightly.
 
 ## Reverse proxy / middleware
 
-The Next.js 16 codebase uses `proxy.ts` (the Next 16 replacement for
-`middleware.ts`) at the repo root to enforce `ROUTE_ROLE_MAP` for every
-portal and its `/api/*` siblings.
+`proxy.ts` at the repo root is **images-only** — it gates `/api/images/*`
+(auth + hotlink/header protection) and sets image security headers. It does
+**not** enforce portal auth for `/staff`, `/instructor`, `/student`,
+`/examiner`, `/applicant`, or their `/api/*` siblings.
+
+Portal auth is enforced in three layers:
+
+1. **Portal layouts** — each portal's `layout.tsx` calls
+   `requireStaff`/`requireInstructor`/`requireStudent`/etc. from
+   `lib/auth/helpers.ts` as the primary gate.
+2. **Route handlers / server actions** — call `requireAdmin()`/`requireAuth()`
+   /`requireStaff()`/`requirePermission()` directly; thrown `'Unauthorized'`/
+   `'Forbidden'` strings are caught by `withErrorHandler` and converted to
+   401/403.
+3. **Edge proxy** (`proxy.ts`) — images-only; does not gate portal routes.
 
 ## Webhooks
 

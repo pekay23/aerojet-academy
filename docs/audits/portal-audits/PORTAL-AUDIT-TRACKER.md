@@ -1,7 +1,7 @@
 # Portal Audit & Implementation Tracker
 
-**Last Updated**: 2026-09-04
-**Status**: All 5 portals audited. All 213 portal-specific findings implemented. Cross-portal schema migration complete (2026-09-04). ESLint `no-explicit-any` rule upgrade in progress by parallel agent.
+**Last Updated**: 2026-09-07
+**Status**: All 5 portals audited. All 213 portal-specific findings implemented. Cross-portal schema migration complete (2026-09-04). TypeScript: 0 errors (02717b1e). ESLint: 0 errors, 17 warnings in 2 files (8e43423c bulk cleanup).
 
 ---
 
@@ -390,11 +390,7 @@ A second audit pass was conducted across all 5 portals to identify cross-portal 
 
 **Note**: Pre-existing test failures in `tests/unit/lib/utils-date.test.ts` were resolved by adding missing exports to `lib/utils/date.ts`. Remaining test gaps are in legacy integration test scaffolding, not in audit-related implementations.
 
-**Type-check status**: `tsc --noEmit` exits with code 2 (~530 errors). Applied the safe high-leverage fix: `tsconfig.json` now **excludes `.next`** build/dev cache (previously type-checked stale generated route validators → spurious TS2307). Residual errors are **multi-root**, not the single `RouteContext` drift diagnosed above: ~45 TS18046/18048 (`ctx?:` optional-param across ~31 `app/api/**/route.ts` handlers); ~187 TS2339 (Zod `ZodError.errors` narrowing + Prisma `include` literal narrowing); ~70 TS2304 (missing `NextResponse`/`z` imports); ~65 TS2322 (Prisma `JsonValue` writes); ~15 TS7006/TS5097 (auto-gen integration tests). `tsc` cold-cache exceeds the environment run timeout, so reduction is gated to a **separate type-check sprint** (start: make `RouteHandler` ctx required + `withErrorHandler` always pass resolved `{ params }`, then `ctx?:` → `ctx:`).
-
-**Type-check status**: `tsc --noEmit` exits with code 2 (~530 errors). Applied the safe high-leverage fix: `tsconfig.json` now **excludes `.next`** build/dev cache (previously type-checked stale generated route validators → spurious TS2307). Residual errors are **multi-root**, not the single `RouteContext` drift diagnosed above: ~45 TS18046/18048 (`ctx?:` optional-param across ~31 `app/api/**/route.ts` handlers); ~187 TS2339 (Zod `ZodError.errors` narrowing + Prisma `include` literal narrowing); ~70 TS2304 (missing `NextResponse`/`z` imports); ~65 TS2322 (Prisma `JsonValue` writes); ~15 TS7006/TS5097 (auto-gen integration tests). `tsc` cold-cache exceeds the environment run timeout, so reduction is gated to a **separate type-check sprint** (start: make `RouteHandler` ctx required + `withErrorHandler` always pass resolved `{ params }`, then `ctx?:` → `ctx:`).
-
-**Type-check status**: `tsc --noEmit` exits with code 2 (~530 errors). Applied the safe high-leverage fix: `tsconfig.json` now **excludes `.next`** build/dev cache (previously type-checked stale generated route validators → spurious TS2307). Residual errors are **multi-root**, not the single `RouteContext` drift diagnosed above: ~45 TS18046/18048 (`ctx?:` optional-param across ~31 `app/api/**/route.ts` handlers); ~187 TS2339 (Zod `ZodError.errors` narrowing + Prisma `include` literal narrowing); ~70 TS2304 (missing `NextResponse`/`z` imports); ~65 TS2322 (Prisma `JsonValue` writes); ~15 TS7006/TS5097 (auto-gen integration tests). `tsc` cold-cache exceeds the environment run timeout, so reduction is gated to a **separate type-check sprint** (start: make `RouteHandler` ctx required + `withErrorHandler` always pass resolved `{ params }`, then `ctx?:` → `ctx:`).
+**Type-check status**: `tsc --noEmit` exits 0 (0 errors) as of 2026-09-07 (commit `02717b1e`). The prior `RouteHandler`/`RouteContext` type drift from the `withErrorHandler` wrapper signature was resolved across 31 files. The stale ~495-error / ~530-error paragraphs below are superseded.
 
 ---
 
@@ -414,19 +410,24 @@ Two skills encode the standards for this project:
 
 1. ~~Run LLM Council 3-pass verification~~ — Completed; 7 critical bugs found and fixed
 2. ~~Update audit docs~~ — Tracker complete; individual audit docs (`staff-portal-audit-2026-08-27.md` etc.) still show "Confirmed Pending" per-item and need a bulk status pass to match this tracker's ✅ Implemented verdicts
-3. ~~Run type-check~~ — 0 app/lib errors **at time of audit; current working tree has ~495 `RouteHandler`/`RouteContext` type mismatches across `app/api/**/route.ts` (pre-commit blocker — see Test Coverage Status above)** **at time of audit; current working tree has ~495 `RouteHandler`/`RouteContext` type mismatches across `app/api/**/route.ts` (pre-commit blocker — see Test Coverage Status above)** **at time of audit; current working tree has ~495 `RouteHandler`/`RouteContext` type mismatches across `app/api/**/route.ts` (pre-commit blocker — see Test Coverage Status above)**
+3. ~~Run type-check~~ — Done (2026-09-07, 0 errors, commit 02717b1e)
 4. Address verification findings:
    - ✅ **Fixed**: Student H-6 — `lib/student/error-handler.ts` IS used; `logActionError` imported in `app/student/actions.ts:26`
    - ✅ **Fixed**: Instructor M-4 — server-side pagination in `getGradingQueue(page, limit)` with clamped `limit`
-   - **Medium**: Instructor M-12 — add `unstable_cache` to `getInstructorProfileByUserId`
-   - **Medium**: Staff H-9 — split `app/staff/actions.ts` into domain-specific files (currently 1,043 lines)
-   - **Medium**: Staff M-4 — add rate limiting to OJT API routes
-   - **Medium**: Staff H-3 — replace remaining `any` types in 3 files
-   - **Medium**: Examiner M-2 — batch update path in results submission (`for...of` → `updateMany`)
-   - **Low**: Instructor L-4 — generic error messages in production (`{error.message}` in `grading/error.tsx:7`)
-   - **Low**: Instructor H-3 — add missing `attendance/[id]/error.tsx`
-   - **Low**: Applicant C-5 — add `not-found.tsx` to `exam-bookings/[id]`
-5. Commit changes with comprehensive commit message
+   - ✅ **Fixed**: Instructor M-12 — `unstable_cache` on `getInstructorProfileByUserId` (`lib/instructor/profile.ts`)
+   - ✅ **Fixed**: Staff H-9 — `app/staff/actions.ts` is now an 11-line barrel re-export; 9 domain files in `app/staff/actions/`
+   - ✅ **Fixed**: Staff M-4 — all 8 OJT routes under `app/api/staff/ojt/**` import `rateLimitByUser`
+   - ✅ **Fixed**: Staff H-3 — `any` types replaced in `audit-logs/page.tsx`, `CourseInfoEditDialog.tsx`, `ExamComponentsSection.tsx`
+   - ⏸️ **Closed — false positive**: Examiner M-2 — `for...of` loop in `app/examiner/results/actions.ts:126` is correct; each `ExamResult` row gets unique values, and `updateMany` cannot apply per-row-different data. Loop already runs inside `$transaction`.
+   - ✅ **Fixed**: Instructor L-4 — `app/instructor/grading/error.tsx:7` now renders a generic message in production; `{error.message}` gated behind `NODE_ENV === 'development'`
+   - ✅ **Fixed**: Instructor H-3 — `app/instructor/attendance/[id]/error.tsx` created
+   - ✅ **Fixed**: Applicant C-5 — `app/applicant/exam-bookings/[id]/not-found.tsx` created
+5. ~~Commit changes with comprehensive commit message~~ — Done (8e43423c, 02717b1e)
+
+### Outstanding (minor)
+- 17 ESLint warnings remain in 2 files: `app/staff/exams/events/create/page.tsx` (11 `any`) and `app/staff/exams/events/[id]/edit/_components/EditExamEventForm.tsx` (8 `any`). Non-blocking.
+- 1 unused import warning: `lib/withdrawal/actions.ts:6` (`Prisma`).
+- Duplicate type-check status paragraphs (3x) in this file — cleaned up 2026-09-07.
 
 ---
 
@@ -446,7 +447,4 @@ Two skills encode the standards for this project:
 - Implementation status is tracked with ✅ Fixed, ⚠️ Partial, ⏸️ Pending
 - All 213 findings across 5 portals have been implemented
 - The codebase has 538 modified files across all portals (19,230 insertions, 10,077 deletions)
-- Type-check and full test suite need to be run to verify implementations
-- **2026-08-28**: `bun run type-check` fails with ~495 errors in `app/api/**/route.ts` due to `RouteHandler`/`RouteContext` type drift from the `withErrorHandler` wrapper signature. Auto-generated tests in `tests/integration/api/` also have `TS5097`/`TS7006` errors. This is a pre-commit blocker — fix `RouteContext` in `lib/api/response.ts` to match route handler call-site signatures.
-- **2026-08-28**: `bun run type-check` fails with ~495 errors in `app/api/**/route.ts` due to `RouteHandler`/`RouteContext` type drift from the `withErrorHandler` wrapper signature. Auto-generated tests in `tests/integration/api/` also have `TS5097`/`TS7006` errors. This is a pre-commit blocker — fix `RouteContext` in `lib/api/response.ts` to match route handler call-site signatures.
-- **2026-08-28**: `bun run type-check` fails with ~495 errors in `app/api/**/route.ts` due to `RouteHandler`/`RouteContext` type drift from the `withErrorHandler` wrapper signature. Auto-generated tests in `tests/integration/api/` also have `TS5097`/`TS7006` errors. This is a pre-commit blocker — fix `RouteContext` in `lib/api/response.ts` to match route handler call-site signatures.
+- **2026-09-07**: `bun run type-check` exits 0 (0 errors) — resolved in commit `02717b1e`. `bun run lint` exits 0 (0 errors, 17 warnings in 2 files) — bulk cleanup in commit `8e43423c`.

@@ -1,7 +1,7 @@
 # Central Audit, Issues & Fixes Tracker
 
-**Last Updated**: 2026-09-04 (Post-schema migration verification)
-**Status**: All critical issues fixed. Schema migration complete on Neon + Supabase. ESLint `no-explicit-any` rule upgrade in progress by parallel agent.
+**Last Updated**: 2026-09-07 (Post-type-check + ESLint verification)
+**Status**: All critical issues fixed. Schema migration complete on Neon + Supabase. TypeScript: 0 errors (02717b1e). ESLint: 0 errors, 17 warnings in 2 files (8e43423c bulk cleanup).
 
 ---
 
@@ -231,12 +231,17 @@
 
 ## Next Steps
 
-1. **Run `bun run db:push`** to apply all schema changes (review migration SQLs first)
-2. **Run `bun run type-check`** to verify no new type errors
-3. **Run `bun run test --run`** to verify no new test failures
-4. **Run `bun run lint`** before opening a PR (currently non-functional in Windows env)
-5. **Commit changes** with comprehensive commit message
-6. **Push to remote** (use `--no-verify` due to pre-existing type errors)
+1. ~~Run `bun run db:push`~~ — Done (2026-09-04, Neon + Supabase)
+2. ~~Run `bun run type-check`~~ — Done (2026-09-07, 0 errors, commit 02717b1e)
+3. ~~Run `bun run test --run`~~ — Done (2026-09-04, 52/52 integration tests)
+4. ~~Run `bun run lint`~~ — Done (2026-09-07, 0 errors, commit 8e43423c)
+5. ~~Commit changes~~ — Done (commits 8e43423c, 02717b1e)
+6. ~~Push to remote~~ — Done
+
+### Outstanding (minor)
+- 17 ESLint warnings remain in 2 files: `app/staff/exams/events/create/page.tsx` (11 `any`) and `app/staff/exams/events/[id]/edit/_components/EditExamEventForm.tsx` (8 `any`). Non-blocking; tracked in `known-issues.md`.
+- 1 unused import warning: `lib/withdrawal/actions.ts:6` (`Prisma`).
+- `docs/audits/portal-audits/PORTAL-AUDIT-TRACKER.md` has duplicated type-check status paragraphs (3x) — cosmetic cleanup only.
 
 ---
 

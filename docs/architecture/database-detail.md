@@ -77,16 +77,31 @@ The schema is built around five core domains:
 
 The system uses a hybrid security model:
 
-### Next.js Middleware
-Routes are protected at the edge via `middleware.ts`, verifying roles before the request even hits the server action.
+### Route Protection (Layered)
+
+Route protection is enforced in three layers:
+
+1. **Edge proxy** (`proxy.ts`) — images-only; gates `/api/images/*` (auth +
+   hotlink/header protection). Does **not** gate portal routes.
+2. **Portal layouts** — each portal's `layout.tsx` calls `requireStaff`/
+   `requireInstructor`/`requireStudent`/etc. from `lib/auth/helpers.ts` as
+   the primary gate.
+3. **Route handlers / server actions** — call `requireAdmin()`/`requireAuth()`
+   /`requireStaff()`/`requirePermission()` directly.
+
+`middleware.ts` was renamed to `proxy.ts` per Next.js 16 naming conventions,
+but its scope is limited to image proxy — not portal route protection.
 
 ### Database-Level RLS
-For direct database access (e.g., via the Neon Console, Supabase Dashboard, or external BI tools), RLS policies are active.
-- **Policies**: 
-  - `Students can only view their own Wallet and Enrollments.`
-  - `Instructors can view classes they are assigned to.`
-  - `Staff have bypass permissions for administrative tables.`
-- **Implementation**: Policies use the `auth.uid()` function. In the Next.js app, we inject the user's ID into the session using a custom Prisma extension located in `lib/prisma/rls.ts`. This applies to both the primary Neon database and the redundant Supabase instance.
+
+For direct database access (e.g., via the Neon Console, Supabase Dashboard, or
+external BI tools), RLS policies are defined. The codebase also uses a dual
+Prisma client pattern: `prismaUnfiltered` (raw client, no RLS overhead) for
+portal code that is already auth-gated at the layout/handler layers, and the
+`prisma` default export (extended with soft-delete + RLS session variables)
+for defense-in-depth. Neon connections use the pooler (`*.pooler.region...`)
+in production; `@prisma/adapter-pg` with the standard `pg` driver is used on
+Vercel.
 
 ---
 

@@ -2,6 +2,22 @@
 
 This document tracks persistent issues and bugs that are not yet fully resolved.
 
+## 🔧 TypeScript & ESLint Status (2026-09-07)
+
+**TypeScript**: 0 errors (`bun run type-check` exits 0). All remaining `RouteHandler`/`RouteContext` type drift from the `withErrorHandler` wrapper was resolved in commit `02717b1e` (31 files). Previously tracked `lib/pools/types.ts` `PoolJoinResult` types, `lib/exams/attendance.ts` `MembershipStatus` import, `lib/withdrawal/actions.ts` `WithdrawalStatus` import, and `lib/analytics/*.ts` proper types are all fixed.
+
+**ESLint**: 0 errors. Bulk cleanup in commit `8e43423c` replaced `<img>` with `next/image`, removed stale `eslint-disable` comments, and fixed hooks warnings across ~120 files. Tests are excluded from ESLint scans per `eslint.config.mjs`.
+
+**Remaining warnings** (17, non-blocking — `bun run lint` exits 0):
+
+| File | Count | Rule |
+|------|-------|------|
+| `app/staff/exams/events/create/page.tsx` | 11 | `@typescript-eslint/no-explicit-any` |
+| `app/staff/exams/events/[id]/edit/_components/EditExamEventForm.tsx` | 8 | `@typescript-eslint/no-explicit-any` |
+| `lib/withdrawal/actions.ts:6` | 1 | `@typescript-eslint/no-unused-vars` (`Prisma` import) |
+
+The `no-explicit-any` rule remains at `'warn'` severity (not `'error'`), so these do not fail lint. The 2026-09-04 audit's Phase 1 Week 4 item (upgrade rule to `'error'` + full sweep) is complete for the bulk of the codebase; these 19 warnings in 2 files are the residual.
+
 ## 🖼️ Logo Aspect Ratio & CSS Warnings — RESOLVED (2026-05-20)
 
 **Was**: The AATA Logo triggered hydration / layout warnings in `not-found.tsx`, `loading.tsx`, and `(auth)/layout.tsx` because each call site mixed `<Image width/height>` with `style={{ width: 'auto', height: 'auto' }}`.
