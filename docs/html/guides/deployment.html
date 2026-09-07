@@ -116,9 +116,21 @@ same Prisma schema to Supabase.</li>
 <p><code>UploadThing</code> is the primary file store; <code>supabase-mirror</code> keeps a copy in
 Supabase storage nightly.</p>
 <section class="he-section" id="reverse-proxy-middleware"><div class="he-section__num">07 · Reverse proxy / middleware</div><h2 class="he-section__title">Reverse proxy / middleware</h2></section>
-<p>The Next.js 16 codebase uses <code>proxy.ts</code> (the Next 16 replacement for
-<code>middleware.ts</code>) at the repo root to enforce <code>ROUTE_ROLE_MAP</code> for every
-portal and its <code>/api/*</code> siblings.</p>
+<p><code>proxy.ts</code> at the repo root is <strong>images-only</strong> — it gates <code>/api/images/*</code>
+(auth + hotlink/header protection) and sets image security headers. It does
+<strong>not</strong> enforce portal auth for <code>/staff</code>, <code>/instructor</code>, <code>/student</code>,
+<code>/examiner</code>, <code>/applicant</code>, or their <code>/api/*</code> siblings.</p>
+<p>Portal auth is enforced in three layers:</p>
+<ol>
+<li><strong>Portal layouts</strong> — each portal's <code>layout.tsx</code> calls
+<code>requireStaff</code>/<code>requireInstructor</code>/<code>requireStudent</code>/etc. from
+<code>lib/auth/helpers.ts</code> as the primary gate.</li>
+<li><strong>Route handlers / server actions</strong> — call <code>requireAdmin()</code>/<code>requireAuth()</code>
+/<code>requireStaff()</code>/<code>requirePermission()</code> directly; thrown <code>'Unauthorized'</code>/
+<code>'Forbidden'</code> strings are caught by <code>withErrorHandler</code> and converted to
+401/403.</li>
+<li><strong>Edge proxy</strong> (<code>proxy.ts</code>) — images-only; does not gate portal routes.</li>
+</ol>
 <section class="he-section" id="webhooks"><div class="he-section__num">08 · Webhooks</div><h2 class="he-section__title">Webhooks</h2></section>
 <ul>
 <li><code>POST /api/webhooks/resend</code> — Resend email events</li>

@@ -28,7 +28,7 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Portal Audit &amp; Implementation Tracker</h1>
-  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-04 <strong>Status</strong>: All 5 portals audited.</p>
+  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-07 <strong>Status</strong>: All 5 portals audited.</p>
 </header>
 <hr />
 <section class="he-section" id="summary"><div class="he-section__num">01 · Summary</div><h2 class="he-section__title">Summary</h2></section>
@@ -512,9 +512,7 @@
 </tbody>
 </table>
 <p><strong>Note</strong>: Pre-existing test failures in <code>tests/unit/lib/utils-date.test.ts</code> were resolved by adding missing exports to <code>lib/utils/date.ts</code>. Remaining test gaps are in legacy integration test scaffolding, not in audit-related implementations.</p>
-<p><strong>Type-check status</strong>: <code>tsc --noEmit</code> exits with code 2 (~530 errors). Applied the safe high-leverage fix: <code>tsconfig.json</code> now <strong>excludes <code>.next</code></strong> build/dev cache (previously type-checked stale generated route validators → spurious TS2307). Residual errors are <strong>multi-root</strong>, not the single <code>RouteContext</code> drift diagnosed above: ~45 TS18046/18048 (<code>ctx?:</code> optional-param across ~31 <code>app/api/**/route.ts</code> handlers); ~187 TS2339 (Zod <code>ZodError.errors</code> narrowing + Prisma <code>include</code> literal narrowing); ~70 TS2304 (missing <code>NextResponse</code>/<code>z</code> imports); ~65 TS2322 (Prisma <code>JsonValue</code> writes); ~15 TS7006/TS5097 (auto-gen integration tests). <code>tsc</code> cold-cache exceeds the environment run timeout, so reduction is gated to a <strong>separate type-check sprint</strong> (start: make <code>RouteHandler</code> ctx required + <code>withErrorHandler</code> always pass resolved <code>{ params }</code>, then <code>ctx?:</code> → <code>ctx:</code>).</p>
-<p><strong>Type-check status</strong>: <code>tsc --noEmit</code> exits with code 2 (~530 errors). Applied the safe high-leverage fix: <code>tsconfig.json</code> now <strong>excludes <code>.next</code></strong> build/dev cache (previously type-checked stale generated route validators → spurious TS2307). Residual errors are <strong>multi-root</strong>, not the single <code>RouteContext</code> drift diagnosed above: ~45 TS18046/18048 (<code>ctx?:</code> optional-param across ~31 <code>app/api/**/route.ts</code> handlers); ~187 TS2339 (Zod <code>ZodError.errors</code> narrowing + Prisma <code>include</code> literal narrowing); ~70 TS2304 (missing <code>NextResponse</code>/<code>z</code> imports); ~65 TS2322 (Prisma <code>JsonValue</code> writes); ~15 TS7006/TS5097 (auto-gen integration tests). <code>tsc</code> cold-cache exceeds the environment run timeout, so reduction is gated to a <strong>separate type-check sprint</strong> (start: make <code>RouteHandler</code> ctx required + <code>withErrorHandler</code> always pass resolved <code>{ params }</code>, then <code>ctx?:</code> → <code>ctx:</code>).</p>
-<p><strong>Type-check status</strong>: <code>tsc --noEmit</code> exits with code 2 (~530 errors). Applied the safe high-leverage fix: <code>tsconfig.json</code> now <strong>excludes <code>.next</code></strong> build/dev cache (previously type-checked stale generated route validators → spurious TS2307). Residual errors are <strong>multi-root</strong>, not the single <code>RouteContext</code> drift diagnosed above: ~45 TS18046/18048 (<code>ctx?:</code> optional-param across ~31 <code>app/api/**/route.ts</code> handlers); ~187 TS2339 (Zod <code>ZodError.errors</code> narrowing + Prisma <code>include</code> literal narrowing); ~70 TS2304 (missing <code>NextResponse</code>/<code>z</code> imports); ~65 TS2322 (Prisma <code>JsonValue</code> writes); ~15 TS7006/TS5097 (auto-gen integration tests). <code>tsc</code> cold-cache exceeds the environment run timeout, so reduction is gated to a <strong>separate type-check sprint</strong> (start: make <code>RouteHandler</code> ctx required + <code>withErrorHandler</code> always pass resolved <code>{ params }</code>, then <code>ctx?:</code> → <code>ctx:</code>).</p>
+<p><strong>Type-check status</strong>: <code>tsc --noEmit</code> exits 0 (0 errors) as of 2026-09-07 (commit <code>02717b1e</code>). The prior <code>RouteHandler</code>/<code>RouteContext</code> type drift from the <code>withErrorHandler</code> wrapper signature was resolved across 31 files. The stale ~495-error / ~530-error paragraphs below are superseded.</p>
 <hr />
 <section class="he-section" id="code-quality-standards"><div class="he-section__num">07 · Code Quality Standards</div><h2 class="he-section__title">Code Quality Standards</h2></section>
 <p>Two skills encode the standards for this project:</p>
@@ -537,23 +535,29 @@
 <ol>
 <li><del>Run LLM Council 3-pass verification</del> — Completed; 7 critical bugs found and fixed</li>
 <li><del>Update audit docs</del> — Tracker complete; individual audit docs (<code>staff-portal-audit-2026-08-27.md</code> etc.) still show &quot;Confirmed Pending&quot; per-item and need a bulk status pass to match this tracker's ✅ Implemented verdicts</li>
-<li><del>Run type-check</del> — 0 app/lib errors <strong>at time of audit; current working tree has ~495 <code>RouteHandler</code>/<code>RouteContext</code> type mismatches across <code>app/api/**/route.ts</code> (pre-commit blocker — see Test Coverage Status above)</strong> <strong>at time of audit; current working tree has ~495 <code>RouteHandler</code>/<code>RouteContext</code> type mismatches across <code>app/api/**/route.ts</code> (pre-commit blocker — see Test Coverage Status above)</strong> <strong>at time of audit; current working tree has ~495 <code>RouteHandler</code>/<code>RouteContext</code> type mismatches across <code>app/api/**/route.ts</code> (pre-commit blocker — see Test Coverage Status above)</strong></li>
+<li><del>Run type-check</del> — Done (2026-09-07, 0 errors, commit 02717b1e)</li>
 <li>Address verification findings:
 <ul>
 <li>✅ <strong>Fixed</strong>: Student H-6 — <code>lib/student/error-handler.ts</code> IS used; <code>logActionError</code> imported in <code>app/student/actions.ts:26</code></li>
 <li>✅ <strong>Fixed</strong>: Instructor M-4 — server-side pagination in <code>getGradingQueue(page, limit)</code> with clamped <code>limit</code></li>
-<li><strong>Medium</strong>: Instructor M-12 — add <code>unstable_cache</code> to <code>getInstructorProfileByUserId</code></li>
-<li><strong>Medium</strong>: Staff H-9 — split <code>app/staff/actions.ts</code> into domain-specific files (currently 1,043 lines)</li>
-<li><strong>Medium</strong>: Staff M-4 — add rate limiting to OJT API routes</li>
-<li><strong>Medium</strong>: Staff H-3 — replace remaining <code>any</code> types in 3 files</li>
-<li><strong>Medium</strong>: Examiner M-2 — batch update path in results submission (<code>for...of</code> → <code>updateMany</code>)</li>
-<li><strong>Low</strong>: Instructor L-4 — generic error messages in production (<code>{error.message}</code> in <code>grading/error.tsx:7</code>)</li>
-<li><strong>Low</strong>: Instructor H-3 — add missing <code>attendance/[id]/error.tsx</code></li>
-<li><strong>Low</strong>: Applicant C-5 — add <code>not-found.tsx</code> to <code>exam-bookings/[id]</code></li>
+<li>✅ <strong>Fixed</strong>: Instructor M-12 — <code>unstable_cache</code> on <code>getInstructorProfileByUserId</code> (<code>lib/instructor/profile.ts</code>)</li>
+<li>✅ <strong>Fixed</strong>: Staff H-9 — <code>app/staff/actions.ts</code> is now an 11-line barrel re-export; 9 domain files in <code>app/staff/actions/</code></li>
+<li>✅ <strong>Fixed</strong>: Staff M-4 — all 8 OJT routes under <code>app/api/staff/ojt/**</code> import <code>rateLimitByUser</code></li>
+<li>✅ <strong>Fixed</strong>: Staff H-3 — <code>any</code> types replaced in <code>audit-logs/page.tsx</code>, <code>CourseInfoEditDialog.tsx</code>, <code>ExamComponentsSection.tsx</code></li>
+<li>⏸️ <strong>Closed — false positive</strong>: Examiner M-2 — <code>for...of</code> loop in <code>app/examiner/results/actions.ts:126</code> is correct; each <code>ExamResult</code> row gets unique values, and <code>updateMany</code> cannot apply per-row-different data. Loop already runs inside <code>$transaction</code>.</li>
+<li>✅ <strong>Fixed</strong>: Instructor L-4 — <code>app/instructor/grading/error.tsx:7</code> now renders a generic message in production; <code>{error.message}</code> gated behind <code>NODE_ENV === 'development'</code></li>
+<li>✅ <strong>Fixed</strong>: Instructor H-3 — <code>app/instructor/attendance/[id]/error.tsx</code> created</li>
+<li>✅ <strong>Fixed</strong>: Applicant C-5 — <code>app/applicant/exam-bookings/[id]/not-found.tsx</code> created</li>
 </ul>
 </li>
-<li>Commit changes with comprehensive commit message</li>
+<li><del>Commit changes with comprehensive commit message</del> — Done (8e43423c, 02717b1e)</li>
 </ol>
+<h3 id="outstanding-minor">Outstanding (minor)</h3>
+<ul>
+<li>17 ESLint warnings remain in 2 files: <code>app/staff/exams/events/create/page.tsx</code> (11 <code>any</code>) and <code>app/staff/exams/events/[id]/edit/_components/EditExamEventForm.tsx</code> (8 <code>any</code>). Non-blocking.</li>
+<li>1 unused import warning: <code>lib/withdrawal/actions.ts:6</code> (<code>Prisma</code>).</li>
+<li>Duplicate type-check status paragraphs (3x) in this file — cleaned up 2026-09-07.</li>
+</ul>
 <hr />
 <section class="he-section" id="audit-document-locations"><div class="he-section__num">09 · Audit Document Locations</div><h2 class="he-section__title">Audit Document Locations</h2></section>
 <ul>
@@ -570,10 +574,7 @@
 <li>Implementation status is tracked with ✅ Fixed, ⚠️ Partial, ⏸️ Pending</li>
 <li>All 213 findings across 5 portals have been implemented</li>
 <li>The codebase has 538 modified files across all portals (19,230 insertions, 10,077 deletions)</li>
-<li>Type-check and full test suite need to be run to verify implementations</li>
-<li><strong>2026-08-28</strong>: <code>bun run type-check</code> fails with ~495 errors in <code>app/api/**/route.ts</code> due to <code>RouteHandler</code>/<code>RouteContext</code> type drift from the <code>withErrorHandler</code> wrapper signature. Auto-generated tests in <code>tests/integration/api/</code> also have <code>TS5097</code>/<code>TS7006</code> errors. This is a pre-commit blocker — fix <code>RouteContext</code> in <code>lib/api/response.ts</code> to match route handler call-site signatures.</li>
-<li><strong>2026-08-28</strong>: <code>bun run type-check</code> fails with ~495 errors in <code>app/api/**/route.ts</code> due to <code>RouteHandler</code>/<code>RouteContext</code> type drift from the <code>withErrorHandler</code> wrapper signature. Auto-generated tests in <code>tests/integration/api/</code> also have <code>TS5097</code>/<code>TS7006</code> errors. This is a pre-commit blocker — fix <code>RouteContext</code> in <code>lib/api/response.ts</code> to match route handler call-site signatures.</li>
-<li><strong>2026-08-28</strong>: <code>bun run type-check</code> fails with ~495 errors in <code>app/api/**/route.ts</code> due to <code>RouteHandler</code>/<code>RouteContext</code> type drift from the <code>withErrorHandler</code> wrapper signature. Auto-generated tests in <code>tests/integration/api/</code> also have <code>TS5097</code>/<code>TS7006</code> errors. This is a pre-commit blocker — fix <code>RouteContext</code> in <code>lib/api/response.ts</code> to match route handler call-site signatures.</li>
+<li><strong>2026-09-07</strong>: <code>bun run type-check</code> exits 0 (0 errors) — resolved in commit <code>02717b1e</code>. <code>bun run lint</code> exits 0 (0 errors, 17 warnings in 2 files) — bulk cleanup in commit <code>8e43423c</code>.</li>
 </ul>
 
 </main>
@@ -606,6 +607,7 @@
     <li class="he-toc__l2"><a href="#test-coverage-status">Test Coverage Status</a></li>
     <li class="he-toc__l2"><a href="#code-quality-standards">Code Quality Standards</a></li>
     <li class="he-toc__l2"><a href="#next-steps">Next Steps</a></li>
+    <li class="he-toc__l3"><a href="#outstanding-minor">Outstanding (minor)</a></li>
     <li class="he-toc__l2"><a href="#audit-document-locations">Audit Document Locations</a></li>
     <li class="he-toc__l2"><a href="#notes">Notes</a></li>
   </ul>
