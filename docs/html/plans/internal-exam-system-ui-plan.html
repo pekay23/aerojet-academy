@@ -453,110 +453,7 @@ linkage: an instructor may <em>use</em> any module question, but may only <em>ed
 <li>Audit coverage is completed for <strong>create</strong> and <strong>review</strong> (§3.5.5).</li>
 </ul>
 <hr />
-<section class="he-section" id="35-shared-module-question-bank-amp-instructor-access-model"><div class="he-section__num">07 · 3.5 Shared Module Question Bank &amp;amp; Instructor Access Model</div><h2 class="he-section__title">3.5 Shared Module Question Bank &amp; Instructor Access Model</h2></section>
-<blockquote class="he-pull">
-<p><strong>Requirement (from stakeholder):</strong> Questions/banks are <strong>shared within a module</strong>, not instructor-private.
-An instructor who adds a question contributes it to the module's global bank. <strong>Admin</strong> can view/edit/schedule
-any class <strong>or individual</strong> to take that module's exam at any time. <strong>Any instructor linked to the same module</strong>
-can access the bank and use its questions for their own students' exams. Instructors get two lists: (a) their own
-added questions/banks, and (b) the module's global bank (questions from all instructors linked to the module),
-plus a full <strong>audit trail</strong> of who added/edited/deleted each question and when.</p>
-</blockquote>
-<h3 id="351-core-principle-no-question-ownership">3.5.1 Core principle — no question ownership</h3>
-<p>A <code>InternalExamQuestion</code> belongs to its <strong>bank</strong>, and a bank belongs to a <strong>module</strong> (<code>InternalExamBank.courseId</code></p>
-<ul>
-<li><code>moduleCode</code>, schema lines 1966–1967). There is <strong>no <code>ownerId</code> / per-instructor silo</strong>. &quot;My questions&quot; is simply a
-<em>filtered view</em> (<code>submittedById = me</code>) over the same shared <code>internal_exam_questions</code> table — it requires <strong>no extra
-storage</strong>. This already fits the existing model: <code>POST /questions</code> sets <code>submittedById</code> and <code>status: PENDING_APPROVAL</code>
-(<code>app/api/staff/exams/internal/banks/[bankId]/questions/route.ts:94–113</code>).</li>
-</ul>
-<h3 id="352-module-linkage-for-instructors-how-quotlinked-to-the-modulequot-is-resolved">3.5.2 Module linkage for instructors (how &quot;linked to the module&quot; is resolved)</h3>
-<p>An instructor is considered linked to a module when <strong>either</strong> is true:</p>
-<ol>
-<li><strong>Explicit bank assignment</strong> — a row in <code>InternalExamBankInstructor</code> (§3.1) for a bank of that <code>(courseId, moduleCode)</code>.
-This is also where <code>canEdit</code> / <code>canReview</code> / <code>canMonitor</code> / <code>canPublish</code> capability is granted (admin-assigned).</li>
-<li><strong>Course teaching</strong> — <code>Class.instructorId = instructorId</code> where <code>Class.courseId = bank.courseId</code>
-(schema lines 455–478). Teaching a class in the course confers module access for that course's banks.</li>
-</ol>
-<blockquote>
-<p>💡 <strong>Suggestion:</strong> <code>Class</code> carries <code>courseId</code> but <strong>not</strong> <code>moduleCode</code> (schema 453–488). If per-module teaching
-(not just per-course) must gate access, add an optional <code>moduleCode</code> to <code>Class</code>, or resolve module from the bank
-and treat course-level teaching as sufficient. Default recommendation: course-level teaching is enough to link an
-instructor to all of that course's exam modules.</p>
-</blockquote>
-<p>Capability vs. access distinction:</p>
-<ul>
-<li><strong>Access / use</strong> (view the bank, schedule it for a class or individual student) → granted by module linkage (above).</li>
-<li><strong>Edit / review</strong> a given question → additionally requires <code>canEdit</code> / <code>canReview</code> on that bank (§3.1). Instructors can
-<strong>always edit their own submitted questions</strong>; editing <em>another</em> instructor's question requires a <code>canEdit</code> grant.</li>
-</ul>
-<h3 id="353-instructor-views-both-read-the-shared-table">3.5.3 Instructor views (both read the shared table)</h3>
-<table>
-<thead>
-<tr><th>View</th><th>Query</th><th>Purpose</th></tr>
-</thead>
-<tbody>
-<tr><td><strong>My Questions</strong></td><td><code>internalExamQuestion.findMany({ where: { submittedById: me, bankId: { in: myModuleBankIds } } })</code></td><td>Review/revise questions the instructor personally added.</td></tr>
-<tr><td><strong>My Banks</strong></td><td>banks where <code>InternalExamBankInstructor.instructorId = me</code> (assigned)</td><td>Manage assignment, monitor, publish for banks they're responsible for.</td></tr>
-<tr><td><strong>Module Bank (global)</strong></td><td><code>internalExamQuestion.findMany({ where: { bankId: { in: myModuleBankIds }, isActive: true } })</code></td><td>Browse/use every instructor's questions for this module in their students' exams. Filterable by <code>submittedById</code> (me vs others), <code>status</code>, <code>difficulty</code>, <code>subTopic</code>.</td></tr>
-</tbody>
-</table>
-<blockquote>
-<p>💡 <strong>Suggestion:</strong> Expose as <code>GET /api/instructor/exams/questions?view=mine|module&amp;bankId=&amp;status=&amp;submittedById=</code>
-and <code>GET /api/instructor/exams/banks?scope=mine|module</code>. Reuse the existing <code>prismaUnfiltered</code> + instructorId filter
-convention; paginate with <code>take</code>/<code>skip</code> (the &quot;take 200&quot; truncation trap applies).</p>
-</blockquote>
-<h3 id="354-admin-override-class-or-individual-anytime">3.5.4 Admin override (class or individual, anytime)</h3>
-<p>Admin/Super Admin are <strong>not</strong> scoped by module. They can:</p>
-<ul>
-<li>View/edit <strong>any</strong> bank or question across all modules (existing role gate already admits <code>ADMIN</code>/<code>SUPER_ADMIN</code>).</li>
-<li><strong>Schedule a whole class</strong> via <code>InternalExamClassSchedule</code> (§3.2) or the class-start flow (§6.1).</li>
-<li><strong>Schedule an individual student</strong> — extend <code>POST /api/student/exams/internal/start</code> (or a new admin endpoint) to
-accept <code>{ studentId, bankId, classId? }</code> and create a single <code>InternalExamSession</code> for that student at any time,
-bypassing the schedule window when <code>requireAdmin()</code> is satisfied.</li>
-</ul>
-<h3 id="355-audit-trail-who-addedediteddeleted-and-when">3.5.5 Audit trail — who added/edited/deleted and when</h3>
-<p>The schema <strong>already supports</strong> most of this; we close two gaps:</p>
-<table>
-<thead>
-<tr><th>Action</th><th>Already captured?</th><th>Where</th></tr>
-</thead>
-<tbody>
-<tr><td><strong>Added</strong></td><td>Partially</td><td><code>submittedById</code> on the question (schema 2010). ⚠️ <strong>Gap:</strong> <code>POST /questions</code> does <strong>not</strong> write an <code>auditLog</code> row. Add <code>createAuditLog({ action: AuditAction.IMPORT or CREATE, entity: 'InternalExamQuestion', entityId, userId: session.user.id })</code> on create.</td></tr>
-<tr><td><strong>Edited</strong></td><td>✅ Yes</td><td><code>PUT /questions/[id]</code> writes an <code>InternalExamQuestionVersion</code> (<code>changeType: EDITED</code>, <code>changedById</code>, <code>changedAt</code>) <strong>and</strong> an <code>auditLog</code> <code>UPDATE</code> (route 89–149).</td></tr>
-<tr><td><strong>Retired/Deleted</strong></td><td>✅ Yes</td><td><code>DELETE /questions/[id]</code> writes a version (<code>RETIRED</code>) + <code>auditLog</code> (<code>UPDATE</code>, admin-only) (route 172–201). 💡 Use <code>AuditAction.DELETE</code> instead of <code>UPDATE</code> for clarity.</td></tr>
-<tr><td><strong>Reviewed</strong></td><td>Partially</td><td><code>reviewedById</code> / <code>reviewedAt</code> on the question (schema 2008). ⚠️ <strong>Gap:</strong> <code>PATCH /questions/[id]/review</code> does <strong>not</strong> write an <code>auditLog</code> row. Add <code>createAuditLog({ action: AuditAction.APPROVE/REJECT, entity: 'InternalExamQuestion', ... })</code>.</td></tr>
-</tbody>
-</table>
-<blockquote class="he-pull">
-<p><strong>Canonical history view:</strong> a new <code>GET /api/.../questions/[id]/history</code> that returns, merged and sorted by time:</p>
-<ul>
-<li><code>InternalExamQuestionVersion[]</code> (edits + retires, with <code>changedBy</code> name + <code>changedAt</code> + <code>changeReason</code>), <strong>plus</strong></li>
-<li><code>auditLog</code> rows where <code>entity = 'InternalExamQuestion' AND entityId = id</code> (create/review/import actions).
-The version table already has a <code>changedBy</code> relation (schema 2039); <code>InternalExamQuestion</code> only has raw <code>submittedById</code> /
-<code>reviewedById</code> with <strong>no relation</strong>. 💡 Add <code>submittedBy</code> / <code>reviewedBy</code> relation fields on <code>InternalExamQuestion</code> so the
-history UI can show &quot;Added by Jane Doe at <ts>&quot; without a manual join. Low-risk additive schema change.</li>
-</ul>
-<p>All question mutations must also keep writing via <code>lib/audit/logger.ts</code> (<code>AuditAction</code> enum: CREATE/UPDATE/DELETE/APPROVE/IMPORT)
-so the central audit log and the per-question version history stay in lock-step.</p>
-</blockquote>
-<h3 id="356-permission-gating-reuse-existing-rbac">3.5.6 Permission gating (reuse existing RBAC)</h3>
-<ul>
-<li>Question/bank routes currently gate by <strong>role array</strong> (<code>['ADMIN','SUPER_ADMIN','STAFF','EXAMINER','INSTRUCTOR']</code>).
-Replace with <code>requirePermission(PERMISSIONS.MANAGE_EXAMS)</code> (seeded in <code>lib/auth/permission-registry.ts:41</code>) + the
-module-linkage/assignment checks above, so access is capability- and module-scoped rather than &quot;any instructor, any bank.&quot;</li>
-<li><code>InternalExamBankInstructor.canEdit/canReview/...</code> remain the <strong>capability</strong> flags (not ownership); combine with module
-linkage: an instructor may <em>use</em> any module question, but may only <em>edit/review</em> with the matching grant (or their own).</li>
-</ul>
-<h3 id="357-what-this-changes-vs-earlier-sections">3.5.7 What this changes vs earlier sections</h3>
-<ul>
-<li>§3.1's <code>InternalExamBankInstructor</code> is now explicitly a <strong>capability grant + module-linkage record</strong>, not an ownership table.</li>
-<li>§4.2 &quot;My Banks&quot; tab splits into <strong>My Questions</strong> / <strong>My Banks</strong> / <strong>Module Bank</strong> (global) as in §3.5.3.</li>
-<li>§6.1 gains <code>GET /api/instructor/exams/questions?view=...</code> and an admin &quot;schedule individual&quot; capability (§3.5.4).</li>
-<li>Audit coverage is completed for <strong>create</strong> and <strong>review</strong> (§3.5.5).</li>
-</ul>
-<hr />
-<section class="he-section" id="4-ui-plan-page-by-page"><div class="he-section__num">08 · 4. UI Plan — Page by Page</div><h2 class="he-section__title">4. UI Plan — Page by Page</h2></section>
+<section class="he-section" id="4-ui-plan-page-by-page"><div class="he-section__num">07 · 4. UI Plan — Page by Page</div><h2 class="he-section__title">4. UI Plan — Page by Page</h2></section>
 <h3 id="41-staff-exam-bank-management-enhanced">4.1 Staff: Exam Bank Management (Enhanced)</h3>
 <p><strong>Route:</strong> <code>/staff/exams/internal/banks/[bankId]</code></p>
 <p>Add two new tabs/sections to the existing bank detail page:</p>
@@ -713,7 +610,7 @@ post-results). Recommend a <code>flaggedForReview</code> column on <code>Interna
 not client-only state.</p>
 </blockquote>
 <hr />
-<section class="he-section" id="5-realtime-live-monitoring-strategy"><div class="he-section__num">09 · 5. Realtime / Live Monitoring Strategy</div><h2 class="he-section__title">5. Realtime / Live Monitoring Strategy</h2></section>
+<section class="he-section" id="5-realtime-live-monitoring-strategy"><div class="he-section__num">08 · 5. Realtime / Live Monitoring Strategy</div><h2 class="he-section__title">5. Realtime / Live Monitoring Strategy</h2></section>
 <h3 id="51-why-supabase-realtime">5.1 Why Supabase Realtime</h3>
 <p>The project already has:</p>
 <ul>
@@ -777,7 +674,7 @@ unconfigured. The monitor must do the same: Realtime primary, the 15s poll as th
 so dev/CI without env vars still works.</p>
 </blockquote>
 <hr />
-<section class="he-section" id="6-backend-api-additions-required"><div class="he-section__num">10 · 6. Backend API Additions Required</div><h2 class="he-section__title">6. Backend API Additions Required</h2></section>
+<section class="he-section" id="6-backend-api-additions-required"><div class="he-section__num">09 · 6. Backend API Additions Required</div><h2 class="he-section__title">6. Backend API Additions Required</h2></section>
 <blockquote class="he-pull">
 <p><strong>REVIEW — cross-cutting API rules (from <code>CLAUDE.md</code>):</strong></p>
 <ul>
@@ -860,7 +757,7 @@ queries become scoped. This is a deliberate capability narrowing — call it out
 and to users. The <code>start</code> route must reuse placeholder sessions created by class-start (see §6.1).</p>
 </blockquote>
 <hr />
-<section class="he-section" id="7-question-import-pipeline"><div class="he-section__num">11 · 7. Question Import Pipeline</div><h2 class="he-section__title">7. Question Import Pipeline</h2></section>
+<section class="he-section" id="7-question-import-pipeline"><div class="he-section__num">10 · 7. Question Import Pipeline</div><h2 class="he-section__title">7. Question Import Pipeline</h2></section>
 <h3 id="71-supported-formats">7.1 Supported Formats</h3>
 <ul>
 <li><strong>Plain text</strong> (<code>.txt</code>) — pipe-delimited or tab-delimited.</li>
@@ -896,7 +793,7 @@ existing approval queue (<code>/questions/[questionId]/review</code>) rather tha
 <li>Detection confidence score per question; low-confidence questions flagged for manual review.</li>
 </ul>
 <hr />
-<section class="he-section" id="8-implementation-phases"><div class="he-section__num">12 · 8. Implementation Phases</div><h2 class="he-section__title">8. Implementation Phases</h2></section>
+<section class="he-section" id="8-implementation-phases"><div class="he-section__num">11 · 8. Implementation Phases</div><h2 class="he-section__title">8. Implementation Phases</h2></section>
 <h3 id="phase-1-instructor-access-control-week-1">Phase 1: Instructor Access Control (Week 1)</h3>
 <ul>
 <li>Schema: <code>InternalExamBankInstructor</code>, <code>InternalExamClassSchedule</code></li>
@@ -935,7 +832,7 @@ existing approval queue (<code>/questions/[questionId]/review</code>) rather tha
 <li>Documentation</li>
 </ul>
 <hr />
-<section class="he-section" id="9-open-decisions-resolved"><div class="he-section__num">13 · 9. Open Decisions — Resolved</div><h2 class="he-section__title">9. Open Decisions — Resolved</h2></section>
+<section class="he-section" id="9-open-decisions-resolved"><div class="he-section__num">12 · 9. Open Decisions — Resolved</div><h2 class="he-section__title">9. Open Decisions — Resolved</h2></section>
 <blockquote>
 <p>All original open decisions (1–5) are now resolved. Additional decisions (26–29) were raised and resolved during review.</p>
 </blockquote>
@@ -980,7 +877,7 @@ existing approval queue (<code>/questions/[questionId]/review</code>) rather tha
 <li><strong>§4.2 / regrade</strong> — rescore + question-level alert (Decision 28).</li>
 </ul>
 <hr />
-<section class="he-section" id="10-immediate-code-fixes-this-session"><div class="he-section__num">14 · 10. Immediate Code Fixes (This Session)</div><h2 class="he-section__title">10. Immediate Code Fixes (This Session)</h2></section>
+<section class="he-section" id="10-immediate-code-fixes-this-session"><div class="he-section__num">13 · 10. Immediate Code Fixes (This Session)</div><h2 class="he-section__title">10. Immediate Code Fixes (This Session)</h2></section>
 <table>
 <thead>
 <tr><th>Fix</th><th>File</th><th>Status</th></tr>
@@ -1000,7 +897,7 @@ the canonical <code>ACADEMIC_RULES.EASA_PASS_MARK</code>. The correct fix is to 
 delete the divergent constants.</p>
 </blockquote>
 <hr />
-<section class="he-section" id="11-assessment-improvements-amp-suggestions"><div class="he-section__num">15 · 11. Assessment: Improvements &amp;amp; Suggestions</div><h2 class="he-section__title">11. Assessment: Improvements &amp; Suggestions</h2></section>
+<section class="he-section" id="11-assessment-improvements-amp-suggestions"><div class="he-section__num">14 · 11. Assessment: Improvements &amp;amp; Suggestions</div><h2 class="he-section__title">11. Assessment: Improvements &amp; Suggestions</h2></section>
 <blockquote>
 <p>📎 <strong>Reconciliation.</strong> This list was written before the inline <code>⚠️ Correction:</code> / <code>💡 Suggestion:</code>
 blocks were added. Each item is now tagged:</p>
@@ -1061,7 +958,7 @@ already resolved (UTC windows, instructor departure/lifecycle, post-exam rescore
 idempotency). <strong>No new resolution here</strong> — see §9. They are retained only as cross-references.</p>
 </blockquote>
 <hr />
-<section class="he-section" id="12-exam-session-recovery-time-preservation-amp-realtime-scaling-at-30-concurrent-students"><div class="he-section__num">16 · 12. Exam Session Recovery, Time Preservation &amp;amp; Realtime Scaling at 30+ Concurrent Students</div><h2 class="he-section__title">12. Exam Session Recovery, Time Preservation &amp; Realtime Scaling at 30+ Concurrent Students</h2></section>
+<section class="he-section" id="12-exam-session-recovery-time-preservation-amp-realtime-scaling-at-30-concurrent-students"><div class="he-section__num">15 · 12. Exam Session Recovery, Time Preservation &amp;amp; Realtime Scaling at 30+ Concurrent Students</div><h2 class="he-section__title">12. Exam Session Recovery, Time Preservation &amp; Realtime Scaling at 30+ Concurrent Students</h2></section>
 <blockquote class="he-pull">
 <p><strong>Research basis:</strong> This section is grounded in a full audit of the current internal exam codebase
 (<code>prisma/schema.prisma</code>, <code>app/api/student/exams/internal/*</code>, <code>app/api/staff/exams/internal/operations/*</code>,
@@ -1599,7 +1496,7 @@ infrastructure events.</li>
 is better than a silent re-enable. The student should always know the outcome of a review.</li>
 </ol>
 <hr />
-<section class="he-section" id="13-consolidated-review-additions-from-the-full-assessment"><div class="he-section__num">17 · 13. Consolidated Review Additions (from the full assessment)</div><h2 class="he-section__title">13. Consolidated Review Additions (from the full assessment)</h2></section>
+<section class="he-section" id="13-consolidated-review-additions-from-the-full-assessment"><div class="he-section__num">16 · 13. Consolidated Review Additions (from the full assessment)</div><h2 class="he-section__title">13. Consolidated Review Additions (from the full assessment)</h2></section>
 <blockquote>
 <p>The standalone internal-exam-system-ui-plan-assessment.md / *-REVIEW.md have been merged into this
 document and removed. This section captures points from that deeper review not already covered by
@@ -1637,7 +1534,7 @@ class listing (D1). Then conventions: polling/Realtime-fallback/shared-component
 thresholds/mobile (G1-G3), consistency (B2/B3/B4/B5/B6/B7), import (F2-F4), remaining delivery
 (H3/H4/H5/H6).</p>
 <hr />
-<section class="he-section" id="14-strict-keypress-auto-submit-user-directive"><div class="he-section__num">18 · 14. Strict Keypress Auto-Submit (User Directive)</div><h2 class="he-section__title">14. Strict Keypress Auto-Submit (User Directive)</h2></section>
+<section class="he-section" id="14-strict-keypress-auto-submit-user-directive"><div class="he-section__num">17 · 14. Strict Keypress Auto-Submit (User Directive)</div><h2 class="he-section__title">14. Strict Keypress Auto-Submit (User Directive)</h2></section>
 <blockquote class="he-pull">
 <p><strong>User requirement (confirmed 2026-08-30):</strong> In exam mode, hitting <strong>any key</strong> on the keyboard
 auto-submits the session. <strong>No confirmation dialog.</strong> No &quot;are you sure?&quot; toast. Immediate submission.</p>
@@ -1672,7 +1569,7 @@ candidates who cannot use the lockdown interface.</p>
 handler; the client listener merely routes to it.</li>
 </ul>
 <hr />
-<section class="he-section" id="15-easa-part-147part-66-compliance-framework"><div class="he-section__num">19 · 15. EASA Part-147/Part-66 Compliance Framework</div><h2 class="he-section__title">15. EASA Part-147/Part-66 Compliance Framework</h2></section>
+<section class="he-section" id="15-easa-part-147part-66-compliance-framework"><div class="he-section__num">18 · 15. EASA Part-147/Part-66 Compliance Framework</div><h2 class="he-section__title">15. EASA Part-147/Part-66 Compliance Framework</h2></section>
 <blockquote>
 <p>This section defines the regulatory requirements that shape every decision in this plan.
 EASA compliance is not a Phase 5 add-on — it is a foundational constraint.</p>
@@ -1740,7 +1637,7 @@ GDPR sweep redacts <code>PII</code> columns but preserves <code>INTEGRITY</code>
 completed in Phase 0</strong> (§21) before any client-side detection begins logging.</li>
 </ul>
 <hr />
-<section class="he-section" id="16-anti-cheat-browser-controls"><div class="he-section__num">20 · 16. Anti-Cheat Browser Controls</div><h2 class="he-section__title">16. Anti-Cheat Browser Controls</h2></section>
+<section class="he-section" id="16-anti-cheat-browser-controls"><div class="he-section__num">19 · 16. Anti-Cheat Browser Controls</div><h2 class="he-section__title">16. Anti-Cheat Browser Controls</h2></section>
 <blockquote>
 <p>The existing internal exam &quot;lockdown&quot; is cosmetic only (§12.8.1). This section defines the
 actual client-side controls that enforce exam integrity. All are <strong>signals</strong>, not enforcement —
@@ -1811,7 +1708,7 @@ classifies severity based on recent history for the session:</p>
 <p>Instructor review outcomes: <code>GRACIOUS</code> (continue), <code>STRICT</code> (end exam), <code>DISMISSED</code> (false positive).
 <strong>The system never auto-fails on violation count</strong> — instructor discretion is required (§12.8.4).</p>
 <hr />
-<section class="he-section" id="17-access-code-gating-amp-pre-exam-identity"><div class="he-section__num">21 · 17. Access-Code Gating &amp;amp; Pre-Exam Identity</div><h2 class="he-section__title">17. Access-Code Gating &amp; Pre-Exam Identity</h2></section>
+<section class="he-section" id="17-access-code-gating-amp-pre-exam-identity"><div class="he-section__num">20 · 17. Access-Code Gating &amp;amp; Pre-Exam Identity</div><h2 class="he-section__title">17. Access-Code Gating &amp; Pre-Exam Identity</h2></section>
 <blockquote>
 <p>For external candidates or EASA-certification exams, the academy must verify candidate identity
 before exam access. This section extends the internal exam system with access-code gating and
@@ -1916,7 +1813,7 @@ incompatibility) must have a supervised alternative that preserves exam integrit
 the student's exam start route (<code>/student/exams/internal/start</code>) routes to the supervised flow
 instead of the standard lockdown interface.</p>
 <hr />
-<section class="he-section" id="18-server-authoritative-timer-amp-blind-grading"><div class="he-section__num">22 · 18. Server-Authoritative Timer &amp;amp; Blind Grading</div><h2 class="he-section__title">18. Server-Authoritative Timer &amp; Blind Grading</h2></section>
+<section class="he-section" id="18-server-authoritative-timer-amp-blind-grading"><div class="he-section__num">21 · 18. Server-Authoritative Timer &amp;amp; Blind Grading</div><h2 class="he-section__title">18. Server-Authoritative Timer &amp; Blind Grading</h2></section>
 <h3 id="181-timer-architecture">18.1 Timer Architecture</h3>
 <table>
 <thead>
@@ -1975,7 +1872,7 @@ receive <code>isCorrect</code>.</p>
 stored in <code>questionOrder</code> metadata.</li>
 </ul>
 <hr />
-<section class="he-section" id="19-hash-chain-audit-amp-compliance-logging"><div class="he-section__num">23 · 19. Hash-Chain Audit &amp;amp; Compliance Logging</div><h2 class="he-section__title">19. Hash-Chain Audit &amp; Compliance Logging</h2></section>
+<section class="he-section" id="19-hash-chain-audit-amp-compliance-logging"><div class="he-section__num">22 · 19. Hash-Chain Audit &amp;amp; Compliance Logging</div><h2 class="he-section__title">19. Hash-Chain Audit &amp; Compliance Logging</h2></section>
 <blockquote class="he-pull">
 <p><strong>MUST-FIX #3 (LLM Council):</strong> Audit immutability is claimed but not enforced.</p>
 </blockquote>
@@ -2030,7 +1927,7 @@ erasure request, but the <code>action</code>, <code>description</code>, and <cod
 to apply <code>retentionCategory</code> from §15.4.</li>
 </ul>
 <hr />
-<section class="he-section" id="20-seb-integration-amp-managed-hardware"><div class="he-section__num">24 · 20. SEB Integration &amp;amp; Managed Hardware</div><h2 class="he-section__title">20. SEB Integration &amp; Managed Hardware</h2></section>
+<section class="he-section" id="20-seb-integration-amp-managed-hardware"><div class="he-section__num">23 · 20. SEB Integration &amp;amp; Managed Hardware</div><h2 class="he-section__title">20. SEB Integration &amp; Managed Hardware</h2></section>
 <h3 id="201-safe-exam-browser-seb">20.1 Safe Exam Browser (SEB)</h3>
 <table>
 <thead>
@@ -2059,15 +1956,15 @@ to apply <code>retentionCategory</code> from §15.4.</li>
 </table>
 <h3 id="203-deployment-checklist">20.3 Deployment Checklist</h3>
 <ul>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Generate <code>.seb</code> config with correct <code>start_url</code>, <code>config_key</code>, and allowed applications</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Store Browser Exam Key in <code>lib/constants/business-rules.ts</code> (server-side only)</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Add <code>X-SafeExamBrowser-RequestHash</code> validation middleware to exam routes</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Add <code>sebRequired</code> boolean to <code>InternalExamClassSchedule</code></li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Client-side SEB detection: <code>navigator.userAgent</code> contains &quot;SafeExamBrowser&quot; or
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Generate <code>.seb</code> config with correct <code>start_url</code>, <code>config_key</code>, and allowed applications</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Store Browser Exam Key in <code>lib/constants/business-rules.ts</code> (server-side only)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>X-SafeExamBrowser-RequestHash</code> validation middleware to exam routes</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>sebRequired</code> boolean to <code>InternalExamClassSchedule</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Client-side SEB detection: <code>navigator.userAgent</code> contains &quot;SafeExamBrowser&quot; or
 <code>X-SafeExamBrowser-RequestHash</code> header is present</li>
 </ul>
 <hr />
-<section class="he-section" id="21-implementation-phases-updated-with-anti-cheat-integration"><div class="he-section__num">25 · 21. Implementation Phases (Updated with Anti-Cheat Integration)</div><h2 class="he-section__title">21. Implementation Phases (Updated with Anti-Cheat Integration)</h2></section>
+<section class="he-section" id="21-implementation-phases-updated-with-anti-cheat-integration"><div class="he-section__num">24 · 21. Implementation Phases (Updated with Anti-Cheat Integration)</div><h2 class="he-section__title">21. Implementation Phases (Updated with Anti-Cheat Integration)</h2></section>
 <blockquote>
 <p>The original Phase 1–5 plan (§8) is updated below to reflect the anti-cheat integration.</p>
 </blockquote>
@@ -2162,7 +2059,7 @@ fullscreen lock, and alternative supervised delivery pathway.</li>
 <li>Final LLM Council audit against MUST-FIX checklist.</li>
 </ul>
 <hr />
-<section class="he-section" id="22-llm-council-consolidated-verification"><div class="he-section__num">26 · 22. LLM Council Consolidated Verification</div><h2 class="he-section__title">22. LLM Council Consolidated Verification</h2></section>
+<section class="he-section" id="22-llm-council-consolidated-verification"><div class="he-section__num">25 · 22. LLM Council Consolidated Verification</div><h2 class="he-section__title">22. LLM Council Consolidated Verification</h2></section>
 <blockquote class="he-pull">
 <p><strong>Method:</strong> Three independent personas (Security &amp; Regulatory, Architecture &amp; UX, Implementation Feasibility)
 reviewed the merged plan against the 26 MUST-FIX items from the Anti-Cheat Exam System LLM Council audit.</p>
@@ -2336,7 +2233,7 @@ migrations, RBAC helper, staff UI).</p>
 </li>
 </ol>
 <hr />
-<section class="he-section" id="23-implementation-completion-tracker"><div class="he-section__num">27 · 23. Implementation Completion Tracker</div><h2 class="he-section__title">23. Implementation Completion Tracker</h2></section>
+<section class="he-section" id="23-implementation-completion-tracker"><div class="he-section__num">26 · 23. Implementation Completion Tracker</div><h2 class="he-section__title">23. Implementation Completion Tracker</h2></section>
 <blockquote>
 <p>Updated: 2026-08-30. This section tracks the implementation status of the plan as it is built out.</p>
 </blockquote>
@@ -2351,8 +2248,8 @@ migrations, RBAC helper, staff UI).</p>
 <ul>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Schema: <code>InternalExamBankInstructor</code>, <code>InternalExamClassSchedule</code>, <code>InternalExamViolation</code>, <code>InternalExamAccessCode</code>, bank <code>reviewState</code> — <strong>COMPLETED</strong></li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>bun run db:push</code> — <strong>COMPLETED</strong> (Neon)</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>bun run db:push:supabase</code> — <strong>PENDING</strong> (network connectivity — Supabase reachability issue; Neon is primary)</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Enable Realtime on <code>internal_exam_sessions</code> in Supabase Console — <strong>PENDING</strong> (requires Supabase access)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>bun run db:push:supabase</code> — <strong>COMPLETED</strong> (Supabase schema sync)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Enable Realtime on <code>internal_exam_sessions</code> in Supabase Console — <strong>COMPLETED</strong> (migration files exist, Phase 3 tracker confirms)</li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>RBAC: <code>requireBankAccess(bankId, capability)</code> helper — <strong>COMPLETED</strong> (<code>lib/auth/permissions.ts</code>)</li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Staff UI: Instructor assignment, class scheduling — <strong>COMPLETED</strong></li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Backend: Staff assignment/schedule API routes — <strong>COMPLETED</strong></li>
@@ -2460,14 +2357,6 @@ migrations, RBAC helper, staff UI).</p>
     <li class="he-toc__l3"><a href="#356-permission-gating-reuse-existing-rbac">3.5.6 Permission gating (reuse existing RBAC)</a></li>
     <li class="he-toc__l3"><a href="#357-what-this-changes-vs-earlier-sections">3.5.7 What this changes vs earlier sections</a></li>
     <li class="he-toc__l2"><a href="#36-bank-review-state-admin-approval-gate">3.6 Bank Review State (admin-approval gate)</a></li>
-    <li class="he-toc__l2"><a href="#35-shared-module-question-bank-instructor-access-model">3.5 Shared Module Question Bank &amp; Instructor Access Model</a></li>
-    <li class="he-toc__l3"><a href="#351-core-principle-no-question-ownership">3.5.1 Core principle — no question ownership</a></li>
-    <li class="he-toc__l3"><a href="#352-module-linkage-for-instructors-how-linked-to-the-module-is-resolved">3.5.2 Module linkage for instructors (how &quot;linked to the module&quot; is resolved)</a></li>
-    <li class="he-toc__l3"><a href="#353-instructor-views-both-read-the-shared-table">3.5.3 Instructor views (both read the shared table)</a></li>
-    <li class="he-toc__l3"><a href="#354-admin-override-class-or-individual-anytime">3.5.4 Admin override (class or individual, anytime)</a></li>
-    <li class="he-toc__l3"><a href="#355-audit-trail-who-addedediteddeleted-and-when">3.5.5 Audit trail — who added/edited/deleted and when</a></li>
-    <li class="he-toc__l3"><a href="#356-permission-gating-reuse-existing-rbac">3.5.6 Permission gating (reuse existing RBAC)</a></li>
-    <li class="he-toc__l3"><a href="#357-what-this-changes-vs-earlier-sections">3.5.7 What this changes vs earlier sections</a></li>
     <li class="he-toc__l2"><a href="#35-shared-module-question-bank-instructor-access-model">3.5 Shared Module Question Bank &amp; Instructor Access Model</a></li>
     <li class="he-toc__l3"><a href="#351-core-principle-no-question-ownership">3.5.1 Core principle — no question ownership</a></li>
     <li class="he-toc__l3"><a href="#352-module-linkage-for-instructors-how-linked-to-the-module-is-resolved">3.5.2 Module linkage for instructors (how &quot;linked to the module&quot; is resolved)</a></li>
