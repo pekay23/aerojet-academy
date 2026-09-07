@@ -350,13 +350,12 @@ A second audit pass was conducted across all 5 portals to identify cross-portal 
 | 17 | All | Type safety hardening | `tx: any` → `Prisma.TransactionClient`, discriminated `resultOverride`, input validation |
 
 ### Deferred Items (in progress)
-| Item | Status |
-|------|--------|
-| Pagination UI for student exams | ✅ Client-side pagination added to `ExamHistoryTable` (20 per page) |
-| Pagination UI for instructor grades | ✅ Server-side pagination added (`?page=&limit=`) |
-| Replace remaining `any` casts | ⏸️ Minor casts remain in JSON field access patterns |
-| Add `error.tsx`/`not-found.tsx` to all segments | ⏸️ Parent boundaries provide coverage; per-segment boundaries are enhancement |
-| Dark mode contrast micro-fixes | ✅ Fixed 3 identified contrast issues |
+
+- [x] Pagination UI for student exams — Client-side pagination added to `ExamHistoryTable` (20 per page)
+- [x] Pagination UI for instructor grades — Server-side pagination added (`?page=&limit=`)
+- [ ] Replace remaining `any` casts — Minor casts remain in JSON field access patterns
+- [ ] Add `error.tsx`/`not-found.tsx` to all segments — Parent boundaries provide coverage; per-segment boundaries are enhancement
+- [x] Dark mode contrast micro-fixes — Fixed 3 identified contrast issues
 
 ### Cross-Portal Schema Migration Complete (2026-09-04)
 
@@ -427,7 +426,6 @@ Two skills encode the standards for this project:
 ### Outstanding (minor)
 - 17 ESLint warnings remain in 2 files: `app/staff/exams/events/create/page.tsx` (11 `any`) and `app/staff/exams/events/[id]/edit/_components/EditExamEventForm.tsx` (8 `any`). Non-blocking.
 - 1 unused import warning: `lib/withdrawal/actions.ts:6` (`Prisma`).
-- Duplicate type-check status paragraphs (3x) in this file — cleaned up 2026-09-07.
 
 ---
 

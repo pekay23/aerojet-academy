@@ -32,7 +32,7 @@ The real value of tests is **not catching bugs today** — it's **preventing reg
 
 ---
 
-## 2. Current State Breakdown (POST-REMEDIATION)
+## 2. Post-Remediation: Current State Breakdown
 
 ### Tier 1 — Excellent (expanded to ~15 files)
 
@@ -64,7 +64,7 @@ All UI primitive smoke tests, hook smoke tests, trivial `typeof` tests, and auto
 
 ---
 
-## 3. Remediation Summary (COMPLETED)
+## 3. Post-Remediation: Remediation Summary
 
 ### Phase 1: Delete Waste ✅ COMPLETED
 
@@ -149,7 +149,7 @@ Plus 4 action tests and 2 workflow tests.
 
 ---
 
-## 4. Final Metrics
+## 4. Post-Remediation: Final Metrics
 
 | Metric | Before | After | Change |
 |--------|--------|-------|--------|
@@ -167,7 +167,7 @@ Plus 4 action tests and 2 workflow tests.
 
 ---
 
-## 5. Guardrails (Enforced)
+## 5. Post-Remediation: Guardrails (Enforced)
 
 See `tests/TEST-STANDARDS.md` §12-13 and `.kilo/skills/aerojet-code-standards/SKILL.md` §21 for the full forbidden/required patterns.
 
@@ -204,7 +204,7 @@ These are documented but not blocking. The core test suite is healthy.
 
 ---
 
-## 2. Current State Breakdown
+## 2. Original Plan: Current State Breakdown
 
 ### Tier 1 — Excellent (~6 files, keep and expand)
 
@@ -246,7 +246,7 @@ Component and hook tests with some real assertions but shallow coverage. Example
 
 ---
 
-## 3. Remediation Plan
+## 3. Original Plan: Remediation Plan
 
 ### Phase 1: Delete Waste (Week 1)
 
@@ -358,7 +358,7 @@ it('returns paginated users with correct meta', async () => {
 
 ---
 
-## 4. Guardrails — Preventing Future Waste
+## 4. Original Plan: Guardrails — Preventing Future Waste
 
 ### 4.1 What NOT to test
 
@@ -464,7 +464,7 @@ tests/
 
 ---
 
-## 5. Verification Criteria
+## 5. Original Plan: Verification Criteria
 
 ### Entry criteria
 - All Phase 1 deletions committed

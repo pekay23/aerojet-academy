@@ -213,7 +213,7 @@ Use this queue to pick the next item to implement.
 | 17  | Batch enrollment interface (bulk class assignment)          | ~1-2 days | 1       | **Done** |
 | 18  | Visual weekly schedule UI (calendar-based class scheduling) | ~1-2 days | 1       | **Done** |
 | 19  | Classroom/room mapping + capacity enforcement               | ~1 day    | 1       | **Done** |
-| 20  | Stripe/Paystack checkout flow for students                  | ~2-3 days | 5       |          |
+| 20  | Stripe/Paystack checkout flow for students                  | ~2-3 days | 5       | **Deferred** |
 
 ### Tier 5 — Major Projects (3+ days each)
 
