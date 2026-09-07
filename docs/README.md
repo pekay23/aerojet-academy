@@ -56,6 +56,8 @@ Operational how-tos — read these to _do_ something.
 Historical audit reports. Newest first; older reports preserved for context.
 
 - [2026-09-05 · TypeScript and ESLint verification](./audits/2026-09-05-typecheck-eslint-verification.md) — type-check clean, ESLint runner fixed, warning inventory recorded
+- [2026-09-04 · Full portal audit](./audits/2026-09-04-full-portal-audit.md) — cross-portal role enforcement and data access audit
+- [2026-08-30 · Portal QA issues](./audits/2026-08-30-portal-qa-issues.md) — QA findings and resolutions
 - [**2026-05-21 · Internal exams audit**](./audits/2026-05-21-internal-exams.md) — internal-exams hardening (`94375e5` + `b928b76`), 1 CRITICAL bug (void route writes non-existent columns)
 - [2026-05-20 · Comprehensive audit](./audits/2026-05-20-comprehensive.md) — consolidated cross-check (CRITICAL/HIGH all resolved)
 - [2026-05-19 · Design-gap status](./audits/2026-05-19-design-gap-status.md) — every row of the original design gap audit re-checked
@@ -77,6 +79,9 @@ Regulatory and security compliance registers. These map product controls to exte
 RFCs and implementation roadmaps. Use these to understand _why_ something was designed the way it is.
 
 - [Future plans](./plans/future-plans.md) — open roadmap
+- [Test suite remediation](./plans/test-suite-remediation.md) (2026-09-07) — unit, component, and integration test coverage plan
+- [Anti-cheat exam system plan](./plans/anticheat-exam-system-plan.md) (2026-09-01) — SEB integration, lockdown browser, exam security
+- [Anti-cheat vs internal exam comparison](./plans/anticheat-vs-internal-exam-comparison.md) (2026-09-01) — trade-off analysis for exam delivery approaches
 - [Admissions pipeline](./plans/admissions-pipeline.md) (visual report: [admissions-pipeline.html](./html/admissions-pipeline.html))
 - [Exam pooling refactor](./plans/exam-pooling-refactor.md) + [phase execution checklists](./plans/exam-pooling-checklists.md)
 - [On-premise product plan](./plans/on-premise-product.md) (visual: [on-premise-product.html](./html/on-premise-product.html))
@@ -128,4 +133,4 @@ Each command:
 3. Runs `type-check` + `test` before bumping
 4. Bumps `package.json` version, updates `docs/CHANGELOG.md`, commits, tags as `<branch>/vX.Y.Z`, and pushes
 
-The pre-commit hook **no longer bumps versions** — it only runs `lint-staged`. Version bumps are explicit via `bun run release:*`.
+The pre-commit hook runs `lint-staged` (Prettier format only). Version bumps are explicit via `bun run release:*` — the pre-commit hook does **not** bump versions.
