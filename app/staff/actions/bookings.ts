@@ -3,7 +3,7 @@
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
-import { BookingType, ExamCategory, PaymentStatus } from '@prisma/client'
+import { BookingType, ExamCategory, PaymentStatus, Prisma } from '@prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 import { handleActionError } from '@/lib/staff/errors'
 import { getRequestContext } from '@/lib/server/request-context'
@@ -146,7 +146,7 @@ interface BookingResultSyncData {
  * Separated from updateExamBooking to maintain booking/result domain boundaries.
  */
 async function syncExamResultFromBooking(
-  tx: any,
+  tx: Prisma.TransactionClient,
   booking: { userId: string; moduleCode?: string | null },
   sync: BookingResultSyncData
 ) {

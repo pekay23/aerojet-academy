@@ -7,11 +7,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const session = await getAuthSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const staff = session.user as any
-  if (!['STAFF', 'ADMIN'].includes(staff.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const STAFF_ROLES = ['ADMIN', 'SUPER_ADMIN', 'STAFF']
+  if (!session || !STAFF_ROLES.includes(session.user.role)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const staff = session.user
   const { id } = await params
 
   try {
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     })
 
     return NextResponse.json({ success: true, message: 'Academic period updated' })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Academic period update error:', error)
     return NextResponse.json({ error: 'Failed to update academic period' }, { status: 500 })
   }

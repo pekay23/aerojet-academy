@@ -83,8 +83,8 @@ export default function InstructorsTable() {
   }, [search, page, perPage, searchParams])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [search])
@@ -330,10 +330,10 @@ export default function InstructorsTable() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
-                      {instructor.instructorProfile?.employeeId ?? 'â€”'}
+                      {instructor.instructorProfile?.employeeId ?? '—'}
                     </td>
                     <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
-                      {instructor.instructorProfile?.specialization ?? 'â€”'}
+                      {instructor.instructorProfile?.specialization ?? '—'}
                     </td>
                     <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
                       {instructor.academyEmail ?? instructor.email}

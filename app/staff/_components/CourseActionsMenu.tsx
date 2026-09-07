@@ -31,7 +31,7 @@ export default function CourseActionsMenu({
 
   const slug = courseCode || courseId
 
-  const handleDelete = async (force = false) => {
+  const handleDelete = async (force = false): Promise<void> => {
     const msg = force
       ? `FORCE DELETE "${courseName}"? This will remove all enrollments, classes, exam components, bookings, and related records. This cannot be undone.`
       : `Are you sure you want to delete the course "${courseName}"? This action cannot be undone.`
@@ -62,8 +62,9 @@ export default function CourseActionsMenu({
       onActionComplete?.()
       router.push('/staff/courses')
       router.refresh()
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to delete course')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to delete course'
+      toast.error(message)
     } finally {
       setLoading(null)
     }

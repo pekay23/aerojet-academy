@@ -42,8 +42,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ poolId: 
     )
 
     return response
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[ROSTER_REPORT_ERROR]', error)
-    return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Server error' }, { status: 500 })
   }
 }

@@ -4,7 +4,7 @@ import { requireAuth } from '@/lib/auth/helpers'
 import { apiForbidden, apiPaginated, withErrorHandler } from '@/lib/api/response'
 import { parsePagination } from '@/lib/api/response'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
-import { UserRole } from '@prisma/client'
+import { Prisma, UserRole } from '@prisma/client'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const user = await requireAuth()
@@ -17,7 +17,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const { page, limit, skip } = parsePagination(searchParams)
   const upcoming = searchParams.get('upcoming') === 'true'
 
-  const where: any = { instructorId: instructorProfile.id }
+  const where: Prisma.ClassWhereInput = { instructorId: instructorProfile.id }
   if (upcoming) where.startDate = { gte: new Date() }
 
   const [classes, total] = await Promise.all([

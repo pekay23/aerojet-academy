@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(classroom)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CLASSROOM_CREATE]', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }

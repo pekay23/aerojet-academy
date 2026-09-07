@@ -5,7 +5,25 @@ import { useRouter } from 'next/navigation'
 import { Plus, Calendar, Clock, MapPin, Users, ChevronDown, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
 
-export default function InterviewSchedulesManager({ initialSchedules }: { initialSchedules: any[] }) {
+export interface InterviewSlot {
+  id: string
+  date: string
+  startTime: string
+  endTime: string
+  capacity: number
+  location: string | null
+  bookedCount: number
+}
+
+export interface InterviewSchedule {
+  id: string
+  name: string
+  startDate: string
+  endDate: string
+  slots: InterviewSlot[]
+}
+
+export default function InterviewSchedulesManager({ initialSchedules }: { initialSchedules: InterviewSchedule[] }) {
   const router = useRouter()
   const [schedules, _setSchedules] = useState(initialSchedules)
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -335,7 +353,7 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
                     <div className="text-sm text-slate-500">No slots defined for this schedule.</div>
                   ) : (
                     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                      {schedule.slots.map((slot: any) => (
+                      {schedule.slots.map((slot) => (
                         <div key={slot.id} className="flex flex-col justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-xs dark:border-slate-700 dark:bg-slate-900">
                           <div className="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-white">
                             <Calendar className="h-4 w-4 text-slate-400" />

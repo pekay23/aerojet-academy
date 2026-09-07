@@ -20,12 +20,17 @@ import {
   ShieldAlert,
 } from 'lucide-react'
 
+function getPlatform(nav: Navigator): string | undefined {
+  const navWithPlatform = nav as Navigator & { platform?: string }
+  return navWithPlatform.platform
+}
+
 interface Question {
   id: string
   text: string
-  options: any // JSON array of option strings
+  options: string[] // JSON array of option strings
   points: number
-  // `subTopic` is intentionally not rendered to students â€” the question
+  // `subTopic` is intentionally not rendered to students — the question
   // text + module code is enough context, and topic labels can give away
   // the answer. Kept off the wire on the server side as well.
   syllabusRef?: string | null
@@ -93,7 +98,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
           detail,
           deviceInfo: {
             userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-            platform: typeof navigator !== 'undefined' ? (navigator as any).platform : undefined,
+            platform: typeof navigator !== 'undefined' ? getPlatform(navigator) : undefined,
             language: typeof navigator !== 'undefined' ? navigator.language : undefined,
           },
           ...(opts?.severity ? { severity: opts.severity } : {}),
@@ -144,7 +149,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
       // Hide the student sidebar
       document.body.classList.add('exam-lockdown')
     } catch {
-      // Fullscreen not supported or denied â€” still hide sidebar
+      // Fullscreen not supported or denied — still hide sidebar
       document.body.classList.add('exam-lockdown')
     }
   }, [])
@@ -152,7 +157,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   // Auto-request fullscreen when exam data loads
   useEffect(() => {
     if (!data || result) return
-    // Show a prompt first â€” browsers require a user gesture for fullscreen
+    // Show a prompt first — browsers require a user gesture for fullscreen
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowFullscreenPrompt(true)
   }, [data, result])
@@ -237,7 +242,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     }
   }, [data, result, logViolation])
 
-  // Page unload â€” log that the exam interface was exited abnormally
+  // Page unload — log that the exam interface was exited abnormally
   useEffect(() => {
     if (!data || result || data.status !== 'IN_PROGRESS') return
 
@@ -253,7 +258,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
           detail: 'Student navigated away or closed the exam interface during an active session',
           deviceInfo: {
             userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-            platform: typeof navigator !== 'undefined' ? (navigator as any).platform : undefined,
+            platform: typeof navigator !== 'undefined' ? getPlatform(navigator) : undefined,
           },
         }),
       })
@@ -346,7 +351,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
           body: JSON.stringify({ sessionId, questionId, selectedAnswer }),
         })
       } catch {
-        /* silent â€” answers are also submitted at final submit */
+        /* silent — answers are also submitted at final submit */
       }
     },
     [sessionId]
@@ -456,7 +461,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">
           <Hourglass className="mx-auto mb-4 h-16 w-16 text-amber-500" />
           <h2 className="text-2xl font-black text-slate-900 dark:text-white">
-            {result.timedOut ? 'Time Expired â€” Exam Submitted' : 'Exam Submitted Successfully'}
+            {result.timedOut ? 'Time Expired — Exam Submitted' : 'Exam Submitted Successfully'}
           </h2>
           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
             Your answers have been recorded. Results are pending admin review and will be published
@@ -487,7 +492,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
           ) : (
             <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-green-50 px-4 py-2 text-xs font-bold text-green-700 dark:bg-green-900/20 dark:text-green-300">
               <CheckCircle2 className="h-3.5 w-3.5" />
-              Report submitted â€” admin will review shortly
+              Report submitted — admin will review shortly
             </div>
           )}
 
@@ -958,7 +963,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
           <div className="fixed right-4 bottom-4 z-50 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 shadow-lg dark:border-red-800 dark:bg-red-900/30">
             <ShieldAlert className="h-4 w-4 text-red-500" />
             <span className="text-xs font-bold text-red-700 dark:text-red-300">
-              Tab switches: {tabSwitchCount} â€” activity logged
+              Tab switches: {tabSwitchCount} — activity logged
             </span>
           </div>
         )}

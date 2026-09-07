@@ -5,7 +5,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
 import { ArrowLeft, MapPin, Users, Building } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import FloorPlanDesigner from './_components/FloorPlanDesigner'
+import FloorPlanDesigner, { type LayoutData } from './_components/FloorPlanDesigner'
 
 export const metadata: Metadata = {
   title: 'Classroom Layout | Staff Portal',
@@ -32,7 +32,7 @@ export default async function ClassroomDetailPage({
 
   if (!classroom) notFound()
 
-  const layout = classroom.layout as { rows: number; cols: number; cells: any[] } | null
+  const layout = classroom.layout as unknown as LayoutData | null
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">

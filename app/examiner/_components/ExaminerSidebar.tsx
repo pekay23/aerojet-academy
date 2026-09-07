@@ -9,9 +9,9 @@ import {
   Calendar,
   FileCheck,
   ClipboardCheck,
-  _UserCircle,
+  UserCircle as _UserCircle,
   LogOut,
-  _ChevronLeft
+  ChevronLeft as _ChevronLeft
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 

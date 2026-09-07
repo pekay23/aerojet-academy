@@ -7,7 +7,7 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const staff = await requireStaff()
 
-  let body: any
+  let body: { paymentIds: string[]; notes?: string }
   try {
     body = await req.json()
   } catch (_e) {

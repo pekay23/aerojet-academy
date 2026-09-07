@@ -111,6 +111,9 @@ export async function getStudentResources() {
   return serializePrisma(resources)
 }
 
+// Allowed URL protocols — relative paths (/foo) and absolute (https://, http://, mailto:, tel:)
+const SAFE_URL_RE = /^(\/|[a-z][a-z\d+\-.]*:\/\/)/i
+
 export async function upsertResource(data: {
   id?: string
   name: string
@@ -128,10 +131,31 @@ export async function upsertResource(data: {
 
   const { courseIds = [], pathwayIds = [], ...rest } = data
 
+  // Reject dangerous URL schemes (javascript:, data:, vbscript:, …)
+  if (!SAFE_URL_RE.test(rest.url)) {
+    throw new Error('Invalid resource URL. Only http(s), mailto, tel, or relative paths are allowed.')
+  }
+
+  // ── Category-aware visibility guard ──────────────────────────────────────
+  // STUDENT_GUIDE: always global and visible to everyone (enforced, not optional).
+  // ADMINISTRATIVE / INSTITUTIONAL: never visible to students (staff/in instructor only).
+  const visibility =
+    data.category === 'STUDENT_GUIDE'
+      ? { showToInstructors: true, showToStaff: true, showToStudents: true }
+      : data.category === 'ADMINISTRATIVE' || data.category === 'INSTITUTIONAL'
+        ? { showToInstructors: rest.showToInstructors, showToStaff: rest.showToStaff, showToStudents: false }
+        : {
+            showToInstructors: rest.showToInstructors,
+            showToStaff: rest.showToStaff,
+            showToStudents: rest.showToStudents,
+          }
+
+  const finalData = { ...rest, ...visibility }
+
   const resource = await prismaUnfiltered.generalResource.upsert({
     where: { id: data.id || 'new' },
     update: {
-      ...rest,
+      ...finalData,
       courses: {
         set: courseIds.map(id => ({ id }))
       },
@@ -140,7 +164,7 @@ export async function upsertResource(data: {
       }
     },
     create: {
-      ...rest,
+      ...finalData,
       courses: {
         connect: courseIds.map(id => ({ id }))
       },
@@ -153,6 +177,9 @@ export async function upsertResource(data: {
   revalidatePath('/instructor/resources')
   revalidatePath('/staff/resources')
   revalidatePath('/student/resources')
+  revalidatePath('/student/courses')
+  revalidatePath('/student/courses/[slug]')
+  revalidatePath('/student/courses/[slug]/materials')
   return serializePrisma(resource)
 }
 

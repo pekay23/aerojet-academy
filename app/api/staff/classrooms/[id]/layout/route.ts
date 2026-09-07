@@ -82,7 +82,7 @@ export async function PUT(
     })
 
     return NextResponse.json(updated)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CLASSROOM_LAYOUT_UPDATE]', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }

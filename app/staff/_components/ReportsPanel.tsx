@@ -40,12 +40,26 @@ import type {
 
 interface ReportsPanelProps {
   initialData: {
-    summary: any
-    revenueByType: any[]
-    paymentMethods: any[]
-    monthlyData: any[]
-    paymentStatus: any[]
+    summary: FinanceReportSummary
+    revenueByType: RevenueByProgrammeItem[]
+    paymentMethods: PaymentMethodBreakdownItem[]
+    monthlyData: MonthlyRevenueItem[]
+    paymentStatus: PaymentStatusBreakdownItem[]
   }
+}
+
+type FinanceReportSummary = {
+  totalRevenue: number
+  revenueThisMonth: number
+  revenueThisYear: number
+  pendingAmount: number
+  pendingCount: number
+  avgTransactionValue: number
+  totalCount: number
+  monthCount: number
+  yearCount: number
+  rejectedCount: number
+  rejectedAmount: number
 }
 
 const MONTH_NAMES = [
@@ -127,7 +141,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
   const isInitialMonth = month === now.getMonth() + 1
   useEffect(() => {
     if (!isInitialYear || !isInitialMonth) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchData()
     }
@@ -170,7 +184,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="min-w-[56px] px-2 text-center text-sm font-black text-slate-900 dark:text-slate-100">
+            <span className="min-w-14 px-2 text-center text-sm font-black text-slate-900 dark:text-slate-100">
               {year}
             </span>
             <button
@@ -368,9 +382,9 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
           ) : (
             <div className="space-y-4">
               {revenueByType
-                .filter((r: any) => r.value > 0)
-                .sort((a: any, b: any) => b.value - a.value)
-                .map((item: any, idx: number) => {
+                .filter((r: RevenueByProgrammeItem) => r.value > 0)
+                .sort((a: RevenueByProgrammeItem, b: RevenueByProgrammeItem) => b.value - a.value)
+                .map((item: RevenueByProgrammeItem, idx: number) => {
                   const colors = [
                     'bg-aerojet-blue',
                     'bg-indigo-500',

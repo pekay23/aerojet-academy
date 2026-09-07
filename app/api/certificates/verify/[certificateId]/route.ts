@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { apiSuccess, apiNotFound, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiNotFound, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { getCertificateByNumber } from '@/lib/certificates/generator'
 
 /**
@@ -8,10 +8,8 @@ import { getCertificateByNumber } from '@/lib/certificates/generator'
  * Returns certificate details for verification purposes.
  */
 export const GET = withErrorHandler(async (
-  _req: NextRequest,
-  ctx: { params: Promise<{ certificateId: string }> }
-) => {
-  const { certificateId } = await ctx.params
+  _req: NextRequest, ctx?: RouteContext) => {
+  const { certificateId } = (await ctx!.params) as { certificateId: string }
 
   if (!certificateId) return apiError('certificateId is required', 400)
 

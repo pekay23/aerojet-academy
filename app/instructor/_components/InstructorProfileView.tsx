@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   User as UserIcon,
   Mail,
@@ -59,7 +59,11 @@ interface ProfileData {
     qualifications?: string | null
     hireDate?: string | null
     modulesQualified: string[]
-    classesInstructed: any[]
+    classesInstructed: Array<{
+      id: string
+      course: { code: string }
+      name: string
+    }>
   }
 }
 
@@ -67,6 +71,18 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState(initialData)
+
+  // Warn before closing the tab / navigating away with unsaved edits.
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData)
+  useEffect(() => {
+    if (!isDirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
 
   const handleUpdate = async () => {
     setIsSubmitting(true)

@@ -45,12 +45,13 @@ export function useLiveExamSessions({
   const [error, setError] = useState<string | null>(null)
   const sessionsRef = useRef<ExamSession[]>([])
 
-  const updateSession = useCallback((updated: any) => {
+  const updateSession = useCallback((updated: unknown) => {
+    const u = updated as Partial<ExamSession>
     setSessions((prev) => {
-      const idx = prev.findIndex((s) => s.id === updated.id)
+      const idx = prev.findIndex((s) => s.id === u.id)
       if (idx >= 0) {
         const next = [...prev]
-        next[idx] = { ...next[idx], ...updated }
+        next[idx] = { ...next[idx], ...u }
         sessionsRef.current = next
         return next
       }
@@ -58,10 +59,11 @@ export function useLiveExamSessions({
     })
   }, [])
 
-  const insertSession = useCallback((inserted: any) => {
+  const insertSession = useCallback((inserted: unknown) => {
+    const ins = inserted as ExamSession
     setSessions((prev) => {
-      if (prev.some((s) => s.id === inserted.id)) return prev
-      const next = [inserted, ...prev]
+      if (prev.some((s) => s.id === ins.id)) return prev
+      const next = [ins, ...prev]
       sessionsRef.current = next
       return next
     })
@@ -107,7 +109,7 @@ export function useLiveExamSessions({
   })
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSessions()
   }, [fetchSessions])

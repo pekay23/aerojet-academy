@@ -26,7 +26,7 @@ interface Props {
   staffId: string
 }
 
-export default function ReviewSignoffPanel({ entries, _logbookId, _staffId }: Props) {
+export default function ReviewSignoffPanel({ entries, logbookId: _logbookId, staffId: _staffId }: Props) {
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [commentId, setCommentId] = useState<string | null>(null)

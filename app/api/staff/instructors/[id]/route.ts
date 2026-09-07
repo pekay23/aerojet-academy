@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 
@@ -20,9 +20,9 @@ const _recencySchema = z.object({
 })
 
 // GET — single instructor detail
-export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
+export const GET = withErrorHandler(async (_req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
 
   const instructor = await prismaUnfiltered.instructorProfile.findUnique({
     where: { id },
@@ -50,9 +50,9 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
 })
 
 // PUT — update instructor profile
-export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const PUT = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
   const body = await req.json()
 
   const updated = await prismaUnfiltered.instructorProfile.update({

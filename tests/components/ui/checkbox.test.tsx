@@ -3,12 +3,22 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { Checkbox } from '@/components/ui/checkbox'
 import * as React from 'react'
 
+type CheckboxRootProps = React.ComponentProps<'div'> & {
+  checked?: boolean
+  onCheckedChange?: (checked: boolean) => void
+}
+
+type CheckboxIndicatorProps = {
+  children?: React.ReactNode
+}
+
 vi.mock('@radix-ui/react-checkbox', () => ({
-  Root: ({ children, className, checked, onCheckedChange, ...props }: any) => {
+  Root: ({ children, className, checked, onCheckedChange, ...props }: CheckboxRootProps) => {
     const [state, setState] = React.useState(!!checked)
     return (
       <div
         role="checkbox"
+        aria-checked={state}
         className={className}
         data-checked={String(state)}
         onClick={() => {
@@ -22,7 +32,7 @@ vi.mock('@radix-ui/react-checkbox', () => ({
       </div>
     )
   },
-  Indicator: ({ children }: any) => <span>{children}</span>,
+  Indicator: ({ children }: CheckboxIndicatorProps) => <span>{children}</span>,
 }))
 
 describe('Checkbox', () => {

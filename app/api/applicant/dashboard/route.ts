@@ -15,6 +15,6 @@ export const GET = withErrorHandler(async (_req: NextRequest) => {
     }),
     prisma.course.findMany({ where: { isActive: true }, orderBy: { code: 'asc' }, take: 50 }),
   ])
-  const { _password, ...safe } = applicant!
+  const { password: _password, ...safe } = applicant!
   return apiSuccess({ user: safe, availableCourses })
 })

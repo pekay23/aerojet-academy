@@ -80,10 +80,8 @@ const finalRecords = unifiedRecords.sort(...).slice(0, 2000)
 <li><strong>Recommendation</strong>: Use a SQL slug-resolve query (like <code>users/[id]/page.tsx</code> and <code>students/[id]/page.tsx</code> already do) or add a unique <code>slug</code> column.</li>
 <li><strong>Code Reference</strong>:
 <pre><code class="language-ts">if (id.length &lt; 20) {
-  const allBasicClasses = await prismaUnfiltered.class.findMany({
-    select: { id: true, name: true },
-  })
-  const matchedClass = allBasicClasses.find((c) =&gt; slugify(c.name) === id)
+  const allBasicClasses = await prismaUnfiltered.class.findMany({ select: { id: true, name: true } })
+  const matchedClass = allBasicClasses.find(c =&gt; slugify(c.name) === id)
   if (matchedClass) targetId = matchedClass.id
 }
 </code></pre>

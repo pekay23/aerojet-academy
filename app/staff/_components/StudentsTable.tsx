@@ -9,7 +9,6 @@ import {
   RefreshCw,
   CheckSquare,
   Square,
-  AlignJustify,
   CheckCircle2,
   AlertTriangle,
   Trash2,
@@ -18,7 +17,7 @@ import {
   Archive,
 } from 'lucide-react'
 import StudentDetailPanel from './StudentDetailPanel'
-import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
+
 import Image from 'next/image'
 
 import TablePagination from './TablePagination'
@@ -210,8 +209,9 @@ export default function StudentsTable({
                     if (!res.ok) throw new Error(data.error || 'Failed')
                     toast.success(`Credentials sent to ${data.data.summary.sent} students`)
                     fetchStudents()
-                  } catch (err: any) {
-                    toast.error(err.message || 'Failed')
+                  } catch (err: unknown) {
+                    const message = err instanceof Error ? err.message : 'Failed'
+                    toast.error(message)
                   }
                 },
               },
@@ -282,10 +282,10 @@ export default function StudentsTable({
 
       {/* Split Panel */}
       <div
-        className="flex h-[calc(100vh-300px)] min-h-[500px] overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        className="flex h-[calc(100vh-300px)] min-h-125 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
         {/* Left: List */}
-        <div className="flex w-full shrink-0 flex-col border-r border-slate-100 lg:w-[380px] xl:w-[420px] dark:border-slate-800">
+        <div className="flex w-full shrink-0 flex-col border-r border-slate-100 lg:w-95 xl:w-105 dark:border-slate-800">
           {/* Search + Filters */}
           <div className="space-y-3 border-b border-slate-100 p-4 dark:border-slate-800">
             <div className="relative">
@@ -443,7 +443,7 @@ export default function StudentsTable({
                             {fullName}
                           </p>
                           <p className="font-mono text-xs text-slate-400">
-                            {student.studentProfile?.studentId ?? 'â€”'}
+                            {student.studentProfile?.studentId ?? '—'}
                           </p>
                         </div>
                       </div>

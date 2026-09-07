@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiPaginated, apiError, apiForbidden, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiPaginated, apiError, apiForbidden, apiNotFound, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { parsePagination } from '@/lib/api/response'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import { Prisma } from '@prisma/client'
 
-export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ classId: string }> }) => {
+export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const user = await requireInstructor()
   const instructorProfile = await getInstructorProfileByUserId(user.id)
   if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -14,7 +15,7 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
   if (!(await isInternalExamSystemEnabled())) {
     return apiError('Internal exams are not currently available', 403)
   }
-  const { classId } = await ctx.params
+  const { classId } = (await ctx!.params) as { classId: string }
 
   const classItem = await prismaUnfiltered.class.findUnique({
     where: { id: classId },
@@ -36,7 +37,7 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
   if (to) dateFilter.lte = new Date(to)
   const hasDateFilter = Object.keys(dateFilter).length > 0
 
-  const sessionsWhere: any = { classId, status: { in: ['COMPLETED', 'TIMED_OUT'] } }
+  const sessionsWhere: Prisma.InternalExamSessionWhereInput = { classId, status: { in: ['COMPLETED', 'TIMED_OUT'] } }
   if (hasDateFilter) sessionsWhere.submittedAt = dateFilter
 
   const [
@@ -61,12 +62,12 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
     prismaUnfiltered.internalExamAnswer.groupBy({
       by: ['questionId'],
       where: { session: { classId, status: { in: ['COMPLETED', 'TIMED_OUT'] }, ...(hasDateFilter ? { submittedAt: dateFilter } : {}) } },
-      _count: { id: true },
+      _count: { _all: true },
     }),
     prismaUnfiltered.internalExamAnswer.groupBy({
       by: ['questionId'],
-      where: { session: { classId, status: { in: ['COMPLETED', 'TIMED_OUT'] }, isCorrect: true, ...(hasDateFilter ? { submittedAt: dateFilter } : {}) } },
-      _count: { id: true },
+      where: { isCorrect: true, session: { classId, status: { in: ['COMPLETED', 'TIMED_OUT'] }, ...(hasDateFilter ? { submittedAt: dateFilter } : {}) } },
+      _count: { _all: true },
     }),
     prismaUnfiltered.internalExamSession.findMany({
       where: hasDateFilter ? { classId, submittedAt: dateFilter } : { classId },
@@ -85,7 +86,7 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
     }),
   ])
 
-  const correctMap = new Map(correctStatsRaw.map((c) => [c.questionId, c._count.id]))
+  const correctMap = new Map(correctStatsRaw.map((c) => [c.questionId, c._count._all]))
   const questionIds = questionStatsRaw.map((q) => q.questionId)
   const questionDetails =
     questionIds.length > 0
@@ -97,7 +98,7 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
   const questionDetailMap = new Map(questionDetails.map((qd) => [qd.id, qd]))
 
   const questionStats = questionStatsRaw.map((q) => {
-    const total = q._count.id
+    const total = q._count._all
     const correct = correctMap.get(q.questionId) || 0
     const detail = questionDetailMap.get(q.questionId)
     return {

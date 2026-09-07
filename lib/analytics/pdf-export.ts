@@ -2,10 +2,48 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { formatCurrency } from '@/lib/currency';
 
+export interface MonthlyDataRow {
+  month: string
+  revenue: number
+  count: number
+}
+
+export interface RevenueByTypeRow {
+  name: string
+  value: number
+  percentage: number
+}
+
+export interface PaymentStatusRow {
+  status: string
+  amount: number
+  count: number
+}
+
+export interface FinancialReportData {
+  summary: {
+    totalRevenue: number
+    revenueThisMonth: number
+    pendingAmount: number
+    avgTransactionValue: number
+  }
+  revenueByType: RevenueByTypeRow[]
+  monthlyData: MonthlyDataRow[]
+  paymentStatus: PaymentStatusRow[]
+}
+
 // Extending jsPDF with autotable types
 declare module 'jspdf' {
   interface jsPDF {
-    autoTable: (options: any) => jsPDF;
+    autoTable: (options: {
+      startY?: number
+      head?: string[][]
+      body?: string[][] | (([string, string, string] | [string, string]) | { [key: string]: unknown })[]
+      theme?: 'striped' | 'grid'
+      headStyles?: { fillColor?: number[] }
+      margin?: { left?: number; right?: number }
+    }) => jsPDF
+    lastAutoTable?: { finalY: number }
   }
 }
 
@@ -14,8 +52,8 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-export async function generateFinancialPDF(data: any, year: number, month: number) {
-  const { summary, revenueByType, _paymentMethods, monthlyData, paymentStatus } = data;
+export async function generateFinancialPDF(data: FinancialReportData, year: number, month: number) {
+  const { summary, revenueByType, monthlyData, paymentStatus } = data;
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 14;
@@ -62,11 +100,11 @@ export async function generateFinancialPDF(data: any, year: number, month: numbe
   });
 
   // Monthly Data
-  const lastY = (doc as any).lastAutoTable.finalY;
+  const lastY = doc.lastAutoTable?.finalY ?? 55
   doc.setFontSize(12);
   doc.text(`Monthly Breakdown — ${year}`, margin, lastY + 15);
 
-  const monthlyRows = monthlyData.map((m: any) => [
+  const monthlyRows = monthlyData.map((m: MonthlyDataRow) => [
     m.month,
     formatCurrency(m.revenue),
     m.count.toString(),
@@ -82,13 +120,13 @@ export async function generateFinancialPDF(data: any, year: number, month: numbe
   });
 
   // Program Type & Status
-  const lastY2 = (doc as any).lastAutoTable.finalY;
+  const lastY2 = doc.lastAutoTable?.finalY ?? lastY + 20
   
   // Two columns roughly
   doc.text('Revenue by Programme', margin, lastY2 + 15);
   const progRows = revenueByType
-    .filter((r: any) => r.value > 0)
-    .map((r: any) => [r.name, formatCurrency(r.value), `${r.percentage}%`]);
+    .filter((r: RevenueByTypeRow) => r.value > 0)
+    .map((r: RevenueByTypeRow) => [r.name, formatCurrency(r.value), `${r.percentage}%`])
 
   doc.autoTable({
     startY: lastY2 + 20,
@@ -99,9 +137,8 @@ export async function generateFinancialPDF(data: any, year: number, month: numbe
     margin: { left: margin, right: pageWidth / 2 + 5 },
   });
 
-  const _lastY3 = (doc as any).lastAutoTable.finalY;
-  doc.text('Payment Status', pageWidth / 2 + 10, lastY2 + 15);
-  const statusRows = paymentStatus.map((s: any) => [s.status, formatCurrency(s.amount), s.count.toString()]);
+  doc.text('Payment Status', pageWidth / 2 + 10, lastY2 + 15)
+  const statusRows = paymentStatus.map((s: PaymentStatusRow) => [s.status, formatCurrency(s.amount), s.count.toString()])
 
   doc.autoTable({
     startY: lastY2 + 20,
@@ -110,10 +147,9 @@ export async function generateFinancialPDF(data: any, year: number, month: numbe
     theme: 'striped',
     headStyles: { fillColor: [15, 43, 91] },
     margin: { left: pageWidth / 2 + 10, right: margin },
-  });
+  })
 
-  // Footer
-  const pageCount = (doc as any).internal.getNumberOfPages();
+  const pageCount = (doc.internal as unknown as { getNumberOfPages: () => number }).getNumberOfPages()
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);

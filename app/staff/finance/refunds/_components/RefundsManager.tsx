@@ -19,9 +19,9 @@ interface StudentOption {
 }
 
 const CURRENCY_OPTIONS = [
-  { code: 'EUR', symbol: 'â‚¬', label: 'EUR Â· â‚¬' },
-  { code: 'USD', symbol: '$', label: 'USD Â· $' },
-  { code: 'GHS', symbol: 'GHâ‚µ', label: 'GHS Â· GHâ‚µ' },
+  { code: 'EUR', symbol: 'â‚¬', label: 'EUR · â‚¬' },
+  { code: 'USD', symbol: '$', label: 'USD · $' },
+  { code: 'GHS', symbol: 'GHâ‚µ', label: 'GHS · GHâ‚µ' },
 ] as const
 
 interface RefundRow {
@@ -76,7 +76,7 @@ export default function RefundsManager({
   useEffect(() => {
     if (!showCreate) return
     if (debouncedQuery.trim().length < 1) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
       setOptions([])
       return
@@ -95,7 +95,7 @@ export default function RefundsManager({
         const json = await res.json()
         if (cancelled) return
         // Endpoint returns `{ data: User[] }` via apiPaginated
-        const rows: any[] = json?.data ?? []
+        const rows: Array<{ id: string; profile?: { firstName: string; lastName: string } | null; email: string; studentProfile?: { studentId: string } | null }> = json?.data ?? []
         setOptions(
           rows.map((u) => ({
             id: u.id,
@@ -120,7 +120,7 @@ export default function RefundsManager({
 
   const pickStudent = (s: StudentOption) => {
     setForm((f) => ({ ...f, student: s.email, studentId: s.id }))
-    setStudentQuery(`${s.name} Â· ${s.email}`)
+    setStudentQuery(`${s.name} · ${s.email}`)
     setShowDropdown(false)
   }
 
@@ -203,13 +203,13 @@ export default function RefundsManager({
               }}
               onFocus={() => setShowDropdown(true)}
               onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-              placeholder="Search by name, email, or student IDâ€¦"
+              placeholder="Search by name, email, or student ID…"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 pl-9 text-sm dark:border-slate-700 dark:bg-slate-800"
             />
             {showDropdown && (studentQuery.length > 0 || options.length > 0) && (
               <div className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
                 {searching && (
-                  <div className="px-3 py-2 text-xs text-slate-400">Searchingâ€¦</div>
+                  <div className="px-3 py-2 text-xs text-slate-400">Searching…</div>
                 )}
                 {!searching && options.length === 0 && studentQuery.length > 0 && (
                   <div className="px-3 py-2 text-xs text-slate-400">No matches.</div>
@@ -230,7 +230,7 @@ export default function RefundsManager({
                       <p className="truncate text-xs text-slate-500">
                         {opt.email}
                         {opt.studentId && (
-                          <span className="ml-2 font-mono">Â· {opt.studentId}</span>
+                          <span className="ml-2 font-mono">· {opt.studentId}</span>
                         )}
                       </p>
                     </div>

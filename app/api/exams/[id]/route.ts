@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff, getClientIp } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 import { validateBody } from '@/lib/validation/schemas'
@@ -17,10 +17,10 @@ const updateExamSchema = z.object({
 })
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
+  async (_req: NextRequest, ctx: RouteContext<{ id: string }>) => {
     await requireStaff()
     const exam = await prismaUnfiltered.exam.findUnique({
-      where: { id: params.id },
+      where: { id: ctx.params.id },
       include: {
         event: true,
         examComponent: true,
@@ -34,7 +34,7 @@ export const GET = withErrorHandler(
 )
 
 export const PUT = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
+  async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
     const staff = await requireStaff()
     let body: unknown
     try {
@@ -46,11 +46,11 @@ export const PUT = withErrorHandler(
     if (!result.success) return apiError(result.error || 'Invalid input', 400)
     const data = result.data
 
-    const prior = await prismaUnfiltered.exam.findUnique({ where: { id: params.id } })
+    const prior = await prismaUnfiltered.exam.findUnique({ where: { id: ctx.params.id } })
     if (!prior) return apiError('Exam not found', 404)
 
     const exam = await prismaUnfiltered.exam.update({
-      where: { id: params.id },
+      where: { id: ctx.params.id },
       data: {
         name: data.name,
         description: data.description,
@@ -96,16 +96,16 @@ export const PUT = withErrorHandler(
 )
 
 export const DELETE = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
+  async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
     const staff = await requireStaff()
 
-    if (!params.id) return apiError('Exam ID required', 400)
+    if (!ctx.params.id) return apiError('Exam ID required', 400)
 
-    const prior = await prismaUnfiltered.exam.findUnique({ where: { id: params.id } })
+    const prior = await prismaUnfiltered.exam.findUnique({ where: { id: ctx.params.id } })
     if (!prior) return apiError('Exam not found', 404)
 
     await prismaUnfiltered.exam.delete({
-      where: { id: params.id },
+      where: { id: ctx.params.id },
     })
 
     await createAuditLog({

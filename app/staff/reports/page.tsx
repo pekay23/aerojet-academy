@@ -1,6 +1,7 @@
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
+import React from 'react'
 import {
   TrendingUp,
   Users,
@@ -58,7 +59,7 @@ interface MetricCardProps {
   title: string
   value: string | number
   growth?: number
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   color: string
   label: string
 }
@@ -802,7 +803,7 @@ async function AttendanceTab() {
                     </td>
                   </tr>
                 ) : (
-                  records.map((record: any) => (
+                  records.map((record) => (
                     <tr
                       key={record.id}
                       className="group transition-all duration-150 ease-out hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
@@ -1234,7 +1235,7 @@ async function YoYTab({ year }: { year?: number }) {
     change: string
     positive: boolean
     color: string
-    icon: any
+    icon: React.ComponentType<{ className?: string }>
   }> = [
     {
       label: 'Revenue',

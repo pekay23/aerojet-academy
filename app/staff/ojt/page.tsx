@@ -23,20 +23,25 @@ export default async function OJTLogbooksPage() {
   })
 
   if (ojtEligibleMissing.length > 0) {
-    await Promise.all(
-      ojtEligibleMissing.map((student) => {
-        const defaultCat = student.licenseTargets[0]?.licenseCategory?.code || 'B1.1'
-        return prismaUnfiltered.oJTLogbook.create({
+    const logbookCreates = ojtEligibleMissing.flatMap((student) => {
+      const licenceCategoryId = student.licenseTargets[0]?.licenseCategoryId
+      if (!licenceCategoryId) {
+        console.warn(`[OJT] Skipped auto-provision for student ${student.studentId}: no license target found`)
+        return []
+      }
+      return [
+        prismaUnfiltered.oJTLogbook.create({
           data: {
             studentProfileId: student.id,
-            licenceCategory: defaultCat,
+            licenceCategoryId,
             facilityName: 'Aerojet Academy',
             startDate: new Date(),
             status: 'ACTIVE',
           },
-        })
-      })
-    )
+        }),
+      ]
+    })
+    await Promise.all(logbookCreates)
   }
 
   const [logbooks, statusCounts] = await Promise.all([
@@ -59,6 +64,7 @@ export default async function OJTLogbooksPage() {
           take: 1,
           select: { mentorId: true },
         },
+        licenceCategory: { select: { code: true, name: true } },
         _count: { select: { entries: true } },
       },
       orderBy: { updatedAt: 'desc' },
@@ -82,7 +88,7 @@ export default async function OJTLogbooksPage() {
     studentId: lb.studentProfile.studentId,
     email: lb.studentProfile.user.email,
     programme: lb.studentProfile.programmeChoice ?? 'Unknown',
-    licenceCategory: lb.licenceCategory,
+    licenceCategory: lb.licenceCategory.code,
     facilityName: lb.facilityName,
     facilityApprovalNo: lb.facilityApprovalNo,
     startDate: lb.startDate.toISOString(),

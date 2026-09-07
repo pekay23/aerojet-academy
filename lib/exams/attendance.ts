@@ -1,4 +1,4 @@
-import { ExamAttendanceStatus, Prisma } from '@prisma/client'
+import { ExamAttendanceStatus, Prisma, MembershipStatus } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 
@@ -249,7 +249,7 @@ export async function markExamAttendance(params: {
       if (membership.status !== membershipStatus) {
         await tx.poolMembership.update({
           where: { id: membership.id },
-          data: { status: membershipStatus as any },
+          data: { status: membershipStatus as unknown as MembershipStatus },
         })
       }
     }

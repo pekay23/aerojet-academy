@@ -162,27 +162,27 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
         sendWithdrawalConfirmationEmail(
           email,
           name,
-          (result as any)._emailData?.poolName || 'Pool',
+          (result as { _emailData?: { poolName?: string } })._emailData?.poolName || 'Pool',
           result.amountReleased || 0
         ).catch(console.error)
       }
 
       // Waitlist promotion notification
-      if ((result as any).promotedUserId) {
+      if ((result as { promotedUserId?: string }).promotedUserId) {
         const promoted = await prisma.user.findUnique({
-          where: { id: (result as any).promotedUserId },
+          where: { id: (result as { promotedUserId: string }).promotedUserId },
           select: { email: true, academyEmail: true, profile: { select: { firstName: true } } },
         })
         if (promoted) {
           const email = promoted.academyEmail || promoted.email
           const name = promoted.profile?.firstName || 'Student'
-          const examDateStr = (result as any)._emailData?.examDate
-            ? format(new Date((result as any)._emailData.examDate), 'dd MMM yyyy')
+          const examDateStr = (result as { _emailData?: { examDate?: Date } })._emailData?.examDate
+            ? format(new Date((result as { _emailData: { examDate: Date } })._emailData.examDate), 'dd MMM yyyy')
             : 'TBA'
           sendWaitlistPromotionEmail(
             email,
             name,
-            (result as any)._emailData?.poolName || 'Pool',
+            (result as { _emailData?: { poolName?: string } })._emailData?.poolName || 'Pool',
             examDateStr,
             'Module'
           ).catch(console.error)
@@ -191,8 +191,8 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
     }
 
     return result
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[POOL WITHDRAW ERROR]', err)
-    return { success: false, error: err.message || 'Failed to withdraw from pool' }
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to withdraw from pool' }
   }
 }

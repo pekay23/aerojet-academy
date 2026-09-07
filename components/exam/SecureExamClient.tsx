@@ -72,7 +72,7 @@ export default function SecureExamClient({ sessionId }: { sessionId: string }) {
     [sessionId, answers, submitting, router]
   )
 
-  const { logViolation, _isFullscreen, tabSwitchCount, devToolsDetected } = useAntiCheat({
+  const { logViolation, tabSwitchCount, devToolsDetected } = useAntiCheat({
     sessionId,
     enforceFullscreen: true,
     blockClipboard: true,

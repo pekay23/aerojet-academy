@@ -23,7 +23,7 @@ const enrollmentConfig = {
 
 export function EnrollmentChart({ data, title = 'Enrollment by Course' }: EnrollmentChartProps) {
   const [mounted, setMounted] = React.useState(false)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
@@ -55,7 +55,7 @@ export function EnrollmentChart({ data, title = 'Enrollment by Course' }: Enroll
                 content={
                   <ChartTooltipContent
                     indicator="dot"
-                    formatter={(value: any, name: any) => [value ?? 0, name] as any}
+                    formatter={(value, name) => [value ?? 0, name ?? '']}
                   />
                 }
               />

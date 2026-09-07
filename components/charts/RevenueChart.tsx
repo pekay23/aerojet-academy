@@ -4,7 +4,6 @@ import * as React from 'react'
 import {
   Area,
   AreaChart,
-  _ResponsiveContainer,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -26,7 +25,7 @@ const revenueConfig = {
 
 export function RevenueChart({ data, title = 'Revenue History' }: RevenueChartProps) {
   const [mounted, setMounted] = React.useState(false)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
@@ -35,7 +34,7 @@ export function RevenueChart({ data, title = 'Revenue History' }: RevenueChartPr
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="h-[350px] w-full">
+      <CardContent className="h-87.5 w-full">
         {mounted ? (
           <ChartContainer config={revenueConfig} className="h-full w-full">
             <AreaChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>

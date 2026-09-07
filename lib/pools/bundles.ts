@@ -161,9 +161,9 @@ export async function purchaseBundle(
     }
 
     return txResult
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[BUNDLE PURCHASE ERROR]', err)
-    return { success: false, error: err.message || 'Failed to purchase bundle' }
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to purchase bundle' }
   }
 }
 
@@ -188,7 +188,7 @@ export async function getAvailableBundle(userId: string) {
 /**
  * Use one seat from a bundle.
  */
-export async function useBundleSeat(tx: any, bundleId: string) {
+export async function useBundleSeat(tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0], bundleId: string) {
   const bundle = await tx.examBundle.findUnique({ where: { id: bundleId } })
   if (!bundle) throw new Error('Bundle not found')
   if (bundle.usedSeats >= bundle.totalSeats) throw new Error('Bundle exhausted')

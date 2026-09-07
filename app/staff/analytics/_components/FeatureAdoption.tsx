@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { GitBranch } from 'lucide-react'
 import FeatureChart from './FeatureChart'
+import type { FeatureAdoption } from '@/lib/analytics/queries'
 
 const DEFAULT_FEATURES = [
   { key: 'registration', label: 'Registration' },
@@ -21,7 +22,7 @@ const DEFAULT_FEATURES = [
 export default function FeatureAdoption() {
   const [features] = useState(DEFAULT_FEATURES)
   const [selectedFeature, setSelectedFeature] = useState('')
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<FeatureAdoption | null>(null)
   const [loading, setLoading] = useState(false)
 
   const loadFeature = async (feature: string) => {
@@ -41,7 +42,7 @@ export default function FeatureAdoption() {
 
   useEffect(() => {
     if (selectedFeature) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
       loadFeature(selectedFeature)
     }

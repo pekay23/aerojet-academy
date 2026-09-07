@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Calendar, Users, FileText, Settings, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
@@ -13,7 +13,7 @@ interface Exam {
   durationMinutes: number
   passMark: number
   status: string
-  config: Record<string, any>
+  config: Record<string, unknown>
   createdAt: string
   _count: { questions: number; sessions: number }
 }
@@ -96,7 +96,7 @@ export function ExamDetailClient({ examId }: { examId: string }) {
     return <div className="p-8 text-center text-red-500">Exam not found</div>
   }
 
-  const tabs = [
+  const tabs: { id: 'overview' | 'sessions' | 'questions'; label: string; icon: typeof Settings }[] = [
     { id: 'overview', label: 'Overview', icon: Settings },
     { id: 'sessions', label: 'Sessions', icon: Calendar },
     { id: 'questions', label: 'Questions', icon: FileText },
@@ -132,7 +132,7 @@ export function ExamDetailClient({ examId }: { examId: string }) {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
                 activeTab === tab.id
                   ? 'border-aerojet-blue text-aerojet-blue'

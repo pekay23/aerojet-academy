@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { CalendarIcon, Eye } from 'lucide-react'
 import PageViewsTable from './PageViewsTable'
+import type { PageViewMetrics } from '@/lib/analytics/queries'
 
 export default function PageViews() {
   const [from, setFrom] = useState(() => {
@@ -15,7 +16,7 @@ export default function PageViews() {
     return sevenDaysAgo.toISOString().split('T')[0]
   })
   const [to, setTo] = useState(() => new Date().toISOString().split('T')[0])
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<{ pages: PageViewMetrics[] } | null>(null)
   const [loading, setLoading] = useState(false)
 
   const loadPageViews = useCallback(async () => {
@@ -30,7 +31,7 @@ export default function PageViews() {
       if (json.success) {
         setData(json.data)
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to load page views')
     } finally {
       setLoading(false)

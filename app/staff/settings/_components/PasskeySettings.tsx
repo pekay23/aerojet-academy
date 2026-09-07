@@ -55,8 +55,8 @@ export function PasskeySettings() {
   }
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     setWebAuthnSupported(typeof window !== 'undefined' && !!window.PublicKeyCredential)
     fetchPasskeys()
@@ -79,18 +79,18 @@ export function PasskeySettings() {
       let credential
       try {
         credential = await startRegistration({ optionsJSON: options })
-      } catch (err: any) {
-        if (err.name === 'NotAllowedError') {
+      } catch (err: unknown) {
+        if ((err as { name?: string }).name === 'NotAllowedError') {
           toast.error('Passkey creation was cancelled or blocked by your browser.')
           return
         }
-        if (err.name === 'NotSupportedError') {
+        if ((err as { name?: string }).name === 'NotSupportedError') {
           toast.error(
             'Your device or browser does not support passkeys. Try using a security key instead.'
           )
           return
         }
-        if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+        if ((err as { name?: string }).name === 'AbortError' || (err as { name?: string }).name === 'TimeoutError') {
           toast.error('Passkey creation timed out. Please try again.')
           return
         }
@@ -111,9 +111,13 @@ export function PasskeySettings() {
 
       toast.success('Passkey added successfully')
       fetchPasskeys()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error)
-      toast.error(error.message || 'An error occurred while adding the passkey')
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while adding the passkey'
+      )
     } finally {
       setIsRegistering(false)
     }
@@ -130,8 +134,8 @@ export function PasskeySettings() {
 
           toast.success('Passkey deleted')
           setPasskeys((prev) => prev.filter((p) => p.id !== id))
-        } catch (error: any) {
-          toast.error(error.message)
+        } catch (error: unknown) {
+          toast.error(error instanceof Error ? error.message : 'Operation failed')
         } finally {
           confirmDialog.close()
         }
@@ -157,8 +161,8 @@ export function PasskeySettings() {
       toast.success('Passkey renamed')
       setPasskeys(passkeys.map((p) => (p.id === id ? { ...p, name: editName } : p)))
       setEditingId(null)
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Operation failed')
     }
   }
 
@@ -267,7 +271,7 @@ export function PasskeySettings() {
                         <p className="text-muted-foreground text-xs">
                           Added {new Date(passkey.createdAt).toLocaleDateString()}
                           {passkey.lastUsedAt &&
-                            ` â€¢ Last used ${new Date(passkey.lastUsedAt).toLocaleDateString()}`}
+                            ` • Last used ${new Date(passkey.lastUsedAt).toLocaleDateString()}`}
                         </p>
                       </div>
                     </div>

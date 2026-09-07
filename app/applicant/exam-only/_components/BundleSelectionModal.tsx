@@ -28,7 +28,7 @@ export default function BundleSelectionModal({
   fmt,
   twoSeatPrice,
   fourSeatPrice,
-  _purchasingBundle,
+  purchasingBundle: _purchasingBundle,
 }: BundleSelectionModalProps) {
   if (!bundleType) return null
 

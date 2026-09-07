@@ -17,7 +17,7 @@ async function main() {
   ]
 
   // 1. Create the Pools with full module flexibility
-  const createdPools: Record<string, any> = {}
+  const createdPools: Record<string, unknown> = {}
   for (const s of slots) {
     createdPools[s.id] = await prisma.examPool.upsert({
       where: { id: s.id },

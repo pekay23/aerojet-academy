@@ -444,7 +444,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
                       className="text-aerojet-blue h-4 w-4"
                     />
                     <span className="text-sm font-medium">
-                      {label}: {form.options[i] || 'â€”'}
+                      {label}: {form.options[i] || '—'}
                     </span>
                   </label>
                 ))}
@@ -773,7 +773,7 @@ function QuestionList({
         <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 dark:border-amber-900/30 dark:bg-amber-900/10">
           <RotateCcw className="h-4 w-4 text-amber-600" />
           <span className="text-xs font-bold text-amber-700 dark:text-amber-300">
-            Retired Questions ({retiredQuestions.length}) â€” Click restore to reactivate
+            Retired Questions ({retiredQuestions.length}) — Click restore to reactivate
           </span>
         </div>
       )}
@@ -819,17 +819,17 @@ function QuestionList({
                     {q.status}
                   </span>
                   <span>{q.difficulty}</span>
-                  <span>â€¢</span>
+                  <span>•</span>
                   <span>{q.points} pts</span>
                   {q.subTopic && (
                     <>
-                      <span>â€¢</span>
+                      <span>•</span>
                       <span>{q.subTopic}</span>
                     </>
                   )}
                   {!q.isActive && (
                     <>
-                      <span>â€¢</span>
+                      <span>•</span>
                       <span className="text-red-500">RETIRED</span>
                     </>
                   )}

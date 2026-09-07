@@ -1,21 +1,21 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession, requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { getRequestContext } from '@/lib/server/request-context'
 
-export const GET = withErrorHandler(async (req: NextRequest, context: { params: { id: string } }) => {
+export const GET = withErrorHandler(async (_req: NextRequest, ctx: RouteContext<{ id: string }>) => {
   await requireStaff()
 
-  const { id } = await context.params
+  const { id } = (await ctx!.params) as { id: string }
 
   const session = await prismaUnfiltered.internalExamSession.findUnique({
     where: { id },
     include: {
       bank: { select: { id: true, name: true, course: { select: { code: true, name: true } } } },
-      student: { select: { id: true, firstName: true, lastName: true, email: true } },
+      student: { select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } } },
       class: { select: { id: true, name: true, classroom: { select: { name: true } } } },
     },
   })
@@ -34,13 +34,13 @@ export const GET = withErrorHandler(async (req: NextRequest, context: { params: 
   })
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, context: { params: { id: string } }) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
   await requireStaff()
   if (!(await isInternalExamSystemEnabled())) {
     return apiError('Internal exams are not currently available', 403)
   }
 
-  const { id } = await context.params
+  const { id } = (await ctx!.params) as { id: string }
   const body = await req.json()
   const { candidateId, candidateDetails } = body || {}
 
@@ -65,7 +65,7 @@ export const POST = withErrorHandler(async (req: NextRequest, context: { params:
     },
   })
 
-  const ctx = await getRequestContext()
+  const requestContext = await getRequestContext()
   await createAuditLog({
     userId: (await getAuthSession())?.user?.id,
     action: AuditAction.EXAM_SESSION_STARTED,
@@ -73,8 +73,8 @@ export const POST = withErrorHandler(async (req: NextRequest, context: { params:
     entityId: id,
     description: `Started supervised exam session ${id} for candidate ${candidateId}`,
     changes: { candidateId, candidateDetails: candidateDetails || null, supervised: true },
-    ipAddress: ctx.ipAddress ?? undefined,
-    userAgent: ctx.userAgent ?? undefined,
+    ipAddress: requestContext.ipAddress ?? undefined,
+    userAgent: requestContext.userAgent ?? undefined,
   })
 
   return apiSuccess({ success: true, session: { id: updated.id, supervised: updated.supervised, status: updated.status } })

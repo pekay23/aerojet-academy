@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 
@@ -8,9 +8,9 @@ const schema = z.object({
   experienceScore: z.number().min(0).max(100),
 })
 
-export const PUT = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const PUT = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await params
+  const { id } = (await ctx!.params) as { id: string }
 
   const body = await req.json()
   const result = schema.safeParse(body)
@@ -19,7 +19,7 @@ export const PUT = withErrorHandler(async (req: NextRequest, { params }: { param
   const app = await prismaUnfiltered.application.findUnique({ where: { id } })
   if (!app) return apiError('Application not found', 404)
 
-  const existingMeta = (app.metadata as any) || {}
+  const existingMeta: Record<string, unknown> = (app.metadata as Record<string, unknown>) || {}
   const newMeta = { ...existingMeta, experienceScore: result.data.experienceScore }
 
   await prismaUnfiltered.application.update({

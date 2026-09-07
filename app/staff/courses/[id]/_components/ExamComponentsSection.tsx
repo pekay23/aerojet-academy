@@ -141,8 +141,8 @@ export default function ExamComponentsSection({
       setOpen(false)
       resetForm()
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setLoading(false)
     }
@@ -163,8 +163,8 @@ export default function ExamComponentsSection({
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || 'Failed to delete')
       router.refresh()
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setDeleting(null)
     }

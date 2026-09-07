@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import {
   CheckCircle2,
   XCircle,
@@ -8,7 +8,6 @@ import {
   ShieldCheck,
   Loader2,
   Users,
-  _Calendar,
   Save,
   AlertTriangle,
 } from 'lucide-react'
@@ -16,7 +15,7 @@ import {
 const STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const
 type Status = typeof STATUSES[number]
 
-const STATUS_CONFIG: Record<Status, { label: string; color: string; icon: any }> = {
+const STATUS_CONFIG: Record<Status, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   PRESENT: { label: 'Present', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300', icon: CheckCircle2 },
   ABSENT: { label: 'Absent', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', icon: XCircle },
   LATE: { label: 'Late', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300', icon: Clock },
@@ -57,9 +56,23 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
         const { records, roster, stats } = json.data
 
         // Build student list from roster, merging existing records
-        const existingMap = new Map<string, any>(records.map((r: any) => [r.userId, r]))
-        const merged: StudentRecord[] = roster.map((u: any) => {
-          const existing = existingMap.get(u.id) as StudentRecord | undefined
+type ExistingAttendanceRecord = {
+  userId: string
+  status: Status
+  minutesLate?: number
+  notes?: string
+}
+
+type RosterUser = {
+  id: string
+  email: string
+  profile?: { firstName: string; lastName: string }
+  studentProfile?: { studentId: string }
+}
+
+        const existingMap = new Map<string, ExistingAttendanceRecord>(records.map((r: ExistingAttendanceRecord) => [r.userId, r]))
+        const merged: StudentRecord[] = roster.map((u: RosterUser) => {
+          const existing = existingMap.get(u.id)
           return {
             userId: u.id,
             status: existing?.status || 'PRESENT',
@@ -80,10 +93,10 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
     }
   }, [classId, date])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { fetchRoster() }, [fetchRoster])
+  useEffect(() => { 
+    const timer = setTimeout(() => { void fetchRoster() }, 0)
+    return () => clearTimeout(timer)
+  }, [fetchRoster])
 
   const setStatus = (userId: string, status: Status) => {
     setStudents(prev => prev.map(s =>
@@ -132,7 +145,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
     <div className="space-y-6">
       {/* Controls */}
       <div className="flex flex-wrap gap-4">
-        <div className="min-w-[200px] flex-1">
+        <div className="min-w-50 flex-1">
           <label className="mb-1 block text-xs font-bold text-slate-500">Class</label>
           <select
             value={classId}
@@ -144,7 +157,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
             ))}
           </select>
         </div>
-        <div className="min-w-[160px]">
+        <div className="min-w-40">
           <label className="mb-1 block text-xs font-bold text-slate-500">Date</label>
           <input
             type="date"

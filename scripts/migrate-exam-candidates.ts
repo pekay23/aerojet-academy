@@ -980,9 +980,9 @@ async function main() {
   for (const candidate of candidates) {
     try {
       await migrateCandidate(candidate)
-    } catch (error: any) {
-      console.error(`  ERROR processing ${candidate.personalEmail}: ${error.message}`)
-      report.errors.push({ email: candidate.personalEmail, error: error.message })
+    } catch (error: unknown) {
+      console.error(`  ERROR processing ${candidate.personalEmail}: ${(error as Error).message}`)
+      report.errors.push({ email: candidate.personalEmail, error: (error as Error).message })
     }
   }
 
@@ -1000,3 +1000,6 @@ main().catch((e) => {
   console.error('FATAL migration error:', e)
   process.exit(1)
 })
+
+
+

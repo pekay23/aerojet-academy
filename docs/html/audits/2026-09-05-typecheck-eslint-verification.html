@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2026-09-05 TypeScript and ESLint Verification · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">2026-09-05 TypeScript and ESLint Verification</h1>
+  <p class="he-deck">Independent verification was run against the current working tree on 2026-09-05.</p>
+</header>
+<section class="he-section" id="summary"><div class="he-section__num">01 · Summary</div><h2 class="he-section__title">Summary</h2></section>
+<p>Independent verification was run against the current working tree on 2026-09-05.</p>
+<ul>
+<li>TypeScript type-check status: PASS</li>
+<li>TypeScript error count: 0</li>
+<li>ESLint status: BLOCKED before rule execution</li>
+<li>ESLint warning count: not observable until the TypeScript 7 / typescript-eslint compatibility issue is resolved</li>
+</ul>
+<section class="he-section" id="commands-run"><div class="he-section__num">02 · Commands Run</div><h2 class="he-section__title">Commands Run</h2></section>
+<pre><code class="language-bash">bun run type-check --pretty false
+</code></pre>
+<p>Result:</p>
+<pre><code class="language-text">$ tsc --noEmit --pretty false
+exit code: 0
+</code></pre>
+<pre><code class="language-bash">bun run lint
+</code></pre>
+<p>Result:</p>
+<pre><code class="language-text">$ eslint .
+typescript-eslint does not support TS 7.0.
+ESLint: 10.9.1
+Error: typescript-eslint does not support TS 7.0.
+exit code: 1
+</code></pre>
+<section class="he-section" id="current-findings"><div class="he-section__num">03 · Current Findings</div><h2 class="he-section__title">Current Findings</h2></section>
+<h3 id="typescript">TypeScript</h3>
+<p>No current TypeScript errors were reported by <code>bun run type-check --pretty false</code>.</p>
+<p>This verifies that the previously observed type errors around route handlers, Prisma enums, serialized staff/student DTOs, exam booking DTOs, OJT logbooks, resources, scheduling, charts, and wallet/image imports are no longer compiler-visible in the current tree.</p>
+<h3 id="eslint">ESLint</h3>
+<p>ESLint did not reach project lint rules, so no warning list could be produced.</p>
+<p>The blocker is toolchain compatibility:</p>
+<ul>
+<li><code>package.json</code> currently uses <code>typescript: ^7.0.2</code>.</li>
+<li><code>package.json</code> currently uses <code>@typescript-eslint/eslint-plugin: 8.68.0</code> and <code>@typescript-eslint/parser: 8.68.0</code>.</li>
+<li><code>bun run lint</code> aborts because <code>typescript-eslint</code> does not support TypeScript 7.0 in this installed configuration.</li>
+</ul>
+<p>Microsoft's TypeScript 7.0 release notes state that TypeScript 7.0 does not ship the old compiler API and recommends running TypeScript 6 side by side for tooling such as <code>typescript-eslint</code>: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6-0</p>
+<section class="he-section" id="audit-of-previously-active-work"><div class="he-section__num">04 · Audit of Previously Active Work</div><h2 class="he-section__title">Audit of Previously Active Work</h2></section>
+<p>The following areas were part of the previous type-fix pass and are now covered by the clean type-check result:</p>
+<ul>
+<li><code>lib/api/response.ts</code>: route handler context compatibility for Next.js async <code>params</code>.</li>
+<li>API routes: Prisma enum imports and query filter validation for staff enrollments, exam events, payments, users, practical training, and instructor recency.</li>
+<li>Exam routes: dynamic route params and handler context fixes across exams, sessions, exam pools, and supervise routes.</li>
+<li><code>lib/types/staff.ts</code>: serialized staff DTO updates for practical records, transactions, wallets, exam bookings, exam results, exam components, student profiles, and related nullable API payloads.</li>
+<li>Staff student UI: <code>StudentDetailPanel</code>, <code>ExamsTab</code>, <code>ProfileTab</code>, <code>StudentDetailTabs</code>, and <code>WalletTab</code> type alignment with serialized API data.</li>
+<li>Staff finance UI: <code>TransactionsTable</code> payment/currency DTO corrections.</li>
+<li>Applicant document/import UI: typed document upload data and CSV parsing boundaries.</li>
+<li>Staff analytics/reports UI: Recharts formatter typing and exported revenue data point typing.</li>
+<li>Staff admissions UI: interview slot nullability and shortlisting metadata handling.</li>
+<li>Staff dashboard/exams UI: nullable event deadlines and exam booking/result serialization.</li>
+<li>Staff resources/scheduling UI: nullable course/pathway arrays and derived academic term display names.</li>
+<li>Staff OJT pages: logbook <code>licenceCategoryId</code> relation usage and serialized licence category display.</li>
+<li>Staff settings/newsroom/internal exam UI: unknown catch narrowing, upload error variable fix, <code>useCallback</code> import, and saved-answer item typing.</li>
+<li>Full-time enrollment creation paths: <code>academicYearId</code> now included where required by Prisma.</li>
+</ul>
+<section class="he-section" id="remaining-work"><div class="he-section__num">05 · Remaining Work</div><h2 class="he-section__title">Remaining Work</h2></section>
+<ol>
+<li>Resolve ESLint toolchain compatibility so lint rules can execute.</li>
+<li>Re-run <code>bun run lint</code> after the compatibility fix.</li>
+<li>Record the actual ESLint warning/error count after the lint command reaches rule execution.</li>
+</ol>
+<p>Recommended compatibility path:</p>
+<ul>
+<li>Keep TypeScript 7 for fast <code>tsc</code> if desired.</li>
+<li>Configure a TypeScript 6 API package for tools that import <code>typescript</code>, following the TypeScript 7 side-by-side guidance.</li>
+<li>Then rerun <code>bun run lint</code>.</li>
+</ul>
+<section class="he-section" id="delegation-notes"><div class="he-section__num">06 · Delegation Notes</div><h2 class="he-section__title">Delegation Notes</h2></section>
+<p>The next agent should not spend time fixing TypeScript errors first; the current source-of-truth type-check is already clean.</p>
+<p>The next useful delegation target is the ESLint runner compatibility issue. Once that is fixed, any actual ESLint warnings should be handled from the fresh <code>bun run lint</code> output, not from stale assumptions.</p>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#summary">Summary</a></li>
+    <li class="he-toc__l2"><a href="#commands-run">Commands Run</a></li>
+    <li class="he-toc__l2"><a href="#current-findings">Current Findings</a></li>
+    <li class="he-toc__l3"><a href="#typescript">TypeScript</a></li>
+    <li class="he-toc__l3"><a href="#eslint">ESLint</a></li>
+    <li class="he-toc__l2"><a href="#audit-of-previously-active-work">Audit of Previously Active Work</a></li>
+    <li class="he-toc__l2"><a href="#remaining-work">Remaining Work</a></li>
+    <li class="he-toc__l2"><a href="#delegation-notes">Delegation Notes</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

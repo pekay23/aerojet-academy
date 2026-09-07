@@ -13,7 +13,7 @@ import {
   ImagePlus,
   X,
   Calendar,
-  _Clock,
+  Clock as _Clock,
   User as UserIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -74,8 +74,9 @@ export default function CreateArticlePage() {
       toast.success(isPublishing ? 'Article published successfully' : 'Article created as draft')
       router.push('/staff/newsroom')
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Something went wrong')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Something went wrong'
+      toast.error(message || 'Something went wrong')
     } finally {
       setLoading(false)
     }

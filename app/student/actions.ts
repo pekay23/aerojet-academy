@@ -2,13 +2,7 @@
 
 import { Prisma } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
-import {
-  joinPool,
-  _confirmPool,
-  _failPool,
-  _getPoolWithDetails,
-  _getAvailablePools,
-} from '@/lib/pools/operations'
+import { joinPool } from '@/lib/pools/operations'
 import {
   bookStandaloneExam,
   bookResitExam,
@@ -731,6 +725,18 @@ export async function changePassword(current: string, newPass: string) {
   }
 }
 
+interface UserSettings {
+  notifications?: {
+    email?: boolean
+    sms?: boolean
+    push?: boolean
+  }
+  appearance?: {
+    theme?: 'light' | 'dark' | 'system'
+  }
+  [key: string]: unknown
+}
+
 export async function updateEmailNotifications(enabled: boolean) {
   const user = await requireStudent()
 
@@ -740,7 +746,7 @@ export async function updateEmailNotifications(enabled: boolean) {
       select: { settings: true },
     })
 
-    const currentSettings = (dbUser?.settings as any) || {}
+    const currentSettings = (dbUser?.settings as UserSettings) || {}
     const newSettings = {
       ...currentSettings,
       notifications: {
@@ -762,18 +768,6 @@ export async function updateEmailNotifications(enabled: boolean) {
   }
 }
 
-interface UserSettings {
-  notifications?: {
-    email?: boolean
-    sms?: boolean
-    push?: boolean
-  }
-  appearance?: {
-    theme?: 'light' | 'dark' | 'system'
-  }
-  [key: string]: any
-}
-
 export async function updateUserSettings(settings: UserSettings) {
   const user = await requireStudent()
 
@@ -783,7 +777,7 @@ export async function updateUserSettings(settings: UserSettings) {
       select: { settings: true },
     })
 
-    const currentSettings = (dbUser?.settings as any) || {}
+    const currentSettings = (dbUser?.settings as UserSettings) || {}
     const newSettings = {
       ...currentSettings,
       ...settings,
@@ -882,8 +876,20 @@ export async function getAvailableRecipients() {
     },
   })
 
+  type InstructorUser = {
+    id: string
+    email: string | null
+    role: string
+    profile: {
+      firstName: string
+      middleName: string | null
+      lastName: string
+      profilePhotoUrl: string | null
+    } | null
+  }
+
   // Extract unique instructors
-  const instructorMap = new Map<string, any>()
+  const instructorMap = new Map<string, InstructorUser>()
 
   enrollments.forEach((enrollment) => {
     enrollment.course.classes.forEach((cls) => {
@@ -1045,47 +1051,6 @@ export async function bookStandaloneExamAction(params: {
 
 export async function bookBundleExamsAction(params: { moduleCodes: string[]; eventId: string }) {
   return bookBundleExamsAtomicAction(params)
-
-  try {
-    const user = await requireStudent()
-    await assertExamOnlyPathway(user.id)
-    const { moduleCodes, eventId } = params
-
-    if (!moduleCodes.length || !eventId) {
-      return { error: 'Missing booking parameters.' }
-    }
-
-    // Book all modules — if any fails, the entire batch is rolled back
-    const results: { moduleCode: string; usedBundle: boolean }[] = []
-    for (const moduleCode of moduleCodes) {
-      const result = await bookStandaloneExam(user.id, { moduleCode, eventId })
-      results.push({ moduleCode, usedBundle: result.usedBundle })
-    }
-
-    const usedBundle = results.some((r) => r.usedBundle)
-    const typeStr = usedBundle ? 'Exam Package seats' : 'wallet balance'
-    const modulesStr = moduleCodes.join(', ')
-
-    await prisma.notification.create({
-      data: {
-        userId: user.id,
-        title: `Bundle Booking Confirmed (${moduleCodes.length} seats)`,
-        message: `You booked modules ${modulesStr} using ${typeStr}.`,
-        type: 'SUCCESS',
-        linkUrl: '/student/exams',
-        linkText: 'View Exams',
-      },
-    })
-
-    revalidatePath('/student/exam-bookings')
-    revalidatePath('/student/exams')
-    revalidatePath('/student/wallet')
-    revalidatePath('/student')
-    return { success: true, bookedCount: results.length }
-  } catch (error: any) {
-    console.error('bookBundleExamsAction error:', error)
-    return { error: error.message || 'Failed to book bundle. No seats were reserved.' }
-  }
 }
 
 export async function bookBundleExamsAtomicAction(params: {
@@ -1207,9 +1172,9 @@ export async function bookBundleExamsAtomicAction(params: {
     revalidatePath('/student/wallet')
     revalidatePath('/student')
     return { success: true, bookedCount: components.length }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('bookBundleExamsAtomicAction error:', error)
-    return { error: error.message || 'Failed to book bundle. No seats were reserved.' }
+    return { error: error instanceof Error ? error.message : 'Failed to book bundle. No seats were reserved.' }
   }
 }
 
@@ -1246,9 +1211,9 @@ export async function bookResitExamAction(moduleCode: string, eventId: string) {
     revalidatePath('/student/wallet')
     revalidatePath('/student')
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('bookResitExamAction error:', error)
-    return { error: error.message || 'Failed to book resit exam.' }
+    return { error: error instanceof Error ? error.message : 'Failed to book resit exam.' }
   }
 }
 
@@ -1297,7 +1262,7 @@ export async function cancelMyBookingAction(bookingId: string, reason?: string) 
       refundAmount: result.refundAmount,
       refundType: result.refundType,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(
       'cancelMyBookingAction error:',
       error instanceof Error ? error.message : 'Unknown error'
@@ -1370,8 +1335,8 @@ export async function changeModuleBookingAction(bookingId: string, newModuleCode
     revalidatePath('/student/exam-bookings')
     revalidatePath('/student/exam-bookings/' + bookingId)
     return { success: true }
-  } catch (error: any) {
-    return { error: error.message || 'Failed to change module.' }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Failed to change module.' }
   }
 }
 
@@ -1398,7 +1363,7 @@ export async function createGroupBookingAction(params: {
     revalidatePath('/student/wallet')
     revalidatePath('/student')
     return { success: true, poolId: result.pool.id, bookingId: result.booking.id }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(
       'createGroupBookingAction error:',
       error instanceof Error ? error.message : 'Unknown error'
@@ -1464,7 +1429,7 @@ export async function setReferrerAction(input: string) {
 
     revalidatePath('/student/ambassador')
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('setReferrerAction error:', error)
     return { error: 'Failed to set referrer.' }
   }
@@ -1498,7 +1463,7 @@ export async function createCalendarEvent(data: {
         startDate: new Date(data.startDate),
         endDate: data.endDate ? new Date(data.endDate) : null,
         color: data.color || '#3b82f6',
-        recurrenceType: (data.recurrenceType as any) || 'NONE',
+        recurrenceType: (data.recurrenceType as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM' | undefined) || 'NONE',
         recurrenceDays: data.recurrenceDays || null,
         recurrenceUntil: data.recurrenceUntil ? new Date(data.recurrenceUntil) : null,
       },
@@ -1546,7 +1511,7 @@ export async function updateCalendarEvent(
           endDate: data.endDate ? new Date(data.endDate) : null,
         }),
         ...(data.color && { color: data.color }),
-        ...(data.recurrenceType !== undefined && { recurrenceType: data.recurrenceType as any }),
+        ...(data.recurrenceType !== undefined && { recurrenceType: data.recurrenceType as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM' }),
         ...(data.recurrenceDays !== undefined && { recurrenceDays: data.recurrenceDays || null }),
         ...(data.recurrenceUntil !== undefined && {
           recurrenceUntil: data.recurrenceUntil ? new Date(data.recurrenceUntil) : null,

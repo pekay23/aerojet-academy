@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Stethoscope,
@@ -10,10 +10,10 @@ import {
   FileText,
   ExternalLink,
   Clock,
-  _AlertTriangle,
+  AlertTriangle as _AlertTriangle,
 } from 'lucide-react'
 
-interface MedicalApp {
+export interface MedicalApp {
   id: string
   stage: string
   medicalStatus: string | null
@@ -34,7 +34,7 @@ interface MedicalApp {
   }[]
 }
 
-const STAGE_BADGES: Record<string, { label: string; color: string; icon: any }> = {
+const STAGE_BADGES: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   MEDICAL_PENDING: { label: 'Awaiting Docs', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', icon: Clock },
   MEDICAL_SUBMITTED: { label: 'Ready for Review', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300', icon: FileText },
   MEDICAL_CLEARED: { label: 'Cleared', color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300', icon: CheckCircle2 },

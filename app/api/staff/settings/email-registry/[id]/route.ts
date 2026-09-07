@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
-import { withErrorHandler, apiSuccess, apiError } from '@/lib/api/response'
+import { withErrorHandler, apiSuccess, apiError , RouteContext } from '@/lib/api/response'
 import { requireAdmin } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
@@ -8,13 +8,21 @@ import { createAuditLog } from '@/lib/audit/logger'
 const patchSchema = z.object({
   title: z.string().min(2).max(80).optional(),
   description: z.string().max(280).nullable().optional(),
-  address: z.string().email().max(120).optional(),
+  address: z.preprocess(
+    (val) => {
+      if (val === null || val === undefined) return undefined
+      if (typeof val === 'string' && val.trim() === '') return undefined
+      if (typeof val === 'string') return val.trim()
+      return val
+    },
+    z.string().email().max(120).optional()
+  ),
 })
 
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const actor = await requireAdmin()
-    const { id } = await ctx.params
+    const { id } = (await ctx!.params) as { id: string }
     const body = patchSchema.parse(await req.json())
 
     const existing = await prismaUnfiltered.emailRegistryEntry.findUnique({ where: { id } })
@@ -33,7 +41,7 @@ export const PATCH = withErrorHandler(
       data: {
         title: body.title?.trim() ?? existing.title,
         description: body.description?.trim() ?? existing.description,
-        address: body.address?.trim().toLowerCase() ?? existing.address,
+        address: body.address ? body.address.toLowerCase() : existing.address,
       },
     })
     await createAuditLog({
@@ -49,9 +57,9 @@ export const PATCH = withErrorHandler(
 )
 
 export const DELETE = withErrorHandler(
-  async (_req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+  async (_req: NextRequest, ctx?: RouteContext) => {
     const actor = await requireAdmin()
-    const { id } = await ctx.params
+    const { id } = (await ctx!.params) as { id: string }
 
     const existing = await prismaUnfiltered.emailRegistryEntry.findUnique({ where: { id } })
     if (!existing) return apiError('Entry not found', 404)

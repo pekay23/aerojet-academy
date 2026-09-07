@@ -7,11 +7,11 @@ import {
   getPaymentStatusBreakdown,
 } from '@/lib/analytics/reports'
 import { renderToStream } from '@react-pdf/renderer'
-import { FinancialReportTemplate } from '@/components/pdf/templates/FinancialReportTemplate'
+import { FinancialReportTemplate, type FinancialReportTemplateProps } from '@/components/pdf/templates/FinancialReportTemplate'
 import { getPDFSettings } from '@/lib/pdf-settings'
 import React from 'react'
 
-function FinancialReportElement(props: any) {
+function FinancialReportElement(props: FinancialReportTemplateProps) {
   return <FinancialReportTemplate {...props} />
 }
 
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
       })
     )
 
-    return new NextResponse(stream as any, {
+    return new NextResponse(stream as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="financial-report-${year}-${month}.pdf"`,

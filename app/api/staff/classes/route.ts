@@ -54,7 +54,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Post-create conflict probe — return 409 + the new class id so the UI can
   // offer "go fix it" or "I know, keep it" (resubmit with force:true).
-  const force = (body as any)?.force === true
+  const force = (body as { force?: boolean })?.force === true
   if (!force) {
     const windowFrom = new Date(validation.data.startDate)
     const windowTo = new Date(validation.data.endDate)

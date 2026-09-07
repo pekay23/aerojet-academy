@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Edit2, Loader2, AlertTriangle } from 'lucide-react'
 
-export type PathwayCode = 'FULL_TIME_4Y' | 'FULL_TIME_2Y' | 'MILITARY_1Y' | 'MODULAR' | 'EXAM_ONLY' | null
+export type PathwayCode = string | null
 
 export default function EditPathwayDialog({
   userId,
@@ -21,13 +21,13 @@ export default function EditPathwayDialog({
   isLocked,
 }: {
   userId: string
-  currentPathway: PathwayCode
+  currentPathway: string | null
   isLocked: boolean
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [pathway, setPathway] = useState<PathwayCode>(currentPathway)
+  const [pathway, setPathway] = useState<string | null>(currentPathway)
   const [reason, setReason] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -53,8 +53,8 @@ export default function EditPathwayDialog({
 
       setOpen(false)
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to update pathway')
     } finally {
       setIsSubmitting(false)
     }

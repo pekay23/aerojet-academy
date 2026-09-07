@@ -53,7 +53,7 @@ export const POST = withErrorHandler(
     const body = await req.json()
     const result = validateBody(createSessionSchema, body)
     if (!result.success) return apiError(result.error || 'Invalid input', 400)
-    const _data = result._data
+
 
     const exam = await prismaUnfiltered.exam.findUnique({
       where: { id: params.id },
@@ -67,7 +67,7 @@ export const POST = withErrorHandler(
         userId: '',
         attendanceDate: new Date(),
         status: 'PRESENT',
-      } as any,
+      },
     })
 
     return apiCreated(attendance)

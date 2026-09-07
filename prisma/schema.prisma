@@ -2153,6 +2153,7 @@ model InternalExamSession {
   recoveredBy      String?
   recoveryReason   String?
   bekExpiresAt     DateTime?
+  sebKeys          Json?
   /// DB-level immutability trigger prevents modification of published results
   /// (see scripts/create-immutability-trigger.sql)
   /// Persisted randomized question order for paper randomization

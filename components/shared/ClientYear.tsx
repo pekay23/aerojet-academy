@@ -10,8 +10,8 @@ export default function ClientYear() {
   const [year, setYear] = useState<number | null>(null)
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     setYear(new Date().getFullYear())
   }, [])

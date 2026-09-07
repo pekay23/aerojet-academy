@@ -85,7 +85,7 @@ function LiveClock() {
   const [now, setNow] = useState<Date | null>(null)
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     setNow(new Date())
     const interval = setInterval(() => setNow(new Date()), 60_000)
@@ -102,7 +102,7 @@ function LiveClock() {
         month: 'short',
         year: 'numeric',
       })}
-      <span className="mx-1.5 text-slate-300 dark:text-slate-600">Â·</span>
+      <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
       {now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
     </span>
   )
@@ -115,7 +115,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
 
   useEffect(() => {
     if (welcomeMessages?.length) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
       const idx = Math.floor(Math.random() * welcomeMessages.length)
   // eslint-disable-next-line react-hooks/set-state-in-effect
       setWelcomeMsg(welcomeMessages[idx] ?? welcomeMessages[0])
@@ -244,7 +244,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
             <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
             <p className="truncate text-xs text-slate-500 italic dark:text-slate-400">
               {userName && <span className="not-italic font-medium text-slate-500 dark:text-slate-400">Hi {userName}</span>}
-              {userName && <span className="mx-1">â€”</span>}
+              {userName && <span className="mx-1">—</span>}
               {welcomeMsg}
             </p>
           </div>
@@ -343,7 +343,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
                             </p>
                             <p className="text-[11px] text-slate-400">
                               {p.currency} {p.amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
-                              {' Â· '}
+                              {' · '}
                               {formatDistanceToNow(new Date(p.createdAt), { addSuffix: true })}
                             </p>
                           </div>
@@ -372,7 +372,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
                             </p>
                             <p className="text-[11px] text-slate-400">
                               {e.courseName}
-                              {' Â· '}
+                              {' · '}
                               {formatDistanceToNow(new Date(e.createdAt), { addSuffix: true })}
                             </p>
                           </div>

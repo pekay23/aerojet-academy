@@ -87,7 +87,7 @@ export default function FeatureChart({ data }: FeatureChartProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
-              <ChartTooltip content={<ChartTooltipContent indicator="dot" formatter={(value: any, name: any) => [Number(value ?? 0).toLocaleString(), name] as any} />} />
+              <ChartTooltip content={<ChartTooltipContent indicator="dot" formatter={(value: unknown, _name: unknown) => Number(value ?? 0).toLocaleString()} />} />
               <Bar dataKey="value" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ChartContainer>

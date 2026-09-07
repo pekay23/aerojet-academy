@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import type { Prisma } from '@prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
@@ -15,8 +16,10 @@ const updateSchema = z.object({
   isActive: z.boolean().optional(),
 })
 
+type RouteContext = { params: Promise<{ id: string }> }
+
 // GET /api/staff/admissions/document-types/[id]
-export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
+export const GET = withErrorHandler(async (_req: NextRequest, ctx: RouteContext) => {
   await requireStaff()
   const { id } = await ctx.params
 
@@ -30,7 +33,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
 })
 
 // PUT /api/staff/admissions/document-types/[id]
-export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const PUT = withErrorHandler(async (req: NextRequest, ctx: RouteContext) => {
   await requireStaff()
   const { id } = await ctx.params
   const body = await req.json()
@@ -42,14 +45,14 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
 
   const updated = await prismaUnfiltered.applicationDocumentType.update({
     where: { id },
-    data: parsed.data as any,
+    data: parsed.data as Prisma.ApplicationDocumentTypeUpdateInput,
   })
 
   return apiSuccess(updated)
 })
 
 // DELETE /api/staff/admissions/document-types/[id]
-export const DELETE = withErrorHandler(async (_req: NextRequest, ctx: any) => {
+export const DELETE = withErrorHandler(async (_req: NextRequest, ctx: RouteContext) => {
   await requireStaff()
   const { id } = await ctx.params
 

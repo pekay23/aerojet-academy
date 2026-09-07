@@ -10,7 +10,7 @@ async function main() {
   const tables = await client.query(
     "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"
   )
-  console.log('Tables:', tables.rows.map((r: any) => r.table_name).join(', '))
+  console.log('Tables:', tables.rows.map((r: unknown) => r.table_name).join(', '))
 
   // Check Realtime publication
   const publications = await client.query(
@@ -22,12 +22,15 @@ async function main() {
   const realtimeTables = await client.query(
     "SELECT tablename FROM pg_publication_tables WHERE pubname = 'supabase_realtime'"
   )
-  console.log('Realtime tables:', realtimeTables.rows.map((r: any) => r.tablename).join(', '))
+  console.log('Realtime tables:', realtimeTables.rows.map((r: unknown) => r.tablename).join(', '))
 
   await client.end()
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

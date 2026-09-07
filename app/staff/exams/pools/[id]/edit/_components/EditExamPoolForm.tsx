@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -30,7 +30,19 @@ const editExamPoolSchema = createExamPoolSchema.omit({ eventId: true })
 type ExamPoolFormValues = z.infer<typeof editExamPoolSchema>
 
 interface EditExamPoolFormProps {
-  pool: any
+  pool: {
+    id: string
+    name: string
+    minCandidates: number
+    maxCandidates: number
+    moduleDiversityCap: number
+    seatPrice: number
+    allowedModules: string[]
+    examDate: Date | string
+    examStartTime: Date | string
+    examEndTime: Date | string
+    notes?: string | null
+  }
 }
 
 const EASA_MODULES = EASA_MODULE_CODES
@@ -46,8 +58,8 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
     return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
   }
 
-  const form = useForm<any>({
-    resolver: zodResolver(editExamPoolSchema),
+  const form = useForm<ExamPoolFormValues>({
+    resolver: zodResolver(editExamPoolSchema) as unknown as Resolver<ExamPoolFormValues>,
     defaultValues: {
       name: pool.name,
       minCandidates: pool.minCandidates,
@@ -55,6 +67,9 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
       moduleDiversityCap: pool.moduleDiversityCap,
       seatPrice: Number(pool.seatPrice),
       allowedModules: pool.allowedModules,
+      poolType: 'STANDARD',
+      dayNumber: 1,
+      isAutoPool: false,
       examDate: formatDateForInput(pool.examDate),
       examStartTime: formatDateForInput(pool.examStartTime),
       examEndTime: formatDateForInput(pool.examEndTime),
@@ -89,8 +104,9 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
       toast.success('Exam booking updated successfully')
       router.push(`/staff/exams/pools/${pool.id}`)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update exam booking')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update exam booking'
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }

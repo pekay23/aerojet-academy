@@ -9,12 +9,15 @@ async function main() {
     "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"
   )
   console.log('All tables in Supabase:')
-  tables.rows.forEach((r: any) => console.log('  -', r.table_name))
+  tables.rows.forEach((r: unknown) => console.log('  -', (r as Record<string, unknown>).table_name))
 
   await client.end()
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

@@ -1,4 +1,4 @@
-import { chromium, type Browser, type Page } from '@playwright/test';
+import { chromium } from '@playwright/test';
 
 interface DetectedSelectors {
   images: string[];
@@ -9,7 +9,7 @@ interface DetectedSelectors {
   potentialFlipbookLibraries: string[];
 }
 
-export async function inspectPage(url: string, username: string, password: string): Promise<DetectedSelectors> {
+export async function inspectPage(url: string, _username: string, _password: string): Promise<DetectedSelectors> {
   const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext({
     viewport: { width: 1920, height: 1080 },
@@ -32,9 +32,9 @@ export async function inspectPage(url: string, username: string, password: strin
     // Detect flipbook libraries
     detected.potentialFlipbookLibraries = await page.evaluate(() => {
       const libs: string[] = [];
-      if ((window as any).flipbook) libs.push('window.flipbook');
-      if ((window as any).Flipbook) libs.push('window.Flipbook');
-      if ((window as any).turnjs) libs.push('turnjs');
+      if ((window as unknown as Record<string, unknown>).flipbook) libs.push('window.flipbook');
+      if ((window as unknown as Record<string, unknown>).Flipbook) libs.push('window.Flipbook');
+      if ((window as unknown as Record<string, unknown>).turnjs) libs.push('turnjs');
       if (document.querySelector('.turnjs')) libs.push('turnjs (DOM)');
       if (document.querySelector('[class*="flipbook"]')) libs.push('flipbook CSS class');
       if (document.querySelector('[class*="book"]')) libs.push('book CSS class');

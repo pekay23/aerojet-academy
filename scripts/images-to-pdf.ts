@@ -1,5 +1,6 @@
 import PDFDocument from 'pdfkit';
 import * as fs from 'fs/promises';
+import { createWriteStream } from 'fs';
 import * as path from 'path';
 import sharp from 'sharp';
 
@@ -11,7 +12,7 @@ async function imagesToPdf(imageDir: string, outputPath: string) {
   console.log(`Found ${files.length} images`);
 
   const doc = new PDFDocument({ autoFirstPage: false });
-  const writeStream = require('fs').createWriteStream(outputPath);
+  const writeStream = createWriteStream(outputPath);
   doc.pipe(writeStream);
 
   for (let i = 0; i < files.length; i++) {
@@ -51,3 +52,5 @@ if (!imageDir || !outputPath) {
 }
 
 imagesToPdf(imageDir, outputPath).catch(console.error);
+
+

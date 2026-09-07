@@ -73,7 +73,7 @@ export default function EmailDeliveryTab() {
   }
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     void reload()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -111,7 +111,7 @@ export default function EmailDeliveryTab() {
           }`}
         >
           <p className="text-xs font-bold tracking-widest text-slate-500 uppercase">Failed</p>
-          <p className="mt-1 text-2xl font-black text-red-600">{status === 'FAILED' ? total : 'â€”'}</p>
+          <p className="mt-1 text-2xl font-black text-red-600">{status === 'FAILED' ? total : '—'}</p>
         </button>
         <button
           onClick={() => setStatus('SUCCESS')}
@@ -123,7 +123,7 @@ export default function EmailDeliveryTab() {
         >
           <p className="text-xs font-bold tracking-widest text-slate-500 uppercase">Delivered</p>
           <p className="mt-1 text-2xl font-black text-emerald-600">
-            {status === 'SUCCESS' ? total : 'â€”'}
+            {status === 'SUCCESS' ? total : '—'}
           </p>
         </button>
         <button
@@ -136,7 +136,7 @@ export default function EmailDeliveryTab() {
         >
           <p className="text-xs font-bold tracking-widest text-slate-500 uppercase">All recent</p>
           <p className="mt-1 text-2xl font-black text-aerojet-blue dark:text-white">
-            {status === 'all' ? total : 'â€”'}
+            {status === 'all' ? total : '—'}
           </p>
         </button>
       </div>
@@ -147,7 +147,7 @@ export default function EmailDeliveryTab() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search recipient, subject, error messageâ€¦"
+            placeholder="Search recipient, subject, error message…"
             className="w-full rounded-lg border border-slate-200 bg-white py-2 pr-3 pl-9 text-sm dark:border-slate-700 dark:bg-slate-800"
           />
         </div>
@@ -170,7 +170,7 @@ export default function EmailDeliveryTab() {
         </button>
       </form>
 
-      {loading && <p className="text-sm text-slate-400">Loadingâ€¦</p>}
+      {loading && <p className="text-sm text-slate-400">Loading…</p>}
 
       {!loading && page && (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900">
@@ -209,7 +209,7 @@ export default function EmailDeliveryTab() {
                         </p>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-xs text-slate-500">{row.template ?? 'â€”'}</td>
+                    <td className="px-3 py-2 text-xs text-slate-500">{row.template ?? '—'}</td>
                     <td className="px-3 py-2 font-mono text-xs">{row.attempts}</td>
                     <td className="px-3 py-2 text-xs text-slate-500">
                       {new Date(row.createdAt).toLocaleString()}
@@ -220,7 +220,7 @@ export default function EmailDeliveryTab() {
               {page.data.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-3 py-8 text-center text-sm text-slate-400">
-                    No deliveries match this filter. {status === 'FAILED' && 'â€” that\'s a good thing.'}
+                    No deliveries match this filter. {status === 'FAILED' && '— that\'s a good thing.'}
                   </td>
                 </tr>
               )}
@@ -229,7 +229,7 @@ export default function EmailDeliveryTab() {
           {page.meta.totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-slate-100 px-3 py-2 text-xs dark:border-slate-800">
               <span className="text-slate-400">
-                Page {page.meta.page} of {page.meta.totalPages} Â· {page.meta.total} total
+                Page {page.meta.page} of {page.meta.totalPages} · {page.meta.total} total
               </span>
               <div className="flex gap-1">
                 <button

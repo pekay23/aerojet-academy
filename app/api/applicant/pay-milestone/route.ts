@@ -13,9 +13,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   const userId = session.user.id
 
-  let body: any
+  let body: { milestoneId: string }
   try {
-    body = await req.json()
+    const parsed = await req.json()
+    body = parsed as { milestoneId: string }
   } catch {
     return apiError('Invalid request body', 400)
   }

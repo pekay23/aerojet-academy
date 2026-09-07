@@ -4,7 +4,7 @@ import { useState } from 'react'
 import {
   BookOpen,
   Calendar,
-  _Award,
+  Award as _Award,
   Clock,
   User,
   ChevronDown,
@@ -15,13 +15,13 @@ import {
 
 interface Grade {
   id: string
-  assessmentName: string
-  assessmentType: string
-  score: number | string
-  maxScore: number | string
-  percentage: number | string
+  assessmentName?: string
+  assessmentType?: string
+  score: number
+  maxScore: number
+  percentage: number
   grade?: string | null
-  assessmentDate: string | Date
+  assessmentDate?: string | null
 }
 
 interface Enrollment {
@@ -30,16 +30,16 @@ interface Enrollment {
   enrolledAt?: string | null
   approvedAt?: string | null
   completedAt?: string | null
-  course?: { name: string; code: string } | null
+  course: { id: string; name: string; code: string | null; price: number }
   grades?: Grade[]
 }
 
 interface AttendanceRecord {
   id: string
-  date: string | Date
-  status: string
+  date?: string | null
+  status?: string
   minutesLate?: number | null
-  class?: { name?: string; course?: { name?: string } } | null
+  class?: { name?: string | null; course?: { code: string } | null } | null
 }
 
 interface OjtPeriod {
@@ -58,16 +58,23 @@ interface FullTimeEnrollment {
   id: string
   currentYearNumber?: number | null
   status: string
-  programme?: { name: string } | null
+  programme?: { code: string; name: string } | null
   ojtPeriods?: OjtPeriod[]
+  academicYear?: { id: string; name: string } | null
+}
+
+interface Student {
+  enrollments: Enrollment[]
+  attendanceRecords: AttendanceRecord[]
+  fullTimeEnrollments: FullTimeEnrollment[]
 }
 
 interface Props {
-  student: any
+  student: Student
   onRefresh: () => void
 }
 
-export default function AcademicTab({ student, _onRefresh }: Props) {
+export default function AcademicTab({ student, onRefresh: _onRefresh }: Props) {
   const [expandedEnrollment, setExpandedEnrollment] = useState<string | null>(null)
   const [expandedOjt, setExpandedOjt] = useState<string | null>(null)
 
@@ -78,9 +85,9 @@ export default function AcademicTab({ student, _onRefresh }: Props) {
   // Calculate attendance stats
   const attendanceStats = {
     total: attendanceRecords.length,
-    present: attendanceRecords.filter((r: any) => r.status === 'PRESENT').length,
-    absent: attendanceRecords.filter((r: any) => r.status === 'ABSENT').length,
-    late: attendanceRecords.filter((r: any) => r.status === 'LATE').length,
+    present: attendanceRecords.filter((r: AttendanceRecord) => r.status === 'PRESENT').length,
+    absent: attendanceRecords.filter((r: AttendanceRecord) => r.status === 'ABSENT').length,
+    late: attendanceRecords.filter((r: AttendanceRecord) => r.status === 'LATE').length,
   }
 
   return (
@@ -287,7 +294,7 @@ export default function AcademicTab({ student, _onRefresh }: Props) {
                         : '—'}
                     </td>
                     <td className="px-4 py-2 text-slate-700 dark:text-slate-300">
-                      {record.class?.course?.name || record.class?.name || '—'}
+                      {record.class?.name || record.class?.course?.code || '—'}
                     </td>
                     <td className="px-4 py-2 text-center">
                       {record.status === 'PRESENT' ? (

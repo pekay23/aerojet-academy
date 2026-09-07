@@ -50,8 +50,8 @@ export async function GET(req: NextRequest) {
       message: `Sent ${sent} aptitude test reminders`,
       timestamp: now.toISOString(),
     })
-  } catch (error: any) {
-    console.error('[Cron] Aptitude test reminders failed:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    console.error('[Cron] Aptitude test reminders failed:', error instanceof Error ? error : 'Unknown error')
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
   }
 }

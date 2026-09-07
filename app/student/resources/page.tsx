@@ -21,7 +21,7 @@ export default async function StudentResourcesPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const { isFullTime, _isExamOnly, _isModular } = await getStudentStatus(session.user.id)
+  const { isFullTime } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'materials')
 
   if (isFullTime && !hasAccess) {

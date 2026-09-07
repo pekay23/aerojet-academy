@@ -239,9 +239,9 @@ export default function InternalExamDashboard() {
                     </h3>
                     <p className="text-xs text-slate-500">
                       {bank.courseCode}
-                      {bank.categoryCode && ` Â· Cat ${bank.categoryCode}`}
-                      {bank.totalAttempts > 0 && ` Â· ${bank.totalAttempts} attempt${bank.totalAttempts !== 1 ? 's' : ''}`}
-                      {bank.isPublished && bank.bestScore > 0 && ` Â· Best: ${bank.bestScore}%`}
+                      {bank.categoryCode && ` · Cat ${bank.categoryCode}`}
+                      {bank.totalAttempts > 0 && ` · ${bank.totalAttempts} attempt${bank.totalAttempts !== 1 ? 's' : ''}`}
+                      {bank.isPublished && bank.bestScore > 0 && ` · Best: ${bank.bestScore}%`}
                     </p>
                   </div>
                 </div>

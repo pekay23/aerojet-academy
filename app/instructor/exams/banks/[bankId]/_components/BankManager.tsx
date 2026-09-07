@@ -2,15 +2,15 @@
 
 import { useState } from 'react'
 import {
-  _Plus,
+  Plus as _Plus,
   Search,
-  _Edit3,
-  _Trash2,
+  Edit3 as _Edit3,
+  Trash2 as _Trash2,
   Clock,
   CheckCircle2,
-  _XCircle,
+  XCircle as _XCircle,
   AlertCircle,
-  _Save,
+  Save as _Save,
   X,
   Settings,
 } from 'lucide-react'
@@ -84,9 +84,9 @@ export default function BankManager({
   pendingCount,
   poolHealth,
   questions,
-  _total,
-  _page,
-  _limit,
+  total: _total,
+  page: _page,
+  limit: _limit,
   disabled,
 }: BankManagerProps) {
   const [search, setSearch] = useState('')

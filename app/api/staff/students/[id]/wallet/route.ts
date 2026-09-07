@@ -4,7 +4,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { topUpWallet, adjustWallet, setWalletBalance, getOrCreateWallet } from '@/lib/wallet/operations'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
-import { TransactionType } from '@prisma/client'
+import { TransactionType, Prisma } from '@prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 
 // GET /api/staff/students/[id]/wallet — View student wallet with full history
@@ -25,7 +25,7 @@ export const GET = withErrorHandler(
 
     if (!wallet) return apiNotFound('Wallet not found')
 
-    const where: any = { walletId: wallet.id }
+    const where: Prisma.WalletTransactionWhereInput = { walletId: wallet.id }
     if (typeFilter) where.type = typeFilter
 
     const [transactions, total] = await Promise.all([

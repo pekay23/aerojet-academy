@@ -27,7 +27,7 @@ interface JourneyData {
     event: string
     entity: string
     timestamp: string
-    payload: Record<string, any>
+    payload: Record<string, unknown>
   }>
 }
 
@@ -53,7 +53,7 @@ export default function UserJourney() {
         setError(json.error || 'Failed to load journey')
         setData(null)
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to load user journey')
       setError('Network error. Please try again.')
       setData(null)

@@ -55,34 +55,53 @@ export const SYSTEM_EMAIL_INVENTORY: SystemEntry[] = [
   },
 ]
 
-/** Idempotent seed of the AUTO entries. Only creates new entries or re-tags
- *  existing ones as AUTO/system — never overwrites admin edits to title,
- *  description, or address. Safe to call on every settings load. */
+/** Idempotent seed of the AUTO entries. Creates new entries, re-tags existing
+ *  ones as AUTO/system, and migrates addresses when the canonical address
+ *  changes in business-rules.ts. Admin edits to title and description are
+ *  always preserved. */
 export async function seedSystemEmailRegistry() {
   for (const entry of SYSTEM_EMAIL_INVENTORY) {
-    const existing = await prismaUnfiltered.emailRegistryEntry.findUnique({
+    // Look up by the canonical address first
+    const byAddress = await prismaUnfiltered.emailRegistryEntry.findUnique({
       where: { address: entry.address },
     })
-    if (!existing) {
-      await prismaUnfiltered.emailRegistryEntry.create({
+    if (byAddress) {
+      // Entry exists at the correct address — just re-tag
+      await prismaUnfiltered.emailRegistryEntry.update({
+        where: { address: entry.address },
+        data: { category: 'AUTO', isSystem: true },
+      })
+      continue
+    }
+
+    // No entry at this address. Look for one with the same title that may have
+    // been migrated or edited. If found, update its address to the canonical one.
+    const byTitle = await prismaUnfiltered.emailRegistryEntry.findFirst({
+      where: { title: entry.title, category: 'CUSTOM' },
+    })
+    if (byTitle) {
+      await prismaUnfiltered.emailRegistryEntry.update({
+        where: { id: byTitle.id },
         data: {
-          title: entry.title,
-          description: entry.description,
           address: entry.address,
           category: 'AUTO',
           isSystem: true,
+          description: entry.description, // sync description from code
         },
       })
-    } else {
-      // Re-tag as AUTO/system but preserve any admin edits
-      await prismaUnfiltered.emailRegistryEntry.update({
-        where: { address: entry.address },
-        data: {
-          category: 'AUTO',
-          isSystem: true,
-        },
-      })
+      continue
     }
+
+    // No existing entry at all — create it
+    await prismaUnfiltered.emailRegistryEntry.create({
+      data: {
+        title: entry.title,
+        description: entry.description,
+        address: entry.address,
+        category: 'AUTO',
+        isSystem: true,
+      },
+    })
   }
 }
 

@@ -121,16 +121,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const safeId = (profile.studentId ?? 'student').replace(/[^a-zA-Z0-9-]/g, '_')
 
-    return new NextResponse(stream as any, {
+    return new NextResponse(stream as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="Transcript_${safeId}.pdf"`,
       },
     })
-  } catch (error: any) {
-    console.error('[pdf/staff/student-transcript] Error:', error)
+    } catch (error: unknown) {
+    console.error('[pdf/staff/student-transcript] Error:', error instanceof Error ? error.message : String(error))
     return NextResponse.json(
-      { error: 'Failed to generate transcript', details: error.message },
+      { error: 'Failed to generate transcript', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }

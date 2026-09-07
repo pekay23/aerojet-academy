@@ -21,7 +21,7 @@ export async function GET(_req: NextRequest) {
     })
 
     return NextResponse.json(academicYears)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to fetch academic years:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     revalidateTag('academic-years', 'max')
     return NextResponse.json(academicYear, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to create academic year:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }

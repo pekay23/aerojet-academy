@@ -72,8 +72,8 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ success: true, paymentId: payment.id }, { status: 201 })
-  } catch (error: any) {
-    console.error('Wallet proof upload error:', error)
+  } catch (error: unknown) {
+    console.error('Wallet proof upload error:', error instanceof Error ? error : 'Unknown error')
     return NextResponse.json({ error: 'Failed to submit payment proof.' }, { status: 500 })
   }
 }

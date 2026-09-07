@@ -33,7 +33,12 @@ export default async function Page() {
       {/* Grid of Modules */}
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {classes && classes.length > 0 ? (
-          classes.map((cls) => <ModuleCard key={cls.id} cls={cls} />)
+          classes.map((cls) => (
+            <ModuleCard
+              key={cls.id}
+              cls={{ ...cls, course: { ...cls.course, duration: cls.course.duration ?? undefined } }}
+            />
+          ))
         ) : (
           <div className="col-span-full rounded-3xl border border-dashed border-slate-200 bg-slate-50/50 p-20 text-center dark:border-slate-800 dark:bg-slate-900/50">
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-100 dark:bg-slate-800">

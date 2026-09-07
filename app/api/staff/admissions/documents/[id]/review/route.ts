@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff, getAuthSession } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiNotFound, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { z } from 'zod'
 
 const reviewSchema = z.object({
@@ -10,7 +10,7 @@ const reviewSchema = z.object({
 })
 
 // POST /api/staff/admissions/documents/[id]/review — approve/reject a document
-export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx: RouteContext) => {
   await requireStaff()
   const session = await getAuthSession()
   const { id } = await ctx.params

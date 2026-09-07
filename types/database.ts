@@ -100,7 +100,7 @@ export interface DbClass {
   semesterId?: string | null
   startDate: string // Renamed from date
   endDate: string // Added
-  schedule?: any | null // Added
+  schedule?: unknown | null // Added
   maxStudents: number // Added
   currentStudents: number // Added
   createdAt: string

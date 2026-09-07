@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 
@@ -9,14 +9,14 @@ const reviewSchema = z.object({
   reviewNote: z.string().optional(),
 })
 
-export const PATCH = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ questionId: string }> }) => {
+export const PATCH = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const session = await getAuthSession()
   // Only Staff, Admin, Super Admin, Examiner can review
   if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER'].includes(session.user.role)) {
     return apiError('Unauthorized', 403)
   }
 
-  const { questionId } = await ctx.params
+  const { questionId } = (await ctx!.params) as { questionId: string }
   const body = await req.json()
 
   const parsed = reviewSchema.safeParse(body)

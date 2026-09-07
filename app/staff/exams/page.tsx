@@ -2,7 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import StaffExamsTabs from '../_components/StaffExamsTabs'
-import ExamBookingsTable from '../_components/ExamBookingsTable'
+import ExamBookingsTable, { type ExamBookingWithDetails } from '../_components/ExamBookingsTable'
 import RecordsTab from './_components/RecordsTab'
 import { GroupCharterModal } from './_components/GroupCharterModal'
 import { getAvailableModules } from '../actions'
@@ -10,7 +10,6 @@ import { serializePrisma } from '@/lib/utils/serialization'
 import Link from 'next/link'
 import SearchInput from '@/components/SearchInput'
 import { format } from 'date-fns'
-import { getEventDemandSnapshots } from '@/lib/exams/demand'
 import {
   deriveBookingDisplayResult,
   fulfillmentStateLabel,
@@ -26,6 +25,52 @@ import {
 
 
 import { BookingType, ExamCategory } from '@prisma/client'
+
+type SerializedExamEvent = {
+  id: string
+  name: string
+  status: string
+  startDate: string
+  endDate: string
+  pools: { currentMemberCount: number; maxCandidates: number }[]
+  _count: { pools: number }
+}
+
+type CharterEvent = { id: string; name: string }
+type CharterModule = { id: string; code: string; name: string }
+type SerializedPool = { currentMemberCount: number; maxCandidates: number }
+
+type SerializedFormalResult = {
+  id: string
+  user: {
+    email: string
+    profile: { firstName: string; lastName: string } | null
+  }
+  moduleCode: string | null
+  exam: {
+    name: string | null
+    examDate: Date | string | null
+    examComponent: {
+      course: { code: string } | null
+    } | null
+  } | null
+  score: number | string | null
+  passed: boolean | null
+  certificateUrl: string | null
+  createdAt: Date | string
+}
+
+type FormalResultRow = {
+  id: string
+  type: 'FORMAL'
+  user: SerializedFormalResult['user']
+  moduleCode: string
+  examName: string
+  date: Date | string | null
+  score: number | null
+  passed: boolean | null
+  certificateUrl: string | null
+}
 
 interface ExamRecord {
   id: string
@@ -126,8 +171,6 @@ async function EventsTab({ query }: { query?: string }) {
       orderBy: { startDate: 'desc' },
       take: 100,
     })
-    const _demandByEvent = await getEventDemandSnapshots(eventsRaw.map((event) => event.id))
-
     const events = serializePrisma(eventsRaw)
 
     // Fetch open events and modules for Group Charter modal
@@ -162,9 +205,9 @@ function EventsTabContent({
   charterEvents,
   charterModules,
 }: {
-  events: any
-  charterEvents: any
-  charterModules: any
+  events: SerializedExamEvent[]
+  charterEvents: CharterEvent[]
+  charterModules: CharterModule[]
 }) {
   return (
     <div className="space-y-6">
@@ -215,13 +258,13 @@ function EventsTabContent({
                   </td>
                 </tr>
               ) : (
-                events.map((event: any) => {
+                events.map((event: SerializedExamEvent) => {
                   const totalCandidates = event.pools.reduce(
-                    (acc: number, pool: any) => acc + pool.currentMemberCount,
+                    (acc: number, pool: SerializedPool) => acc + pool.currentMemberCount,
                     0
                   )
                   const totalCapacity = event.pools.reduce(
-                    (acc: number, pool: any) => acc + pool.maxCandidates,
+                    (acc: number, pool: SerializedPool) => acc + pool.maxCandidates,
                     0
                   )
 
@@ -332,7 +375,7 @@ async function BookingsTab({ query }: { query?: string }) {
   }
 }
 
-function BookingsTabContent({ bookings }: { bookings: any }) {
+function BookingsTabContent({ bookings }: { bookings: ExamBookingWithDetails[] }) {
   return (
     <div className="space-y-6">
       <ExamBookingsTable bookings={bookings} />
@@ -366,7 +409,7 @@ async function ResultsTab({ query }: { query?: string }) {
     }).then(res => serializePrisma(res))
 
     // Unify results
-    const allResults = formalResults.map((r: any) => ({
+    const allResults = formalResults.map((r: SerializedFormalResult) => ({
       id: r.id,
       type: 'FORMAL' as const,
       user: r.user,
@@ -376,7 +419,11 @@ async function ResultsTab({ query }: { query?: string }) {
       score: r.score ? Number(r.score) : null,
       passed: r.passed,
       certificateUrl: r.certificateUrl,
-    })).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    })).sort((a: FormalResultRow, b: FormalResultRow) => {
+      const aTime = a.date ? new Date(a.date).getTime() : 0
+      const bTime = b.date ? new Date(b.date).getTime() : 0
+      return bTime - aTime
+    })
 
     // eslint-disable-next-line react-hooks/error-boundaries
     return <ResultsTabContent allResults={allResults} query={query} />
@@ -386,7 +433,7 @@ async function ResultsTab({ query }: { query?: string }) {
   }
 }
 
-function ResultsTabContent({ allResults, query }: { allResults: any; query?: string }) {
+function ResultsTabContent({ allResults, query }: { allResults: FormalResultRow[]; query?: string }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-end">
@@ -427,7 +474,7 @@ function ResultsTabContent({ allResults, query }: { allResults: any; query?: str
                   </td>
                 </tr>
               ) : (
-                allResults.map((result: any) => (
+                allResults.map((result: FormalResultRow) => (
                   <tr
                     key={result.id}
                     className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"

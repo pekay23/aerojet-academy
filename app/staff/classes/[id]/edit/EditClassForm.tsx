@@ -34,9 +34,22 @@ const formSchema = updateClassSchema.extend({
 type FormValues = z.infer<typeof formSchema>
 
 interface EditClassFormProps {
-  initialData: any
+  initialData: {
+    id: string
+    name: string
+    courseId: string
+    instructorId: string | null
+    startDate: string | Date
+    endDate: string | Date
+    maxStudents: number
+  }
   courses: { id: string; name: string; code: string }[]
-  instructors: any[]
+  instructors: Array<{
+    id: string
+    user: {
+      profile: { firstName: string; lastName: string } | null
+    }
+  }>
 }
 
 export default function EditClassForm({ initialData, courses, instructors }: EditClassFormProps) {
@@ -83,8 +96,9 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
       toast.success('Class updated successfully')
       router.push(`/staff/classes/${initialData.id}`)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update class')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update class'
+      toast.error(message || 'Failed to update class')
     } finally {
       setIsLoading(false)
     }
@@ -154,7 +168,7 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
                     <SelectItem value="none">Unassigned</SelectItem>
                     {instructors.map((inst) => (
                       <SelectItem key={inst.id} value={inst.id}>
-                        {inst.user.profile.firstName} {inst.user.profile.lastName}
+                        {inst.user.profile?.firstName ?? ''} {inst.user.profile?.lastName ?? ''}
                       </SelectItem>
                     ))}
                   </SelectContent>

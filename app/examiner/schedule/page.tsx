@@ -41,8 +41,26 @@ export default async function ExaminerSchedulePage({
     }),
   ])
 
+  type SittingRow = {
+  id: string
+  startTime: Date
+  endTime: Date | null
+  sessionType: string | null
+  event: { name: string } | null
+  examComponent: { code: string; name: string } | null
+}
+
+type AdminEventRow = {
+  id: string
+  title: string
+  description: string | null
+  startDate: Date
+  endDate: Date | null
+  color: string | null
+}
+
   const events: UnifiedCalendarEvent[] = [
-    ...(sittings as any[]).map((s: any) => ({
+    ...(sittings as SittingRow[]).map((s) => ({
       id: `sitting-${s.id}`,
       dbId: s.id,
       title: `Invigilation: ${s.examComponent?.code || 'Module'}`,
@@ -54,7 +72,7 @@ export default async function ExaminerSchedulePage({
       editable: false,
       visibleTo: 'EXAMINER',
     })),
-    ...(adminEvents as any[]).map((evt: any) => ({
+    ...(adminEvents as AdminEventRow[]).map((evt) => ({
       id: `admin-${evt.id}`,
       dbId: evt.id,
       title: evt.title,
@@ -69,7 +87,7 @@ export default async function ExaminerSchedulePage({
   ]
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1400px] space-y-8 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-350 space-y-8 duration-700">
       <div>
         <h1 className="text-aerojet-blue text-3xl font-black tracking-tight uppercase dark:text-white">
           Invigilation Schedule

@@ -204,27 +204,27 @@ export default async function AuditLogsPage(req: {
 
   users.forEach((u) => (entityLabels[u.id] = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email))
   courses.forEach((c) => (entityLabels[c.id] = c.name))
-  events.forEach((e: any) => (entityLabels[e.id] = e.name))
-  pools.forEach((p: any) => (entityLabels[p.id] = p.name))
-  comps.forEach((c: any) => (entityLabels[c.id] = c.name))
-  classes.forEach((c: any) => (entityLabels[c.id] = c.name))
-  payments.forEach((p: any) => (entityLabels[p.id] = p.referenceCode || `Payment #${p.id.substring(0, 6)}`))
-  profiles.forEach((p: any) => (entityLabels[p.id] = `Student ID: ${p.studentId}`))
-  enrollments.forEach((e: any) => {
+  events.forEach((e) => (entityLabels[e.id] = e.name))
+  pools.forEach((p) => (entityLabels[p.id] = p.name))
+  comps.forEach((c) => (entityLabels[c.id] = c.name))
+  classes.forEach((c) => (entityLabels[c.id] = c.name))
+  payments.forEach((p) => (entityLabels[p.id] = p.referenceCode || `Payment #${p.id.substring(0, 6)}`))
+  profiles.forEach((p) => (entityLabels[p.id] = `Student ID: ${p.studentId}`))
+  enrollments.forEach((e) => {
     const name = e.user.profile ? `${e.user.profile.firstName} ${e.user.profile.lastName}` : e.user.email
     entityLabels[e.id] = `${name} — ${e.course.name}`
   })
-  examBookings.forEach((b: any) => {
+  examBookings.forEach((b) => {
     const name = b.user?.profile ? `${b.user.profile.firstName} ${b.user.profile.lastName}` : (b.user?.email || 'Unknown')
     entityLabels[b.id] = `${name} — ${b.moduleCode || 'Exam'}`
   })
-  examResults.forEach((r: any) => {
+  examResults.forEach((r) => {
     const name = r.user?.profile ? `${r.user.profile.firstName} ${r.user.profile.lastName}` : (r.user?.email || 'Unknown')
     entityLabels[r.id] = `${name} — ${r.moduleCode || 'Result'}`
   })
-  usersLowercase.forEach((u: any) => (entityLabels[u.id] = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email))
-  licenseCategories.forEach((lc: any) => (entityLabels[lc.id] = lc.name))
-  licenseModuleReqs.forEach((lmr: any) => {
+  usersLowercase.forEach((u) => (entityLabels[u.id] = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email))
+  licenseCategories.forEach((lc) => (entityLabels[lc.id] = lc.name))
+  licenseModuleReqs.forEach((lmr) => {
     const courseName = lmr.course?.code || lmr.course?.name || 'Module'
     const catName = lmr.licenseCategory?.name || ''
     entityLabels[lmr.id] = `${courseName}${catName ? ` — ${catName}` : ''}`

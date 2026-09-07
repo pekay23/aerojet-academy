@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { EnrollmentStatus, type Prisma } from '@prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiPaginated, withErrorHandler, parsePagination, parseSearch } from '@/lib/api/response'
@@ -26,8 +27,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     { createdAt: 'desc' }
   )
 
-  const where: any = {}
-  if (statusFilter) where.status = statusFilter
+  const where: Prisma.EnrollmentWhereInput = {}
+  if (statusFilter && Object.values(EnrollmentStatus).includes(statusFilter as EnrollmentStatus)) {
+    where.status = statusFilter as EnrollmentStatus
+  }
   if (search) {
     where.OR = [
       { user: { profile: { firstName: { contains: search, mode: 'insensitive' } } } },
@@ -53,4 +56,3 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   return apiPaginated(enrollments, total, page, limit)
 })
-

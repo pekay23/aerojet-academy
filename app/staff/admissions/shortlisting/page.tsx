@@ -104,7 +104,7 @@ export default async function ShortlistingPage() {
           reasoning: { raw: session.reasoningRawScore, total: session.reasoningTotalQuestions, percentile: session.reasoningPercentile },
           physics: { raw: session.physicsRawScore, total: session.physicsTotalQuestions, percentile: session.physicsPercentile },
         } : null,
-        metadata: app.metadata,
+        metadata: app.metadata as Record<string, unknown> | null,
       }
     })
   )

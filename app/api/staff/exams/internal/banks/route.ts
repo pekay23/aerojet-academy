@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import type { Prisma } from '@prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { getInternalBankCategoryCode, normalizeCategoryCode } from '@/lib/easa/category-selection'
@@ -15,7 +16,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const url = new URL(req.url)
   const courseId = url.searchParams.get('courseId')
 
-  const where: any = {}
+  const where: Prisma.InternalExamBankWhereInput = {}
   if (courseId) where.courseId = courseId
 
   const banks = await prismaUnfiltered.internalExamBank.findMany({

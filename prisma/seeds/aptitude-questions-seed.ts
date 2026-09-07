@@ -8,7 +8,7 @@
  */
 
 import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
+import { AptitudeCategory, AptitudeQuestionType, Prisma, PrismaClient, QuestionDifficulty } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 
@@ -1107,9 +1107,9 @@ async function main() {
       await prisma.aptitudeQuestion.create({
         data: {
           bankId: bank.id,
-          category: category as any,
-          questionType: q.questionType as any,
-          difficulty: q.difficulty as any,
+          category: category as unknown as AptitudeCategory,
+          questionType: q.questionType as unknown as AptitudeQuestionType,
+          difficulty: q.difficulty as unknown as QuestionDifficulty,
           text: q.text,
           options: q.options ?? undefined,
           correctAnswer: q.correctAnswer,

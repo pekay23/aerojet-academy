@@ -1,4 +1,5 @@
 import 'server-only'
+import { Prisma } from '@prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
 // ============================================================================
@@ -118,7 +119,7 @@ export type AnalyticsPayload =
   | WalletPayload
   | ReferralPayload
   | TourPayload
-  | Record<string, any>
+  | Record<string, unknown>
 
 // ============================================================================
 // Event validation
@@ -143,7 +144,7 @@ export const REQUIRED_PAYLOAD_FIELDS: Record<AnalyticsEventName, string[]> = {
   TOUR_COMPLETED: ['tourName'],
 }
 
-export function validatePayload(event: AnalyticsEventName, data: Record<string, any>): Record<string, any> {
+export function validatePayload(event: AnalyticsEventName, data: Record<string, unknown>): Record<string, unknown> {
   const required = REQUIRED_PAYLOAD_FIELDS[event] || []
   const missing = required.filter((field) => !(field in data))
   if (missing.length > 0) {
@@ -161,9 +162,9 @@ export async function trackEvent(
   data: AnalyticsPayload = {},
   userId?: string,
 ): Promise<void> {
-  const payload = validatePayload(event, data as Record<string, any>)
+  const payload = validatePayload(event, data as Record<string, unknown>)
 
-  const resolvedUserId = userId ?? payload.userId
+  const resolvedUserId = userId ?? payload.userId as string | undefined
 
   // Validate that the user exists before tracking (if userId is provided)
   if (resolvedUserId) {
@@ -189,7 +190,7 @@ export async function trackEvent(
         entity: 'ANALYTICS',
         entityId: 'system',
         userId: resolvedUserId,
-        changes: payload,
+        changes: payload as unknown as Prisma.InputJsonValue,
       },
     })
   } catch (err) {

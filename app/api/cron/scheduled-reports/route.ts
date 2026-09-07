@@ -159,8 +159,9 @@ export async function GET(req: NextRequest) {
       success: true,
       message: `Report sent to ${email}`,
     })
-  } catch (error: any) {
-    console.error('[Scheduled Report Error]', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  } catch (error) {
+    const message = error instanceof Error ? (error as Error).message : String(error)
+    console.error('[Scheduled Report Error]', message)
+    return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
 }

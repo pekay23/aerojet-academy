@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { apiError, withErrorHandler } from '@/lib/api/response'
+import { apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 
-export const GET = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const _staff = await requireStaff()
-  const { eventId } = ctx.params
+  const { eventId } = (await ctx!.params) as { eventId: string }
   const format = req.nextUrl.searchParams.get('format') || 'csv'
 
   const event = await prismaUnfiltered.examEvent.findUnique({

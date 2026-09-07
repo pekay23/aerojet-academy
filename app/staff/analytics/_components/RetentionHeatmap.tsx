@@ -38,6 +38,15 @@ const cohortConfig = {
   },
 } as const
 
+const retentionFormatter = (value: unknown, _name: unknown): React.ReactNode => {
+  const numValue = Number(value ?? 0)
+  return numValue !== 0 ? `${numValue}%` : '0%'
+}
+
+const cohortSizeFormatter = (value: unknown): React.ReactNode => {
+  return Number(value ?? 0).toLocaleString()
+}
+
 export default function RetentionHeatmap({ data }: RetentionHeatmapProps) {
   const chartData = data.cohorts.map((cohort) => {
     const date = new Date(cohort.cohortDate)
@@ -60,12 +69,12 @@ export default function RetentionHeatmap({ data }: RetentionHeatmapProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={retentionConfig} className="h-[300px] w-full">
+          <ChartContainer config={retentionConfig} className="h-75 w-full">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} />
-              <ChartTooltip content={<ChartTooltipContent indicator="dot" formatter={(value: any, name: any) => [`${Number(value ?? 0)}%`, name] as any} />} />
+              <ChartTooltip content={<ChartTooltipContent indicator="dot" formatter={retentionFormatter} />} />
               <Bar dataKey="d1" fill="var(--color-d1)" radius={[4, 4, 0, 0]} />
               <Bar dataKey="d7" fill="var(--color-d7)" radius={[4, 4, 0, 0]} />
               <Bar dataKey="d30" fill="var(--color-d30)" radius={[4, 4, 0, 0]} />
@@ -81,12 +90,12 @@ export default function RetentionHeatmap({ data }: RetentionHeatmapProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={cohortConfig} className="h-[300px] w-full">
+          <ChartContainer config={cohortConfig} className="h-75 w-full">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-slate-700" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
-              <ChartTooltip content={<ChartTooltipContent indicator="dot" formatter={(value: any) => [Number(value ?? 0).toLocaleString(), 'Users'] as any} />} />
+              <ChartTooltip content={<ChartTooltipContent indicator="dot" formatter={cohortSizeFormatter} />} />
               <Bar dataKey="cohortSize" fill="var(--color-cohortSize)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ChartContainer>

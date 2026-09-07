@@ -120,8 +120,8 @@ export async function GET(request: NextRequest) {
     const result = await adapter.fetch(imageUrl)
     data = result.data
     contentType = result.contentType
-  } catch (err: any) {
-    console.error('[image-proxy] fetch error:', err.message)
+  } catch (err: unknown) {
+    console.error('[image-proxy] fetch error:', err instanceof Error ? err.message : String(err))
     return new NextResponse(JSON.stringify({ error: 'Image not found' }), {
       status: 404,
       headers: { 'Content-Type': 'application/json' },

@@ -89,8 +89,9 @@ export default function ManualWalletAdjustmentDialog({
       resetForm()
       onSuccess?.()
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update wallet'
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -154,7 +155,7 @@ export default function ManualWalletAdjustmentDialog({
             >
               Operation Type
             </Label>
-            <Select value={action} onValueChange={(val: any) => setAction(val)}>
+            <Select value={action} onValueChange={(val) => setAction(val as 'credit' | 'debit' | 'set_balance' | 'adjustment')}>
               <SelectTrigger
                 id="action"
                 className="w-full rounded-xl border-slate-200 bg-white focus:ring-aerojet-blue dark:border-slate-800 dark:bg-slate-950"

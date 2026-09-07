@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
   for (const [role, roleMsgs] of Object.entries(messages)) {
     if (Array.isArray(roleMsgs)) {
-      cleanMessages[role] = [...new Set(roleMsgs.map((m: any) => String(m).trim()).filter(Boolean))]
+      cleanMessages[role] = [...new Set(roleMsgs.map((m: string) => String(m).trim()).filter(Boolean))]
     }
   }
 

@@ -38,8 +38,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       } else {
         failures.push({ id, error: transition.error || 'Transition not allowed' })
       }
-    } catch (err: any) {
-      failures.push({ id, error: err.message || 'Unknown error' })
+    } catch (err: unknown) {
+      failures.push({ id, error: err instanceof Error ? err.message : 'Unknown error' })
     }
   }
 

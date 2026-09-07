@@ -40,7 +40,7 @@ const statusConfig: Record<
     label: string
     color: string
     bg: string
-    icon: any
+    icon: React.ComponentType<{ className?: string }>
     description: string
   }
 > = {

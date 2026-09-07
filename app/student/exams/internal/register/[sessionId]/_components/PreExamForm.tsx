@@ -1,12 +1,13 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import Image from 'next/image'
+import { useForm, type Resolver } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Loader2, Upload, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Loader2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -31,7 +32,6 @@ import { UploadButton } from '@/lib/uploads/uploadthing'
 import { PROGRAMMES } from '@/lib/utils/constants'
 import {
   internalExamRegistrationSchema,
-  type InternalExamRegistrationInput,
 } from '@/lib/validation/schemas'
 import { format } from 'date-fns'
 
@@ -55,7 +55,7 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(internalExamRegistrationSchema),
+    resolver: zodResolver(internalExamRegistrationSchema) as unknown as Resolver<FormValues>,
     defaultValues: {
       sessionId,
       fullName: '',
@@ -75,7 +75,7 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
       consentIdentity: false,
       consentProcessing: false,
     },
-  } as any)
+  })
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true)
@@ -99,8 +99,9 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
       toast.success('Registration submitted successfully')
       router.push(`/student/exams/internal/${sessionId}`)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to submit registration')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to submit registration'
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }
@@ -269,9 +270,11 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
                 <FormLabel>Candidate Photo</FormLabel>
                 <div className="flex items-center gap-4">
                   {photoUrl && (
-                    <img
+                    <Image
                       src={photoUrl}
                       alt="Candidate preview"
+                      width={64}
+                      height={64}
                       className="h-16 w-16 rounded-full border object-cover"
                     />
                   )}

@@ -1,12 +1,7 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import {
-  _hashPassword,
-  generateRegistrationCode,
-  generateToken,
-  checkRateLimit,
-  getClientIp,
-} from '@/lib/auth/helpers'
+  hashPassword as _hashPassword, generateRegistrationCode, generateToken, checkRateLimit, getClientIp, } from '@/lib/auth/helpers'
 import { registerSchema, validateBody } from '@/lib/validation/schemas'
 import { apiCreated, apiError, apiTooManyRequests, withErrorHandler } from '@/lib/api/response'
 import { sendEmailVerificationEmail } from '@/lib/email/service'

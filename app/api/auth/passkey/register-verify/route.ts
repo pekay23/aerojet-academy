@@ -100,10 +100,10 @@ export async function POST(req: Request) {
       passkeyId: passkey.id,
       name: passkeyName,
     })
-  } catch (error: any) {
-    console.error('[PASSKEY_REGISTER_VERIFY]', error?.message || error)
+  } catch (error: unknown) {
+    console.error('[PASSKEY_REGISTER_VERIFY]', error instanceof Error ? error?.message || error : 'Unknown error')
     return NextResponse.json(
-      { error: 'Registration verification failed', detail: error?.message },
+      { error: 'Registration verification failed', detail: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

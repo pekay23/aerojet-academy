@@ -7,40 +7,64 @@ import EditPathwayDialog from '@/app/staff/users/[id]/_components/EditPathwayDia
 import EditAcademicPeriodDialog from '@/app/staff/users/[id]/_components/EditAcademicPeriodDialog'
 import UserActionsMenu from '@/app/staff/_components/UserActionsMenu'
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import type { SerializedStudent } from '@/lib/types/staff'
+
+type ReferralLite = {
+  id: string
+  status?: string
+  createdAt?: string | Date
+  referee?: { profile?: { firstName?: string; lastName?: string }; email?: string }
+  referrer?: { profile?: { firstName?: string; lastName?: string }; email?: string }
+}
+
 interface Props {
-  student: {
-    id: string
-    email: string
-    personalEmail?: string | null
-    academyEmail?: string | null
-    status: string
-    emailVerified: string | Date | null
-    createdAt: string | Date
-    lastLoginAt?: string | Date | null
-    registrationPaid: boolean
-    isAmbassador: boolean
-    referralCode?: string | null
-    programmeChoice?: string | null
-    referralsReceived?: any[]
-    referralsMade?: any[]
-    profile: any
-    studentProfile: any
-  }
-  academicYears: { id: string; name: string }[]
-  semesters: { id: string; name: string }[]
-  studyPathways: { id: string; name: string; code: string }[]
+  student: SerializedStudent
   onRefresh: () => void
 }
 
 export default function ProfileTab({
   student,
-  _academicYears,
-  _semesters,
-  _studyPathways,
   onRefresh,
 }: Props) {
   const profile = student.profile
   const sp = student.studentProfile
+  const referralsReceived = (student.referralsReceived || []) as unknown as ReferralLite[]
+  const referralsMade = (student.referralsMade || []) as unknown as ReferralLite[]
 
   const fullName = profile
     ? [profile.firstName, profile.middleName, profile.lastName].filter(Boolean).join(' ')
@@ -239,16 +263,18 @@ export default function ProfileTab({
               '—'
             }
           />
-          {sp?.licenseTargets?.length > 0 && (
+          {(sp?.licenseTargets?.length ?? 0) > 0 && (
             <Field
               icon={BookOpen}
               label="License Targets"
-              value={sp.licenseTargets
-                .map(
-                  (t: { licenseCategory: { name?: string | null; code?: string | null } | null }) =>
-                    t.licenseCategory?.name || t.licenseCategory?.code
-                )
-                .join(', ')}
+              value={
+                sp?.licenseTargets
+                  ?.map(
+                    (t: { licenseCategory: { name?: string | null; code?: string | null } | null }) =>
+                      t.licenseCategory?.name || t.licenseCategory?.code
+                  )
+                  .join(', ') ?? '—'
+              }
             />
           )}
           <Field
@@ -354,19 +380,19 @@ export default function ProfileTab({
             <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
               Referred By
             </h4>
-            {student.referralsReceived && student.referralsReceived.length > 0 ? (
+            {referralsReceived.length > 0 ? (
               <div className="flex items-center gap-3">
                 <div className="text-aerojet-blue flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold dark:bg-blue-900/30">
-                  {student.referralsReceived[0].referrer.profile?.firstName?.[0]}
-                  {student.referralsReceived[0].referrer.profile?.lastName?.[0]}
+                  {referralsReceived[0]?.referrer?.profile?.firstName?.[0]}
+                  {referralsReceived[0]?.referrer?.profile?.lastName?.[0]}
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900 dark:text-white">
-                    {student.referralsReceived[0].referrer.profile?.firstName}{' '}
-                    {student.referralsReceived[0].referrer.profile?.lastName}
+                    {referralsReceived[0]?.referrer?.profile?.firstName}{' '}
+                    {referralsReceived[0]?.referrer?.profile?.lastName}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {student.referralsReceived[0].referrer?.email}
+                    {referralsReceived[0]?.referrer?.email}
                   </p>
                 </div>
               </div>
@@ -380,16 +406,16 @@ export default function ProfileTab({
             <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
               Referrals Made
             </h4>
-            {student.referralsMade && student.referralsMade.length > 0 ? (
+            {referralsMade.length > 0 ? (
               <div className="space-y-3">
-                {student.referralsMade.slice(0, 5).map((ref) => (
+                {referralsMade.slice(0, 5).map((ref) => (
                   <div key={ref.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold dark:bg-slate-700">
-                        {ref.referee.profile?.firstName?.[0]}
+                        {ref.referee?.profile?.firstName?.[0]}
                       </div>
                       <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {ref.referee.profile?.firstName} {ref.referee.profile?.lastName}
+                        {ref.referee?.profile?.firstName} {ref.referee?.profile?.lastName}
                       </p>
                     </div>
                     <span
@@ -403,9 +429,9 @@ export default function ProfileTab({
                     </span>
                   </div>
                 ))}
-                {student.referralsMade.length > 5 && (
+                {referralsMade.length > 5 && (
                   <p className="text-center text-[10px] text-slate-400">
-                    +{student.referralsMade.length - 5} more referrals
+                    + {referralsMade.length - 5} more
                   </p>
                 )}
               </div>

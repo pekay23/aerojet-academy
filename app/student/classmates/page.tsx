@@ -5,6 +5,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Users, GraduationCap, BookOpen, Sparkles, Calendar } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Prisma } from '@prisma/client'
 
 import ClassmatesFilters from './_components/ClassmatesFilters'
 
@@ -124,7 +125,7 @@ export default async function ClassmatesPage({
   }
 
   // Build peer query conditions
-  const peerWhere: any = {
+  const peerWhere: Prisma.StudentProfileWhereInput = {
     userId: userIdFilter !== undefined ? { in: userIdFilter } : { not: session.user.id },
     user: q
       ? {

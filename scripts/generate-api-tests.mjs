@@ -272,7 +272,7 @@ function getSchemaDefaults(content) {
   return defaults
 }
 
-function getValidBody(content) {
+function _getValidBody(content) {
   const defaults = getSchemaDefaults(content)
   if (Object.keys(defaults).length > 0) {
     return JSON.stringify(defaults)
@@ -325,7 +325,7 @@ function getSchemaDefaults(content) {
   return defaults
 }
 
-function getValidBody(content) {
+function _getValidBody(content) {
   const defaults = getSchemaDefaults(content)
   if (Object.keys(defaults).length > 0) {
     return JSON.stringify(defaults)
@@ -378,7 +378,7 @@ function getSchemaDefaults(content) {
   return defaults
 }
 
-function getValidBody(content) {
+function _getValidBody(content) {
   const defaults = getSchemaDefaults(content)
   if (Object.keys(defaults).length > 0) {
     return JSON.stringify(defaults)
@@ -456,7 +456,7 @@ function generateTest(routePath, content) {
 
   const authHelper = getAuthHelper(routePath, content)
   const role = getRole(routePath)
-  const model = getPrimaryModel(routePath)
+  const _model = getPrimaryModel(routePath)
   const models = getModelNames(content)
   const hasGetAuthSession = usesGetAuthSession(content)
 
@@ -491,7 +491,7 @@ function generateTest(routePath, content) {
   sendActivationEmail: vi.fn(),
 }))`
 
-  const mockInternalExam = content.includes('isInternalExamSystemEnabled') || content.includes('/internal-exam/engine')
+  const _mockInternalExam = content.includes('isInternalExamSystemEnabled') || content.includes('/internal-exam/engine')
     ? `vi.mock('@/lib/internal-exam/engine', () => ({
   isInternalExamSystemEnabled: vi.fn().mockResolvedValue(true),
 }))`
@@ -527,7 +527,7 @@ function generateTest(routePath, content) {
     }
   }
 
-  const beforeEachMocks = models.map(m => `    prismaMock.${m}.findUnique.mockResolvedValue(null as any)`).join('\n')
+  const _beforeEachMocks = models.map(m => `    prismaMock.${m}.findUnique.mockResolvedValue(null as any)`).join('\n')
 
   const testBlocks = []
 
@@ -588,7 +588,7 @@ function generateTest(routePath, content) {
   }
 
   if (methods.includes('POST')) {
-    const isWithParams = hasIdParam(routeUrl)
+    const _isWithParams = hasIdParam(routeUrl)
     const paramsArg = paramNames.length > 0 ? `, { params: { ${paramsObj} } } as any` : ''
     testBlocks.push(`  it('returns 401 when unauthenticated', async () => {
     ;(${hasGetAuthSession ? 'getAuthSession' : authHelper} as any).mockRejectedValueOnce(new Error('Unauthorized'))
@@ -626,7 +626,7 @@ function generateTest(routePath, content) {
 
   if (methods.includes('PATCH') || methods.includes('PUT')) {
     const method = methods.includes('PATCH') ? 'PATCH' : 'PUT'
-    const isWithParams = hasIdParam(routeUrl)
+    const _isWithParams = hasIdParam(routeUrl)
     const paramsArg = paramNames.length > 0 ? `, { params: { ${paramsObj} } } as any` : ''
     testBlocks.push(`  it('returns 401 when unauthenticated', async () => {
     ;(${hasGetAuthSession ? 'getAuthSession' : authHelper} as any).mockRejectedValueOnce(new Error('Unauthorized'))
@@ -661,7 +661,7 @@ function generateTest(routePath, content) {
   }
 
   if (methods.includes('DELETE')) {
-    const isWithParams = hasIdParam(routeUrl)
+    const _isWithParams = hasIdParam(routeUrl)
     const paramsArg = paramNames.length > 0 ? `, { params: { ${paramsObj} } } as any` : ''
     testBlocks.push(`  it('returns 401 when unauthenticated', async () => {
     ;(${hasGetAuthSession ? 'getAuthSession' : authHelper} as any).mockRejectedValueOnce(new Error('Unauthorized'))
@@ -752,3 +752,7 @@ for (const routePath of allRoutes) {
 }
 
 console.log(`Generated ${count} test files`)
+
+
+
+

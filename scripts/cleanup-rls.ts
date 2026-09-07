@@ -27,8 +27,8 @@ async function main() {
       try {
         await client.query(`DROP POLICY IF EXISTS "${policy.policyname}" ON public.${table}`)
         droppedPolicies.push(`${table}: ${policy.policyname}`)
-      } catch (e: any) {
-        console.log(`⚠️ Failed to drop ${policy.policyname}: ${e.message}`)
+      } catch (e: unknown) {
+        console.log(`⚠️ Failed to drop ${policy.policyname}: ${(e as Error).message}`)
       }
     }
   }
@@ -99,8 +99,8 @@ async function main() {
     try {
       await client.query(policy.sql)
       console.log(`✅ Clean policies created for ${policy.table}`)
-    } catch (e: any) {
-      console.log(`⚠️ ${policy.table}: ${e.message}`)
+    } catch (e: unknown) {
+      console.log(`⚠️ ${policy.table}: ${(e as Error).message}`)
     }
   }
 
@@ -109,6 +109,9 @@ async function main() {
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

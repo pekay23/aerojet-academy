@@ -5,7 +5,7 @@ import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/r
 
 export const PUT = withErrorHandler(async (req: NextRequest, ctx) => {
   await requireStaff()
-  const id = ctx?.params?.id
+  const id = (await ctx!.params).id
   if (!id) return apiError('Missing payment method ID')
 
   const existing = await prismaUnfiltered.paymentMethod.findUnique({ where: { id } })
@@ -39,7 +39,7 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx) => {
 
 export const DELETE = withErrorHandler(async (_req: NextRequest, ctx) => {
   await requireStaff()
-  const id = ctx?.params?.id
+  const id = (await ctx!.params).id
   if (!id) return apiError('Missing payment method ID')
 
   const existing = await prismaUnfiltered.paymentMethod.findUnique({ where: { id } })

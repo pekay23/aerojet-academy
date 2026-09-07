@@ -77,7 +77,7 @@ function determineBumpType(commits) {
   return 'patch'
 }
 
-function writeTempReleaserc(branch, bumpType) {
+function writeTempReleaserc(branch, _bumpType) {
   const config = {
     git: {
       commitMessage: 'chore(release): ${version}',
@@ -157,3 +157,5 @@ function main() {
 }
 
 main()
+
+

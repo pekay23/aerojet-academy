@@ -9,7 +9,7 @@ interface UserJourneyTimelineProps {
     event: string
     entity: string
     timestamp: string
-    payload: Record<string, any>
+    payload: Record<string, unknown>
   }>
 }
 

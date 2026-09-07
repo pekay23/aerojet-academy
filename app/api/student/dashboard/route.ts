@@ -10,12 +10,39 @@ export const GET = withErrorHandler(async (_req: NextRequest) => {
     (await Promise.all([
       prismaUnfiltered.user.findUnique({
         where: { id: user.id },
-        include: { profile: true, studentProfile: true },
+        select: {
+          id: true,
+          email: true,
+          personalEmail: true,
+          academyEmail: true,
+          role: true,
+          status: true,
+          registrationCode: true,
+          registrationFee: true,
+          registrationCurrency: true,
+          registrationPaid: true,
+          paymentProofUrl: true,
+          paymentApprovedAt: true,
+          programmeChoice: true,
+          selectedLicenseCategories: true,
+          settings: true,
+          hasCompletedTour: true,
+          createdAt: true,
+          updatedAt: true,
+          profile: true,
+          studentProfile: true,
+        },
       }),
       prismaUnfiltered.wallet.findUnique({ where: { userId: user.id } }),
       prismaUnfiltered.enrollment.findMany({
         where: { userId: user.id, status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
         include: { course: { select: { name: true, code: true, duration: true } } },
+      }),
+      prismaUnfiltered.poolMembership.findMany({
+        where: { userId: user.id },
+        include: { pool: { include: { event: { select: { name: true, startDate: true } } } } },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
       }),
       prismaUnfiltered.examBooking.findMany({
         where: { userId: user.id, exam: { examDate: { gte: new Date() } } },
@@ -32,13 +59,14 @@ export const GET = withErrorHandler(async (_req: NextRequest) => {
       prismaUnfiltered.attendanceRecord.count({
         where: { userId: user.id, status: 'PRESENT' },
       }),
-    ])) as unknown as [any, any, any, any, any, number, number, number]
+    ]))
   const attendanceRate =
     totalAttendanceRecords > 0 ? Math.round((presentCount / totalAttendanceRecords) * 100) : 0
 
-  const { _password, ...safe } = studentData!
+  if (!studentData) throw new Error('Student not found')
+
   return apiSuccess({
-    user: safe,
+    user: studentData,
     wallet,
     enrollments,
     poolMemberships,

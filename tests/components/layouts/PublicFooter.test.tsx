@@ -1,15 +1,24 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import PublicFooter from '@/components/layouts/PublicFooter'
+import type React from 'react'
+
+type MockImageProps = React.ComponentProps<'img'>
+type MockLinkProps = React.PropsWithChildren<React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string
+}>
 
 vi.mock('next/link', () => ({
   __esModule: true,
-  default: ({ children, href, ...props }: any) => <a href={href} {...props}>{children}</a>,
+  default: ({ children, href, ...props }: MockLinkProps) => <a href={href} {...props}>{children}</a>,
 }))
 
 vi.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => <img src={props.src} alt={props.alt} width={props.width} height={props.height} />,
+  default: (props: MockImageProps) => {
+    const MockImage = 'img'
+    return <MockImage src={props.src} alt={props.alt} width={props.width} height={props.height} />
+  },
 }))
 
 describe('PublicFooter', () => {

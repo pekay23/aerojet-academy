@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
 import { requireApplicant } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { apiError, withErrorHandler } from '@/lib/api/response'
+import { apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 
-export const DELETE = withErrorHandler(async (request: NextRequest, ctx?: { params: Record<string, string> }) => {
+export const DELETE = withErrorHandler(async (request: NextRequest, ctx?: RouteContext) => {
   const user = await requireApplicant()
 
-  const { id: paymentId } = await ctx!.params
+  const { id: paymentId } = (await ctx!.params) as Record<string, string>
 
   const payment = await prismaUnfiltered.payment.findUnique({
     where: { id: paymentId },

@@ -22,7 +22,7 @@ export default async function AttendancePage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const { isFullTime, _isExamOnly, _isModular } = await getStudentStatus(session.user.id)
+  const { isFullTime } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'classes')
 
   if (isFullTime && !hasAccess) {

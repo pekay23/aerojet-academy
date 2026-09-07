@@ -11,7 +11,7 @@ const _MIN_EXPERIENCE = {
 }
 
 // GET — list OJT logbooks with progress
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext) => {
   await requireStaff()
   const url = new URL(req.url)
   const status = url.searchParams.get('status')

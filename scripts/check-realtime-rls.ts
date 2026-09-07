@@ -12,7 +12,7 @@ async function main() {
     WHERE tablename = 'messages'
   `)
   console.log('Messages RLS policies:')
-  messagesPolicy.rows.forEach((r: any) => {
+  messagesPolicy.rows.forEach((r: unknown) => {
     console.log(`  ${r.policyname} (${r.cmd}):`)
     console.log(`    qual: ${r.qual || '(none)'}`)
     console.log(`    with_check: ${r.with_check || '(none)'}`)
@@ -23,12 +23,15 @@ async function main() {
     SELECT proname, prosrc FROM pg_proc WHERE proname LIKE '%app_user%' OR proname LIKE '%current_user%'
   `)
   console.log('\nAuth helper functions:')
-  funcs.rows.forEach((r: any) => console.log(`  ${r.proname}: ${r.prosrc?.substring(0, 100) || '(no source)'}`))
+  funcs.rows.forEach((r: unknown) => console.log(`  ${r.proname}: ${r.prosrc?.substring(0, 100) || '(no source)'}`))
 
   await client.end()
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

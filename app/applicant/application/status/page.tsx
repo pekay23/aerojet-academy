@@ -17,7 +17,7 @@ import {
   getMilestoneStages,
   getActiveStagesForConfig,
 } from '@/lib/admissions/constants'
-import type { _ApplicationStage } from '@prisma/client'
+import type { ApplicationStage as _ApplicationStage } from '@prisma/client'
 import PipelineTracker from './_components/PipelineTracker'
 import { PageTransition } from '@/components/shared/PageTransition'
 

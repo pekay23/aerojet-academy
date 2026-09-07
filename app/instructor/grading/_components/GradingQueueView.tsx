@@ -3,15 +3,15 @@
 import React, { useMemo, useState } from 'react'
 import {
   Search,
-  _Filter,
+  Filter as _Filter,
   ClipboardCheck,
   User as UserIcon,
   BookOpen,
   Calendar,
   ChevronRight,
-  _MoreVertical,
+  MoreVertical as _MoreVertical,
   CheckCircle2,
-  _AlertCircle,
+  AlertCircle as _AlertCircle,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 

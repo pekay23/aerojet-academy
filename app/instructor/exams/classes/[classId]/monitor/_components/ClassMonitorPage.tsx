@@ -11,7 +11,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
-  _ShieldAlert,
+  ShieldAlert as _ShieldAlert,
   Send,
   Hourglass,
   Award,

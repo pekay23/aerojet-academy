@@ -66,9 +66,9 @@ export default function VerifyEmailPage() {
             router.push('/student')
           }, 1500)
         }
-      } catch (err: any) {
+      } catch (err) {
         setStatus('error')
-        setMessage(err.message || 'Verification failed. The link may have expired.')
+        setMessage(err instanceof Error ? err.message : 'Verification failed. The link may have expired.')
       }
     }
 
@@ -88,7 +88,7 @@ export default function VerifyEmailPage() {
           </>
         )}
 
-        {/* Registration verification â€” no auto-login */}
+        {/* Registration verification — no auto-login */}
         {status === 'verified' && (
           <>
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
@@ -134,7 +134,7 @@ export default function VerifyEmailPage() {
           </>
         )}
 
-        {/* Activation verification â€” auto-login */}
+        {/* Activation verification — auto-login */}
         {status === 'success' && (
           <>
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">

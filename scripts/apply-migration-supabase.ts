@@ -52,8 +52,8 @@ async function main() {
       console.log('  ✓ Done')
     }
     console.log('\nAll Supabase migrations applied successfully!')
-  } catch (e: any) {
-    console.error('Supabase migration failed:', e.message)
+  } catch (e: unknown) {
+    console.error('Supabase migration failed:', (e as Error).message)
     process.exit(1)
   } finally {
     client.release()
@@ -62,3 +62,6 @@ async function main() {
 }
 
 main()
+
+
+

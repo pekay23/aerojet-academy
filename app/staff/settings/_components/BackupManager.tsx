@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import {
-  _Download,
+  Download as _Download,
   Mail,
   Loader2,
   AlertCircle,
@@ -75,8 +75,8 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
       URL.revokeObjectURL(url)
 
       toast.success(`${format.toUpperCase()} backup downloaded`)
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to download backup')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to download backup')
     } finally {
       setDownloading(null)
     }
@@ -100,8 +100,8 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
       if (!res.ok) throw new Error(data.error || 'Failed to send backup')
 
       toast.success(`Backup sent to ${email.trim()} (JSON + HTML)`)
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to email backup')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to email backup')
     } finally {
       setEmailing(false)
     }
@@ -126,8 +126,8 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
 
       setLastRun(new Date().toISOString())
       toast.success('Backup completed and sent!')
-    } catch (err: any) {
-      toast.error(err.message || 'Backup failed')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Backup failed')
     } finally {
       setBackingUpNow(false)
     }
@@ -155,8 +155,8 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
       if (!res.ok) throw new Error(data.error || 'Failed to save schedule')
 
       toast.success('Backup schedule saved')
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to save schedule')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save schedule')
     } finally {
       setSavingSchedule(false)
     }

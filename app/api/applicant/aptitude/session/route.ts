@@ -30,6 +30,13 @@ export const GET = withErrorHandler(async (_req: NextRequest) => {
     text: a.question.text,
     options: a.question.options,
     selectedAnswer: a.selectedAnswer,
+  } as {
+    questionId: string
+    category: string | null
+    questionType: string | null
+    text: string
+    options: unknown
+    selectedAnswer: string | null
   }))
 
   return apiSuccess({

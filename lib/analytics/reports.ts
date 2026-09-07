@@ -865,7 +865,7 @@ export const getYoYComparison = (baseYear?: number) =>
 
       // Helper: build empty 12-month buckets
       function emptyMonths(): Record<number, { revenue: number; enrollments: number; examTotal: number; examPassed: number; newStudents: number }> {
-        const m: Record<number, any> = {}
+        const m: Record<number, { revenue: number; enrollments: number; examTotal: number; examPassed: number; newStudents: number }> = {}
         for (let i = 0; i < 12; i++) m[i] = { revenue: 0, enrollments: 0, examTotal: 0, examPassed: 0, newStudents: 0 }
         return m
       }

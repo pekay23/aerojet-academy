@@ -76,8 +76,8 @@ export async function GET(req: NextRequest) {
       schedule,
       files: [jsonFilename, htmlFilename],
     })
-  } catch (err: any) {
-    console.error('[Cron Backup] Error:', err.message)
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    console.error('[Cron Backup] Error:', err instanceof Error ? err.message : 'Unknown error')
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
   }
 }

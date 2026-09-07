@@ -1,6 +1,5 @@
-import { chromium, type Browser, type BrowserContext, type Page, type Route } from '@playwright/test';
+import { chromium, type Route } from '@playwright/test';
 import * as fs from 'fs/promises';
-import * as path from 'path';
 
 async function captureMissingPage() {
   const browser = await chromium.launch({
@@ -61,9 +60,9 @@ async function captureMissingPage() {
   // Get the current page image URL
   const currentImg = await page.evaluate(() => {
     const imgs = Array.from(document.querySelectorAll('.book img, .flipbook-main-wrapper img'));
-    const visible = imgs.find((img: any) => {
-      const rect = img.getBoundingClientRect();
-      return rect.width > 100 && rect.height > 100 && !img.src.includes('spinner');
+    const visible = imgs.find((img: unknown) => {
+      const rect = (img as HTMLImageElement).getBoundingClientRect();
+      return rect.width > 100 && rect.height > 100 && !(img as HTMLImageElement).src.includes('spinner');
     });
     return visible?.src || null;
   });
@@ -119,3 +118,5 @@ async function captureMissingPage() {
 }
 
 captureMissingPage().catch(console.error);
+
+

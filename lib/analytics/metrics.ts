@@ -267,7 +267,7 @@ export const getBehavioralMetrics = (period: string = 'mom', customFrom?: Date, 
 export const getAttendanceRate = (userId?: string) =>
   unstable_cache(
     async () => {
-      const where: any = {}
+      const where: Record<string, string> = {}
       if (userId) {
         // Validate that the user exists before querying attendance
         const userExists = await prisma.user.findUnique({

@@ -22,9 +22,9 @@ export default async function LatestNews() {
 
   try {
     articles = await getRecentArticles()
-  } catch (e: any) {
+  } catch (e) {
     console.error('LatestNews fetch error:', e)
-    errorMsg = e.message
+    errorMsg = e instanceof Error ? e.message : 'Unknown error'
   }
 
   if (errorMsg) {

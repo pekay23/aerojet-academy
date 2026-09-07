@@ -33,7 +33,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   const body = await req.json()
-  const { questions, bankId } = body as { questions: any[]; bankId: string }
+  const { questions, bankId } = body as {
+    questions: z.infer<typeof questionSchema>[]
+    bankId: string
+  }
 
   const bank = await prismaUnfiltered.internalExamBank.findFirst({
     where: { id: bankId },

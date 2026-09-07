@@ -54,9 +54,9 @@ export async function joinPool(input: PoolJoinInput): Promise<PoolJoinResult> {
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     )
 
-    if (result.success && result.triggeredNearFull && result.pool?.id) {
+    if (result.success && result.triggeredNearFull && (result.pool as { id: string } | undefined)?.id) {
       const memberships = await prisma.poolMembership.findMany({
-        where: { poolId: result.pool.id, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
+        where: { poolId: (result.pool as { id: string }).id, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
         include: {
           user: { include: { profile: true } },
           pool: { select: { name: true, examDate: true } },
@@ -88,9 +88,9 @@ export async function joinPool(input: PoolJoinInput): Promise<PoolJoinResult> {
     }
 
     return result
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[POOL JOIN ERROR]', err)
-    return { success: false, error: err.message || 'Failed to join booking' }
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to join booking' }
   }
 }
 
@@ -278,7 +278,7 @@ export async function joinPoolInternal(
     )
   }
 
-  let booking: any = null
+  let booking: Prisma.ExamBookingGetPayload<{}> | null = null
   if (eventIdForBooking && input.moduleCode) {
     booking = await tx.examBooking.create({
       data: {

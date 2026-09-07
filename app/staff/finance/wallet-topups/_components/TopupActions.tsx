@@ -39,8 +39,9 @@ export function TopupActions({
       if (!res.ok) throw new Error((await res.json()).error)
       toast.success('Wallet top-up approved successfully!')
       router.refresh()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to approve top-up'
+      toast.error(message)
     } finally {
       setLoadingApprove(false)
     }
@@ -62,8 +63,9 @@ export function TopupActions({
       toast.success('Wallet top-up rejected.')
       setRejectModalOpen(false)
       router.refresh()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to reject top-up'
+      toast.error(message)
     } finally {
       setLoadingReject(false)
     }

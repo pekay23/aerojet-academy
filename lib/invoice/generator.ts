@@ -89,7 +89,7 @@ export async function generateInvoicePDF(invoiceId: string): Promise<Buffer> {
   }
 
   // Items Table
-  const items = (invoice.items as any as InvoiceItem[]) || [
+  const items = (invoice.items as unknown as Array<{ description: string; quantity: number; unitPrice: number; total: number }>) || [
     { description: 'Academy Fees', quantity: 1, unitPrice: Number(invoice.amount), total: Number(invoice.amount) }
   ]
 
@@ -100,7 +100,7 @@ export async function generateInvoicePDF(invoiceId: string): Promise<Buffer> {
     `${Number(item.total).toFixed(2)}`
   ])
 
-  ;(doc as any).autoTable({
+  ;(doc as unknown as { autoTable: (opts: unknown) => void }).autoTable({
     startY: 90,
     head: [['Description', 'Qty', 'Unit Price', 'Total']],
     body: tableData,
@@ -114,7 +114,7 @@ export async function generateInvoicePDF(invoiceId: string): Promise<Buffer> {
     },
   })
 
-  const finalY = (doc as any).lastAutoTable.finalY || 150
+  const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY || 150
 
   // Totals
   doc.setFontSize(10)

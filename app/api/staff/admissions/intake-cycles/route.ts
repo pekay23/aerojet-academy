@@ -43,7 +43,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (!parsed.success) return apiError(parsed.error.issues[0].message)
 
   const cycle = await prismaUnfiltered.intakeCycle.create({
-    data: parsed.data as any,
+    data: parsed.data,
     include: { academicYear: { select: { id: true, name: true } } },
   })
 

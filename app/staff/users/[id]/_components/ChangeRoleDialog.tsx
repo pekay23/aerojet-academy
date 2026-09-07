@@ -47,7 +47,7 @@ interface PreviewResponse {
 
 type Step = 'select' | 'preview' | 'confirm'
 
-const SIDE_EFFECT_ICON: Record<string, React.ComponentType<any>> = {
+const SIDE_EFFECT_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
   CREATE_INSTRUCTOR_PROFILE: Database,
   CREATE_STAFF_PROFILE: Database,
   CREATE_STUDENT_PROFILE: Database,
@@ -99,8 +99,12 @@ export default function ChangeRoleDialog({
       if (!res.ok) throw new Error(json?.error || 'Preview failed')
       setPreview(json.data ?? json)
       setStep('preview')
-    } catch (e: any) {
-      toast.error(e.message)
+    } catch (e) {
+      if (e instanceof Error) {
+        toast.error(e.message)
+      } else {
+        toast.error('An unknown error occurred')
+      }
     } finally {
       setLoading(false)
     }
@@ -125,8 +129,12 @@ export default function ChangeRoleDialog({
       toast.success(`Role updated to ${newRole} for ${userName}`)
       close()
       router.refresh()
-    } catch (e: any) {
-      toast.error(e.message)
+    } catch (e) {
+      if (e instanceof Error) {
+        toast.error(e.message)
+      } else {
+        toast.error('An unknown error occurred')
+      }
     } finally {
       setLoading(false)
     }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { Webhook } from 'svix'
 import prisma from '@/lib/prisma/client'
+import { Prisma } from '@prisma/client'
 
 /**
  * Resend Webhook Handler
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
     const body = await req.text()
     const webhookSecret = process.env.RESEND_WEBHOOK_SECRET
 
-    let payload: any
+    let payload: Record<string, unknown> = {}
 
     if (webhookSecret) {
       const svixId = req.headers.get('svix-id')
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
           'svix-id': svixId,
           'svix-timestamp': svixTimestamp,
           'svix-signature': svixSignature,
-        })
+        }) as Record<string, unknown>
       } catch {
         console.error('[Webhooks] Resend signature verification failed')
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
@@ -43,7 +44,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Webhook verification not configured' }, { status: 503 })
     }
 
-    const { type, data, created_at } = payload
+    const { type, data, created_at } = payload as unknown as {
+      type: string
+      data: Record<string, unknown>
+      created_at: string
+    }
 
     if (!type || !data) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
@@ -53,13 +58,13 @@ export async function POST(req: Request) {
       data: {
         action: `EMAIL_${type.replace('.', '_').toUpperCase()}`,
         entity: 'email',
-        entityId: data.email_id || data.id || 'unknown',
+        entityId: (data.email_id as string) || (data.id as string) || 'unknown',
         description: `Email event ${type} received from Resend at ${created_at}`,
         changes: {
-          payload: payload,
+          payload: JSON.parse(JSON.stringify(payload)),
           to: data.to,
           subject: data.subject,
-        },
+        } as Prisma.InputJsonObject,
       },
     })
 

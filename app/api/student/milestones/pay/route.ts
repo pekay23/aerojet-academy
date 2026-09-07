@@ -4,6 +4,9 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { chargeWallet } from '@/lib/wallet/operations'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { z } from 'zod'
+
+const payMilestoneSchema = z.object({ milestoneId: z.string().min(1) })
 
 // POST /api/student/milestones/pay — Pay a DUE milestone from wallet (for students)
 export const POST = withErrorHandler(async (req: NextRequest) => {
@@ -16,15 +19,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const user = await prismaUnfiltered.user.findUnique({ where: { id: userId } })
   if (!user || user.role !== 'STUDENT') return apiError('Only students can use this endpoint', 403)
 
-  let body: any
+  let body: unknown
   try {
     body = await req.json()
   } catch {
     return apiError('Invalid request body', 400)
   }
 
-  const { milestoneId } = body
-  if (!milestoneId) return apiError('milestoneId is required')
+  const parsed = payMilestoneSchema.safeParse(body)
+  if (!parsed.success) return apiError('milestoneId is required')
+
+  const { milestoneId } = parsed.data
 
   const milestone = await prismaUnfiltered.paymentMilestone.findUnique({
     where: { id: milestoneId },

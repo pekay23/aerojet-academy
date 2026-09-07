@@ -98,21 +98,45 @@ function computeUserStats(
   }
 }
 
-function computeEventStats(activeEventRaw: any) {
+type EventPoolSummary = {
+  maxCandidates: number
+  _count: { memberships: number }
+}
+
+type EventBookingSummary = {
+  amountPaid: number | string | null
+}
+
+type ActiveEventRaw = {
+  name: string
+  minRevenueTarget: number | string | null
+  paymentDeadline: string | Date | null
+  pools: EventPoolSummary[]
+  examBookings: EventBookingSummary[]
+}
+
+function computeEventStats(activeEventRaw: ActiveEventRaw | null | undefined, now: Date) {
   if (!activeEventRaw) return null
+  const paymentDeadlineTime = activeEventRaw.paymentDeadline
+    ? new Date(activeEventRaw.paymentDeadline).getTime()
+    : null
   return {
     name: activeEventRaw.name,
     totalSeatsFilled: activeEventRaw.pools.reduce(
-      (sum: number, p: any) => sum + p._count.memberships,
+      (sum, p) => sum + p._count.memberships,
       0
     ),
-    totalCapacity: activeEventRaw.pools.reduce((sum: number, p: any) => sum + p.maxCandidates, 0),
+    totalCapacity: activeEventRaw.pools.reduce((sum, p) => sum + p.maxCandidates, 0),
     totalConfirmedRevenue: activeEventRaw.examBookings.reduce(
-      (sum: number, b: any) => sum + Number(b.amountPaid || 0),
+      (sum, b) => sum + Number(b.amountPaid || 0),
       0
     ),
     targetRevenue: Number(activeEventRaw.minRevenueTarget),
     paymentDeadline: activeEventRaw.paymentDeadline,
+    isNearDeadline:
+      paymentDeadlineTime !== null
+        ? paymentDeadlineTime - now.getTime() < 7 * 24 * 60 * 60 * 1000
+        : false,
   }
 }
 
@@ -234,7 +258,7 @@ async function getDashboardData() {
       ])
 
       const { totalUsers, pendingApplicants, activeStudents } = computeUserStats(
-        userStatusCounts as any
+        userStatusCounts
       )
 
       return {
@@ -243,7 +267,7 @@ async function getDashboardData() {
         activeStudents,
         pendingPayments,
         recentPendingPayments: serializePrisma(recentPendingPaymentsRaw),
-        activeEvent: serializePrisma(computeEventStats(serializePrisma(activeEventRaw))),
+        activeEvent: serializePrisma(computeEventStats(serializePrisma(activeEventRaw), now)),
         openPools: serializePrisma(
           openPoolsRaw.map((p) => ({ ...p, currentMemberCount: p._count.memberships }))
         ),
@@ -386,6 +410,7 @@ export default async function StaffDashboardPage() {
               confirmedSeats={data.activeEvent.totalSeatsFilled}
               totalSeats={data.activeEvent.totalCapacity}
               paymentDeadline={data.activeEvent.paymentDeadline}
+              isNearDeadline={data.activeEvent.isNearDeadline}
             />
           ) : (
             <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center dark:border-slate-700 dark:bg-slate-800/50">

@@ -40,7 +40,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   const body = await req.json()
-  const { questions, bankId } = body as { questions: any[]; bankId: string }
+  const { questions, bankId } = body as {
+    questions: z.infer<typeof questionSchema>[]
+    bankId: string
+  }
 
   if (!Array.isArray(questions) || questions.length === 0) {
     return apiError('No questions provided', 400)
