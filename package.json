@@ -41,7 +41,7 @@
     "release:patch": "bun scripts/release.mjs --patch",
     "release:minor": "bun scripts/release.mjs --minor",
     "release:major": "bun scripts/release.mjs --major",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && bun scripts/fix-tsc6-shim.mjs",
     "prepare": "husky"
   },
   "dependencies": {
@@ -155,6 +155,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@types/sanitize-html": "^2.16.1",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "@typescript-eslint/eslint-plugin": "8.68.0",
     "@typescript-eslint/parser": "8.68.0",
     "@vitejs/plugin-react": "6.1.0",
@@ -177,7 +178,7 @@
     "storybook": "^10.5.10",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
-    "typescript": "6.0.2",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "4.1.4"
   },
   "engines": {
