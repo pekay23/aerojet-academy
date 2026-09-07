@@ -27,7 +27,7 @@ app/api/          → REST API + cron + UploadThing
 
 ## Auth enforcement (three layers)
 
-1. **Edge proxy** at `proxy.ts` — `ROUTE_ROLE_MAP` gates every `/staff`, `/instructor`, `/student`, `/examiner`, `/applicant` page and their `/api/*` siblings. Wrong-role users are redirected to their own portal; unauthenticated users get `/login?callbackUrl=…` (pages) or 401 JSON (API).
+1. **Edge proxy** at `proxy.ts` — images-only gate. Handles `/api/images/*` auth, hotlink protection, and security headers. Does **NOT** enforce portal role authentication.
 2. **Portal layouts** — each portal `layout.tsx` calls `requireStaff` / `requireInstructor` / etc. from `lib/auth/helpers.ts` as a second check and to pass the session into the tree.
 3. **Route handlers / server actions** — call `requireAdmin()` / `requireAuth()` directly; thrown `'Unauthorized'` / `'Forbidden'` is converted to 401 / 403 by `withErrorHandler`.
 
