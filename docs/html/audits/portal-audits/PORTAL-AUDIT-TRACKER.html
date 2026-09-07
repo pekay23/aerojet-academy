@@ -464,18 +464,13 @@
 </tbody>
 </table>
 <h3 id="deferred-items-in-progress">Deferred Items (in progress)</h3>
-<table>
-<thead>
-<tr><th>Item</th><th>Status</th></tr>
-</thead>
-<tbody>
-<tr><td>Pagination UI for student exams</td><td>✅ Client-side pagination added to <code>ExamHistoryTable</code> (20 per page)</td></tr>
-<tr><td>Pagination UI for instructor grades</td><td>✅ Server-side pagination added (<code>?page=&amp;limit=</code>)</td></tr>
-<tr><td>Replace remaining <code>any</code> casts</td><td>⏸️ Minor casts remain in JSON field access patterns</td></tr>
-<tr><td>Add <code>error.tsx</code>/<code>not-found.tsx</code> to all segments</td><td>⏸️ Parent boundaries provide coverage; per-segment boundaries are enhancement</td></tr>
-<tr><td>Dark mode contrast micro-fixes</td><td>✅ Fixed 3 identified contrast issues</td></tr>
-</tbody>
-</table>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Pagination UI for student exams — Client-side pagination added to <code>ExamHistoryTable</code> (20 per page)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Pagination UI for instructor grades — Server-side pagination added (<code>?page=&amp;limit=</code>)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Replace remaining <code>any</code> casts — Minor casts remain in JSON field access patterns</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Add <code>error.tsx</code>/<code>not-found.tsx</code> to all segments — Parent boundaries provide coverage; per-segment boundaries are enhancement</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Dark mode contrast micro-fixes — Fixed 3 identified contrast issues</li>
+</ul>
 <h3 id="cross-portal-schema-migration-complete-2026-09-04">Cross-Portal Schema Migration Complete (2026-09-04)</h3>
 <table>
 <thead>
@@ -556,7 +551,6 @@
 <ul>
 <li>17 ESLint warnings remain in 2 files: <code>app/staff/exams/events/create/page.tsx</code> (11 <code>any</code>) and <code>app/staff/exams/events/[id]/edit/_components/EditExamEventForm.tsx</code> (8 <code>any</code>). Non-blocking.</li>
 <li>1 unused import warning: <code>lib/withdrawal/actions.ts:6</code> (<code>Prisma</code>).</li>
-<li>Duplicate type-check status paragraphs (3x) in this file — cleaned up 2026-09-07.</li>
 </ul>
 <hr />
 <section class="he-section" id="audit-document-locations"><div class="he-section__num">09 · Audit Document Locations</div><h2 class="he-section__title">Audit Document Locations</h2></section>
