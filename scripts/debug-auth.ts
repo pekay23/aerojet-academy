@@ -3,7 +3,6 @@
  */
 import { chromium } from '@playwright/test'
 import path from 'path'
-import fs from 'fs'
 
 const BASE_URL = 'http://localhost:3000'
 const SCREENSHOT_DIR = 'tests/e2e/tour-screenshots'
@@ -28,7 +27,7 @@ async function main() {
 
   // === Step 2: Intercept the credentials response ===
   log('Step 2: Submitting form with response interception...')
-  const [response] = await Promise.all([
+  const [_response] = await Promise.all([
     page.waitForResponse(async (resp) => {
       const url = resp.url()
       if (url.includes('/api/auth/callback/credentials')) {
@@ -168,3 +167,5 @@ async function main() {
 }
 
 main().catch(console.error)
+
+

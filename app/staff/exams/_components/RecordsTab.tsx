@@ -12,10 +12,10 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  _User,
+  User as _User,
   FilePlus2,
-  _AlertCircle,
-  _Calendar,
+  AlertCircle as _AlertCircle,
+  Calendar as _Calendar,
   Award,
   BookOpen,
   ChevronLeft,
@@ -53,9 +53,9 @@ interface ExamRecord {
   id: string
   examId?: string | null
   moduleCode: string | null
-  score: any
-  maxScore?: any
-  percentage?: any
+  score: number | string | null
+  maxScore?: number | string | null
+  percentage?: number | string | null
   passed: boolean | null
   grade?: string | null
   attemptType: string | null
@@ -186,14 +186,14 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
 
   // Reset pagination when filters change
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1)
   }, [tableFilter, categoryFilter])
 
   // Debounced student search
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
     if (studentQuery.length < 2) {
   // eslint-disable-next-line react-hooks/set-state-in-effect
       setStudentResults([])
@@ -224,7 +224,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
   }
 
   // Adjust module slots when booking type changes
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
     const seats = BOOKING_TYPES.find((t) => t.value === bookingType)?.seats || 1
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -338,7 +338,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
     setEditIsMigrated(!!record.isMigrated)
     const linkedCourse = modules.find((m) => m.id === record.examId)
     setEditCourseQuery(
-      linkedCourse ? `${linkedCourse.code} â€” ${linkedCourse.name}` : record.moduleCode || ''
+      linkedCourse ? `${linkedCourse.code} — ${linkedCourse.name}` : record.moduleCode || ''
     )
     setShowEditCourseDropdown(false)
   }
@@ -354,9 +354,9 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
         moduleCode: editModuleCode || undefined,
         examDate: editDate ? new Date(editDate) : undefined,
         score: editScore ? Number(editScore) : undefined,
-        bookingType: editBookingType as any,
+        bookingType: editBookingType as 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK',
         attemptType: editAttemptType,
-        examCategory: editCategory as any,
+        examCategory: editCategory as 'INTERNAL' | 'OFFICIAL_EASA',
         isMigrated: editIsMigrated,
       }
     )
@@ -667,7 +667,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 type="number"
                 value={score}
                 onChange={(e) => setScore(e.target.value)}
-                placeholder="â€”"
+                placeholder="—"
                 min="0"
                 max="100"
                 step="0.01"
@@ -1057,7 +1057,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                             </select>
                           ) : (
                             <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[9px] font-bold uppercase">
-                              {record.attemptType === 'MIGRATED' ? 'â€”' : record.attemptType || 'â€”'}
+                              {record.attemptType === 'MIGRATED' ? '—' : record.attemptType || '—'}
                             </span>
                           )}
                         </td>
@@ -1080,7 +1080,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                             </span>
                           ) : (
                             <span className="text-[10px] font-bold text-slate-300 uppercase">
-                              â€”
+                              —
                             </span>
                           )}
                         </td>
@@ -1102,7 +1102,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                           ) : scoreNum !== null ? (
                             `${scoreNum.toFixed(0)}%`
                           ) : (
-                            'â€”'
+                            '—'
                           )}
                         </td>
                         <td className="px-6 py-4 text-right">

@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 
 const FIELD_TYPES = ['TEXT', 'NUMBER', 'DATE', 'SELECT', 'MULTI_SELECT', 'FILE', 'BOOLEAN'] as const
 const FIELD_TARGETS = ['APPLICATION', 'STUDENT_PROFILE', 'USER'] as const
@@ -19,7 +20,7 @@ const schema = z.object({
   isActive: z.boolean().optional()
 })
 
-export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const PUT = withErrorHandler(async (req: NextRequest, ctx: RouteContext) => {
   await requireStaff()
   const { id } = await ctx.params
   
@@ -29,13 +30,13 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
 
   const field = await prismaUnfiltered.customFieldDefinition.update({
     where: { id },
-    data: result.data as any
+    data: result.data as Prisma.CustomFieldDefinitionUpdateInput
   })
 
   return apiSuccess({ field })
 })
 
-export const DELETE = withErrorHandler(async (_req: NextRequest, ctx: any) => {
+export const DELETE = withErrorHandler(async (_req: NextRequest, ctx: RouteContext) => {
   await requireStaff()
   const { id } = await ctx.params
 

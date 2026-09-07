@@ -88,8 +88,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       }
     }
     return { ok: true as const }
-  }).catch((err: any) => {
-    if (err.message === 'SLOT_FULL') {
+  }).catch((err: unknown) => {
+    if (err instanceof Error && err.message === 'SLOT_FULL') {
       return { ok: false as const, error: 'Slot is fully booked (concurrent booking detected)' }
     }
     throw err

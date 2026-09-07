@@ -61,7 +61,7 @@ export default function CourseCategoriesPage() {
   }
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCategories()
   }, [])
@@ -169,7 +169,7 @@ export default function CourseCategoriesPage() {
               Course Categories
             </h1>
             <p className="text-slate-500 dark:text-slate-400">
-              {categories.length} {categories.length === 1 ? 'category' : 'categories'} â€¢{' '}
+              {categories.length} {categories.length === 1 ? 'category' : 'categories'} •{' '}
               {categories.reduce((sum, c) => sum + (c._count?.courses ?? 0), 0)} courses total
             </p>
           </div>

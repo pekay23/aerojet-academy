@@ -57,8 +57,37 @@ export default async function Page({
     }),
   ])
 
+  type ClassWithCourse = {
+  id: string
+  name: string
+  startDate: Date
+  endDate: Date
+  recurrenceType: 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM' | null
+  recurrenceDays: string | null
+  recurrenceUntil: Date | null
+  course: { id: string; code: string; name: string; category: string | null }
+}
+
+type ExamSittingWithRefs = {
+  id: string
+  startTime: Date
+  endTime: Date | null
+  sessionType: string | null
+  event: { name: string } | null
+  examComponent: { code: string; name: string } | null
+}
+
+type AdminEventRow = {
+  id: string
+  title: string
+  description: string | null
+  startDate: Date
+  endDate: Date | null
+  color: string | null
+}
+
   const events: UnifiedCalendarEvent[] = [
-    ...(classes as any[]).map((cls: any) => ({
+    ...(classes as ClassWithCourse[]).map((cls) => ({
       id: `class-${cls.id}`,
       dbId: cls.id,
       title: cls.name,
@@ -73,7 +102,7 @@ export default async function Page({
       recurrenceDays: cls.recurrenceDays,
       recurrenceUntil: cls.recurrenceUntil?.toISOString() || null,
     })),
-    ...(examSittings as any[]).map((s: any) => ({
+    ...(examSittings as ExamSittingWithRefs[]).map((s) => ({
       id: `sitting-${s.id}`,
       dbId: s.id,
       title: `Exam: ${s.examComponent?.code || 'Module'}`,
@@ -85,7 +114,7 @@ export default async function Page({
       editable: false,
       visibleTo: 'INSTRUCTOR',
     })),
-    ...(adminEvents as any[]).map((evt: any) => ({
+    ...(adminEvents as AdminEventRow[]).map((evt) => ({
       id: `admin-${evt.id}`,
       dbId: evt.id,
       title: evt.title,
@@ -100,7 +129,7 @@ export default async function Page({
   ]
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1400px] space-y-8 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-350 space-y-8 duration-700">
       <div>
         <h1 className="text-aerojet-blue text-3xl font-black tracking-tight uppercase dark:text-white">
           Teaching Schedule

@@ -514,14 +514,14 @@ export default function NewsMarkdownEditor({
             endpoint="newsImage"
             onClientUploadComplete={(res) => {
               if (res && res[0]) {
-                const url =
-                  (res[0] as any).ufsUrl || res[0].url || (res[0] as any).serverData?.fileUrl
+                const file = res[0]
+                const url = file.ufsUrl ?? file.url ?? file.serverData?.fileUrl
                 editor.chain().focus().setImage({ src: url }).run()
                 toast.success(`Image inserted!`)
                 setActiveMediaTab(null)
               }
             }}
-            onUploadError={(_error: Error) => {
+            onUploadError={(error: Error) => {
               toast.error(`Upload failed: ${error.message}`)
             }}
             appearance={{
@@ -564,8 +564,8 @@ export default function NewsMarkdownEditor({
             endpoint="newsAudio"
             onClientUploadComplete={(res) => {
               if (res && res[0]) {
-                const url =
-                  (res[0] as any).ufsUrl || res[0].url || (res[0] as any).serverData?.fileUrl
+                const file = res[0]
+                const url = file.ufsUrl ?? file.url ?? file.serverData?.fileUrl
                 editor.chain().focus().setAudio({ src: url }).run()
                 toast.success(`Audio inserted!`)
                 setActiveMediaTab(null)

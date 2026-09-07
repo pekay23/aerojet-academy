@@ -9,7 +9,7 @@ async function findDuplicates() {
   })
 
   // Group by userId + moduleCode
-  const groups: Record<string, any[]> = {}
+  const groups: Record<string, unknown[]> = {}
   for (const r of allResults) {
     if (!r.moduleCode) continue
     const key = `${r.userId}_${r.moduleCode.toUpperCase()}`
@@ -37,3 +37,5 @@ findDuplicates().catch(e => {
   console.error(e)
   process.exit(1)
 })
+
+

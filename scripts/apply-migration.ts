@@ -60,10 +60,13 @@ async function main() {
       console.log('  ✓ Done')
     }
     console.log('\nAll migrations applied successfully!')
-  } catch (error: any) {
-    console.error('Migration failed:', error.message)
+  } catch (error: unknown) {
+    console.error('Migration failed:', (error as Error).message)
     process.exit(1)
   }
 }
 
 main()
+
+
+

@@ -79,6 +79,15 @@ export default function UserActionsMenu({
   const isSuspended = userStatus === 'SUSPENDED'
   const isArchived = userStatus === 'ARCHIVED'
 
+  interface ActionItem {
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  href?: string
+  action?: string
+  variant: string
+  onClick?: () => void
+}
+
   const actions = isArchived
     ? [
         {
@@ -124,7 +133,7 @@ export default function UserActionsMenu({
           icon: ShieldCheck,
           action: 'resend-verification',
           variant: 'default',
-        },
+        } as ActionItem,
         {
           label: 'Send Email',
           icon: Mail,
@@ -142,7 +151,7 @@ export default function UserActionsMenu({
           icon: mustChangePassword ? LockOpen : Lock,
           action: 'toggle-password-change',
           variant: 'default',
-        },
+        } as ActionItem,
         isSuspended
           ? { label: 'Activate Account', icon: UserCheck, action: 'activate', variant: 'success' }
           : { label: 'Suspend Account', icon: UserX, action: 'suspend', variant: 'warning' },
@@ -173,7 +182,7 @@ export default function UserActionsMenu({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" side="bottom" collisionPadding={10} className="w-48 p-1">
-          {actions.filter(Boolean).map((item: any) => {
+          {(actions.filter((a): a is ActionItem => Boolean(a))).map((item) => {
             const Icon = item.icon
             const colorClass =
               item.variant === 'danger'
@@ -188,7 +197,7 @@ export default function UserActionsMenu({
               return (
                 <DropdownMenuItem key={item.label} asChild className={colorClass}>
                   <Link
-                    href={item.href}
+                    href={item.href ?? ''}
                     onClick={(e) => e.stopPropagation()}
                     className="flex w-full cursor-pointer items-center gap-2.5 px-2 py-2"
                   >
@@ -205,7 +214,7 @@ export default function UserActionsMenu({
                   key={item.label}
                   onClick={(e) => {
                     e.stopPropagation()
-                    item.onClick()
+                    item.onClick?.()
                   }}
                   className={`${colorClass} flex w-full cursor-pointer items-center gap-2.5 px-2 py-2`}
                 >

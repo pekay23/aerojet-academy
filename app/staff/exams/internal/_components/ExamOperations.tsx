@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Loader2,
   RefreshCw,
-  _Eye,
+  Eye as _Eye,
   XCircle,
   CheckCircle2,
   Clock,
-  _AlertTriangle,
-  _Send,
+  AlertTriangle as _AlertTriangle,
+  Send as _Send,
   ChevronDown,
   ChevronRight,
   Flag,
@@ -19,12 +19,13 @@ import {
   Activity,
   Hourglass,
   RefreshCcw,
-  _ShieldAlert,
-  _Award,
+  ShieldAlert as _ShieldAlert,
+  Award as _Award,
 } from 'lucide-react'
 import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
 import ViolationReviewPanel from './ViolationReviewPanel'
 import ConfirmModal from './ConfirmModal'
+import type { Violation } from './ViolationReviewPanel'
 
 interface StudentAnswer {
   id: string
@@ -68,9 +69,9 @@ interface SessionData {
   /** Total answer rows for the session (one per question). Cheap count. */
   answerCount: number
   reports: Report[]
-  /** Violation count from the list endpoint â€” used for the tab badge. */
+  /** Violation count from the list endpoint — used for the tab badge. */
   violationCount?: number
-  /** Full per-question detail â€” only populated after the row is expanded. */
+  /** Full per-question detail — only populated after the row is expanded. */
   answers?: StudentAnswer[]
 }
 
@@ -84,7 +85,7 @@ export default function ExamOperations() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
-  const [violationsMap, setViolationsMap] = useState<Record<string, any[]>>({})
+  const [violationsMap, setViolationsMap] = useState<Record<string, Violation[]>>({})
   const [violationsLoadingMap, setViolationsLoadingMap] = useState<Set<string>>(new Set())
 
   // Confirmation modal state
@@ -122,14 +123,14 @@ export default function ExamOperations() {
   }, [])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSessions()
   }, [fetchSessions])
 
   // Auto-refresh on the Live tab. Polls every 30s while the tab is visible
-  // and pauses entirely when the admin's browser tab is hidden â€” same
+  // and pauses entirely when the admin's browser tab is hidden — same
   // pattern as `<Heartbeat>`. The slim list endpoint makes a 30s cadence
   // cheap even with several admins on the page.
   useEffect(() => {
@@ -172,7 +173,7 @@ export default function ExamOperations() {
       const detail = json.data as SessionData
       setSessions((prev) => prev.map((row) => (row.id === sessionId ? { ...row, ...detail } : row)))
     } catch {
-      // Silent â€” the row stays at "Loadingâ€¦" until the next refresh
+      // Silent — the row stays at "Loading…" until the next refresh
     }
   }, [])
 
@@ -306,7 +307,7 @@ export default function ExamOperations() {
             if (detail?.changed) {
               setSuccessMsg(`Regraded: ${detail.oldPct}% â†’ ${detail.newPct}%`)
             } else {
-              setSuccessMsg('Regraded â€” no score change.')
+              setSuccessMsg('Regraded — no score change.')
             }
             setTimeout(() => setSuccessMsg(null), 5000)
             fetchSessions()
@@ -614,7 +615,7 @@ export default function ExamOperations() {
                       className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border text-sm font-black ${getScoreBg(session.percentage)}`}
                     >
                       <span className={getScoreColor(session.percentage)}>
-                        {session.percentage !== null ? `${session.percentage}%` : 'â€”'}
+                        {session.percentage !== null ? `${session.percentage}%` : '—'}
                       </span>
                     </div>
 
@@ -632,12 +633,12 @@ export default function ExamOperations() {
                         )}
                       </div>
                       <p className="text-xs text-slate-500">
-                        {session.bank.courseCode} Â· {session.bank.moduleCode || session.bank.name}
-                        {session.student.studentId && ` Â· ${session.student.studentId}`}
+                        {session.bank.courseCode} · {session.bank.moduleCode || session.bank.name}
+                        {session.student.studentId && ` · ${session.student.studentId}`}
                         {session.status === 'IN_PROGRESS' &&
                           (answeredCount !== null
-                            ? ` Â· ${answeredCount}/${totalQuestions} answered`
-                            : ` Â· ${totalQuestions} questions`)}
+                            ? ` · ${answeredCount}/${totalQuestions} answered`
+                            : ` · ${totalQuestions} questions`)}
                       </p>
                     </div>
 
@@ -718,19 +719,19 @@ export default function ExamOperations() {
                       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                         <div className="rounded-lg border border-slate-200 bg-white p-3 text-center dark:border-slate-700 dark:bg-slate-900">
                           <p className="text-lg font-black text-slate-900 dark:text-white">
-                            {session.score ?? 'â€”'}
+                            {session.score ?? '—'}
                           </p>
                           <p className="text-[10px] text-slate-500">Score</p>
                         </div>
                         <div className="rounded-lg border border-slate-200 bg-white p-3 text-center dark:border-slate-700 dark:bg-slate-900">
                           <p className="text-lg font-black text-slate-900 dark:text-white">
-                            {session.totalPoints ?? 'â€”'}
+                            {session.totalPoints ?? '—'}
                           </p>
                           <p className="text-[10px] text-slate-500">Total Points</p>
                         </div>
                         <div className="rounded-lg border border-slate-200 bg-white p-3 text-center dark:border-slate-700 dark:bg-slate-900">
                           <p className={`text-lg font-black ${getScoreColor(session.percentage)}`}>
-                            {session.percentage ?? 'â€”'}%
+                            {session.percentage ?? '—'}%
                           </p>
                           <p className="text-[10px] text-slate-500">Percentage</p>
                         </div>
@@ -738,13 +739,13 @@ export default function ExamOperations() {
                           <p
                             className={`text-lg font-black ${session.passed ? 'text-green-600' : session.passed === false ? 'text-red-600' : 'text-slate-400'}`}
                           >
-                            {session.passed === null ? 'â€”' : session.passed ? 'PASS' : 'FAIL'}
+                            {session.passed === null ? '—' : session.passed ? 'PASS' : 'FAIL'}
                           </p>
                           <p className="text-[10px] text-slate-500">Result</p>
                         </div>
                       </div>
 
-                      {/* Answer detail table â€” answers are lazy-loaded on
+                      {/* Answer detail table — answers are lazy-loaded on
                         first expand; show a skeleton until they arrive. */}
                       <div className="mb-4 overflow-x-auto">
                         <h4 className="mb-2 text-xs font-bold tracking-widest text-slate-400 uppercase">
@@ -791,7 +792,7 @@ export default function ExamOperations() {
                                 >
                                   <td className="px-2 py-1.5 text-slate-500">{idx + 1}</td>
                                   <td className="px-2 py-1.5 font-mono text-slate-500">
-                                    {ans.questionRef || 'â€”'}
+                                    {ans.questionRef || '—'}
                                   </td>
                                   <td className="max-w-[200px] truncate px-2 py-1.5 text-slate-700 dark:text-slate-300">
                                     {ans.questionText}
@@ -812,7 +813,7 @@ export default function ExamOperations() {
                                   </td>
                                   <td className="px-2 py-1.5 text-center">
                                     {ans.isCorrect === null ? (
-                                      <span className="text-slate-400">â€”</span>
+                                      <span className="text-slate-400">—</span>
                                     ) : ans.isCorrect ? (
                                       <CheckCircle2 className="mx-auto h-4 w-4 text-green-500" />
                                     ) : (

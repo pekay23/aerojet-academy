@@ -11,7 +11,7 @@ import {
   Users,
   BarChart3,
   Copy,
-  _History,
+  History as _History,
   Edit3,
   X,
   Clock,
@@ -35,7 +35,7 @@ interface ExamBank {
   _count: { questions: number; sessions: number }
   poolHealth: { health: PoolHealth; questionCount: number; requiredMinimum: number }
   pendingCount: number
-  ruleOverride: any | null
+  ruleOverride: { passMarkPct?: number; timePerQuestionSecs?: number; retakeWaitDays?: number; maxRetakes?: number; completionWindowYears?: number; allowKeyboardAutoSubmit?: boolean; customInstructions?: string } | null
 }
 
 const HEALTH_CONFIG: Record<PoolHealth, { label: string; color: string; bg: string }> = {
@@ -95,7 +95,7 @@ export default function ExamBankManager() {
     }
   }, [])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchBanks() }, [fetchBanks])
 
@@ -141,7 +141,7 @@ export default function ExamBankManager() {
           if (j.data) setModules(j.data)
         })
         .catch(() => setModules([]))
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
     } else {
   // eslint-disable-next-line react-hooks/set-state-in-effect
       setModules([])
@@ -229,7 +229,7 @@ export default function ExamBankManager() {
                     <div>
                       <h3 className="font-bold text-slate-900 dark:text-white">{bank.name}</h3>
                       <p className="text-xs text-slate-500">
-                        {bank.course.code} â€¢ {bank.mcqCount} MCQs â€¢ {bank.ruleSet}
+                        {bank.course.code} • {bank.mcqCount} MCQs • {bank.ruleSet}
                       </p>
                     </div>
                   </div>
@@ -399,7 +399,7 @@ export default function ExamBankManager() {
             </button>
           </div>
           <p className="mt-1 text-sm text-slate-500">
-            Configure exam rules. EASA standard is 75s/question â€” reduce to sharpen students for final exams.
+            Configure exam rules. EASA standard is 75s/question — reduce to sharpen students for final exams.
           </p>
 
           <div className="mt-6 space-y-4">
@@ -566,7 +566,7 @@ export default function ExamBankManager() {
                 <option value="">Select a course...</option>
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.code} â€” {c.name}
+                    {c.code} — {c.name}
                   </option>
                 ))}
               </select>
@@ -578,7 +578,7 @@ export default function ExamBankManager() {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Module 1 â€” Air Law"
+                placeholder="e.g. Module 1 — Air Law"
                 value={createForm.name}
                 onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -598,7 +598,7 @@ export default function ExamBankManager() {
                 <option value="">Select a module...</option>
                 {modules.map((m) => (
                   <option key={m.code} value={m.code}>
-                    {m.code} â€” {m.name}
+                    {m.code} — {m.name}
                   </option>
                 ))}
               </select>

@@ -63,8 +63,8 @@ export default function EditInstructorProfileDialog({
       toast.success('Instructor details updated')
       setOpen(false)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update instructor profile')
     } finally {
       setLoading(false)
     }

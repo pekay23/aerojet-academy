@@ -3,9 +3,9 @@ import { renderToStream } from '@react-pdf/renderer'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getPDFSettings } from '@/lib/pdf-settings'
-import { TranscriptTemplate, TranscriptRecord } from '@/components/pdf/templates/TranscriptTemplate'
+import { TranscriptTemplate, TranscriptRecord, type TranscriptTemplateProps } from '@/components/pdf/templates/TranscriptTemplate'
 
-function TranscriptTemplateElement(props: any) {
+function TranscriptTemplateElement(props: TranscriptTemplateProps) {
   return <TranscriptTemplate {...props} />
 }
 import React from 'react'
@@ -123,16 +123,16 @@ export async function GET(req: NextRequest) {
 
     const safeId = (profile.studentId ?? 'student').replace(/[^a-zA-Z0-9-]/g, '_')
 
-    return new NextResponse(stream as any, {
+    return new NextResponse(stream as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="Transcript_${safeId}.pdf"`,
       },
     })
-  } catch (error: any) {
-    console.error('[pdf/student-transcript] Error:', error)
+  } catch (error: unknown) {
+    console.error('[pdf/student-transcript] Error:', error instanceof Error ? error.message : String(error))
     return NextResponse.json(
-      { error: 'Failed to generate transcript', details: error.message },
+      { error: 'Failed to generate transcript', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }

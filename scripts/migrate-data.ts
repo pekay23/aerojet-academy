@@ -44,3 +44,5 @@ async function main() {
 main()
   .catch((e) => { console.error('❌ Migration failed:', e); process.exit(1) })
   .finally(() => prisma.$disconnect())
+
+

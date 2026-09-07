@@ -49,7 +49,7 @@ interface Doc {
   }
 }
 
-type StorageProvider = (typeof STORAGE_PROVIDERS)[number]
+type StorageProvider = (typeof _STORAGE_PROVIDERS)[number]
 
 export default function DocumentsManager({ documents }: { documents: Doc[] }) {
   const [isPending, startTransition] = useTransition()

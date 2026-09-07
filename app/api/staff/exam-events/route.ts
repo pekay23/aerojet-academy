@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { EventStatus, type Prisma } from '@prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -13,8 +14,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const { page, limit, skip } = parsePagination(searchParams)
   const statusFilter = searchParams.get('status')
 
-  const where: any = {}
-  if (statusFilter) where.status = statusFilter
+  const where: Prisma.ExamEventWhereInput = {}
+  if (statusFilter && Object.values(EventStatus).includes(statusFilter as EventStatus)) {
+    where.status = statusFilter as EventStatus
+  }
 
   const [events, total] = await Promise.all([
     prismaUnfiltered.examEvent.findMany({
@@ -71,4 +74,3 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   })
   return apiCreated(event)
 })
-

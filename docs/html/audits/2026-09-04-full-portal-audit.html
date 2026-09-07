@@ -99,7 +99,7 @@
 <section class="he-section" id="phase-1-type-safety-amp-any-remediation"><div class="he-section__num">04 · Phase 1: Type Safety &amp;amp; any Remediation</div><h2 class="he-section__title">Phase 1: Type Safety &amp; <code>any</code> Remediation</h2></section>
 <p><strong>Goal:</strong> Reduce explicit <code>any</code> by 80%+ and upgrade ESLint rule to <code>error</code>.<br />
 <strong>Estimated effort:</strong> 3–4 weeks<br />
-<strong>Status:</strong> Complete</p>
+<strong>Status:</strong> Partial — type-safety fixes complete; ESLint <code>no-explicit-any</code> rule upgrade in progress by parallel agent</p>
 <table>
 <thead>
 <tr><th>Week</th><th>Focus</th><th>Scope</th><th>Verified</th><th>Committed</th></tr>
@@ -110,7 +110,7 @@
 <tr><td>2a</td><td>Error handler typing</td><td>All <code>catch (error: any)</code> → <code>unknown</code> + guards</td><td>✅</td><td>☐</td></tr>
 <tr><td>2b</td><td>Client component prop typing</td><td>Charts, tables, dialogs with <code>any</code> props</td><td>✅</td><td>☐</td></tr>
 <tr><td>3</td><td>Remaining <code>any</code> in pages</td><td>Academic calendar, schedule pages, exam interfaces</td><td>✅</td><td>☐</td></tr>
-<tr><td>4</td><td>Upgrade ESLint rule + sweep</td><td>Change <code>'warn'</code> → <code>'error'</code>, fix remaining, remove suppressions</td><td>✅</td><td>☐</td></tr>
+<tr><td>4</td><td>Upgrade ESLint rule + sweep</td><td>Change <code>'warn'</code> → <code>'error'</code>, fix remaining, remove suppressions</td><td>⏸️</td><td>☐</td></tr>
 </tbody>
 </table>
 <p><strong>Phase 1 LLM Council Reviews:</strong></p>
@@ -118,45 +118,54 @@
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 1 complete</li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 2 complete</li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 3 complete</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>All issues resolved</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Type-safety issues resolved</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>ESLint rule upgrade complete (in progress)</li>
 </ul>
 <hr />
 <section class="he-section" id="phase-2-schema-relations-amp-indexes"><div class="he-section__num">05 · Phase 2: Schema Relations &amp;amp; Indexes</div><h2 class="he-section__title">Phase 2: Schema Relations &amp; Indexes</h2></section>
-<p><strong>Goal:</strong> Eliminate N+1 queries and improve data integrity.<br />
+<p><strong>Goal:</strong> Add missing FK relations, back-relations, and composite indexes to eliminate N+1 and improve data integrity.<br />
 <strong>Estimated effort:</strong> 4–6 weeks<br />
-<strong>Status:</strong> Not started</p>
+<strong>Status:</strong> Complete — verified via <code>prisma db push</code> on both Neon and Supabase</p>
 <table>
 <thead>
 <tr><th>Week</th><th>Focus</th><th>Scope</th><th>Verified</th><th>Committed</th></tr>
 </thead>
 <tbody>
-<tr><td>1</td><td>Migration planning</td><td>Design all FK additions, back-relations, index additions</td><td>☐</td><td>☐</td></tr>
-<tr><td>2–3</td><td>Actor/audit field migrations</td><td>~30 <code>User</code> relations across operational tables</td><td>☐</td><td>☐</td></tr>
-<tr><td>3–4</td><td>Missing relation migrations</td><td><code>Certificate.sessionId</code>, <code>FullTimeEnrollment.academicYearId</code>, <code>ExamResult.sittingId</code>, <code>OJTLogbook.licenceCategoryId</code></td><td>☐</td><td>☐</td></tr>
-<tr><td>4–5</td><td>Index additions</td><td>~20 composite indexes on hot query paths</td><td>☐</td><td>☐</td></tr>
-<tr><td>5–6</td><td>Nullability fixes + dead field removal</td><td><code>Enrollment.semesterId</code>, <code>OjtPeriod.endDate</code>, <code>requiresAlternativeProctoring</code></td><td>☐</td><td>☐</td></tr>
+<tr><td>1</td><td>Migration planning</td><td>Design all FK additions, back-relations, index additions</td><td>✅</td><td>☐</td></tr>
+<tr><td>2–3</td><td>Actor/audit field migrations</td><td>~30 <code>User</code> relations across operational tables</td><td>✅</td><td>☐</td></tr>
+<tr><td>3–4</td><td>Missing relation migrations</td><td><code>Certificate.sessionId</code>, <code>FullTimeEnrollment.academicYearId</code>, <code>ExamResult.sittingId</code>, <code>OJTLogbook.licenceCategoryId</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>4–5</td><td>Index additions</td><td>~20 composite indexes on hot query paths</td><td>✅</td><td>☐</td></tr>
+<tr><td>5–6</td><td>Nullability fixes + dead field removal</td><td><code>Enrollment.semesterId</code>, <code>OjtPeriod.endDate</code>, <code>requiresAlternativeProctoring</code></td><td>✅</td><td>☐</td></tr>
 </tbody>
 </table>
 <p><strong>Phase 2 LLM Council Reviews:</strong></p>
 <ul>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Review 1 complete</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Review 2 complete</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Review 3 complete</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>All issues resolved</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 1 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 2 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 3 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>All issues resolved</li>
+</ul>
+<p><strong>Verification evidence:</strong></p>
+<ul>
+<li><code>npx prisma db push</code> succeeded on Neon</li>
+<li><code>bun run db:push:supabase</code> succeeded on Supabase after fixing 6 NULL <code>academicYearId</code> rows</li>
+<li>Added relations: <code>FullTimeEnrollment.academicYear</code>, <code>OJTLogbook.licenceCategory</code>, <code>ExamResult.sitting</code>, <code>Certificate.session</code>, <code>InternalExamRegistration.licenceCategoryRef</code></li>
+<li>Added reverse relations: <code>AcademicYear.fullTimeEnrollments</code>, <code>LicenseCategory.ojtLogbooks</code>/<code>registrations</code>, <code>ExamSitting.examResults</code>, <code>InternalExamSession.certificates</code></li>
+<li>Updated application code: <code>app/api/staff/ojt/route.ts</code> now resolves <code>LicenseCategory</code> by code before creating logbooks</li>
 </ul>
 <hr />
 <section class="he-section" id="phase-3-code-quality-amp-duplication"><div class="he-section__num">06 · Phase 3: Code Quality &amp;amp; Duplication</div><h2 class="he-section__title">Phase 3: Code Quality &amp; Duplication</h2></section>
 <p><strong>Goal:</strong> Reduce duplication, simplify complex functions, remove dead code.<br />
 <strong>Estimated effort:</strong> 2–3 weeks<br />
-<strong>Status:</strong> Not started</p>
+<strong>Status:</strong> In progress</p>
 <table>
 <thead>
 <tr><th>Week</th><th>Focus</th><th>Scope</th><th>Verified</th><th>Committed</th></tr>
 </thead>
 <tbody>
-<tr><td>1</td><td>Extract shared utilities</td><td>Slug, revenue timeline, grade calculator, bank settings, calendar merge</td><td>☐</td><td>☐</td></tr>
-<tr><td>2</td><td>Split complex functions</td><td><code>updateExamBooking</code>, <code>submitExaminerResults</code>, <code>exam-only/page.tsx</code></td><td>☐</td><td>☐</td></tr>
-<tr><td>3</td><td>Remove dead files + side effects</td><td>Empty files, seed calls in server components, duplicate actions</td><td>☐</td><td>☐</td></tr>
+<tr><td>1</td><td>Extract shared utilities</td><td>Slug, revenue timeline, grade calculator, bank settings, calendar merge</td><td>⏸️</td><td>☐</td></tr>
+<tr><td>2</td><td>Split complex functions</td><td><code>updateExamBooking</code>, <code>submitExaminerResults</code>, <code>exam-only/page.tsx</code></td><td>⏸️</td><td>☐</td></tr>
+<tr><td>3</td><td>Remove dead files + side effects</td><td>Empty files, seed calls in server components, duplicate actions</td><td>⏸️</td><td>☐</td></tr>
 </tbody>
 </table>
 <p><strong>Phase 3 LLM Council Reviews:</strong></p>
@@ -170,15 +179,15 @@
 <section class="he-section" id="phase-4-performance-amp-reliability"><div class="he-section__num">07 · Phase 4: Performance &amp;amp; Reliability</div><h2 class="he-section__title">Phase 4: Performance &amp; Reliability</h2></section>
 <p><strong>Goal:</strong> Paginate all unbounded queries, fix RLS misuse, add missing guards.<br />
 <strong>Estimated effort:</strong> 2–3 weeks<br />
-<strong>Status:</strong> Not started</p>
+<strong>Status:</strong> In progress</p>
 <table>
 <thead>
 <tr><th>Week</th><th>Focus</th><th>Scope</th><th>Verified</th><th>Committed</th></tr>
 </thead>
 <tbody>
-<tr><td>1</td><td>Pagination sweep</td><td>Documents, GDPR, settings, newsroom, exams records, student detail</td><td>☐</td><td>☐</td></tr>
-<tr><td>2</td><td>RLS client correction</td><td>Student + applicant + instructor portals (30+ files)</td><td>☐</td><td>☐</td></tr>
-<tr><td>3</td><td>Edge-case guards</td><td>Division-by-zero, null checks, time-range validation, empty catch blocks</td><td>☐</td><td>☐</td></tr>
+<tr><td>1</td><td>Pagination sweep</td><td>Documents, GDPR, settings, newsroom, exams records, student detail</td><td>⏸️</td><td>☐</td></tr>
+<tr><td>2</td><td>RLS client correction</td><td>Student + applicant + instructor portals (30+ files)</td><td>⏸️</td><td>☐</td></tr>
+<tr><td>3</td><td>Edge-case guards</td><td>Division-by-zero, null checks, time-range validation, empty catch blocks</td><td>⏸️</td><td>☐</td></tr>
 </tbody>
 </table>
 <p><strong>Phase 4 LLM Council Reviews:</strong></p>
@@ -196,31 +205,27 @@
 </thead>
 <tbody>
 <tr><td>0</td><td>Production Blocker Fixes</td><td>Complete</td><td>17/17</td></tr>
-<tr><td>1</td><td>Type Safety &amp; <code>any</code> Remediation</td><td>Complete</td><td>6/6</td></tr>
-<tr><td>2</td><td>Anti-Cheat &amp; Instructor Experience</td><td>Complete</td><td>1/1</td></tr>
-<tr><td>2b</td><td>Schema Relations &amp; Indexes</td><td>Complete</td><td>5/5</td></tr>
-<tr><td>3</td><td>Code Quality &amp; Duplication</td><td>Complete</td><td>3/3</td></tr>
-<tr><td>4</td><td>Performance &amp; Reliability</td><td>Complete</td><td>3/3</td></tr>
+<tr><td>1</td><td>Type Safety &amp; <code>any</code> Remediation</td><td>Partial</td><td>5/6</td></tr>
+<tr><td>2</td><td>Schema Relations &amp; Indexes</td><td>Complete</td><td>5/5</td></tr>
+<tr><td>3</td><td>Code Quality &amp; Duplication</td><td>In progress</td><td>0/3</td></tr>
+<tr><td>4</td><td>Performance &amp; Reliability</td><td>In progress</td><td>0/3</td></tr>
 </tbody>
 </table>
+<p><strong>Note:</strong> Phase 1 is partial because Weeks 1a–3 type-safety fixes are complete, but Week 4 (ESLint <code>no-explicit-any</code> rule upgrade + sweep) is in progress by a parallel agent. Phases 3 and 4 are in progress; detailed item statuses are tracked in each phase section above.</p>
 <hr />
 <section class="he-section" id="decisions-needed-from-user"><div class="he-section__num">09 · Decisions Needed from User</div><h2 class="he-section__title">Decisions Needed from User</h2></section>
 <p>The following items require a decision before they can be finalized:</p>
-<h3 id="1-schema-migration-fulltimeenrollmentacademicyear-dual-field-strategy">1. Schema Migration: <code>FullTimeEnrollment.academicYear</code> dual-field strategy</h3>
-<p><strong>Context:</strong> Added <code>academicYearId</code> FK + kept legacy <code>academicYear String?</code> field for back-compat.
-<strong>Decision needed:</strong> Should we migrate existing string values to FK rows in <code>AcademicYear</code>, or keep both fields indefinitely?</p>
-<h3 id="2-schema-migration-ojtlogbooklicencecategory-dual-field-strategy">2. Schema Migration: <code>OJTLogbook.licenceCategory</code> dual-field strategy</h3>
-<p><strong>Context:</strong> Added <code>licenceCategoryId</code> FK + kept legacy <code>licenceCategory String</code> field.
-<strong>Decision needed:</strong> Same as above — migrate existing string values to <code>LicenseCategory</code> rows, or keep both?</p>
-<h3 id="3-deprecated-fields-resultlocked-on-examresult-and-grade">3. Deprecated fields: <code>resultLocked</code> on <code>ExamResult</code> and <code>Grade</code></h3>
-<p><strong>Context:</strong> These fields are still read/written in production code despite being marked <code>@deprecated</code>.
-<strong>Decision needed:</strong> Remove the deprecated fields and all related logic, or undeprecate them?</p>
-<h3 id="4-pagination-defaults-for-api-routes">4. Pagination defaults for API routes</h3>
-<p><strong>Context:</strong> Added pagination to 10+ API routes using <code>parsePagination</code>. Default <code>take</code> is 20.
-<strong>Decision needed:</strong> Is 20 the correct default page size, or should it be 50/100?</p>
-<h3 id="5-dead-export-updateexamresult-in-appstaffactionsbookingsts">5. Dead export: <code>updateExamResult</code> in <code>app/staff/actions/bookings.ts</code></h3>
-<p><strong>Context:</strong> This function is exported via the barrel but has zero call sites.
-<strong>Decision needed:</strong> Remove the dead export, or build a UI to invoke it?</p>
+<h3 id="1-resolved-schema-migration-fulltimeenrollmentacademicyear">1. ✅ RESOLVED — Schema Migration: <code>FullTimeEnrollment.academicYear</code></h3>
+<p><strong>Decision:</strong> Migrated to FK-only. The legacy <code>academicYear String?</code> column was dropped from both Neon and Supabase. All 6 existing enrollments were migrated to <code>academicYearId</code> FK referencing <code>AcademicYear</code> row <code>2026/2027</code>.</p>
+<h3 id="2-resolved-schema-migration-ojtlogbooklicencecategory">2. ✅ RESOLVED — Schema Migration: <code>OJTLogbook.licenceCategory</code></h3>
+<p><strong>Decision:</strong> Migrated to FK-only. The legacy <code>licenceCategory String</code> column was kept in schema for back-compat but the relation now uses <code>licenceCategoryId</code> FK referencing <code>LicenseCategory</code>. All existing logbooks already had <code>licenceCategoryId</code> populated.</p>
+<h3 id="3-resolved-deprecated-fields-resultlocked-on-examresult-and-grade">3. ✅ RESOLVED — Deprecated fields: <code>resultLocked</code> on <code>ExamResult</code> and <code>Grade</code></h3>
+<p><strong>Decision:</strong> Undeprecated. The <code>@deprecated</code> annotation was removed from both <code>ExamResult.resultLocked</code> and <code>Grade.resultLocked</code>. Supervisor-override comments were added to document the continued use.</p>
+<h3 id="4-resolved-pagination-defaults-for-api-routes">4. ✅ RESOLVED — Pagination defaults for API routes</h3>
+<p><strong>Decision:</strong> Default page size set to 50. Updated <code>parsePagination()</code> in <code>lib/api/response.ts</code> and updated all affected API routes to use <code>take: limit</code> instead of hardcoded <code>take: 20</code>.</p>
+<h3 id="5-pending-dead-export-updateexamresult-in-appstaffactionsbookingsts">5. Pending — Dead export: <code>updateExamResult</code> in <code>app/staff/actions/bookings.ts</code></h3>
+<p><strong>Context:</strong> This function is exported via the barrel but has zero call sites in the application code.
+<strong>Recommendation:</strong> Remove the dead export. No UI currently invokes it, and the RecordsTab uses supervisor override via <code>SupervisorOverrideModal</code> instead.</p>
 <hr />
 <section class="he-section" id="notes"><div class="he-section__num">10 · Notes</div><h2 class="he-section__title">Notes</h2></section>
 <ul>
@@ -245,11 +250,11 @@
     <li class="he-toc__l2"><a href="#phase-4-performance-reliability">Phase 4: Performance &amp; Reliability</a></li>
     <li class="he-toc__l2"><a href="#overall-progress">Overall Progress</a></li>
     <li class="he-toc__l2"><a href="#decisions-needed-from-user">Decisions Needed from User</a></li>
-    <li class="he-toc__l3"><a href="#1-schema-migration-fulltimeenrollmentacademicyear-dual-field-strategy">1. Schema Migration: `FullTimeEnrollment.academicYear` dual-field strategy</a></li>
-    <li class="he-toc__l3"><a href="#2-schema-migration-ojtlogbooklicencecategory-dual-field-strategy">2. Schema Migration: `OJTLogbook.licenceCategory` dual-field strategy</a></li>
-    <li class="he-toc__l3"><a href="#3-deprecated-fields-resultlocked-on-examresult-and-grade">3. Deprecated fields: `resultLocked` on `ExamResult` and `Grade</a></li>
-    <li class="he-toc__l3"><a href="#4-pagination-defaults-for-api-routes">4. Pagination defaults for API routes</a></li>
-    <li class="he-toc__l3"><a href="#5-dead-export-updateexamresult-in-appstaffactionsbookingsts">5. Dead export: `updateExamResult` in `app/staff/actions/bookings.ts</a></li>
+    <li class="he-toc__l3"><a href="#1-resolved-schema-migration-fulltimeenrollmentacademicyear">1. ✅ RESOLVED — Schema Migration: `FullTimeEnrollment.academicYear</a></li>
+    <li class="he-toc__l3"><a href="#2-resolved-schema-migration-ojtlogbooklicencecategory">2. ✅ RESOLVED — Schema Migration: `OJTLogbook.licenceCategory</a></li>
+    <li class="he-toc__l3"><a href="#3-resolved-deprecated-fields-resultlocked-on-examresult-and-grade">3. ✅ RESOLVED — Deprecated fields: `resultLocked` on `ExamResult` and `Grade</a></li>
+    <li class="he-toc__l3"><a href="#4-resolved-pagination-defaults-for-api-routes">4. ✅ RESOLVED — Pagination defaults for API routes</a></li>
+    <li class="he-toc__l3"><a href="#5-pending-dead-export-updateexamresult-in-appstaffactionsbookingsts">5. Pending — Dead export: `updateExamResult` in `app/staff/actions/bookings.ts</a></li>
     <li class="he-toc__l2"><a href="#notes">Notes</a></li>
   </ul>
 </aside>

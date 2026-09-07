@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { withErrorHandler, apiSuccess, apiError } from '@/lib/api/response'
+import { withErrorHandler, apiSuccess, apiError , RouteContext } from '@/lib/api/response'
 import { requirePermission } from '@/lib/auth/permissions'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
@@ -10,11 +10,9 @@ import {
 } from '@/lib/auth/permission-registry'
 
 export const DELETE = withErrorHandler(async (
-  _req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
-) => {
+  _req: NextRequest, ctx?: RouteContext) => {
   const actor = await requirePermission(ADDITIONAL_PERMISSION_KEYS.MANAGE_RBAC)
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
 
   const existing = await prismaUnfiltered.roleGrant.findUnique({ where: { id } })
   if (!existing) return apiError('Grant not found', 404)

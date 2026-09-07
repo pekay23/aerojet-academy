@@ -76,8 +76,9 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
       toast.success('Profile updated successfully')
       setOpen(false)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update profile'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

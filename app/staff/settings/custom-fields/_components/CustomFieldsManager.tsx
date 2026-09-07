@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Save, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { CustomFieldDefinition, CustomFieldType, CustomFieldTarget } from '@prisma/client'
@@ -11,6 +11,18 @@ export default function CustomFieldsManager({ initialFields }: { initialFields: 
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<Partial<CustomFieldDefinition>>({})
+
+  // Warn before navigating away with unsaved form edits.
+  const hasUnsavedEdits = isAdding || editingId !== null
+  useEffect(() => {
+    if (!hasUnsavedEdits) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [hasUnsavedEdits])
 
   const handleSave = async () => {
     if (!formData.name || !formData.slug || !formData.fieldType || !formData.appliesTo) {

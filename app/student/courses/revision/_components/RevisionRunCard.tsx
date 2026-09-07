@@ -9,15 +9,26 @@ import { bookRevisionRun } from '../actions'
 import { useRouter } from 'next/navigation'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 
-export default function RevisionRunCard({ 
-  run, 
-  isBooked, 
-  walletBalance 
-}: { 
-  run: any, 
-  isBooked: boolean, 
-  walletBalance: number 
-}) {
+interface RevisionRunCardProps {
+  run: {
+    id: string
+    moduleTag: string | null
+    price: number
+    title: string
+    description: string | null
+    startDatetime: Date
+    currentEnrollments: number
+    capacity: number
+  }
+  isBooked: boolean
+  walletBalance: number
+}
+
+export default function RevisionRunCard({
+  run,
+  isBooked,
+  walletBalance
+}: RevisionRunCardProps) {
   const [loading, setLoading] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const router = useRouter()

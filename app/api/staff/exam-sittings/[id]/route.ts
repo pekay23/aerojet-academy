@@ -43,9 +43,9 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
     }
 
     return NextResponse.json({ sitting })
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch sitting' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch sitting' },
       { status: 500 }
     )
   }
@@ -126,9 +126,9 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     revalidatePath('/staff/exams')
 
     return NextResponse.json({ success: true, sitting: updated })
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to update sitting' },
+      { success: false, error: error instanceof Error ? error.message : 'Failed to update sitting' },
       { status: 500 }
     )
   }

@@ -1,6 +1,6 @@
 // Create missing loading.tsx files for all routes
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
 
 const dirs = [
   // Staff Portal - dynamic routes

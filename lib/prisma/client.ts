@@ -17,7 +17,7 @@ const createExtendedClient = () => {
   }
 
   const clientWithSoftDelete = prismaBase.$extends(softDeleteExtension())
-  return clientWithSoftDelete.$extends(rlsExtension(clientWithSoftDelete))
+  return clientWithSoftDelete.$extends(rlsExtension(clientWithSoftDelete as unknown as PrismaClient)) as unknown as PrismaClient
 }
 
 const globalForPrisma = globalThis as unknown as {

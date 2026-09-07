@@ -3,7 +3,6 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import {
   apiCreated,
-  _apiSuccess,
   apiError,
   withErrorHandler,
   RouteContext,

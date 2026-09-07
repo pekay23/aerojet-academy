@@ -28,7 +28,7 @@ async function main() {
         END LOOP;
         $$;
       `, [table, table])
-    } catch (e: any) {
+    } catch (_e: unknown) {
       // ignore
     }
   }
@@ -159,8 +159,8 @@ async function main() {
     try {
       await client.query(policy.sql)
       console.log(`✅ RLS policies created for ${policy.table}`)
-    } catch (e: any) {
-      console.log(`⚠️ ${policy.table}: ${e.message}`)
+    } catch (e: unknown) {
+      console.log(`⚠️ ${policy.table}: ${(e as Error).message}`)
     }
   }
 
@@ -169,6 +169,9 @@ async function main() {
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

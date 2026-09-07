@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiForbidden, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiForbidden, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { isInternalExamSystemEnabled, getBankRules } from '@/lib/internal-exam/engine'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
@@ -15,7 +15,7 @@ import { AuditAction, createAuditLog } from '@/lib/audit/logger'
  * non-voided session. The Live Monitor tab then reflects these as "Active".
  */
 export const POST = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ classId: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireInstructor()
     const instructorProfile = await getInstructorProfileByUserId(user.id)
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -23,7 +23,7 @@ export const POST = withErrorHandler(
     if (!(await isInternalExamSystemEnabled())) {
       return apiError('Internal exams are not currently available', 403)
     }
-    const { classId } = await ctx.params
+    const { classId } = (await ctx!.params) as { classId: string }
 
     const classItem = await prismaUnfiltered.class.findUnique({
       where: { id: classId },

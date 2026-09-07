@@ -45,7 +45,10 @@ export default async function AttendanceCompliancePage({
     },
   })
 
-  const studentIds = enrollments.map((e: any) => e.user.id)
+  type EnrollmentWithUser = (typeof enrollments)[number]
+  type AttendanceRecordWithClass = (typeof records)[number]
+
+  const studentIds = enrollments.map((e: EnrollmentWithUser) => e.user.id)
 
   const records = await prismaUnfiltered.attendanceRecord.findMany({
     where: { userId: { in: studentIds } },
@@ -54,18 +57,18 @@ export default async function AttendanceCompliancePage({
     },
   })
 
-  const recordsByUser = new Map<string, any[]>()
+  const recordsByUser = new Map<string, AttendanceRecordWithClass[]>()
   for (const r of records) {
     const list = recordsByUser.get(r.userId) || []
     list.push(r)
     recordsByUser.set(r.userId, list)
   }
 
-  const report = enrollments.map((e: any) => {
+  const report = enrollments.map((e: EnrollmentWithUser) => {
     const userRecords = recordsByUser.get(e.user.id) || []
-    const courseRecords = userRecords.filter((r: any) => r.class.courseId === e.courseId)
+    const courseRecords = userRecords.filter((r) => r.class.courseId === e.courseId)
     const total = courseRecords.length
-    const present = courseRecords.filter((r: any) => r.status === 'PRESENT' || r.status === 'LATE').length
+    const present = courseRecords.filter((r) => r.status === 'PRESENT' || r.status === 'LATE').length
     const rate = total > 0 ? Math.round((present / total) * 100) : 0
     const complianceStatus = rate >= threshold ? 'COMPLIANT' : rate >= threshold - 5 ? 'AT_RISK' : 'NON_COMPLIANT'
 

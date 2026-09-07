@@ -37,7 +37,7 @@ export default function ExchangeRateDisplay() {
   }, [])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRates()
   }, [fetchRates])

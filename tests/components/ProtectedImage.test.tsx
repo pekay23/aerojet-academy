@@ -1,12 +1,16 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { ProtectedImage } from '@/components/ProtectedImage'
+import type React from 'react'
+
+type MockImageProps = React.ComponentProps<'img'>
 
 vi.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => {
+  default: (props: MockImageProps) => {
     const { alt, src, width, height, className } = props
-    return <img src={src} alt={alt} width={width} height={height} className={className} />
+    const MockImage = 'img'
+    return <MockImage src={src} alt={alt} width={width} height={height} className={className} />
   },
 }))
 

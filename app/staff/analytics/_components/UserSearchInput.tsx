@@ -25,7 +25,7 @@ interface UserSearchInputProps {
   disabled: boolean
 }
 
-export default function UserSearchInput({ onSelect, onTrack, _loading, _disabled }: UserSearchInputProps) {
+export default function UserSearchInput({ onSelect, onTrack, loading: _loading, disabled: _disabled }: UserSearchInputProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [students, setStudents] = useState<Student[]>([])

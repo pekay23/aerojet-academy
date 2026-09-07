@@ -86,8 +86,8 @@ export default function OjtSection({
       if (!res.ok) throw new Error(data.error || 'Failed to create')
       setOpen(false)
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create')
     } finally {
       setLoading(false)
     }

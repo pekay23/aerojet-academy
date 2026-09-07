@@ -52,7 +52,7 @@ export default function SchedulingWarningsPanel({ eventId }: { eventId: string }
       <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center gap-2 text-sm text-slate-400">
           <AlertTriangle className="h-4 w-4 animate-pulse" />
-          Checking scheduling conflictsâ€¦
+          Checking scheduling conflicts…
         </div>
       </div>
     )

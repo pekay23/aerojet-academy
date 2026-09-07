@@ -5,15 +5,9 @@ import { apiSuccess, withErrorHandler, apiError } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { revalidateTag } from 'next/cache'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   await requireAdmin()
-  const { searchParams } = new URL(req.url)
-  const group = searchParams.get('group')
-
-  const where: any = {}
-  if (group) where.group = group
-
-  const settings = await prismaUnfiltered.systemSetting.findMany({ where, orderBy: { key: 'asc' } })
+  const settings = await prismaUnfiltered.systemSetting.findMany({ orderBy: { key: 'asc' } })
   return apiSuccess(settings)
 })
 
@@ -81,7 +75,7 @@ export async function POST(req: NextRequest) {
       status: 303,
       headers: { Location: '/staff/settings?saved=1' },
     })
-  } catch (error: any) {
-    return apiError(error.message || 'Failed to save settings', 500)
+  } catch (error: unknown) {
+    return apiError(error instanceof Error ? error.message : 'Failed to save settings', 500)
   }
 }

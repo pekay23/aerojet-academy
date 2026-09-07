@@ -2,27 +2,27 @@
 
 import prisma from '@/lib/prisma/client'
 
-export async function createAdminUser(userData: any) {
+export async function createAdminUser(userData: Record<string, unknown>) {
   return prisma.user.create({
     data: {
       ...userData,
       emailVerified: new Date(),
-      role: 'ADMIN', // FIX: Changed "SUPER_ADMIN" to "ADMIN"
-    },
+      role: 'ADMIN',
+    } as unknown as Parameters<typeof prisma.user.create>[0]['data'],
   })
 }
 
-export async function createSystemSettings(settingsData: any[]) {
+export async function createSystemSettings(settingsData: Array<Record<string, unknown>>) {
   const createOrUpdateSettings = settingsData.map((setting) => {
     const { key, value, type } = setting
     return prisma.systemSetting.upsert({
-      where: { key },
-      update: { value },
+      where: { key: key as string },
+      update: { value: value as string },
       create: {
-        key,
-        value,
-        type, // FIX: Ensured 'type' is included, as it's required
-      }, // The invalid 'group' property was here and has been removed
+        key: key as string,
+        value: value as string,
+        type: type as string,
+      },
     })
   })
 

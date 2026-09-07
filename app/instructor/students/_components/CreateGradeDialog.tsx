@@ -91,8 +91,8 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
       setEssay1Score('')
       setEssay2Score('')
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to record grade')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to record grade')
     } finally {
       setIsSubmitting(false)
     }

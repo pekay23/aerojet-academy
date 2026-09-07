@@ -11,14 +11,6 @@ import AddExamRecordDialog from '../../../students/[id]/_components/AddExamRecor
 // TYPES
 // ---------------------------------------------------------------------------
 
-interface EnrollmentData {
-  id: string
-  status: string
-  completedAt: string | null
-  course: { code: string; name: string }
-  academicYear: { name: string } | null
-  semester: { name: string } | null
-}
 
 interface ExamBookingData {
   id: string
@@ -42,11 +34,22 @@ interface StudentProfileData {
   enrollmentType: string | null
 }
 
+interface ExamComponentData {
+  id: string
+  code: string
+  name: string
+}
+
 interface Props {
   studentId: string
   studentName: string
-  examComponents: any[]
-  enrollments: EnrollmentData[]
+  examComponents: ExamComponentData[]
+  enrollments: Array<{
+    id: string
+    status: string
+    completedAt: string | null
+    course: { code: string; name: string }
+  }>
   examBookings: ExamBookingData[]
   studentProfile: StudentProfileData | null
 }
@@ -69,12 +72,26 @@ interface SemesterGroup {
   key: string
   yearName: string
   semesterName: string
-  enrollments: EnrollmentData[]
+  enrollments: Array<{
+    id: string
+    status: string
+    completedAt: string | null
+    course: { code: string; name: string }
+    academicYear?: { name: string } | null
+    semester?: { name: string } | null
+  }>
   examResults: Map<string, ExamBookingData[]> // moduleCode -> bookings
 }
 
 function groupBySemester(
-  enrollments: EnrollmentData[],
+  enrollments: Array<{
+    id: string
+    status: string
+    completedAt: string | null
+    course: { code: string; name: string }
+    academicYear?: { name: string } | null
+    semester?: { name: string } | null
+  }>,
   examBookings: ExamBookingData[]
 ): SemesterGroup[] {
   const groups = new Map<string, SemesterGroup>()
@@ -147,7 +164,7 @@ function ExamOnlyHistory({
   studentProfile: StudentProfileData
   studentId: string
   studentName: string
-  examComponents: any[]
+  examComponents: ExamComponentData[]
 }) {
   const router = useRouter()
   const passed = examBookings.filter((b) => b.result?.toLowerCase() === 'pass').length

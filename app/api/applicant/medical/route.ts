@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
-export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (_req: NextRequest, _ctx: RouteContext) => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
 

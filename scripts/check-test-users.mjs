@@ -21,4 +21,7 @@ async function main() {
   console.log('Examiner user exists:', !!examiner)
 }
 
-main().catch(e => { console.error(e.message); process.exit(1); }).finally(() => prisma.$disconnect());
+main().catch(e => { console.error((e as Error).message); process.exit(1); }).finally(() => prisma.$disconnect());
+
+
+

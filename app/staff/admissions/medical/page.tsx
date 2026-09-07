@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import MedicalReviewDashboard from './_components/MedicalReviewDashboard'
+import type { MedicalApp } from './_components/MedicalReviewDashboard'
 
 export const metadata: Metadata = { title: 'Medical Review | Admissions' }
 export const dynamic = 'force-dynamic'
@@ -34,6 +35,12 @@ export default async function MedicalPage() {
     orderBy: { updatedAt: 'desc' },
   })
 
+  const serializedApplications = applications.map((app) => ({
+    ...app,
+    medicalClearedAt: app.medicalClearedAt?.toISOString() ?? null,
+    updatedAt: app.updatedAt.toISOString(),
+  }))
+
   return (
     <div className="space-y-6">
       <div>
@@ -45,7 +52,7 @@ export default async function MedicalPage() {
         </p>
       </div>
 
-      <MedicalReviewDashboard applications={applications as any} />
+      <MedicalReviewDashboard applications={serializedApplications as unknown as MedicalApp[]} />
     </div>
   )
 }

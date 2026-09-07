@@ -26,13 +26,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-interface SchedulingClientProps {
-  pathways: any[]
-  programmes: any[]
-  licenseCategories: LicenseCategory[]
-  courses: any[]
-}
-
 interface LicenseCategoryRequirement {
   course: {
     id: string
@@ -53,6 +46,7 @@ interface AcademicTerm {
   yearNumber: number
   semesterNumber: number
   licenseCategory?: LicenseCategory | null
+  courseAssignments: { courseId: string }[]
 }
 
 interface Pathway {
@@ -63,8 +57,25 @@ interface Pathway {
 }
 
 interface Programme {
+  id: string
   code: string
   name: string
+  durationYears: number
+}
+
+interface Course {
+  id: string
+  code: string
+  name: string
+  duration: number
+  category?: { name: string } | null
+}
+
+interface SchedulingClientProps {
+  pathways: Pathway[]
+  programmes: Programme[]
+  licenseCategories: LicenseCategory[]
+  courses: Course[]
 }
 
 interface Tab {
@@ -76,7 +87,7 @@ interface Tab {
 
 interface ProgrammeSchedulePanelProps {
   tab: Tab
-  groupedCourses: Record<string, any[]>
+  groupedCourses: Record<string, Course[]>
   licenseCourseMap: Record<string, Set<string>>
   loading: string | null
   isPending: boolean
@@ -92,13 +103,6 @@ const PATHWAY_PROGRAMME_MAP: Record<string, string[]> = {
   MILITARY_1Y: ['MIL_1Y_B1'],
 }
 
-interface SchedulingClientProps {
-  pathways: any[]
-  programmes: any[]
-  licenseCategories: LicenseCategory[]
-  courses: any[]
-}
-
 export default function SchedulingClient({
   pathways,
   programmes,
@@ -112,9 +116,9 @@ export default function SchedulingClient({
   // Build programme tabs that link to pathways
   const programmeTabs = useMemo(() => {
     const tabs: {
-      programme: any
-      pathway: any
-      licenseCategories: any[]
+      programme: Programme
+      pathway: Pathway
+      licenseCategories: LicenseCategory[]
       totalYears: number
     }[] = []
 
@@ -149,16 +153,16 @@ export default function SchedulingClient({
   // Group courses by category for cleaner organization
   const groupedCourses = useMemo(() => {
     const filtered = courses.filter(
-      (c: any) =>
+      (c) =>
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.code.toLowerCase().includes(search.toLowerCase())
     )
 
     const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
-    const sorted = [...filtered].sort((a: any, b: any) => collator.compare(a.code, b.code))
+    const sorted = [...filtered].sort((a, b) => collator.compare(a.code, b.code))
 
-    const groups: Record<string, any[]> = {}
-    sorted.forEach((course: any) => {
+    const groups: Record<string, Course[]> = {}
+    sorted.forEach((course) => {
       const cat = course.category?.name || 'General'
       if (!groups[cat]) groups[cat] = []
       groups[cat].push(course)
@@ -357,7 +361,7 @@ function ProgrammeSchedulePanel({
     const requiredCourseIds = licenseCourseMap[activeLicenseId]
     if (!requiredCourseIds) return groupedCourses
 
-    const filtered: Record<string, any[]> = {}
+    const filtered: Record<string, Course[]> = {}
     for (const [cat, catCourses] of Object.entries(groupedCourses)) {
       const matching = catCourses.filter((c) => requiredCourseIds.has(c.id))
       if (matching.length > 0) {
@@ -489,9 +493,9 @@ function ProgrammeSchedulePanel({
                             </div>
                           </TableCell>
 
-                          {filteredTerms.map((term: any) => {
+                          {filteredTerms.map((term) => {
                             const isAssigned = term.courseAssignments.some(
-                              (a: any) => a.courseId === course.id
+                              (a) => a.courseId === course.id
                             )
                             const isLoading = loading === `${term.id}-${course.id}`
 

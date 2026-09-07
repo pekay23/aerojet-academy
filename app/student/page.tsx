@@ -6,7 +6,6 @@ import {
   Calendar,
   Wallet,
   TrendingUp,
-  _ArrowRight,
   CheckCircle2,
   Package,
   AlertCircle,
@@ -92,7 +91,7 @@ export default async function StudentDashboard() {
         }
       },
     }),
-    getWelcomeMessages(prismaUnfiltered, session.user.role),
+    getWelcomeMessages(prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient, session.user.role),
   ])
 
   const profile = userData?.studentProfile
@@ -116,8 +115,8 @@ export default async function StudentDashboard() {
     )
   }
 
-  const { isFullTime, isExamOnly, isModular: isFlexible, enrollmentType, _pathwayCode } = await getStudentStatus(userId)
-  const _activePathway = profile.pathwayRel
+  const { isFullTime, isExamOnly, isModular: isFlexible, enrollmentType } = await getStudentStatus(userId)
+
 
   // Activity data is already included in the consolidated query above
   const activityData = userData
@@ -138,7 +137,7 @@ export default async function StudentDashboard() {
     : null
 
   const upcomingExams = activityData?.examBookings || []
-  const _poolMemberships = activityData?._poolMemberships || []
+
   const currentPoolsCount = activityData?._count?.poolMemberships || 0
   const ftCourseEnrollmentCount = activityData?._count?.enrollments || 0
   const latestResultRecord = activityData?.examResults?.[0] || null
@@ -149,8 +148,8 @@ export default async function StudentDashboard() {
 
   // Full-Time: milestones are now included in the parallel fetch above — no sequential query needed
   const ftEnrollment = ftEnrollmentRaw
-  const ftMilestones: SerializedPaymentMilestone[] = (ftEnrollment as any)?.milestones
-    ? (ftEnrollment as any).milestones.map(serializePaymentMilestone)
+  const ftMilestones: SerializedPaymentMilestone[] = ftEnrollment?.milestones
+    ? ftEnrollment.milestones.map(serializePaymentMilestone)
     : []
 
   const serializedUpcomingExams = upcomingExams.map(serializeExamBooking)

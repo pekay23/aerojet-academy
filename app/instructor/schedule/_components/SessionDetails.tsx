@@ -6,8 +6,26 @@ import { X, Video, MapPin, BookOpen, Users, FileText, Edit } from 'lucide-react'
 const MotionDiv = motion.div
 const MotionAside = motion.aside
 
+interface SessionCourse {
+  code: string
+  name: string
+  _count?: {
+    enrollments?: number
+  }
+}
+
+interface SessionRoom {
+  name?: string
+}
+
 interface SessionDetailsProps {
-  session: any
+  session: {
+    course: SessionCourse
+    locationType?: string | null
+    room?: SessionRoom | null
+    name?: string
+    description?: string | null
+  } | null
   isOpen: boolean
   onClose: () => void
 }

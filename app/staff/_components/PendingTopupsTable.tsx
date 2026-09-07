@@ -23,10 +23,10 @@ import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface PendingTopup {
   id: string
-  amount: any
+  amount: number | string
   currency: string
   paymentCurrency: string | null
-  originalAmount: any | null
+  originalAmount: number | string | null
   createdAt: string | Date
   proofUrl: string | null
   user: {

@@ -35,7 +35,7 @@ const examTrendConfig = {
 
 export function ExamTrendChart({ data }: ExamTrendChartProps) {
   const [mounted, setMounted] = React.useState(false)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
@@ -62,7 +62,7 @@ export function ExamTrendChart({ data }: ExamTrendChartProps) {
               content={
                 <ChartTooltipContent
                   indicator="dot"
-                  formatter={(value: any, name: any) => [value ?? 0, name] as any}
+                  formatter={(value, name) => [value ?? 0, name] as [React.ReactNode, string]}
                 />
               }
             />
@@ -102,7 +102,7 @@ const scoreDistributionConfig = {
 } satisfies ChartConfig
 
 export function ScoreDistributionChart({ data }: ScoreDistributionChartProps) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   const [mounted, setMounted] = React.useState(false)
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
@@ -130,7 +130,7 @@ export function ScoreDistributionChart({ data }: ScoreDistributionChartProps) {
               content={
                 <ChartTooltipContent
                   indicator="dot"
-                  formatter={(value: any) => [value ?? 0, 'Exams'] as any}
+                  formatter={(value) => [value ?? 0, 'Exams'] as [React.ReactNode, string]}
                 />
               }
             />

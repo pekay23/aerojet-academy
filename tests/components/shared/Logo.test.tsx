@@ -1,11 +1,26 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import Logo from '@/components/shared/Logo'
+import type React from 'react'
+
+type MockImageProps = React.ComponentProps<'img'> & {
+  priority?: boolean
+}
 
 vi.mock('next/image', () => ({
-  default: (props: any) => {
+  default: (props: MockImageProps) => {
     const { src, alt, width, height, priority, className } = props
-    return <img src={src} alt={alt} width={width} height={height} className={className} data-priority={priority ? '' : undefined} />
+    const MockImage = 'img'
+    return (
+      <MockImage
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        className={className}
+        data-priority={priority ? '' : undefined}
+      />
+    )
   },
 }))
 

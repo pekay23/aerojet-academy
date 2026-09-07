@@ -43,8 +43,8 @@ export function MyPoolsDashboard() {
   }
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchMemberships()
   }, [])
@@ -88,7 +88,7 @@ export function MyPoolsDashboard() {
                   <span className="text-[13px] text-[#93c5fd] font-medium">
                     {m.examComponent?.course?.code || 'Module'}
                   </span>
-                  <span className="text-[#666] mx-2">â€¢</span>
+                  <span className="text-[#666] mx-2">•</span>
                   <span className="text-[13px] text-[#888]">
                     {m.examComponent?.name || 'Exam'}
                   </span>
@@ -159,7 +159,7 @@ export function MyPoolsDashboard() {
             >
               <div className="flex justify-between">
                 <span className="text-[13px] text-[#888]">
-                  {m.examComponent?.course?.code} â€” {m.pool.name}
+                  {m.examComponent?.course?.code} — {m.pool.name}
                 </span>
                 <span
                   className={`text-[11px] ${

@@ -8,6 +8,7 @@ import {
   parsePagination,
   parseSorting,
   parseSearch,
+  RouteContext
 } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -23,9 +24,9 @@ const patchSchema = z.object({
 })
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     await requireStaff()
-    const { id: sessionId } = await ctx.params
+    const { id: sessionId } = (await ctx!.params) as { id: string }
 
     const searchParams = new URL(req.url).searchParams
     const { page, limit, skip } = parsePagination(searchParams)
@@ -93,9 +94,9 @@ export const GET = withErrorHandler(
 )
 
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const staff = await requireStaff()
-    const { id: sessionId } = await ctx.params
+    const { id: sessionId } = (await ctx!.params) as { id: string }
 
     const body = await req.json()
     const parsed = patchSchema.safeParse(body)

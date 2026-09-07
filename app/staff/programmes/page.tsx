@@ -22,9 +22,9 @@ export default async function ProgrammesPage() {
     orderBy: { code: 'asc' },
   })
 
-  const serialized = serializePrisma(programmes).map((p: any) => ({
+  const serialized = serializePrisma(programmes).map((p) => ({
     ...p,
-    programmeYears: p.programmeYears.map((y: any) => ({
+    programmeYears: p.programmeYears.map((y) => ({
       ...y,
       semesters: (Array.isArray(y.semesters) ? y.semesters : []) as unknown as ProgrammeSemester[],
     })),

@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, type Resolver } from 'react-hook-form'
+import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
 import {
@@ -51,7 +51,23 @@ const courseFormSchema = z.object({
 type CourseFormValues = z.infer<typeof courseFormSchema>
 
 interface EditCourseFormProps {
-  initialData: any
+  initialData: {
+    id: string
+    code?: string | null
+    name?: string | null
+    description?: string | null
+    categoryId?: string | null
+    applicableCategories?: string[] | null
+    moduleType?: CourseFormValues['moduleType']
+    duration?: number | null
+    price?: number | string | null
+    isActive?: boolean | null
+    requiresPrerequisite?: boolean | null
+    prerequisites?: string[] | null
+    syllabusUrl?: string | null
+    materialsUrl?: string | null
+    currency?: string | null
+  }
 }
 
 export default function EditCourseForm({ initialData }: EditCourseFormProps) {
@@ -75,7 +91,7 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
           setCategories(catsData.data)
         }
         if (licensesData.success) {
-          setLicenseCategories(licensesData.data.map((l: any) => ({
+          setLicenseCategories(licensesData.data.map((l: { code: string; name: string }) => ({
             label: `${l.code} - ${l.name}`,
             value: l.code
           })))
@@ -108,6 +124,7 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
     },
     mode: 'onChange',
   })
+  const requiresPrerequisite = useWatch({ control: form.control, name: 'requiresPrerequisite' })
 
   async function onSubmit(values: CourseFormValues) {
     setIsLoading(true)
@@ -138,8 +155,9 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
       toast.success('Course updated successfully')
       router.push(`/staff/courses`)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update course')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update course'
+      toast.error(message || 'Failed to update course')
     } finally {
       setIsLoading(false)
     }
@@ -244,7 +262,7 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
           />
         </div>
 
-        {form.watch('requiresPrerequisite') && (
+        {requiresPrerequisite && (
           <FormField
             control={form.control}
             name="prerequisites"

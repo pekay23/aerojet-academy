@@ -5,15 +5,12 @@ import { naturalCompare } from '@/lib/utils/array'
 import {
   Search,
   Plus,
-  _Calendar,
   CheckCircle2,
   XCircle,
   Clock,
   Edit,
   Trash2,
   FileCheck,
-  _ShoppingCart,
-  _Filter,
   ArrowUp,
   ArrowDown,
 } from 'lucide-react'
@@ -24,7 +21,6 @@ import AddExamRecordDialog from './AddExamRecordDialog'
 import CertificateReleaseControl from './CertificateReleaseControl'
 import { deriveBookingDisplayResult } from '@/lib/exams/fulfillment'
 import type {
-  SerializedExamBooking,
   SerializedExamComponent,
   SerializedExamBundle,
 } from '@/lib/types/staff'
@@ -42,10 +38,40 @@ const EXAM_FILTERS = [
 
 type ExamFilter = (typeof EXAM_FILTERS)[number]['key']
 
+import type { SerializedStudent } from '@/lib/types/staff'
+type StudentSummary = SerializedStudent
+
+export type UnifiedExamRecord = {
+  id: string
+  source: 'booking' | 'result'
+  moduleCode: string
+  examName: string
+  examDate: string | null | undefined
+  courseId?: string | null
+  score: number | null
+  percentage: number | null
+  result: string | null
+  passed: boolean
+  status: string
+  bookingType: string | null
+  attemptType: string | null
+  isResit: boolean
+  eventName: string | null | undefined
+  bookedAt: string | null | undefined
+  amountPaid: number
+  examCategory: string | null | undefined
+  attendanceStatus: string | null
+  sittingLabel?: string | null
+  hasResult?: boolean
+  resultId?: string
+  sourceNotes?: string | null
+  certificateUrl?: string | null
+}
+
 interface Props {
-  student: any
-  examComponents: any[]
-  upcomingEvents: any[]
+  student: StudentSummary
+  examComponents: SerializedExamComponent[]
+  upcomingEvents: { id: string; name: string; startDate: string; endDate?: string }[]
   academicYears?: { id: string; name: string }[]
   semesters?: { id: string; name: string }[]
   onRefresh: () => void
@@ -77,7 +103,7 @@ export default function ExamsTab({
 
   // Merge exam bookings and exam results into unified history
   const allExamRecords = useMemo(() => {
-    const records: any[] = []
+    const records: UnifiedExamRecord[] = []
 
     // From examBookings
     for (const b of student.examBookings || []) {
@@ -164,11 +190,11 @@ export default function ExamsTab({
 
         if (rType && !isPlaceholder(rType)) {
           existingBooking.attemptType = r.attemptType
-          existingBooking.isResit = r.attemptType.startsWith('RESIT')
+          existingBooking.isResit = (r.attemptType || '').startsWith('RESIT')
         } else if (!bType || isPlaceholder(bType)) {
           if (rType && !isPlaceholder(rType)) {
             existingBooking.attemptType = r.attemptType
-            existingBooking.isResit = r.attemptType.startsWith('RESIT')
+            existingBooking.isResit = (r.attemptType || '').startsWith('RESIT')
           } else if (r.attemptType) {
             // Fallback to result's attempt type even if it's a placeholder,
             // but only if booking has nothing better
@@ -181,7 +207,7 @@ export default function ExamsTab({
           source: 'result',
           moduleCode: rModuleCode,
           examName: r.exam?.name || 'Manual Result',
-          examDate: r.exam?.examDate || r.createdAt,
+          examDate: r.exam?.examDate != null ? String(r.exam.examDate) : r.createdAt ?? undefined,
           score: Number(r.score),
           percentage: Number(r.percentage),
           result: r.passed ? 'pass' : 'fail',
@@ -287,7 +313,7 @@ export default function ExamsTab({
   )
 
   // Handle inline edit save
-  const handleSaveEdit = async (record: SerializedExamBooking) => {
+  const handleSaveEdit = async (record: UnifiedExamRecord) => {
     try {
       const res = await updateExamBooking(record.id, {
         score: editData.score,
@@ -427,7 +453,14 @@ export default function ExamsTab({
                 ? `${student.profile.firstName} ${student.profile.lastName}`
                 : student.email
             }
-            examComponents={examComponents}
+            examComponents={examComponents.map((ec) => ({
+              id: ec.id,
+              code: ec.code,
+              name: ec.name,
+              course: ec.course
+                ? { id: ec.course.id, name: ec.course.name || '', code: ec.course.code }
+                : undefined,
+            }))}
             onSuccess={onRefresh}
           />
           <BookExamForStudentDialog
@@ -442,8 +475,18 @@ export default function ExamsTab({
             enrollmentType={student.studentProfile?.enrollmentType}
             academicYears={academicYears}
             semesters={semesters}
-            examComponents={examComponents}
-            upcomingEvents={upcomingEvents}
+            examComponents={examComponents.map((ec) => ({
+              id: ec.id,
+              code: ec.code,
+              name: ec.name,
+              course: ec.course
+                ? { id: ec.course.id, name: ec.course.name || '', code: ec.course.code }
+                : undefined,
+            }))}
+            upcomingEvents={upcomingEvents.map((e) => ({
+              ...e,
+              endDate: (e as { endDate?: string }).endDate ?? '',
+            }))}
             onSuccess={onRefresh}
           />
         </div>
@@ -506,7 +549,7 @@ export default function ExamsTab({
 
       {/* Search & Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative max-w-xs min-w-[200px] flex-1">
+        <div className="relative max-w-xs min-w-50 flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
@@ -694,7 +737,7 @@ export default function ExamsTab({
                       })()
                     )}
                   </td>
-                  <td className="max-w-[200px] px-4 py-3 text-xs text-slate-500">
+                  <td className="max-w-50 px-4 py-3 text-xs text-slate-500">
                     <div className="flex flex-col">
                       <span className="truncate font-medium text-slate-800 dark:text-slate-200">
                         {record.examName}
@@ -938,13 +981,13 @@ export default function ExamsTab({
       )}
 
       {/* Bundles */}
-      {student.examBundles?.length > 0 && (
+      {(student.examBundles?.length ?? 0) > 0 && (
         <div>
           <h3 className="mb-3 text-xs font-black tracking-widest text-slate-400 uppercase">
             Active Bundles
           </h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {student.examBundles.map((bundle: SerializedExamBundle) => (
+            {(student.examBundles || []).map((bundle: SerializedExamBundle) => (
               <div
                 key={bundle.id}
                 className="rounded-xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"

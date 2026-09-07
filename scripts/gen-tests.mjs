@@ -118,7 +118,7 @@ function detectMethods(content) {
   return methods
 }
 
-function detect404Pattern(content) {
+function _detect404Pattern(content) {
   return content.includes('apiNotFound')
     || /apiError\(.*404/.test(content)
     || /not found.*404/i.test(content)
@@ -171,7 +171,7 @@ function getSchemaDefaults(content) {
   return defaults
 }
 
-function getValidBody(content) {
+function _getValidBody(content) {
   const defaults = getSchemaDefaults(content)
   if (Object.keys(defaults).length > 0) {
     return JSON.stringify(defaults)
@@ -251,7 +251,7 @@ function generateTest(routePath, content) {
   const testFileName = getTestFileName(relPath)
   const testFilePath = path.join(root, 'tests', 'integration', 'api', testFileName)
 
-  const usesUnfiltered = content.includes('prismaUnfiltered')
+  const _usesUnfiltered = content.includes('prismaUnfiltered')
   const prismaModel = (model) => `prismaMock.${model}`
 
   let testContent = `import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'\n`
@@ -596,3 +596,5 @@ for (const routePath of allRoutes) {
 }
 
 console.log(`\nGenerated ${count} test files`)
+
+

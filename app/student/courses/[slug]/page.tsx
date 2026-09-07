@@ -2,7 +2,6 @@ import { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
-  FileText,
   Clock,
   ArrowLeft,
   ChevronRight,
@@ -10,11 +9,16 @@ import {
   Activity,
   HelpCircle,
   Lock as LockIcon,
+  BookOpen,
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { canAccessClasses, resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
+import {
+  getStudentCourseResources,
+  getStudentGuideResources,
+} from '@/lib/resources/student-course-resources'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -30,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     include: { course: true },
   })
   const enrollment = enrollments.find(
-    (e: any) =>
+    (e) =>
       e.course.name
         .toLowerCase()
         .trim()
@@ -86,7 +90,7 @@ export default async function CourseDetailsPage({
   })
 
   const enrollment = allEnrollments.find(
-    (e: any) =>
+    (e) =>
       e.course.name
         .toLowerCase()
         .trim()
@@ -110,6 +114,18 @@ export default async function CourseDetailsPage({
       programmeChoice: enrollment.user.studentProfile?.programmeChoice,
     }) || 'MODULAR'
   const allowClasses = canAccessClasses(enrollmentType)
+
+  // Course materials + global student guides fetched in parallel when paid.
+  const [linkedResources, studentGuides] = isPaid
+    ? await Promise.all([
+        getStudentCourseResources(course.id),
+        getStudentGuideResources(),
+      ])
+    : [[], []]
+
+  const hasAnyMaterial =
+    !!course.materialsUrl || linkedResources.length > 0
+  const hasStudentGuides = studentGuides.length > 0
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
@@ -185,22 +201,20 @@ export default async function CourseDetailsPage({
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-xl border border-slate-100 p-5 transition-all hover:border-blue-100 hover:bg-blue-50/20 dark:border-slate-800">
                 <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-sky-400">
-                  <FileText className="h-5 w-5" />
+                  <BookOpen className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Syllabus</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Student Guide</h3>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Detailed course curriculum.
+                  Academy-wide handbooks and reference material.
                 </p>
-                {course.syllabusUrl ? (
-                  <a
-                    href={course.syllabusUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center text-xs font-bold text-blue-800 hover:underline"
+                {hasStudentGuides ? (
+                  <Link
+                    href={`/student/courses/${slug}/materials#student-guide`}
+                    className="text-aerojet-blue mt-4 inline-flex items-center text-xs font-black tracking-widest uppercase hover:underline dark:text-sky-400"
                   >
-                    Download Syllabus
+                    View {studentGuides.length} guide{studentGuides.length === 1 ? '' : 's'}
                     <ChevronRight className="ml-1 h-3 w-3" />
-                  </a>
+                  </Link>
                 ) : (
                   <span className="mt-4 inline-block text-xs text-slate-400 italic">
                     Not available
@@ -214,9 +228,9 @@ export default async function CourseDetailsPage({
                 </div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Materials</h3>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Learning guides and assets.
+                  Learning guides and assets for this course.
                 </p>
-                {course.materialsUrl ? (
+                {hasAnyMaterial ? (
                   isPaid ? (
                     <Link
                       href={`/student/courses/${slug}/materials`}

@@ -113,7 +113,7 @@ export async function qualifyReferral(refereeId: string): Promise<void> {
 /**
  * Promote a user to Ambassador status and credit their wallet.
  */
-async function promoteToAmbassador(tx: any, userId: string) {
+async function promoteToAmbassador(tx: Prisma.TransactionClient, userId: string) {
   const pricing = await getExamPricingConfig()
 
   // Set ambassador flag

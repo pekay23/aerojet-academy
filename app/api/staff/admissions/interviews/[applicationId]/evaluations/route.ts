@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
 import { z } from 'zod'
@@ -25,9 +25,9 @@ const evaluationSchema = z.object({
 })
 
 // GET — list all evaluations for an application
-export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
+export const GET = withErrorHandler(async (_req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { applicationId } = ctx.params
+  const { applicationId } = (await ctx!.params) as { applicationId: string }
 
   const evaluations = await prismaUnfiltered.interviewEvaluation.findMany({
     where: { applicationId },
@@ -80,9 +80,9 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
 })
 
 // POST — create or update evaluation (one per evaluator per application)
-export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const staff = await requireStaff()
-  const { applicationId } = ctx.params
+  const { applicationId } = (await ctx!.params) as { applicationId: string }
 
   const body = await req.json()
   const parsed = evaluationSchema.safeParse(body)

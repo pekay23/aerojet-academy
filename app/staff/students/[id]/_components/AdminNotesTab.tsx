@@ -14,14 +14,18 @@ interface AdminNote {
   authorName: string
 }
 
+interface StudentRef {
+  id: string
+}
+
 interface Props {
-  student: any
+  student: StudentRef
   onRefresh: () => void
   staffId: string
   staffRole: string
 }
 
-export default function AdminNotesTab({ student, _onRefresh, staffId, staffRole }: Props) {
+export default function AdminNotesTab({ student, onRefresh: _onRefresh, staffId, staffRole }: Props) {
   const [notes, setNotes] = useState<AdminNote[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [newNote, setNewNote] = useState('')
@@ -108,8 +112,12 @@ export default function AdminNotesTab({ student, _onRefresh, staffId, staffRole 
       if (!res.ok) throw new Error(data.error || 'Failed to delete note')
       toast.success('Note deleted')
       fetchNotes()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message)
+      } else {
+        toast.error('An unexpected error occurred')
+      }
     } finally {
       setDeletingId(null)
     }

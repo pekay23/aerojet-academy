@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'uploadthing.com' },
       { protocol: 'https', hostname: 'gx1g03nvpo.ufs.sh' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      { protocol: 'https', hostname: 'flagcdn.com' },
       { protocol: 'https', hostname: 'lightpink-guanaco-745322.hostingersite.com' },
       { protocol: 'https', hostname: '*.ufs.sh' },
     ],

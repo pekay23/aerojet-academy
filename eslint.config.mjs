@@ -57,6 +57,10 @@ export default defineConfig([
     'scratch/**',
     'artifacts/**',
     'plans/**',
+    'tools/flipbook-app/dist/**',
+    'tools/flipbook-app/src-tauri/target/**',
+    'tools/flipbook-wpf-app/bin/**',
+    'tools/flipbook-wpf-app/obj/**',
     'node_modules/**',
     // One-off ad-hoc scripts at the repo root — not part of the build or
     // any npm script; kept for history but should not gate CI lint.
@@ -66,6 +70,7 @@ export default defineConfig([
     // aren't referenced by any package.json script.
     'scripts/check-joyride-classes.cjs',
     'scripts/check-test-users.cjs',
+    'scripts/_tmp_*.cjs',
     'scripts/debug.mjs',
     'scripts/debug2.mjs',
     'scripts/debug3.mjs',
@@ -74,6 +79,8 @@ export default defineConfig([
     'scripts/migrate-prisma.js',
     'scripts/migrate-prisma-2.js',
     'scripts/replace.cjs',
+    // Test files — use Vitest mocks with `any` for test isolation
+    'tests/**',
   ]),
 
   // ── Next + Core Web Vitals + TypeScript ────────────────────────────────────

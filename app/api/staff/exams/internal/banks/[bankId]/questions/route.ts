@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { z } from 'zod'
+import { Prisma, QuestionStatus } from '@prisma/client'
 
 const questionSchema = z.object({
   text: z.string().min(1),
@@ -24,7 +25,7 @@ const questionSchema = z.object({
 })
 
 // GET — list questions for a bank
-export const GET = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{ bankId: string }>) => {
   const session = await getAuthSession()
   if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(session.user.role)) {
     return apiError('Unauthorized', 403)
@@ -37,8 +38,8 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: any) => {
   const url = new URL(req.url)
   const status = url.searchParams.get('status')
   
-  const where: any = { bankId }
-  if (status) where.status = status
+  const where: Prisma.InternalExamQuestionWhereInput = { bankId }
+  if (status) where.status = status as QuestionStatus
 
   const questions = await prismaUnfiltered.internalExamQuestion.findMany({
     where,
@@ -49,7 +50,7 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: any) => {
 })
 
 // POST — add question to bank
-export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{ bankId: string }>) => {
   const session = await getAuthSession()
   if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(session.user.role)) {
     return apiError('Unauthorized', 403)

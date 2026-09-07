@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
   Search,
-  Download,
   RefreshCw,
   UserCheck,
   Clock,
@@ -44,7 +43,15 @@ interface Applicant {
     idDocumentUrl?: string | null
     profilePhotoUrl?: string | null
   } | null
-  payments?: any[]
+  payments?: {
+    id: string
+    amount: number
+    currency: string
+    paymentMethod: string
+    status: string
+    proofUrl?: string | null
+    createdAt: string
+  }[]
 }
 
 const TABS = [
@@ -79,7 +86,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
    
   // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialCounts.all > 0) setCounts(initialCounts)
-  }, [initialCounts.all, initialCounts.pending_payment, initialCounts.pending_approval])
+  }, [initialCounts])
 
   // paged is now the raw applicants array since the server handles slicing
   const paged = applicants
@@ -465,7 +472,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                         </td>
                         <td className="px-6 py-4">
                           <span className="rounded-lg bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600 dark:text-slate-400">
-                            {applicant.registrationCode ?? 'â€”'}
+                            {applicant.registrationCode ?? '—'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">

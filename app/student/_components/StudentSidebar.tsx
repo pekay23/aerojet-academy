@@ -8,19 +8,13 @@ import {
   BookOpen,
   FileCheck,
   ClipboardCheck,
-  _CalendarCheck,
   Award,
   Bell,
   User,
   Users,
   Mail,
-  _ScrollText,
   GraduationCap,
-  _Armchair,
-  _FileQuestion,
-  _BookMarked,
   FolderOpen,
-  _Calendar,
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
 import { useBadgeCounts } from '@/hooks/useBadgeCounts'

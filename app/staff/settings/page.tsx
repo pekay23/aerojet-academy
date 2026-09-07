@@ -370,7 +370,7 @@ export default async function SettingsPage({
 }
 
 async function WelcomeMessagesContent() {
-  const welcomeMessages = await getWelcomeMessagesGrouped(prismaUnfiltered)
+  const welcomeMessages = await getWelcomeMessagesGrouped(prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient)
   return <WelcomeMessagesManager initialMessages={welcomeMessages} />
 }
 async function SecurityContent({ userId }: { userId: string }) {

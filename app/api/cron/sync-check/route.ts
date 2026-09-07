@@ -59,15 +59,16 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true, ...result })
-  } catch (err: any) {
-    console.error('[Cron sync-check] Error:', err.message)
-    await notifyStaff('Sync Check Failed', `Neon ↔ Supabase sync check failed: ${err.message}`)
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[Cron sync-check] Error:', message)
+    await notifyStaff('Sync Check Failed', `Neon ↔ Supabase sync check failed: ${message}`)
     await createAuditLog({
       action: AuditAction.SYSTEM,
       entity: 'SyncCheck',
       entityId: 'neon-supabase',
-      description: `Sync check failed: ${err.message}`,
+      description: `Sync check failed: ${message}`,
     })
-    return NextResponse.json({ ok: false, error: err.message }, { status: 500 })
+    return NextResponse.json({ ok: false, error: message }, { status: 500 })
   }
 }

@@ -24,10 +24,10 @@ async function main() {
     ORDER BY tablename, cmd
   `)
   console.log('\nExam table RLS policies:')
-  policies.rows.forEach((r: any) => {
-    console.log(`\n  ${r.tablename}: ${r.policyname} (${r.cmd})`)
-    console.log(`    qual: ${r.qual || '(none)'}`)
-    console.log(`    with_check: ${r.with_check || '(none)'}`)
+  policies.rows.forEach((r: unknown) => {
+    console.log(`\n  ${(r as Record<string, unknown>).tablename}: ${(r as Record<string, unknown>).policyname} (${(r as Record<string, unknown>).cmd})`)
+    console.log(`    qual: ${(r as Record<string, unknown>).qual || '(none)'}`)
+    console.log(`    with_check: ${(r as Record<string, unknown>).with_check || '(none)'}`)
   })
 
   // Verify Realtime publication
@@ -35,12 +35,15 @@ async function main() {
     SELECT tablename FROM pg_publication_tables WHERE pubname = 'supabase_realtime' ORDER BY tablename
   `)
   console.log('\nRealtime tables:')
-  pubTables.rows.forEach((r: any) => console.log(`  - ${r.tablename}`))
+  pubTables.rows.forEach((r: unknown) => console.log(`  - ${(r as Record<string, unknown>).tablename}`))
 
   await client.end()
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

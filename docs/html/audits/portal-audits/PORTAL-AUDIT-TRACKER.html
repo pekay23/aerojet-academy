@@ -28,7 +28,7 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Portal Audit &amp; Implementation Tracker</h1>
-  <p class="he-deck"><strong>Last Updated</strong>: 2026-08-28 <strong>Status</strong>: All 5 portals audited.</p>
+  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-04 <strong>Status</strong>: All 5 portals audited.</p>
 </header>
 <hr />
 <section class="he-section" id="summary"><div class="he-section__num">01 · Summary</div><h2 class="he-section__title">Summary</h2></section>
@@ -476,6 +476,21 @@
 <tr><td>Dark mode contrast micro-fixes</td><td>✅ Fixed 3 identified contrast issues</td></tr>
 </tbody>
 </table>
+<h3 id="cross-portal-schema-migration-complete-2026-09-04">Cross-Portal Schema Migration Complete (2026-09-04)</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Migration</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td><code>FullTimeEnrollment.academicYearId</code> FK</td><td>✅ Complete</td><td><code>prisma/schema.prisma</code>; Neon + Supabase <code>db push</code> succeeded</td></tr>
+<tr><td>2</td><td><code>OJTLogbook.licenceCategoryId</code> FK</td><td>✅ Complete</td><td><code>prisma/schema.prisma</code>; legacy <code>licenceCategory String</code> retained</td></tr>
+<tr><td>3</td><td><code>ExamResult.sittingId</code> FK</td><td>✅ Complete</td><td><code>prisma/schema.prisma</code>; 32 existing results have no sitting assignments</td></tr>
+<tr><td>4</td><td><code>Certificate.session</code> relation</td><td>✅ Complete</td><td><code>prisma/schema.prisma</code>; uses existing <code>sessionId</code> column</td></tr>
+<tr><td>5</td><td><code>InternalExamRegistration.licenceCategoryId</code> FK</td><td>✅ Complete</td><td>Optional FK for future use</td></tr>
+<tr><td>6</td><td>Reverse relations + indexes</td><td>✅ Complete</td><td><code>AcademicYear.fullTimeEnrollments</code>, <code>LicenseCategory.ojtLogbooks</code>/<code>registrations</code>, <code>ExamSitting.examResults</code>, <code>InternalExamSession.certificates</code></td></tr>
+<tr><td>7</td><td>Application code updated</td><td>✅ Complete</td><td><code>app/api/staff/ojt/route.ts</code> resolves <code>LicenseCategory</code> by code; <code>app/api/staff/students/[id]/route.ts</code> includes <code>academicYear</code>; student/applicant pages updated</td></tr>
+</tbody>
+</table>
 <h3 id="audit-documentation-issues">Audit Documentation Issues</h3>
 <ul>
 <li><strong>Examiner audit</strong>: Many findings listed as &quot;Pending&quot; in Remaining Gaps are actually implemented (M-1, M-3, M-4, M-5, M-6, L-2, L-4, L-5)</li>
@@ -586,6 +601,7 @@
     <li class="he-toc__l3"><a href="#high-9">High (9)</a></li>
     <li class="he-toc__l3"><a href="#medium-3">Medium (3)</a></li>
     <li class="he-toc__l3"><a href="#deferred-items-in-progress">Deferred Items (in progress)</a></li>
+    <li class="he-toc__l3"><a href="#cross-portal-schema-migration-complete-2026-09-04">Cross-Portal Schema Migration Complete (2026-09-04)</a></li>
     <li class="he-toc__l3"><a href="#audit-documentation-issues">Audit Documentation Issues</a></li>
     <li class="he-toc__l2"><a href="#test-coverage-status">Test Coverage Status</a></li>
     <li class="he-toc__l2"><a href="#code-quality-standards">Code Quality Standards</a></li>

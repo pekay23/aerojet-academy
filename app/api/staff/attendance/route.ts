@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AttendanceStatus } from '@prisma/client'
 import { z } from 'zod'
@@ -21,7 +21,7 @@ const batchSchema = z.object({
 })
 
 // GET — fetch attendance for a class + date, and the class roster (from course enrollments)
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext) => {
   await requireStaff()
   const url = new URL(req.url)
   const classId = url.searchParams.get('classId')
@@ -29,7 +29,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
 
   if (!classId) return apiError('classId is required')
 
-  const where: any = { classId }
+  const where: Record<string, unknown> = { classId }
   if (date) {
     const d = new Date(date)
     const next = new Date(d.getTime() + 24 * 60 * 60 * 1000)
@@ -81,14 +81,14 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
 
   return apiSuccess({
     records,
-    roster: enrollments.map((e: any) => e.user),
+    roster: enrollments.map((e) => e.user),
     className: classData?.name,
     stats: { total: totalRecords, present, rate },
   })
 })
 
 // POST — batch submit attendance
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext) => {
   const staff = await requireStaff()
   const body = await req.json()
   const parsed = batchSchema.safeParse(body)

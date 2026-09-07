@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Shield, ShieldCheck, ShieldOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -53,8 +54,9 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
       setCode('')
       setQrCodeUrl('')
       toast.success('Two-factor authentication enabled')
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to verify code')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to verify code'
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -80,8 +82,9 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
       setStep('idle')
       setCode('')
       toast.success('Two-factor authentication disabled')
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to disable 2FA')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to disable 2FA'
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -174,8 +177,14 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
             {qrCodeUrl && (
               <div className="flex justify-center">
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrCodeUrl} alt="2FA QR Code" className="h-48 w-48" />
+                  <Image
+                    src={qrCodeUrl}
+                    alt="2FA QR Code"
+                    width={192}
+                    height={192}
+                    className="h-48 w-48"
+                    unoptimized
+                  />
                 </div>
               </div>
             )}

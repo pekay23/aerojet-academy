@@ -1,12 +1,11 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import ApplicantSidebar from './_components/ApplicantSidebar'
-import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
-import PortalHeader from '@/components/layouts/PortalHeader'
+import PortalTopbar from '@/components/layouts/PortalTopbar'
 import TourTrigger from '@/components/Tour/TourTrigger'
 import AppTour from '@/components/Tour/AppTour'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import type { _User } from '@prisma/client'
+import type { User as _User } from '@prisma/client'
 import ForcePasswordChange from './_components/ForcePasswordChange'
 import {
   resolveEffectiveEnrollmentType,
@@ -105,14 +104,14 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         id="main-content"
         className="relative min-h-screen min-w-0 flex-1 overflow-x-hidden pt-16 lg:pt-0"
       >
-        <div className="mx-auto max-w-[1920px] p-4 pt-16 sm:p-8 lg:px-8 lg:py-6 lg:pt-10">
-          <PortalHeader
-            actions={
-              <TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />
-            }
-          >
-            <BreadcrumbNav />
-          </PortalHeader>
+        <PortalTopbar
+          itemsEndpoint="/api/applicant/topbar-items"
+          notificationsHref="/applicant/notifications"
+          messagesHref="/applicant/messages"
+          composeHref="/applicant/messages?compose=true"
+          actions={<TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />}
+        />
+        <div className="mx-auto max-w-[1920px] p-4 sm:p-8 lg:px-8 lg:py-6">
           {children}
         </div>
       </main>

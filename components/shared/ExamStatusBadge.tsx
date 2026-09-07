@@ -5,9 +5,6 @@ import {
   Clock,
   XCircle,
   FileBarChart2,
-  _AlertCircle,
-  _BookOpen,
-  _Tag,
 } from 'lucide-react'
 
 type StatusVariant = 'booking' | 'payment' | 'result' | 'visual'

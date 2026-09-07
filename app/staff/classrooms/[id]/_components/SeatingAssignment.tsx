@@ -128,8 +128,9 @@ export default function SeatingAssignment({
       toast.success('Seating assignments saved', {
         description: `${assignedCount} of ${students.length} students assigned`,
       })
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to save')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save'
+      toast.error(message)
     } finally {
       setSaving(false)
     }

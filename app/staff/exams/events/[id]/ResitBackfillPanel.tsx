@@ -60,8 +60,9 @@ export default function ResitBackfillPanel({ eventId }: { eventId: string }) {
       const data = await res.json()
       setResult(data)
       setExpanded(true)
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch proposals'
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -89,9 +90,10 @@ export default function ResitBackfillPanel({ eventId }: { eventId: string }) {
         setExpanded(false)
         // Revalidate would happen via the API route's revalidatePath
         // But we might need a window reload or router refresh if the parent doesn't auto-update
-        window.location.reload() 
-      } catch (error: any) {
-        toast.error(error.message)
+        window.location.reload()
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Failed to execute backfill'
+        toast.error(message)
       }
     })
   }

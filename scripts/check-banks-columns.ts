@@ -10,12 +10,15 @@ async function main() {
     ['internal_exam_banks']
   )
   console.log('internal_exam_banks columns:')
-  columns.rows.forEach((r: any) => console.log(`  - ${r.column_name}`))
+  columns.rows.forEach((r: unknown) => console.log(`  - ${r.column_name}`))
 
   await client.end()
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

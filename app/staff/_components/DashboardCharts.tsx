@@ -2,14 +2,15 @@
 
 import dynamic from 'next/dynamic'
 import React from 'react'
+import type { RevenueDataPoint } from './RevenueChart'
 
-const RevenueChart = dynamic(() => import('./RevenueChart'), { 
+const RevenueChart = dynamic(() => import('./RevenueChart'), {
   ssr: false,
-  loading: () => <div className="h-[256px] w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800/50" />
+  loading: () => <div className="h-64 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800/50" />
 })
 
 interface DashboardChartsProps {
-  data: any[]
+  data: RevenueDataPoint[]
   currency: string
 }
 

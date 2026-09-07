@@ -13,33 +13,48 @@ import {
   endOfMonth,
   eachDayOfInterval,
   getDay,
-  _getHours,
-  _getMinutes,
+  getHours as _getHours,
+  getMinutes as _getMinutes,
 } from 'date-fns'
 import {
   ChevronLeft,
   ChevronRight,
   Calendar as _CalendarIcon,
-  _Clock,
+  Clock as _Clock,
   Filter,
   Plus,
   BookOpen,
-  _GraduationCap,
-  _CalendarDays,
+  GraduationCap as _GraduationCap,
+  CalendarDays as _CalendarDays,
 } from 'lucide-react'
 import SessionDetails from './SessionDetails'
 import { cn } from '@/lib/utils'
 
 type ViewMode = 'Day' | 'Week' | 'Month'
 
+interface CalendarSession {
+  id: string
+  startDate: string | Date
+  endDate: string | Date
+  course: {
+    category: string | null
+    name: string
+    code: string
+  }
+  locationType?: string
+  room?: { name?: string } | null
+  name?: string
+  description?: string | null
+}
+
 interface CalendarGridProps {
-  schedule: any[]
+  schedule: CalendarSession[]
   initialDate?: Date
 }
 
 export default function CalendarGrid({ schedule, initialDate }: CalendarGridProps) {
   const [currentDate, setCurrentDate] = useState(initialDate || new Date())
-  const [selectedSession, setSelectedSession] = useState<any>(null)
+  const [selectedSession, setSelectedSession] = useState<CalendarSession | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('Week')
 
   const startOfRange = startOfWeek(currentDate, { weekStartsOn: 1 })
@@ -210,12 +225,12 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
           </div>
 
           {/* Week Grid */}
-          <div className="flex h-[600px] overflow-y-auto">
+          <div className="flex h-150 overflow-y-auto">
             <div className="relative grid w-full grid-cols-[80px_1fr]">
               {/* Times */}
               <div className="border-r border-slate-100 dark:border-slate-800">
                 {timeSlots.map((hour) => (
-                  <div key={hour} className="relative h-[96px]">
+                  <div key={hour} className="relative h-24">
                     <span className="absolute -top-3 left-0 w-full text-center text-xs font-medium text-slate-400">
                       {hour === 0
                         ? '12 am'
@@ -236,7 +251,7 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
                   {timeSlots.map((hour) => (
                     <div
                       key={hour}
-                      className="h-[96px] border-b border-slate-100 dark:border-slate-800"
+                      className="h-24 border-b border-slate-100 dark:border-slate-800"
                     ></div>
                   ))}
                 </div>
@@ -334,12 +349,12 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
           </div>
 
           {/* Day Grid */}
-          <div className="flex h-[600px] overflow-y-auto">
+          <div className="flex h-150 overflow-y-auto">
             <div className="relative grid w-full grid-cols-[80px_1fr]">
               {/* Times */}
               <div className="border-r border-slate-100 dark:border-slate-800">
                 {timeSlots.map((hour) => (
-                  <div key={hour} className="relative h-[96px]">
+                  <div key={hour} className="relative h-24">
                     <span className="absolute -top-3 left-0 w-full text-center text-xs font-medium text-slate-400">
                       {hour === 0
                         ? '12 am'
@@ -359,7 +374,7 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
                   {timeSlots.map((hour) => (
                     <div
                       key={hour}
-                      className="h-[96px] border-b border-slate-100 dark:border-slate-800"
+                      className="h-24 border-b border-slate-100 dark:border-slate-800"
                     ></div>
                   ))}
                 </div>
@@ -428,7 +443,7 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
                     setViewMode('Day')
                   }}
                   className={cn(
-                    'relative min-h-[120px] cursor-pointer border-r border-b border-slate-100 p-2 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50',
+                    'relative min-h-30 cursor-pointer border-r border-b border-slate-100 p-2 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50',
                     !isCurrentMonth && 'bg-slate-50/50 dark:bg-slate-900/50',
                     isToday && 'bg-[#F8FBFF] dark:bg-blue-900/10'
                   )}

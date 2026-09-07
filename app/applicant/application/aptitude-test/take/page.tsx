@@ -3,12 +3,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
-import TestInterface, { type _TestQuestion } from '../_components/TestInterface'
+import TestInterface, { type TestQuestion } from '../_components/TestInterface'
 import AntiCheatProvider from '../_components/AntiCheatProvider'
+
+interface AptitudeSessionData {
+  id: string
+  status: string
+  expiresAt: string
+  questions: TestQuestion[]
+}
 
 export default function TakeTestPage() {
   const router = useRouter()
-  const [session, setSession] = useState<any>(null)
+  const [session, setSession] = useState<AptitudeSessionData | null>(null)
   const [loading, setLoading] = useState(true)
 
   const fetchSession = useCallback(async () => {

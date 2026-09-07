@@ -19,6 +19,18 @@ export interface ScrapeProgress {
 
 export type ProgressCallback = (progress: ScrapeProgress) => void
 
+interface DomImageInspection {
+  src: string | null
+  tag: string | null
+  rect: { w: number; h: number } | null
+  totalCandidates: number
+  allCandidates: Array<{ src: string; tag: string; w: number; h: number }>
+  pageText: string
+  flipbookPage: unknown
+}
+
+type JsonObject = Record<string, unknown>
+
 export class FlipbookScraper {
   private browser: Browser | null = null
   private context: BrowserContext | null = null
@@ -71,7 +83,28 @@ export class FlipbookScraper {
     if (!this.page) return
 
     await this.page.evaluate(() => {
-      const w = window as any
+      type FlipbookCall = {
+        method: string
+        args?: string[]
+        returned?: unknown
+      }
+      type FlipbookInstance = {
+        book?: unknown
+      }
+      type FlipbookMethod = (this: FlipbookInstance, ...args: unknown[]) => unknown
+      type FlipbookPrototype = Record<string, FlipbookMethod | undefined>
+      type FlipbookGlobal = {
+        Main?: { prototype?: FlipbookPrototype }
+        Book?: { prototype?: FlipbookPrototype }
+      } & Record<string, unknown>
+
+      const stringifyArg = (arg: unknown) =>
+        (typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).slice(0, 200)
+      const w = window as Window & {
+        FLIPBOOK?: FlipbookGlobal
+        __flipbookBookInstance?: unknown
+        __flipbookTraceCalls?: FlipbookCall[]
+      }
       if (!w.FLIPBOOK) return
 
       const originalCreateBook = w.FLIPBOOK.Main?.prototype?.createBook
@@ -81,28 +114,28 @@ export class FlipbookScraper {
       const originalUpdateCurrentPage = w.FLIPBOOK.Main?.prototype?.updateCurrentPage
       const originalGoToPage = w.FLIPBOOK.Main?.prototype?.goToPage
 
-      const calls: any[] = []
+      const calls: FlipbookCall[] = []
 
       if (originalCreateBook) {
-        w.FLIPBOOK.Main.prototype.createBook = function (...args: any[]) {
-          calls.push({ method: 'createBook', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.createBook = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'createBook', args: args.map(stringifyArg) })
           const ret = originalCreateBook.apply(this, args)
-          if (this && this.book) {
-            ;(window as any).__flipbookBookInstance = this.book
+          if (this.book) {
+            w.__flipbookBookInstance = this.book
           }
           return ret
         }
       }
 
       if (originalFetchAndCacheImage) {
-        w.FLIPBOOK.Main.prototype.fetchAndCacheImage = function (...args: any[]) {
-          calls.push({ method: 'fetchAndCacheImage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.fetchAndCacheImage = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'fetchAndCacheImage', args: args.map(stringifyArg) })
           return originalFetchAndCacheImage.apply(this, args)
         }
       }
 
       if (originalGetCurrentPageNumber) {
-        w.FLIPBOOK.Book.prototype.getCurrentPageNumber = function (...args: any[]) {
+        w.FLIPBOOK.Book!.prototype!.getCurrentPageNumber = function (this: FlipbookInstance, ...args: unknown[]) {
           const pageNum = originalGetCurrentPageNumber.apply(this, args)
           calls.push({ method: 'getCurrentPageNumber', returned: pageNum })
           return pageNum
@@ -110,27 +143,27 @@ export class FlipbookScraper {
       }
 
       if (originalLoadPage) {
-        w.FLIPBOOK.Main.prototype.loadPage = function (...args: any[]) {
-          calls.push({ method: 'loadPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.loadPage = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'loadPage', args: args.map(stringifyArg) })
           return originalLoadPage.apply(this, args)
         }
       }
 
       if (originalUpdateCurrentPage) {
-        w.FLIPBOOK.Main.prototype.updateCurrentPage = function (...args: any[]) {
-          calls.push({ method: 'updateCurrentPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.updateCurrentPage = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'updateCurrentPage', args: args.map(stringifyArg) })
           return originalUpdateCurrentPage.apply(this, args)
         }
       }
 
       if (originalGoToPage) {
-        w.FLIPBOOK.Main.prototype.goToPage = function (...args: any[]) {
-          calls.push({ method: 'goToPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.goToPage = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'goToPage', args: args.map(stringifyArg) })
           return originalGoToPage.apply(this, args)
         }
       }
 
-      ;(window as any).__flipbookTraceCalls = calls
+      w.__flipbookTraceCalls = calls
     })
   }
 
@@ -204,7 +237,7 @@ export class FlipbookScraper {
       message: 'Waiting for flipbook library to load...',
     })
 
-    await this.page.waitForFunction(() => (window as any).FLIPBOOK !== undefined, { timeout: 60000 }).catch(() => {})
+    await this.page.waitForFunction(() => 'FLIPBOOK' in window, { timeout: 60000 }).catch(() => {})
 
     this.report({
       status: 'navigating',
@@ -226,14 +259,19 @@ export class FlipbookScraper {
 
     // Try to get page count from window.FLIPBOOK
     const jsCount = await this.page.evaluate(() => {
-      const w = window as any
+      const w = window as Window & { FLIPBOOK?: Record<string, unknown> }
       if (w.FLIPBOOK) {
         const keys = Object.keys(w.FLIPBOOK)
         for (const key of keys) {
           const fb = w.FLIPBOOK[key]
-          if (fb?.options?.pages?.length) return fb.options.pages.length
-          if (fb?.totalPages) return fb.totalPages
-          if (fb?.pages?.length) return fb.pages.length
+          if (!fb || typeof fb !== 'object') continue
+          const record = fb as Record<string, unknown>
+          const options = record.options
+          if (options && typeof options === 'object' && Array.isArray((options as Record<string, unknown>).pages)) {
+            return (options as { pages: unknown[] }).pages.length
+          }
+          if (typeof record.totalPages === 'number') return record.totalPages
+          if (Array.isArray(record.pages)) return record.pages.length
         }
       }
       return 0
@@ -260,10 +298,18 @@ export class FlipbookScraper {
 
     // Try to find page count from flipbook navigation elements
     const navCount = await this.page.evaluate(() => {
-      const w = window as any
-      if (w.totalPages) return w.totalPages
-      if (w.flipbookData?.pages) return w.flipbookData.pages.length
-      if (w.flipbookOptions?.pages) return w.flipbookOptions.pages.length
+      const hasPages = (value: unknown): value is { pages: unknown[] } =>
+        value !== null &&
+        typeof value === 'object' &&
+        Array.isArray((value as Record<string, unknown>).pages)
+      const w = window as Window & {
+        totalPages?: unknown
+        flipbookData?: unknown
+        flipbookOptions?: unknown
+      }
+      if (typeof w.totalPages === 'number') return w.totalPages
+      if (hasPages(w.flipbookData)) return w.flipbookData.pages.length
+      if (hasPages(w.flipbookOptions)) return w.flipbookOptions.pages.length
 
       // Try to find from DOM elements with page indicators
       const pageElements = document.querySelectorAll('[class*="page"], [class*="count"]')
@@ -357,7 +403,7 @@ export class FlipbookScraper {
       let imageBuffer: Buffer | null = null
 
       // Get the current visible image URL from the DOM
-      const currentImgSrc = await this.page.evaluate(() => {
+      const currentImgSrc = await this.page.evaluate<DomImageInspection>(() => {
         const candidates: { src: string; rect: DOMRect; tag: string }[] = []
 
         // 1. All <img> elements
@@ -399,10 +445,14 @@ export class FlipbookScraper {
             .find((t) => /^\d+\s*\/\s*\d+$/.test(t)) || ''
 
         // 5. FLIPBOOK current page
-        const flipbookPage = (window as any).FLIPBOOK
-          ? Object.values((window as any).FLIPBOOK as Record<string, any>).find(
-              (fb: any) => fb?.currentPage != null
-            )?.currentPage
+        const flipbook = (window as Window & { FLIPBOOK?: Record<string, unknown> }).FLIPBOOK
+        const flipbookPage = flipbook
+          ? (Object.values(flipbook).find((fb) => (
+              fb !== null &&
+              typeof fb === 'object' &&
+              'currentPage' in fb &&
+              (fb as { currentPage?: unknown }).currentPage != null
+            )) as { currentPage?: unknown } | undefined)?.currentPage
           : null
 
         const best = candidates
@@ -432,9 +482,9 @@ export class FlipbookScraper {
       if (currentImgSrc) {
         this.report({
           status: 'capturing',
-          message: `[dom] page ${i}: candidates=${(currentImgSrc as any).totalCandidates}, best=${(currentImgSrc as any).tag}@${(currentImgSrc as any).rect?.w}x${(currentImgSrc as any).rect?.h}, src=${(currentImgSrc as any).src?.slice(-50) ?? 'null'}, pageText=${(currentImgSrc as any).pageText ?? 'none'}, fbPage=${(currentImgSrc as any).flipbookPage ?? 'none'}`,
-        })
-        const domSrc = (currentImgSrc as any).src
+            message: `[dom] page ${i}: candidates=${currentImgSrc.totalCandidates}, best=${currentImgSrc.tag}@${currentImgSrc.rect?.w}x${currentImgSrc.rect?.h}, src=${currentImgSrc.src?.slice(-50) ?? 'null'}, pageText=${currentImgSrc.pageText ?? 'none'}, fbPage=${String(currentImgSrc.flipbookPage ?? 'none')}`,
+          })
+        const domSrc = currentImgSrc.src
         if (domSrc) {
           imageBuffer = this.findInterceptedImage(domSrc)
         }
@@ -453,7 +503,7 @@ export class FlipbookScraper {
       // Fallback: use the largest intercepted image
       if (!imageBuffer && !useScreenshot) {
         let bestSize = 0
-        for (const [url, buffer] of this.interceptedImages) {
+        for (const [_url, buffer] of this.interceptedImages) {
           if (buffer.length > bestSize && buffer.length > 10000) {
             bestSize = buffer.length
             imageBuffer = buffer
@@ -584,8 +634,12 @@ export class FlipbookScraper {
     if (!this.page) throw new Error('Browser not initialized')
 
     const state = await this.page.evaluate(() => {
-      const w = window as any
-      const result: any = {
+      const w = window as unknown as Window & JsonObject
+      const getRecord = (value: unknown): JsonObject | null =>
+        value !== null && typeof value === 'object' ? (value as JsonObject) : null
+      const getConstructorName = (value: unknown) =>
+        getRecord(value)?.constructor instanceof Function ? getRecord(value)?.constructor?.name : undefined
+      const result: JsonObject = {
         url: location.href,
         timestamp: new Date().toISOString(),
         globals: {},
@@ -608,7 +662,7 @@ export class FlipbookScraper {
       for (const key of knownGlobals) {
         if (w[key] !== undefined) {
           try {
-            result.globals[key] = JSON.parse(JSON.stringify(w[key], (k, v) => {
+            ;(result.globals as JsonObject)[key] = JSON.parse(JSON.stringify(w[key], (_k, v: unknown) => {
               if (typeof v === 'function') return '[function]'
               if (v instanceof HTMLElement) return '[HTMLElement]'
               if (v instanceof HTMLImageElement) return '[HTMLImageElement]'
@@ -616,32 +670,34 @@ export class FlipbookScraper {
               return v
             }))
           } catch {
-            result.globals[key] = '[unserializable]'
+            ;(result.globals as JsonObject)[key] = '[unserializable]'
           }
         }
       }
 
-      if (w.FLIPBOOK) {
+      const flipbook = getRecord(w.FLIPBOOK)
+      if (flipbook) {
         try {
-          result.flipbook = JSON.parse(JSON.stringify(w.FLIPBOOK, (k, v) => {
+          result.flipbook = JSON.parse(JSON.stringify(flipbook, (_k, v: unknown) => {
             if (typeof v === 'function') return '[function]'
             if (v instanceof HTMLElement) return '[HTMLElement]'
             if (v instanceof HTMLImageElement) return '[HTMLImageElement]'
             if (v instanceof HTMLCanvasElement) return '[HTMLCanvasElement]'
-            if (v && typeof v === 'object' && v.constructor && v.constructor.name) {
-              return { __type: v.constructor.name, keys: Object.keys(v) }
+            const constructorName = getConstructorName(v)
+            if (constructorName) {
+              return { __type: constructorName, keys: Object.keys(v as object) }
             }
             return v
           }))
         } catch {
           result.flipbook = '[serialization-failed]'
-          result.flipbookKeys = Object.keys(w.FLIPBOOK).map((k: string) => {
-            const fb = (w.FLIPBOOK as Record<string, any>)[k]
+          result.flipbookKeys = Object.keys(flipbook).map((k: string) => {
+            const fb = getRecord(flipbook[k])
             return {
               key: k,
               type: typeof fb,
-              constructor: fb?.constructor?.name,
-              keys: fb && typeof fb === 'object' ? Object.keys(fb).slice(0, 50) : [],
+              constructor: getConstructorName(fb),
+              keys: fb ? Object.keys(fb).slice(0, 50) : [],
               hasOptions: !!fb?.options,
               hasPages: !!fb?.pages,
               hasTotalPages: fb?.totalPages != null,
@@ -653,66 +709,72 @@ export class FlipbookScraper {
           })
         }
 
+        const main = getRecord(flipbook.Main)
+        const book = getRecord(flipbook.Book)
+        const mainPrototype = getRecord(main?.prototype)
+        const bookPrototype = getRecord(book?.prototype)
         result.flipbookPrototypes = {
-          Main: w.FLIPBOOK.Main?.prototype ? Object.keys(w.FLIPBOOK.Main.prototype) : [],
-          Book: w.FLIPBOOK.Book?.prototype ? Object.keys(w.FLIPBOOK.Book.prototype) : [],
+          Main: mainPrototype ? Object.keys(mainPrototype) : [],
+          Book: bookPrototype ? Object.keys(bookPrototype) : [],
         }
 
         result.flipbookStaticKeys = {
-          Main: w.FLIPBOOK.Main ? Object.keys(w.FLIPBOOK.Main).slice(0, 50) : [],
-          Book: w.FLIPBOOK.Book ? Object.keys(w.FLIPBOOK.Book).slice(0, 50) : [],
+          Main: main ? Object.keys(main).slice(0, 50) : [],
+          Book: book ? Object.keys(book).slice(0, 50) : [],
         }
       }
 
       const allGlobals = Object.keys(w).filter(k => !['document', 'navigator', 'location', 'history', 'screen', 'performance', 'localStorage', 'sessionStorage', 'crypto', 'fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource', 'webkitStorageInfo', 'chrome', 'opera', 'safari', 'phantom', '_phantom', 'callPhantom', '__phantomas', 'domAutomation', 'domAutomationController'].includes(k))
       result.allGlobalKeys = allGlobals.slice(0, 200)
 
-      const webglContexts: any[] = []
+      const webglContexts: JsonObject[] = []
       document.querySelectorAll('canvas').forEach((canvas) => {
         const ctx = canvas.getContext('webgl') || canvas.getContext('webgl2') || canvas.getContext('experimental-webgl')
         if (ctx) {
-          const gl = ctx as any
+          const gl = ctx as WebGLRenderingContext | WebGL2RenderingContext
           webglContexts.push({
             id: canvas.id,
             className: canvas.className,
             width: canvas.width,
             height: canvas.height,
-            vendor: gl.getParameter ? gl.getParameter(gl.VENDOR) : null,
-            renderer: gl.getParameter ? gl.getParameter(gl.RENDERER) : null,
-            version: gl.getParameter ? gl.getParameter(gl.VERSION) : null,
-            textures: gl.getParameter ? gl.getParameter(gl.MAX_TEXTURE_SIZE) : null,
+            vendor: gl.getParameter(gl.VENDOR),
+            renderer: gl.getParameter(gl.RENDERER),
+            version: gl.getParameter(gl.VERSION),
+            textures: gl.getParameter(gl.MAX_TEXTURE_SIZE),
           })
         }
       })
       result.webglContexts = webglContexts
 
-      result.dataAttributes = Array.from(document.querySelectorAll('[data-src], [data-lazy], [data-original], [data-page], [data-flipbook], [data-book]')).map((el) => ({
+      result.dataAttributes = Array.from(document.querySelectorAll<HTMLElement>('[data-src], [data-lazy], [data-original], [data-page], [data-flipbook], [data-book]')).map((el) => ({
         tag: el.tagName.toLowerCase(),
         id: el.id,
         className: el.className,
-        dataSrc: (el as any).dataset.src || null,
-        dataLazy: (el as any).dataset.lazy || null,
-        dataOriginal: (el as any).dataset.original || null,
-        dataPage: (el as any).dataset.page || null,
-        dataFlipbook: (el as any).dataset.flipbook || null,
-        dataBook: (el as any).dataset.book || null,
+        dataSrc: el.dataset.src || null,
+        dataLazy: el.dataset.lazy || null,
+        dataOriginal: el.dataset.original || null,
+        dataPage: el.dataset.page || null,
+        dataFlipbook: el.dataset.flipbook || null,
+        dataBook: el.dataset.book || null,
       })).slice(0, 50)
 
-      const flipbookInstances: any[] = []
-      const seen = new WeakSet()
+      const flipbookInstances: Array<{ type: string; path: string; keys: string[] }> = []
+      const seen = new WeakSet<object>()
 
-      function scanObject(obj: any, path: string, depth: number) {
+      function scanObject(obj: unknown, path: string, depth: number) {
         if (!obj || typeof obj !== 'object' || depth > 5 || seen.has(obj)) return
         seen.add(obj)
 
         if (obj instanceof HTMLElement) {
+          const elementRecord = obj as HTMLElement & JsonObject
           for (const key of Object.keys(obj)) {
             try {
-              const val = (obj as any)[key]
-              if (val && typeof val === 'object' && val.constructor?.name === 'Main') {
+              const val = getRecord(elementRecord[key])
+              const name = getConstructorName(val)
+              if (val && name === 'Main') {
                 flipbookInstances.push({ type: 'Main', path: `${path}.${key}`, keys: Object.keys(val).slice(0, 30) })
               }
-              if (val && typeof val === 'object' && val.constructor?.name === 'Book') {
+              if (val && name === 'Book') {
                 flipbookInstances.push({ type: 'Book', path: `${path}.${key}`, keys: Object.keys(val).slice(0, 30) })
               }
             } catch {}
@@ -720,12 +782,13 @@ export class FlipbookScraper {
           return
         }
 
-        const keys = Object.keys(obj).slice(0, 30)
+        const record = obj as JsonObject
+        const keys = Object.keys(record).slice(0, 30)
         for (const key of keys) {
           try {
-            const val = (obj as any)[key]
+            const val = record[key]
             if (val && typeof val === 'object') {
-              const name = val.constructor?.name
+              const name = getConstructorName(val)
               if (name === 'Main' || name === 'Book') {
                 flipbookInstances.push({ type: name, path: `${path}.${key}`, keys: Object.keys(val).slice(0, 30) })
               }
@@ -749,8 +812,33 @@ export class FlipbookScraper {
     if (!this.page) throw new Error('Browser not initialized')
 
     const trace = await this.page.evaluate(() => {
-      const w = window as any
-      const result: any = {
+      type FlipbookCall = {
+        method: string
+        args?: string[]
+        returned?: unknown
+      }
+      type FlipbookInstance = {
+        book?: { constructor?: { name?: string } } & Record<string, unknown>
+      }
+      type FlipbookMethod = (this: FlipbookInstance, ...args: unknown[]) => unknown
+      type FlipbookPrototype = Record<string, FlipbookMethod | undefined>
+      type FlipbookGlobal = {
+        Main?: { prototype?: FlipbookPrototype }
+        Book?: { prototype?: FlipbookPrototype }
+      }
+      type TraceResult = {
+        url: string
+        timestamp: string
+        prototypes: { Main?: string[]; Book?: string[] }
+        monkeyPatches: string[]
+        calls: FlipbookCall[]
+        bookInstance: { constructor?: string; keys: string[] } | null
+        error?: string
+      }
+      const stringifyArg = (arg: unknown) =>
+        (typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).slice(0, 200)
+      const w = window as Window & { FLIPBOOK?: FlipbookGlobal }
+      const result: TraceResult = {
         url: location.href,
         timestamp: new Date().toISOString(),
         prototypes: {},
@@ -778,23 +866,21 @@ export class FlipbookScraper {
       const originalStart = w.FLIPBOOK.Main?.prototype?.start
       const originalOnBookCreated = w.FLIPBOOK.Main?.prototype?.onBookCreated
 
-      let bookInstance: any = null
-      const calls: any[] = []
+      const calls: FlipbookCall[] = []
 
       if (originalStart) {
-        w.FLIPBOOK.Main.prototype.start = function (...args: any[]) {
-          calls.push({ method: 'start', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.start = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'start', args: args.map(stringifyArg) })
           return originalStart.apply(this, args)
         }
         result.monkeyPatches.push('start')
       }
 
       if (originalCreateBook) {
-        w.FLIPBOOK.Main.prototype.createBook = function (...args: any[]) {
-          calls.push({ method: 'createBook', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.createBook = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'createBook', args: args.map(stringifyArg) })
           const ret = originalCreateBook.apply(this, args)
-          if (this && this.book) {
-            bookInstance = this.book
+          if (this.book) {
             result.bookInstance = {
               constructor: this.book.constructor?.name,
               keys: Object.keys(this.book).slice(0, 50),
@@ -806,63 +892,63 @@ export class FlipbookScraper {
       }
 
       if (originalOnBookCreated) {
-        w.FLIPBOOK.Main.prototype.onBookCreated = function (...args: any[]) {
-          calls.push({ method: 'onBookCreated', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.onBookCreated = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'onBookCreated', args: args.map(stringifyArg) })
           return originalOnBookCreated.apply(this, args)
         }
         result.monkeyPatches.push('onBookCreated')
       }
 
       if (originalInitJpg) {
-        w.FLIPBOOK.Main.prototype.initJpg = function (...args: any[]) {
-          calls.push({ method: 'initJpg', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.initJpg = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'initJpg', args: args.map(stringifyArg) })
           return originalInitJpg.apply(this, args)
         }
         result.monkeyPatches.push('initJpg')
       }
 
       if (originalInitPdf) {
-        w.FLIPBOOK.Main.prototype.initPdf = function (...args: any[]) {
-          calls.push({ method: 'initPdf', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.initPdf = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'initPdf', args: args.map(stringifyArg) })
           return originalInitPdf.apply(this, args)
         }
         result.monkeyPatches.push('initPdf')
       }
 
       if (originalInitPageHTML) {
-        w.FLIPBOOK.Main.prototype.initPageHTML = function (...args: any[]) {
-          calls.push({ method: 'initPageHTML', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.initPageHTML = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'initPageHTML', args: args.map(stringifyArg) })
           return originalInitPageHTML.apply(this, args)
         }
         result.monkeyPatches.push('initPageHTML')
       }
 
       if (originalFetchAndCacheImage) {
-        w.FLIPBOOK.Main.prototype.fetchAndCacheImage = function (...args: any[]) {
-          calls.push({ method: 'fetchAndCacheImage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.fetchAndCacheImage = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'fetchAndCacheImage', args: args.map(stringifyArg) })
           return originalFetchAndCacheImage.apply(this, args)
         }
         result.monkeyPatches.push('fetchAndCacheImage')
       }
 
       if (originalLoadPage) {
-        w.FLIPBOOK.Main.prototype.loadPage = function (...args: any[]) {
-          calls.push({ method: 'loadPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.loadPage = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'loadPage', args: args.map(stringifyArg) })
           return originalLoadPage.apply(this, args)
         }
         result.monkeyPatches.push('loadPage')
       }
 
       if (originalUpdateCurrentPage) {
-        w.FLIPBOOK.Main.prototype.updateCurrentPage = function (...args: any[]) {
-          calls.push({ method: 'updateCurrentPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.updateCurrentPage = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'updateCurrentPage', args: args.map(stringifyArg) })
           return originalUpdateCurrentPage.apply(this, args)
         }
         result.monkeyPatches.push('updateCurrentPage')
       }
 
       if (originalGetCurrentPageNumber) {
-        w.FLIPBOOK.Book.prototype.getCurrentPageNumber = function (...args: any[]) {
+        w.FLIPBOOK.Book!.prototype!.getCurrentPageNumber = function (this: FlipbookInstance, ...args: unknown[]) {
           const pageNum = originalGetCurrentPageNumber.apply(this, args)
           calls.push({ method: 'getCurrentPageNumber', returned: pageNum })
           return pageNum
@@ -871,8 +957,8 @@ export class FlipbookScraper {
       }
 
       if (originalGoToPage) {
-        w.FLIPBOOK.Main.prototype.goToPage = function (...args: any[]) {
-          calls.push({ method: 'goToPage', args: args.map(a => typeof a === 'object' ? JSON.stringify(a).slice(0, 200) : String(a).slice(0, 200)) })
+        w.FLIPBOOK.Main!.prototype!.goToPage = function (this: FlipbookInstance, ...args: unknown[]) {
+          calls.push({ method: 'goToPage', args: args.map(stringifyArg) })
           return originalGoToPage.apply(this, args)
         }
         result.monkeyPatches.push('goToPage')

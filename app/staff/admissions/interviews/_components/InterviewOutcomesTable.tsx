@@ -16,7 +16,18 @@ import { format } from 'date-fns'
 import InterviewEvaluationForm from './InterviewEvaluationForm'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
-export default function InterviewOutcomesTable({ data }: { data: any[] }) {
+export default function InterviewOutcomesTable({ data }: { data: Array<{
+  id: string
+  applicantName: string
+  email: string
+  programmeChoice: string
+  intakeCycle: string
+  slot?: {
+    date: string
+    startTime: string
+  } | null
+  stage: string
+}> }) {
   const router = useRouter()
   const [processing, setProcessing] = useState<string | null>(null)
   const [evaluatingApp, setEvaluatingApp] = useState<{ id: string; name: string } | null>(null)

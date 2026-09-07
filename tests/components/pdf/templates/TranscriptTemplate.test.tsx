@@ -1,14 +1,20 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { TranscriptTemplate } from '@/components/pdf/templates/TranscriptTemplate'
+import type React from 'react'
+
+type MockImageProps = React.ComponentProps<'img'>
+type MockChildrenProps = React.PropsWithChildren
 
 vi.mock('@react-pdf/renderer', () => ({
-  Document: ({ children }: any) => <div>{children}</div>,
-  Page: ({ children }: any) => <div>{children}</div>,
-  View: ({ children }: any) => <div>{children}</div>,
-  Text: ({ children }: any) => <span>{children}</span>,
-  // eslint-disable-next-line jsx-a11y/alt-text
-  Image: (props: any) => <img {...props} />,
+  Document: ({ children }: MockChildrenProps) => <div>{children}</div>,
+  Page: ({ children }: MockChildrenProps) => <div>{children}</div>,
+  View: ({ children }: MockChildrenProps) => <div>{children}</div>,
+  Text: ({ children }: MockChildrenProps) => <span>{children}</span>,
+  Image: (props: MockImageProps) => {
+    const MockImage = 'img'
+    return <MockImage alt="" {...props} />
+  },
   StyleSheet: { create: () => ({}) },
 }))
 

@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { withErrorHandler, apiError } from '@/lib/api/response'
+import { withErrorHandler, apiError , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { buildSebConfig, generateSebConfig, BankSebConfig } from '@/lib/internal-exam/seb-config'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 // GET /api/student/exams/internal/banks/[bankId]/seb-config — return .seb config for a bank
-export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ bankId: string }> }) => {
+export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
 
-  const { bankId } = await ctx.params
+  const { bankId } = (await ctx!.params) as { bankId: string }
 
   const bank = await prismaUnfiltered.internalExamBank.findUnique({
     where: { id: bankId },

@@ -3,6 +3,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import InterviewSchedulesManager from './_components/InterviewSchedulesManager'
 import InterviewOutcomesTable from './_components/InterviewOutcomesTable'
+import type { InterviewSchedule } from './_components/InterviewSchedulesManager'
 
 export const metadata: Metadata = { title: 'Interview Management' }
 export const dynamic = 'force-dynamic'
@@ -55,20 +56,20 @@ export default async function InterviewsPage() {
     metadata: app.metadata,
   }))
 
-  const scheduleData = schedules.map(s => ({
-    ...s,
+  const scheduleData: InterviewSchedule[] = schedules.map(s => ({
+    id: s.id,
+    name: s.name,
     startDate: s.startDate.toISOString(),
     endDate: s.endDate.toISOString(),
-    createdAt: s.createdAt.toISOString(),
-    updatedAt: s.updatedAt.toISOString(),
     slots: s.slots.map(sl => ({
-      ...sl,
+      id: sl.id,
       date: sl.date.toISOString(),
       startTime: sl.startTime.toISOString(),
       endTime: sl.endTime.toISOString(),
-      createdAt: sl.createdAt.toISOString(),
-      updatedAt: sl.updatedAt.toISOString(),
-    }))
+      capacity: sl.capacity,
+      location: sl.location,
+      bookedCount: sl._count?.applications ?? 0,
+    })),
   }))
 
   return (
@@ -80,7 +81,7 @@ export default async function InterviewsPage() {
         </p>
       </div>
 
-      <InterviewSchedulesManager initialSchedules={scheduleData as any} />
+      <InterviewSchedulesManager initialSchedules={scheduleData} />
 
       <div>
         <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white mb-4">Candidate Interviews</h2>

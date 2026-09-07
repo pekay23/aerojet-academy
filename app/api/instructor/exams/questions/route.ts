@@ -6,6 +6,7 @@ import { parsePagination } from '@/lib/api/response'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 
 const QUESTION_STATUS_VALUES = ['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'REJECTED'] as const
 
@@ -52,8 +53,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     return apiPaginated([], 0, page, limit)
   }
 
-  const where: any = { bankId: { in: bankIds } }
-  if (bankId) where.bankId = bankId
+  const where: Prisma.InternalExamQuestionWhereInput = { bankId: { in: bankIds } }
+  if (bankId) where.bankId = { in: [bankId] }
   if (status) {
     const parsed = z.enum(QUESTION_STATUS_VALUES).safeParse(status)
     if (!parsed.success) {

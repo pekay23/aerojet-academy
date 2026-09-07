@@ -1,11 +1,11 @@
 import 'server-only'
-import { NotificationType } from '@prisma/client'
+import { NotificationType, Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
 import { getFinanceConfig, getRegistrationConfig, getEmailConfig } from '@/lib/settings'
 import { getBaseUrl } from '@/lib/utils/url'
 import { formatPaymentType } from '@/lib/utils/string'
 
-type TxClient = any // Prisma transaction client
+type TxClient = Prisma.TransactionClient
 
 // ---------------------------------------------------------------------------
 // NOTIFICATION CREATOR (for use within transactions)
@@ -55,7 +55,7 @@ async function getFromEmail() {
 /**
  * Replaces {{handlebars}} style placeholders in a string.
  */
-function replacePlaceholders(template: string, data: Record<string, any>) {
+function replacePlaceholders(template: string, data: Record<string, unknown>) {
   return template.replace(/\{\{(.*?)\}\}/g, (match, key) => {
     const value = data[key.trim()]
     return value !== undefined ? String(value) : match
@@ -313,8 +313,8 @@ export async function renderRegistrationEmail(
       bankName: finance.bankName || 'FNB Ghana',
       bankAccountName: finance.bankAccountName || 'Aerojet Aviation Training Academy Foundation',
       bankAccountNumber: finance.bankAccountNumber || 'N/A',
-      bankBranch: (finance as any).bankBranch || 'N/A',
-      bankSwift: (finance as any).bankSwift || 'N/A',
+      bankBranch: (finance as Awaited<ReturnType<typeof getFinanceConfig>>).bankBranch || 'N/A',
+      bankSwift: (finance as Awaited<ReturnType<typeof getFinanceConfig>>).bankSwift || 'N/A',
       uploadUrl: `${baseUrl}/upload-proof?code=${registrationCode}`,
     })
 

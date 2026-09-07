@@ -4,8 +4,6 @@ import { useMemo } from 'react'
 import type {
   SerializedExamResult,
   SerializedStudent,
-  _SerializedPayment,
-  _SerializedExamBooking,
 } from '@/lib/types/staff'
 import {
   UserPlus,
@@ -165,13 +163,13 @@ export default function JourneyTab({ student }: Props) {
 
     // Wallet top-ups
     const walletTopUps = (student.walletTransactions || [])
-      .filter((t: any) => t.type === 'TOP_UP')
-      .reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0)
+      .filter((t) => t.type === 'TOP_UP')
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0)
 
     // Approved payment records (registration, services, etc.)
     const approvedPayments = (student.payments || [])
-      .filter((p: any) => p.status === 'APPROVED' || p.status === 'COMPLETED')
-      .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0)
+      .filter((p) => p.status === 'APPROVED' || p.status === 'COMPLETED')
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0)
 
     const totalPayments = walletTopUps + approvedPayments
 
@@ -258,7 +256,7 @@ export default function JourneyTab({ student }: Props) {
                   <div key={event.id}>
                     {/* Duration gap indicator */}
                     {gap && (
-                      <div className="relative flex items-center py-1.5 pl-[26px] sm:pl-[30px]">
+                      <div className="relative flex items-center py-1.5 pl-6.5 sm:pl-7.5">
                         <div className="flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-0.5 text-[10px] font-bold text-slate-400 dark:bg-slate-800 dark:text-slate-500">
                           <ArrowRight className="h-3 w-3" />
                           {gap}

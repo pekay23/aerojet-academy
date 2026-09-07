@@ -8,8 +8,20 @@ import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface ExaminerDashboardProps {
   examinerName: string
-  nextSitting?: any
-  recentSittings: any[]
+  nextSitting?: {
+    id: string
+    name?: string | null
+    startTime: string
+    maxCandidates?: number | null
+  } | null
+  recentSittings: {
+    id: string
+    name?: string | null
+    startTime: string
+    event?: { name: string } | null
+    currentMemberCount?: number | null
+    status: string
+  }[]
 }
 
 export default function ExaminerDashboard({ examinerName, nextSitting, recentSittings }: ExaminerDashboardProps) {

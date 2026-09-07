@@ -7,15 +7,10 @@ import {
   CreditCard,
   Clock,
   ArrowUpRight,
-  _ArrowDownRight,
-  _Building2,
   Info,
-  _Search,
-  _Filter,
   CheckCircle2,
   AlertTriangle,
   Target,
-  _RefreshCw,
   History,
 } from 'lucide-react'
 
@@ -30,6 +25,19 @@ import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import { getCurrencySymbol } from '@/lib/currency'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
+
+interface WalletTransactionDisplay {
+  id: string
+  createdAt: Date
+  type: string
+  amount: number
+  description: string
+  status: string
+  currency: string
+  paymentCurrency?: string
+  originalAmount?: number
+  isPending: boolean
+}
 
 export const metadata: Metadata = {
   title: 'Wallet | Student Portal',
@@ -138,7 +146,7 @@ export default async function WalletPage({
   }
 
   // Fetch transactions for transactions tab
-  let allTransactions: any[] = []
+  let allTransactions: WalletTransactionDisplay[] = []
   if (tab === 'transactions') {
     // Audit 4g: the transactions tab shows only approved purchases/deposits and
     // wallet deductions. Pending payments and invoices are intentionally excluded
@@ -180,7 +188,7 @@ export default async function WalletPage({
         description: `${p.referenceType || 'Payment'} (${p.paymentMethod || 'Transfer'})`,
         status: 'COMPLETED',
         currency: p.currency,
-        paymentCurrency: p.paymentCurrency,
+        paymentCurrency: p.paymentCurrency ?? undefined,
         originalAmount: p.originalAmount ? Number(p.originalAmount) : undefined,
         isPending: false,
       })),

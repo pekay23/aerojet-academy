@@ -14,3 +14,5 @@ for (const [i, c] of all.entries()) {
   const files = c.files ? `files=[${(Array.isArray(c.files) ? c.files : [c.files]).slice(0, 3).join(',')}]` : ''
   console.log(i, plugins.join(',') || '-', `rules=${rules}`, lang, files)
 }
+
+

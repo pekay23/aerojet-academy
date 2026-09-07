@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { FileText, Download, AlertTriangle } from 'lucide-react'
 
@@ -74,9 +75,11 @@ export default async function StudentDocumentsPage() {
               >
                 {hasThumbnail ? (
                   <div className="mb-3 overflow-hidden rounded-xl bg-slate-50 dark:bg-slate-800">
-                    <img
+                    <Image
                       src={proxyImageUrl(d.fileUrl, 'students')}
                       alt={d.title}
+                      width={384}
+                      height={128}
                       className="h-32 w-full object-cover"
                     />
                   </div>

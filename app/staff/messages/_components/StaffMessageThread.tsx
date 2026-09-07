@@ -8,7 +8,7 @@ import {
   CornerDownRight,
   Send,
   Loader2,
-  _User,
+  User as _User,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -125,7 +125,7 @@ function MessageBubble({
 export default function StaffMessageThread({
   thread,
   currentUserId,
-  _recipients,
+  recipients: _recipients,
 }: StaffMessageThreadProps) {
   const [expanded, setExpanded] = useState(thread.unreadCount > 0)
   const [replyText, setReplyText] = useState('')

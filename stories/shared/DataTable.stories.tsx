@@ -18,29 +18,29 @@ const mockData = [
   { id: '4', name: 'Dan Wilson', email: 'dan@example.com', status: 'COMPLETED', role: 'Student' },
 ]
 
-const columns: { key: string; header: string; cell?: (row: Record<string, any>) => React.ReactNode }[] = [
+const columns: { key: string; header: string; cell?: (row: Record<string, unknown>) => React.ReactNode }[] = [
   { key: 'name', header: 'Name' },
   { key: 'email', header: 'Email' },
   { key: 'role', header: 'Role' },
-  { key: 'status', header: 'Status', cell: (row) => <StatusBadge status={row.status} /> },
+  { key: 'status', header: 'Status', cell: (row) => <StatusBadge status={String(row.status)} /> },
 ]
 
 export const Default: Story = {
-  args: { columns, data: mockData } as any,
+  args: { columns, data: mockData } as unknown as Meta<typeof DataTable>['args'],
 }
 
 export const Loading: Story = {
-  args: { columns, data: [], loading: true } as any,
+  args: { columns, data: [], loading: true } as unknown as Meta<typeof DataTable>['args'],
 }
 
 export const Empty: Story = {
-  args: { columns, data: [], emptyMessage: 'No students found' } as any,
+  args: { columns, data: [], emptyMessage: 'No students found' } as unknown as Meta<typeof DataTable>['args'],
 }
 
 export const Clickable: Story = {
   args: {
     columns,
     data: mockData,
-    onRowClick: (row: Record<string, any>) => alert(`Clicked: ${row.name}`),
-  } as any,
+    onRowClick: (row: Record<string, unknown>) => alert(`Clicked: ${row.name}`),
+  } as unknown as Meta<typeof DataTable>['args'],
 }

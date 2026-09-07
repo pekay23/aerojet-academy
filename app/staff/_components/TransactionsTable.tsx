@@ -20,9 +20,9 @@ import { SerializedTransactionRow, SerializedTransactionRelated } from '@/lib/ty
 
 interface TransactionsTableProps {
   currencySymbol: string
-  initialData: any[]
+  initialData: SerializedTransactionRow[]
   initialTotal: number
-  initialRelated: any
+  initialRelated: SerializedTransactionRelated | undefined
   query?: string
 }
 
@@ -33,7 +33,7 @@ export default function TransactionsTable({
   initialRelated,
   query: initialQuery,
 }: TransactionsTableProps) {
-  const [data, setData] = useState<any[]>(initialData)
+  const [data, setData] = useState<SerializedTransactionRow[]>(initialData)
   const [total, setTotal] = useState(initialTotal)
   const [related, setRelated] = useState(initialRelated)
   const [page, setPage] = useState(1)
@@ -68,48 +68,42 @@ export default function TransactionsTable({
   useEffect(() => {
     const isInitial = page === 1 && perPage === 25 && sortBy === 'createdAt' && sortDir === 'desc'
     if (!isInitial) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchData()
     }
   }, [page, perPage, sortBy, sortDir, fetchData])
 
   // Build lookup maps from related data
-  const paymentDataMap = new Map<string, any>(
-    (related?.payments || []).map((p: any) => [
+  const paymentDataMap = new Map<string, SerializedTransactionRelated['payments'][number]>(
+    (related?.payments || []).map((p) => [
       p.id,
-      {
-        reconciled: p.reconciled,
-        originalCurrency: p.paymentCurrency,
-        originalAmount: p.originalAmount,
-        status: p.status,
-      },
+      p,
     ])
   )
-  const examBookingStatusByReference = new Map<string, any>(
-    (related?.examBookings || []).flatMap((b: any) => {
-      const entries: [string, any][] = [[b.id, b]]
+  const examBookingStatusByReference = new Map<string, SerializedTransactionRelated['examBookings'][number]>(
+    (related?.examBookings || []).flatMap((b) => {
+      const entries: [string, SerializedTransactionRelated['examBookings'][number]][] = [[b.id, b]]
       if (b.walletTxnId) entries.push([b.walletTxnId, b])
       return entries
     })
   )
-  const enrollmentStatusMap = new Map(
-    (related?.fullTimeEnrollments || []).map((e: any) => [e.id, e.status])
+  const enrollmentStatusMap = new Map<string, string>(
+    (related?.fullTimeEnrollments || []).map((e) => [e.id, e.status])
   )
-  const modularStatusByTxn = new Map(
+  const modularStatusByTxn = new Map<string, string>(
     (related?.modularEnrollments || [])
-      .filter((e: any) => e.walletTxnId)
-      .map((e: any) => [e.walletTxnId!, e.status])
+      .filter((e) => e.walletTxnId)
+      .map((e) => [e.walletTxnId!, e.status])
   )
-  const milestoneStatusByTxn = new Map(
+  const milestoneStatusByTxn = new Map<string, string>(
     (related?.milestones || [])
-      .filter((m: any) => m.walletTxnId)
-      .map((m: any) => [m.walletTxnId!, `${m.milestoneType.replace(/_/g, ' ')} ${m.status}`])
+      .filter((m) => m.walletTxnId)
+      .map((m) => [m.walletTxnId!, `${m.milestoneType.replace(/_/g, ' ')} ${m.status}`])
   )
 
   const CREDIT_TYPES = ['TOP_UP', 'REFUND', 'RELEASE', 'CREDIT']
-  const _DEBIT_TYPES = ['CAPTURE', 'PAYMENT', 'RESERVE', 'DEBIT']
 
   const getTypeColor = (type: string) => {
     if (CREDIT_TYPES.includes(type))
@@ -279,11 +273,13 @@ export default function TransactionsTable({
                           {symbol}
                           {Number(tx.amount).toFixed(2)}
                         </span>
-                        {paymentData?.originalCurrency &&
-                          paymentData.originalCurrency !== symbol && (
+                        {paymentData?.paymentCurrency &&
+                          paymentData.paymentCurrency !== symbol && (
                             <span className="text-[10px] font-medium text-slate-400">
-                              ({paymentData.originalCurrency}{' '}
-                              {paymentData.originalAmount?.toFixed(2)})
+                              ({paymentData.paymentCurrency}{' '}
+                              {paymentData.originalAmount != null
+                                ? paymentData.originalAmount.toFixed(2)
+                                : '0.00'})
                             </span>
                           )}
                       </div>

@@ -15,7 +15,6 @@ import {
   ProgrammeChoice,
   UserRole,
   UserStatus,
-  _TransactionType,
   BookingType,
   PaymentStatus,
   FundingSource,
@@ -658,6 +657,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             ftProgramme.programmeYears[0]
 
           if (targetProgrammeYear) {
+            const academicYear = await prismaUnfiltered.academicYear.findFirst({
+              orderBy: { startDate: 'desc' },
+            })
+
+            if (!academicYear) {
+              throw new Error('No academic year configured. Please create an academic year before importing students.')
+            }
+
             await prismaUnfiltered.fullTimeEnrollment.upsert({
               where: {
                 studentId_programmeId: {
@@ -668,11 +675,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
               update: {
                 currentYearNumber: currentYear,
                 programmeYearId: targetProgrammeYear.id,
+                academicYearId: academicYear.id,
               },
               create: {
                 studentId: userId,
                 programmeId: ftProgramme.id,
                 programmeYearId: targetProgrammeYear.id,
+                academicYearId: academicYear?.id,
                 currentYearNumber: currentYear,
                 status: 'ACTIVE',
                 startDate: new Date(),
@@ -774,8 +783,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         enrollmentStatus: s.enrollmentStatus || 'ENROLLED',
         notes: s.notes || '',
       })
-    } catch (error: any) {
-      results.errors.push(`${s.email}: ${error.message}`)
+    } catch (error: unknown) {
+      results.errors.push(`${s.email}: ${error instanceof Error ? error.message : String(error)}`)
       results.skipped++
     }
   }
@@ -804,7 +813,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       skipped: results.skipped,
       errors: results.errors.length,
     },
-    credentials: results.credentials.map(({ _temporaryPassword, ...rest }) => rest),
+    credentials: results.credentials.map(({ ...rest }) => rest),
     errors: results.errors,
   })
 })

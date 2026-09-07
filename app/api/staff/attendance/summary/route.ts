@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
 /**
@@ -8,7 +8,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
  * Returns per-module and overall attendance % for a student.
  * Also returns cumulative training hours toward 2,400h target.
  */
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext) => {
   await requireStaff()
   const url = new URL(req.url)
   const userId = url.searchParams.get('userId')

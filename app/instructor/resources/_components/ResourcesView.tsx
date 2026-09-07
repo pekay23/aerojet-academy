@@ -23,6 +23,7 @@ interface ResourcesViewProps {
 
 const CATEGORIES = [
   { id: 'ALL', label: 'All Resources', icon: BookOpen },
+  { id: 'STUDENT_GUIDE', label: 'Student Guide', icon: GraduationCap },
   { id: 'ACADEMIC', label: 'Academic', icon: GraduationCap },
   { id: 'ADMINISTRATIVE', label: 'Administrative', icon: ClipboardList },
   { id: 'EXAMINATION', label: 'Examination', icon: Shield },

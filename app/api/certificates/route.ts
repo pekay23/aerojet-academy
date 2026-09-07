@@ -90,7 +90,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const url = new URL(req.url)
   const sessionIdFilter = url.searchParams.get('sessionId')
 
-  const where: any = {}
+   const where: { studentId?: string; sessionId?: string } = {}
   if (isStudent) {
     where.studentId = session.user.id
   }

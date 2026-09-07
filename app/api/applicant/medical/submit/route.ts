@@ -5,7 +5,9 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { transitionApplication } from '@/lib/admissions/state-machine'
 import { ApplicationStage } from '@prisma/client'
 
-export const POST = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (_req: NextRequest, _ctx?: {
+  params: Promise<Record<string, string | string[]>>
+}) => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
 

@@ -67,8 +67,8 @@ export async function GET(req: NextRequest) {
             reasons: evaluation.reasons,
           },
         })
-      } catch (err: any) {
-        results.errors.push(`Event ${event.id}: ${err.message}`)
+      } catch (err: unknown) {
+        results.errors.push(`Event ${event.id}: ${err instanceof Error ? err.message : String(err)}`)
       }
     }
 
@@ -78,8 +78,8 @@ export async function GET(req: NextRequest) {
       results: { ...results },
       timestamp: now.toISOString(),
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Cron check-pools error:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

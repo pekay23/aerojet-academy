@@ -1,21 +1,20 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import { apiError, apiCreated, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { RecencyActivityType } from '@prisma/client'
 import { z } from 'zod'
 
-const ACTIVITY_TYPES = ['CLASSROOM_INSTRUCTION', 'PRACTICAL_SUPERVISION', 'UPDATE_TRAINING', 'EXAM_INVIGILATION', 'INDUSTRY_EXPERIENCE', 'OTHER'] as const
-
 const recencySchema = z.object({
-  activityType: z.enum(ACTIVITY_TYPES),
+  activityType: z.enum(RecencyActivityType),
   description: z.string().min(1),
   hours: z.number().min(0.5),
   date: z.string(),
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
   const body = await req.json()
   const parsed = recencySchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid input')
@@ -23,7 +22,7 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
   const entry = await prismaUnfiltered.instructorRecency.create({
     data: {
       instructorId: id,
-      activityType: parsed.data.activityType as any,
+      activityType: parsed.data.activityType,
       description: parsed.data.description,
       hours: parsed.data.hours,
       date: new Date(parsed.data.date),

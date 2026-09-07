@@ -7,9 +7,11 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireApplicant()
   const { searchParams } = new URL(req.url)
   const type = searchParams.get('type')
-  const where: any = { isActive: true }
-  if (type) where.type = type
-  const courses = await prisma.course.findMany({ where, orderBy: { code: 'asc' }, take: 200 })
+  const courses = await prisma.course.findMany({
+    where: { isActive: true, ...(type ? { type } : {}) },
+    orderBy: { code: 'asc' },
+    take: 200,
+  })
   return apiSuccess(courses)
 })
 

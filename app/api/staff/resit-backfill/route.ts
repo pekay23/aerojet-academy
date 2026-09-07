@@ -20,8 +20,8 @@ export async function GET(req: NextRequest) {
 
     const result = await generateResitBackfillProposals(eventId)
     return NextResponse.json(result)
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to generate proposals' }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to generate proposals' }, { status: 500 })
   }
 }
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       ...result,
       message: `Assigned ${result.assignedCount} resit seat(s). ${result.skippedCount} skipped (already assigned or no capacity).`,
     })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to execute backfill' }, { status: 500 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to execute backfill' }, { status: 500 })
   }
 }

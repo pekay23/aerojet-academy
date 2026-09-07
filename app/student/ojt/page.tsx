@@ -36,6 +36,7 @@ export default async function StudentOJTPage() {
   let logbook = await prisma.oJTLogbook.findUnique({
     where: { studentProfileId: studentProfile.id },
     include: {
+      licenceCategory: true,
       entries: {
         include: { ataChapter: { select: { code: true, title: true, category: true } } },
         orderBy: { date: 'desc' },
@@ -49,16 +50,17 @@ export default async function StudentOJTPage() {
 
   // If missing and they are in the OJT programme (FULL_TIME_4YEAR), auto-create it now!
   if (!logbook && studentProfile.programmeChoice === 'FULL_TIME_4YEAR') {
-    const defaultCat = studentProfile.licenseTargets[0]?.licenseCategory?.code || 'B1.1'
+
     logbook = await prisma.oJTLogbook.create({
       data: {
         studentProfileId: studentProfile.id,
-        licenceCategory: defaultCat,
+        licenceCategoryId: studentProfile.licenseTargets[0]?.licenseCategoryId || (await prisma.licenseCategory.findFirst())?.id || '',
         facilityName: 'Aerojet Academy',
         startDate: new Date(),
         status: 'ACTIVE',
       },
       include: {
+        licenceCategory: true,
         entries: {
           include: { ataChapter: { select: { code: true, title: true, category: true } } },
           orderBy: { date: 'desc' },
@@ -134,7 +136,7 @@ export default async function StudentOJTPage() {
     studentName,
     studentId: studentProfile.studentId,
     email: studentProfile.user.email,
-    licenceCategory: logbook.licenceCategory,
+    licenceCategory: logbook.licenceCategory?.code || 'B1.1',
     facilityName: logbook.facilityName,
     facilityApprovalNo: logbook.facilityApprovalNo,
     startDate: logbook.startDate.toISOString(),

@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  _AlertCircle,
   BookOpen,
   Tag,
   Package,
@@ -297,7 +296,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             Sitting &amp; Venue
           </h2>
           <div className="space-y-4">
-            {booking.sittingAssignments.map((sa: any) => (
+            {booking.sittingAssignments.map((sa) => (
               <div
                 key={sa.id}
                 className="grid gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-5 sm:grid-cols-3 dark:border-slate-800 dark:bg-slate-800/30"
@@ -362,7 +361,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             Pool Information
           </h2>
           <div className="space-y-4">
-            {booking.poolMemberships.map((membership: any) => (
+            {booking.poolMemberships.map((membership) => (
               <div
                 key={membership.id}
                 className="rounded-2xl border border-slate-100 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-800/30"

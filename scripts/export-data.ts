@@ -16,7 +16,7 @@ async function main() {
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
 
-  const exporters: Record<string, () => Promise<any[]>> = {
+  const exporters: Record<string, () => Promise<unknown[]>> = {
     users: () => prisma.user.findMany({ include: { profile: true }, orderBy: { createdAt: 'asc' } }),
     students: () => prisma.user.findMany({ where: { role: 'STUDENT' }, include: { profile: true, studentProfile: true, wallet: true } }),
     enrollments: () => prisma.enrollment.findMany({ include: { user: { include: { profile: true } }, course: true } }),
@@ -38,3 +38,5 @@ async function main() {
 main()
   .catch((e) => { console.error('❌ Export failed:', e); process.exit(1) })
   .finally(() => prisma.$disconnect())
+
+

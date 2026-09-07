@@ -3,7 +3,6 @@
  */
 import { chromium } from '@playwright/test'
 import path from 'path'
-import fs from 'fs'
 
 const BASE_URL = 'http://localhost:3000'
 const SCREENSHOT_DIR = path.join(process.cwd(), 'tests', 'e2e', 'tour-screenshots')
@@ -136,3 +135,5 @@ async function main() {
 }
 
 main().catch(console.error)
+
+

@@ -58,7 +58,7 @@ export default function IntakeCycleManager() {
 
   useEffect(() => {
     fetchCycles()
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAcademicYears()
   }, [fetchCycles, fetchAcademicYears])
@@ -267,7 +267,7 @@ export default function IntakeCycleManager() {
               <div className="mt-4 space-y-2">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Calendar className="h-3.5 w-3.5" />
-                  {format(new Date(cycle.startDate), 'MMM d, yyyy')} â€” {format(new Date(cycle.endDate), 'MMM d, yyyy')}
+                  {format(new Date(cycle.startDate), 'MMM d, yyyy')} — {format(new Date(cycle.endDate), 'MMM d, yyyy')}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Users className="h-3.5 w-3.5" />

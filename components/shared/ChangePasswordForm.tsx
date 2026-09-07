@@ -61,8 +61,8 @@ export default function ChangePasswordForm({ apiEndpoint, onSuccess }: ChangePas
       if (onSuccess) {
         setTimeout(onSuccess, 2000)
       }
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to change password')
     } finally {
       setLoading(false)
     }

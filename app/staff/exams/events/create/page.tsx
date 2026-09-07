@@ -28,13 +28,13 @@ import {
 import { toast } from '@/hooks/use-toast'
 import { createExamEventSchema } from '@/lib/validation/schemas'
 
-type ExamEventFormValues = z.infer<typeof createExamEventSchema>
+type ExamEventFormValues = z.input<typeof createExamEventSchema>
 
 export default function CreateExamEventPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const form = useForm<any>({
-    resolver: zodResolver(createExamEventSchema),
+  const form = useForm<ExamEventFormValues>({
+    resolver: zodResolver(createExamEventSchema) as any,
     defaultValues: {
       name: '',
       minRevenueTarget: 25000,
@@ -70,8 +70,9 @@ export default function CreateExamEventPage() {
       toast.success('Exam event created successfully')
       router.push('/staff/exams/events')
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create exam event')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to create exam event'
+      toast.error(message || 'Failed to create exam event')
     } finally {
       setIsLoading(false)
     }
@@ -116,7 +117,7 @@ export default function CreateExamEventPage() {
                       Core Information
                     </h3>
                     <FormField
-                      control={form.control}
+                      control={form.control as any}
                       name="name"
                       render={({ field }) => (
                         <FormItem>
@@ -144,7 +145,7 @@ export default function CreateExamEventPage() {
                     </h3>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                       <FormField
-                        control={form.control}
+                        control={form.control as any}
                         name="minRevenueTarget"
                         render={({ field }) => (
                           <FormItem className="sm:col-span-2">
@@ -174,7 +175,7 @@ export default function CreateExamEventPage() {
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={form.control as any}
                         name="minRevenueCurrency"
                         render={({ field }) => (
                           <FormItem>
@@ -212,7 +213,7 @@ export default function CreateExamEventPage() {
 
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <FormField
-                      control={form.control}
+                      control={form.control as any}
                       name="startDate"
                       render={({ field }) => (
                         <FormItem>
@@ -233,7 +234,7 @@ export default function CreateExamEventPage() {
                       )}
                     />
                     <FormField
-                      control={form.control}
+                      control={form.control as any}
                       name="endDate"
                       render={({ field }) => (
                         <FormItem>
@@ -257,7 +258,7 @@ export default function CreateExamEventPage() {
 
                   <div className="space-y-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                     <FormField
-                      control={form.control}
+                      control={form.control as any}
                       name="paymentDeadline"
                       render={({ field }) => (
                         <FormItem>
@@ -281,7 +282,7 @@ export default function CreateExamEventPage() {
                       )}
                     />
                     <FormField
-                      control={form.control}
+                      control={form.control as any}
                       name="joinDeadline"
                       render={({ field }) => (
                         <FormItem>

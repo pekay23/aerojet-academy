@@ -72,7 +72,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   let certificatesGenerated = 0
   if (certificatesEnabled) {
     const passingSessions = candidates.filter((c) => c.passed && c.bank.certificateEnabled)
-    const certPromises: Promise<any>[] = []
+    const certPromises: Promise<unknown>[] = []
 
     for (const c of passingSessions) {
       const rules = await getBankRules(c.bankId)

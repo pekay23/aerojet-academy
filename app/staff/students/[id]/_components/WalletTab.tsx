@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import {
   Wallet as WalletIcon,
   ArrowUpRight,
   ArrowDownRight,
   Search,
-  ChevronDown,
   FileText,
   Upload,
   User,
@@ -16,7 +16,7 @@ import { toast } from 'sonner'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import ManualWalletAdjustmentDialog from '@/app/staff/users/[id]/_components/ManualWalletAdjustmentDialog'
 import { UploadButton } from '@/lib/uploads/uploadthing'
-import type { SerializedWalletTransaction } from '@/lib/types/staff'
+import type { SerializedStudent, SerializedWalletTransaction } from '@/lib/types/staff'
 
 const TRANSACTION_TYPES = [
   { value: '', label: 'All Types' },
@@ -44,7 +44,7 @@ const TYPE_COLOR: Record<string, string> = {
 const POSITIVE_TYPES = ['TOP_UP', 'CREDIT', 'REFUND', 'RELEASE']
 
 interface Props {
-  student: any
+  student: SerializedStudent
   onRefresh: () => void
 }
 
@@ -55,7 +55,7 @@ export default function WalletTab({ student, onRefresh }: Props) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const wallet = student.wallet
-  const transactions = student.walletTransactions || wallet?.transactions || []
+  const transactions = student.walletTransactions || []
 
   const filteredTransactions = transactions.filter((t: SerializedWalletTransaction) => {
     if (typeFilter && t.type !== typeFilter) return false
@@ -181,8 +181,8 @@ export default function WalletTab({ student, onRefresh }: Props) {
           <p className="text-lg font-black text-emerald-600">
             {currencySymbol}
             {transactions
-              .filter((t: any) => t.type === 'TOP_UP')
-              .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+              .filter((t: SerializedWalletTransaction) => t.type === 'TOP_UP')
+              .reduce((sum: number, t: SerializedWalletTransaction) => sum + Number(t.amount), 0)
               .toFixed(2)}
           </p>
         </div>
@@ -193,8 +193,8 @@ export default function WalletTab({ student, onRefresh }: Props) {
           <p className="text-lg font-black text-red-600">
             {currencySymbol}
             {transactions
-              .filter((t: any) => t.type === 'DEBIT')
-              .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+              .filter((t: SerializedWalletTransaction) => t.type === 'DEBIT')
+              .reduce((sum: number, t: SerializedWalletTransaction) => sum + Number(t.amount), 0)
               .toFixed(2)}
           </p>
         </div>
@@ -205,8 +205,8 @@ export default function WalletTab({ student, onRefresh }: Props) {
           <p className="text-lg font-black text-orange-600">
             {currencySymbol}
             {transactions
-              .filter((t: any) => t.type === 'CAPTURE')
-              .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+              .filter((t: SerializedWalletTransaction) => t.type === 'CAPTURE')
+              .reduce((sum: number, t: SerializedWalletTransaction) => sum + Number(t.amount), 0)
               .toFixed(2)}
           </p>
         </div>
@@ -217,8 +217,8 @@ export default function WalletTab({ student, onRefresh }: Props) {
           <p className="text-lg font-black text-blue-600">
             {currencySymbol}
             {transactions
-              .filter((t: any) => t.type === 'ADJUSTMENT')
-              .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+              .filter((t: SerializedWalletTransaction) => t.type === 'ADJUSTMENT')
+              .reduce((sum: number, t: SerializedWalletTransaction) => sum + Number(t.amount), 0)
               .toFixed(2)}
           </p>
         </div>
@@ -226,7 +226,7 @@ export default function WalletTab({ student, onRefresh }: Props) {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative max-w-xs min-w-[200px] flex-1">
+        <div className="relative w-full max-w-xs flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
@@ -261,7 +261,7 @@ export default function WalletTab({ student, onRefresh }: Props) {
         <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-800">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900/50">
+              <tr className="border-b border-slate-50 bg-slate-50/30 dark:border-slate-800 dark:bg-slate-900/30">
                 <th className="px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Date
                 </th>
@@ -305,7 +305,6 @@ export default function WalletTab({ student, onRefresh }: Props) {
                     formatAmount={formatAmount}
                     onToggle={() => setExpandedId(isExpanded ? null : txn.id)}
                     onProofUploaded={handleProofUploaded}
-                    studentId={student.id}
                   />
                 )
               })}
@@ -335,9 +334,8 @@ function TransactionRow({
   formatAmount,
   onToggle,
   onProofUploaded,
-  studentId,
 }: {
-  txn: any
+  txn: SerializedWalletTransaction
   isExpanded: boolean
   isPositive: boolean
   typeColor: string
@@ -347,7 +345,6 @@ function TransactionRow({
   formatAmount: (a: number, t: string) => string
   onToggle: () => void
   onProofUploaded: (txnId: string, proofUrl: string) => void
-  studentId: string
 }) {
   return (
     <>
@@ -365,7 +362,7 @@ function TransactionRow({
             {txn.type}
           </span>
         </td>
-        <td className="max-w-[200px] truncate px-4 py-3 text-xs text-slate-500">
+        <td className="max-w-50 truncate px-4 py-3 text-xs text-slate-500">
           <div>{txn.description || '—'}</div>
           {txn.referenceType && (
             <div className="text-[10px] text-slate-400">
@@ -508,10 +505,12 @@ function TransactionRow({
                   <div className="space-y-2">
                     {txn.proofUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                       <a href={txn.proofUrl} target="_blank" rel="noopener noreferrer">
-                        <img
+                        <Image
                           src={txn.proofUrl}
                           alt="Payment proof"
-                          className="max-h-40 rounded-lg border border-slate-200 object-contain"
+                          width={300}
+                          height={160}
+                          className="max-h-40 w-auto rounded-lg border border-slate-200 object-contain"
                         />
                       </a>
                     ) : (

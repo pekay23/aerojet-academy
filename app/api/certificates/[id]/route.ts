@@ -1,19 +1,17 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSignedUrl } from '@/lib/storage/supabase-storage'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { getRequestContext } from '@/lib/server/request-context'
 
 export const GET = withErrorHandler(async (
-  req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
-) => {
+  req: NextRequest, ctx?: RouteContext) => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
 
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
 
   const certificate = await prismaUnfiltered.certificate.findUnique({
     where: { id },
@@ -80,16 +78,14 @@ export const GET = withErrorHandler(async (
 })
 
 export const DELETE = withErrorHandler(async (
-  _req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
-) => {
+  _req: NextRequest, ctx?: RouteContext) => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
 
   const isStaff = ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)
   if (!isStaff) return apiError('Only staff can revoke certificates', 403)
 
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
 
   const certificate = await prismaUnfiltered.certificate.findUnique({
     where: { id },

@@ -10,16 +10,15 @@ export async function verifyPaymentProof(paymentId: string): Promise<PaymentVeri
   if (!payment) return { verified: false, error: 'Payment not found' }
   if (!payment.proofUrl) return { verified: false, error: 'No payment proof uploaded' }
 
-  // Manual verification — staff must review and approve
   return { verified: true }
 }
 
 export async function getPendingPayments(type?: string) {
-  const where: any = { status: 'PENDING' }
-  if (type) where.referenceType = type
-
   return prisma.payment.findMany({
-    where,
+    where: {
+      status: 'PENDING',
+      ...(type ? { referenceType: type } : {}),
+    },
     include: { user: { include: { profile: true } } },
     orderBy: { createdAt: 'asc' },
   })

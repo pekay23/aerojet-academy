@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, FileText, Calendar, Users, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
@@ -13,7 +13,12 @@ interface Exam {
   durationMinutes: number
   passMark: number
   status: string
-  config: Record<string, any>
+  config: {
+    fullscreen: boolean
+    sebRequired: boolean
+    violationThreshold: number
+    strictMode: boolean
+  }
   createdAt: string
   _count: { questions: number; sessions: number }
 }

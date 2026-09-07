@@ -30,7 +30,7 @@ interface EditRevisionRunDialogProps {
     endDatetime: Date
     capacity: number
     minClassSize: number
-    price: any
+    price: number
     status: string
   }
 }

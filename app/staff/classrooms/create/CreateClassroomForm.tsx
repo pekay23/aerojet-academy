@@ -56,8 +56,9 @@ export default function CreateClassroomForm() {
       toast.success('Success', { description: 'Room added successfully' })
       router.push('/staff/classrooms')
       router.refresh()
-    } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to add room' })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to add room'
+      toast.error('Error', { description: message })
     } finally {
       setIsLoading(false)
     }

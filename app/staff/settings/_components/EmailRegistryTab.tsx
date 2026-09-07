@@ -45,7 +45,7 @@ export default function EmailRegistryTab() {
   }
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     void reload()
   }, [])
@@ -72,11 +72,13 @@ export default function EmailRegistryTab() {
   }
 
   const onSaveEdit = async (entry: RegistryEntry) => {
-    const payload: Record<string, string> = {}
+    const payload: Record<string, string | null> = {}
     if (editDraft.title !== entry.title) payload.title = editDraft.title
     if (editDraft.description !== (entry.description ?? ''))
       payload.description = editDraft.description
-    if (editDraft.address !== entry.address) payload.address = editDraft.address
+    const trimmedAddress = editDraft.address.trim()
+    if (trimmedAddress !== '' && trimmedAddress !== entry.address)
+      payload.address = trimmedAddress
 
     if (Object.keys(payload).length === 0) {
       toast.info('No changes to save')
@@ -102,7 +104,7 @@ export default function EmailRegistryTab() {
   const onDelete = async (entry: RegistryEntry) => {
     if (entry.category === 'AUTO') {
       toast.error(
-        'Auto-synced entries cannot be deleted â€” update the source code or change the address instead'
+        'Auto-synced entries cannot be deleted — update the source code or change the address instead'
       )
       return
     }
@@ -130,13 +132,13 @@ export default function EmailRegistryTab() {
           Communication emails
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Every email address used by the application â€” both code-synced senders and admin-added
+          Every email address used by the application — both code-synced senders and admin-added
           entries. Edit any entry's title, description, or address. Auto-synced entries (tagged
           "AUTO") are re-linked on each visit but your edits are preserved.
         </p>
       </div>
 
-      {loading && <p className="text-sm text-slate-400">Loadingâ€¦</p>}
+      {loading && <p className="text-sm text-slate-400">Loading…</p>}
 
       {!loading && (
         <>
@@ -147,7 +149,7 @@ export default function EmailRegistryTab() {
                 System auto-senders
               </h3>
               <span className="text-xs text-slate-400">
-                {autoEntries.length} entries Â· synced from code
+                {autoEntries.length} entries · synced from code
               </span>
             </header>
             <ul className="space-y-2">

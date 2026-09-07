@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { CalendarIcon, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import RetentionHeatmap from './RetentionHeatmap'
+import type { RetentionCohort } from '@/lib/analytics/queries'
 
 export default function RetentionAnalysis() {
   const [cohort, setCohort] = useState(() => {
@@ -14,7 +15,7 @@ export default function RetentionAnalysis() {
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
     return threeMonthsAgo.toISOString().slice(0, 7)
   })
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<{ cohorts: RetentionCohort[] } | null>(null)
   const [loading, setLoading] = useState(false)
 
   const loadRetention = useCallback(async () => {

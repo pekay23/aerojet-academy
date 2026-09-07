@@ -43,8 +43,9 @@ export async function upsertATAChapter(data: {
 
     revalidatePath('/staff/ata-chapters')
     return { success: true }
-  } catch (error: any) {
-    return { success: false, error: error.message }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return { success: false, error: message }
   }
 }
 
@@ -59,7 +60,8 @@ export async function toggleATAChapterStatus(id: string, isActive: boolean) {
 
     revalidatePath('/staff/ata-chapters')
     return { success: true }
-  } catch (error: any) {
-    return { success: false, error: error.message }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return { success: false, error: message }
   }
 }

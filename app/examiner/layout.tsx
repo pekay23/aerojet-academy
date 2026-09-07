@@ -2,7 +2,7 @@ import { requireExaminer } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import ExaminerSidebar from './_components/ExaminerSidebar'
 import Heartbeat from '@/components/shared/Heartbeat'
-import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
+import PortalTopbar from '@/components/layouts/PortalTopbar'
 import AppTour from '@/components/Tour/AppTour'
 import TourTrigger from '@/components/Tour/TourTrigger'
 import { Toaster } from 'sonner'
@@ -36,12 +36,15 @@ export default async function ExaminerLayout({ children }: { children: React.Rea
         data={{ pendingExamReports, unreadNotifications }}
       />
       <ExaminerSidebar />
-      <main id="main-content" className="flex-1 overflow-y-auto px-8 py-10">
-        <div className="mb-6 flex items-center justify-between">
-          <BreadcrumbNav />
-          <TourTrigger title="Take a tour of your examiner portal" />
-        </div>
-        <div className="mx-auto max-w-[1920px] animate-in fade-in slide-in-from-bottom-4 duration-500 motion-reduce:animate-none motion-reduce:transition-none">
+      <main id="main-content" className="flex-1 overflow-y-auto pt-16 lg:pt-0">
+        <PortalTopbar
+          itemsEndpoint="/api/examiner/topbar-items"
+          notificationsHref="/examiner/notifications"
+          messagesHref="/examiner/messages"
+          composeHref="/examiner/messages?compose=true"
+          actions={<TourTrigger title="Take a tour of your examiner portal" />}
+        />
+        <div className="mx-auto max-w-[1920px] animate-in p-4 fade-in slide-in-from-bottom-4 duration-500 motion-reduce:animate-none motion-reduce:transition-none sm:p-8 lg:px-8 lg:py-6">
           {children}
         </div>
       </main>

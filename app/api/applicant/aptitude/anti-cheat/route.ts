@@ -37,7 +37,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (eventType === 'TAB_SWITCH') tabSwitchCount++
   if (eventType === 'FULLSCREEN_EXIT') fullscreenExits++
 
-  let status: any = session.status
+  let status: 'IN_PROGRESS' | 'FLAGGED' = session.status
 
   if (tabSwitchCount + fullscreenExits > maxViolations) {
     status = 'FLAGGED'

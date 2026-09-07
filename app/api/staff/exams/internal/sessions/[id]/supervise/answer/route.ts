@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
-export const POST = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const staff = await requireStaff()
-  const { id: sessionId } = await ctx.params
+  const { id: sessionId } = (await ctx!.params) as { id: string }
   const body = await req.json().catch(() => ({}))
   const { questionId, selectedAnswer } = body as { questionId?: string; selectedAnswer?: string }
 

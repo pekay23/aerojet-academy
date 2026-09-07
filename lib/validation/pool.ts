@@ -4,7 +4,7 @@ import { MODULE_LIST } from '@/types/enums'
 export const joinPoolSchema = z.object({
   poolId: z.string().min(1, 'Pool ID is required'),
   selectedModule: z.string().refine(
-    (val) => MODULE_LIST.includes(val as any),
+    (val) => MODULE_LIST.includes(val as unknown as string),
     'Invalid module selection'
   ),
 })

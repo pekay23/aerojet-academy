@@ -1,16 +1,16 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler, apiCreated } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, apiCreated , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
-export const GET = withErrorHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const GET = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
   const url = new URL(req.url)
   const page = parseInt(url.searchParams.get('page') || '1')
   const limit = parseInt(url.searchParams.get('limit') || '50')
 
   const [bookings, total] = await Promise.all([
     prismaUnfiltered.examBooking.findMany({
-      where: { examId: params.id },
+      where: { examId: ctx.params.id },
       include: {
         user: { select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } } },
       },
@@ -18,7 +18,7 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: { param
       skip: (page - 1) * limit,
       take: limit,
     }),
-    prismaUnfiltered.examBooking.count({ where: { examId: params.id } }),
+    prismaUnfiltered.examBooking.count({ where: { examId: ctx.params.id } }),
   ])
 
   return apiSuccess({
@@ -27,21 +27,21 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: { param
   })
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
   const _session = await requireStaff()
 
   const body = await req.json()
   const count = Math.min(Math.max(body.count || 10, 1), 100)
 
   const exam = await prismaUnfiltered.exam.findUnique({
-    where: { id: params.id },
+    where: { id: ctx.params.id },
   })
 
   if (!exam) return apiError('Exam not found', 404)
 
   const codes = await prismaUnfiltered.examBooking.createMany({
     data: Array.from({ length: count }, () => ({
-      examId: params.id,
+      examId: ctx.params.id,
       userId: '',
       status: 'PENDING',
       amountPaid: 0,

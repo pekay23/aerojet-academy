@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
-  _CheckCircle2,
+  CheckCircle2 as _CheckCircle2,
   RefreshCw,
   Search,
   FileCheck,
   Calendar,
-  _User,
+  User as _User,
   ExternalLink,
-  _ChevronDown,
+  ChevronDown as _ChevronDown,
   Loader2,
   AlertCircle,
 } from 'lucide-react'
@@ -59,7 +59,7 @@ export default function ReconciliationQueue() {
   }, [])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPayments()
   }, [fetchPayments])
@@ -266,7 +266,7 @@ export default function ReconciliationQueue() {
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400">
                         <Calendar className="h-3 w-3" />
-                        {p.approvedAt ? format(new Date(p.approvedAt), 'MMM d, yyyy') : 'â€”'}
+                        {p.approvedAt ? format(new Date(p.approvedAt), 'MMM d, yyyy') : '—'}
                       </div>
                       {p.proofUrl && (
                         <a

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import _prisma, { prismaUnfiltered } from '@/lib/_prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
+import { PaymentStatus, Prisma } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { serializePrisma } from '@/lib/utils/serialization'
 
@@ -13,10 +14,10 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get('page') || '1')
   const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100)
 
-  const where: any = {}
+  const where: Prisma.PaymentWhereInput = {}
 
-  if (status && status !== 'ALL') {
-    where.status = status
+  if (status && status !== 'ALL' && Object.values(PaymentStatus).includes(status as PaymentStatus)) {
+    where.status = status as PaymentStatus
   }
 
   if (search) {

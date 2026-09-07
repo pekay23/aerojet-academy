@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Save } from 'lucide-react'
@@ -20,6 +20,17 @@ export default function RetentionEditor({ policies }: { policies: Policy[] }) {
   const [isPending, startTransition] = useTransition()
   const [draft, setDraft] = useState<Policy[]>(policies)
   const dirty = JSON.stringify(draft) !== JSON.stringify(policies)
+
+  // Warn before closing the tab / navigating away with unsaved edits.
+  useEffect(() => {
+    if (!dirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [dirty])
 
   const update = (id: string, patch: Partial<Policy>) => {
     setDraft((d) => d.map((p) => (p.id === id ? { ...p, ...patch } : p)))

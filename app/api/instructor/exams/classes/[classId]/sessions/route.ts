@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiForbidden, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiForbidden, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
-export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ classId: string }> }) => {
+export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const user = await requireInstructor()
   const instructorProfile = await getInstructorProfileByUserId(user.id)
   if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -14,7 +14,7 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
   if (!(await isInternalExamSystemEnabled())) {
     return apiError('Internal exams are not currently available', 403)
   }
-  const { classId } = await ctx.params
+  const { classId } = (await ctx!.params) as { classId: string }
 
   const classItem = await prismaUnfiltered.class.findUnique({
     where: { id: classId },
@@ -83,7 +83,7 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
   return apiSuccess(result)
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ classId: string }> }) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const user = await requireInstructor()
   const instructorProfile = await getInstructorProfileByUserId(user.id)
   if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -91,7 +91,7 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: { params: Pro
   if (!(await isInternalExamSystemEnabled())) {
     return apiError('Internal exams are not currently available', 403)
   }
-  const { classId } = await ctx.params
+  const { classId } = (await ctx!.params) as { classId: string }
 
   const classItem = await prismaUnfiltered.class.findUnique({
     where: { id: classId },

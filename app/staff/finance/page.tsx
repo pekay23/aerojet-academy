@@ -16,7 +16,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  _TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
@@ -28,18 +27,9 @@ import { format } from 'date-fns'
 
 
 import { getCurrencySymbol } from '@/lib/currency'
+import type { SerializedTransactionRow } from '@/lib/types/staff'
 
-import {
-  _DollarSign,
-  _TrendingUp,
-  _Calendar,
-  Clock,
-  _CheckCircle,
-  CheckCircle2,
-  _XCircle,
-  _AlertCircle,
-  _ExternalLink,
-} from 'lucide-react'
+import { Clock, CheckCircle2 } from 'lucide-react'
 import {
   getFinanceReportSummary,
   getRevenueByProgrammeType,
@@ -128,17 +118,17 @@ async function getTransactionsData(query?: string) {
   ])
 
   const serialized = serializePrisma(transactions)
-  const transactionIds = serialized.map((tx: any) => tx.id)
-  
+  const transactionIds = serialized.map((tx: SerializedTransactionRow) => tx.id)
+
   const paymentIds = serialized
-    .filter((tx: any) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
-    .map((tx: any) => tx.referenceId!)
+    .filter((tx: SerializedTransactionRow) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
+    .map((tx: SerializedTransactionRow) => tx.referenceId!)
   const examBookingReferenceIds = serialized
-    .filter((tx: any) => tx.referenceType === 'EXAM_BOOKING' && tx.referenceId)
-    .map((tx: any) => tx.referenceId!)
+    .filter((tx: SerializedTransactionRow) => tx.referenceType === 'EXAM_BOOKING' && tx.referenceId)
+    .map((tx: SerializedTransactionRow) => tx.referenceId!)
   const fullTimeEnrollmentIds = serialized
-    .filter((tx: any) => tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId)
-    .map((tx: any) => tx.referenceId!)
+    .filter((tx: SerializedTransactionRow) => tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId)
+    .map((tx: SerializedTransactionRow) => tx.referenceId!)
 
   const [relatedPayments, relatedExamBookings, relatedFullTimeEnrollments, relatedModularEnrollments, relatedMilestones] =
     await Promise.all([
@@ -277,7 +267,7 @@ async function WalletTopupsTab({ sort, order }: { sort?: string; order?: string 
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedHistory.map((tx: any) => {
+                sortedHistory.map((tx: SerializedTransactionRow) => {
                   const user = tx.wallet.user
                   const userName = user.profile
                     ? `${user.profile.firstName} ${user.profile.lastName}`
@@ -336,10 +326,10 @@ function ReconciliationTab() {
 }
 
 /* ─── Reports Tab ─── */
-function sortTopupHistory(history: any[], sort?: string, order?: string) {
+function sortTopupHistory(history: SerializedTransactionRow[], sort?: string, order?: string) {
   if (!sort) return history
   const dir = order === 'asc' ? 1 : -1
-  const getKey = (tx: any) => {
+  const getKey = (tx: SerializedTransactionRow) => {
     if (sort === 'student') {
       const p = tx.wallet?.user?.profile
       return p ? `${p.firstName ?? ''} ${p.lastName ?? ''}` : tx.wallet?.user?.email ?? ''

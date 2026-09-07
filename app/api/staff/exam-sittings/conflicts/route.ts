@@ -13,9 +13,9 @@ export async function GET(req: NextRequest) {
 
     const conflicts = await detectSchedulingConflicts(eventId)
     return NextResponse.json({ conflicts })
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error?.message || 'Failed to detect conflicts' },
+      { error: error instanceof Error ? error.message : 'Failed to detect conflicts' },
       { status: 500 }
     )
   }

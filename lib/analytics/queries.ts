@@ -57,7 +57,7 @@ export interface UserJourneyEvent {
   event: AnalyticsEventName
   entity: string
   timestamp: string
-  payload: Record<string, any>
+  payload: Record<string, unknown>
 }
 
 // ============================================================================
@@ -136,8 +136,7 @@ function formatEventLabel(event: string): string {
 // ============================================================================
 
 export async function getCohortRetention(cohortDate?: Date): Promise<RetentionCohort[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const _cohortRetention: any[] = []
+  const _cohortRetention: Array<Record<string, unknown>> = []
 
   // Get users who registered in the specified month
   const targetMonth = cohortDate
@@ -372,7 +371,7 @@ export async function getUserJourney(userId: string, limit = 50): Promise<UserJo
       event: e.action as AnalyticsEventName,
       entity: e.entity ?? 'UNKNOWN',
       timestamp: e.createdAt.toISOString(),
-      payload: (e.changes as Record<string, any>) ?? {},
+      payload: (e.changes as Record<string, unknown>) ?? {},
     })
   )
 }

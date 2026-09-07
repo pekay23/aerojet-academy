@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { PracticalDeliveryMethod, PracticalResult, PracticalTaskCategory, Prisma } from '@prisma/client'
 import { z } from 'zod'
 
 const MAX_STUDENTS_PER_SESSION = 15
@@ -40,7 +41,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
   const page = parseInt(url.searchParams.get('page') || '1')
   const limit = parseInt(url.searchParams.get('limit') || '50')
 
-  const where: any = {}
+  const where: Prisma.PracticalTrainingRecordWhereInput = {}
   if (studentProfileId) where.studentProfileId = studentProfileId
   if (courseId) where.courseId = courseId
 
@@ -123,16 +124,16 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContex
       studentProfileId: parsed.data.studentProfileId,
       courseId: parsed.data.courseId,
       classId: parsed.data.classId || null,
-      taskCategory: parsed.data.taskCategory as any,
+      taskCategory: parsed.data.taskCategory as PracticalTaskCategory,
       taskReference: parsed.data.taskReference || null,
       ataChapterId: parsed.data.ataChapterId || null,
       description: parsed.data.description,
-      deliveryMethod: parsed.data.deliveryMethod as any,
+      deliveryMethod: parsed.data.deliveryMethod as PracticalDeliveryMethod,
       date: sessionDate,
       durationMinutes: parsed.data.durationMinutes,
       instructorId: parsed.data.instructorId,
       assessorId: parsed.data.assessorId || null,
-      result: (parsed.data.result as any) || null,
+      result: (parsed.data.result as PracticalResult) || null,
       assessorNotes: parsed.data.assessorNotes || null,
     },
   })

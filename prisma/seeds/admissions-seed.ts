@@ -5,6 +5,7 @@
  * Or: npx tsx prisma/seeds/admissions-seed.ts
  */
 
+import { ATACategory, Prisma } from '@prisma/client'
 import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 
 // ---------------------------------------------------------------------------
@@ -549,14 +550,14 @@ async function main() {
       update: {
         title: ch.title,
         description: ch.description,
-        category: ch.category as any,
+        category: ch.category as unknown as ATACategory,
         sortOrder: ch.sortOrder,
       },
       create: {
         code: ch.code,
         title: ch.title,
         description: ch.description,
-        category: ch.category as any,
+        category: ch.category as unknown as ATACategory,
         sortOrder: ch.sortOrder,
       },
     })

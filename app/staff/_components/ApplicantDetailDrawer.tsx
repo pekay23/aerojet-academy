@@ -129,8 +129,9 @@ export default function ApplicantDetailDrawer({
         throw new Error(data.error || 'Failed to resend')
       }
       toast.success('Payment details email resent')
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to resend email')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to resend email'
+      toast.error(message)
     } finally {
       setLoading(null)
     }
@@ -202,7 +203,7 @@ export default function ApplicantDetailDrawer({
                   done: false,
                   icon: ShieldCheck,
                 },
-              ].map((step, idx) => (
+              ].map((step, _idx) => (
                 <div key={step.label} className="relative z-10 flex flex-col items-center">
                   <div
                     className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${

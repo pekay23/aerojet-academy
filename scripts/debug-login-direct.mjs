@@ -1,7 +1,7 @@
 /**
  * Debug: Direct API login to test credentials and session
  */
-const { chromium } = require('@playwright/test')
+import { chromium } from '@playwright/test'
 
 (async () => {
   const browser = await chromium.launch({ headless: true })
@@ -81,4 +81,7 @@ const { chromium } = require('@playwright/test')
   await page.screenshot({ path: 'tests/e2e/tour-screenshots/debug-direct-api.png', fullPage: true })
   
   await browser.close()
-})().catch(e => console.error('FATAL:', e.message))
+})().catch(e => console.error('FATAL:', (e as Error).message))
+
+
+

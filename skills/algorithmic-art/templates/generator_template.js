@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  *                  P5.JS GENERATIVE ART - BEST PRACTICES

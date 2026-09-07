@@ -75,7 +75,7 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
             severity: opts?.severity || 'WARNING',
             deviceInfo: {
               userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-              platform: typeof navigator !== 'undefined' ? (navigator as any).platform : undefined,
+              platform: typeof navigator !== 'undefined' ? navigator.platform : undefined,
               language: typeof navigator !== 'undefined' ? navigator.language : undefined,
             },
           }),
@@ -302,7 +302,7 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
             severity: 'WARNING',
             deviceInfo: {
               userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-              platform: typeof navigator !== 'undefined' ? (navigator as any).platform : undefined,
+              platform: typeof navigator !== 'undefined' ? navigator.platform : undefined,
             },
           }),
         })

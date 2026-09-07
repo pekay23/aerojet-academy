@@ -13,7 +13,7 @@ import {
   BrainCircuit,
   ListChecks,
   CalendarDays,
-  type _LucideIcon,
+  type LucideIcon as _LucideIcon,
 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -116,7 +116,7 @@ const TERMINAL_STAGES = ['REJECTED', 'WITHDRAWN']
 
 export default function PipelineTracker({
   currentStage,
-  _previousStage,
+  previousStage: _previousStage,
   programmeLabel,
   registrationCode,
   rejectionReason,

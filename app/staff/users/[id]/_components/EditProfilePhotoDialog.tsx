@@ -28,9 +28,9 @@ export default function EditProfilePhotoDialog({
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
-  const handleUploadComplete = async (res: any) => {
-    if (!res || res.length === 0) return
-    const fileUrl = res[0].url
+  const handleUploadComplete = async (res: unknown) => {
+    if (!res || !Array.isArray(res) || res.length === 0) return
+    const fileUrl = (res as Array<{ url: string }>)[0].url
 
     try {
       const updateRes = await fetch(`/api/staff/users/${userId}`, {

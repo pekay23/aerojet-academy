@@ -16,7 +16,7 @@ import {
   ChevronDown,
   BarChart3,
   Users,
-  _ClipboardList,
+  ClipboardList as _ClipboardList,
 } from 'lucide-react'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
@@ -49,7 +49,7 @@ interface ApplicationRow {
   intakeCycle: string
   cvUrl: string | null
   scores: ScoreData
-  metadata: any
+  metadata: Record<string, unknown> | null
 }
 
 function PercentileBar({ label, percentile, raw }: { label: string; percentile: number | null; raw?: string }) {

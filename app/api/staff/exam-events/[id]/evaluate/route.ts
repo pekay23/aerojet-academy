@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { evaluateGoNoGo } from '@/lib/events/go-no-go'
 
 /**
@@ -8,9 +8,9 @@ import { evaluateGoNoGo } from '@/lib/events/go-no-go'
  * Returns metrics, pool-by-pool breakdown, and recommendation.
  */
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const _admin = await requireStaff()
-    const id = ctx?.params?.id
+    const id = (await ctx!.params).id
     if (!id) return apiError('Event ID required')
 
     const evaluation = await evaluateGoNoGo(id)

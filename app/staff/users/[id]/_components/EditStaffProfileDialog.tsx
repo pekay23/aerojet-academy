@@ -60,8 +60,9 @@ export default function EditStaffProfileDialog({
       toast.success('Staff details updated')
       setOpen(false)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update staff profile'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

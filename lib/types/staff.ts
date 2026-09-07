@@ -1,4 +1,5 @@
 import type { UserRole, UserStatus } from '@/types/enums'
+import type { PracticalDeliveryMethod, PracticalResult, PracticalTaskCategory } from '@prisma/client'
 
 export interface SerializedProfile {
   firstName: string
@@ -8,6 +9,13 @@ export interface SerializedProfile {
   nationality: string | null
   dateOfBirth: string | null
   profilePhotoUrl: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  gender?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  emergencyContactRelation?: string | null
 }
 
 export interface SerializedStudentProfile {
@@ -29,6 +37,9 @@ export interface SerializedStudentProfile {
   licenseTargets?: Array<{
     licenseCategory: { name?: string | null; code?: string | null } | null
   }>
+  academicYearId?: string | null
+  semesterId?: string | null
+  CGPA?: number | null
 }
 
 export interface SerializedWallet {
@@ -91,20 +102,30 @@ export interface SerializedExamBooking {
   bookingType: string | null
   attemptType: string | null
   examCategory: string | null
-  amountPaid: number
+  amountPaid: number | null
   isResit: boolean
   eventName: string | null
   sittingLabel: string | null
   attendanceStatus: string | null
   bookedAt?: string | null
   createdAt?: string
-  course?: { name: string; code: string } | null
+  demandStatus?: string | null
+  executedAt?: string | null
+  rolloverToEventId?: string | null
+  examAttendance?: { status?: string | null } | null
+  sittingAssignments?: Array<{
+    attendanceStatus?: string | null
+    sitting?: { dayNumber?: number; sessionType?: string } | null
+  }> | null
+  course?: { id?: string; name: string; code: string } | null
   exam?: {
+    name?: string | null
+    examDate?: string | Date | null
     examComponent?: {
-      course?: { name: string; code: string } | null
+      course?: { id?: string; name: string; code: string } | null
     } | null
   } | null
-  event?: { name: string } | null
+  event?: { id?: string; name: string; startDate?: string | null; endDate?: string | null } | null
 }
 
 export interface SerializedExamResult {
@@ -120,8 +141,10 @@ export interface SerializedExamResult {
   examCategory: string | null
   createdAt?: string
   exam?: {
+    name?: string | null
+    examDate?: string | Date | null
     examComponent?: {
-      course?: { code: string; name: string } | null
+      course?: { id?: string; code: string; name: string } | null
     } | null
   } | null
 }
@@ -158,12 +181,14 @@ export interface SerializedExamComponent {
   code: string
   name: string
   moduleCode: string
-  course?: { code: string; id: string } | null
+  course?: { code: string; id: string; name?: string | null } | null
 }
 
 export interface SerializedUpcomingEvent {
   id: string
   name: string
+  startDate?: string | null
+  endDate?: string | null
 }
 
 export interface SerializedAcademicYear {
@@ -187,13 +212,13 @@ export interface SerializedPracticalRecord {
   date: string
   studentProfileId: string
   courseId: string
-  taskCategory: string
+  taskCategory: PracticalTaskCategory
   taskReference: string | null
   ataChapterId: string | null
   description: string
-  deliveryMethod: string
+  deliveryMethod: PracticalDeliveryMethod
   durationMinutes: number
-  result: string | null
+  result: PracticalResult | null
   signedByInstructor: boolean
   signedByStudent: boolean
   assessorNotes: string | null
@@ -265,9 +290,10 @@ export interface SerializedStudent {
   grades: SerializedGrade[]
   studentId?: string | null
   paymentApprovedBy?: string | null
-  referralsReceived?: unknown[]
-  referralsMade?: unknown[]
+  referralsReceived?: Array<Record<string, unknown>>
+  referralsMade?: Array<Record<string, unknown>>
   isAmbassador?: boolean
+  referralCode?: string | null
 }
 
 export interface SerializedFullTimeEnrollment {
@@ -417,7 +443,7 @@ export interface ApplicantSummary {
     idDocumentUrl?: string | null
     profilePhotoUrl?: string | null
   } | null
-  payments?: any[]
+  payments?: Array<Record<string, unknown>>
 }
 
 export interface ApplicantCounts {
@@ -431,10 +457,11 @@ export interface SerializedTransactionRow {
   id: string
   type: string
   amount: number
-  referenceType: string
+  referenceType: string | null
   referenceId: string | null
   createdAt: string
   wallet: {
+    currency?: string | null
     user: {
       profile: { firstName: string; lastName: string } | null
       email: string

@@ -81,7 +81,7 @@ interface Bank {
   questionCount?: number
   poolHealth?: PoolHealth
   /** When true, the row is a placeholder for a module the instructor teaches
-   *  that has no bank yet â€” the UI offers a "Create bank" action. */
+   *  that has no bank yet — the UI offers a "Create bank" action. */
   bankless?: boolean
   courseId?: string
 }
@@ -296,7 +296,7 @@ function MyQuestionsTab() {
   }, [page, limit])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
   }, [load])
@@ -372,7 +372,7 @@ function MyBanksTab() {
     }
   }, [page, limit])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
   // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
@@ -407,7 +407,7 @@ function MyBanksTab() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{b.name}</p>
-                    <p className="text-xs text-slate-500">{b.course?.name || 'â€”'}</p>
+                    <p className="text-xs text-slate-500">{b.course?.name || '—'}</p>
                   </div>
                   {b.pendingCount ? (
                     <Badge
@@ -462,7 +462,7 @@ type QuestionSortKey =
 const QUESTION_SORT_OPTIONS: { value: QuestionSortKey; label: string }[] = [
   { value: 'recent', label: 'Most recent' },
   { value: 'oldest', label: 'Oldest first' },
-  { value: 'author', label: 'Author Aâ€“Z' },
+  { value: 'author', label: 'Author A–Z' },
   { value: 'difficulty_desc', label: 'Difficulty: Hard â†’ Easy' },
   { value: 'difficulty_asc', label: 'Difficulty: Easy â†’ Hard' },
   { value: 'status', label: 'Status' },
@@ -470,7 +470,7 @@ const QUESTION_SORT_OPTIONS: { value: QuestionSortKey; label: string }[] = [
   { value: 'served', label: 'Most served' },
 ]
 
-/** Per-bank question panel â€” renders inside an expanded module card. */
+/** Per-bank question panel — renders inside an expanded module card. */
 function BankQuestionPanel({ bankId, instructorId }: { bankId: string; instructorId: string }) {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
@@ -495,7 +495,7 @@ function BankQuestionPanel({ bankId, instructorId }: { bankId: string; instructo
       setLoading(false)
     }
   }, [bankId, sort, status])
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
 
   useEffect(() => {
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -521,7 +521,7 @@ function BankQuestionPanel({ bankId, instructorId }: { bankId: string; instructo
         <div className="relative max-w-xs flex-1">
           <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <Input
-            placeholder="Search questionsâ€¦"
+            placeholder="Search questions…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-8 pl-8 text-xs"
@@ -599,7 +599,7 @@ function BankQuestionPanel({ bankId, instructorId }: { bankId: string; instructo
                   ) : null}
                   <span className="inline-flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {q.createdAt ? new Date(q.createdAt).toLocaleDateString() : 'â€”'}
+                    {q.createdAt ? new Date(q.createdAt).toLocaleDateString() : '—'}
                   </span>
                   {(q.timesServed ?? 0) > 0 ? (
                     <span className="inline-flex items-center gap-1">
@@ -643,7 +643,7 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
     } finally {
       setLoading(false)
     }
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   }, [page, limit])
 
   useEffect(() => {
@@ -733,7 +733,7 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
                         </div>
                         <p className="text-xs text-slate-500">
                           {b.course?.name || 'Module bank'}
-                          {isBankless ? ' â€” no bank yet' : null}
+                          {isBankless ? ' — no bank yet' : null}
                         </p>
                       </div>
                     </button>
@@ -831,7 +831,7 @@ function MyClassesTab() {
       toast.error('Failed to load your classes')
     } finally {
       setLoading(false)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
     }
   }, [page, limit])
 
@@ -866,7 +866,7 @@ function MyClassesTab() {
                     {c.completionRate}% done
                   </Badge>
                 </div>
-                <p className="text-xs text-slate-500">{c.course?.name || 'â€”'}</p>
+                <p className="text-xs text-slate-500">{c.course?.name || '—'}</p>
                 <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
                   <span>
                     <strong className="text-slate-700 dark:text-slate-200">
@@ -918,7 +918,7 @@ function ClassScheduleTab() {
     } catch {
       toast.error('Failed to load schedules')
     } finally {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
       setLoading(false)
     }
   }, [page, limit])
@@ -951,7 +951,7 @@ function ClassScheduleTab() {
                   <div>
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{c.name}</p>
                     <p className="text-xs text-slate-500">
-                      {c.course?.name || 'â€”'} Â· {c.enrolledCount} enrolled
+                      {c.course?.name || '—'} · {c.enrolledCount} enrolled
                     </p>
                   </div>
                   <button
@@ -980,8 +980,8 @@ function ClassScheduleTab() {
                             )}
                           </p>
                           <p className="text-[10px] text-slate-500">
-                            {s.bankMcqCount} questions Â· {s.sebRequired ? 'SEB required' : 'No SEB'}
-                            {s.allowLateStart && ' Â· Late start allowed'}
+                            {s.bankMcqCount} questions · {s.sebRequired ? 'SEB required' : 'No SEB'}
+                            {s.allowLateStart && ' · Late start allowed'}
                           </p>
                         </div>
                         <div className="text-right">
@@ -990,7 +990,7 @@ function ClassScheduleTab() {
                           </p>
                           <p className="text-[10px] text-slate-500">
                             {s.scheduledStart && s.scheduledEnd
-                              ? `${formatTime(s.scheduledStart)} â€“ ${formatTime(s.scheduledEnd)}`
+                              ? `${formatTime(s.scheduledStart)} – ${formatTime(s.scheduledEnd)}`
                               : 'Anytime'}
                           </p>
                         </div>
@@ -1047,7 +1047,7 @@ function LiveMonitorTab() {
     } finally {
       setRefreshing(false)
       setLoading(false)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
     }
   }, [selectedClass])
 
@@ -1165,16 +1165,16 @@ function LiveMonitorTab() {
                       </span>
                     </td>
                     <td className="py-3 pr-4 text-right text-slate-500 tabular-nums">
-                      {s.timeRemaining != null ? formatDuration(s.timeRemaining) : 'â€”'}
+                      {s.timeRemaining != null ? formatDuration(s.timeRemaining) : '—'}
                     </td>
                     <td className="py-3 text-right font-semibold text-slate-700 tabular-nums dark:text-slate-200">
-                      {s.score != null ? `${s.score}/${s.totalPoints ?? '?'}` : 'â€”'}
+                      {s.score != null ? `${s.score}/${s.totalPoints ?? '?'}` : '—'}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {refreshing ? <p className="mt-2 text-xs text-slate-400">Refreshingâ€¦</p> : null}
+            {refreshing ? <p className="mt-2 text-xs text-slate-400">Refreshing…</p> : null}
           </div>
         )}
       </CardContent>

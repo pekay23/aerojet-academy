@@ -241,7 +241,7 @@ export async function rollForwardGuaranteedBookings(params: {
       }
 
       await tx.examBooking.update({
-        where: { id: placement.booking.id },
+        where: { id: (placement.booking as { id: string }).id },
         data: {
           rolloverFromBookingId: booking.id,
           attemptType: booking.attemptType,
@@ -428,7 +428,7 @@ export async function preserveCompanyGuaranteedDemand(
       }
 
       await tx.examBooking.update({
-        where: { id: placement.booking.id },
+        where: { id: (placement.booking as { id: string }).id },
         data: {
           rolloverFromBookingId: booking.id,
           groupName: booking.groupName,

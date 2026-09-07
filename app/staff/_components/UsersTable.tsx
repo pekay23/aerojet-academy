@@ -77,12 +77,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
     return () => clearTimeout(t)
   }, [fetchUsers, search])
 
-  useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPage(1)
-  }, [role, status, search])
+
 
   const bulkActions = [
     {
@@ -126,8 +121,9 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           if (!res.ok) throw new Error(data.error || 'Failed')
           toast.success(`Credentials sent to ${data.data.summary.sent} users`)
           fetchUsers()
-        } catch (err: any) {
-          toast.error(err.message || 'Failed')
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'Failed'
+          toast.error(message)
         }
       },
     },
@@ -220,9 +216,9 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
         role={role}
         status={status}
         search={search}
-        onRoleChange={setRole}
-        onStatusChange={setStatus}
-        onSearchChange={setSearch}
+        onRoleChange={(r) => { setRole(r); setPage(1); }}
+        onStatusChange={(s) => { setStatus(s); setPage(1); }}
+        onSearchChange={(s) => { setSearch(s); setPage(1); }}
       />
 
       {/* Table */}

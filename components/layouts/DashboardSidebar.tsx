@@ -9,7 +9,6 @@ import { signOut } from 'next-auth/react'
 import { useTheme } from '@/components/shared/theme-provider'
 import {
   ChevronDown,
-  _ChevronRight,
   LogOut,
   Menu,
   X,
@@ -747,7 +746,7 @@ function renderSidebarContent({
         })}
       </nav>
 
-      {/* Footer â€” User Dropdown Menu */}
+      {/* Footer — User Dropdown Menu */}
       <div id="sidebar-user-menu" className="border-sidebar-border border-t px-3 py-4">
         <UserMenu
           collapsed={collapsed}
@@ -788,7 +787,7 @@ export default function DashboardSidebar({
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])

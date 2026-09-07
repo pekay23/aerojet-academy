@@ -89,7 +89,7 @@ export interface SerializedUserProfile {
     pathwayName?: string | null
     enrollmentDate?: string | null
   } | null
-  settings?: any
+  settings?: Record<string, unknown>
 }
 
 export interface UnifiedExamRecord {

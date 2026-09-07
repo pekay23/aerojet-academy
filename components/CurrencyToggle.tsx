@@ -48,13 +48,13 @@ export default function CurrencyToggle({
   }, [baseCurrency])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRates()
   }, [fetchRates])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
     if (currentCurrency === baseCurrency) {
   // eslint-disable-next-line react-hooks/set-state-in-effect
       setConvertedAmount(amount)

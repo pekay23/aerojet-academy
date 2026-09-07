@@ -62,7 +62,7 @@ export const BACKUP_MODELS = [
   { key: 'referral', label: 'Referrals' },
 ] as const
 
-export type BackupData = Record<string, any[]>
+export type BackupData = Record<string, unknown[]>
 
 /**
  * Export all database tables. Returns a map of model name → records.
@@ -75,8 +75,8 @@ export async function exportAllTables(): Promise<BackupData> {
       // @ts-expect-error - dynamic model access on Prisma client
       const records = await prisma[model.key].findMany()
       backup[model.key] = records
-    } catch (err: any) {
-      console.warn(`[Backup] Skipping model "${model.key}": ${err.message}`)
+    } catch (err: unknown) {
+      console.warn(`[Backup] Skipping model "${model.key}": ${err instanceof Error ? err.message : String(err)}`)
       backup[model.key] = []
     }
   }
@@ -107,7 +107,7 @@ export function generateReadableReport(backup: BackupData): string {
   const totalRecords = Object.values(backup).reduce((sum, arr) => sum + arr.length, 0)
 
   // Helper to format a value for display
-  const fmt = (val: any): string => {
+  const fmt = (val: unknown): string => {
     if (val === null || val === undefined) return '—'
     if (val instanceof Date || (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(val))) {
       return new Date(val).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })
@@ -117,12 +117,12 @@ export function generateReadableReport(backup: BackupData): string {
   }
 
   // Build table HTML for a model's data (max 500 rows for readability)
-  const buildTable = (key: string, label: string, records: any[]) => {
+  const buildTable = (key: string, label: string, records: unknown[]) => {
     if (!records.length) {
       return `<div class="section"><h3>${label}</h3><p class="empty">No records</p></div>`
     }
 
-    const columns = Object.keys(records[0])
+    const columns = Object.keys(records[0] as object)
     // Exclude overly long/binary columns
     const displayCols = columns.filter(
       (c) => !['password', 'html', 'body', 'content'].includes(c.toLowerCase())
@@ -133,7 +133,7 @@ export function generateReadableReport(backup: BackupData): string {
     const dataRows = displayRows
       .map((row) => {
         const cells = displayCols.map((c) => {
-          const val = fmt(row[c])
+          const val = fmt((row as Record<string, unknown>)[c])
           // Truncate long values
           const display = val.length > 100 ? val.substring(0, 100) + '...' : val
           return `<td>${display}</td>`
