@@ -89,7 +89,7 @@ export default function PaymentMethodsManager() {
     }
   }, [])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchMethods() }, [fetchMethods])
 
@@ -204,6 +204,17 @@ export default function PaymentMethodsManager() {
     setForm({ ...emptyForm })
   }
 
+  // Warn before navigating away with an open add/edit form.
+  useEffect(() => {
+    if (!showForm) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [showForm])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12 text-slate-400">
@@ -267,8 +278,8 @@ export default function PaymentMethodsManager() {
                     <span className="text-[10px] text-slate-400">{meta.label}</span>
                   </div>
                   <p className="mt-0.5 truncate text-xs text-slate-400">
-                    {m.type === 'BANK_TRANSFER' && `${m.bankName || ''} Â· ${m.bankAccountNumber || ''}`}
-                    {m.type === 'MOBILE_MONEY' && `${m.momoProvider || ''} Â· ${m.momoNumber || ''}`}
+                    {m.type === 'BANK_TRANSFER' && `${m.bankName || ''} · ${m.bankAccountNumber || ''}`}
+                    {m.type === 'MOBILE_MONEY' && `${m.momoProvider || ''} · ${m.momoNumber || ''}`}
                     {m.type === 'CARD_STRIPE' && 'Online card payments'}
                   </p>
                 </div>

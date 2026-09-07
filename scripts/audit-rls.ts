@@ -15,13 +15,13 @@ async function main() {
 
   console.log('All RLS policies in Supabase:')
   console.log('='.repeat(80))
-  policies.rows.forEach((r: any) => {
-    console.log(`\nTable: ${r.tablename}`)
-    console.log(`  Policy: ${r.policyname}`)
-    console.log(`  Command: ${r.cmd}`)
-    console.log(`  Permissive: ${r.permissive}`)
-    console.log(`  Qual: ${r.qual || '(none)'}`)
-    console.log(`  With Check: ${r.with_check || '(none)'}`)
+  policies.rows.forEach((r: unknown) => {
+    console.log(`\nTable: ${(r as Record<string, unknown>).tablename}`)
+    console.log(`  Policy: ${(r as Record<string, unknown>).policyname}`)
+    console.log(`  Command: ${(r as Record<string, unknown>).cmd}`)
+    console.log(`  Permissive: ${(r as Record<string, unknown>).permissive}`)
+    console.log(`  Qual: ${(r as Record<string, unknown>).qual || '(none)'}`)
+    console.log(`  With Check: ${(r as Record<string, unknown>).with_check || '(none)'}`)
   })
 
   // Get tables with RLS enabled
@@ -30,12 +30,15 @@ async function main() {
   `)
   console.log('\n' + '='.repeat(80))
   console.log(`\nTables with RLS enabled (${tablesWithRLS.rows.length}):`)
-  tablesWithRLS.rows.forEach((r: any) => console.log(`  - ${r.tablename}`))
+  tablesWithRLS.rows.forEach((r: unknown) => console.log(`  - ${(r as Record<string, unknown>).tablename}`))
 
   await client.end()
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

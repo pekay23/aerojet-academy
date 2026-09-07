@@ -37,7 +37,12 @@ export const POST = withErrorHandler(
 
     if (!id) return apiError('Payment ID required')
 
-    let body: any
+     let body: {
+      action?: string
+      notes?: string
+      reason?: string
+      ignorePathwayRestrictions?: boolean
+    }
     try {
       body = await req.json()
     } catch (_e) {
@@ -45,7 +50,7 @@ export const POST = withErrorHandler(
     }
 
     const { action, notes, reason } = body
-    if (!['approve', 'reject'].includes(action)) {
+    if (!action || !['approve', 'reject'].includes(action)) {
       return apiError('Action must be "approve" or "reject"')
     }
 
@@ -152,6 +157,12 @@ export const POST = withErrorHandler(
           }
 
           const year1 = programme.programmeYears[0]
+          const academicYear = await prismaUnfiltered.academicYear.findUnique({
+            where: { name: '2026/2027' },
+          })
+          if (!academicYear) {
+            return apiError('Academic year 2026/2027 is not configured.', 400)
+          }
 
           // Create FullTimeEnrollment if it doesn't exist yet
           let enrollment = await prismaUnfiltered.fullTimeEnrollment.findFirst({
@@ -166,7 +177,7 @@ export const POST = withErrorHandler(
                 programmeYearId: year1.id,
                 status: 'PENDING_CONFIRMATION',
                 currentYearNumber: 1,
-                academicYear: '2026/2027',
+                academicYearId: academicYear.id,
               },
             })
 

@@ -125,7 +125,7 @@ export const GET = withErrorHandler(
       })
     }
 
-    const { _password, ...safe } = student
+    const { password: _password, ...safe } = student
 
     return apiSuccess(serializePrisma({
       ...safe,

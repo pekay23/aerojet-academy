@@ -1,7 +1,5 @@
 'use client'
 
-export const metadata = { title: 'Aptitude Test | Applicant Portal' }
-
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -18,7 +16,7 @@ export default function AptitudeTestLanding() {
   const router = useRouter()
   const [showModal, setShowModal] = useState(false)
   const [starting, setStarting] = useState(false)
-  const { data: sessionInfo, loading, _error, _refetch } = useFetch<AptitudeSession>('/api/applicant/aptitude/session')
+  const { data: sessionInfo, loading, error: _error, refetch: _refetch } = useFetch<AptitudeSession>('/api/applicant/aptitude/session')
 
   const handleStart = async () => {
     setStarting(true)

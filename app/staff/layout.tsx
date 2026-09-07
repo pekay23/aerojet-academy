@@ -36,7 +36,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
         profile: { select: { firstName: true, middleName: true, lastName: true } },
       },
     }),
-    getWelcomeMessages(prismaUnfiltered, user.role),
+    getWelcomeMessages(prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient, user.role),
     isInternalExamSystemEnabled(),
     getDashboardAlerts(),
     getRegistrationConfig(),

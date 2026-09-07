@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import _prisma, { prismaUnfiltered } from '@/lib/_prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { badgeCountsCache } from './cache'
 
@@ -17,7 +17,13 @@ export async function GET(_req: NextRequest) {
     const cachedUser = badgeCountsCache.getUser(userId, 'badges')
     if (cachedUser) return NextResponse.json(cachedUser)
 
-    const counts: any = {
+    const counts: {
+      pendingApplicants: number
+      pendingEnrollments: number
+      pendingPayments: number
+      unreadMessages: number
+      unreadNotifications: number
+    } = {
       pendingApplicants: 0,
       pendingEnrollments: 0,
       pendingPayments: 0,

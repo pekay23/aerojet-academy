@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createContext, useContext, useCallback } from 'react'
+import { createContext, useContext, useCallback, useMemo } from 'react'
 import {
   School,
   DollarSign,
@@ -12,8 +12,10 @@ import {
   ClipboardList,
   FileText,
 } from 'lucide-react'
+import MotionTabs from '@/components/ui/MotionTabs'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { UnsavedChangesDialog } from '@/components/shared/UnsavedChangesDialog'
+import { toast } from 'sonner'
 
 const TABS = [
   { key: 'general', label: 'General', icon: School },
@@ -30,11 +32,13 @@ const TABS = [
 interface DirtyContextValue {
   markDirty: () => void
   markClean: () => void
+  isDirty: boolean
 }
 
 export const SettingsDirtyContext = createContext<DirtyContextValue>({
   markDirty: () => {},
   markClean: () => {},
+  isDirty: false,
 })
 
 export function useSettingsDirty() {
@@ -46,10 +50,10 @@ export default function SettingsTabs({ children }: { children: React.ReactNode }
   const searchParams = useSearchParams()
   const currentTab = searchParams.get('tab') || 'general'
 
-  const { isDirty: _isDirty, markDirty, markClean, confirmLeave: _confirmLeave, pendingTab, proceedLeave, cancelLeave } =
+  const { isDirty, markDirty, markClean, confirmLeave, pendingTab, proceedLeave, cancelLeave } =
     useUnsavedChanges()
 
-  const _handleChange = useCallback(
+  const handleChange = useCallback(
     (tab: string) => {
       router.push(`/staff/settings?tab=${tab}`, { scroll: false })
       // Reset dirty state when we actually navigate
@@ -58,10 +62,23 @@ export default function SettingsTabs({ children }: { children: React.ReactNode }
     [router, markClean]
   )
 
+  // Stable context value so consumers don't re-render unnecessarily
+  const contextValue = useMemo<DirtyContextValue>(
+    () => ({ markDirty, markClean, isDirty }),
+    [markDirty, markClean, isDirty]
+  )
+
   const currentTabObj = TABS.find((t) => t.key === currentTab) || TABS[0]
+  const pendingTabObj = pendingTab ? TABS.find((t) => t.key === pendingTab) : null
+
+  // Toast confirmation after discarding
+  const handleProceed = useCallback(() => {
+    toast.info('Unsaved changes discarded')
+    proceedLeave()
+  }, [proceedLeave])
 
   return (
-    <SettingsDirtyContext.Provider value={{ markDirty, markClean }}>
+    <SettingsDirtyContext.Provider value={contextValue}>
       <div className="space-y-6">
         <div>
           <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
@@ -69,11 +86,22 @@ export default function SettingsTabs({ children }: { children: React.ReactNode }
           </h1>
         </div>
 
+        <MotionTabs
+          tabs={TABS}
+          activeTab={currentTab}
+          onChange={handleChange}
+          onBeforeChange={confirmLeave}
+          layoutId="settings-tab"
+          ariaLabel="Settings sections"
+        />
+
         {children}
 
         <UnsavedChangesDialog
           open={pendingTab !== null}
-          onProceed={proceedLeave}
+          fromLabel={currentTabObj.label}
+          toLabel={pendingTabObj?.label ?? ''}
+          onProceed={handleProceed}
           onCancel={cancelLeave}
         />
       </div>

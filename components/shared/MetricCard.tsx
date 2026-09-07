@@ -1,10 +1,10 @@
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, type LucideIcon } from 'lucide-react'
 
 interface MetricCardProps {
   title: string
   value: string | number
   growth?: number
-  icon: any
+  icon: LucideIcon
   color: string
   label: string
 }

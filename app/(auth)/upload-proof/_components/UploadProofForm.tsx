@@ -17,8 +17,8 @@ export default function UploadProofForm() {
   useEffect(() => {
     const code = searchParams.get('code')
     if (code) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
       setRegistrationCode(code)
     }
@@ -92,7 +92,7 @@ export default function UploadProofForm() {
             onClientUploadComplete={async (res) => {
               setUploading(false)
               if (!res?.[0]?.url) {
-                toast.error('Upload failed â€” no file URL returned.')
+                toast.error('Upload failed — no file URL returned.')
                 return
               }
 

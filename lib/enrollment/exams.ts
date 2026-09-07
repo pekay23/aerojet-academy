@@ -144,7 +144,7 @@ export async function bookStandaloneExam(
       bundleId: activeBundle?.id || null,
     })
 
-    return { usedBundle: !!activeBundle, poolId: result.pool!.id, bookingId: result.booking.id, componentCode }
+    return { usedBundle: !!activeBundle, poolId: result.pool!.id, bookingId: result.booking!.id, componentCode }
   })
 }
 
@@ -218,7 +218,7 @@ export async function bookResitExam(userId: string, moduleCode: string, eventId:
     })
 
     return {
-      bookingId: result.booking.id,
+      bookingId: result.booking!.id,
       poolId: result.pool!.id,
       usedFreeResit: !!freeResitBundle,
     }

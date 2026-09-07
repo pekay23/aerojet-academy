@@ -1,4 +1,4 @@
-import type { BookingType } from '@prisma/client'
+import type { BookingType, Prisma, PoolStatus } from '@prisma/client'
 
 export interface PoolJoinInput {
   poolId: string
@@ -15,9 +15,9 @@ export interface PoolJoinInput {
 
 export interface PoolJoinResult {
   success: boolean
-  membership?: any
-  booking?: any
-  pool?: any
+  membership?: { id: string } | Prisma.PoolMembershipGetPayload<{}>
+  booking?: { id: string } | Prisma.ExamBookingGetPayload<{}> | null
+  pool?: { id: string; name: string } | { id: string; name: string; status: PoolStatus; currentMemberCount: number }
   error?: string
   autoConfirmed?: boolean
   triggeredNearFull?: boolean

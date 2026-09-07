@@ -192,8 +192,8 @@ export async function createPayoutRun(
   periodEnd: Date,
   actorId: string
 ): Promise<{ created: number }> {
-  const pricing = await getExamPricingConfig().catch(() => ({} as any))
-  const perReferral: number = pricing?.ambassadorPayoutPerReferral ?? 25
+  const pricing = await getExamPricingConfig().catch(() => ({ ambassadorCredit: 25 } as unknown as { ambassadorCredit: number }))
+  const perReferral: number = pricing?.ambassadorCredit ?? 25
 
   const qualified = await prismaUnfiltered.referral.findMany({
     where: {

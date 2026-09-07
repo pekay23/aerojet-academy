@@ -1,14 +1,14 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireApplicant } from '@/lib/auth/helpers'
-import { apiCreated, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiCreated, apiError, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import crypto from 'crypto'
 
 export const POST = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireApplicant()
-    const courseId = ctx?.params?.id
+    const courseId = (await ctx!.params).id
     if (!courseId) return apiError('Course ID required')
     const body = await req.json()
     const { proofUrl } = body

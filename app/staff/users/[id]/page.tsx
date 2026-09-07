@@ -389,8 +389,8 @@ export default async function UserProfilePage({ params }: Props) {
                   id: e.id,
                   status: e.status,
                   completedAt: e.completedAt ?? null,
-                  course: e.course,
-                })) as any
+                  course: { code: e.course?.code ?? '', name: e.course?.name ?? '' },
+                }))
               }
               examBookings={
                 (user.examBookings || []).map((b) => ({
@@ -403,7 +403,7 @@ export default async function UserProfilePage({ params }: Props) {
                   examDate: b.examDate,
                   status: b.status,
                   examCategory: b.examCategory,
-                })) as any
+                }))
               }
               studentProfile={
                 user.studentProfile

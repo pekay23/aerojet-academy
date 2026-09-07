@@ -61,8 +61,8 @@ export default function ResetPasswordPage() {
       }
 
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reset password')
     } finally {
       setLoading(false);
     }

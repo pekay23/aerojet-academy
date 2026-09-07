@@ -141,7 +141,7 @@ export async function generateCertificatePdf(
       percentage: data.percentage,
       passMarkPct: data.passMarkPct,
       qrDataUrl,
-    }) as any
+    }) as unknown as React.ReactElement<Record<string, unknown>>
   )
 
   return streamToBuffer(stream)

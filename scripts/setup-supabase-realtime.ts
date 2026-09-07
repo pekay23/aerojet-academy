@@ -32,11 +32,11 @@ async function main() {
     try {
       await client.query(`ALTER PUBLICATION supabase_realtime ADD TABLE public.${table}`)
       console.log(`✅ Added ${table} to Realtime`)
-    } catch (e: any) {
-      if (e.message.includes('already exists')) {
+    } catch (e: unknown) {
+      if ((e as Error).message.includes('already exists')) {
         console.log(`✓ ${table} already in Realtime`)
       } else {
-        console.log(`⚠️ ${table}: ${e.message}`)
+        console.log(`⚠️ ${table}: ${(e as Error).message}`)
       }
     }
   }
@@ -46,6 +46,9 @@ async function main() {
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

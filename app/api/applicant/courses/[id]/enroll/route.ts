@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import crypto from 'crypto'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireApplicant, checkRateLimit } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiTooManyRequests, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiTooManyRequests, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { trackEnrollment, trackPaymentSubmitted } from '@/lib/analytics/events'
 
 const ALLOWED_PROOF_HOSTNAMES = new Set([
@@ -25,12 +25,12 @@ function isValidProofUrl(url: string): boolean {
 }
 
 export const POST = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     if (!checkRateLimit(`enroll:${(await requireApplicant()).id}`, 10, 60 * 60 * 1000)) {
       return apiTooManyRequests('Too many enrollment submissions. Please try again later.')
     }
     const user = await requireApplicant()
-    const courseId = ctx?.params?.id
+    const courseId = (await ctx!.params).id
     let body: { proofUrl?: unknown }
     try {
       body = await req.json()

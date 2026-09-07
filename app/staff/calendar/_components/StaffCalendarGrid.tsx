@@ -21,7 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  _Filter,
+  Filter as _Filter,
   BookOpen,
   GraduationCap,
   CalendarDays,
@@ -132,7 +132,7 @@ function AudienceBadge({ visibleTo }: { visibleTo: string }) {
   )
 }
 
-export default function StaffCalendarGrid({ events, initialDate, _currentUserId }: Props) {
+export default function StaffCalendarGrid({ events, initialDate, currentUserId: _currentUserId }: Props) {
   const [currentDate, setCurrentDate] = useState(initialDate || new Date())
   const [viewMode, setViewMode] = useState<'Month' | 'Week' | 'Day'>('Week')
   const [popupEvent, setPopupEvent] = useState<StaffCalendarEvent | null>(null)

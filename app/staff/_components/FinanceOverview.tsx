@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import {
   TrendingUp,
   Clock,
@@ -14,7 +14,7 @@ import type { FinanceOverviewData } from '@/lib/finance/overview'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 const RevenueChart = dynamic(() => import('./RevenueChart'), { ssr: false })
 
-const STATUS_CONFIG: Record<string, { label: string; icon: any; style: string }> = {
+const STATUS_CONFIG: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; style: string }> = {
   APPROVED: { label: 'Approved', icon: CheckCircle2, style: 'text-emerald-600 bg-emerald-50' },
   PENDING: { label: 'Pending', icon: Clock, style: 'text-amber-600 bg-amber-50' },
   REJECTED: { label: 'Rejected', icon: XCircle, style: 'text-red-600 bg-red-50' },

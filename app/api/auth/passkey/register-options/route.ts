@@ -70,10 +70,13 @@ export async function POST() {
     })
 
     return NextResponse.json({ options })
-  } catch (error: any) {
-    console.error('[PASSKEY_REGISTER_OPTIONS]', error?.message || error)
+  } catch (error: unknown) {
+    console.error('[PASSKEY_REGISTER_OPTIONS]', error instanceof Error ? error.message : String(error))
     return NextResponse.json(
-      { error: 'Failed to generate registration options', detail: error?.message },
+      {
+        error: 'Failed to generate registration options',
+        detail: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     )
   }

@@ -59,7 +59,7 @@ async function SettingsTab() {
 
   if (!user) redirect('/login')
 
-  const serializedSettings = user.settings || {}
+  const serializedSettings = (user.settings as { notifications?: { email?: boolean }; theme?: string }) || {}
 
   return <SettingsForm initialSettings={serializedSettings} />
 }

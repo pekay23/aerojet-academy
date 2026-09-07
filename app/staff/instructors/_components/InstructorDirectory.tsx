@@ -5,16 +5,16 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Search,
   Users,
-  _Shield,
-  _Clock,
+  Shield as _Shield,
+  Clock as _Clock,
   AlertTriangle,
   CheckCircle2,
   XCircle,
   ChevronRight,
   Award,
   Loader2,
-  _BookOpen,
-  _Plus,
+  BookOpen as _BookOpen,
+  Plus as _Plus,
 } from 'lucide-react'
 
 interface Qualification {

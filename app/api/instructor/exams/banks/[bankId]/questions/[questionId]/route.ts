@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiForbidden, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiForbidden, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
@@ -26,7 +26,7 @@ const questionSchema = z
   })
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ bankId: string; questionId: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireInstructor()
     const instructorProfile = await getInstructorProfileByUserId(user.id)
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -34,7 +34,7 @@ export const GET = withErrorHandler(
     if (!(await isInternalExamSystemEnabled())) {
       return apiError('Internal exams are not currently available', 403)
     }
-    const { questionId } = await ctx.params
+    const { questionId } = (await ctx!.params) as { bankId: string; questionId: string }
 
     const versions = await prismaUnfiltered.internalExamQuestionVersion.findMany({
       where: { questionId },
@@ -46,7 +46,7 @@ export const GET = withErrorHandler(
 )
 
 export const PUT = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ bankId: string; questionId: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireInstructor()
     const instructorProfile = await getInstructorProfileByUserId(user.id)
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -54,7 +54,7 @@ export const PUT = withErrorHandler(
     if (!(await isInternalExamSystemEnabled())) {
       return apiError('Internal exams are not currently available', 403)
     }
-    const { bankId, questionId } = await ctx.params
+    const { bankId, questionId } = (await ctx!.params) as { bankId: string; questionId: string }
 
     const grant = await prismaUnfiltered.internalExamBankInstructor.findFirst({
       where: { bankId, instructorId: instructorProfile.id },
@@ -182,7 +182,7 @@ export const PUT = withErrorHandler(
 )
 
 export const DELETE = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ bankId: string; questionId: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireInstructor()
     const instructorProfile = await getInstructorProfileByUserId(user.id)
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -190,7 +190,7 @@ export const DELETE = withErrorHandler(
     if (!(await isInternalExamSystemEnabled())) {
       return apiError('Internal exams are not currently available', 403)
     }
-    const { bankId, questionId } = await ctx.params
+    const { bankId, questionId } = (await ctx!.params) as { bankId: string; questionId: string }
 
     const grant = await prismaUnfiltered.internalExamBankInstructor.findFirst({
       where: { bankId, instructorId: instructorProfile.id },

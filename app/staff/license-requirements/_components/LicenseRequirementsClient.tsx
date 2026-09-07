@@ -155,7 +155,7 @@ export default function LicenseRequirementsClient({
                   className="group cursor-pointer px-3 py-3 text-center text-xs font-black tracking-wider text-slate-500 transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
                   onClick={() => handleSort(lc.id)}
                 >
-                  {/* eslint-disable-next-line react-hooks/static-components */}
+                  { }
                   {lc.code} <SortIndicator column={lc.id} />
                 </th>
               ))}

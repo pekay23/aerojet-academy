@@ -48,15 +48,16 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({ ok: true, mirror, sweep, ms: Date.now() - started })
-  } catch (err: any) {
-    console.error('[Cron supabase-mirror] Error:', err.message)
-    await notifyStaff('Supabase Mirror Failed', `Nightly file mirror failed: ${err.message}`)
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[Cron supabase-mirror] Error:', message)
+    await notifyStaff('Supabase Mirror Failed', `Nightly file mirror failed: ${message}`)
     await createAuditLog({
       action: AuditAction.SYSTEM,
       entity: 'SupabaseMirror',
       entityId: 'nightly',
-      description: `Mirror failed: ${err.message}`,
+      description: `Mirror failed: ${message}`,
     })
-    return NextResponse.json({ ok: false, error: err.message }, { status: 500 })
+    return NextResponse.json({ ok: false, error: message }, { status: 500 })
   }
 }

@@ -46,7 +46,7 @@ interface ClassSeatingAssignmentProps {
 
 export default function ClassSeatingAssignment({
   classId,
-  _classroomId,
+  classroomId: _classroomId,
   layout,
   seats,
   students,

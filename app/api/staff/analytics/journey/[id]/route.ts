@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
-import { withErrorHandler, apiError, apiSuccess } from '@/lib/api/response'
+import { withErrorHandler, apiError, apiSuccess, RouteContext } from '@/lib/api/response'
 import { requireStaff } from '@/lib/auth/helpers'
 import { getUserJourney } from '@/lib/analytics/queries'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
-export const GET = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const userId = ctx?.params?.id
+  const { id: userId } = (await ctx!.params) as { id: string }
 
   if (!userId) {
     return apiError('User ID is required', 400)

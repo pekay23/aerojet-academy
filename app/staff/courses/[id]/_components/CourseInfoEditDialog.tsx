@@ -14,12 +14,30 @@ import { Pencil, Loader2 } from 'lucide-react'
 
 const LICENCE_CATEGORIES = ['A', 'B1', 'B2', 'B3'] as const
 
+interface CourseInfo {
+  id: string
+  description: string | null
+  subtitle?: string | null
+  duration?: number | null
+  categoryId?: string | null
+  prerequisites?: string[]
+  topics?: string[]
+  estimatedStudyHoursMin?: number | null
+  estimatedStudyHoursMax?: number | null
+  applicableCategories?: string[]
+}
+
+interface CourseCategory {
+  id: string
+  name: string
+}
+
 export default function CourseInfoEditDialog({
   course,
   categories,
 }: {
-  course: any
-  categories: any[]
+  course: CourseInfo
+  categories: CourseCategory[]
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -79,8 +97,8 @@ export default function CourseInfoEditDialog({
       if (!res.ok) throw new Error(data.error || 'Failed to update')
       setOpen(false)
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setLoading(false)
     }

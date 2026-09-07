@@ -13,8 +13,8 @@ async function main() {
         FOR SELECT TO authenticated USING ("instructorId" = auth.uid()::text);
     `)
     console.log('✅ RLS policy created for internal_exam_bank_instructors')
-  } catch (e: any) {
-    console.log(`⚠️ internal_exam_bank_instructors: ${e.message}`)
+  } catch (e: unknown) {
+    console.log(`⚠️ internal_exam_bank_instructors: ${(e as Error).message}`)
   }
 
   // Verify all policies
@@ -26,8 +26,8 @@ async function main() {
     ORDER BY tablename, cmd
   `)
   console.log('\nCurrent RLS policies:')
-  policies.rows.forEach((r: any) => {
-    console.log(`  ${r.tablename}: ${r.policyname} (${r.cmd})`)
+  policies.rows.forEach((r: unknown) => {
+    console.log(`  ${(r as Record<string, unknown>).tablename}: ${(r as Record<string, unknown>).policyname} (${(r as Record<string, unknown>).cmd})`)
   })
 
   await client.end()
@@ -35,6 +35,9 @@ async function main() {
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

@@ -1,15 +1,15 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiError, apiSuccess, withErrorHandler } from '@/lib/api/response'
+import { apiError, apiSuccess, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { updateExamEventSchema, validateBody } from '@/lib/validation/schemas'
 import { softDeleteData } from '@/lib/prisma/soft-delete'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const PUT = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const staff = await requireStaff()
-    const id = ctx?.params?.id
+    const id = (await ctx!.params).id
     const body = await req.json()
     const validation = validateBody(updateExamEventSchema, body)
 
@@ -42,9 +42,9 @@ export const PUT = withErrorHandler(
 )
 
 export const DELETE = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const staff = await requireStaff()
-    const id = ctx?.params?.id
+    const id = (await ctx!.params).id
 
     const existingEvent = await prismaUnfiltered.examEvent.findUnique({
       where: { id },

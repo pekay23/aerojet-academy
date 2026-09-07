@@ -19,13 +19,16 @@ async function main() {
     console.log(`\n${table}:`)
     console.log(`  RLS: ${rls.rows[0]?.rowsecurity || false}`)
     console.log(`  Policies: ${policies.rows.length}`)
-    policies.rows.forEach((p: any) => console.log(`    - ${p.policyname} (${p.cmd})`))
+    policies.rows.forEach((p: unknown) => console.log(`    - ${(p as Record<string, unknown>).policyname} (${(p as Record<string, unknown>).cmd})`))
   }
 
   await client.end()
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

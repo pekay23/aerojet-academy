@@ -66,6 +66,8 @@ interface SemesterEnrollment {
   status?: string
 }
 
+type ImportRecordValue = string | number | boolean | null | string[]
+
 interface ImportStudent {
   firstName: string
   middleName?: string
@@ -78,9 +80,9 @@ interface ImportStudent {
   walletCreditEur?: number
   walletNotes?: string
   completedModules?: CompletedModule[]
-  examHistory?: any[]
-  entitlements?: any[]
-  plannedBookings?: any[]
+  examHistory?: ImportRecordValue[]
+  entitlements?: ImportRecordValue[]
+  plannedBookings?: ImportRecordValue[]
   notes?: string
   selectedLicenseCategories?: string[]
   fundingSource?: string
@@ -154,7 +156,6 @@ export default function ImportStudentsPage() {
   const [parsedData, setParsedData] = useState<ImportStudent[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
-  const [_sendingCredentials, _setSendingCredentials] = useState<string | null>(null)
 
   // Manual entry state
   const [manualStudents, setManualStudents] = useState<ImportStudent[]>([createEmptyStudent()])
@@ -183,7 +184,7 @@ export default function ImportStudentsPage() {
         if (!lines[i].trim()) continue
 
         const values = parseCSVLine(lines[i])
-        const student: any = {}
+        const student: Partial<ImportStudent> = {}
 
         headers.forEach((header, index) => {
           const val = values[index]?.trim()
@@ -266,7 +267,7 @@ export default function ImportStudentsPage() {
         })
 
         if (student.firstName && student.lastName && student.email) {
-          data.push(student)
+          data.push(student as ImportStudent)
         }
       }
       setParsedData(data)
@@ -298,8 +299,8 @@ export default function ImportStudentsPage() {
       } else if (result.errors?.length > 0) {
         toast.warning('Some records could not be imported')
       }
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Import failed')
     } finally {
       setIsUploading(false)
     }
@@ -334,10 +335,10 @@ export default function ImportStudentsPage() {
     setExpandedStudent(null)
   }
 
-  const updateManualStudent = (index: number, field: string, value: any) => {
+  const updateManualStudent = (index: number, field: keyof ImportStudent, value: ImportStudent[keyof ImportStudent]) => {
     setManualStudents((prev) => {
       const updated = [...prev]
-      ;(updated[index] as any)[field] = value
+      ;(updated[index] as unknown as Record<string, unknown>)[field as string] = value
       return updated
     })
   }
@@ -356,11 +357,11 @@ export default function ImportStudentsPage() {
     })
   }
 
-  const updateCompletedModule = (studentIndex: number, modIndex: number, field: string, value: any) => {
+  const updateCompletedModule = (studentIndex: number, modIndex: number, field: keyof CompletedModule, value: CompletedModule[keyof CompletedModule]) => {
     setManualStudents((prev) => {
       const updated = [...prev]
       const mods = [...(updated[studentIndex].completedModules || [])]
-      ;(mods[modIndex] as any)[field] = value
+      ;(mods[modIndex] as unknown as Record<string, unknown>)[field as string] = value
       updated[studentIndex] = { ...updated[studentIndex], completedModules: mods }
       return updated
     })

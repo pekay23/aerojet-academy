@@ -46,7 +46,7 @@ interface EditExamEventFormProps {
   }
 }
 
-type ExamEventFormValues = z.infer<typeof createExamEventSchema>
+type ExamEventFormValues = z.input<typeof createExamEventSchema>
 
 export default function EditExamEventForm({ event }: EditExamEventFormProps) {
   const router = useRouter()
@@ -63,8 +63,8 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
     }
   }
 
-  const form = useForm<any>({
-    resolver: zodResolver(createExamEventSchema),
+  const form = useForm<ExamEventFormValues>({
+    resolver: zodResolver(createExamEventSchema) as any,
     defaultValues: {
       name: event.name,
       startDate: formatDateForInput(event.startDate),
@@ -72,7 +72,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
       paymentDeadline: formatDateForInput(event.paymentDeadline),
       joinDeadline: formatDateForInput(event.joinDeadline),
       minRevenueTarget: Number(event.minRevenueTarget),
-      minRevenueCurrency: event.minRevenueCurrency || 'EUR',
+      minRevenueCurrency: (event.minRevenueCurrency || 'EUR') as 'EUR' | 'GHS' | 'USD',
     },
   })
 
@@ -104,8 +104,9 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
       toast.success('Exam event updated successfully')
       router.push(`/staff/exams/events/${event.id}`)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update exam event')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update exam event'
+      toast.error(message || 'Failed to update exam event')
     } finally {
       setIsLoading(false)
     }
@@ -115,7 +116,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
-          control={form.control}
+          control={form.control as any}
           name="name"
           render={({ field }) => (
             <FormItem>
@@ -130,7 +131,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="startDate"
             render={({ field }) => (
               <FormItem>
@@ -143,7 +144,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             )}
           />
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="endDate"
             render={({ field }) => (
               <FormItem>
@@ -159,7 +160,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="paymentDeadline"
             render={({ field }) => (
               <FormItem>
@@ -175,7 +176,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             )}
           />
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="joinDeadline"
             render={({ field }) => (
               <FormItem>
@@ -192,7 +193,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="minRevenueTarget"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
@@ -209,7 +210,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             )}
           />
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="minRevenueCurrency"
             render={({ field }) => (
               <FormItem>

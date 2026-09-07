@@ -27,7 +27,7 @@ interface Props {
   sittings: Sitting[]
 }
 
-export default function ManifestButton({ eventId, _sittings }: Props) {
+export default function ManifestButton({ eventId, sittings: _sittings }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 

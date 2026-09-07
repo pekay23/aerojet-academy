@@ -5,8 +5,8 @@ interface CacheEntry<T> {
 
 export class BadgeCountsCache {
   private static instance: BadgeCountsCache
-  private globalCache: Map<string, CacheEntry<any>> = new Map()
-  private userCache: Map<string, CacheEntry<any>> = new Map()
+  private globalCache: Map<string, CacheEntry<unknown>> = new Map()
+  private userCache: Map<string, CacheEntry<unknown>> = new Map()
   private readonly GLOBAL_TTL = 60 * 1000 // 60 seconds
   private readonly USER_TTL = 45 * 1000 // 45 seconds
 
@@ -19,21 +19,21 @@ export class BadgeCountsCache {
     return BadgeCountsCache.instance
   }
 
-  getGlobal(key: string) {
+  getGlobal<T = unknown>(key: string): T | null {
     const entry = this.globalCache.get(key)
     if (!entry) return null
     if (Date.now() - entry.timestamp.getTime() > this.GLOBAL_TTL) {
       this.globalCache.delete(key)
       return null
     }
-    return entry.data
+    return entry.data as T
   }
 
-  setGlobal(key: string, data: any) {
+  setGlobal(key: string, data: unknown) {
     this.globalCache.set(key, { data, timestamp: new Date() })
   }
 
-  getUser(userId: string, key: string) {
+  getUser<T = unknown>(userId: string, key: string): T | null {
     const compositeKey = `${userId}:${key}`
     const entry = this.userCache.get(compositeKey)
     if (!entry) return null
@@ -41,10 +41,10 @@ export class BadgeCountsCache {
       this.userCache.delete(compositeKey)
       return null
     }
-    return entry.data
+    return entry.data as T
   }
 
-  setUser(userId: string, key: string, data: any) {
+  setUser(userId: string, key: string, data: unknown) {
     const compositeKey = `${userId}:${key}`
     this.userCache.set(compositeKey, { data, timestamp: new Date() })
   }

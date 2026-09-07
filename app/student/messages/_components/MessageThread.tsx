@@ -4,8 +4,6 @@ import { useState } from 'react'
 import {
   ChevronDown,
   ChevronRight,
-  _User,
-  _Clock,
   CornerDownRight,
   Send,
   Loader2,

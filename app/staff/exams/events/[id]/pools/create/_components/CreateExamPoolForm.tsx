@@ -24,7 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { EASA_MODULE_CODES } from '@/lib/constants/easa-modules'
 
 interface CreateExamPoolFormProps {
-  event: Omit<ExamEvent, 'minRevenueTarget'> & { minRevenueTarget: number | any }
+  event: Omit<ExamEvent, 'minRevenueTarget'> & { minRevenueTarget: number | null }
 }
 
 type ExamPoolFormValues = z.infer<typeof createExamPoolSchema>
@@ -78,8 +78,8 @@ export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
       toast.success('Exam booking created successfully')
       router.push(`/staff/exams/events/${event.id}`)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create exam booking')
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create exam booking')
     } finally {
       setIsLoading(false)
     }

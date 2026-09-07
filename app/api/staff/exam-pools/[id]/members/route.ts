@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiCreated, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { z } from 'zod'
 import { validateBody } from '@/lib/validation/schemas'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -13,8 +13,8 @@ const addMemberSchema = z.object({
 })
 
 export const POST = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
-    const params = ctx?.params ?? {}
+  async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
+    const params = ctx.params
     const staff = await requireStaff()
     const body = await req.json()
     const validation = validateBody(addMemberSchema, body)

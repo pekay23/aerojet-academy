@@ -130,9 +130,9 @@ function extractToc(md) {
 }
 
 // ── Layout heuristic ─────────────────────────────────────────────────────
-function detectLayout(slug, mdContent) {
+function _detectLayout(slug, mdContent) {
   const s = slug.toLowerCase()
-  const c = mdContent.toLowerCase()
+  const _c = mdContent.toLowerCase()
   if (/incident|post-?mortem/.test(s)) return 'incident'
   if (/-plan|implementation|refactor/.test(s)) return 'plan'
   if (/audit|status|findings|review/.test(s)) return 'audit'
@@ -833,6 +833,8 @@ main().catch((err) => {
   console.error('[build-docs-html] failed:', err)
   process.exit(1)
 })
+
+
 
 
 

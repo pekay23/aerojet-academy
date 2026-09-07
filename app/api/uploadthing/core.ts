@@ -41,7 +41,7 @@ export const ourFileRouter = {
   // Define as many FileRoutes as you like, each with a unique routeSlug
   paymentProof: f({ image: { maxFileSize: '4MB' }, pdf: { maxFileSize: '4MB' } })
     // Set permissions and file types for this FileRoute
-    .middleware(async ({ _req }) => {
+    .middleware(async ({ req: _req }) => {
       // This code runs on your server before upload
       try {
         const session = await getAuthSession()
@@ -61,7 +61,7 @@ export const ourFileRouter = {
     }),
 
   profileImage: f({ image: { maxFileSize: '2MB', maxFileCount: 1 } })
-    .middleware(async ({ _req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session) throw new UploadThingError('Unauthorized')
       return { userId: session.user.id }
@@ -73,7 +73,7 @@ export const ourFileRouter = {
     }),
 
   newsCoverImage: f({ image: { maxFileSize: '4MB', maxFileCount: 1 } })
-    .middleware(async ({ _req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
@@ -92,7 +92,7 @@ export const ourFileRouter = {
     audio: { maxFileSize: '8MB', maxFileCount: 1 },
     blob: { maxFileSize: '4MB', maxFileCount: 1 },
   })
-    .middleware(async ({ _req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
@@ -106,7 +106,7 @@ export const ourFileRouter = {
     }),
 
   newsImage: f({ blob: { maxFileSize: '4MB', maxFileCount: 1 } })
-    .middleware(async ({ _req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
@@ -120,7 +120,7 @@ export const ourFileRouter = {
     }),
 
   newsAudio: f({ blob: { maxFileSize: '32MB', maxFileCount: 1 } })
-    .middleware(async ({ _req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
@@ -137,7 +137,7 @@ export const ourFileRouter = {
     pdf: { maxFileSize: '4MB', maxFileCount: 1 },
     image: { maxFileSize: '4MB', maxFileCount: 1 },
   })
-    .middleware(async ({ _req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session) throw new UploadThingError('Unauthorized')
       return { userId: session.user.id }
@@ -153,7 +153,7 @@ export const ourFileRouter = {
     image: { maxFileSize: '16MB', maxFileCount: 1 },
     blob: { maxFileSize: '32MB', maxFileCount: 1 },
   })
-    .middleware(async ({ _req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
@@ -167,7 +167,7 @@ export const ourFileRouter = {
     }),
 
   candidatePhoto: f({ image: { maxFileSize: '4MB', maxFileCount: 1 } })
-    .middleware(async ({ _req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session) throw new UploadThingError('Unauthorized')
       return { userId: session.user.id }
@@ -187,7 +187,7 @@ export const ourFileRouter = {
     'application/pdf': { maxFileSize: '16MB', maxFileCount: 1 },
     'application/json': { maxFileSize: '16MB', maxFileCount: 1 },
   })
-    .middleware(async ({ _req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (
         !session ||

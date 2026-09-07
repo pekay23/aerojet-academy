@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
-export const POST = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const session = await requireStaff()
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
 
   const examSession = await prismaUnfiltered.internalExamSession.findUnique({
     where: { id },

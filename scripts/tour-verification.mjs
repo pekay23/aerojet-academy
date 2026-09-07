@@ -3,7 +3,7 @@
  * Uses Playwright directly (not the test framework) to log in, start the tour,
  * and capture screenshots across all 5 portals.
  */
-import { chromium, FullPageScreenshotOptions } from 'playwright'
+import { chromium } from 'playwright'
 import fs from 'fs'
 import path from 'path'
 
@@ -32,7 +32,7 @@ const PORTAL_URLS = {
   examiner: '/examiner',
 }
 
-async function loginAs(page: any, role: string) {
+async function loginAs(page: unknown, role: string) {
   const creds = CREDENTIALS[role as keyof typeof CREDENTIALS]
   console.log(`[${role}] Navigating to login page...`)
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' })
@@ -48,14 +48,14 @@ async function loginAs(page: any, role: string) {
   console.log(`[${role}] Login successful, on page: ${page.url()}`)
 }
 
-async function takeFullPageScreenshot(page: any, filename: string) {
+async function takeFullPageScreenshot(page: unknown, filename: string) {
   await page.screenshot({
     path: path.join(SCREENSHOT_DIR, filename),
     fullPage: true,
   })
 }
 
-async function captureTourScreenshots(page: any, role: string) {
+async function captureTourScreenshots(page: unknown, role: string) {
   const screenshotFile = (step: number, label: string) =>
     takeFullPageScreenshot(page, `${role}-${String(step).padStart(2, '0')}-${label}.png`)
 
@@ -153,15 +153,15 @@ async function testPortal(role: string) {
   })
 
   // Capture console and page errors
-  page.on('console', (msg: any) => {
+  page.on('console', (msg: unknown) => {
     if (msg.type() === 'error') {
       console.log(`[${role}] Page error: ${msg.text()}`)
     }
   })
-  page.on('pageerror', (err: any) => {
+  page.on('pageerror', (err: unknown) => {
     console.log(`[${role}] JS Error: ${err.message}`)
   })
-  page.on('requestfailed', (req: any) => {
+  page.on('requestfailed', (req: unknown) => {
     if (req.url().includes('/api/') || req.url().includes('favicon')) return
     console.log(`[${role}] Request failed: ${req.url()} - ${req.failure()?.errorText}`)
   })
@@ -169,9 +169,9 @@ async function testPortal(role: string) {
   try {
     await loginAs(page, role)
     await captureTourScreenshots(page, role)
-  } catch (e: any) {
-    console.error(`[${role}] Error:`, e.message)
-    await takeFullPageScreenshot(page, `${role}-error-${e.message.substring(0, 30)}.png`)
+  } catch (e: unknown) {
+    console.error(`[${role}] Error:`, (e as Error).message)
+    await takeFullPageScreenshot(page, `${role}-error-${(e as Error).message.substring(0, 30)}.png`)
   } finally {
     await browser.close()
   }
@@ -194,3 +194,7 @@ async function main() {
 }
 
 main().catch(console.error)
+
+
+
+

@@ -4,22 +4,23 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Internal Exam System — Implementation Gap Report · Aerojet Academy</title>
-<link rel="stylesheet" href="../../design-tokens.css">
-<link rel="stylesheet" href="../../docs.css">
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="undefinedindex.html">Index</a>
-    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
-    <a href="undefinedguides/setup.html">Guides</a>
-    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="undefinedplans/future-plans.html">Plans</a>
-    <a href="undefineddesign-system.html">Design</a>
-    <a href="undefinedoperations/branch-strategy.html">Operations</a>
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -61,8 +62,8 @@
 <tr><td>Schema: session recovery fields (<code>lastActivityAt</code>, <code>timeExtensionSec</code>, <code>recoveredAt</code>, <code>supervised</code>, <code>questionOrder</code>)</td><td>✅ Complete</td><td><code>prisma/schema.prisma:2136-2158</code>, <code>:2152</code></td></tr>
 <tr><td>Schema: <code>flaggedForReview</code> on answer</td><td>✅ Complete</td><td><code>prisma/schema.prisma:1963</code></td></tr>
 <tr><td><code>bun run db:push</code> (Neon)</td><td>✅ Complete</td><td>Per session digest; schema reflects models</td></tr>
-<tr><td><code>bun run db:push:supabase</code> (mirror)</td><td>❌ Pending</td><td>Tracker correctly marks PENDING (network/Supabase reachability). Schema not mirrored to replica.</td></tr>
-<tr><td>Enable Realtime on <code>internal_exam_sessions</code> in Supabase Console</td><td>❌ Pending</td><td>Tracker correctly marks PENDING. The RLS migration SQL exists (see below) but the table is not enabled in the console/publication in the live project.</td></tr>
+<tr><td><code>bun run db:push:supabase</code> (mirror)</td><td>✅ Complete</td><td>Schema mirrored to Supabase replica on 2026-09-04. Fixed 6 NULL <code>academicYearId</code> rows in Supabase before push.</td></tr>
+<tr><td>Enable Realtime on <code>internal_exam_sessions</code> in Supabase Console</td><td>❌ Pending</td><td>Tracker correctly marks PENDING. The RLS migration SQL exists but the table is not enabled in the console/publication in the live project.</td></tr>
 <tr><td>RBAC: <code>requireBankAccess(bankId, capability)</code></td><td>✅ Complete</td><td><code>lib/auth/permissions.ts:138</code></td></tr>
 <tr><td>6 permission keys (<code>EXAM_BANK_EDIT</code>, <code>EXAM_SESSION_MONITOR</code>, <code>EXAM_VIOLATION_REVIEW</code>, etc.)</td><td>✅ Complete</td><td><code>lib/auth/permission-registry.ts:29,31,34,57,59,62</code></td></tr>
 <tr><td>20 exam <code>AuditAction</code> values</td><td>✅ Complete</td><td><code>lib/audit/logger.ts:23-26</code> (+ more)</td></tr>
@@ -148,7 +149,6 @@
 <ol>
 <li><strong>Phase 5 — EASA compliance guide doc</strong> (<code>docs/guides/easa-exam-compliance.md</code>): create the deliverable referenced by Phase 5. Currently missing.</li>
 <li><strong>Phase 5 — Accessibility exception doc</strong> (<code>ACCESSIBILITY.md</code>): create WCAG-waiver documentation for strict keypress + fullscreen lock + supervised pathway. Currently missing.</li>
-<li><strong><code>bun run db:push:supabase</code></strong>: mirror schema to Supabase replica (blocked on network/Supabase reachability).</li>
 <li><strong>Enable Realtime on <code>internal_exam_sessions</code></strong> in Supabase Console + add to publication so the live monitor actually streams (the RLS migration SQL exists but the table is not enabled live).</li>
 <li><strong>Unit tests</strong> for <code>requireBankAccess</code> and class-start idempotency (tracker PENDING).</li>
 <li><strong>Final LLM Council audit</strong> against the MUST-FIX checklist (tracker PENDING).</li>
@@ -185,7 +185,7 @@
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

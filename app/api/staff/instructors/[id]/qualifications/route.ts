@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import { apiError, apiCreated, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 
@@ -12,9 +12,9 @@ const qualSchema = z.object({
   notes: z.string().optional(),
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
   const body = await req.json()
   const parsed = qualSchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid input')

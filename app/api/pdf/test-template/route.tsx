@@ -199,16 +199,17 @@ async function generatePDFResponse(
       )
     }
 
-    return new NextResponse(stream as any, {
+    return new NextResponse(stream as unknown as ReadableStream, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="test-${type}.pdf"`,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error generating PDF:', error)
+    const details = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to generate PDF', details: error.message },
+      { error: 'Failed to generate PDF', details },
       { status: 500 }
     )
   }

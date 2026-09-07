@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
 // PUT — sign/update a practical training record (dual signature or full admin edit)
-export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const PUT = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
   await requireStaff()
-  const { id } = ctx.params
+  const { id } = (await ctx!.params) as { id: string }
   const body = await req.json()
 
   const record = await prismaUnfiltered.practicalTrainingRecord.findUnique({ where: { id } })
@@ -36,7 +36,7 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
   }
 
   // Otherwise fallback to the signature/quick-result update path
-  const data: any = {}
+   const data: Record<string, unknown> = {}
 
   // Instructor signature
   if (body.signedByInstructor !== undefined) {
@@ -69,9 +69,9 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
 })
 
 // DELETE — delete practical training record
-export const DELETE = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const DELETE = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
   await requireStaff()
-  const { id } = ctx.params
+  const { id } = (await ctx!.params) as { id: string }
 
   const record = await prismaUnfiltered.practicalTrainingRecord.findUnique({ where: { id } })
   if (!record) return apiError('Record not found', 404)

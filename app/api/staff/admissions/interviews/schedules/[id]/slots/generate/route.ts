@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getInterviewConfig } from '@/lib/settings'
 import { z } from 'zod'
@@ -17,9 +17,9 @@ const schema = z.object({
   })).min(1),
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await params
+  const { id } = (await ctx!.params) as { id: string }
   
   const body = await req.json()
   const result = schema.safeParse(body)

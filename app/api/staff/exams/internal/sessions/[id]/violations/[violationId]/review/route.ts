@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 import { z } from 'zod'
@@ -10,9 +10,9 @@ const reviewSchema = z.object({
   reviewNote: z.string().optional(),
 })
 
-export const PATCH = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ id: string; violationId: string }> }) => {
+export const PATCH = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const session = await requireStaff()
-  const { id, violationId } = await ctx.params
+  const { id, violationId } = (await ctx!.params) as { id: string; violationId: string }
   const body = reviewSchema.safeParse(await req.json())
   if (!body.success) return apiError(body.error.issues.map(i => i.message).join('; '), 400)
 

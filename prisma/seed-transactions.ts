@@ -63,6 +63,7 @@ async function main() {
   }
 
   const programmeYear = ftProgramme.programmeYears[0]
+  const academicYear = await prisma.academicYear.findFirst({ where: { name: '2026/2027' } })
 
   for (const user of users) {
     const pathwayCode = user.studentProfile?.pathwayRel?.code
@@ -95,7 +96,7 @@ async function main() {
           programmeId: ftProgramme.id,
           programmeYearId: programmeYear.id,
           status: 'PENDING_CONFIRMATION', // Not released yet
-          academicYear: '2026/2027',
+          academicYearId: academicYear?.id || '',
           currentYearNumber: 1
         }
       })

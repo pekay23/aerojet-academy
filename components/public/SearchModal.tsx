@@ -81,7 +81,7 @@ export default function SearchModal() {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 100)
     } else {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery('')
       setResults([])
@@ -91,7 +91,7 @@ export default function SearchModal() {
 
   // Debounced search
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
     if (query.length < 2) {
   // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([])
@@ -155,7 +155,7 @@ export default function SearchModal() {
 
   return (
     <>
-      {/* Search trigger â€” icon only */}
+      {/* Search trigger — icon only */}
       <button
         onClick={() => setOpen(true)}
         className="group flex items-center gap-2 rounded-lg px-3 py-2 transition-all"

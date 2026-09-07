@@ -36,7 +36,7 @@ export function useBadgeCounts(
         setCounts(data)
       }
     } catch {
-      // Silently fail â€” stale counts are fine
+      // Silently fail — stale counts are fine
     }
   }, [])
 
@@ -47,8 +47,8 @@ export function useBadgeCounts(
 
   useEffect(() => {
     // Fetch immediately on mount
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCounts()
 

@@ -3,16 +3,20 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { getRealtimeClient } from '@/lib/realtime/client'
 
+interface ExamSessionChange {
+  studentId?: string
+  [key: string]: unknown
+}
+
 interface UseRealtimeExamMonitorOptions {
   classId: string
-  onSessionUpdate: (session: any) => void
-  onSessionInsert: (session: any) => void
+  onSessionUpdate: (session: ExamSessionChange) => void
+  onSessionInsert: (session: ExamSessionChange) => void
   enabled?: boolean
 }
 
 const STUDENT_THROTTLE_MS = 5_000
 const DEBOUNCE_MS = 1_000
-const _POLL_INTERVAL_MS = 15_000
 const RECONNECT_BACKOFF_MS = 5_000
 
 export function useRealtimeExamMonitor({
@@ -60,7 +64,7 @@ export function useRealtimeExamMonitor({
 
   useEffect(() => {
     if (!enabled) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
       teardown()
       return
@@ -83,8 +87,8 @@ export function useRealtimeExamMonitor({
           table: 'internal_exam_sessions',
           filter: `classId=eq.${classId}`,
         },
-        (payload: { new: Record<string, any> }) => {
-          const studentId = (payload.new as any)?.studentId as string | undefined
+        (payload: { new: ExamSessionChange }) => {
+          const studentId = payload.new?.studentId
           if (!studentId) return
 
           const now = Date.now()
@@ -94,7 +98,7 @@ export function useRealtimeExamMonitor({
           lastUpdateRef.current.set(studentId, now)
 
           scheduleDebounced(() => {
-            onSessionInsert(payload.new as any)
+            onSessionInsert(payload.new)
           })
         }
       )
@@ -106,8 +110,8 @@ export function useRealtimeExamMonitor({
           table: 'internal_exam_sessions',
           filter: `classId=eq.${classId}`,
         },
-        (payload: { new: Record<string, any> }) => {
-          const studentId = (payload.new as any)?.studentId as string | undefined
+        (payload: { new: ExamSessionChange }) => {
+          const studentId = payload.new?.studentId
           if (!studentId) return
 
           const now = Date.now()
@@ -117,7 +121,7 @@ export function useRealtimeExamMonitor({
           lastUpdateRef.current.set(studentId, now)
 
           scheduleDebounced(() => {
-            onSessionUpdate(payload.new as any)
+            onSessionUpdate(payload.new)
           })
         }
       )

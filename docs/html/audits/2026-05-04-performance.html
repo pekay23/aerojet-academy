@@ -39,15 +39,15 @@
 <li><code>app/staff/students/[id]/page.tsx:34-43</code></li>
 </ul>
 <pre><code class="language-ts">const allUsers = await prisma.user.findMany({
-  select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } },
+  select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } }
 })
-const matchedUser = allUsers.find((u) =&gt; slugify(name) === id)
+const matchedUser = allUsers.find(u =&gt; slugify(name) === id)
 </code></pre>
 <p><strong>Impact:</strong> Every detail page loads the ENTIRE users table into Node.js memory just to resolve a slug. With 10,000 users, this alone could take 5-10 seconds and use 50MB+ RAM per request.</p>
 <p><strong>Fix:</strong> Add a <code>slug</code> column to the <code>Profile</code> model (or use a computed/stored generated column), index it, and query directly:</p>
 <pre><code class="language-ts">const user = await prisma.profile.findFirst({
   where: { slug: id },
-  select: { userId: true },
+  select: { userId: true }
 })
 </code></pre>
 <p>Or at minimum, do the filtering in SQL:</p>
@@ -248,12 +248,12 @@ const event = await prismaUnfiltered.examEvent.findUnique({  // full fetch with 
 <pre><code class="language-tsx">export default async function FinancePage() {
   return (
     &lt;&gt;
-      &lt;FinanceHeader /&gt; {/* renders immediately */}
+      &lt;FinanceHeader /&gt;  {/* renders immediately */}
       &lt;Suspense fallback={&lt;ChartSkeleton /&gt;}&gt;
-        &lt;OverviewCharts /&gt; {/* streams when ready */}
+        &lt;OverviewCharts /&gt;  {/* streams when ready */}
       &lt;/Suspense&gt;
       &lt;Suspense fallback={&lt;TableSkeleton /&gt;}&gt;
-        &lt;TransactionsTable /&gt; {/* streams when ready */}
+        &lt;TransactionsTable /&gt;  {/* streams when ready */}
       &lt;/Suspense&gt;
     &lt;/&gt;
   )

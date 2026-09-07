@@ -21,7 +21,7 @@ interface Props {
   staffId: string
 }
 
-export default function MentorAssignments({ logbookId, mentorAssignments, availableMentors, _staffId }: Props) {
+export default function MentorAssignments({ logbookId, mentorAssignments, availableMentors, staffId: _staffId }: Props) {
   const router = useRouter()
   const [selectedMentor, setSelectedMentor] = useState('')
   const [loading, setLoading] = useState(false)

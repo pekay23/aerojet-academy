@@ -22,7 +22,7 @@ import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import ManualWalletAdjustmentDialog from '../users/[id]/_components/ManualWalletAdjustmentDialog'
 import { UserStatus, EnrollmentStatus, PaymentStatus } from '@/types/enums'
 import Image from 'next/image'
-import type { ExamHistoryItem } from '@/lib/types/staff'
+import type { ExamHistoryItem, SerializedExamBooking } from '@/lib/types/staff'
 
 interface Student {
   id: string
@@ -61,28 +61,14 @@ interface Student {
     id: string
     score: number
     passed: boolean
-    exam: {
-      name: string
-      examDate: Date
-      examComponent?: { course?: { name: string; code: string } }
-    }
+    exam?: {
+      name?: string | null
+      examDate?: string | Date | null
+      examComponent?: { course?: { name: string; code: string } | null } | null
+    } | null
     certificateUrl?: string | null
   }[]
-  examBookings?: {
-    id: string
-    moduleCode?: string | null
-    examDate?: Date | null
-    bookedAt: Date
-    status: string
-    result?: string | null
-    score?: number | null
-    examCategory?: string | null
-    attemptType?: string | null
-    exam?: {
-      name: string
-      examComponent?: { course?: { name: string; code: string } }
-    }
-  }[]
+  examBookings?: SerializedExamBooking[]
   enrollments?: {
     id: string
     status: string
@@ -149,7 +135,7 @@ export default function StudentDetailPanel({
           const data = await res.json()
           setStudent(data.data) // apiSuccess wraps in 'data'
         }
-      } catch (err) {
+      } catch (_err) {
         toast.error('Failed to load student details')
       } finally {
         setLoading(false)
@@ -204,7 +190,7 @@ export default function StudentDetailPanel({
     id: r.id,
     source: 'result' as const,
     type: 'FORMAL',
-    moduleCode: r.exam?.examComponent?.course?.code || 'â€”',
+    moduleCode: r.exam?.examComponent?.course?.code || '—',
     examName: r.exam?.name || 'Exam Result',
     date: r.exam?.examDate || null,
     score: r.score != null ? Number(r.score) : null,
@@ -215,15 +201,15 @@ export default function StudentDetailPanel({
   // 2. Completed bookings (have a definitive result like pass/fail, or a score)
   const completedBookings = (currentStudent.examBookings || [])
     .filter(
-      (b: any) => isCompletedResult(b.result) || (b.score != null && b.status === 'COMPLETED')
+      (b: SerializedExamBooking) => isCompletedResult(b.result) || (b.score != null && b.status === 'COMPLETED')
     )
-    .map((b: any) => ({
+    .map((b: SerializedExamBooking) => ({
       id: b.id,
       source: 'booking' as const,
       type: 'MANUAL',
-      moduleCode: b.moduleCode || 'â€”',
+      moduleCode: b.moduleCode || '—',
       examName: b.exam?.name || 'Exam Booking',
-      date: b.examDate || b.bookedAt,
+      date: b.examDate || b.bookedAt || null,
       score: b.score != null ? Number(b.score) : null,
       passed: b.result?.toLowerCase() === 'pass',
       result: b.result?.toUpperCase() || (b.score != null ? 'SCORED' : null),
@@ -231,21 +217,24 @@ export default function StudentDetailPanel({
       attemptType: b.attemptType,
     }))
 
-  // 3. Upcoming bookings â€” no completed result, still pending/approved
+  // 3. Upcoming bookings — no completed result, still pending/approved
   const upcomingExamsList = (currentStudent.examBookings || [])
-    .filter((b: any) => isUpcomingBooking(b))
-    .map((b: any) => ({
+    .filter((b: SerializedExamBooking) => isUpcomingBooking(b))
+    .map((b: SerializedExamBooking) => ({
       id: b.id,
       source: 'booking' as const,
       type: b.exam?.name ? 'BOOKED' : 'MANUAL',
-      moduleCode: b.moduleCode || 'â€”',
+      moduleCode: b.moduleCode || '—',
       examName: b.exam?.name || 'Upcoming Exam',
-      date: b.examDate || b.bookedAt,
+      date: b.examDate || b.bookedAt || null,
+      score: null,
+      passed: undefined,
+      result: null,
       paymentStatus: b.status,
       examCategory: b.examCategory,
       attemptType: b.attemptType,
     }))
-    .sort((a: any, b: any) => {
+    .sort((a: ExamHistoryItem, b: ExamHistoryItem) => {
       const da = a.date ? new Date(a.date).getTime() : 0
       const db = b.date ? new Date(b.date).getTime() : 0
       return da - db
@@ -325,7 +314,7 @@ export default function StudentDetailPanel({
             <div>
               <h2 className="text-xl font-black text-slate-800 dark:text-slate-200">{fullName}</h2>
               <p className="mt-0.5 flex items-center gap-2 text-sm text-slate-400">
-                <span className="font-mono">{currentStudent.studentProfile?.studentId ?? 'â€”'}</span>
+                <span className="font-mono">{currentStudent.studentProfile?.studentId ?? '—'}</span>
                 {currentStudent.studentProfile?.cohort && (
                   <>
                     <span className="h-1 w-1 rounded-full bg-slate-300" />
@@ -429,12 +418,12 @@ export default function StudentDetailPanel({
                     <Field
                       icon={Phone}
                       label="Phone"
-                      value={currentStudent.profile?.phone ?? 'â€”'}
+                      value={currentStudent.profile?.phone ?? '—'}
                     />
                     <Field
                       icon={Globe}
                       label="Nationality"
-                      value={currentStudent.profile?.nationality ?? 'â€”'}
+                      value={currentStudent.profile?.nationality ?? '—'}
                     />
                     <Field
                       icon={Calendar}
@@ -449,7 +438,7 @@ export default function StudentDetailPanel({
                                 year: 'numeric',
                               }
                             )
-                          : 'â€”'
+                          : '—'
                       }
                     />
                   </Grid2>
@@ -460,17 +449,17 @@ export default function StudentDetailPanel({
                     <Field
                       icon={GraduationCap}
                       label="Programme"
-                      value={currentStudent.studentProfile?.programType?.replace(/_/g, ' ') ?? 'â€”'}
+                      value={currentStudent.studentProfile?.programType?.replace(/_/g, ' ') ?? '—'}
                     />
                     <Field
                       icon={BookOpen}
                       label="Licence Category"
-                      value={currentStudent.studentProfile?.licenceCategory ?? 'â€”'}
+                      value={currentStudent.studentProfile?.licenceCategory ?? '—'}
                     />
                     <Field
                       icon={Globe}
                       label="Pathway"
-                      value={currentStudent.studentProfile?.pathwayRel?.name ?? 'â€”'}
+                      value={currentStudent.studentProfile?.pathwayRel?.name ?? '—'}
                     />
                     <Field
                       icon={Calendar}
@@ -485,19 +474,19 @@ export default function StudentDetailPanel({
                                 year: 'numeric',
                               }
                             )
-                          : 'â€”'
+                          : '—'
                       }
                     />
                     <Field
                       icon={User}
                       label="Cohort"
-                      value={currentStudent.studentProfile?.cohort ?? 'â€”'}
+                      value={currentStudent.studentProfile?.cohort ?? '—'}
                     />
                     <Field
                       icon={Wallet}
                       label="Funding Source"
                       value={
-                        currentStudent.studentProfile?.fundingSource?.replace(/_/g, ' ') ?? 'â€”'
+                        currentStudent.studentProfile?.fundingSource?.replace(/_/g, ' ') ?? '—'
                       }
                     />
                     {currentStudent.studentProfile?.academicYear && (
@@ -626,8 +615,8 @@ function ExamTabContent({
   upcomingExams,
   allExamHistory,
 }: {
-  upcomingExams: any[]
-  allExamHistory: any[]
+  upcomingExams: ExamHistoryItem[]
+  allExamHistory: ExamHistoryItem[]
 }) {
   const [filter, setFilter] = useState<ExamFilter>('ALL')
 
@@ -703,7 +692,7 @@ function ExamTabContent({
                     )}
                   </div>
                   <p className="mt-0.5 text-[10px] text-slate-400">
-                    {exam.date ? new Date(exam.date).toLocaleDateString() : 'â€”'}
+                    {exam.date ? new Date(exam.date).toLocaleDateString() : '—'}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -773,12 +762,12 @@ function ExamTabContent({
                       )}
                     </div>
                     <p className="mt-0.5 text-[10px] text-slate-400">
-                      {h.date ? new Date(h.date).toLocaleDateString() : 'â€”'}
+                      {h.date ? new Date(h.date).toLocaleDateString() : '—'}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <span className="font-mono text-xs font-black">
-                      {h.score !== null ? `${h.score}%` : 'â€”'}
+                      {h.score !== null ? `${h.score}%` : '—'}
                     </span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiForbidden, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiForbidden, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
@@ -23,7 +23,7 @@ const overrideSchema = z.object({
  * Returns the current rule override for the bank (instructor must have canEdit).
  */
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ bankId: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireInstructor()
     const instructorProfile = await getInstructorProfileByUserId(user.id)
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -32,7 +32,7 @@ export const GET = withErrorHandler(
       return apiError('Internal exams are not currently available', 403)
     }
 
-    const { bankId } = await ctx.params
+    const { bankId } = (await ctx!.params) as { bankId: string }
 
     const grant = await prismaUnfiltered.internalExamBankInstructor.findFirst({
       where: { bankId, instructorId: instructorProfile.id },
@@ -60,7 +60,7 @@ export const GET = withErrorHandler(
  * Updates the rule override for the bank (instructor must have canEdit).
  */
 export const PUT = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ bankId: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireInstructor()
     const instructorProfile = await getInstructorProfileByUserId(user.id)
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -69,7 +69,7 @@ export const PUT = withErrorHandler(
       return apiError('Internal exams are not currently available', 403)
     }
 
-    const { bankId } = await ctx.params
+    const { bankId } = (await ctx!.params) as { bankId: string }
 
     const grant = await prismaUnfiltered.internalExamBankInstructor.findFirst({
       where: { bankId, instructorId: instructorProfile.id },

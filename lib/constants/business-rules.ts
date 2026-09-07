@@ -50,9 +50,9 @@ export const POOL_DEFAULTS = {
 // drift across noreply@aerojet.aviation vs noreply@aerojet-academy.com.
 export const EMAIL_ADDRESSES = {
   /** Default `from:` for transactional email (welcome / verification / etc.) */
-  fromTransactional: 'Aerojet Academy <admissions@mail.aerojet-academy.com>',
+  fromTransactional: 'Aerojet Academy <admissions@aerojet-academy.com>',
   /** Default `from:` for system-generated / no-reply email (backups, alerts) */
-  fromNoReply: 'Aerojet Academy <noreply@mail.aerojet-academy.com>',
+  fromNoReply: 'Aerojet Academy <noreply@aerojet-academy.com>',
   /** Address users can write to for support (visible in emails / contact form) */
   support: 'support@aerojet-academy.com',
   /** Address admissions team monitors */

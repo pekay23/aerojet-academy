@@ -67,3 +67,5 @@ if (!pkgJson.bin.tsc) {
 }
 
 console.log('[fix-tsc6-shim] Done');
+
+

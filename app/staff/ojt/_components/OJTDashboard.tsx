@@ -5,7 +5,7 @@ import {
   BookOpen,
   Clock,
   CheckCircle2,
-  _AlertTriangle,
+  AlertTriangle as _AlertTriangle,
   PauseCircle,
   ChevronRight,
   Search,

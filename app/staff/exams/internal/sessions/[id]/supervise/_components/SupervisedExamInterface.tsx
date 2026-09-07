@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { cn } from '@/lib/utils'
 
 interface SupervisedExamInterfaceProps {
@@ -20,6 +19,13 @@ interface ExamQuestion {
   subTopic: string
 }
 
+interface SupervisedSession {
+  id: string
+  questions: ExamQuestion[]
+  savedAnswers: { questionId: string; selectedAnswer: string }[]
+  totalTimeSecs: number
+}
+
 interface ActivityLogEntry {
   timestamp: string
   type: string
@@ -33,7 +39,7 @@ export default function SupervisedExamInterface({
   bankName,
   className,
 }: SupervisedExamInterfaceProps) {
-  const [session, setSession] = useState<any>(null)
+  const [session, setSession] = useState<SupervisedSession | null>(null)
   const [questions, setQuestions] = useState<ExamQuestion[]>([])
   const [savedAnswers, setSavedAnswers] = useState<Record<string, string>>({})
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -56,12 +62,11 @@ export default function SupervisedExamInterface({
     }
     setActivityLog((prev) => [...prev, entry])
 
-    createAuditLog({
-      action: AuditAction.EXAM_SESSION_STARTED,
-      entity: 'InternalExamSession',
-      entityId: sessionId,
-      description: `[Supervised] ${type}: ${description}`,
-      details: { studentName, studentEmail, bankName, className, type, description },
+    // Call the API route to log the activity on the server
+    fetch(`/api/staff/exams/internal/sessions/${sessionId}/supervise/activity`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, description, studentName, studentEmail, bankName, className }),
     }).catch(() => {})
   }, [sessionId, studentName, studentEmail, bankName, className])
 
@@ -81,7 +86,16 @@ export default function SupervisedExamInterface({
       const sessionData = data.data
       setSession(sessionData)
       setQuestions(sessionData.questions || [])
-      setSavedAnswers(Object.fromEntries((sessionData.savedAnswers || []).map((a: any) => [a.questionId, a.selectedAnswer])))
+      setSavedAnswers(
+        Object.fromEntries(
+          (sessionData.savedAnswers || []).map(
+            (answer: { questionId: string; selectedAnswer: string }) => [
+              answer.questionId,
+              answer.selectedAnswer,
+            ]
+          )
+        )
+      )
       setTimeLeft(sessionData.totalTimeSecs || 0)
       setIsSubmitted(false)
       logActivity('EXAM_STARTED', `Invigilator started supervised exam for ${studentName}`)

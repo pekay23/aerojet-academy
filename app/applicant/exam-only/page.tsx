@@ -1,7 +1,5 @@
 'use client'
 
-export const metadata = { title: 'Exam Only Pathway | Applicant Portal' }
-
 import dynamic from 'next/dynamic'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'

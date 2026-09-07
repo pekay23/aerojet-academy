@@ -1,7 +1,7 @@
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import crypto from 'crypto'
 
-function computeEntryHash(data: Record<string, any>): string {
+function computeEntryHash(data: Record<string, unknown>): string {
   return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex')
 }
 
@@ -89,3 +89,5 @@ main()
   .finally(async () => {
     await prismaUnfiltered.$disconnect()
   })
+
+

@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({ success: true, expired: expired.length })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CRON] bek-rotation error:', error)
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }

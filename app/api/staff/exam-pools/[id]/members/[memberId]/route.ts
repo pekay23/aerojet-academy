@@ -2,17 +2,17 @@ import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { decrementPoolMemberCount } from '@/lib/pools/operations'
 import { releaseFunds, creditToWallet } from '@/lib/wallet/operations'
 
 // DELETE /api/staff/exam-pools/[id]/members/[memberId] — Remove a member from a pool
 export const DELETE = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const staff = await requireStaff()
-    const poolId = ctx?.params?.id
-    const memberId = ctx?.params?.memberId
+    const poolId = (await ctx!.params).id
+    const memberId = (await ctx!.params).memberId
 
     const { reason } = await req.json()
     if (!reason || reason.trim().length < 5) {

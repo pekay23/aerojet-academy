@@ -91,8 +91,8 @@ export async function GET(req: NextRequest) {
       deletedCount,
       retentionDays,
     })
-  } catch (error: any) {
-    console.error('Cron cleanup-audit-logs error:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    console.error('Cron cleanup-audit-logs error:', error instanceof Error ? error : 'Unknown error')
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
   }
 }

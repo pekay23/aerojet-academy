@@ -66,7 +66,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }
     
     // Save notes and score to metadata
-    const existingMeta = (app.metadata as any) || {}
+    const existingMeta = (app.metadata as Record<string, unknown> | null) ?? {}
     await prismaUnfiltered.application.update({
       where: { id: applicationId },
       data: {

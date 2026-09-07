@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Mail,
   Send,
@@ -118,7 +118,7 @@ export default function EmailPreviewsPage() {
         // Merge DB templates with default TEMPLATES
         const mergedTemplates = [...TEMPLATES]
 
-        dbTemplates.forEach((dbTemp: any) => {
+        dbTemplates.forEach((dbTemp: { name?: string; description?: string | null }) => {
           const existingIndex = mergedTemplates.findIndex((t) => t.id === dbTemp.name)
           if (existingIndex === -1 && dbTemp.name) {
             // It's a brand new custom template

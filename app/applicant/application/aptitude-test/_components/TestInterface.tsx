@@ -10,12 +10,14 @@ interface TestInterfaceProps {
   session: {
     id: string
     expiresAt: string
-    questions: any[]
+    questions: TestQuestion[]
   }
 }
 
 export interface TestQuestion {
   questionId: string
+  category: string
+  questionType: string
   text: string
   options: string[]
   selectedAnswer: string | null

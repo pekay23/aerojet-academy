@@ -199,7 +199,7 @@ async function main() {
     { code: 'C', name: 'Base Maintenance Certifying Engineer' },
   ]
 
-  const createdLicenses: Record<string, any> = {}
+  const createdLicenses: Record<string, { id: string }> = {}
   for (const lic of licenses) {
     createdLicenses[lic.code] = await prisma.licenseCategory.upsert({
       where: { code: lic.code },
@@ -255,7 +255,7 @@ async function main() {
     },
   ]
 
-  const createdPathways: Record<string, any> = {}
+  const createdPathways: Record<string, { id: string }> = {}
   for (const p of pathways) {
     createdPathways[p.code] = await prisma.studyPathwayModel.upsert({
       where: { code: p.code },
@@ -719,7 +719,7 @@ async function main() {
     },
   ]
 
-  const createdModules: Record<string, any> = {}
+  const createdModules: Record<string, { id: string }> = {}
   for (const mod of moduleData) {
     createdModules[mod.code] = await prisma.course.upsert({
       where: { code: mod.code },
@@ -1645,7 +1645,7 @@ async function main() {
     },
   })
 
-  const semester1 = await prisma.semester.upsert({
+  const _semester1 = await prisma.semester.upsert({
     where: {
       id:
         (
@@ -1664,7 +1664,7 @@ async function main() {
     },
   })
 
-  const semester2 = await prisma.semester.upsert({
+  const _semester2 = await prisma.semester.upsert({
     where: {
       id:
         (

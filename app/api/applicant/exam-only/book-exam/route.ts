@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireApplicant } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { joinPool } from '@/lib/pools/join'
+import type { PoolJoinResult } from '@/lib/pools/types'
 import { bookStandaloneExam } from '@/lib/enrollment/exams'
 import { promoteIfFirstExamActivity } from '@/lib/enrollment/pathway'
 import { categoryMatchesTarget, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
@@ -171,7 +172,7 @@ export const POST = withErrorHandler(async (request: Request) => {
   }
 
   // Delegate entirely to the canonical joinPool path.
-  const joinResult = await joinPool({
+  const joinResult = (await joinPool({
     poolId: pool.id,
     userId: user.id,
     examComponentId,
@@ -179,7 +180,7 @@ export const POST = withErrorHandler(async (request: Request) => {
     moduleCode,
     reserveAmount: poolPrice,
     amountPaid: poolPrice,
-  })
+  })) as PoolJoinResult
 
   if (!joinResult.success) {
     return apiError(joinResult.error || 'Failed to join pool', 400)

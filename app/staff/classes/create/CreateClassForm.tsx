@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, type Resolver } from 'react-hook-form'
+import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -91,7 +91,8 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
     },
   })
 
-  const recurrenceType = form.watch('recurrenceType')
+  const recurrenceType = useWatch({ control: form.control, name: 'recurrenceType' })
+  const weeklySchedule = useWatch({ control: form.control, name: 'weeklySchedule' })
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true)
@@ -123,8 +124,9 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
       toast.success('Class scheduled successfully')
       router.push('/staff/classes')
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create class')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to create class'
+      toast.error(message || 'Failed to create class')
     } finally {
       setIsLoading(false)
     }
@@ -347,7 +349,7 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
                 </div>
               </div>
               <div className="space-y-3">
-                {form.watch('weeklySchedule')?.map((schedule, index) => (
+                {weeklySchedule?.map((schedule, index) => (
                   <div key={index} className={`flex items-center gap-4 rounded-lg border p-3 transition-colors ${schedule.active ? 'border-aerojet-blue/30 bg-blue-50/50 dark:border-aerojet-blue/50 dark:bg-blue-900/10' : 'border-slate-100 dark:border-slate-800'}`}>
                     <label className="flex w-24 items-center gap-2 cursor-pointer">
                       <input

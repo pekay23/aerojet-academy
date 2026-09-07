@@ -28,7 +28,7 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Central Audit, Issues &amp; Fixes Tracker</h1>
-  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-02 (Post-Implementation Verification) <strong>Status</strong>: All critical issues fixed.</p>
+  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-04 (Post-schema migration verification) <strong>Status</strong>: All critical issues fixed.</p>
 </header>
 <hr />
 <section class="he-section" id="current-state-summary"><div class="he-section__num">01 · Current State Summary</div><h2 class="he-section__title">Current State Summary</h2></section>
@@ -78,6 +78,22 @@
 <tr><td>Instructor</td><td>2</td><td>✅ All migrated</td></tr>
 <tr><td>Examiner</td><td>3</td><td>✅ All migrated</td></tr>
 <tr><td>Applicant</td><td>0</td><td>N/A (card-based)</td></tr>
+</tbody>
+</table>
+<h3 id="schema-migration-complete-2026-09-04">Schema Migration Complete (2026-09-04)</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Migration</th><th>Status</th><th>Details</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td><code>FullTimeEnrollment.academicYearId</code> FK</td><td>✅ Complete</td><td>Added <code>academicYearId String</code> + <code>academicYear AcademicYear</code> relation; legacy <code>academicYear String?</code> dropped from Neon and Supabase; 6 existing enrollments migrated to FK</td></tr>
+<tr><td>2</td><td><code>OJTLogbook.licenceCategoryId</code> FK</td><td>✅ Complete</td><td>Added <code>licenceCategoryId String</code> + <code>licenceCategory LicenseCategory</code> relation; legacy <code>licenceCategory String</code> retained for back-compat; all existing logbooks already had FK populated</td></tr>
+<tr><td>3</td><td><code>ExamResult.sittingId</code> FK</td><td>✅ Complete</td><td>Added <code>sittingId String?</code> + <code>sitting ExamSitting?</code> relation; 32 existing results have no sitting assignments (expected)</td></tr>
+<tr><td>4</td><td><code>Certificate.session</code> relation</td><td>✅ Complete</td><td>Added <code>session InternalExamSession?</code> relation using existing <code>sessionId</code> column</td></tr>
+<tr><td>5</td><td><code>InternalExamRegistration.licenceCategoryId</code> FK</td><td>✅ Complete</td><td>Added optional <code>licenceCategoryId</code> + <code>licenceCategoryRef LicenseCategory?</code> relation for future use</td></tr>
+<tr><td>6</td><td>Reverse relations + indexes</td><td>✅ Complete</td><td>Added <code>AcademicYear.fullTimeEnrollments</code>, <code>LicenseCategory.ojtLogbooks</code>/<code>registrations</code>, <code>ExamSitting.examResults</code>, <code>InternalExamSession.certificates</code>; composite indexes added</td></tr>
+<tr><td>7</td><td>Neon <code>db push</code></td><td>✅ Complete</td><td><code>npx prisma db push</code> succeeded on <code>ep-wandering-wave-ahyik1io-pooler.c-3.us-east-1.aws.neon.tech</code></td></tr>
+<tr><td>8</td><td>Supabase <code>db push:supabase</code></td><td>✅ Complete</td><td><code>bun run db:push:supabase</code> succeeded on <code>aws-1-eu-west-1.pooler.supabase.com:5432</code> after fixing 6 NULL <code>academicYearId</code> rows</td></tr>
 </tbody>
 </table>
 <h3 id="portal-audit-findings-fixed">Portal Audit Findings Fixed</h3>
@@ -266,6 +282,8 @@
 <tr><td>SEB Config</td><td>2026-09-02</td><td>7 issues</td><td>7/7 fixed</td></tr>
 <tr><td>Internal Exam</td><td>2026-09-02</td><td>23 sections</td><td>23/23 complete</td></tr>
 <tr><td>Anti-Cheat</td><td>2026-09-02</td><td>13 features</td><td>13/13 complete</td></tr>
+<tr><td>Schema Migration</td><td>2026-09-04</td><td>Neon + Supabase</td><td>8 relations/indexes added; both <code>db push</code> and <code>db push:supabase</code> succeeded</td></tr>
+<tr><td>Integration Tests</td><td>2026-09-04</td><td>6 test files</td><td>52/52 passed</td></tr>
 <tr><td>Accessibility</td><td>2026-09-02</td><td>10 requirements</td><td>10/10 complete</td></tr>
 <tr><td>EASA Compliance</td><td>2026-09-02</td><td>14 requirements</td><td>14/14 complete</td></tr>
 </tbody>
@@ -301,6 +319,7 @@
     <li class="he-toc__l2"><a href="#completed-work-2026-09-02">Completed Work (2026-09-02)</a></li>
     <li class="he-toc__l3"><a href="#critical-issues-fixed">Critical Issues Fixed</a></li>
     <li class="he-toc__l3"><a href="#table-sorting-migration-complete">Table Sorting Migration Complete</a></li>
+    <li class="he-toc__l3"><a href="#schema-migration-complete-2026-09-04">Schema Migration Complete (2026-09-04)</a></li>
     <li class="he-toc__l3"><a href="#portal-audit-findings-fixed">Portal Audit Findings Fixed</a></li>
     <li class="he-toc__l3"><a href="#security-tests-fixed">Security Tests Fixed</a></li>
     <li class="he-toc__l3"><a href="#seb-config-issues-fixed">SEB Config Issues Fixed</a></li>

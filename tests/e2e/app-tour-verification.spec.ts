@@ -5,13 +5,7 @@
  * Tour: Capture before-tour (before 1.5s auto-start), then step through Joyride
  */
 import { test, expect, Page } from '@playwright/test'
-import {
-  _getStaffCredentials,
-  _getStudentCredentials,
-  _getInstructorCredentials,
-  _getApplicantCredentials,
-  _getExaminerCredentials,
-} from './helpers/auth'
+// auth helpers intentionally not imported here since they are unused
 
 const SCREENSHOT_DIR = 'tests/e2e/tour-screenshots'
 

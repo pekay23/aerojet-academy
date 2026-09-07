@@ -1,5 +1,5 @@
 import { prismaUnfiltered as prisma } from '../lib/prisma/client'
-import { BookingType, PaymentStatus } from '@prisma/client'
+import { PaymentStatus } from '@prisma/client'
 
 async function main() {
   const email = 'f.ampeh@aerojet-academy.com'

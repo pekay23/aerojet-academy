@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireApplicant } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { joinPool } from '@/lib/pools/join'
+import type { PoolJoinResult } from '@/lib/pools/types'
 import { validatePoolJoin } from '@/lib/pools/validation'
 import { promoteIfFirstExamActivity } from '@/lib/enrollment/pathway'
 import { categoryMatchesTarget, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
@@ -52,12 +53,12 @@ export const POST = withErrorHandler(async (request: Request) => {
   }
 
   // Use the atomic joinPool function with serializable isolation
-  const result = await joinPool({
+  const result = (await joinPool({
     poolId,
     userId: user.id,
     examComponentId: examComponent.id,
     moduleCode: examComponent.course.code,
-  })
+  })) as PoolJoinResult
 
   if (!result.success) {
     if (result.error?.includes('Insufficient') || result.error?.includes('balance')) {

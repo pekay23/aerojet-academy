@@ -15,4 +15,7 @@ async function main() {
   console.log(JSON.stringify(users, null, 2))
 }
 
-main().catch(e => { console.error(e.message); process.exit(1); }).finally(() => prisma.$disconnect())
+main().catch(e => { console.error((e as Error).message); process.exit(1); }).finally(() => prisma.$disconnect())
+
+
+

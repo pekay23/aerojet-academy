@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, apiForbidden, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiCreated, apiForbidden, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
@@ -41,7 +41,7 @@ type QuestionSort = (typeof SORT_VALUES)[number]
 const DIFFICULTY_RANK: Record<string, number> = { EASY: 1, MEDIUM: 2, HARD: 3 }
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ bankId: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireInstructor()
     const instructorProfile = await getInstructorProfileByUserId(user.id)
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -49,7 +49,7 @@ export const GET = withErrorHandler(
     if (!(await isInternalExamSystemEnabled())) {
       return apiError('Internal exams are not currently available', 403)
     }
-    const { bankId } = await ctx.params
+    const { bankId } = (await ctx!.params) as { bankId: string }
 
     const grant = await prismaUnfiltered.internalExamBankInstructor.findFirst({
       where: { bankId, instructorId: instructorProfile.id },
@@ -177,7 +177,7 @@ export const GET = withErrorHandler(
 )
 
 export const POST = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ bankId: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireInstructor()
     const instructorProfile = await getInstructorProfileByUserId(user.id)
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
@@ -185,7 +185,7 @@ export const POST = withErrorHandler(
     if (!(await isInternalExamSystemEnabled())) {
       return apiError('Internal exams are not currently available', 403)
     }
-    const { bankId } = await ctx.params
+    const { bankId } = (await ctx!.params) as { bankId: string }
 
     const grant = await prismaUnfiltered.internalExamBankInstructor.findFirst({
       where: { bankId, instructorId: instructorProfile.id },

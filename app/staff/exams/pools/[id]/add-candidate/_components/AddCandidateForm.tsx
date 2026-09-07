@@ -15,7 +15,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  _FormDescription,
+  FormDescription as _FormDescription,
 } from '@/components/ui/form'
 import {
   Select,
@@ -29,9 +29,10 @@ import { toast } from 'sonner'
 
 
 interface AddCandidateFormProps {
-  pool: any // Using any to key into complex include if needed. Wait, passing standard type + explicit props is better.
-  // Actually, I fetched pool with details, so it has allowedModules.
-  // Let's use `ExamPool` type and assume it's augmented or just use `any` temporarily for flexibility with Prisma includes.
+  pool: {
+    id: string
+    allowedModules: string[]
+  }
 }
 
 const addCandidateSchema = z.object({
@@ -45,8 +46,8 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<any[]>([])
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [searchResults, setSearchResults] = useState<{ id: string; profile: { firstName: string; lastName: string }; email: string }[]>([])
+  const [selectedUser, setSelectedUser] = useState<{ id: string; profile: { firstName: string; lastName: string }; email: string } | null>(null)
 
   const form = useForm<AddCandidateFormValues>({
     resolver: zodResolver(addCandidateSchema),
@@ -77,7 +78,7 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  const handleSelectUser = (user: any) => {
+  const handleSelectUser = (user: { id: string; profile: { firstName: string; lastName: string }; email: string }) => {
     setSelectedUser(user)
     form.setValue('userId', user.id)
     setSearchQuery('')
@@ -108,8 +109,9 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
       toast.success('Candidate added successfully')
       router.push(`/staff/exams/pools/${pool.id}`)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to add candidate')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to add candidate'
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }

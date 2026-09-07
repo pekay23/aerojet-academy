@@ -39,6 +39,8 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
 
   const getCategoryColor = (category: string) => {
     switch (category.toUpperCase()) {
+      case 'STUDENT_GUIDE':
+        return 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'
       case 'ACADEMIC':
         return 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
       case 'ADMINISTRATIVE':
@@ -49,6 +51,13 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
         return 'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:text-slate-300 dark:border-slate-700'
     }
   }
+
+  const humanCategory = (category: string) =>
+    category
+      .toLowerCase()
+      .split('_')
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(' ')
 
   return (
     <MotionDiv
@@ -67,7 +76,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
               getCategoryColor(resource.category)
             )}
           >
-            {resource.category}
+            {humanCategory(resource.category)}
           </span>
         </div>
 

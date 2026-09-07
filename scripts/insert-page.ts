@@ -1,6 +1,5 @@
 import { PDFDocument } from 'pdf-lib';
 import * as fs from 'fs/promises';
-import path from 'path';
 
 async function insertPage() {
   const existingPdfPath = 'C:/Users/Pekay/OneDrive - Ghana Communication Technology University/AerojetAviation/Module 9 - Human Factors/suntech/EASA-Module-9a-Human-Factors-Complete.pdf';
@@ -41,3 +40,5 @@ async function insertPage() {
 }
 
 insertPage().catch(console.error);
+
+

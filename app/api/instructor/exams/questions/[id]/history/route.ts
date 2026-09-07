@@ -1,16 +1,16 @@
 import { NextRequest } from 'next/server'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiSuccess, apiForbidden, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiForbidden, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireInstructor()
     const instructorProfile = await getInstructorProfileByUserId(user.id)
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
 
-    const { id } = await ctx.params
+    const { id } = (await ctx!.params) as { id: string }
 
     const [versions, audits] = await Promise.all([
       prismaUnfiltered.internalExamQuestionVersion.findMany({

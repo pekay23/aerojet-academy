@@ -32,7 +32,7 @@ export const GET = withErrorHandler(
 
     if (!user) return apiNotFound('User not found')
 
-    const { _password, ...safeUser } = user
+    const { password: _password, ...safeUser } = user
     return apiSuccess(safeUser)
   }
 )
@@ -172,7 +172,7 @@ export const PATCH = withErrorHandler(
           },
         })
       } else if (['ADMIN', 'STAFF', 'SUPER_ADMIN'].includes(user.role)) {
-        const staffData: any = {}
+        const staffData: Record<string, unknown> = {}
         if (employeeId) staffData.employeeId = employeeId
         if (department !== undefined) staffData.department = department
         if (position !== undefined) staffData.position = position

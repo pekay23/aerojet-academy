@@ -52,8 +52,9 @@ export default function EditIdDialog({ userId, currentId, type, label }: EditIdD
       toast.success(`${label} updated successfully`)
       setOpen(false)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update ID'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

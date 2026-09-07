@@ -15,13 +15,16 @@ async function main() {
     const result = (await prisma.queryRaw(
       'SELECT table_name FROM information_schema.tables WHERE table_schema = $1 ORDER BY table_name',
       'public'
-    )) as any[]
+    )) as unknown[]
     console.log('Tables:', result.map(r => r.table_name).join(', '))
-  } catch (e: any) {
-    console.log('Supabase DB connection FAILED:', e.message)
+  } catch (e: unknown) {
+    console.log('Supabase DB connection FAILED:', (e as Error).message)
   } finally {
     await prisma.disconnect()
   }
 }
 
 main()
+
+
+

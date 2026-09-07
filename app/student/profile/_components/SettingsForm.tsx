@@ -10,7 +10,12 @@ import PrivacyToggle from '@/components/shared/PrivacyToggle'
 import { useProfileDirty } from './ProfileTabs'
 
 interface SettingsFormProps {
-  initialSettings: any
+  initialSettings: {
+    notifications?: {
+      email?: boolean
+    }
+    theme?: string
+  }
 }
 
 export default function SettingsForm({ initialSettings }: SettingsFormProps) {

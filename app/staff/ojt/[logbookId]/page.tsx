@@ -44,6 +44,7 @@ export default async function LogbookDetailPage({
           },
           orderBy: { date: 'desc' },
         },
+        licenceCategory: { select: { code: true, name: true } },
       },
     }),
     prismaUnfiltered.aTAChapter.findMany({
@@ -89,7 +90,7 @@ export default async function LogbookDetailPage({
     studentId: logbook.studentProfile.studentId,
     email: logbook.studentProfile.user.email,
     programme: logbook.studentProfile.programmeChoice ?? 'Unknown',
-    licenceCategory: logbook.licenceCategory,
+    licenceCategory: logbook.licenceCategory.code,
     facilityName: logbook.facilityName,
     facilityApprovalNo: logbook.facilityApprovalNo,
     startDate: logbook.startDate.toISOString(),

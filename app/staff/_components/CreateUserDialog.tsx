@@ -77,8 +77,9 @@ export default function CreateUserDialog() {
         role: 'STUDENT',
       })
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to create user'
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -91,7 +92,7 @@ export default function CreateUserDialog() {
           <UserPlus className="h-3.5 w-3.5" /> Add User
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle>Create New User</DialogTitle>
           <DialogDescription className="sr-only">

@@ -135,8 +135,8 @@ export async function GET(req: NextRequest) {
         })
 
         results.remindersSent++
-      } catch (err: any) {
-        results.errors.push(`Document ${doc.id}: ${err.message}`)
+      } catch (err: unknown) {
+        results.errors.push(`Document ${doc.id}: ${err instanceof Error ? err.message : 'Unknown error'}`)
       }
     }
 
@@ -173,8 +173,8 @@ export async function GET(req: NextRequest) {
         })
 
         results.remindersSent++
-      } catch (err: any) {
-        results.errors.push(`License ${lic.id}: ${err.message}`)
+      } catch (err: unknown) {
+        results.errors.push(`License ${lic.id}: ${err instanceof Error ? err.message : 'Unknown error'}`)
       }
     }
 
@@ -184,8 +184,8 @@ export async function GET(req: NextRequest) {
       results,
       timestamp: now.toISOString(),
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Cron renewal-reminders error:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
   }
 }

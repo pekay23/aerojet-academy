@@ -10,7 +10,7 @@ interface AccessGateProps {
   fallback?: React.ReactNode
 }
 
-export function AccessGate({ hasAccess, _feature, children, fallback }: AccessGateProps) {
+export function AccessGate({ hasAccess, children, fallback }: AccessGateProps) {
   if (hasAccess) {
     return <>{children}</>
   }

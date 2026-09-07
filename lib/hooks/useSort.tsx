@@ -17,24 +17,33 @@ export function useSort<T>(items: T[], initialSort?: SortConfig) {
   const sortedItems = useMemo(() => {
     if (!sortConfig || !sortConfig.order) return items
 
-    return [...items].sort((a: any, b: any) => {
-      const getNestedValue = (obj: any, path: string) => {
-        return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+    return [...items].sort((a: T, b: T) => {
+      const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
+        return path.split('.').reduce<unknown>(
+          (acc, part) =>
+            acc && typeof acc === 'object' ? (acc as Record<string, unknown>)[part] : acc,
+          obj
+        )
       }
 
-      const aValue = getNestedValue(a, sortConfig.key)
-      const bValue = getNestedValue(b, sortConfig.key)
+      const aValue = getNestedValue(a as unknown as Record<string, unknown>, sortConfig.key)
+      const bValue = getNestedValue(b as unknown as Record<string, unknown>, sortConfig.key)
 
       // Handle nulls
       if (aValue === null || aValue === undefined) return 1
       if (bValue === null || bValue === undefined) return -1
 
       // Handle dates
-      if ((aValue instanceof Date || !isNaN(Date.parse(aValue))) && 
-          (bValue instanceof Date || !isNaN(Date.parse(bValue))) &&
-          typeof aValue !== 'number' && typeof bValue !== 'number') {
-        const dateA = new Date(aValue).getTime()
-        const dateB = new Date(bValue).getTime()
+      if (
+        (aValue instanceof Date ||
+          (typeof aValue === 'string' && !isNaN(Date.parse(aValue)))) &&
+        (bValue instanceof Date ||
+          (typeof bValue === 'string' && !isNaN(Date.parse(bValue)))) &&
+        typeof aValue !== 'number' &&
+        typeof bValue !== 'number'
+      ) {
+        const dateA = new Date(aValue as string | Date).getTime()
+        const dateB = new Date(bValue as string | Date).getTime()
         return sortConfig.order === 'asc' ? dateA - dateB : dateB - dateA
       }
 
@@ -46,7 +55,9 @@ export function useSort<T>(items: T[], initialSort?: SortConfig) {
       }
 
       // Handle numbers
-      return sortConfig.order === 'asc' ? aValue - bValue : bValue - aValue
+      return sortConfig.order === 'asc'
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number)
     })
   }, [items, sortConfig])
 

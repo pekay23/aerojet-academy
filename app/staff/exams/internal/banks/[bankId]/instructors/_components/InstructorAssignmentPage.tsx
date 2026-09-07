@@ -41,7 +41,7 @@ interface InstructorAssignmentPageProps {
   courseId: string
 }
 
-export default function InstructorAssignmentPage({ bankId, bankName, courseCode, _courseId }: InstructorAssignmentPageProps) {
+export default function InstructorAssignmentPage({ bankId, bankName, courseCode, courseId: _courseId }: InstructorAssignmentPageProps) {
   const [assignments, setAssignments] = useState<InstructorAssignment[]>([])
   const [availableInstructors, setAvailableInstructors] = useState<InstructorOption[]>([])
   const [loading, setLoading] = useState(true)
@@ -71,9 +71,9 @@ export default function InstructorAssignmentPage({ bankId, bankName, courseCode,
     const res = await fetch(`/api/staff/audit-logs?action=EXAM_BANK_INSTRUCTOR_ASSIGNED&limit=10`)
     const json = await res.json()
     if (json.success) {
-      const logs = (json.data || []) as any[]
+      const logs = (json.data || []) as Array<{ description: string; createdAt: string; changes?: Record<string, unknown> }>
       const relevant = logs.filter((l) => l.description?.includes(bankId) || l.changes?.bankId === bankId)
-      setAuditLog(relevant.map((l: any) => ({ description: l.description, createdAt: l.createdAt })))
+      setAuditLog(relevant.map((l) => ({ description: l.description, createdAt: l.createdAt })))
     }
   }, [bankId])
 

@@ -300,7 +300,7 @@ export async function promoteApplicantToStudent(
       data: {
         userId,
         studentId,
-        enrollmentType: enrollmentType as any,
+        enrollmentType: enrollmentType as EnrollmentType,
         enrollmentStatus: 'ENROLLED',
         pathwayId: pathway?.id ?? null,
       },

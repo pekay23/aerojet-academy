@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 
 const FIELD_TYPES = ['TEXT', 'NUMBER', 'DATE', 'SELECT', 'MULTI_SELECT', 'FILE', 'BOOLEAN'] as const
 const FIELD_TARGETS = ['APPLICATION', 'STUDENT_PROFILE', 'USER'] as const
@@ -19,7 +20,7 @@ const schema = z.object({
   isActive: z.boolean().default(true)
 })
 
-export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (_req: NextRequest, _ctx: RouteContext) => {
   await requireStaff()
   const fields = await prismaUnfiltered.customFieldDefinition.findMany({
     orderBy: [{ appliesTo: 'asc' }, { sortOrder: 'asc' }]
@@ -27,14 +28,14 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
   return apiSuccess({ fields })
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, _ctx: RouteContext) => {
   await requireStaff()
   const body = await req.json()
   const result = schema.safeParse(body)
   if (!result.success) return apiError('Invalid input')
 
   const field = await prismaUnfiltered.customFieldDefinition.create({
-    data: result.data as any
+    data: result.data as Prisma.CustomFieldDefinitionUncheckedCreateInput,
   })
 
   return apiSuccess({ field })

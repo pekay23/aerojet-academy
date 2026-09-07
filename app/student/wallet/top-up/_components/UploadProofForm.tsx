@@ -35,7 +35,6 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
   useEffect(() => {
     if (!amount || currency === 'EUR') {
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
       setEurEquivalent(currency === 'EUR' ? Number(amount) || null : null)
       return
     }
@@ -51,7 +50,7 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
             setEurEquivalent(Math.round((Number(amount) / rate) * 100) / 100)
           }
         }
-      } catch (err: any) {
+      } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') return
         console.error('Rate fetch error:', err instanceof Error ? err.message : 'Unknown error')
       } finally {
@@ -96,8 +95,8 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
 
       setSuccess(true)
       router.refresh()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setLoading(false)
     }

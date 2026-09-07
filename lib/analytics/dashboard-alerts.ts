@@ -9,6 +9,7 @@
 import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import type { ExamBundleStatus } from '@prisma/client'
 
 export interface DashboardAlert {
   id: string
@@ -58,7 +59,7 @@ async function compute(): Promise<DashboardAlert[]> {
     prismaUnfiltered.examBundle.count({
       where: {
         validUntil: { gte: tomorrow, lte: sevenDaysOut },
-        status: { in: ['ACTIVE'] as any },
+        status: { in: ['ACTIVE'] as unknown as ExamBundleStatus[] },
       },
     }).catch(() => 0),
 

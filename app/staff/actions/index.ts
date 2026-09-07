@@ -1,5 +1,3 @@
-'use server'
-
 export { getStaffRecipients, sendStaffMessage, markMessageAsRead } from './messages'
 export { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers, bulkBypassPasswordChange } from './users'
 export { bulkUpdateEnrollmentStatus, bulkDeleteEnrollments } from './enrollments'

@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { z } from 'zod'
 
 const updateQuestionSchema = z.object({
@@ -17,9 +17,9 @@ const updateQuestionSchema = z.object({
 })
 
 // PUT /api/staff/admissions/aptitude/banks/[id]/questions/[questionId]
-export const PUT = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string; questionId: string }> }) => {
+export const PUT = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id, questionId } = await params
+  const { id, questionId } = (await ctx!.params) as { id: string; questionId: string }
   const body = await req.json()
   
   const parsed = updateQuestionSchema.safeParse(body)
@@ -28,19 +28,19 @@ export const PUT = withErrorHandler(async (req: NextRequest, { params }: { param
   try {
     const question = await prismaUnfiltered.aptitudeQuestion.update({
       where: { id: questionId, bankId: id },
-      data: parsed.data as any,
+      data: parsed.data,
     })
     return apiSuccess(question)
-  } catch (error: any) {
-    if (error.code === 'P2025') return apiError('Question not found', 404)
+  } catch (error: unknown) {
+    if (error instanceof Error && 'code' in error && (error as Error & { code?: string }).code === 'P2025') return apiError('Question not found', 404)
     throw error
   }
 })
 
 // DELETE /api/staff/admissions/aptitude/banks/[id]/questions/[questionId]
-export const DELETE = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string; questionId: string }> }) => {
+export const DELETE = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id, questionId } = await params
+  const { id, questionId } = (await ctx!.params) as { id: string; questionId: string }
 
   // Check if question has answers in sessions
   const question = await prismaUnfiltered.aptitudeQuestion.findUnique({

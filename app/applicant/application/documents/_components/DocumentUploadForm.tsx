@@ -12,7 +12,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 
-interface DocumentType {
+export interface DocumentType {
   id: string
   name: string
   slug: string
@@ -22,7 +22,7 @@ interface DocumentType {
   isRequired: boolean
 }
 
-interface UploadedDocument {
+export interface UploadedDocument {
   id: string
   documentTypeId: string
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
@@ -65,7 +65,7 @@ const STATUS_CONFIG = {
 export default function DocumentUploadForm({
   documentTypes,
   uploadedDocuments,
-  _applicationId,
+  applicationId: _applicationId,
   onRefresh,
 }: DocumentUploadFormProps) {
   const [uploading, setUploading] = useState<string | null>(null)
@@ -191,7 +191,7 @@ export default function DocumentUploadForm({
 function DocumentCard({
   docType,
   uploaded,
-  _uploading,
+  uploading: _uploading,
   onUploaded,
 }: {
   docType: DocumentType

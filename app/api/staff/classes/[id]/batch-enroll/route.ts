@@ -102,7 +102,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     })
 
     return NextResponse.json({ success: true, addedCount: newStudents.length })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[BATCH_ENROLL]', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }

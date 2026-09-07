@@ -7,7 +7,21 @@ import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface ModuleCardProps {
-  cls: any // To be typed properly or handled with serializePrisma types
+  cls: {
+    id: string
+    course: {
+      code: string
+      name: string
+      category?: string
+      duration?: number
+    }
+    semester?: string | { name?: string | null } | null
+    academicYear?: string | { name?: string | null } | null
+    startDate: string | Date
+    endDate: string | Date
+    currentStudents: number
+    maxStudents: number
+  }
 }
 
 export default function ModuleCard({ cls }: ModuleCardProps) {
@@ -29,6 +43,12 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
 
   const categoryColor = getCategoryColor(cls.course.category)
   const enrollmentPercentage = Math.round((cls.currentStudents / cls.maxStudents) * 100)
+  const semesterName =
+    typeof cls.semester === 'string' ? cls.semester : (cls.semester?.name ?? 'Unassigned')
+  const academicYearName =
+    typeof cls.academicYear === 'string'
+      ? cls.academicYear
+      : (cls.academicYear?.name ?? 'Current Year')
 
   return (
     <motion.div
@@ -57,7 +77,7 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
                 </span>
                 <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-slate-700" />
                 <span className="text-[10px] font-bold text-slate-400 uppercase dark:text-slate-300">
-                  {cls.semester} {cls.academicYear}
+                  {semesterName} {academicYearName}
                 </span>
               </div>
               <h3 className="text-lg font-bold text-slate-900 transition-colors group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400">

@@ -112,9 +112,10 @@ export default function StandaloneBooking({
           setSelectedExamId('')
           setSelectedModuleCode('')
         }
-      } catch (err: any) {
-        toast.error(err.message || 'Something went wrong. Please try again.')
-      }
+       } catch (err) {
+         const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+         toast.error(message)
+       }
     })
   }
 

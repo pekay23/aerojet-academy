@@ -9,7 +9,6 @@ import {
   BookOpen,
   FileText,
   Route,
-  _ClipboardList,
 } from 'lucide-react'
 import MotionTabs from '@/components/ui/MotionTabs'
 
@@ -32,13 +31,20 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]['key']
 
+import type { SerializedStudent, SerializedExamComponent } from '@/lib/staff/types'
+
+type UpcomingEvent = { id: string; name: string; startDate: string }
+type AcademicYearOption = { id: string; name: string; startDate: string | Date }
+type SemesterOption = { id: string; name: string; startDate: string | Date }
+type StudyPathwayOption = { id: string; code: string; name: string }
+
 interface Props {
-  student: any
-  examComponents: any[]
-  upcomingEvents: any[]
-  academicYears: any[]
-  semesters: any[]
-  studyPathways: any[]
+  student: SerializedStudent
+  examComponents: SerializedExamComponent[]
+  upcomingEvents: UpcomingEvent[]
+  academicYears: AcademicYearOption[]
+  semesters: SemesterOption[]
+  studyPathways: StudyPathwayOption[]
   initialTab: string
   staffId: string
   staffRole: string
@@ -50,7 +56,7 @@ export default function StudentDetailTabs({
   upcomingEvents,
   academicYears,
   semesters,
-  studyPathways,
+  studyPathways: _studyPathways,
   initialTab,
   staffId,
   staffRole,
@@ -92,9 +98,6 @@ export default function StudentDetailTabs({
           {activeTab === 'profile' && (
             <ProfileTab
               student={student}
-              academicYears={academicYears}
-              semesters={semesters}
-              studyPathways={studyPathways}
               onRefresh={handleRefresh}
             />
           )}
@@ -118,9 +121,6 @@ export default function StudentDetailTabs({
               staffId={staffId}
               staffRole={staffRole}
             />
-          )}
-          {activeTab === 'practical' && (
-            <PracticalTab student={student} onRefresh={handleRefresh} />
           )}
           {activeTab === 'practical' && (
             <PracticalTab student={student} onRefresh={handleRefresh} />

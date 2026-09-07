@@ -16,13 +16,16 @@ async function main() {
     const policies = await client.query(`
       SELECT policyname, cmd FROM pg_policies WHERE tablename = $1
     `, [table])
-    console.log(`  Policies: ${policies.rows.map((r: any) => `${r.policyname} (${r.cmd})`).join(', ') || 'none'}`)
+    console.log(`  Policies: ${policies.rows.map((r: unknown) => `${r.policyname} (${r.cmd})`).join(', ') || 'none'}`)
   }
 
   await client.end()
 }
 
 main().catch(e => {
-  console.error('Error:', e.message)
+  console.error('Error:', (e as Error).message)
   process.exit(1)
 })
+
+
+

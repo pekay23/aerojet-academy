@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { withErrorHandler, apiError } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { Prisma } from '@prisma/client'
 import {
   generateBekPair,
   buildSebConfig,
   generateSebConfig,
-  _BekPair,
+  BekPair as _BekPair,
   BankSebConfig,
 } from '@/lib/internal-exam/seb-config'
 
@@ -48,7 +49,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   await prismaUnfiltered.internalExamSession.update({
     where: { id: sessionId },
     data: {
-      sebKeys: bekPair as unknown as any,
+        sebKeys: bekPair as unknown as Prisma.InputJsonValue,
     },
   })
 

@@ -120,9 +120,9 @@ export default function PublicNav() {
   }, [])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
+   
+   
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -141,23 +141,23 @@ export default function PublicNav() {
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   }, [])
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false)
   }, [pathname])
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
   }, [mobileOpen])
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
 
   const [hasForceClass, setHasForceClass] = useState(false)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
     // Initial check
     // eslint-disable-next-line react-hooks/set-state-in-effect

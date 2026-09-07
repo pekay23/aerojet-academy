@@ -10,9 +10,9 @@ async function checkConstraints() {
     GROUP BY "sessionId"
     HAVING COUNT(*) > 1
   `
-  console.log(`Duplicate certificates by sessionId: ${(duplicateCertificates as any[]).length}`)
-  if ((duplicateCertificates as any[]).length > 0) {
-    console.log('Sample duplicates:', (duplicateCertificates as any[]).slice(0, 5))
+  console.log(`Duplicate certificates by sessionId: ${(duplicateCertificates as unknown[]).length}`)
+  if ((duplicateCertificates as unknown[]).length > 0) {
+    console.log('Sample duplicates:', (duplicateCertificates as unknown[]).slice(0, 5))
   }
 
   // Check for duplicate sessionId+userId in internal_exam_registrations
@@ -22,9 +22,9 @@ async function checkConstraints() {
     GROUP BY "sessionId", "userId"
     HAVING COUNT(*) > 1
   `
-  console.log(`Duplicate registrations by sessionId+userId: ${(duplicateRegistrations as any[]).length}`)
-  if ((duplicateRegistrations as any[]).length > 0) {
-    console.log('Sample duplicates:', (duplicateRegistrations as any[]).slice(0, 5))
+  console.log(`Duplicate registrations by sessionId+userId: ${(duplicateRegistrations as unknown[]).length}`)
+  if ((duplicateRegistrations as unknown[]).length > 0) {
+    console.log('Sample duplicates:', (duplicateRegistrations as unknown[]).slice(0, 5))
   }
 
   // Check if columns we deprecated still exist
@@ -32,16 +32,19 @@ async function checkConstraints() {
     SELECT column_name::text FROM information_schema.columns
     WHERE table_name = 'attendance_records' AND column_name = 'sessionType'
   `
-  console.log(`attendance_records.sessionType exists: ${(attendanceColumns as any[]).length > 0}`)
+  console.log(`attendance_records.sessionType exists: ${(attendanceColumns as unknown[]).length > 0}`)
 
   const qvColumns = await prismaUnfiltered.$queryRaw`
     SELECT column_name::text FROM information_schema.columns
     WHERE table_name = 'internal_exam_question_versions' AND column_name IN ('difficulty', 'changeType')
   `
-  console.log(`question_versions.difficulty/changeType exist: ${(qvColumns as any[]).length > 0}`)
+  console.log(`question_versions.difficulty/changeType exist: ${(qvColumns as unknown[]).length > 0}`)
 }
 
 checkConstraints().catch(err => {
   console.error(err)
   process.exit(1)
 })
+
+
+

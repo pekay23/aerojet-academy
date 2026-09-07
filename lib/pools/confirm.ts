@@ -5,7 +5,7 @@ import { sendPoolConfirmedEmail, sendPoolFailedEmail } from '@/lib/email/service
 import { logAuditEvent } from '../audit/logger'
 import { captureFunds, releaseFunds } from '@/lib/wallet/operations'
 
-export async function confirmPoolInternal(poolId: string, tx: any) {
+export async function confirmPoolInternal(poolId: string, tx: Prisma.TransactionClient) {
   const memberships = await tx.poolMembership.findMany({
     where: { poolId, status: 'RESERVED' },
     include: {

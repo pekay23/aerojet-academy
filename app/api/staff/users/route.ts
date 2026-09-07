@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
+import { UserRole, UserStatus, type Prisma } from '@prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { apiPaginated, apiUnauthorized } from '@/lib/api/response'
 import { buildOrderBy } from '@/lib/utils/build-order-by'
@@ -31,13 +32,17 @@ export async function GET(req: NextRequest) {
     { createdAt: 'desc' }
   )
 
-  const where: any = {}
-  if (role !== 'all') where.role = role
+  const where: Prisma.UserWhereInput = {}
+  if (role !== 'all' && Object.values(UserRole).includes(role as UserRole)) {
+    where.role = role as UserRole
+  }
 
   if (status === 'all') {
     where.status = { notIn: ['ARCHIVED', 'DELETED'] }
   } else {
-    where.status = status
+    if (Object.values(UserStatus).includes(status as UserStatus)) {
+      where.status = status as UserStatus
+    }
   }
   if (search) {
     where.OR = [

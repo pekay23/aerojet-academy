@@ -25,8 +25,8 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({ ok: true, totalAffected, results })
-  } catch (err: any) {
-    console.error('[Cron gdpr-retention] Error:', err.message)
-    return NextResponse.json({ ok: false, error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    console.error('[Cron gdpr-retention] Error:', err instanceof Error ? err.message : String(err))
+    return NextResponse.json({ ok: false, error: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }

@@ -22,7 +22,7 @@ const SEVERITY_STYLE: Record<DashboardAlert['severity'], { bg: string; text: str
 /**
  * Auto-refreshes every 60s by calling router.refresh(), which re-runs the
  * server component that fetched `initialAlerts`. The 5-minute unstable_cache
- * absorbs the cost â€” most ticks are cache hits.
+ * absorbs the cost — most ticks are cache hits.
  */
 export default function AlertsCenter({ initialAlerts }: { initialAlerts: DashboardAlert[] }) {
   const [alerts, setAlerts] = useState(initialAlerts)
@@ -30,7 +30,7 @@ export default function AlertsCenter({ initialAlerts }: { initialAlerts: Dashboa
   const router = useRouter()
 
   // Keep state in sync when the server re-fetches.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setAlerts(initialAlerts), [initialAlerts])
 

@@ -60,7 +60,7 @@ export default async function ExaminerResultsPage({
 }) {
   const user = await requireExaminer()
   const sp = await searchParams
-  const { _page, limit, skip } = parsePagination(new URLSearchParams(sp as Record<string, string>))
+  const { page: _page, limit, skip } = parsePagination(new URLSearchParams(sp as Record<string, string>))
 
   const examiner = await prismaUnfiltered.examiner.findUnique({
     where: { userId: user.id },

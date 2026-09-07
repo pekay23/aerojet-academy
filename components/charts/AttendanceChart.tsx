@@ -20,7 +20,7 @@ const attendanceConfig = {
 
 export function AttendanceChart({ data, title = 'Attendance Overview' }: AttendanceChartProps) {
   const [mounted, setMounted] = React.useState(false)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
@@ -50,7 +50,7 @@ export function AttendanceChart({ data, title = 'Attendance Overview' }: Attenda
                 content={
                   <ChartTooltipContent
                     indicator="dot"
-                    formatter={(value: any, name: any) => [value ?? 0, name] as any}
+                    formatter={(value, name) => [value ?? 0, name ?? '']}
                   />
                 }
               />

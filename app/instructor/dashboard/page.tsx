@@ -11,12 +11,10 @@ import {
   Sparkles,
 } from 'lucide-react'
 import WelcomeBanner from '@/components/WelcomeBanner'
-import { getWelcomeMessages } from '@/lib/welcome-messages'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { getInstructorDashboardData } from '@/lib/actions/instructor'
-import { prismaUnfiltered } from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Dashboard | Instructor Portal' }
 export const dynamic = 'force-dynamic'
@@ -294,8 +292,5 @@ export default async function Page() {
 }
 
 async function AsyncWelcomeBanner({ userName }: { userName?: string }) {
-  const session = await getAuthSession()
-  const role = session?.user?.role || 'STUDENT'
-  const [welcomeMessages] = await Promise.all([getWelcomeMessages(prismaUnfiltered, role)])
-  return <WelcomeBanner messages={welcomeMessages} userName={userName} />
+  return <WelcomeBanner messages={[]} userName={userName} />
 }

@@ -8,3 +8,5 @@ import { execSync } from 'child_process'
 console.log('🌱 Running database seed...')
 execSync('npx tsx prisma/seed.ts', { stdio: 'inherit' })
 console.log('✅ Done')
+
+

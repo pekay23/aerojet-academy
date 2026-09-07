@@ -100,7 +100,7 @@ export async function requirePermission(
   const session = await getAuthSession()
   if (!session) throw new Error('Unauthorized')
 
-  const user = session.user as any
+  const user = session.user as { id: string; role: string }
   if (!['STAFF', 'ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
     throw new Error('Staff access required')
   }

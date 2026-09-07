@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
 /**
@@ -10,11 +10,9 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
  * when the admin actually drills into a row.
  */
 export const GET = withErrorHandler(async (
-  _req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
-) => {
+  _req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
 
   const s = await prismaUnfiltered.internalExamSession.findUnique({
     where: { id },
