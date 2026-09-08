@@ -31,6 +31,7 @@ interface StaffSidebarProps {
     messages?: number
   }
   internalExamEnabled?: boolean
+  pdfTemplateEnabled?: boolean
   appVersion?: string
 }
 
@@ -40,6 +41,7 @@ export default function StaffSidebar({
   userImage,
   counts: initialCounts,
   internalExamEnabled = false,
+  pdfTemplateEnabled = false,
   appVersion,
 }: StaffSidebarProps) {
   const pathname = usePathname()
@@ -111,7 +113,7 @@ export default function StaffSidebar({
         { label: 'Programmes', href: '/programmes' },
         { label: 'License Requirements', href: '/license-requirements' },
         { label: 'Learning Resources', href: '/resources' },
-        { label: 'Academic Scheduling', href: '/academic/scheduling' },
+        { label: 'Course Categories', href: '/courses/categories' },
       ],
     },
     {
@@ -123,6 +125,7 @@ export default function StaffSidebar({
       children: [
         { label: 'Course Enrollments', href: '/enrollments' },
         { label: 'Exam Management', href: '/exams' },
+        { label: 'Exam Events', href: '/exams/events' },
         { label: 'Pool Members', href: '/exams/pools/members' },
         ...(internalExamEnabled ? [{ label: 'Internal Exams', href: '/exams/internal' }] : []),
         { label: 'Batch Processing', href: '/enrollments/batch' },
@@ -206,7 +209,7 @@ export default function StaffSidebar({
     { label: 'Finance', href: '/settings?tab=finance' },
     { label: 'Emails & Comms', href: '/settings?tab=comms' },
     { label: 'Academic', href: '/settings?tab=academic' },
-    { label: 'Templates', href: '/settings?tab=templates' },
+    ...(pdfTemplateEnabled ? [{ label: 'Templates', href: '/settings?tab=templates' }] : []),
     { label: 'System & Data', href: '/settings?tab=system' },
     { label: 'My Security', href: '/settings?tab=security' },
   ]
