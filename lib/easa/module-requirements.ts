@@ -75,10 +75,10 @@ export const EASA_MODULE_REQUIREMENTS: Record<string, ModuleExamRequirement> = {
     essayTimeMins: 20,
     passMarkPct: 75,
   },
-  // Module 7 - Maintenance Practices
+  // Module 7 - Maintenance Practices (essay module under EASA 2023/989)
   M7: {
     moduleCode: 'M7',
-    categoryQuestions: { A: 72, B1: 80, B2: 60, B3: 60 },
+    categoryQuestions: { A: 76, B1: 80, B2: 60, B3: 80 },
     categoryEssay: { A: 2, B1: 2, B2: 2, B3: 2 },
     timePerQuestionSecs: 75,
     essayTimeMins: 20,
@@ -93,20 +93,20 @@ export const EASA_MODULE_REQUIREMENTS: Record<string, ModuleExamRequirement> = {
     essayTimeMins: 20,
     passMarkPct: 75,
   },
-  // Module 9 - Human Factors
+  // Module 9 - Human Factors (essay removed for EASA under 2023/989; retained for UK CAA)
   M9: {
     moduleCode: 'M9',
-    categoryQuestions: { A: 20, B1: 20, B2: 20, B3: 20 },
-    categoryEssay: { A: 1, B1: 1, B2: 1, B3: 1 },
+    categoryQuestions: { A: 28, B1: 28, B2: 28, B3: 28 },
+    categoryEssay: { A: 0, B1: 0, B2: 0, B3: 0 },
     timePerQuestionSecs: 75,
     essayTimeMins: 20,
     passMarkPct: 75,
   },
-  // Module 10 - Aviation Legislation
+  // Module 10 - Aviation Legislation (essay removed for EASA under 2023/989; retained for UK CAA)
   M10: {
     moduleCode: 'M10',
-    categoryQuestions: { A: 32, B1: 40, B2: 40, B3: 32 },
-    categoryEssay: { A: 1, B1: 1, B2: 1, B3: 1 },
+    categoryQuestions: { A: 32, B1: 44, B2: 44, B3: 44 },
+    categoryEssay: { A: 0, B1: 0, B2: 0, B3: 0 },
     timePerQuestionSecs: 75,
     essayTimeMins: 20,
     passMarkPct: 75,
