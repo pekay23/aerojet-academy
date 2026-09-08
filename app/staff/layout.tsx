@@ -10,6 +10,7 @@ import { getDashboardAlerts } from '@/lib/analytics/dashboard-alerts'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import packageJson from '../../package.json'
 import { getRegistrationConfig } from '@/lib/settings'
+import { getSystemSetting } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   const user = session.user
 
   // Run all queries in parallel; use prismaUnfiltered to bypass RLS transaction overhead
-  const [dbUser, welcomeMessages, internalExamEnabled, dashboardAlerts, registrationConfigData] = await Promise.all([
+  const [dbUser, welcomeMessages, internalExamEnabled, dashboardAlerts, registrationConfigData, pdfTemplateEnabled] = await Promise.all([
     prismaUnfiltered.user.findUnique({
       where: { id: user.id },
       select: {
@@ -40,6 +41,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
     isInternalExamSystemEnabled(),
     getDashboardAlerts(),
     getRegistrationConfig(),
+    getSystemSetting('pdf_template_system_enabled', 'false').then(v => v === 'true'),
   ])
 
   if (
@@ -80,6 +82,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           messages: 0,
         }}
         internalExamEnabled={internalExamEnabled}
+        pdfTemplateEnabled={pdfTemplateEnabled}
         appVersion={packageJson.version}
       />
 

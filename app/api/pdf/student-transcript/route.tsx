@@ -3,12 +3,8 @@ import { renderToStream } from '@react-pdf/renderer'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getPDFSettings } from '@/lib/pdf-settings'
-import { TranscriptTemplate, TranscriptRecord, type TranscriptTemplateProps } from '@/components/pdf/templates/TranscriptTemplate'
-
-function TranscriptTemplateElement(props: TranscriptTemplateProps) {
-  return <TranscriptTemplate {...props} />
-}
-import React from 'react'
+import { TranscriptTemplate, TranscriptRecord } from '@/components/pdf/templates/TranscriptTemplate'
+import { createVerificationRecord, generateVerificationQrDataUrl } from '@/lib/document-verification'
 
 export async function GET(req: NextRequest) {
   try {
@@ -50,7 +46,7 @@ export async function GET(req: NextRequest) {
               examDate: true,
               examComponent: {
                 select: {
-                  course: { select: { code: true, name: true, credits: true } },
+                  course: { select: { code: true, name: true } },
                 },
               },
             },
@@ -76,7 +72,7 @@ export async function GET(req: NextRequest) {
     for (const r of examResults) {
       const code = r.exam?.examComponent?.course?.code ?? r.moduleCode ?? '—'
       const courseName = r.exam?.examComponent?.course?.name ?? r.moduleCode ?? '—'
-      const credits = r.exam?.examComponent?.course?.credits ?? 0
+      const credits = 0
 
       const existing = moduleMap.get(code)
       // Prefer passed results, then latest
@@ -85,7 +81,7 @@ export async function GET(req: NextRequest) {
           code,
           courseName,
           credits,
-          grade: r.passed ? 'Pass' : 'Fail',
+          grade: r.percentage != null ? `${r.percentage}%` : (r.passed ? 'Pass' : 'Fail'),
           status: r.passed ? 'Pass' : 'Fail',
         })
       }
@@ -97,28 +93,42 @@ export async function GET(req: NextRequest) {
 
     const now = new Date()
 
+    // Create verification record for transcript QR code
+    const verification = await createVerificationRecord({
+      documentType: 'Transcript',
+      certificateNo: `transcript-${profile.studentId ?? userId}`,
+      recipientName: fullName,
+      issueDate: now,
+      generatedBy: session.user.id,
+    })
+
+    const qrDataUrl = await generateVerificationQrDataUrl(verification.code)
+
+    // eslint-disable-next-line react-hooks/error-boundaries
     const stream = await renderToStream(
-      TranscriptTemplateElement({
-        logoUrl: pdfSettings.logoUrl,
-        watermarkUrl: pdfSettings.watermarkUrl,
-        footerText: pdfSettings.footerText,
-        watermarkOpacity: pdfSettings.watermarkOpacity,
-        studentName: fullName,
-        studentId: profile.studentId ?? '—',
-        programName: programName,
-        enrollmentDate:
+      <TranscriptTemplate
+        logoUrl={pdfSettings.logoUrl}
+        watermarkUrl={pdfSettings.watermarkUrl}
+        footerText={pdfSettings.footerText}
+        watermarkOpacity={pdfSettings.watermarkOpacity}
+        studentName={fullName}
+        studentId={profile.studentId ?? '—'}
+        programName={programName}
+        enrollmentDate={
           profile.enrollmentDate?.toLocaleDateString('en-GB', {
             day: '2-digit',
             month: 'short',
             year: 'numeric',
-          }) ?? '—',
-        generatedDate: now.toLocaleDateString('en-GB', {
+          }) ?? '—'
+        }
+        generatedDate={now.toLocaleDateString('en-GB', {
           day: '2-digit',
           month: 'short',
           year: 'numeric',
-        }),
-        records: records,
-      })
+        })}
+        records={records}
+        qrDataUrl={qrDataUrl}
+      />
     )
 
     const safeId = (profile.studentId ?? 'student').replace(/[^a-zA-Z0-9-]/g, '_')

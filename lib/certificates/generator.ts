@@ -10,6 +10,14 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { getRequestContext } from '@/lib/server/request-context'
 import QRCode from 'qrcode'
 import crypto from 'crypto'
+import {
+  getDefaultTemplate,
+  formatNextCertificateNumber,
+  incrementTemplateSequence,
+} from '@/lib/pdf-templates'
+import {
+  createVerificationRecord,
+} from '@/lib/document-verification'
 
 export interface CertificateData {
   certificateId: string
@@ -201,7 +209,17 @@ export async function createCertificate(params: CreateCertificateParams): Promis
     }
   }
 
-  const certificateId = generateCertificateNumber()
+  // ── Use template numbering if a default template exists ──
+  const templateEnabled = await getSystemSetting('pdf_template_system_enabled', 'false')
+  const template = templateEnabled === 'true' ? await getDefaultTemplate('CERTIFICATE') : null
+  let certificateId: string
+
+  if (template) {
+    certificateId = formatNextCertificateNumber(template)
+  } else {
+    certificateId = generateCertificateNumber()
+  }
+
   const issuedAt = new Date()
   const dateStr = issuedAt.toLocaleDateString('en-GB', {
     day: '2-digit',
@@ -253,6 +271,11 @@ export async function createCertificate(params: CreateCertificateParams): Promis
   const pdfBuffer = await generateCertificatePdf(pdfData)
   const pdfUrl = await uploadCertificateToStorage(certificateId, pdfBuffer)
 
+  // ── Increment template sequence counter ──
+  if (template) {
+    await incrementTemplateSequence(template.id)
+  }
+
   const certificate = await prismaUnfiltered.certificate.create({
     data: {
       certificateId,
@@ -268,6 +291,16 @@ export async function createCertificate(params: CreateCertificateParams): Promis
       pdfUrl,
       verified: true,
     },
+  })
+
+  // ── Create verification record for QR code ──
+  await createVerificationRecord({
+    templateId: template?.id ?? undefined,
+    recipientName: studentName,
+    documentType: 'Certificate',
+    certificateNo: certificateId,
+    issueDate: issuedAt,
+    generatedBy: issuedBy ?? undefined,
   })
 
   const ctx = await getRequestContext().catch(() => ({ ipAddress: undefined, userAgent: undefined }))
