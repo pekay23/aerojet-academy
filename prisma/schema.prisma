@@ -2145,9 +2145,9 @@ model InternalExamSession {
   /// the single-attempt block so the student can retake).
   voidedAt         DateTime?
   voidedBy         String?
-   timeExtensionSec Int                  @default(0)
-   timeExtensionRecoveredAt DateTime?
-   lastActivityAt   DateTime?
+  timeExtensionSec Int                  @default(0)
+  timeExtensionRecoveredAt DateTime?
+  lastActivityAt   DateTime?
   supervised       Boolean              @default(false)
   recoveredAt      DateTime?
   recoveredBy      String?
@@ -2158,12 +2158,12 @@ model InternalExamSession {
   /// (see scripts/create-immutability-trigger.sql)
   /// Persisted randomized question order for paper randomization
   questionOrder    Json?
-   answers          InternalExamAnswer[]
-   reports          InternalExamReport[]
-   accessCodes      InternalExamAccessCode[]
-   violations       InternalExamViolation[]
-    registrations    InternalExamRegistration[]
-    bank             InternalExamBank     @relation(fields: [bankId], references: [id])
+  answers          InternalExamAnswer[]
+  reports          InternalExamReport[]
+  accessCodes      InternalExamAccessCode[]
+  violations       InternalExamViolation[]
+  registrations    InternalExamRegistration[]
+  bank             InternalExamBank     @relation(fields: [bankId], references: [id])
   class            Class?               @relation(fields: [classId], references: [id])
   sitting          ExamSitting?         @relation(fields: [sittingId], references: [id])
   student          User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -3534,6 +3534,117 @@ model Certificate {
   @@index([studentId])
   @@index([sessionId])
   @@map("certificates")
+}
+
+enum PdfTemplateType {
+  CERTIFICATE
+  TRANSCRIPT
+}
+
+enum PdfTemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+/// Stores template configurations for data-driven PDF generation.
+/// Staff can customise text content, signatures, branding, and numbering format per template.
+model PdfTemplate {
+  id                String                @id @default(cuid())
+  name              String                @unique
+  slug              String                @unique
+  type              PdfTemplateType
+  layout            String                @default("default")
+  status            PdfTemplateStatus     @default(DRAFT)
+  isDefault         Boolean               @default(false)
+  /// JSON: title, subtitle, completionText, accreditationText, signatureLabels, etc.
+  content           Json                  @default("{}")
+  /// JSON: logoUrl, watermarkUrl, watermarkOpacity, footerText (overrides global)
+  branding          Json?
+  /// e.g. "CERT-{YYYY}-{SEQ:4}"
+  numberFormat      String?
+  lastSequence      Int                   @default(0)
+  lastSequenceYear  Int?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  createdBy         String?
+  updatedBy         String?
+  clonedFromId      String?
+  signatures        PdfTemplateSignature[]
+  verifications     DocumentVerification[]
+
+  @@index([type, isDefault])
+  @@index([status])
+  @@map("pdf_templates")
+}
+
+/// Uploaded digital signature images stored in Supabase Storage.
+model PdfSignature {
+  id          String                  @id @default(cuid())
+  /// Role title, e.g. "Training Manager", "Academy Director"
+  label       String
+  /// Full name of the person whose signature this is, e.g. "Capt. John Doe"
+  signerName  String
+  /// Supabase Storage path: "signatures/{id}.png"
+  imageUrl    String
+  isActive    Boolean                 @default(true)
+  sortOrder   Int                     @default(0)
+  /// When set, this signature should be rotated (staff role change, etc.)
+  expiresAt   DateTime?
+  /// User ID of the admin who uploaded this signature
+  uploadedBy  String?
+  /// User ID of the person whose consent was obtained for this signature
+  consentGivenBy String?
+  /// How consent was obtained: "in_person", "email", "verbal", "written"
+  consentMethod  String?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  templates   PdfTemplateSignature[]
+
+  @@map("pdf_signatures")
+}
+
+/// Join table: assigns a PdfSignature to a PdfTemplate position (left/right slot).
+model PdfTemplateSignature {
+  id          String       @id @default(cuid())
+  templateId  String
+  signatureId String
+  /// 0 = left slot, 1 = right slot
+  position    Int          @default(0)
+  template    PdfTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  signature   PdfSignature @relation(fields: [signatureId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, position])
+  @@map("pdf_template_signatures")
+}
+
+/// Public-facing verification record created when a document is generated.
+/// Used by the QR code verification page — no auth required.
+model DocumentVerification {
+  id              String       @id @default(cuid())
+  /// Short unique code shown in QR, e.g. "AJ-2026-A7X9K2"
+  code            String       @unique
+  templateId      String?
+  recipientName   String
+  /// e.g. "Certificate" | "Transcript"
+  documentType    String
+  certificateNo   String?      @unique
+  issueDate       DateTime
+  metadata        Json?
+  generatedBy     String?
+  /// When set, this verification record expires (e.g. for re-issued docs)
+  expiresAt       DateTime?
+  /// When set, this verification record has been revoked
+  revokedAt       DateTime?
+  /// User ID of the admin who revoked this record
+  revokedBy       String?
+  revokeReason    String?
+  createdAt       DateTime     @default(now())
+  template        PdfTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([code])
+  @@index([recipientName])
+  @@map("document_verifications")
 }
 
 enum PermissionScope {
