@@ -1,6 +1,6 @@
 {
   "name": "aerojet-academy",
-  "version": "1.0.107",
+  "version": "1.0.108",
   "packageManager": "bun@1.4.0",
   "private": true,
   "type": "module",
