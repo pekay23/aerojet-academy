@@ -120,9 +120,7 @@ export default function StudentDetailPanel({
   // Fetch full student details when selected
   useEffect(() => {
     if (!initialStudent) {
-   
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStudent(null)
       return
     }
@@ -201,7 +199,8 @@ export default function StudentDetailPanel({
   // 2. Completed bookings (have a definitive result like pass/fail, or a score)
   const completedBookings = (currentStudent.examBookings || [])
     .filter(
-      (b: SerializedExamBooking) => isCompletedResult(b.result) || (b.score != null && b.status === 'COMPLETED')
+      (b: SerializedExamBooking) =>
+        isCompletedResult(b.result) || (b.score != null && b.status === 'COMPLETED')
     )
     .map((b: SerializedExamBooking) => ({
       id: b.id,
@@ -305,6 +304,7 @@ export default function StudentDetailPanel({
                   src={currentStudent.profile.profilePhotoUrl}
                   alt={fullName}
                   fill
+                  sizes="64px"
                   className="object-cover"
                 />
               ) : (
