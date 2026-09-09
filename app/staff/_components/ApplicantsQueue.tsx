@@ -82,9 +82,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
 
   // Sync counts when parent provides updated values
   useEffect(() => {
-   
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialCounts.all > 0) setCounts(initialCounts)
   }, [initialCounts])
 
@@ -121,11 +119,9 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
       setLoading(false)
     }
   }, [tab, search, page, perPage, searchParams])
-   
 
-   
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [tab, search])
 
@@ -454,6 +450,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                                   src={applicant.profile.profilePhotoUrl}
                                   alt={fullName}
                                   fill
+                                  sizes="36px"
                                   className="object-cover"
                                 />
                               ) : (
