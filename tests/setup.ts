@@ -1,4 +1,5 @@
 import { vi } from 'vitest'
+import '@testing-library/jest-dom/vitest'
 
 // ---------------------------------------------------------------------------
 // MUST BE FIRST: prevent real DB connections at module-evaluation time.
@@ -144,6 +145,8 @@ const prismaMockCore = {
   notification: mockModel(),
   message: mockModel(),
   emailTemplate: mockModel(),
+  emailRegistryEntry: mockModel(),
+  emailDelivery: mockModel(),
 
   // Content & Files
   fileUpload: mockModel(),
@@ -192,6 +195,7 @@ const prismaMock: any = new Proxy(prismaMockCore, {
 vi.mock('@/lib/prisma/client', () => ({
   default: prismaMock,
   prismaUnfiltered: prismaMock,
+  prisma: prismaMock,
 }))
 
 vi.mock('@/lib/prisma/db-base', () => ({
@@ -206,6 +210,35 @@ vi.mock('resend', () => ({
   Resend: vi.fn(() => ({
     emails: { send: vi.fn(() => ({ data: { id: 'test' }, error: null })) },
   })),
+}))
+
+// ---------------------------------------------------------------------------
+// Mock next/navigation
+// ---------------------------------------------------------------------------
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    refresh: vi.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/',
+}))
+
+// ---------------------------------------------------------------------------
+// Mock analytics server action
+// ---------------------------------------------------------------------------
+vi.mock('@/app/(portal)/_actions/analytics', () => ({
+  recordCourseEngagement: vi.fn(() => Promise.resolve({ success: true })),
+}))
+
+// ---------------------------------------------------------------------------
+// Mock realtime hook
+// ---------------------------------------------------------------------------
+vi.mock('@/hooks/useRealtimeMessages', () => ({
+  useRealtimeMessages: vi.fn(() => () => {}),
 }))
 
 // ---------------------------------------------------------------------------
