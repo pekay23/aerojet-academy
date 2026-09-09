@@ -7,6 +7,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
+import { computeDuplicateCount, questionHash } from '@/lib/internal-exam/import/dedupe'
 
 const questionSchema = z
   .object({
@@ -59,5 +60,18 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }
   })
 
-  return apiSuccess({ preview })
+  const existingQuestions = await prismaUnfiltered.internalExamQuestion.findMany({
+    where: { bankId },
+    select: { text: true, options: true },
+  })
+  const existingHashes = new Set(
+    existingQuestions.map((q) => {
+      const opts = Array.isArray(q.options) ? (q.options as string[]) : []
+      return questionHash(q.text, opts)
+    })
+  )
+
+  const duplicateCount = computeDuplicateCount(questions, existingHashes)
+
+  return apiSuccess({ preview, duplicateCount })
 })

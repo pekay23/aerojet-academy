@@ -5,8 +5,27 @@ import ResourcesView from './_components/ResourcesView'
 export const metadata: Metadata = { title: 'Teaching Resources | Instructor Portal' }
 export const dynamic = 'force-dynamic'
 
-export default async function Page() {
-  const resources = await getInstructorResources()
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    page?: string
+    limit?: string
+    sortBy?: string
+    sortOrder?: string
+    search?: string
+    category?: string
+  }>
+}) {
+  const params = await searchParams
+  const resourcesData = await getInstructorResources({
+    page: parseInt(params.page || '1'),
+    limit: parseInt(params.limit || '20'),
+    sortBy: params.sortBy,
+    sortOrder: (params.sortOrder as 'asc' | 'desc') || 'desc',
+    search: params.search,
+    category: params.category,
+  })
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 flex flex-col space-y-6 duration-700">
@@ -19,7 +38,11 @@ export default async function Page() {
         </p>
       </div>
 
-      <ResourcesView initialResources={resources || []} />
+      <ResourcesView
+        initialResources={resourcesData?.resources || []}
+        meta={resourcesData?.meta}
+        searchParams={params}
+      />
     </div>
   )
 }

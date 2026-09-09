@@ -15,6 +15,8 @@ import {
   Mail,
   GraduationCap,
   FolderOpen,
+  Settings,
+  Lock,
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
 import { useBadgeCounts } from '@/hooks/useBadgeCounts'
@@ -24,7 +26,7 @@ function buildLinks(
   paymentAccessLevel?: PaymentAccessLevel,
   internalExamEnabled = false,
   showRevisionSupport = false,
-  hasWallet = true,
+  hasWallet = true
 ) {
   const isFullTime = [
     'FULL_TIME',
@@ -50,7 +52,7 @@ function buildLinks(
     // Modular: can browse catalog and enroll
     academicChildren.push(
       { label: 'My Courses', href: '/student/courses' },
-      { label: 'Enroll in New', href: '/student/courses/enroll' },
+      { label: 'Enroll in New', href: '/student/courses/enroll' }
     )
   }
   // Exam-only: no courses
@@ -169,7 +171,16 @@ function buildLinks(
   // ── Financial ──
   // Wallet: all pathways (for full-time, only shown if self-funded / has wallet)
   if (!isFullTime || hasWallet) {
-    links.push({ label: 'Wallet', href: '/student/wallet', icon: Wallet, tourId: 'nav-wallet' })
+    links.push({
+      label: 'Wallet',
+      href: '/student/wallet',
+      icon: Wallet,
+      children: [
+        { label: 'Overview', href: '/student/wallet' },
+        { label: 'Top-up', href: '/student/wallet/top-up' },
+        { label: 'Transactions', href: '/student/wallet/transactions' },
+      ],
+    })
   }
 
   // ── Documents ──
@@ -178,8 +189,13 @@ function buildLinks(
 
   // ── Communication ──
   links.push(
-    { label: 'Notifications', href: '/student/notifications', icon: Bell, tourId: 'nav-notifications' },
-    { label: 'Messages', href: '/student/messages', icon: Mail },
+    {
+      label: 'Notifications',
+      href: '/student/notifications',
+      icon: Bell,
+      tourId: 'nav-notifications',
+    },
+    { label: 'Messages', href: '/student/messages', icon: Mail }
   )
 
   return links
@@ -213,7 +229,13 @@ export default function StudentSidebar({
     messages: messageCount,
   })
 
-  const links = buildLinks(studyPathway, paymentAccessLevel, internalExamEnabled, showRevisionSupport, hasWallet)
+  const links = buildLinks(
+    studyPathway,
+    paymentAccessLevel,
+    internalExamEnabled,
+    showRevisionSupport,
+    hasWallet
+  )
 
   const linksWithBadge = links.map((link) => {
     if (link.type === 'header') return link
@@ -236,6 +258,8 @@ export default function StudentSidebar({
       userImage={userImage}
       userMenuItems={[
         { label: 'Profile', href: '/student/profile', icon: User },
+        { label: 'Settings', href: '/student/profile/settings', icon: Settings },
+        { label: 'Change Password', href: '/student/profile/change-password', icon: Lock },
         { label: 'Ambassador', href: '/student/ambassador', icon: Users },
         { label: 'Request Withdrawal', href: '/student/withdrawal', icon: FileCheck },
       ]}

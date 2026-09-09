@@ -13,10 +13,25 @@ interface DashboardAlert {
   count?: number
 }
 
-const SEVERITY_STYLE: Record<DashboardAlert['severity'], { bg: string; text: string; Icon: React.ComponentType<{ className?: string }> }> = {
-  CRITICAL: { bg: 'bg-red-50 dark:bg-red-900/20', text: 'text-red-700 dark:text-red-300', Icon: AlertOctagon },
-  WARNING: { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300', Icon: AlertTriangle },
-  INFO: { bg: 'bg-indigo-50 dark:bg-indigo-900/20', text: 'text-indigo-700 dark:text-indigo-300', Icon: Info },
+const SEVERITY_STYLE: Record<
+  DashboardAlert['severity'],
+  { bg: string; text: string; Icon: React.ComponentType<{ className?: string }> }
+> = {
+  CRITICAL: {
+    bg: 'bg-red-50 dark:bg-red-900/20',
+    text: 'text-red-700 dark:text-red-300',
+    Icon: AlertOctagon,
+  },
+  WARNING: {
+    bg: 'bg-amber-50 dark:bg-amber-900/20',
+    text: 'text-amber-700 dark:text-amber-300',
+    Icon: AlertTriangle,
+  },
+  INFO: {
+    bg: 'bg-indigo-50 dark:bg-indigo-900/20',
+    text: 'text-indigo-700 dark:text-indigo-300',
+    Icon: Info,
+  },
 }
 
 /**
@@ -30,7 +45,7 @@ export default function AlertsCenter({ initialAlerts }: { initialAlerts: Dashboa
   const router = useRouter()
 
   // Keep state in sync when the server re-fetches.
-   
+
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setAlerts(initialAlerts), [initialAlerts])
 
@@ -44,7 +59,7 @@ export default function AlertsCenter({ initialAlerts }: { initialAlerts: Dashboa
   if (alerts.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/60 p-4 text-center text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
-        ðŸŽ‰ No active alerts.
+        🎉 No active alerts.
       </div>
     )
   }

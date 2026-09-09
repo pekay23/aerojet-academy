@@ -37,18 +37,16 @@ import {
   GroupedCourse,
 } from './_components/examOnlyTypes'
 
-const IndividualBookingModal = dynamic(
-  () => import('./_components/IndividualBookingModal'),
-  { ssr: false }
-)
-const BundleSelectionModal = dynamic(
-  () => import('./_components/BundleSelectionModal'),
-  { ssr: false }
-)
+const IndividualBookingModal = dynamic(() => import('./_components/IndividualBookingModal'), {
+  ssr: false,
+})
+const BundleSelectionModal = dynamic(() => import('./_components/BundleSelectionModal'), {
+  ssr: false,
+})
 import type { ConfirmationBooking } from './_components/ConfirmationModal'
 
 const ConfirmationModal = dynamic(
-  () => import('./_components/ConfirmationModal').then(m => ({ default: m.default })),
+  () => import('./_components/ConfirmationModal').then((m) => ({ default: m.default })),
   { ssr: false }
 )
 
@@ -93,42 +91,50 @@ export default function ExamOnlyPathwayPage() {
   const { convert, loading: _ratesLoading } = useCurrencyRates()
 
   const fmt = (eurAmount: number) => {
-    if (displayCurrency === 'EUR') return `â‚¬${eurAmount.toFixed(2)}`
+    if (displayCurrency === 'EUR') return `€${eurAmount.toFixed(2)}`
     const converted = convert(eurAmount, 'EUR', displayCurrency)
-    const sym = displayCurrency === 'GHS' ? 'GHâ‚µ' : '$'
+    const sym = displayCurrency === 'GHS' ? 'GH₵' : '$'
     return `${sym}${converted.toFixed(2)}`
   }
 
   const fetchData = useCallback(async () => {
     try {
-      const [walletRes, componentsRes, poolsRes, membershipsRes, bookingsRes, txRes, bundlesRes, pricingRes] =
-        await Promise.all([
-          fetch('/api/applicant/exam-only/wallet')
-            .then((r) => r.json())
-            .catch(() => null),
-          fetch('/api/applicant/exam-only/exam-components')
-            .then((r) => r.json())
-            .catch(() => []),
-          fetch('/api/applicant/exam-only/pools')
-            .then((r) => r.json())
-            .catch(() => []),
-          fetch('/api/applicant/exam-only/memberships')
-            .then((r) => r.json())
-            .catch(() => []),
-          fetch('/api/applicant/exam-only/bookings')
-            .then((r) => r.json())
-            .catch(() => []),
-          fetch('/api/applicant/exam-only/wallet/transactions')
-            .then((r) => r.json())
-            .catch(() => ({ transactions: [], payments: [] })),
-          fetch('/api/applicant/exam-only/bundles')
-            .then((r) => r.json())
-            .then((res) => res?.bundles || [])
-            .catch(() => []),
-          fetch('/api/applicant/exam-only/pricing')
-            .then((r) => r.json())
-            .catch(() => null),
-        ])
+      const [
+        walletRes,
+        componentsRes,
+        poolsRes,
+        membershipsRes,
+        bookingsRes,
+        txRes,
+        bundlesRes,
+        pricingRes,
+      ] = await Promise.all([
+        fetch('/api/applicant/exam-only/wallet')
+          .then((r) => r.json())
+          .catch(() => null),
+        fetch('/api/applicant/exam-only/exam-components')
+          .then((r) => r.json())
+          .catch(() => []),
+        fetch('/api/applicant/exam-only/pools')
+          .then((r) => r.json())
+          .catch(() => []),
+        fetch('/api/applicant/exam-only/memberships')
+          .then((r) => r.json())
+          .catch(() => []),
+        fetch('/api/applicant/exam-only/bookings')
+          .then((r) => r.json())
+          .catch(() => []),
+        fetch('/api/applicant/exam-only/wallet/transactions')
+          .then((r) => r.json())
+          .catch(() => ({ transactions: [], payments: [] })),
+        fetch('/api/applicant/exam-only/bundles')
+          .then((r) => r.json())
+          .then((res) => res?.bundles || [])
+          .catch(() => []),
+        fetch('/api/applicant/exam-only/pricing')
+          .then((r) => r.json())
+          .catch(() => null),
+      ])
 
       setWallet(walletRes)
       setExamComponents(componentsRes)
@@ -163,7 +169,7 @@ export default function ExamOnlyPathwayPage() {
     if (!wallet || wallet.availableBalance === 0) {
       const lowestPrice = getLowestExamPrice()
       if (topUpAmount < lowestPrice) {
-        toast.error(`Minimum top-up must be at least â‚¬${lowestPrice} (lowest exam fee)`)
+        toast.error(`Minimum top-up must be at least €${lowestPrice} (lowest exam fee)`)
         return
       }
     }
@@ -201,7 +207,7 @@ export default function ExamOnlyPathwayPage() {
     const requiredAmount = Number(pool.seatPrice)
     if (wallet.availableBalance < requiredAmount) {
       toast.error(
-        `Insufficient funds. You need â‚¬${requiredAmount} but have â‚¬${wallet.availableBalance.toFixed(2)} available.`,
+        `Insufficient funds. You need €${requiredAmount} but have €${wallet.availableBalance.toFixed(2)} available.`,
         {
           action: {
             label: 'Top Up',
@@ -225,7 +231,7 @@ export default function ExamOnlyPathwayPage() {
       if (!res.ok) {
         if (data.error === 'INSUFFICIENT_BALANCE') {
           toast.error(
-            `Insufficient funds. You need â‚¬${requiredAmount} but have â‚¬${wallet.availableBalance.toFixed(2)} available.`,
+            `Insufficient funds. You need €${requiredAmount} but have €${wallet.availableBalance.toFixed(2)} available.`,
             {
               action: {
                 label: 'Top Up',
@@ -293,7 +299,7 @@ export default function ExamOnlyPathwayPage() {
 
     if (!wallet || Number(wallet.availableBalance) < requiredAmount) {
       toast.error(
-        `Insufficient funds. You need â‚¬${requiredAmount} but have â‚¬${Number(wallet?.availableBalance || 0).toFixed(2)} available.`,
+        `Insufficient funds. You need €${requiredAmount} but have €${Number(wallet?.availableBalance || 0).toFixed(2)} available.`,
         {
           action: {
             label: 'Top Up',
@@ -330,7 +336,7 @@ export default function ExamOnlyPathwayPage() {
       if (!res.ok) {
         if (data.error === 'INSUFFICIENT_BALANCE') {
           toast.error(
-            `Insufficient funds. You need â‚¬${data.required || price} but have â‚¬${Number(data.available || 0).toFixed(2)} available.`,
+            `Insufficient funds. You need €${data.required || price} but have €${Number(data.available || 0).toFixed(2)} available.`,
             {
               action: {
                 label: 'Top Up',
@@ -357,9 +363,11 @@ export default function ExamOnlyPathwayPage() {
       }
 
       if (type === 'POOL' && data.pool) {
-        toast.success(`Joined ${data.pool.name}! (â‚¬${prices.pool}) - ${data.pool.memberCount}/${data.pool.maxCandidates || 28} candidates`)
+        toast.success(
+          `Joined ${data.pool.name}! (€${prices.pool}) - ${data.pool.memberCount}/${data.pool.maxCandidates || 28} candidates`
+        )
       } else {
-        toast.success(`Individual exam booked successfully! (â‚¬${prices.individual})`)
+        toast.success(`Individual exam booked successfully! (€${prices.individual})`)
       }
       fetchData()
     } catch (_error) {
@@ -382,7 +390,7 @@ export default function ExamOnlyPathwayPage() {
 
     if (wallet.availableBalance < requiredAmount) {
       toast.error(
-        `Insufficient funds. You need â‚¬${requiredAmount} but have â‚¬${wallet.availableBalance.toFixed(2)} available.`,
+        `Insufficient funds. You need €${requiredAmount} but have €${wallet.availableBalance.toFixed(2)} available.`,
         {
           action: {
             label: 'Top Up',
@@ -460,10 +468,10 @@ export default function ExamOnlyPathwayPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Exam Only Pathway
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

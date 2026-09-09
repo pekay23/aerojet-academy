@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { Search, Filter, BookOpen, GraduationCap, ClipboardList, Shield, Building2 } from 'lucide-react'
+import { Search, Filter, BookOpen, GraduationCap, Shield } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import StudentResourceCard from './StudentResourceCard'
 
@@ -19,13 +19,13 @@ interface StudentResourcesViewProps {
   initialResources: Resource[]
 }
 
+// Student-visible categories only. ADMINISTRATIVE and INSTITUTIONAL are forced
+// to showToStudents: false in upsertResource() and must not appear here.
 const CATEGORIES = [
   { id: 'ALL', label: 'All Resources', icon: BookOpen },
   { id: 'STUDENT_GUIDE', label: 'Student Guide', icon: GraduationCap },
   { id: 'ACADEMIC', label: 'Academic', icon: GraduationCap },
-  { id: 'ADMINISTRATIVE', label: 'Administrative', icon: ClipboardList },
   { id: 'EXAMINATION', label: 'Examination', icon: Shield },
-  { id: 'INSTITUTIONAL', label: 'Institutional', icon: Building2 },
 ]
 
 export default function StudentResourcesView({ initialResources }: StudentResourcesViewProps) {

@@ -15,6 +15,9 @@ export const ACADEMIC_RULES = {
   GRADE_THRESHOLD_PASS: 75, // Green
   GRADE_THRESHOLD_WARNING: 50, // Amber
 
+  /** EASA standard time per question (seconds) */
+  TIME_PER_QUESTION_SECS: 75,
+
   /** Default values when a class / event doesn't specify its own */
   DEFAULT_MAX_CANDIDATES: 28,
   MAX_MODULES_PER_EVENT: 4,
@@ -110,4 +113,46 @@ export const SEB = {
     'http://localhost:3000',
     'http://localhost:3001',
   ],
+} as const
+
+// ── PDF / Document Text Defaults ───────────────────────────────────────────
+// Centralised fallback text for PDF templates. These are the build-time
+// defaults consumed when no template is configured. Staff can override
+// any of these via the PDF Template System UI.
+
+export const DEFAULT_PDF_TEXT = {
+  /** Default certificate title */
+  CERTIFICATE_TITLE: 'Certificate of Completion',
+
+  /** Default certificate subtitle */
+  CERTIFICATE_SUBTITLE: 'This is to certify that',
+
+  /** Default certificate completion statement */
+  CERTIFICATE_COMPLETION_TEXT:
+    'has successfully completed the prescribed training and assessment requirements for',
+
+  /** Default EASA Part-147 accreditation text for certificates */
+  CERTIFICATE_ACCREDITATION_TEXT:
+    'Aerojet Aviation Training Academy is an EASA Part-147 Approved Maintenance Training ' +
+    'Organisation. This certificate attests to the completion of the approved training ' +
+    'programme and does not constitute an EASA Part-66 Aircraft Maintenance Licence.',
+
+  /** Default signature labels for certificates */
+  CERTIFICATE_SIGNATURE_LABELS: ['Training Manager', 'Academy Director'],
+
+  /** Default transcript section headers */
+  TRANSCRIPT_SECTION_HEADERS: {
+    studentInfo: 'Student Information',
+    academicRecord: 'Academic Record',
+  },
+
+  /** Default transcript disclaimer text */
+  TRANSCRIPTDisclaimerText:
+    'This is an Academy-issued record. It is not an official EASA certificate. No grade-point ' +
+    'average is computed — this is an EASA Part-147 training record. For EASA Part-66 licence ' +
+    'applications, please refer to your official examination results issued by the competent ' +
+    'authority.',
+
+  /** Default signature labels for transcripts */
+  TRANSCRIPT_SIGNATURE_LABELS: ['Registrar'],
 } as const

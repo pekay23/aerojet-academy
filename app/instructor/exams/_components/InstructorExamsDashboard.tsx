@@ -44,7 +44,7 @@ import { useExamMonitor } from '@/hooks/useExamMonitor'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 import type { ExamsDashboardCounts } from '../page'
 
-// â”€â”€ Shared types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Shared types ────────────────────────────────────────────────────────────
 interface BankRef {
   id: string
   name: string
@@ -155,7 +155,7 @@ async function fetchJson<T>(url: string): Promise<T> {
   return json.data as T
 }
 
-// â”€â”€ Small presentational helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Small presentational helpers ──────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     DRAFT: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
@@ -271,7 +271,7 @@ function formatDuration(seconds: number) {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-// â”€â”€ My Questions tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── My Questions tab ───────────────────────────────────────────────────────────
 function MyQuestionsTab() {
   const router = useRouter()
   const [questions, setQuestions] = useState<Question[]>([])
@@ -296,8 +296,7 @@ function MyQuestionsTab() {
   }, [page, limit])
 
   useEffect(() => {
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
   }, [load])
 
@@ -348,7 +347,7 @@ function MyQuestionsTab() {
   )
 }
 
-// â”€â”€ My Banks tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── My Banks tab ────────────────────────────────────────────────────────────────
 function MyBanksTab() {
   const router = useRouter()
   const [banks, setBanks] = useState<Bank[]>([])
@@ -372,9 +371,8 @@ function MyBanksTab() {
     }
   }, [page, limit])
 
-   
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
   }, [load])
 
@@ -448,7 +446,7 @@ function MyBanksTab() {
   )
 }
 
-// â”€â”€ Module Bank tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Module Bank tab ─────────────────────────────────────────────────────────────
 type QuestionSortKey =
   | 'recent'
   | 'oldest'
@@ -463,8 +461,8 @@ const QUESTION_SORT_OPTIONS: { value: QuestionSortKey; label: string }[] = [
   { value: 'recent', label: 'Most recent' },
   { value: 'oldest', label: 'Oldest first' },
   { value: 'author', label: 'Author A–Z' },
-  { value: 'difficulty_desc', label: 'Difficulty: Hard â†’ Easy' },
-  { value: 'difficulty_asc', label: 'Difficulty: Easy â†’ Hard' },
+  { value: 'difficulty_desc', label: 'Difficulty: Hard → Easy' },
+  { value: 'difficulty_asc', label: 'Difficulty: Easy → Hard' },
   { value: 'status', label: 'Status' },
   { value: 'subtopic', label: 'Sub-topic' },
   { value: 'served', label: 'Most served' },
@@ -495,10 +493,9 @@ function BankQuestionPanel({ bankId, instructorId }: { bankId: string; instructo
       setLoading(false)
     }
   }, [bankId, sort, status])
-   
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
   }, [load])
 
@@ -643,11 +640,10 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
     } finally {
       setLoading(false)
     }
-   
   }, [page, limit])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
   }, [load])
 
@@ -810,7 +806,7 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
   )
 }
 
-// â”€â”€ My Classes tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── My Classes tab ──────────────────────────────────────────────────────────────
 function MyClassesTab() {
   const router = useRouter()
   const [classes, setClasses] = useState<ClassItem[]>([])
@@ -831,12 +827,11 @@ function MyClassesTab() {
       toast.error('Failed to load your classes')
     } finally {
       setLoading(false)
-   
     }
   }, [page, limit])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
   }, [load])
 
@@ -898,7 +893,7 @@ function MyClassesTab() {
   )
 }
 
-// â”€â”€ Class Schedule tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Class Schedule tab ──────────────────────────────────────────────────────────
 function ClassScheduleTab() {
   const router = useRouter()
   const [classes, setClasses] = useState<(ClassItem & { schedules: ClassSchedule[] })[]>([])
@@ -918,13 +913,12 @@ function ClassScheduleTab() {
     } catch {
       toast.error('Failed to load schedules')
     } finally {
-   
       setLoading(false)
     }
   }, [page, limit])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
   }, [load])
 
@@ -1047,14 +1041,13 @@ function LiveMonitorTab() {
     } finally {
       setRefreshing(false)
       setLoading(false)
-   
     }
   }, [selectedClass])
 
   useExamMonitor(selectedClass || null, refresh)
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh()
   }, [refresh])
 
@@ -1191,7 +1184,7 @@ function EmptyState({ label }: { label: string }) {
   )
 }
 
-// â”€â”€ Main dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Main dashboard ───────────────────────────────────────────────────────────────
 export default function InstructorExamsDashboard({
   instructorId,
   instructorName,

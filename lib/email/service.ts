@@ -2,6 +2,7 @@ import 'server-only'
 import { NotificationType, Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
 import { getFinanceConfig, getRegistrationConfig, getEmailConfig } from '@/lib/settings'
+import { getRegistryFromAddress } from '@/lib/email/registry'
 import { getBaseUrl } from '@/lib/utils/url'
 import { formatPaymentType } from '@/lib/utils/string'
 
@@ -27,7 +28,7 @@ export async function createNotification(
       type: data.type,
       title: data.title,
       message: data.message,
-      link: data.link,
+      linkUrl: data.link,
     },
   })
 }
@@ -39,12 +40,18 @@ export async function createNotification(
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 
 /**
- * Resolves the sender email address based on environment variables or dynamic settings.
- * Defaults to the recommended subdomain pattern: noreply@mail.aerojet-academy.com
+ * Resolves the sender email address based on environment variables, the email
+ * registry (admin-edited via the comms tab), or dynamic settings.
+ * Priority: FROM_EMAIL env var → registry "Transactional sender" → SystemSettings
  */
 async function getFromEmail() {
   if (process.env.FROM_EMAIL) return process.env.FROM_EMAIL
 
+  // Check the email registry first — admin edits from the comms tab take effect
+  const registryFrom = await getRegistryFromAddress('transactional_sender')
+  if (registryFrom) return registryFrom
+
+  // Fall back to SystemSettings-based construction
   const config = await getEmailConfig()
   const display = config.fromName ? `"${config.fromName}" ` : ''
   const email = `${config.fromAddress}@${config.subdomain}.${config.rootDomain}`

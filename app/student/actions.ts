@@ -30,7 +30,6 @@ import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import { chargeWallet } from '@/lib/wallet/operations'
 import { categoryMatchesTarget, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
 
-
 export async function enrollInCourse(courseId: string) {
   const user = await requireStudent()
 
@@ -1174,7 +1173,119 @@ export async function bookBundleExamsAtomicAction(params: {
     return { success: true, bookedCount: components.length }
   } catch (error: unknown) {
     console.error('bookBundleExamsAtomicAction error:', error)
-    return { error: error instanceof Error ? error.message : 'Failed to book bundle. No seats were reserved.' }
+    return {
+      error:
+        error instanceof Error ? error.message : 'Failed to book bundle. No seats were reserved.',
+    }
+  }
+}
+
+export async function useExistingBundleSeatsAction(params: {
+  moduleCodes: string[]
+  eventId: string
+  bundleId: string
+}) {
+  try {
+    const user = await requireStudent()
+    await assertExamOnlyPathway(user.id)
+    const { moduleCodes, eventId, bundleId } = params
+
+    if (!moduleCodes.length || !eventId || !bundleId) {
+      return { error: 'Missing booking parameters.' }
+    }
+
+    // Verify the bundle belongs to this user and has remaining seats
+    const bundle = await prisma.examBundle.findFirst({
+      where: {
+        id: bundleId,
+        userId: user.id,
+        status: 'ACTIVE',
+        validUntil: { gt: new Date() },
+      },
+    })
+    if (!bundle) {
+      return { error: 'Active bundle not found.' }
+    }
+    if (bundle.usedSeats + moduleCodes.length > bundle.totalSeats) {
+      return {
+        error: `Not enough seats. Bundle has ${bundle.totalSeats - bundle.usedSeats} remaining but you selected ${moduleCodes.length}.`,
+      }
+    }
+
+    const components = await prisma.examComponent.findMany({
+      where: { code: { in: moduleCodes } },
+      include: { course: true },
+    })
+    if (components.length !== moduleCodes.length) {
+      return { error: 'One or more selected modules could not be found.' }
+    }
+
+    const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
+    if (
+      targetCategories.length > 0 &&
+      components.some(
+        (component) => !categoryMatchesTarget(component.categoryCode, targetCategories)
+      )
+    ) {
+      return {
+        error:
+          'One or more selected module categories are not part of your selected licence pathway.',
+      }
+    }
+
+    const bookingType = bundle.bundleType === 'TWO_SEAT' ? 'TWIN_PACK' : 'FOUR_PACK'
+
+    await prisma.$transaction(
+      async (tx) => {
+        for (const component of components) {
+          const result = await placeExamBookingInStandardPool(tx, {
+            userId: user.id,
+            eventId,
+            examComponentId: component.id,
+            moduleCode: component.course.code,
+            bookingType,
+            reserveAmount: 0,
+            bundleId: bundle.id,
+          })
+          if (!result.success) {
+            throw new Error(result.error || `Failed to place module ${component.course.code}.`)
+          }
+        }
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        timeout: 20000,
+      }
+    )
+
+    const typeStr =
+      bookingType === 'TWIN_PACK' ? 'Twin Pack' : bookingType === 'FOUR_PACK' ? '4-Pack' : 'exam'
+    const modulesStr = components.map((c) => c.code).join(', ')
+
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        title: `Bundle Seats Used (${moduleCodes.length})`,
+        message: `You booked modules ${modulesStr} using your existing ${typeStr} bundle.`,
+        type: 'SUCCESS',
+        linkUrl: '/student/exam-bookings',
+        linkText: 'View Bookings',
+      },
+    })
+
+    revalidatePath('/student/exam-bookings')
+    revalidatePath('/student/exams')
+    revalidatePath('/student/wallet')
+    revalidatePath('/student')
+    return { success: true, bookedCount: components.length }
+  } catch (error: unknown) {
+    console.error('useExistingBundleSeatsAction error:', error)
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to use bundle seats. No seats were reserved.',
+    }
   }
 }
 
@@ -1463,7 +1574,9 @@ export async function createCalendarEvent(data: {
         startDate: new Date(data.startDate),
         endDate: data.endDate ? new Date(data.endDate) : null,
         color: data.color || '#3b82f6',
-        recurrenceType: (data.recurrenceType as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM' | undefined) || 'NONE',
+        recurrenceType:
+          (data.recurrenceType as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM' | undefined) ||
+          'NONE',
         recurrenceDays: data.recurrenceDays || null,
         recurrenceUntil: data.recurrenceUntil ? new Date(data.recurrenceUntil) : null,
       },
@@ -1511,7 +1624,9 @@ export async function updateCalendarEvent(
           endDate: data.endDate ? new Date(data.endDate) : null,
         }),
         ...(data.color && { color: data.color }),
-        ...(data.recurrenceType !== undefined && { recurrenceType: data.recurrenceType as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM' }),
+        ...(data.recurrenceType !== undefined && {
+          recurrenceType: data.recurrenceType as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM',
+        }),
         ...(data.recurrenceDays !== undefined && { recurrenceDays: data.recurrenceDays || null }),
         ...(data.recurrenceUntil !== undefined && {
           recurrenceUntil: data.recurrenceUntil ? new Date(data.recurrenceUntil) : null,

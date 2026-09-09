@@ -1,13 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import {
-  Area,
-  AreaChart,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from 'recharts'
+import { Area, AreaChart, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
@@ -25,7 +19,7 @@ const revenueConfig = {
 
 export function RevenueChart({ data, title = 'Revenue History' }: RevenueChartProps) {
   const [mounted, setMounted] = React.useState(false)
-   
+
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
@@ -57,14 +51,14 @@ export function RevenueChart({ data, title = 'Revenue History' }: RevenueChartPr
                 tickLine={false}
                 axisLine={false}
                 tick={{ fill: '#64748B' }}
-                tickFormatter={(value) => `â‚¬${value / 1000}k`}
+                tickFormatter={(value) => `€${value / 1000}k`}
               />
               <ChartTooltip
                 content={
                   <ChartTooltipContent
                     indicator="dot"
                     formatter={(value) => [
-                      `â‚¬${typeof value === 'number' ? value.toLocaleString() : value}`,
+                      `€${typeof value === 'number' ? value.toLocaleString() : value}`,
                       'Revenue',
                     ]}
                   />

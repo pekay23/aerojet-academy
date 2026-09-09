@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic'
 import SettingsForm from './SettingsForm'
 import { toast } from 'sonner'
 import { FileText, Award } from 'lucide-react'
+import TemplateList from './TemplateList'
+import SignatureManager from './SignatureManager'
 
 // Dynamically import PDFViewer with SSR disabled — @react-pdf/renderer needs DOM APIs
 const LivePDFViewer = dynamic(() => import('./LivePDFViewer'), {
@@ -198,6 +200,12 @@ export default function PDFSettingsForm({ values, pdfSettings }: PDFSettingsForm
 
       {/* ── Settings Fields ── */}
       <SettingsForm fields={PDF_FIELDS} values={values} groupLabel="PDF Templates" />
+
+      {/* ── Template Management ── */}
+      <TemplateList />
+
+      {/* ── Signature Management ── */}
+      <SignatureManager />
     </div>
   )
 }

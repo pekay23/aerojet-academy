@@ -58,6 +58,8 @@ export function getSupabaseClient(): PublicSupabase | null {
  * Get Supabase admin client for server-side operations
  * Uses service role key - bypasses RLS (Row Level Security)
  */
+let supabaseAdminClient: PublicSupabase | null = null
+
 export function getSupabaseAdmin(): PublicSupabase | null {
   if (!isSupabaseConfigured || !supabaseServiceKey) {
     if (process.env.NODE_ENV === 'development') {
@@ -66,12 +68,16 @@ export function getSupabaseAdmin(): PublicSupabase | null {
     return null
   }
 
-  return createClient(supabaseUrl!, supabaseServiceKey!, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  })
+  if (!supabaseAdminClient) {
+    supabaseAdminClient = createClient(supabaseUrl!, supabaseServiceKey!, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    })
+  }
+
+  return supabaseAdminClient
 }
 
 /**

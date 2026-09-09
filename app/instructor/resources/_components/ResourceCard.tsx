@@ -47,6 +47,8 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
         return 'bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800'
       case 'EXAMINATION':
         return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800'
+      case 'INSTITUTIONAL':
+        return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
       default:
         return 'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:text-slate-300 dark:border-slate-700'
     }

@@ -19,9 +19,9 @@ interface StudentOption {
 }
 
 const CURRENCY_OPTIONS = [
-  { code: 'EUR', symbol: 'â‚¬', label: 'EUR · â‚¬' },
+  { code: 'EUR', symbol: '€', label: 'EUR · €' },
   { code: 'USD', symbol: '$', label: 'USD · $' },
-  { code: 'GHS', symbol: 'GHâ‚µ', label: 'GHS · GHâ‚µ' },
+  { code: 'GHS', symbol: 'GH₵', label: 'GHS · GH₵' },
 ] as const
 
 interface RefundRow {
@@ -66,7 +66,7 @@ export default function RefundsManager({
     currency: 'EUR' as 'EUR' | 'USD' | 'GHS',
   })
 
-  // â”€â”€ Student search (debounced typeahead) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Student search (debounced typeahead) ─────────────────────────────
   const [studentQuery, setStudentQuery] = useState('')
   const [debouncedQuery] = useDebounce(studentQuery, 200)
   const [options, setOptions] = useState<StudentOption[]>([])
@@ -76,8 +76,7 @@ export default function RefundsManager({
   useEffect(() => {
     if (!showCreate) return
     if (debouncedQuery.trim().length < 1) {
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOptions([])
       return
     }
@@ -95,7 +94,12 @@ export default function RefundsManager({
         const json = await res.json()
         if (cancelled) return
         // Endpoint returns `{ data: User[] }` via apiPaginated
-        const rows: Array<{ id: string; profile?: { firstName: string; lastName: string } | null; email: string; studentProfile?: { studentId: string } | null }> = json?.data ?? []
+        const rows: Array<{
+          id: string
+          profile?: { firstName: string; lastName: string } | null
+          email: string
+          studentProfile?: { studentId: string } | null
+        }> = json?.data ?? []
         setOptions(
           rows.map((u) => ({
             id: u.id,
@@ -179,7 +183,7 @@ export default function RefundsManager({
         </div>
         <button
           onClick={() => setShowCreate((s) => !s)}
-          className="flex items-center gap-1.5 rounded-xl bg-aerojet-blue px-4 py-2 text-sm font-bold text-white hover:bg-aerojet-blue/90"
+          className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold text-white"
         >
           <Plus className="h-4 w-4" /> New Refund
         </button>
@@ -208,9 +212,7 @@ export default function RefundsManager({
             />
             {showDropdown && (studentQuery.length > 0 || options.length > 0) && (
               <div className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
-                {searching && (
-                  <div className="px-3 py-2 text-xs text-slate-400">Searching…</div>
-                )}
+                {searching && <div className="px-3 py-2 text-xs text-slate-400">Searching…</div>}
                 {!searching && options.length === 0 && studentQuery.length > 0 && (
                   <div className="px-3 py-2 text-xs text-slate-400">No matches.</div>
                 )}
@@ -229,9 +231,7 @@ export default function RefundsManager({
                       </p>
                       <p className="truncate text-xs text-slate-500">
                         {opt.email}
-                        {opt.studentId && (
-                          <span className="ml-2 font-mono">· {opt.studentId}</span>
-                        )}
+                        {opt.studentId && <span className="ml-2 font-mono">· {opt.studentId}</span>}
                       </p>
                     </div>
                     {form.studentId === opt.id && (

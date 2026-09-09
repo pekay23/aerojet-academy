@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation'
-import { Wallet } from 'lucide-react'
+import { Wallet, Package } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 import {
@@ -14,12 +13,43 @@ import GroupBookingModal from './GroupBookingModal'
 import StandaloneBooking from './StandaloneBooking'
 import BundleBooking from './BundleBooking'
 
+/* ── Helper: fetch active bundle for a user ── */
+async function getUserActiveBundle(userId: string) {
+  const bundle = await prismaUnfiltered.examBundle.findFirst({
+    where: {
+      userId: userId,
+      status: 'ACTIVE',
+      validUntil: { gt: new Date() },
+    },
+    select: {
+      id: true,
+      bundleType: true,
+      totalSeats: true,
+      usedSeats: true,
+    },
+  })
+  if (!bundle) return null
+  // Only consider it "active" if seats remain
+  if (bundle.usedSeats >= bundle.totalSeats) return null
+  // Normalize bundleType to canonical form (DB may store FOUR_PACK or FOUR_SEAT)
+  return {
+    ...bundle,
+    bundleType: normalizeBundleType(bundle.bundleType),
+  }
+}
+
+/** Normalize the raw DB bundleType string to a canonical form. */
+function normalizeBundleType(t: string): 'TWO_SEAT' | 'FOUR_SEAT' {
+  if (t === 'TWO_SEAT' || t === 'TWIN_PACK') return 'TWO_SEAT'
+  return 'FOUR_SEAT'
+}
+
 /* ── Helper: fetch common booking data ── */
 async function getBookingData(userId: string) {
   const [wallet, pricing, openEvents, upcomingExams, examComponents] = await Promise.all([
-    prisma.wallet.findUnique({ where: { userId } }),
+    prismaUnfiltered.wallet.findUnique({ where: { userId } }),
     getExamPricingConfig(),
-    prisma.examEvent.findMany({
+    prismaUnfiltered.examEvent.findMany({
       where: {
         status: { in: ['OPEN', 'DRAFT'] },
         joinDeadline: { gt: new Date() },
@@ -27,7 +57,7 @@ async function getBookingData(userId: string) {
       select: { id: true, name: true, startDate: true, endDate: true },
       orderBy: { startDate: 'asc' },
     }),
-    prisma.exam.findMany({
+    prismaUnfiltered.exam.findMany({
       where: { examDate: { gt: new Date() } },
       select: {
         id: true,
@@ -37,12 +67,13 @@ async function getBookingData(userId: string) {
       },
       orderBy: { examDate: 'asc' },
     }),
-    prisma.examComponent.findMany({
+    prismaUnfiltered.examComponent.findMany({
       select: {
         id: true,
         code: true,
         name: true,
         categoryCode: true,
+        type: true,
         questionCount: true,
         course: { select: { code: true, name: true } },
       },
@@ -60,6 +91,7 @@ async function getBookingData(userId: string) {
       id: ec.id,
       code: ec.code,
       name: ec.name,
+      type: ec.type,
       categoryCode: ec.categoryCode,
       questionCount: ec.questionCount,
       courseCode: ec.course.code,
@@ -93,6 +125,11 @@ export default async function BookingActionTab({
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
+  const [userBundle, bookingData] = await Promise.all([
+    getUserActiveBundle(session.user.id),
+    getBookingData(session.user.id),
+  ])
+
   const {
     wallet: _wallet,
     pricing,
@@ -102,7 +139,9 @@ export default async function BookingActionTab({
     balance,
     currency,
     currencySymbol,
-  } = await getBookingData(session.user.id)
+  } = bookingData
+
+  const bundleRemaining = userBundle ? userBundle.totalSeats - userBundle.usedSeats : 0
 
   const BOOKING_META: Record<string, { title: string; description: string; color: string }> = {
     group: {
@@ -147,6 +186,23 @@ export default async function BookingActionTab({
           </span>
         </div>
       </div>
+
+      {/* Bundle seats available banner (only in individual mode) */}
+      {type !== 'group' && bundleRemaining > 0 && (
+        <div
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/60 px-5 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+        >
+          <Package className="h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
+          <span className="font-black">
+            You have {bundleRemaining} remaining seat{bundleRemaining !== 1 ? 's' : ''} in your{' '}
+            {userBundle!.bundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'}.
+          </span>{' '}
+          Use the &quot;
+          {userBundle!.bundleType === 'TWO_SEAT' ? 'Use My Twin Pack' : 'Use My 4-Pack'}&quot;
+          button below to book at no extra cost.
+        </div>
+      )}
 
       {/* Booking Form / Options */}
       <div
@@ -194,6 +250,14 @@ export default async function BookingActionTab({
                 upcomingExams={upcomingExams}
                 examComponents={examComponents}
                 events={openEvents}
+                existingBundle={
+                  userBundle
+                    ? {
+                        ...userBundle,
+                        bundleType: userBundle.bundleType as 'TWO_SEAT' | 'FOUR_SEAT',
+                      }
+                    : null
+                }
                 trigger={
                   <button
                     className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.emerald}`}
@@ -224,11 +288,25 @@ export default async function BookingActionTab({
                 availableBalance={balance}
                 events={openEvents}
                 examComponents={examComponents}
+                existingBundle={
+                  userBundle && userBundle.bundleType === 'TWO_SEAT'
+                    ? {
+                        ...userBundle,
+                        bundleType: userBundle.bundleType as 'TWO_SEAT' | 'FOUR_SEAT',
+                      }
+                    : null
+                }
                 trigger={
                   <button
-                    className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.indigo}`}
+                    className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${
+                      userBundle && userBundle.bundleType === 'TWO_SEAT' && bundleRemaining > 0
+                        ? 'bg-amber-600 hover:bg-amber-700'
+                        : btnColors.indigo
+                    }`}
                   >
-                    Purchase Twin Pack
+                    {userBundle && userBundle.bundleType === 'TWO_SEAT' && bundleRemaining > 0
+                      ? `Use My Twin Pack (${bundleRemaining} left)`
+                      : 'Purchase Twin Pack'}
                   </button>
                 }
               />
@@ -254,11 +332,25 @@ export default async function BookingActionTab({
                 availableBalance={balance}
                 events={openEvents}
                 examComponents={examComponents}
+                existingBundle={
+                  userBundle && userBundle.bundleType === 'FOUR_SEAT'
+                    ? {
+                        ...userBundle,
+                        bundleType: userBundle.bundleType as 'TWO_SEAT' | 'FOUR_SEAT',
+                      }
+                    : null
+                }
                 trigger={
                   <button
-                    className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.amber}`}
+                    className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${
+                      userBundle && userBundle.bundleType === 'FOUR_SEAT' && bundleRemaining > 0
+                        ? 'bg-amber-600 hover:bg-amber-700'
+                        : btnColors.amber
+                    }`}
                   >
-                    Purchase 4-Pack
+                    {userBundle && userBundle.bundleType === 'FOUR_SEAT' && bundleRemaining > 0
+                      ? `Use My 4-Pack (${bundleRemaining} left)`
+                      : 'Purchase 4-Pack'}
                   </button>
                 }
               />

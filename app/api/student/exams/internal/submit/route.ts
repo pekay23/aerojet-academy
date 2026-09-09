@@ -5,13 +5,16 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getBankRules, isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { calculateScore } from '@/lib/internal-exam/grading'
 import { z } from 'zod'
+import { validateSessionTransition } from '@/lib/internal-exam/state-machine'
 
 const submitSchema = z.object({
   sessionId: z.string(),
-  answers: z.array(z.object({
-    questionId: z.string(),
-    selectedAnswer: z.string(),
-  })),
+  answers: z.array(
+    z.object({
+      questionId: z.string(),
+      selectedAnswer: z.string(),
+    })
+  ),
   autoSubmitted: z.boolean().optional(),
 })
 
@@ -48,27 +51,38 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!examSession) return apiError('Session not found', 404)
   if (examSession.studentId !== session.user.id) return apiError('Unauthorized', 403)
-  if (examSession.status !== 'IN_PROGRESS') return apiError('Session already submitted')
 
-  // Check expiry — if expired, force auto-submit with TIMED_OUT status
   const now = new Date()
   const isExpired = examSession.expiresAt && now > examSession.expiresAt
   const finalStatus = isExpired ? 'TIMED_OUT' : 'COMPLETED'
 
+  try {
+    validateSessionTransition(examSession.status, finalStatus)
+  } catch {
+    return apiError('Session cannot be submitted from current status', 403)
+  }
+
   // Grade answers and update everything in a single transaction
   const _result = await prismaUnfiltered.$transaction(async (tx) => {
-    const responses = answers.map(a => ({ questionId: a.questionId, selectedAnswer: a.selectedAnswer }))
-    const gradableAnswers = examSession.answers.map(a => ({
+    const responses = answers.map((a) => ({
+      questionId: a.questionId,
+      selectedAnswer: a.selectedAnswer,
+    }))
+    const gradableAnswers = examSession.answers.map((a) => ({
       questionId: a.questionId,
       correctAnswer: a.question.correctAnswer,
       points: a.question.points,
     }))
 
     const rules = await getBankRules(examSession.bankId)
-    const { score, totalPoints, percentage, passed } = calculateScore(responses, gradableAnswers, rules.passMarkPct)
+    const { score, totalPoints, percentage, passed } = calculateScore(
+      responses,
+      gradableAnswers,
+      rules.passMarkPct
+    )
 
     for (const ans of examSession.answers) {
-      const studentAnswer = answers.find(a => a.questionId === ans.questionId)
+      const studentAnswer = answers.find((a) => a.questionId === ans.questionId)
       const isCorrect = studentAnswer?.selectedAnswer === ans.question.correctAnswer
       const pointsAwarded = isCorrect ? ans.question.points : 0
 

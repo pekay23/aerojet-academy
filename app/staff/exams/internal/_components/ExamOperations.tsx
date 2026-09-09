@@ -26,6 +26,7 @@ import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
 import ViolationReviewPanel from './ViolationReviewPanel'
 import ConfirmModal from './ConfirmModal'
 import type { Violation } from './ViolationReviewPanel'
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 
 interface StudentAnswer {
   id: string
@@ -123,9 +124,7 @@ export default function ExamOperations() {
   }, [])
 
   useEffect(() => {
-   
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSessions()
   }, [fetchSessions])
 
@@ -305,7 +304,7 @@ export default function ExamOperations() {
           if (json.success) {
             const detail = json.data.details?.[0]
             if (detail?.changed) {
-              setSuccessMsg(`Regraded: ${detail.oldPct}% â†’ ${detail.newPct}%`)
+              setSuccessMsg(`Regraded: ${detail.oldPct}% → ${detail.newPct}%`)
             } else {
               setSuccessMsg('Regraded — no score change.')
             }
@@ -469,15 +468,17 @@ export default function ExamOperations() {
 
   const getScoreColor = (pct: number | null) => {
     if (pct === null) return 'text-slate-400'
-    if (pct >= 75) return 'text-green-600 dark:text-green-400'
-    if (pct >= 50) return 'text-amber-600 dark:text-amber-400'
+    if (pct >= ACADEMIC_RULES.GRADE_THRESHOLD_PASS) return 'text-green-600 dark:text-green-400'
+    if (pct >= ACADEMIC_RULES.GRADE_THRESHOLD_WARNING) return 'text-amber-600 dark:text-amber-400'
     return 'text-red-600 dark:text-red-400'
   }
 
   const getScoreBg = (pct: number | null) => {
     if (pct === null) return 'bg-slate-100 dark:bg-slate-800'
-    if (pct >= 75) return 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
-    if (pct >= 50) return 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800'
+    if (pct >= ACADEMIC_RULES.GRADE_THRESHOLD_PASS)
+      return 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+    if (pct >= ACADEMIC_RULES.GRADE_THRESHOLD_WARNING)
+      return 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800'
     return 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
   }
 

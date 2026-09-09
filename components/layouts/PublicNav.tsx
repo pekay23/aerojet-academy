@@ -87,6 +87,10 @@ const navLinks: {
             href: '/courses/aircraft-engineering/exam-schedule',
             label: 'Exam Schedule 2026/2027',
           },
+          {
+            href: '/courses/module-requirements',
+            label: 'Module Requirements',
+          },
         ],
       },
       { value: 'item-2', title: 'Skilled Training Programs', links: [] },
@@ -120,9 +124,6 @@ export default function PublicNav() {
   }, [])
 
   useEffect(() => {
-   
-   
-   
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -141,23 +142,18 @@ export default function PublicNav() {
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-   
   }, [])
-   
 
-   
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false)
   }, [pathname])
   useEffect(() => {
-   
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
   }, [mobileOpen])
-   
 
   const [hasForceClass, setHasForceClass] = useState(false)
-   
+
   useEffect(() => {
     // Initial check
     // eslint-disable-next-line react-hooks/set-state-in-effect

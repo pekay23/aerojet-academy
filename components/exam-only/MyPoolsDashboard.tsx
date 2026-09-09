@@ -43,18 +43,12 @@ export function MyPoolsDashboard() {
   }
 
   useEffect(() => {
-   
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchMemberships()
   }, [])
 
   if (isLoading) {
-    return (
-      <div className="p-5 text-center text-[#888]">
-        Loading your pools...
-      </div>
-    )
+    return <div className="p-5 text-center text-[#888]">Loading your pools...</div>
   }
 
   const active = memberships.filter((m) => ['RESERVED', 'CONFIRMED'].includes(m.status))
@@ -62,9 +56,9 @@ export function MyPoolsDashboard() {
 
   if (memberships.length === 0) {
     return (
-      <div className="py-10 px-5 text-center text-[#888] bg-white/2 rounded-xl border border-white/6">
-        <div className="text-[32px] mb-2">ðŸ“‹</div>
-        <div className="font-semibold mb-1">No pool memberships yet</div>
+      <div className="rounded-xl border border-white/6 bg-white/2 px-5 py-10 text-center text-[#888]">
+        <div className="mb-2 text-[32px]">📋</div>
+        <div className="mb-1 font-semibold">No pool memberships yet</div>
         <div className="text-[13px]">Browse available pools and join one to get started.</div>
       </div>
     )
@@ -75,26 +69,21 @@ export function MyPoolsDashboard() {
       {/* Active Memberships */}
       {active.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-base font-semibold mb-3 text-[#e0e0e0]">
+          <h3 className="mb-3 text-base font-semibold text-[#e0e0e0]">
             Active Pools ({active.length})
           </h3>
           {active.map((m) => (
-            <div
-              key={m.id}
-              className="p-4 bg-white/3 border border-white/8 rounded-[10px] mb-3"
-            >
-              <div className="flex justify-between mb-2">
+            <div key={m.id} className="mb-3 rounded-[10px] border border-white/8 bg-white/3 p-4">
+              <div className="mb-2 flex justify-between">
                 <div>
-                  <span className="text-[13px] text-[#93c5fd] font-medium">
+                  <span className="text-[13px] font-medium text-[#93c5fd]">
                     {m.examComponent?.course?.code || 'Module'}
                   </span>
-                  <span className="text-[#666] mx-2">•</span>
-                  <span className="text-[13px] text-[#888]">
-                    {m.examComponent?.name || 'Exam'}
-                  </span>
+                  <span className="mx-2 text-[#666]">•</span>
+                  <span className="text-[13px] text-[#888]">{m.examComponent?.name || 'Exam'}</span>
                 </div>
                 <span
-                  className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                     m.status === 'CONFIRMED'
                       ? 'bg-[rgba(16,185,129,0.15)] text-[#10b981]'
                       : 'bg-[rgba(245,158,11,0.15)] text-[#f59e0b]'
@@ -112,22 +101,20 @@ export function MyPoolsDashboard() {
                 poolName={m.pool.name}
               />
 
-              <div className="flex justify-between items-center mt-2">
+              <div className="mt-2 flex items-center justify-between">
                 <div className="text-[12px] text-[#888]">
-                  ðŸ“…{' '}
+                  📅{' '}
                   {new Date(m.pool.examDate).toLocaleDateString('en-GB', {
                     day: '2-digit',
                     month: 'short',
                     year: 'numeric',
                   })}
                   {m.amountReserved > 0 && (
-                    <span className="ml-3">
-                      ðŸ’° â‚¬{Number(m.amountReserved).toFixed(0)} reserved
-                    </span>
+                    <span className="ml-3">💰 €{Number(m.amountReserved).toFixed(0)} reserved</span>
                   )}
                   {m.amountPaid > 0 && (
                     <span className="ml-3 text-[#10b981]">
-                      âœ… â‚¬{Number(m.amountPaid).toFixed(0)} paid
+                      ✅ €{Number(m.amountPaid).toFixed(0)} paid
                     </span>
                   )}
                 </div>
@@ -149,13 +136,11 @@ export function MyPoolsDashboard() {
       {/* Past Memberships */}
       {past.length > 0 && (
         <div>
-          <h3 className="text-base font-semibold mb-3 text-[#888]">
-            Past ({past.length})
-          </h3>
+          <h3 className="mb-3 text-base font-semibold text-[#888]">Past ({past.length})</h3>
           {past.map((m) => (
             <div
               key={m.id}
-              className="py-3 px-4 bg-white/1 border border-white/4 rounded-lg mb-2 opacity-60"
+              className="mb-2 rounded-lg border border-white/4 bg-white/1 px-4 py-3 opacity-60"
             >
               <div className="flex justify-between">
                 <span className="text-[13px] text-[#888]">
