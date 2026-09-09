@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 import { useState, useRef, useEffect } from 'react'
 
@@ -75,9 +76,54 @@ function getStatusBadge(cls: ClassData) {
   }
 }
 
+function QuickActionsDropdown({
+  cls,
+  isOpen,
+  onClose,
+}: {
+  cls: ClassData
+  isOpen: boolean
+  onClose: () => void
+}) {
+  if (!isOpen) return null
+
+  return createPortal(
+    <div
+      className="animate-in fade-in zoom-in-95 fixed z-50 w-48 origin-top-right rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg dark:border-slate-800 dark:bg-slate-900"
+      style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+    >
+      <Link
+        href={`/instructor/classes/${cls.id}?tab=grades`}
+        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+        onClick={onClose}
+      >
+        <BarChart3 className="h-4 w-4" />
+        Grades
+      </Link>
+      <Link
+        href={`/instructor/classes/${cls.id}?tab=materials`}
+        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+        onClick={onClose}
+      >
+        <BookOpen className="h-4 w-4" />
+        Materials
+      </Link>
+      <Link
+        href={`/instructor/messages?class=${cls.id}`}
+        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+        onClick={onClose}
+      >
+        <MessageSquare className="h-4 w-4" />
+        Message Students
+      </Link>
+    </div>,
+    document.body
+  )
+}
+
 export default function ModuleCard({ cls }: ModuleCardProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const categoryName =
     typeof cls.course.category === 'object' && cls.course.category
@@ -96,13 +142,12 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
     typeof cls.academicYear === 'string'
       ? cls.academicYear
       : (cls.academicYear?.name ?? 'Current Year')
-
   const status = getStatusBadge(cls)
 
   // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false)
       }
     }
@@ -110,13 +155,18 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const handleMenuToggle = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsMenuOpen(!isMenuOpen)
+  }
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white transition-all hover:border-blue-100 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-900/30"
+      className="group relative flex flex-col rounded-3xl border border-slate-100 bg-white transition-all hover:border-blue-100 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-900/30"
     >
       {/* Decorative top bar */}
-      <div className={cn('h-1.5 w-full', categoryColor)} />
+      <div className={cn('h-1.5 w-full rounded-t-3xl', categoryColor)} />
 
       <div className="flex flex-1 flex-col p-6 sm:p-8">
         {/* Header with Status Badge */}
@@ -224,45 +274,22 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
             Roster <ArrowRight className="ml-1 h-3.5 w-3.5" />
           </Link>
 
-          {/* Quick Actions Dropdown */}
-          <div className="relative" ref={menuRef}>
+          {/* Quick Actions Dropdown - Using Portal */}
+          <div className="relative">
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              ref={buttonRef}
+              onClick={handleMenuToggle}
               className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-all hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
               aria-label="More actions"
               aria-expanded={isMenuOpen}
             >
               <MoreVertical className="h-5 w-5" />
             </button>
-
-            {isMenuOpen && (
-              <div className="animate-in fade-in zoom-in-95 absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg dark:border-slate-800 dark:bg-slate-900">
-                <Link
-                  href={`/instructor/classes/${cls.id}?tab=grades`}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  Grades
-                </Link>
-                <Link
-                  href={`/instructor/classes/${cls.id}?tab=materials`}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <BookOpen className="h-4 w-4" />
-                  Materials
-                </Link>
-                <Link
-                  href={`/instructor/messages?class=${cls.id}`}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Message Students
-                </Link>
-              </div>
-            )}
+            <QuickActionsDropdown
+              cls={cls}
+              isOpen={isMenuOpen}
+              onClose={() => setIsMenuOpen(false)}
+            />
           </div>
         </div>
       </div>
