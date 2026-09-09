@@ -1,13 +1,23 @@
 # Changelog
 
+## [1.0.107] — 2026-09-08
+
+### Changed
+
+- EASA question-bank CSV audit completed: 4,115 questions across 10 modules (M1–M7, M11A, M13, M17) verified at 0 unanswered; 47 garbage/non-aviation or diagram-dependent questions removed and replaced with EASA-compliant text questions.
+- Documentation updated: `docs/plans/internal-exam-test-seeding-plan.md` (§0A added with CSV state/audit history), `docs/guides/easa-exam-compliance.md` (3-option structure, blind grading, answer visibility rules aligned with code), `docs/process/per-phase-audit-gate.md` (CSV audit gate added).
+- `docs/plans/implementation-gap-report.md` corrected: Phase 5 Accessibility/EASA deliverables marked complete now that `ACCESSIBILITY.md` and `docs/guides/easa-exam-compliance.md` exist.
+
 ## [1.0.106] — 2026-09-07
 
 ### Changed
+
 - Maintenance and stability updates.
 
 ## [1.0.105] — 2026-09-04
 
 ### Changed
+
 - Maintenance and stability updates.
 
 ## [1.0.104] — 2026-09-04
