@@ -49,12 +49,22 @@ Operational how-tos — read these to _do_ something.
 - [Contributing](./guides/contributing.md) — branch + PR conventions
 - [Role transitions](./guides/role-transitions.md) — how the user-role wizard works
 - [Newsroom](./guides/newsroom.md) — public blog, article management, SEO
+- [EASA exam compliance](./guides/easa-exam-compliance.md) — EASA Part-147/Part-66 controlled-environment requirements, blind grading, retention
 - [Neon ↔ Supabase replication](./guides/neon-supabase-logical-replication.md) — DB-level sync runbook
+
+## Operations
+
+Operational runbooks — CI/CD, encoding hygiene, branch strategy, deployment.
+
+- [Branch strategy](./operations/branch-strategy.md) — branch naming, promotion flow, protection rules
+- [Encoding prevention](./operations/encoding-prevention.md) — mojibake prevention, detection, and remediation
+- [Encoding fix scripts](./operations/encoding-fix-scripts.md) — reference for the encoding repair tooling
 
 ## Audits
 
 Historical audit reports. Newest first; older reports preserved for context.
 
+- [2026-09-08 · Encoding mojibake fixes](./audits/2026-09-08-encoding-mojibake-fixes.md) — comprehensive encoding remediation across 20+ files, prevention measures added
 - [2026-09-05 · TypeScript and ESLint verification](./audits/2026-09-05-typecheck-eslint-verification.md) — type-check clean, ESLint runner fixed, warning inventory recorded
 - [2026-09-04 · Full portal audit](./audits/2026-09-04-full-portal-audit.md) — cross-portal role enforcement and data access audit
 - [2026-08-30 · Portal QA issues](./audits/2026-08-30-portal-qa-issues.md) — QA findings and resolutions
