@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma/client'
 import { encrypt } from '@/lib/security/encryption'
 import { EMAIL_ADDRESSES } from '@/lib/constants/business-rules'
+import { getRegistryFromAddress } from '@/lib/email/registry'
 
 async function encryptBackup(json: string): Promise<string> {
   return encrypt(json)
@@ -76,7 +77,9 @@ export async function exportAllTables(): Promise<BackupData> {
       const records = await prisma[model.key].findMany()
       backup[model.key] = records
     } catch (err: unknown) {
-      console.warn(`[Backup] Skipping model "${model.key}": ${err instanceof Error ? err.message : String(err)}`)
+      console.warn(
+        `[Backup] Skipping model "${model.key}": ${err instanceof Error ? err.message : String(err)}`
+      )
       backup[model.key] = []
     }
   }
@@ -283,6 +286,10 @@ export async function sendBackupEmail(email: string, backup: BackupData) {
   const htmlFilename = `aerojet-backup-${timestamp}.html`
 
   const emailHtml = buildBackupEmailHtml(backup, jsonFilename)
+  const fromAddress =
+    process.env.FROM_EMAIL ||
+    (await getRegistryFromAddress('noreply_system')) ||
+    EMAIL_ADDRESSES.fromNoReply
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -291,7 +298,7 @@ export async function sendBackupEmail(email: string, backup: BackupData) {
       Authorization: `Bearer ${RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: process.env.FROM_EMAIL || EMAIL_ADDRESSES.fromNoReply,
+      from: fromAddress,
       to: email,
       subject: `Database Backup — ${new Date().toLocaleDateString('en-GB')}`,
       html: emailHtml,

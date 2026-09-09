@@ -14,12 +14,12 @@ vi.mock('react-hook-form', () => ({
   FormProvider: ({ children }: any) => <div>{children}</div>,
   useFormContext: () => ({ getFieldState: () => ({}), formState: { errors: {} } }),
   Controller: ({ render }: any) => render({ field: { onChange: vi.fn(), value: '' } }),
-  useFormField: () => ({
-    id: 'test-id',
-    name: 'test',
-    formItemId: 'test-form-item',
-    formDescriptionId: 'test-form-item-description',
-    formMessageId: 'test-form-item-message',
+  useForm: () => ({
+    control: {},
+    register: vi.fn(),
+    handleSubmit: vi.fn(),
+    watch: vi.fn(),
+    formState: { errors: {} },
   }),
 }))
 

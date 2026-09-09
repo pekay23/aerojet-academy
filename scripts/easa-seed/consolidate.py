@@ -42,7 +42,7 @@ def load_all_questions() -> dict[str, list[dict]]:
     by_module: dict[str, list[dict]] = {}
     for path in OUT_DIR.rglob("*.jsonl"):
         module = path.parent.name
-        if module not in {"M1", "M2", "M3", "M4", "M5", "M6", "M7", "M11A", "M13", "M14", "M15", "M17"}:
+        if module not in {"M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11A", "M13", "M14", "M15", "M17"}:
             continue
         with path.open(encoding="utf-8") as f:
             for line in f:
@@ -77,11 +77,12 @@ def dedup_semantic(questions: list[dict], threshold: float = 0.85) -> list[dict]
     records = [q["question"] for q in questions]
     try:
         sh = SemHash.from_records(records, columns=["question"])
+        result = sh.self_deduplicate(threshold=threshold)
+        selected_texts = set(result.selected)
+        return [q for q in questions if q["question"] in selected_texts]
     except Exception as exc:
         print(f"  semhash failed: {exc}", file=sys.stderr)
         return questions
-    deduped_idx = sh.self_deduplicate(threshold=threshold).indices
-    return [questions[i] for i in sorted(deduped_idx)]
 
 
 def tag_lo(question: dict, catalog: list[dict]) -> str | None:

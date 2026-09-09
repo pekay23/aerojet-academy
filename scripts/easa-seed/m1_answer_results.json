@@ -1,0 +1,980 @@
+[
+  {
+    "index": 35,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 38,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 39,
+    "answer": "C",
+    "reason": "Verified from Suntech M01-Training-book (context match)",
+    "method": "training_book"
+  },
+  {
+    "index": 41,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 42,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 43,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 45,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 46,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 48,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 50,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 51,
+    "answer": "A",
+    "reason": "Computed from question data",
+    "method": "compute"
+  },
+  {
+    "index": 54,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 55,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 61,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 63,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 64,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 71,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 74,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 76,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 78,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 79,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 82,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 83,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 84,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 86,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 87,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 88,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 90,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 94,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 96,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 97,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 99,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 100,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 104,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 107,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 109,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 110,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 111,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 112,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 113,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 114,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 115,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 116,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 119,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 121,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 122,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 124,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 126,
+    "answer": "A",
+    "reason": "Computed from question data",
+    "method": "compute"
+  },
+  {
+    "index": 129,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 130,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 131,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 134,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 135,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 140,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 141,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 143,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 144,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 147,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 148,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 149,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 151,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 152,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 154,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 156,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 158,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 160,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 162,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 163,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 165,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 166,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 167,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 169,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 172,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 173,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 174,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 175,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 176,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 177,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 179,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 180,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 181,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 182,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 186,
+    "answer": "A",
+    "reason": "Verified from Suntech M01-Training-book (context match)",
+    "method": "training_book"
+  },
+  {
+    "index": 187,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 188,
+    "answer": "C",
+    "reason": "Verified from Suntech M01-Training-book (context match)",
+    "method": "training_book"
+  },
+  {
+    "index": 190,
+    "answer": "B",
+    "reason": "Verified from Suntech M01-Training-book (context match)",
+    "method": "training_book"
+  },
+  {
+    "index": 193,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 195,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 196,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 197,
+    "answer": "A",
+    "reason": "Verified from Suntech M01-Training-book (context match)",
+    "method": "training_book"
+  },
+  {
+    "index": 198,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 199,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 200,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 201,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 202,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 204,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 206,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 208,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 212,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 215,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 216,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 219,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 224,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 225,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 226,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 227,
+    "answer": "C",
+    "reason": "Verified from Suntech M01-Training-book (context match)",
+    "method": "training_book"
+  },
+  {
+    "index": 228,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 229,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 230,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 231,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 232,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 233,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 234,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 238,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 240,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 241,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 242,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 247,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 251,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 252,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 254,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 255,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 256,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 262,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 263,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 266,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 269,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 270,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 271,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 273,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 275,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 276,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 277,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 279,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 280,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 281,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 282,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 283,
+    "answer": "A",
+    "reason": "Verified from Suntech M01-Training-book (context match)",
+    "method": "training_book"
+  },
+  {
+    "index": 286,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 288,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 291,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 292,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 295,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 296,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 297,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 299,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 300,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 301,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 302,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 305,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 311,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 312,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 313,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 314,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 315,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 316,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 320,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 322,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 323,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 331,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 337,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 343,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  },
+  {
+    "index": 426,
+    "answer": null,
+    "reason": "NEEDS_ANSWER",
+    "method": "none"
+  }
+]

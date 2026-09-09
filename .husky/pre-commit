@@ -1,1 +1,2 @@
+bun run scripts/check-encoding.mjs
 npx lint-staged

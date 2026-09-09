@@ -1,0 +1,265 @@
+--- Page 1 ---
+7
+Aerojet M2 Sample Set 7 65 minutes
+1. Given that the strain energy of a spring in tension or compression is = ½kx2. Then the strain energy
+contained by a spring with a spring constant of 2000 N/m, stretched 10 cm is:
+A. 10 J
+B. 100 J
+C. 100 kJ
+2. A vehicle of mass 4000 kg, sitting on a hill 100 m high, having a potential energy of 50 kJ: If all this
+potential energy is converted into kinetic energy as the vehicle rolls down the hill. Then its velocity
+at the bottom of the hill will be:
+a. 5 m/s
+b. 25 m/s
+c. 40 m/s
+3. Which of the following statements concerning friction is true?
+a. Static friction is equal to sliding friction
+b. The frictional resistance is dependent on the type of surfaces in contact
+c. The coefficient of friction is equal to the product of the sliding friction force and the normal
+force
+4. A body weighing 3000 N is moved along a horizontal plane by a horizontal force of 600 N, the
+coefficient of friction will be:
+a. 0.2
+b. 2.0
+c. 5.0
+5. The mechanical advantage (MA) of a machine is equal to:
+distance moved by load
+a.
+distance moved by effort
+load
+b.
+effirt
+distance moved by effort
+c.
+distance moved by load
+6. The efficiency of a machine is given by the mechanical advantage (MA) divided by the velocity
+ratio (VR). If a machine is 50% efficient and has a VR = 150, then its MA will be:
+a. 75
+b. 300
+c. 7500
+7. With reference to the laws of fluid pressure, which one of the statements given below is true?
+a. Pressure acts vertically upwards from all surfaces
+b. Pressure at a given depth depends on the shape of the containing vessel
+c. Pressure at a given depth in a fluid is equal in all directions
+8. If the gauge pressure of a fluid is 200 kPa and atmospheric pressure is 100 kPa. Then the absolute
+pressure will be:
+a. 2 kPa
+b. 100 kPa
+c. 300 kPa
+9. If the density of mercury is 13,600 kg/m3 and we assume that the acceleration due to gravity is 10
+m/s2. Then a 10 cm column of mercury will be the equivalent to a gauge pressure of:
+a. 1360 Pa
+b. 13,600 Pa
+c. 1360 kPa
+10. A man weighing 800 N is wearing snowshoes. The area of each of his snow shoes is ¼ m2. The
+pressure exerted on the ground by each of his snow shoes is:
+a. 100 N/m2
+b. 400 N/m2
+c. 3200 N/m2
+
+--- Page 2 ---
+2 | P age
+11. An object completely immersed in still water, will remain at a fixed depth, when the:
+a. weight of the fluid displaced equals the weight of the object
+b. up thrust force reaches a uniform velocity
+c. apparent loss of weight remains stable
+12. The boundary layer:
+a. remains stable at constant velocity
+b. is the thin layer of fluid between the fixed and moving boundary
+c. has an exponential velocity gradient between the fixed and moving boundary
+13. Kinematic viscosity is:
+a. equal to the dynamic viscosity multiplied by the velocity
+b. density dependent and varies with temperature
+c. pressure dependent and varies with weight
+14. Streamline flow may be defined as:
+a. flow in which fluid particles move perpendicular and parallel to the surface of the body
+b. flow where the density does not change from point to point
+c. flow in which fluid particles move in an orderly manner and retain the shape of the body over
+which they are flowing
+15. Given that a stream tube at a point, has a cross-sectional area of 1.5 m2 and an incompressible
+fluid flows steadily past this point at 6 m/s. Then the volume flow rate will be:
+a. 9 m3/s
+b. 4 m3/s
+c. 0.25 m3/s
+16. A wind tunnel is subject to an incompressible steady flow of air at 40 m/s, upstream of the
+working section. If the cross-sectional area (csa) in the upstream part of the wind tunnel is twice
+the csa of the working section then:
+a. the working section velocity will be 1600 m/s
+b. the working section velocity will be twice that of the upstream velocity
+c. the working section velocity will be half that of the upstream velocity
+17. The Bernoulli’s equation, which applies the conservation of energy to fluids in motion, is
+represented in its energy form by:
+a. 𝜌𝑔ℎ + 1 𝑚𝑣2+𝑝 𝑉 = 𝜌𝑔ℎ + 1 𝑚𝑣2+𝑝 𝑉
+1 1 1 1 2 2 1 1
+2 2
+b. 𝑚𝑔ℎ + 1 𝑚𝑣2+𝑝 𝑉 = 𝑚𝑔ℎ + 1 𝑚𝑣2+𝑝 𝑉
+1 1 1 1 2 2 2 2
+2 2
+c. 𝜌𝑔ℎ + 1 𝜌𝑣2+𝑝 = 𝜌𝑔ℎ + 1 𝜌𝑣2+𝑝
+1 1 1 2 2 2
+2 2
+18. As subsonic fluid flow passes through a Venturi tube, at the throat, the fluid pressure:
+a. increases, the fluid velocity decreases
+b. decreases and the fluid velocity decreases
+c. decreases and the fluid velocity increases
+19. Starting at sea level the atmosphere is divided into the following regions:
+a. troposphere, stratosphere and ionosphere
+b. exosphere, troposphere and stratosphere
+c. troposphere, ionosphere and stratosphere
+20. Boyle’s law states that, the volume of a fixed mass of gas is inversely proportional to its:
+a. temperature providing the pressure of the gas remains constant
+b. pressure providing the temperature of the gas remains constant
+c. pressure providing the density of the gas remains constant
+21. The equation, PV/T = constant, for an ideal gas, is known as:
+a. Charles’ law
+b. Combined gas equation
+c. Boyle’s law
+
+--- Page 3 ---
+3 | P age
+22. In the characteristic gas equation given by: PV = mRT the symbol R is the:
+a. universal gas constant with a value of 8314.4 J/kmol K
+b. characteristic gas constant, that has units of J/kg K
+c. special gas constant, that has units of kg/kmol K
+23. If the temperature of the air in the atmosphere increases but the pressure remains constant, the
+density will:
+a. decrease
+b. remain the same
+c. increase
+24. The temperature at the tropopause in the International Standard Atmosphere (ISA) is
+approximately:
+a. −57 K
+b. −570 F
+c. −560 C
+25. The ISA sea-level pressure is expressed as:
+a. 29.92 mbar
+b. 1 bar
+c. 101,320 Pa
+26. With increase in altitude, the speed of sound will:
+a. increase
+b. decrease
+c. remain the same
+27. Temperature falls uniformly, with altitude, in the:
+a. ionosphere
+b. stratosphere
+c. troposphere
+28. A gas occupies a volume of 4 m3 at a pressure of 400 kPa. At constant temperature, the pressure is
+increased to 500 kPa. The new volume occupied by the gas is:
+a. 5 m3
+b. 3.2 m3
+c. 0.3 m3
+29. The temperature of a substance is:
+a. a measure of the energy possessed by the vibrating molecules of the substance
+b. a direct measure of the pressure energy contained within a substance
+c. directly dependent on the volume of the substance
+30. The equivalent of 60 0C in Kelvin is approximately:
+a. 213 K
+b. 273 K
+c. 333 K
+31. Alcohol thermometers are most suitable for measuring:
+a. jet pipe temperatures
+b. cyrogenic substances
+c. temperatures down to −1150 C
+32. The increase in length of a solid bar 5 m in length is = 𝛼𝑙(𝑡 – 𝑡 ). If the linear expansion
+2 1
+coefficient for a solid is 2 × 10−6 and the solid is subject to a temperature rise of 1000 C. Then the
+increase in length will be:
+a. 1 × 10−3 m
+b. 1 × 10−4 m
+c. 1 × 10−5m
+
+--- Page 4 ---
+4 | P age
+33. The temperature of the melting point of ice and the boiling point of water are:
+a. 0 K , 373 K
+b. 273 K , 373 K
+c. 173 K , 273 K
+34. Heat energy:
+a. is the internal energy stored within a body
+b. travels from a cold body to a hot body
+c. is transient energy
+35. Heat transfer by conduction:
+a. is where a large number of molecules travel in bulk in a gas
+b. involves energy transfer from atoms with high vibration energy to those with low vibration
+energy
+c. involves changes in electron energy levels which emits energy in the form of electromagnetic
+waves
+36. How much thermal energy is required to raise the temperature of 2 kg of aluminium by 500 C, if
+the specific heat capacity of aluminium is 900 J/kgK
+a. 90 kJ
+b. 22,500 J
+c. 9000 J
+37. The specific heat capacity at constant pressure, Cp is:
+a. less than the specific heat capacity at constant volume, cv for the same substance
+b. based on constant volume heat transfer
+c. always greater than Cv
+38. The specific latent heat of fusion of a substance is the heat energy required to:
+a. change any amount of a substance from a solid into a liquid
+b. turn any amount of a substance from a liquid into a solid
+c. turn unit mass of a substance from a liquid into a solid
+39. A closed thermal system is one:
+a. that always has fixed system boundaries
+b. that always allows the mass transfer of system fluid
+c. in which there is no mass transfer of system fluid
+40. The first law of thermodynamics applied to a closed system, may be represented symbolically by:
+a. U + Q = U + W
+1 2
+b. Q + W = U
+c. U − Q = U + W
+1 2
+41. The enthalpy of a fluid is the combination of:
+a. kinetic energy + pressure energy
+b. internal energy + pressure energy
+c. potential energy + kinetic energy
+42. An isentropic process is one in which:
+a. the enthalpy remains constant
+b. no heat energy is transferred to or from the working fluid
+c. both heat and work may be transferred to or from the working fluid
+43. From the second law of thermodynamics the thermal efficiency (η) of a heat engine may be
+defined as:
+a. η = total heat suppled/work done
+b. η = Qout + Qin /Qout
+c. η = net work done /total heat supplied
+
+--- Page 5 ---
+5 | P age
+44. The ideal air standard Otto cycle is:
+a. based on constant pressure heat rejection
+b. used as the basis for the aircraft gas turbine engine cycle
+c. based on constant volume heat rejection
+45. Entropy is a measure of:
+a. the degree of disorder in a system
+b. is the product of internal energy and pressure–volume energy
+c. the adiabatic index of the system fluid
+46. A polytropic process is:
+a. one that obeys the law pvγ = c
+b. one in which heat and work transfer may take place
+c. has constant entropy Light and sound
+47. Light:
+a. is a longitudinal wave that travel through air at 340 m/s
+b. is an electromagnetic wave that travels at 3 × 108 m/s
+c. cannot transfer energy from one place to another
+48. With respect to the laws of reflection:
+a. the angle of incidence is equal to the angle of refraction
+b. the incident ray and the normal lie within the same plane
+c. images from plane mirrors are real and laterally converted
+49. The light rays from a concave mirror:
+a. converge at the principle focus
+b. diverge at the principle focus
+c. diverge at the pole which is approximately twice the radius of curvature
+1 1 1
+50. Given that = + the object distance = 50 mm and the focal length = 150 mm, then the
+𝑢 𝑣 𝑓
+distance of the image from the mirror is:
+a. 37.5 mm
+b. 75 mm
+c. 150 mm
+51. As light travels from one medium to another medium with a greater refractive index, its speed:
+a. is increased
+b. remains the same
+c. is decreased
+52. Fibre optic cables use the principle of:
+a. total external reflection to enable light to travel along the cable
+b. internal refraction to enable light to travel along the cable
+c. total internal reflection to enable light to travel along the cable
+END

@@ -22,7 +22,17 @@ interface RevenueChartProps {
   currency?: string
 }
 
-const CustomTooltip = ({ active, payload, label, currency }: { active?: boolean; payload?: Array<{ name: string; value: number; color?: string }>; label?: string; currency?: string }) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  currency,
+}: {
+  active?: boolean
+  payload?: Array<{ name: string; value: number; color?: string }>
+  label?: string
+  currency?: string
+}) => {
   if (!active || !payload?.length) return null
   return (
     <div className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 shadow-xl dark:border-slate-800">
@@ -37,9 +47,9 @@ const CustomTooltip = ({ active, payload, label, currency }: { active?: boolean;
   )
 }
 
-export default function RevenueChart({ data, currency = 'â‚¬' }: RevenueChartProps) {
+export default function RevenueChart({ data, currency = '€' }: RevenueChartProps) {
   const [mounted, setMounted] = React.useState(false)
-   
+
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 

@@ -1,0 +1,45 @@
+Team aviator members
+Ransford Osei-Manu
+Emmanuel Osei Opoku
+Jehoshaphat Tatiglo
+Joshua Tunnor Vugu
+1. What is the unit of potential difference?
+A) Ampere (A)
+B) Ohm (Ω)
+C) Volt (V)
+2. Which term represents the maximum potential difference across a battery’s terminals?
+A) Current
+B) Voltage
+C) Resistance
+3. What is the SI unit for electromotive force?
+A) Ampere (A)
+B) Volt (V)
+C) Ohm (Ω)
+4. Which of the following measures the flow of electric charge in a circuit?
+A) Voltage
+B) Resistance
+C) Current
+5. Which quantity is responsible for opposing the flow of electric current in a circuit?
+A) Voltage
+B) Resistance
+C) Conductance
+6. Which direction does conventional current flow in a circuit?
+A) From positive to negative
+B) From negative to positive
+C) In both directions simultaneously
+7. What is the fundamental particle carrying a negative charge in an atom?
+A) Electron
+B) Proton
+C) Neutron
+8. What is the reciprocal of resistance called?
+A) Voltage
+B) Current
+C) Conductance
+9. What is the symbol for electric current?
+A) V
+B) C
+C) I
+10. In which direction do electrons flow in a circuit?
+A) From positive to negative
+B) From negative to positive
+C) In both directions simultaneously

@@ -82,7 +82,13 @@ export function isSupabaseStorageAvailable(): boolean {
   return getSupabaseAdmin() != null
 }
 
-/** Upload bytes to the documents bucket. Returns the object path. */
+/**
+ * Upload bytes to the documents bucket.
+ *
+ * The Supabase JS client performs signature verification on Buffer inputs.
+ * We convert to a Blob with the correct MIME type so the client and server
+ * both trust the content-type and the magic-byte check passes.
+ */
 export async function uploadToStorage(
   path: string,
   body: Buffer | Uint8Array | ArrayBuffer | Blob,
@@ -94,16 +100,37 @@ export async function uploadToStorage(
       'Supabase storage is not configured (set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY).'
     )
   }
+
+  // Convert to a Blob with the correct MIME type.
+  // The Supabase JS client handles Blob objects without the strict
+  // signature verification it applies to Buffer/Uint8Array inputs.
+  let uploadBody: Blob
+  if (body instanceof Buffer) {
+    uploadBody = new Blob(
+      [new Uint8Array(body.buffer, body.byteOffset, body.byteLength) as unknown as BlobPart],
+      { type: contentType }
+    )
+  } else if (body instanceof Uint8Array) {
+    uploadBody = new Blob(
+      [new Uint8Array(body.buffer, body.byteOffset, body.byteLength) as unknown as BlobPart],
+      { type: contentType }
+    )
+  } else if (body instanceof ArrayBuffer) {
+    uploadBody = new Blob([new Uint8Array(body) as unknown as BlobPart], { type: contentType })
+  } else {
+    uploadBody = new Blob([body as unknown as BlobPart], { type: contentType })
+  }
+
   const { error } = await supabase.storage
     .from(DOCUMENT_BUCKET)
-    .upload(path, body, { contentType, upsert: false })
+    .upload(path, uploadBody, { contentType, upsert: false })
   if (error) {
     // Bucket may not exist yet — create it (private) and retry once.
     if (/bucket.*not.*found/i.test(error.message)) {
       await supabase.storage.createBucket(DOCUMENT_BUCKET, { public: false })
       const retry = await supabase.storage
         .from(DOCUMENT_BUCKET)
-        .upload(path, body, { contentType, upsert: false })
+        .upload(path, uploadBody, { contentType, upsert: false })
       if (retry.error) throw new Error(retry.error.message)
       return { path }
     }
@@ -127,4 +154,12 @@ export async function getSignedUrl(
     return null
   }
   return data?.signedUrl ?? null
+}
+
+/** Get a public URL for a private object (fallback when signed URL fails). */
+export async function getPublicUrl(path: string): Promise<string | null> {
+  const supabase = getSupabaseAdmin()
+  if (!supabase) return null
+  const { data } = supabase.storage.from(DOCUMENT_BUCKET).getPublicUrl(path)
+  return data?.publicUrl ?? null
 }

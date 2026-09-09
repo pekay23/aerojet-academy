@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { withErrorHandler, apiError , RouteContext } from '@/lib/api/response'
+import { withErrorHandler, apiError, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { buildSebConfig, generateSebConfig, BankSebConfig } from '@/lib/internal-exam/seb-config'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -14,11 +14,26 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext)
 
   const bank = await prismaUnfiltered.internalExamBank.findUnique({
     where: { id: bankId },
-    select: { id: true, name: true, sebConfig: true, courseId: true },
+    select: {
+      id: true,
+      name: true,
+      sebConfig: true,
+      courseId: true,
+      isActive: true,
+      reviewState: true,
+    },
   })
 
   if (!bank) {
     return apiError('Exam bank not found', 404)
+  }
+
+  if (!bank.isActive) {
+    return apiError('This exam bank is not currently active', 403)
+  }
+
+  if (bank.reviewState !== 'APPROVED') {
+    return apiError('This exam bank has not been approved for student use', 403)
   }
 
   const enrollment = await prismaUnfiltered.enrollment.findFirst({

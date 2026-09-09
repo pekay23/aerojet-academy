@@ -16,7 +16,7 @@ describe('Alert', () => {
   it('applies destructive variant', () => {
     render(<Alert variant="destructive">Error alert</Alert>)
     const alert = screen.getByRole('alert')
-    expect(alert.getAttribute('data-variant')).toBe('destructive')
+    expect(alert.className).toContain('destructive')
   })
 
   it('renders title', () => {

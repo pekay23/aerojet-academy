@@ -1,0 +1,156 @@
+--- Page 1 ---
+AEROJET M1 MOCK AUG TT3 EXTRA 2 40 MINUTES 17/08/TT3
+1. If 77.95 – x = - 22.05, find x
+A. – 100
+B. 100
+C. 55.9
+2. 3/11 multiplied by 0.088 gives
+A. 0.024
+B. 0.24
+C. 2.4
+3. Log A/B =
+A. Log A –Log B
+B. Log A + Log B
+10
+C. Log B + Log B
+1
+4. What is the surface area of an open right circular cone of height 4 cm and diameter 6 cm?
+A. 15 pi sq. cm
+B. 25 pi sq. cm
+C. 24 pi sq. cm
+5. Tan 45 degrees + Cos 0 degrees =
+A. 2
+B. 1
+C. undefined
+6. Find the length of line BC in Fig. 1, given that OBC and EDC are straight lines, line DC is 3 cm long,
+line AD = radius of the circle centred at O = 4 cm long and line EDC is a tangent to the circle.
+Fig. 1
+A. 1 cm
+B. 2 cm
+C. 3 cm
+7. Any number that can be expressed as the ratio of two integers is
+A. a fraction
+B. a rational number
+C. an irrational number
+8. (2+4)2×2−40×2 =
+A. – 8
+B. 8
+C. 24
+9. Solve for y if ( 1 +2)32 = 36
+y
+A. y = 2
+1
+B. y =
+2
+C. y = −2
+
+--- Page 2 ---
+10. Find angle BCD in Fig. 2, given that triangle ABC is equilateral, BC = CD and angle ABD is 140°?
+Fig. 2
+A. 80°
+B. 40°
+C. 20°
+11. If CD = 7 cm and BD = 5 cm, then find the altitude of triangle ABC in Fig. 2, if the area of CBD is 20
+sq. cm
+A. 9 cm
+B. 8 cm
+C. 2.5 cm
+12. 5(5((5−1)−1))−1 =
+A. 74
+B. 75
+C. 76
+13. Which of the following has all sides equal?
+A. Kite
+B. Rhombus
+C. Trapezium
+14. What is the lowest common factor of 36, 54 and 162?
+A. 9
+B. 6
+C. 2
+15. What is the gradient of the graph of – x = - 6y +18
+A. 1/6
+B. – 1/6
+C. x /6
+16. Rewrite octal 17 as a number in base 10
+A. 12
+B. 15
+C. 21
+17. What is the value of 0.011 base 2 in base 10?
+A. 3
+B. 3/8
+C. ¾
+18. Find the volume of a cuboid with dimensions 5 m by 6 m by 10 cm.
+A. 0.3 cubic metres
+B. 0.03 cubic metres
+C. 0.003 cubic metres
+
+--- Page 3 ---
+19. Evaluate 4(2(5 – 8) – 3) +4(7 – 5)
+A. – 24
+B. 44
+C. – 44
+20. Division of zero by an integer is
+A. 0
+B. 1
+C. at infinity
+21. To covert 10 imperial gallons to litres
+A. Multiply by 45 L
+B. Multiply by 46 L
+C. Multiply by 47 L
+22. What is the supplement of 14 degrees 14 minutes and 39 seconds?
+A. 76 degrees 45 minutes 21 seconds
+B. 165 degrees 45 minutes 21 seconds
+C. 166 degrees 45 minutes 21 seconds
+23. What is the complement of 14 degrees 14 minutes and 39 seconds?
+A. 76 degrees 45 minutes 21 seconds
+B. 75 degrees 45 minutes 21 seconds
+C. 66 degrees 45 minutes 21 seconds
+24. What is the angle between the hands of the clock at 3:30 pm?
+A. 30 degrees
+B. 15 degrees
+C. 7.5 degrees
+25. Factorise −6+𝑥2+𝑥
+A. x = 3 and x = - 2
+B. x = - 3 and x = 2
+C. (x -3)(x + 2)
+26. What is the value of 150 degrees in radians?
+A. 5/6 pi
+B. 7/6 pi
+C. 1.61 pi
+27. Solve x/4 +3/5 = - 3x/2 – 2
+A. 35/52
+B. 52/35
+C. – 52/35
+3𝑇
+28. Make r the subject of the relation 3 (√ )= 𝑏
+𝑎𝑟
+12𝑇
+A. 𝑟 =
+𝑎𝑏2
+27𝑇
+B. 𝑟 =
+𝑎𝑏2
+9𝑇
+C. 𝑟 =
+2𝑎𝑏2
+29. A certain type of motor car cost seven times as much as a certain make of motor cycle. If two cars
+and three motor cycles cost £8500, find the cost of a motor car.
+A. £3500
+B. £500
+C. £3000
+30. Solve simultaneously
+
+--- Page 4 ---
+4x – 3y = 1
+x + 3y = 19
+A. (4 , 5)
+B. (5 , 4)
+C. (- 4 , 5)
+31. Write octal 37·1 in decimal
+A. 31·125
+B. 31·152
+C. 31·251
+32. What is the area of a semi-circle where the diameter is 30cm?
+A. 353.43
+B. 335.34
+C. 353.34

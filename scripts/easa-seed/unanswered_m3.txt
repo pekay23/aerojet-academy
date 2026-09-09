@@ -1,0 +1,7434 @@
+=== Q1 ===
+Text: is delta / star wound, what will the line voltage output be?
+A: 115V
+B: 200V
+C: 346V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q2 ===
+Text: consuming 50 Watts?
+A: 45°
+B: 90°
+C: 0°
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q3 ===
+Text: a landing light (load 24v 45 amps) is used, what is the current drawn?
+A: 205 amps
+B: 9 amps
+C: 4.5 amps
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q4 ===
+Text: A Transformer has 4500 secondary turns and 750 primary turns. Its
+A: 1:6
+B: 6:1
+C: 1/6
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q5 ===
+Text: Two inductive coils are placed in close proximity with each other at 90
+A: 0
+B: maximum positive
+C: maximum negative
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q6 ===
+Text: If you apply this waveform to this circuit, what is the output across the
+A: Zero
+B: Pulsed negative
+C: Pulsed positive
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q7 ===
+Text: 16. What value is the same as the equivalent D.C. heating effect?
+A: Root Mean Square
+B: Average
+C: Peak
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q8 ===
+Text: What shape is the waveform when the input pulse and the time base
+A: Square
+B: Rectangular
+C: Saw tooth
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q9 ===
+Text: In this circuit
+A: current leads voltage
+B: current lags voltage
+C: current = voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q10 ===
+Text: In a delta-connected generator
+A: line volts = phase volts, line current = root 3 times phase current.
+B: line volts = phase volts, line current = phase current divided by root 3
+C: line voltage = root 3 times phase voltage, line current = phase current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q11 ===
+Text: voltage begins to decay?
+A: 20 hours
+B: 4 hours
+C: 40 hours
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q12 ===
+Text: A 10 V battery supplies a resistive load of 10 ohms for 1 minute. What
+A: 100 W
+B: 10 VA
+C: 10 W
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q13 ===
+Text: connected in parallel. What is the total capacitance?
+A: 10.01001mF
+B: 111mF
+C: 1.001001mF
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q14 ===
+Text: If a 1mF capacitor has a potential difference across it of 5V what is the
+A: 12.5 J
+B: 12.5 mJ
+C: 25 mJ
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q15 ===
+Text: A solenoid of 10 turns per meter carries a current of 5A. If the current
+A: 5
+B: 50
+C: 20
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q16 ===
+Text: 90% of the flux transferred from one to the other?
+A: 4.5mH
+B: 459mH
+C: 63mH
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q17 ===
+Text: is the value of the inductor?
+A: 10mH
+B: 100microH
+C: 100mH
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q18 ===
+Text: What is the total inductance?
+A: 35 mH
+B: 2.86 mH
+C: Without knowing the coupling factor the total inductance cannot be
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q19 ===
+Text: what is the current after 3 secs?
+A: 1.26A
+B: 0.63A
+C: 1A
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q20 ===
+Text: the line voltage?
+A: 115V
+B: 200V
+C: 346V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q21 ===
+Text: the apparent power in each line that the generator can produce?
+A: 2.3kW
+B: 2.3kVA
+C: 4kVA
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q22 ===
+Text: Thermocouple harnesses are made from the same materials as the
+A: they will not corrode
+B: mini junctions are not formed
+C: the resistance is not increased beyond limits
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q23 ===
+Text: A capacitor with double the area and double the dielectric thickness will
+A: double the capacitance
+B: half the capacitance
+C: the same capacitance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q24 ===
+Text: In a transformer, if the rate of change of current increases, the mutual
+A: increase
+B: decrease
+C: remain the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q25 ===
+Text: If the brake coil on an actuator motor goes open circuit, the actuator
+A: over-ride its mechanical stops
+B: stop
+C: run slower
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q26 ===
+Text: The frequency of the output of a 4 pole generator is 400 Hz. The
+A: 12000 RPM
+B: 6000 RPM
+C: 3000 RPM
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q27 ===
+Text: What is the wave shape of the x-axis input of a traversing oscilloscope
+A: square
+B: rectangular
+C: triangular
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q28 ===
+Text: An inductance/resistance motor is
+A: better than a capacitance motor
+B: restricted to low loads only
+C: less efficient than a capacitance motor
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q29 ===
+Text: The voltage at point A is
+A: 7 V
+B: 21 V
+C: 28 V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q30 ===
+Text: A 4:1 step down transformer draws 115 V and 1 A. The output power
+A: 28.5 V at 4 A
+B: 28.5 V at 16 A
+C: 460 V at 0.25 A
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q31 ===
+Text: The voltage induced in the stator of an AC generator is produced by
+A: a fixed magnetic field
+B: a rotating magnetic field
+C: an alternating field
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.09
+
+=== Q32 ===
+Text: A low frequency supply
+A: may damage inductive components
+B: will have no effect on inductive components
+C: will make the circuit operate faster due to the reduced impedance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q33 ===
+Text: A zinc-carbon battery life depends upon
+A: the purity of the carbon rod
+B: the amount of zinc
+C: the amount of the electrolyte paste
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q34 ===
+Text: When checking the S.G. of the electrolyte in a lead acid battery, you
+A: check all cells because they may be different
+B: check only the no. 1 cell because it is the master cell
+C: check any cell because they will all be the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q35 ===
+Text: If electrons are added to an atom it becomes
+A: a positive ion
+B: a negative ion
+C: a neutral ion
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q36 ===
+Text: An element whose atoms have fewer than 4 electrons in their valency
+A: good conductors
+B: good insulators
+C: semiconductors
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q37 ===
+Text: In a purely resistive AC circuit, the current vector is
+A: in phase with the voltage vector
+B: +90o out of phase with the voltage vector
+C: -90o out of phase with the voltage vector
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q38 ===
+Text: The PD at the terminals of an open circuit battery with a small internal
+A: more than the EMF
+B: less than the EMF
+C: the same as the EMF
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q39 ===
+Text: dropped across the series resistor?
+A: 200 V
+B: 0.12 V
+C: 0.2 V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q40 ===
+Text: An electrolytic capacitor is used where
+A: minimum losses are essential
+B: there is a polarized input
+C: high frequency AC is used
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q41 ===
+Text: If a connection to an AC motor is disconnected, the motor will
+A: slow down and stop
+B: continue to run
+C: stop
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q42 ===
+Text: A band stop filter
+A: stops a narrow range of frequencies
+B: stops frequencies either side of a narrow range
+C: attenuates frequencies either side of a narrow range
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q43 ===
+Text: This is a diagram of a
+A: band pass filter
+B: high pass filter
+C: low pass filter
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q44 ===
+Text: When comparing the average values of an AC generator output, to the
+A: average voltage = same as the peak voltage
+B: average voltage = 0.63 x peak voltage
+C: average voltage = 0.707 x peak voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q45 ===
+Text: A parallel circuit at resonance has
+A: maximum impedance
+B: minimum impedance
+C: zero impedance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q46 ===
+Text: much energy is dissipated in total?
+A: 1.224 MJ
+B: 20.4 kJ
+C: 191.25 J
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q47 ===
+Text: 80A. How much power does it dissipate?
+A: 3.2 kW
+B: 1.152 kW
+C: 1.92 kW
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q48 ===
+Text: 89. What must you do to make a 3 F capacitor circuit into a 2 F circuit?
+A: Put a 1 F capacitor in series
+B: Put a 2 F capacitor in parallel
+C: Put a 6 F capacitor in series
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q49 ===
+Text: The time required to fully charge a 1 µF capacitor in series with a 100k
+A: 100 ms
+B: 1 s
+C: 100 s
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q50 ===
+Text: This is a symbol for
+A: a voltage dependant resistor
+B: a variable differential resistor
+C: a visual display rectifier
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q51 ===
+Text: If a generator speed is halved and the field strength is doubled, the
+A: halved
+B: doubled
+C: unchanged
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q52 ===
+Text: Point A on the armature of the generator shown is producing
+A: maximum current
+B: minimum current
+C: zero current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q53 ===
+Text: An accumulation of hydrogen on the plates of a battery is known as
+A: hydration
+B: polarization
+C: ionization
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q54 ===
+Text: 96. What is the power dissipated in a 500 ohm resistor with a 3A flow?
+A: 1.5 kW
+B: 4.5 kW
+C: 750 kW
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q55 ===
+Text: 97. Which of the following is 1 Amp?
+A: 1000 mA
+B: 1000 μA
+C: 1000 kA
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q56 ===
+Text: A paramagnetic material has a relative permeability of
+A: greater than unity
+B: less than unity
+C: zero
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q57 ===
+Text: 99. What part of a battery is covered in hydrogen during polarization?
+A: Cathode
+B: Anode
+C: Both the anode and the cathode
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q58 ===
+Text: Electricity conducts through
+A: solids only
+B: solids and liquids
+C: vacuum
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q59 ===
+Text: The term that describes the combined resistive forces in an AC circuit
+A: impedance
+B: resistance
+C: total resistance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q60 ===
+Text: How can the direction of rotation of a DC electric motor be changed
+A: reverse the electrical connections to either the field or armature
+B: interchange the wires which connect the motor to the external power
+C: rotate the positive brush one commutator segment
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q61 ===
+Text: The only practical method of maintaining a constant voltage output
+A: strength of the magnetic field
+B: number of conductors in the armature
+C: speed at which the armature rotates
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q62 ===
+Text: nickel-cadmium battery?
+A: excessive current draw from the battery
+B: high current charging of the battery to more than 100 percent of its
+C: 
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q63 ===
+Text: Electric motors are often classified according to the method of
+A: compound
+B: shunt (parallel)
+C: series
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q64 ===
+Text: If a heavy mechanical load is removed from a series motor
+A: the speed will decrease and the armature current will decrease
+B: the speed will increase and the armature current will decrease
+C: the speed will increase and the armature current will increase
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q65 ===
+Text: Static charges remaining in an aircraft are dissipated by
+A: the use of a conducting type nose wheel
+B: bonding the aircraft to a refuel tanker
+C: earthing the aircraft as soon as possible
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.02
+
+=== Q66 ===
+Text: Total resistance in parallel for R1 and R2 is
+A: 1/RT = (R1 x R2) ÷ (R1 + R2)
+B: RT = 1/R1 + 1/R2
+C: 1/RT = 1/R1 + 1/R2
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q67 ===
+Text: The quill drive on an aircraft generator
+A: makes possible the use of roller
+B: damps out any commutator ripple
+C: damps out vibrations
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q68 ===
+Text: The method of ascertaining the voltage of a standard aircraft lead-acid
+A: the voltage on open circuit
+B: the voltage with rated load switched ON
+C: the voltage off load
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q69 ===
+Text: If the correct supply were connected to a DC shunt motor which had
+A: fail to run
+B: run in the reverse direction
+C: run normally
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q70 ===
+Text: A loss of electrical insulation results in
+A: a short circuit between the supply and earth
+B: an open circuit between the supply and earth
+C: an open circuit in the supply
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q71 ===
+Text: A DC circuit containing a total resistance of 100 ohms has a current
+A: 0.4 watts
+B: 6.25 watts
+C: 5 watts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q72 ===
+Text: Power is the rate of doing work. It is measured in
+A: joules/second
+B: watts/second
+C: joules x seconds
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q73 ===
+Text: Ohm's law states that:
+A: e.m.f. = current divided by resistance
+B: resistance = current divided by e.m.f.
+C: current = e.m.f. divided by resistance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q74 ===
+Text: If the resistance of a resistor which is in series with two other resistors
+A: the current in that resistance is doubled
+B: the current in that resistance is halved
+C: the volts drop across that resistor increases
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q75 ===
+Text: One purpose of a growler test is to determine the presence of:
+A: a shorted armature
+B: an out-of-round commutator
+C: a broken field lead
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q76 ===
+Text: Through which material will magnetic lines of force pass the most
+A: aluminium
+B: iron
+C: copper
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q77 ===
+Text: primary coil have?
+A: 15,000
+B: 150,000
+C: 1,500,000
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q78 ===
+Text: Two batteries 12V and 40 Ah each are in series. What is the total
+A: 12V 80 Ah
+B: 24V 80Ah
+C: 24V 40 Ah
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q79 ===
+Text: secondary winding?
+A: star only
+B: delta only
+C: either delta or star
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q80 ===
+Text: The phases in supply to a 2 phase motor are electrically
+A: 90 degrees apart from each other
+B: 180 degrees apart from each other
+C: 120 degrees apart from each other
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q81 ===
+Text: maximum consistent power?
+A: 30 KW
+B: 24 KW
+C: 37.5 KW
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q82 ===
+Text: charge it to 100V?
+A: 1 s
+B: 0.2 seconds
+C: 12 minutes
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q83 ===
+Text: The total resistance of the circuit shown is
+A: 1.33 Ohms
+B: 12 Ohms
+C: 3 Ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q84 ===
+Text: The three voltages of a three phase generator are connected
+A: independently of each other
+B: in series with each other
+C: in parallel with each other
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q85 ===
+Text: E.M.F. in an electric circuit corresponds to what in a magnetic circuit
+A: mmf
+B: flux
+C: reluctance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q86 ===
+Text: Time constant of an inductor is
+A: LR
+B: L/R
+C: L2/R
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q87 ===
+Text: Permanent magnets have
+A: high reluctance, low coercive force
+B: low reluctance, high coercive force
+C: high reluctance, high coercive force
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q88 ===
+Text: If a battery has got low internal resistance, then
+A: on load voltage will be greater than no load voltage
+B: no load voltage will be greater than on load voltage
+C: no load voltage will be the same as on load voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q89 ===
+Text: In a parallel R, L, C circuit, the value of the capacitor is quadrupled,
+A: reduce
+B: increased
+C: remain the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q90 ===
+Text: 4 seconds. What is the voltage?
+A: 12.8V
+B: 6.4V
+C: 3.2V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q91 ===
+Text: A 3, 5 and 2 ohms resistance is connected in series with a 10 V battery.
+A: 10V
+B: 2 V
+C: 4 V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q92 ===
+Text: The power in a circuit when voltage and resistance is given can be
+A: VxR
+B: VxV / R
+C: VxVxR
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q93 ===
+Text: Conventional current flow inside a battery is from
+A: anode to cathode
+B: cathode to anode
+C: either anode to cathode or cathode to anode, depending on the active
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q94 ===
+Text: Potentiometers are used as a
+A: variable voltage source
+B: variable resistor
+C: variable current source
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q95 ===
+Text: load. What is the core loss at full load?
+A: 200 W
+B: 220 W
+C: 0 W
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q96 ===
+Text: The purpose of end travel microswitch in a linear actuator is to
+A: remain closed and opens at end travel only
+B: remain open and closes at end travel only
+C: remain open during normal operation and only close if the actuator
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q97 ===
+Text: Linear actuators used in aircraft are of
+A: split field series wound type.
+B: split field shunt wound type
+C: compound wound type
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q98 ===
+Text: If a generator sparks, a possible reason is
+A: The brush springs are loose
+B: The brushes have been placed around the magnetic coil
+C: Magnetic flux deflecting the EMF
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q99 ===
+Text: The charge on a proton is
+A: neutral
+B: positive
+C: negative
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q100 ===
+Text: In a capacitive circuit, if the frequency is increased
+A: the current increases
+B: impedance increases
+C: reactance remains the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q101 ===
+Text: Three 12 µF capacitors are in series. The total capacitance is
+A: 12 µF
+B: 4 µF
+C: 36 µF
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q102 ===
+Text: A 500 ohm resistor carries a 3 amp current. What is the power
+A: 5 kW
+B: 4.5 kW
+C: 500 W
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q103 ===
+Text: What is the PD of a circuit which has a 40 mA current and a 1 k ohm
+A: 400 V
+B: 4 V
+C: 40 V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q104 ===
+Text: how many turns must it have?
+A: 15,000
+B: 150,000
+C: 1,500,000
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q105 ===
+Text: 157. A potentiometer has which of the following properties?
+A: 3 terminals
+B: preset values
+C: wire wound
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q106 ===
+Text: A 3 ohm resistor dissipates 27 Watts. How much current flows through
+A: 3 A
+B: 9 A
+C: 0.15 A
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q107 ===
+Text: 159. In a 2 phase generator, how far apart are the windings electrically?
+A: 45o
+B: 90o
+C: 180o
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q108 ===
+Text: The SI unit of work is
+A: Joules per second (Watts)
+B: Kilogram metres - force
+C: Joules per metre
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q109 ===
+Text: In the circuit below, what happens to the total circuit impedance if L is
+A: Increases
+B: Remains the same
+C: Reduces
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q110 ===
+Text: 162. In a voltaic cell, what is the build-up on the cathode called?
+A: Polarization
+B: Sulphation
+C: Hydration
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q111 ===
+Text: A sine wave has a periodic time of 0.5 milliseconds. What is the
+A: 200 Hz
+B: 2 kHz
+C: 20 kHz
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q112 ===
+Text: Three branches in a circuit have currents entering of 3A, 4 A and 5 A.
+A: 2A entering
+B: 2A leaving
+C: 22A leaving
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q113 ===
+Text: If the field strength of a generator is doubled, and the speed is doubled,
+A: quadruple
+B: double
+C: stay the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q114 ===
+Text: If the rate of change of current is halved, mutual inductance will
+A: double
+B: stay the same
+C: halve
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q115 ===
+Text: If a capacitor of 50 microfarads has a current of 25 mA, how long does
+A: 200 milliseconds
+B: 200 seconds
+C: 150 seconds
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q116 ===
+Text: a value of 100 ohms. What is the value of the unknown resistor?
+A: 0.5 ohms
+B: 5 ohms
+C: 50 ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q117 ===
+Text: In a DC motor the pole pairs are
+A: embedded within the field coils
+B: part of the armature
+C: connected to the brush gear
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q118 ===
+Text: Transformer copper loss on full load is 220 Watts. On half load the loss
+A: 110 Watts
+B: 440 Watts
+C: 55 Watts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q119 ===
+Text: The earth's magnetic field is greatest at the
+A: magnetic poles
+B: geographic poles
+C: magnetic equator
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q120 ===
+Text: If a 1 ohm circuit produces a 50 W output, the phase angle is
+A: 0o
+B: 90o
+C: 45o
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q121 ===
+Text: A series wound DC motor, the field has
+A: few turns of thick wire
+B: few turns of thin wire
+C: many turns of thin wire
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q122 ===
+Text: 179. What is a molecule?
+A: The smallest part of a compound
+B: The smallest part of an electron
+C: The smallest part of an atom
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.1
+
+=== Q123 ===
+Text: A coulomb is
+A: one ampere per second
+B: one ampere x second
+C: one second per ampere
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q124 ===
+Text: In a circuit containing three resistors of equal value connected in
+A: increase
+B: decrease
+C: remain the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q125 ===
+Text: A neutron is a particle which is
+A: contained within the nucleus of most atoms
+B: orbits the nucleus of the atom
+C: contained in the nucleus of all atoms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q126 ===
+Text: An electric current is a flow of
+A: electrons from a positively charged area to a negatively charged area
+B: protons from a positively charged area to a negatively charged area
+C: electrons from a negatively charged area to a positively charged area
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q127 ===
+Text: An element could be considered to be a conductor if it has
+A: a large number of electrons
+B: a large number of electrons in its outer orbit
+C: a small number of electrons in its outer orbit
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q128 ===
+Text: A volt can be considered to be a
+A: unit of electrical pressure
+B: quantity of electrical energy
+C: unit of electrical power
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q129 ===
+Text: If the resistance of an electrical circuit is increased
+A: the voltage will increase
+B: the current will increase
+C: the current will decrease
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q130 ===
+Text: If 2 coulombs flowed through a circuit in 2 seconds, the circuit would
+A: 2 volts PD
+B: 2 amps
+C: 1 amp
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q131 ===
+Text: In general, increasing the cross sectional area of an electrical cable
+A: enables it to carry more current
+B: enables it to carry more voltage
+C: increases its resistance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q132 ===
+Text: Doubling the running time of an electrical machine would
+A: double the joules used
+B: double the watts used
+C: double the current used
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q133 ===
+Text: What is 3.25 volts in millivolts
+A: 3.25 millivolts
+B: 3,250 millivolts
+C: 325,000 millivolts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q134 ===
+Text: Six resistors each of 6 ohms would be
+A: 36 ohms in parallel
+B: 1 ohm in series
+C: 1 ohm in parallel
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q135 ===
+Text: The line voltage from a generator with a delta type connection will be
+A: higher than the phase voltage
+B: lower than the phase voltage
+C: the same as the phase voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q136 ===
+Text: On a linear actuator, the field cutoff coil will be energized when
+A: the actuator is running
+B: the actuator is not running
+C: only as the actuator commences movement
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q137 ===
+Text: Kirchhoff's law states
+A: the algebraic sum of all the voltages entering or leaving a series of
+B: the algebraic sum of all the currents entering or leaving a series of
+C: the inverse sum of all the voltages entering or leaving a series of
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q138 ===
+Text: The lines of magnetic flux from a magnet will
+A: repel each other
+B: attract each other
+C: have no effect upon each other
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q139 ===
+Text: A photozoidal cell produces electricity when subjected to
+A: light
+B: heat
+C: pressure
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.04
+
+=== Q140 ===
+Text: A thermocouple indicator is basically a type of
+A: milliammeter
+B: millivoltmeter
+C: milliohmeter
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q141 ===
+Text: An electric motor produces a force of 5 N at a distance of 0.2m from
+A: 100 horsepower
+B: 628.4 watts
+C: 314.2 watts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q142 ===
+Text: Starter motors are usually
+A: series wound
+B: compound wound
+C: shunt wound
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q143 ===
+Text: shorted together?
+A: measure the input voltage with an ohmmeter
+B: the transformer will get hot in normal operation
+C: the output voltage will be high
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q144 ===
+Text: 208. What does a rectifier do?
+A: Changes direct current into alternating current
+B: Changes alternating current into direct current
+C: Reduces voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q145 ===
+Text: Two 12V 40 amp hour batteries connected in parallel will produce
+A: 24V 80 ah
+B: 12V 80 ah
+C: 24V 40 ah
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q146 ===
+Text: When an atom loses or gains an electron it is called
+A: a current
+B: an ion
+C: a molecule
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.1
+
+=== Q147 ===
+Text: A circuit has a resistance of 50 ohms and an inductance of 0.2 Henry.
+A: 31.42 ohms
+B: 62.84 ohms
+C: 6.284 ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q148 ===
+Text: A 24-volt source is required to furnish 48 watts to a parallel circuit
+A: 12 volts
+B: 24 volts
+C: 3 volts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q149 ===
+Text: Of the following which pair of materials would most readily become
+A: copper and steel
+B: nickel and bronze
+C: iron and steel
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q150 ===
+Text: The formula for resistance in series is
+A: RT = R1 + R2 + R3...RN
+B: RT = R1 x R2 x R3...RN
+C: 1/RT = 1/ (R1 x R2 x R3 ...RN)
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q151 ===
+Text: The core material used for an electromagnet is soft iron because
+A: it demagnetizes easily
+B: its magnetism is not easily destroyed
+C: it retains most of its flux density when demagnetized
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q152 ===
+Text: connected in parallel?
+A: 24 ohm
+B: 2.4 ohm
+C: 0.24 ohm
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q153 ===
+Text: Permanent magnets in an AC generator are
+A: to provide initial excitation
+B: to control the frequency
+C: to rectify the current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q154 ===
+Text: Generator brushes are normally made of
+A: carbon
+B: brass
+C: steel
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q155 ===
+Text: If the voltage across a resistor is doubled
+A: the current is doubled
+B: the resistance is halved
+C: the current is halved
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q156 ===
+Text: As the generator load is increases (within its rated capacity), the
+A: remain constant and the amperage output will decrease
+B: decrease and the amperage output will increase
+C: remain constant and the amperage output will increase
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q157 ===
+Text: If a number of resistors are connected in parallel, the total resistance is
+A: the same as the lowest
+B: smaller than the lowest
+C: greater than the lowest
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q158 ===
+Text: A charged body is said to have
+A: a surplus or deficiency of electrons
+B: a surplus of protons
+C: a deficiency of neutrons
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q159 ===
+Text: The voltage output of a generator is controlled by
+A: varying the current of the output
+B: varying the resistance of the output
+C: varying the current of the field
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q160 ===
+Text: The total current flowing in a circuit of 200 lamps in parallel, each of a
+A: 50 amps
+B: 25 amps
+C: 40 amps
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q161 ===
+Text: The current flowing in the armature of a DC motor is equal to
+A: (applied volts - generated volts) x armature resistance
+B: applied volts + generated volts
+C: applied volts - generated volts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q162 ===
+Text: In the circuit shown the 24 volt battery has an internal resistance of 1
+A: 1 ohm
+B: 2 ohms
+C: 6 ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q163 ===
+Text: One advantage of using Ac electrical power in aircraft is
+A: the greater ease in stepping the voltage up or down
+B: AC electrical motors can be reversed while dc motors cannot
+C: the effective voltage is 1.41 times the maximum instantaneous voltage;
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q164 ===
+Text: The amount of electricity a capacitor can store is directly proportional to
+A: distance between the plates and inversely proportional to the plate
+B: plate area and is not affected by the distance between the plates
+C: plate area and inversely proportional to the distance between the
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q165 ===
+Text: current as it leaves the generator?
+A: a commutator
+B: an inverter
+C: a rectifier
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q166 ===
+Text: Two similar 12 v batteries connected in parallel will produce
+A: 24V e.m.f. with twice the capacity of each battery
+B: 24v e.m.f. with the same capacity as each battery
+C: 12V e.m.f. with twice the capacity of each battery
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q167 ===
+Text: Unless otherwise specified, any values given for current or voltage in
+A: maximum values
+B: effective values
+C: instantaneous values
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q168 ===
+Text: In a vector diagram showing the magnitude and direction of the
+A: the inductive reactance would be in opposition to the capacitive
+B: the inductive and capacitance reactance would be additive with the
+C: it is impossible to show values of this kind using vectors
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q169 ===
+Text: If service No. 1 is isolated from the supply busbar shown, there will be
+A: an increase in supply voltage
+B: a decrease in supply voltage
+C: a decrease in total current consumption
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q170 ===
+Text: An increase in operating temperature in most electrical devices
+A: an increase in resistance and a decrease in current
+B: a decrease in resistance and an increase in current
+C: no effect on the resistance and current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q171 ===
+Text: The voltage of a secondary cell is
+A: determined by the number of plates
+B: determined by the area of the plates
+C: determined by the active materials on the plates
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q172 ===
+Text: The basis for transformer operation in the use of alternating current is
+A: reactance
+B: inductance
+C: capacitance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q173 ===
+Text: The exciter winding in a brushless AC generator is supplied with
+A: permanent magnets
+B: the busbar
+C: a rotating generator integrally mounted on the same shaft as the AC
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q174 ===
+Text: If the cross-sectional area of a conductor is doubled, with voltage
+A: halve
+B: double
+C: remain constant
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q175 ===
+Text: The term used to denote the strength of a magnetic field is
+A: retentivity
+B: hysterisis
+C: flux density
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q176 ===
+Text: If two resistors of 5 and 10 ohm respectively are connected in series
+A: 1/3 amp
+B: it cannot be found without knowing the applied voltage
+C: 1 amp
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q177 ===
+Text: At resonant frequency the phase difference between the voltage and
+A: 0 degrees
+B: 180 degrees
+C: 90 degrees
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q178 ===
+Text: secondary coil winding of a transformer designed to triple its input voltage?
+A: primary will have three times as many turns as its secondary
+B: primary will have twice as many turns as its secondary
+C: primary will have one-third as many turns as its secondary
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q179 ===
+Text: A direct current of 12 milliamperes flows through a circuit which has a
+A: 12 milliwatts
+B: 12 watts
+C: 144 milliwatts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q180 ===
+Text: The voltage in a series circuit
+A: is different in each component
+B: is the same in each component
+C: is less than it would be in a parallel circuit
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q181 ===
+Text: Which aircraft circuit would be most likely to use frequency wild 200V
+A: windscreen heating
+B: hydraulic pump
+C: standby compass
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q182 ===
+Text: 252. Why are the iron cores of most induction coils laminated?
+A: To reduce the effects of eddy currents
+B: To increase the core permeability
+C: To reduce the core reluctance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q183 ===
+Text: consisting of three resistors of equal value. What is the value of each resistor?
+A: 12 ohm
+B: 4 ohm
+C: 36 ohm
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q184 ===
+Text: A soft iron core is used in an ELECTRO magnet because
+A: it has HIGH permeability and HIGH coercivity
+B: it has HIGH permeability and LOW coercivity
+C: it has LOW permeability and HIGH coercivity
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q185 ===
+Text: The resistance to electrical flow in a wire depends on
+A: the diameter, length, material of wire and temperature
+B: the material only - copper or aluminum
+C: the length and material of the wire only
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q186 ===
+Text: A transformer should always have its
+A: secondary open circuit or on load
+B: secondary shorted or on load
+C: primary shorted or off load
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q187 ===
+Text: An AC generator's frequency will
+A: always be constant regardless of the generators drive speed
+B: vary with changes in field strength
+C: be proportional to the RPM at which it is driven
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q188 ===
+Text: A short circuit between the supply and earth
+A: does not matter if the circuit uses the aircraft earth as a return
+B: could be very dangerous as the current drawn will be very high
+C: is not dangerous as the current drawn will be low
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q189 ===
+Text: When two coils are linked by a common flux, a voltage can be induced
+A: mutual induction
+B: the magnetic effect
+C: self induction
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q190 ===
+Text: current flowing in the 5 ohm resistor is 10 amps. What is the applied voltage?
+A: 100v
+B: 10v
+C: 200v
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q191 ===
+Text: Copper is an inferior conductor to aluminum when comparing
+A: weight for weight
+B: load for load
+C: CSA with CSA
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q192 ===
+Text: 264. In an AC circuit how is the value of true power calculated?
+A: By volts multiplied by amps multiplied by power factor
+B: By wattmeter readings multiplied by power factor
+C: By voltmeter readings multiplied by ammeter readings
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q193 ===
+Text: Which of the following is not one of the purposes of interpoles in a
+A: Reduce field strength
+B: Overcome armature reaction
+C: Reduce arcing at the brushes
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q194 ===
+Text: Which of the following would be used to calculate transformer turns
+A: primary turns × secondary turns
+B: primary turns ÷ secondary turns
+C: secondary turns ÷ primary turns
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q195 ===
+Text: A good electrical insulator is a material which
+A: has more protons than electrons
+B: has its electrons tightly bound to their parent atoms
+C: contains a large number of positive ions
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q196 ===
+Text: To reverse the direction of a series motor
+A: the direction of the current through the field is reversed
+B: a second series field is fitted
+C: the direction of the current through the field and the armature is
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q197 ===
+Text: the revolving-field type, with each revolution of the rotor?
+A: Four
+B: Six
+C: Three
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q198 ===
+Text: The variable frequency output from an AC generator is used for
+A: supplying non-inductive loads
+B: the AC supply instead of using inverters
+C: driving AC operated instruments
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q199 ===
+Text: The capacitance of a capacitor is dependant upon
+A: the type of material separating the plates
+B: the rate of change of current in the circuit
+C: the charge on it
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q200 ===
+Text: A piece of equipment is rated at 750 watts and the applied voltage is 30
+A: 20 amps
+B: 30 amps
+C: 15 amps
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q201 ===
+Text: The current consumed by a DC starter motor will
+A: remain relatively constant over the starting speed range
+B: increase as the engine speed increases
+C: decrease as the engine speed increases
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q202 ===
+Text: When different rated capacitors are connected in parallel in a circuit,
+A: equal to the capacitance of the highest rated capacitor
+B: less than the capacitance of the lowest rated capacitor
+C: equal to the sum of all the capacitances
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q203 ===
+Text: The voltage in a transformer secondary coil that contains twice as
+A: less and the amperage greater than in the primary coil
+B: greater and the amperage greater than in the primary coil
+C: greater and the amperage less than in the primary coil
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q204 ===
+Text: 277. How are generators rated?
+A: Impedance at rated voltage
+B: Amperes at rated voltage
+C: Watts at rated voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q205 ===
+Text: In a single phase AC generator, frequency is determined by
+A: the generator speed
+B: controlling the current flow through the voltage field windings
+C: the number of pairs of poles
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q206 ===
+Text: The risk of a fire due to static electricity is overcome
+A: by fitting static wicks and insulating all metal components
+B: by connecting all metal components by bonding
+C: by fitting static wicks and isolating the battery from inflammable gas
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q207 ===
+Text: Due to armature reaction in a DC motor
+A: the trailing pole tips are magnetically weakened
+B: the leading pole tips are magnetically weakened
+C: the magnetic flux is restored by moving the MNA towards the GNA
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q208 ===
+Text: Two resistors are connected in series and have an e.m.f. of V volts
+A: V = V1 + V2
+B: V2 = V1 + V
+C: V1 = V2 + V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q209 ===
+Text: When an electrical supply becomes open-circuit
+A: the loss of continuity will prevent its component from functioning
+B: the fuse or circuit breaker should isolate the circuit due to the increased
+C: the component will operate normally but will not switch off
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q210 ===
+Text: Some electric motors have two sets of field winding wound in opposite
+A: speed of the motor can be more closely controlled
+B: motor can be operated in either direction
+C: power output of the motor can be more closely controlled
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q211 ===
+Text: The amount of electrical power for a given generator weight is
+A: determined by the size of the aircraft
+B: greater for DC generator
+C: greater for AC generator
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q212 ===
+Text: deliver 45 amperes for 2.5 hours?
+A: 90.0 ampere-hour
+B: 112.5 ampere-hour
+C: 45.0 ampere-hour
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q213 ===
+Text: How much power must a 24-volt generator furnish to a system which
+A: 450 watts
+B: 402 watts
+C: 28.8 watts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q214 ===
+Text: A volt meter is connected
+A: in series or parallel
+B: in parallel
+C: in series
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q215 ===
+Text: 289. What polarity do interpoles take in a DC motor?
+A: The same as the next main pole behind in the direction of rotation
+B: Either, provided they lay on the MNA
+C: The same as the next main pole ahead in the direction of rotation
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q216 ===
+Text: On a typical AC generator the output is taken
+A: direct from the rotor via slip rings
+B: direct from the exciter
+C: direct from the stator windings
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q217 ===
+Text: Since electrical supplies taken from a bus-bar are in parallel, isolating
+A: reduce the current consumption from the bus-bar
+B: increase the current consumption from the bus-bar
+C: not affect the current consumption, it would reduce the voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q218 ===
+Text: One Picofarad is
+A: 1 x 1012 farad
+B: 1 x 10-6 farad
+C: 1 x 10-12 farad
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q219 ===
+Text: 293. Which of these will cause the resistance of a conductor to decrease?
+A: Decrease the length or the cross-sectional area
+B: Decrease the length or increase the cross-sectional area
+C: Increase the length or decrease the cross-sectional area
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q220 ===
+Text: The purpose of bonding is to
+A: give generated static an easy return path to the generator
+B: stop different potentials developing with subsequent fire risks
+C: ensure all components have been securely fitted
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.02
+
+=== Q221 ===
+Text: Interpole windings fitted to DC series wound generators are
+A: in series with the field
+B: in parallel with the armature
+C: in series with the armature
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q222 ===
+Text: One of the chief advantages of alternating current is that it can be
+A: AC by means of transformers
+B: DC by means of transformers
+C: DC by means of inverters
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q223 ===
+Text: An AC generator is producing the required voltage but a higher
+A: Decrease the speed of the prime mover, and then decrease the
+B: Decrease the speed of the prime mover
+C: Decrease the speed of the prime mover, and then increase the strength
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q224 ===
+Text: ohms each and two of which have a resistance of 5 ohms each?
+A: 25.23 amperes
+B: 1 ampere
+C: 1.11 amperes
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q225 ===
+Text: The area of a hysteresis loop is proportional to the
+A: energy dissipated in putting the material through a complete cycle of
+B: relative permeability of the material being magnetized
+C: energy absorbed in completely demagnetizing the material
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q226 ===
+Text: The current flowing through a circuit can be increased to four times its
+A: doubling the applied voltage and halving the resistance
+B: halving the applied voltage and halving the resistance
+C: doubling the resistance and doubling the applied voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q227 ===
+Text: When more than two inductors of different inductances are connected
+A: equal to the sum of the individual inductances
+B: less than the inductance of the lowest rated inductor
+C: equal to the inductance of the highest rated inductor
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q228 ===
+Text: 304. What polarity do interpoles take in a DC generator?
+A: the same as the next main pole ahead in the direction of rotation
+B: the same as the next main pole behind in the direction of rotation
+C: either, providing they lay on M.N.A.
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q229 ===
+Text: temperature increases?
+A: It increases
+B: It decreases
+C: It remains the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q230 ===
+Text: The method most often used in overcoming the effect of armature
+A: shaded poles
+B: interpoles
+C: drum-wound armatures in combination with a negatively connected
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q231 ===
+Text: The switch on a DC circuit containing a fully charged capacitor is
+A: drops immediately to zero
+B: starts to fall exponentially to zero
+C: remains equal to the original charging voltage supply
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q232 ===
+Text: In a 3 phase generator with balanced load, the potential between the
+A: equal to line volts
+B: equal to phase volts
+C: zero volts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q233 ===
+Text: the inductive reactance of a circuit?
+A: Resistance and capacitive reactance
+B: Resistance and voltage
+C: Inductance and frequency
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q234 ===
+Text: In transformer operation, hysteresis losses are
+A: current overcoming coil resistance
+B: induced current in the iron core
+C: energy wasted in reversing core magnetization
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q235 ===
+Text: The starting current of a series-wound DC motor, in passing through
+A: low starting torque
+B: speed slightly higher when unloaded
+C: high starting torque
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q236 ===
+Text: A non-magnetic metal
+A: has no permeability
+B: has high retentivity
+C: is a poor conductor
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q237 ===
+Text: The power output of an AC parallel generator system is measured in
+A: KVA
+B: KW / KVARS
+C: amperes
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q238 ===
+Text: The shape of the output waveform of an AC generator is known as a
+A: sine wave
+B: cosine wave
+C: frequency wave
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q239 ===
+Text: In a series resistive circuit
+A: the total voltage equals the difference between the individual voltages
+B: the total voltage is equal to the sum of the individual voltages
+C: the total voltage is the same as the highest individual
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q240 ===
+Text: The sum of the instantaneous E.M.F's in a three phase system is
+A: equal to the line voltage
+B: three times the phase voltage
+C: zero
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q241 ===
+Text: A capacitor is a barrier to
+A: both
+B: A.C
+C: D.C
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q242 ===
+Text: One revolution of a three phase generator will produce
+A: 3 cycles
+B: 2 cycles
+C: 1 cycle
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q243 ===
+Text: If the North pole of a magnet is brought nearer to the North pole of
+A: attraction between them will be increased
+B: repulsion between them will be increased
+C: repulsion between them will be reduced
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q244 ===
+Text: A 200 volt motor is taking 10 amperes armature current, the armature
+A: 201 volts
+B: 199 volts
+C: 1 volt
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q245 ===
+Text: What is the effect of inserting an iron core into a current carrying coil?
+A: The flux density of the original magnetic field produced by the coil is
+B: The flux density of the original magnetic field remains constant
+C: The core tends to move from a stronger to a weaker part of the field
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q246 ===
+Text: 0.12microfarad, respectively?
+A: 0.04 µF
+B: 0.04 pF
+C: 0.4 µF
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q247 ===
+Text: The frequency of a power wave in an AC resistance circuit is
+A: the same as the frequency for voltage and current
+B: half the frequency for voltage and current
+C: twice the frequency for voltage and current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q248 ===
+Text: The reading on the ammeter in the circuit shown is
+A: 3A
+B: 6A
+C: 12A
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q249 ===
+Text: The 'A' phase of a three phase power system is colour coded
+A: blue
+B: yellow
+C: red
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q250 ===
+Text: What is a method used for restoring generator field residual
+A: Flash the fields
+B: Reseat the brushes
+C: Energize the armature
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q251 ===
+Text: A 1µF capacitor is equivalent to
+A: 0.000,001 Farads
+B: 1,000,000 Farads
+C: 0.001 Farads
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q252 ===
+Text: The opposition offered by a coil to the flow of alternating current is
+A: impedance
+B: reluctance
+C: inductive reactance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q253 ===
+Text: A high surge of current is required when a DC electric motor is first
+A: the applied emf increases proportionally
+B: the counter emf decreases proportionally
+C: the counter emf builds up and opposes the applied emf, thus reducing
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q254 ===
+Text: The various parts of an aircraft airframe are maintained at the same
+A: the supply bus-bars
+B: static discharge wicks
+C: bonding
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.02
+
+=== Q255 ===
+Text: When two capacitors are connected in series
+A: the charge stored on each is directly proportional to its capacitance
+B: the charge stored on each is the same
+C: the charge stored on each is inversely proportional to the voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q256 ===
+Text: The charge on a capacitor is expressed as
+A: the ratio Q/V
+B: the product Q x V
+C: the product C x V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q257 ===
+Text: A shunt is used with
+A: an ammeter
+B: an ohmmeter
+C: a voltmeter
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q258 ===
+Text: The resistance of the current return path through the aircraft is always
+A: generator is properly grounded
+B: voltage drop across the circuit is checked
+C: structure is adequately bonded
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q259 ===
+Text: When handling a high voltage capacitor in an electrical circuit, be sure
+A: has a full charge before removing it from the circuit
+B: is fully discharged before removing it from the circuit
+C: has at least a residual charge before removing it from the circuit
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q260 ===
+Text: When a circuit with a series inductance and capacitance is at resonant
+A: the current in the circuit decreases
+B: the impedance of the circuit is such that the voltage is in phase with the
+C: the impedance of the circuit is such that the voltage leads the current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q261 ===
+Text: In an AC circuit, the effective voltage is
+A: equal to the maximum instantaneous voltage
+B: greater than the maximum instantaneous voltage
+C: less than the maximum instantaneous voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q262 ===
+Text: On a combined DC starter - generator system
+A: the voltage regulator is connected to the shunt field after the start cycle
+B: the series coil is open circuit during the engine start sequence
+C: the voltage regulator controls the start sequence during engine starting
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q263 ===
+Text: is 1A. How much true power is the circuit consuming?
+A: 30VA
+B: 30W
+C: 10W
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q264 ===
+Text: is their approximate resonant frequency?
+A: 62Hz
+B: 3.2MHz
+C: 1.6kHz
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q265 ===
+Text: Which wave form is stepped positive and negative with unequal length
+A: Trapezoidal wave
+B: Rectangular wave
+C: Saw tooth wave
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q266 ===
+Text: The value of an AC sine wave that will give an equivalent heating effect
+A: average value
+B: RMS value
+C: peak value
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q267 ===
+Text: 355. Where is the magnetic dip least?
+A: Poles
+B: Equator
+C: Isoclinals
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q268 ===
+Text: The dielectric constant of a capacitor is a measurement of
+A: the electrostatic energy storing capacity of the capacitor dielectric
+B: the electrical resistance of the capacitor dielectric
+C: the electrical repulsion of electrons within the dielectric material
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q269 ===
+Text: To reverse the direction of rotation on a DC shunt motor, you must
+A: the field windings or the armature windings
+B: the armature windings only
+C: the field windings and the armature windings
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q270 ===
+Text: If the field current to a shunt wound DC motor is decreased when
+A: reduce
+B: increase
+C: not change
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q271 ===
+Text: An electric current is
+A: a surplus of free electron
+B: an excitement of electrons in a metal
+C: an ordered flow of electrons
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.1
+
+=== Q272 ===
+Text: An atom contains
+A: molecules
+B: hydrogen
+C: electrons
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q273 ===
+Text: 361. What causes a transformer to be noisy?
+A: High coil resistance
+B: An air gap in the core
+C: High core losses
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q274 ===
+Text: Carbon has a
+A: negative temperature coefficient
+B: positive temperature coefficient
+C: temperature coefficient of zero
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q275 ===
+Text: The peak factor for a sine wave is
+A: 0.707
+B: 1.414
+C: 1.11
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q276 ===
+Text: 364. If a motor is spinning at 50 cycles per second, how long is 1 cycle?
+A: 0.02 seconds
+B: 50 seconds
+C: 0.83 seconds
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q277 ===
+Text: An integrated step input at unequal time base produces
+A: a square wave
+B: a sine wave
+C: a saw tooth wave
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q278 ===
+Text: 366. A capacitor in series and inductor in parallel make what kind of filter?
+A: Band pass
+B: High pass
+C: Low pass
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q279 ===
+Text: If a load in series has a current passing through it, the magnetic field
+A: the corkscrew rule
+B: left hand rule
+C: right hand rule
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q280 ===
+Text: is the 5th wire carrying?
+A: 2A in
+B: 2A out
+C: 5A out
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q281 ===
+Text: If an insulated conductor is placed near to a negatively charged rod,
+A: negatively charged
+B: positively charged
+C: No change will occur
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q282 ===
+Text: would the color coding be?
+A: Brown, black, brown
+B: Brown, black, black
+C: Black, brown, black
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q283 ===
+Text: Germanium and silicon have how many electrons in their outer shell
+A: 4
+B: 2
+C: 6
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q284 ===
+Text: If a free electron is given to another atom, that atom is a
+A: positive ion
+B: negative ion
+C: valency atom
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.1
+
+=== Q285 ===
+Text: If a nicad battery is not to be used immediately it should be stored
+A: fully charged
+B: fully dissipated
+C: dry
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q286 ===
+Text: A light / heat sensitive cell is a
+A: transducer
+B: diode
+C: transistor
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q287 ===
+Text: In a mercury cell the steel casing is
+A: the positive terminal
+B: the negative terminal
+C: neither
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q288 ===
+Text: To improve the life of a dry cell you would
+A: use more zinc
+B: use more electrolyte paste
+C: us a a pure carbon positive rod
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q289 ===
+Text: 377. What is the voltage at A?
+A: 26V
+B: 28V
+C: 2V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q290 ===
+Text: The unit for power is equal to
+A: N/m
+B: Joules per second
+C: Volts/Amps
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q291 ===
+Text: The source voltage in the circuit below is
+A: 50V
+B: 200V
+C: 150V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q292 ===
+Text: The 5th colored band on a resistor represents the
+A: tolerance
+B: multiplier
+C: reliability or temperature coefficient
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q293 ===
+Text: Flux density will
+A: increase linearly with coercive force
+B: increase linearly with magnetic flux
+C: decrease linearly with magnetic flux
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q294 ===
+Text: 383. A transformer with a 5:1 ratio has a 24V output. What is the input?
+A: 120 V DC
+B: 4.8 V AC
+C: 120 V AC
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q295 ===
+Text: and the power factor?
+A: 100 VA and 2
+B: 400 VA and 0.5
+C: 100 VA and 0.5
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q296 ===
+Text: The mark-to-space ratio of the following waveform is
+A: A to B
+B: A to D
+C: D to E
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q297 ===
+Text: In a power circuit, the purpose of an inductor is
+A: to dampen power surges
+B: to dampen current surges
+C: to dampen voltage surges
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q298 ===
+Text: When a number of ferrite pieces are grouped together, they
+A: are semi-permanent magnets when DC is passed through them
+B: can be used to store binary code
+C: electromagnets
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q299 ===
+Text: Ampere turns is calculated by the number of turns
+A: multiplied by current
+B: divided by current
+C: multiplied by magnetic flux
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q300 ===
+Text: A conventional aircraft generator will be
+A: series wound
+B: delta wound
+C: star wound
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q301 ===
+Text: Storage of magnets should be
+A: in pairs end to end
+B: in a non magnetic pox
+C: in pairs with keeper plates
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q302 ===
+Text: A circuit has 1 mega ohm and 8 microfarads. What is the time
+A: 1 second
+B: 8 seconds
+C: 40 seconds
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q303 ===
+Text: Current in an inductive circuit will
+A: lead voltage
+B: lag voltage
+C: be at unity
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q304 ===
+Text: Power factor of a generator is
+A: sin ø
+B: cos ø
+C: tan ø
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q305 ===
+Text: In a an AC motor, the rotation of the MNA
+A: is the same as the rotation of the armature
+B: is opposite to the rotation of the armature
+C: is slightly less speed than the rotation of the armature
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q306 ===
+Text: number of brushes?
+A: 4
+B: 2
+C: 8
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q307 ===
+Text: In conventional flow, the left hand rule applies to
+A: generators
+B: motors
+C: batteries
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q308 ===
+Text: Copper losses in a transformer are caused by
+A: circulating currents through the transformer
+B: the resistance in the windings
+C: wasting of the copper wires due to friction
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q309 ===
+Text: in AC generators, 0.637 is
+A: RMS
+B: average value
+C: form factor
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q310 ===
+Text: 400. In a 3 phase generator, what angle are the phases to each other?
+A: 180o
+B: 120o
+C: 0o
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q311 ===
+Text: Delta wound line current is
+A: equal to phase current
+B: root 3 x phase current
+C: less than the phase current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q312 ===
+Text: The multiplier color coding on a capacitor is in
+A: farads
+B: microfarads
+C: picofarads
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q313 ===
+Text: Form Factor for a sine wave AC output is
+A: 0.707
+B: 1.414
+C: 1.1
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q314 ===
+Text: In a simple voltaic cell the collection of ions on the cathode causes
+A: hydration
+B: sulphation
+C: polarisation
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q315 ===
+Text: The electrolyte in a nicad battery would rise if the battery was
+A: discharging
+B: charging
+C: remaining at constant voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q316 ===
+Text: When a conductor is cut by magnetic lines of force an EMF is induced.
+A: Lenz's Law
+B: Faraday's Law
+C: Kirchhoff's Law
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q317 ===
+Text: Two 2 volt 10AH cells are connected in series, the output voltage and
+A: 2 volt, 20 AH
+B: 4 volt 10 AH
+C: 4 volt 20 AH
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q318 ===
+Text: Referring to the drawing below, if the volts dropped across the 20 ohm
+A: 20 ohms
+B: 16 ohms
+C: 2 ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q319 ===
+Text: The atomic number of an atom is determined by the number of
+A: protons
+B: electrons
+C: neutrons
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q320 ===
+Text: In a Leclanche cell the plates are made of
+A: mercury and lithium
+B: nickel and cadmium
+C: zinc and carbon
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q321 ===
+Text: In a simple voltaic cell, polarization reduces output voltage because of
+A: transfer of material between the anode and the cathode
+B: build up of hydrogen on the anode
+C: build up of hydrogen on the cathode
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q322 ===
+Text: If the temperature of a pure metal is reduced to absolute zero, its
+A: infinity
+B: practically zero
+C: unaffected
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q323 ===
+Text: The bridge circuit shown will be balanced when the value of the
+A: 18 ohms
+B: 14 ohms
+C: 2 ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q324 ===
+Text: The current in the circuit below is
+A: 5 A
+B: 0.2 A
+C: 5 mA
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q325 ===
+Text: In the previous question, the power developed across the 10 k ohm
+A: 250 mW
+B: 250 W
+C: 50 mW
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q326 ===
+Text: 420. What is represented by this diagram?
+A: Potentiometer
+B: Rheostat
+C: Thermister
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q327 ===
+Text: What is the voltage across the 6 ohm resistor?
+A: 54V
+B: 1.5V
+C: 6V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q328 ===
+Text: The unknown current in the network below is
+A: 22A
+B: 3A
+C: 47A
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q329 ===
+Text: The Watt can be expressed as
+A: Joules per second
+B: Joules x seconds
+C: Seconds per Joule
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q330 ===
+Text: A single phase circuit has an input voltage of 100V. The current is 10A
+A: 1000W
+B: 50W
+C: 500W
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q331 ===
+Text: Power in a DC circuit is found by
+A: multiplying current by resistance
+B: multiplying the voltage by itself and dividing by the current
+C: multiplying the resistance by the current squared
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q332 ===
+Text: The total capacitance of the circuit shown is
+A: 4µF
+B: 36µF
+C: 3µF
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q333 ===
+Text: When a capacitor is charged from a DC supply, the voltage / time curve
+A: logarithmic
+B: exponential
+C: linear
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q334 ===
+Text: The hysteresis loop for a magnetic material is on a graph with
+A: total flux against flux density
+B: current against flux density
+C: flux density against magnetising force
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q335 ===
+Text: To determine the direction of the magnetic field around a conductor you
+A: the corkscrew rule
+B: Fleming's left hand rule
+C: Fleming's right hand rule
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q336 ===
+Text: A material with a narrow hysteresis loop
+A: will have high retentivity
+B: will have low retentivity
+C: cannot be magnetised
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q337 ===
+Text: If a bar magnet is cut in half
+A: the magnet is destroyed
+B: two bar magnets are formed
+C: one bar magnet and one non-magnet is formed
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q338 ===
+Text: The diagram shows a current carrying conductor in a magnetic field.
+A: upwards
+B: downwards
+C: sideways
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q339 ===
+Text: The electromagnetic force between two charged bodies is
+A: proportional to the distance between them
+B: inversely proportional to the distance between them
+C: inversely proportional to the square of the distance between them
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q340 ===
+Text: Copper is a
+A: paramagnetic materials
+B: ferromagnetic material
+C: diamagnetic material
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q341 ===
+Text: Switching on or off the current in one coil produces an emf in another
+A: self inductance
+B: mutual inductance
+C: auto inductance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q342 ===
+Text: The time constant in an inductive circuit is the time required for the
+A: 63.2% of maximum value
+B: 63.7% of maximum value
+C: 70.7% of maximum value
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q343 ===
+Text: Self induced emf in a coil supplied with a current varying at a uniform
+A: - N dI
+B: - L dØ
+C: - L dI
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q344 ===
+Text: The MMF of a coil fed with 2 amps and having 10 turns is
+A: 5 ampere turns
+B: 20 ampere turns
+C: 20 amperes / turn
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q345 ===
+Text: An AC inductive circuit has an inductance of 10 mH and a frequency
+A: 63,000 ohms
+B: 630 ohms
+C: 63 ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q346 ===
+Text: A sine wave of RMS value 7.07 volts has a peak to peak value of
+A: 10.0 volts
+B: 0.707 volts
+C: 20.0 volts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q347 ===
+Text: The true power in an AC circuit is given by
+A: voltmeter reading x PF
+B: volts x amps
+C: volts x amps x PF
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q348 ===
+Text: The average value of 100 volts peak AC is
+A: 70.7 volts
+B: 141.4 volts
+C: 63.7 volts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q349 ===
+Text: The impedance of a series tuned circuit at resonance is
+A: zero
+B: maximum
+C: minimum
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q350 ===
+Text: What will it be on half load?
+A: 5 Watts
+B: 12.5 Watts
+C: 6.25 Watts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q351 ===
+Text: A transformer is designed to operate at 60 Hz. It is connected across a
+A: draw more current
+B: draw less current
+C: draw the same current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q352 ===
+Text: Rotating coil B through 90o will
+A: increase the EMF induced into B
+B: decrease the EMF induced into B
+C: increase the EMF induced into A
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q353 ===
+Text: A current transformer, when disconnected from a circuit must be
+A: left open circuit
+B: short circuited
+C: have a resistor connected across the terminals
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q354 ===
+Text: 452. What is the reflected impedance in the primary?
+A: 20 ohms
+B: 500 ohms
+C: 50 ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q355 ===
+Text: A transformer rated at a frequency of 200 Hz
+A: may be used at any other frequency
+B: may only be used at the rated frequency or above
+C: may only be used at the rated frequency or below
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q356 ===
+Text: The dots are called, and indicate
+A: quadrature dots, points are 90o out of phase
+B: phasing dots, point that have the same polarity at the same moment in
+C: phasing dots, point that have the opposite polarity at the same moment
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q357 ===
+Text: The power factor of an AC circuit is the
+A: sine of the phase angle
+B: cosine of the phase angle
+C: tangent of the phase angle
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q358 ===
+Text: The Form Factor of an AC waveform can be found by
+A: RMS value divided by the average value
+B: average value divided by the RMS value
+C: average value times the RMS value
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q359 ===
+Text: A differentiator has a time constant which is
+A: long
+B: short
+C: equal to the input pulse
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q360 ===
+Text: If the frequency is increased in an AC circuit of pure resistance, the
+A: increased resistance
+B: decreased resistance
+C: nothing
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q361 ===
+Text: A wire is rotated through a magnetic field. To give DC it must be
+A: a commutator
+B: slip rings
+C: a rectifier
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q362 ===
+Text: In an inductive resistive circuit, 1 amp flows from a supply of 100V
+A: 60o
+B: 90o
+C: 45o
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q363 ===
+Text: A transformer is built with a material having a
+A: narrow hysteresis loop
+B: wide hysteresis loop
+C: high coercive force
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q364 ===
+Text: A component that produces an output voltage due to incident light is
+A: liquid crystal
+B: light emitting diode
+C: solar cell
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q365 ===
+Text: In a circuit which possesses mutual inductance, current is increased to
+A: the induced EMF in the secondary produces a current in the secondary
+B: the induced EMF in the secondary produces a current in the secondary
+C: the induced EMF in the secondary produces a current in the secondary
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q366 ===
+Text: If the supply to a DC shunt motor was reversed
+A: it would rotate in the opposite direction
+B: it would fail to run
+C: it would rotate in the same direction
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q367 ===
+Text: Slip on a synchronous motor on start is
+A: 0%
+B: 50%
+C: 100%
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q368 ===
+Text: A shaded pole motor has shaded poles to
+A: increase efficiency
+B: create a rotating field
+C: reduce interference
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q369 ===
+Text: A series motor draws a high current on start, and then the current
+A: the resistance of the field and the armature in series
+B: the back EMF
+C: the resistance of the field and armature in parallel
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q370 ===
+Text: On a brushless AC generator, the main rotating field is fed with
+A: AC
+B: DC via diodes on the rotor
+C: AC from the rotating field exciter
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q371 ===
+Text: Single phase components in a three phase system may be connected
+A: phase A and B only
+B: phase and neutral only
+C: any phase and neutral OR between any two phases
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q372 ===
+Text: Interpoles in a DC generator are connected
+A: in parallel with the armature
+B: in series with the armature
+C: in series with the field
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q373 ===
+Text: In a DC generator, the effect of armature reaction may be reduced by
+A: from MNA to GNA
+B: in the direction of armature rotation towards the MNA
+C: against the direction of armature rotation towards the MNA
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q374 ===
+Text: The windings embedded in the pole faces of a DC generator are
+A: interpoles
+B: commutating coils
+C: compensating windings
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q375 ===
+Text: A 6 pole wave-wound generator has
+A: 2 brushes
+B: 6 brushes
+C: 3 brushes
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q376 ===
+Text: In a 2 phase induction motor the control winding is fed with
+A: variable phase AC supply
+B: fixed AC supply
+C: variable amplitude supply only
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.09
+
+=== Q377 ===
+Text: A 3 phase induction motor can be reversed by
+A: isolating one phase
+B: reversing the rotor connections
+C: changing over any two phases
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q378 ===
+Text: The speed of an AC motor can be affected by the
+A: field current
+B: pairs of poles
+C: armature current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q379 ===
+Text: A generator rated at 30 KVA and power factor 0.8 has a maximum
+A: 30 kW
+B: 24 kW
+C: 37.5 kW
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q380 ===
+Text: An AC motor which rotates at the same speed as the supply frequency
+A: a universal motor
+B: an induction motor
+C: a synchronous motor
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q381 ===
+Text: An example of a paramagnetic material is
+A: iron
+B: silver
+C: glass
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q382 ===
+Text: In the circuit shown, if the frequency is increased from zero to resonant
+A: increase
+B: decrease
+C: stay the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q383 ===
+Text: The true power developed in this circuit is
+A: 12W
+B: 50W
+C: 20W
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q384 ===
+Text: The filter shown is a
+A: band stop filter
+B: low pass filter
+C: high pass filter
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q385 ===
+Text: In the circuit shown, impedance will be
+A: 9 ohms
+B: 5 ohms
+C: 7 ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q386 ===
+Text: in a balanced Wheatstone bridge, across the centre of the bridge there
+A: no current flow
+B: no voltage present at either end
+C: current and voltage at maximum
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q387 ===
+Text: A 24V battery has an internal resistance of 1 ohm. When connected to
+A: 12 ohms
+B: 1 ohm
+C: 1/2 ohm
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q388 ===
+Text: The property of a material to accept lines of flux is called
+A: permeability
+B: reluctance
+C: retentivity
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q389 ===
+Text: In a DC motor, B-EMF rises if the motor
+A: speed rises
+B: speed falls
+C: load rises
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q390 ===
+Text: Vibration in a magnet causes
+A: flux to increase
+B: flux to decrease
+C: flux to stay the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q391 ===
+Text: What sort of wave would be used in a CR oscilloscope to control
+A: Sawtooth
+B: Square
+C: Sine wave
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q392 ===
+Text: If there was a mainly inductive load on an AC generator, the voltage
+A: lead
+B: lag
+C: be in phase
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q393 ===
+Text: On a brushless AC generator, the permanent magnet generator output
+A: DC
+B: AC
+C: pulsed
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q394 ===
+Text: The output from a rotating armature AC generator would be taken from
+A: the rotor
+B: the stator
+C: either the rotor or the stator
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q395 ===
+Text: In a series LCR circuit at resonance, R = 100 ohms, L and C are each
+A: 100 ohms
+B: 30 ohms
+C: zero ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q396 ===
+Text: An AC generator has four poles. To produce a frequency of 400Hz it
+A: 6000 RPM
+B: 8000 RPM
+C: 12000 RPM
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q397 ===
+Text: If an AC sinewave has an RMS value of 5V its peak value is
+A: 14.14 V
+B: 6.37 V
+C: 7.07 V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q398 ===
+Text: The Daniel Cell electrodes are
+A: copper and zinc
+B: carbon and zinc
+C: zinc and manganese dioxide
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q399 ===
+Text: An inductor of resistance 5 k ohms and inductance 2mH is connected
+A: 400 ns
+B: 10 seconds
+C: 40 ms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q400 ===
+Text: The unit of flux is the
+A: Weber
+B: Ampere turns
+C: Ampere turns / metre
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q401 ===
+Text: The flux density of a magnetic field is 1.5T. The length of the conductor
+A: 0.3 V
+B: 30 V
+C: 7.5 V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q402 ===
+Text: A DC generator armature has 6 poles and is lap wound. The number of
+A: 6
+B: 2
+C: 3
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q403 ===
+Text: Reactive sparking is reduced by
+A: interpoles
+B: compensating windings
+C: auxiliary windings
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q404 ===
+Text: The back EMF in a DC motor is
+A: equal to the applied EMF
+B: less than the applied EMF
+C: greater than the applied EMF
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q405 ===
+Text: A DC shunt motor has 28 volts applied. The current taken from the
+A: 30 V
+B: 27 V
+C: 26 V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q406 ===
+Text: In a motor, armature reaction causes the MNA to move
+A: in the direction of rotation
+B: against the direction of rotation
+C: to the GNA
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q407 ===
+Text: A circuit with good selectivity will have
+A: a large bandwidth
+B: a narrow bandwidth
+C: a low L/C ratio
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q408 ===
+Text: Apparent power in an AC circuit is found by
+A: V x I
+B: V x I x cosØ
+C: V x I x sinØ
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q409 ===
+Text: A 300 ohm resistor would have a colour code of
+A: orange, orange, brown
+B: orange, brown, black
+C: orange, black brown
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q410 ===
+Text: In a two-phase induction motor there are
+A: 2 poles
+B: 3 poles
+C: # c) 4 poles
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q411 ===
+Text: in the previous question, the secondary is connected to a 10 ohm load.
+A: 10 amps
+B: 0.4 amps
+C: 2 amps
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q412 ===
+Text: Magneto motive force can be found by
+A: N/I
+B: I x N
+C: Blv
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q413 ===
+Text: Permeability of a material can be found by
+A: flux density / MMF
+B: MMF x flux density
+C: MMF / flux density
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q414 ===
+Text: A filter with a small bandwidth has
+A: a high value of Q
+B: a low value of Q
+C: a Q of zero
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q415 ===
+Text: An autotransformer windings are
+A: on separate formers
+B: connected
+C: wired in parallel
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q416 ===
+Text: 523. What voltage can the neutral line carry in a star transformer?
+A: Combined line voltages
+B: Zero voltage
+C: Phase voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q417 ===
+Text: in a generator system, a stabilizing winding is used
+A: in series with the field to prevent oscillations
+B: to prevent voltage overshoot
+C: to control output current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q418 ===
+Text: When magnetizing a piece of material, magnetic strength will rise
+A: linearly with coercive force
+B: linearly with magnetic force
+C: non-linearly with magnetic force
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q419 ===
+Text: The stator of a permanent magnet rotor AC generator
+A: is wound in series with the field
+B: is usually delta wound
+C: is usually star wound
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q420 ===
+Text: In a resistive/inductive motor
+A: the resistor circuit must be disconnected after starting
+B: is less efficient than a capacitor start motor
+C: can only be used for light loads
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q421 ===
+Text: A 47K resistor has the following color code
+A: Yellow, Violet, Orange
+B: Orange, Violet, Red
+C: Red, Orange, Yellow
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q422 ===
+Text: A material with a narrow hysterisis loop
+A: has a high retentivity
+B: has a low retentivity
+C: cannot be magnetised
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q423 ===
+Text: The power output of a similar sized 3 phase compared to a single
+A: less
+B: same
+C: more
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q424 ===
+Text: 532. What part of a DC motor would you find the poles?
+A: brushes
+B: stator
+C: rotor
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q425 ===
+Text: capacitance is increased by a factor of 4?
+A: It reduces by 75%
+B: It remains the same
+C: It increases by factor of 4
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q426 ===
+Text: 534. In a thermocouple where is voltage measured?
+A: At the hot junction
+B: At the cold junction
+C: At both junctions
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q427 ===
+Text: Mercury cells are covered with a metal cover
+A: as a protective cover
+B: as a positive terminal
+C: as a negative terminal
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q428 ===
+Text: When switching off the supply, the back emf in a collapsing field in an
+A: never exceeds forward emf
+B: can be multiple times bigger than forward emf
+C: is equal to forward emf
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q429 ===
+Text: would be the energy consumed?
+A: 3.4 KW Hrs
+B: 3400 KW Hrs
+C: 340 KW Hrs
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q430 ===
+Text: A parallel circuit with any number of 2 terminal connections
+A: has the same current throughout
+B: the individual voltage drops is equal to the emf
+C: the resistance is dependent on current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q431 ===
+Text: In this circuit, Rx is equal to
+A: R3 x R2 ÷ R4
+B: R3 x R4 ÷ R2
+C: R2 x R4 ÷ R3
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q432 ===
+Text: A transformer to supply a 24V load with a 5:1 turn's ratio will have what
+A: 120 VDC
+B: 48 VAC
+C: 4.8 V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q433 ===
+Text: A material exposed to heat will
+A: be harder to magnetise
+B: be easier to magnetise
+C: have no effect on magnetism
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q434 ===
+Text: A 20 Pico farad capacitor with a 1MW resistor takes how long to
+A: 20 microseconds
+B: 0.1 second
+C: 100 microseconds
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q435 ===
+Text: The main advantage of a starter-generator over conventional units is
+A: for the same power output there is a weight reduction and the starter
+B: for the same power output there is a weight reduction and the drive is
+C: it can produce a greater power output
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q436 ===
+Text: The speed of a single phase induction motor is dependant on
+A: the strength of the field
+B: the number of pairs of poles
+C: the strength of the armature current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q437 ===
+Text: An A.C. shunt wound motor sometimes uses a volts dropping resistor.
+A: in series with the supply
+B: in series with the field
+C: in series with the armature
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q438 ===
+Text: In a voltage equalizing circuit the generators are regulated so
+A: the lower output is increased to that of the higher
+B: the higher output is decreased to that of the lower
+C: the lower is increased and the higher is decreased until they are equal
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q439 ===
+Text: The capacity of a battery is measured in
+A: volts
+B: cubic centimeters
+C: ampere-hours
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q440 ===
+Text: Phase angle is
+A: the difference in degrees of rotation between 2 alternating voltages or
+B: the difference in degrees between the positive and negative parts of an
+C: the cosine of the peak value of an ac voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q441 ===
+Text: A battery's internal resistance is determined by
+A: IR = OCV – CCV
+B: IR = OCV + CCV
+C: IR = OCV - CCV
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q442 ===
+Text: The impedance of an ac circuit is measured in
+A: kilovolt-amperes
+B: amperes
+C: ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q443 ===
+Text: The formula for impedance in a series circuit is
+A: Z = √(R2 + (X – X )2)
+B: Z = √(R2 – (X – X )2)
+C: Z = √(R2 – (X + X )2)
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q444 ===
+Text: Motor slip is
+A: the percentage of difference in speeds between the stator and rotor
+B: a shifting of the MNA of the motor
+C: a symptom of a weak field
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q445 ===
+Text: The principal characteristic of a synchronous motor is
+A: it rotates at a speed that is synchronised with the applied ac current
+B: it must have a synchronised 3 phase supply to operate
+C: it rotates at a speed that is synchronised with the applied dc current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q446 ===
+Text: There are more negative than positive plates in a lead acid battery
+A: the positive plates are prone to warping if the chemical action is taking
+B: it reduces the internal resistance of the cell
+C: it is necessary for chemical action to take place
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q447 ===
+Text: Commutator ripple can be reduced by
+A: the use of a ripple filter
+B: increasing generator frequency
+C: a resistor in series with the armature
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q448 ===
+Text: In this circuit applied voltage is
+A: Vt = IXC
+B: Vt = IXL
+C: Vt = I/R
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q449 ===
+Text: 561. What is the internal resistance of a Leclanche cell?
+A: 6 ohms - 10 ohms
+B: 0.02 ohms - 4 ohms
+C: 20 ohms - 30 ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q450 ===
+Text: In a DC motor the interpoles are part of the
+A: field
+B: rotor assembly
+C: stator assembly
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q451 ===
+Text: The line voltage in a wye wound transformer is
+A: root 3 / phase voltage
+B: the same as phase voltage
+C: root 3 x phase voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q452 ===
+Text: The valence electron is
+A: the electron in outer shell of atom
+B: the electron in inner shell of atom
+C: a positive electron
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.1
+
+=== Q453 ===
+Text: An aircraft battery on charge from the aircraft generators causes
+A: internal resistance of the battery to decrease in sympathy with the
+B: battery voltage to increases to nominal voltage and the charge current
+C: battery voltage to decrease to zero until it is fully charged
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q454 ===
+Text: 566. What happens to the current in a series resistive resonant circuit?
+A: It is maximum
+B: It is minimum
+C: It is zero
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q455 ===
+Text: An atom with a deficiency in electrons has
+A: high resistance
+B: low resistance
+C: high impendence
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q456 ===
+Text: 568. What effect does hydrogen have in a battery cell?
+A: Polarization
+B: Sulphation
+C: Nothing
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q457 ===
+Text: Eddy current losses in a transformer are
+A: a) current used in magnetising the core
+B: current flow induced into the core
+C: hysteresis losses
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q458 ===
+Text: A 3-phase star-delta wound transformer gives
+A: 90° phase shift
+B: no phase shift
+C: 30° phase shift
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q459 ===
+Text: In a parallel circuit containing resistors
+A: the voltage is the same in all parts of the circuit
+B: the sum of the voltage drops equals applied voltage
+C: resistance is determined by value of current flow
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q460 ===
+Text: An induced current in a coil
+A: opposes the EMF producing it
+B: aids the EMF producing it
+C: does not affect the EMF producing it
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q461 ===
+Text: Armature reaction is
+A: reactive sparking
+B: due to dirty or worn commutator
+C: the MMF opposing rotation
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q462 ===
+Text: In a 4:1 step up transformer, what would give a reflected impedance of
+A: 1 k ohm
+B: 4k ohm
+C: 16k ohm
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q463 ===
+Text: A shunt motor
+A: gives constant torque with variations in speed
+B: is constant speed
+C: has high starting torque
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q464 ===
+Text: The direction of current in a wire rotating in a magnetic field can be
+A: Fleming's right hand rule
+B: Fleming's left hand rule
+C: cork screw rule
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q465 ===
+Text: what happens to the impendence?
+A: increases by 4 times
+B: decreases by 75%
+C: remains the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q466 ===
+Text: to the back EMF?
+A: increases
+B: decreases
+C: remains the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q467 ===
+Text: 581. Why is ferrite used in memory circuits?
+A: High remanence
+B: Low permeability
+C: High reluctance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.06
+
+=== Q468 ===
+Text: 582. What semi-conductor material is used in memory circuits?
+A: Ferrite
+B: Permeomag
+C: Iron
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.06
+
+=== Q469 ===
+Text: The discharge curve of a capacitor is
+A: Linear
+B: Logarithmic
+C: Exponential
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q470 ===
+Text: To generate electricity with a fuel cell, you need a constant supply of
+A: Oxygen & Hydrogen
+B: Kerosene & Heat
+C: Nitrogen & Sunlight
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.04
+
+=== Q471 ===
+Text: them, how are the resistors connected?
+A: In Series
+B: In Parallel
+C: In Series/Parallel
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q472 ===
+Text: The input is 115V and is applied across the 300 turn portion. What is
+A: 460V
+B: 115V
+C: 28V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q473 ===
+Text: A near perfect 4:1 step up transformer has it's primary connected to
+A: 1 amp
+B: 0.3 amps
+C: 1.2 amps
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q474 ===
+Text: Flux losses in a transformer can be prevented by
+A: the use of primary shielding
+B: winding the primary on top of the secondary
+C: laminating the core
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q475 ===
+Text: A ni-cad battery found to be below normal capacity should
+A: be removed and used for ground use only
+B: be re-charged with a freshening charge
+C: have its electrolyte adjusted
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q476 ===
+Text: In cold weather a battery must be kept
+A: fully charged
+B: fully discharged
+C: does not matter
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q477 ===
+Text: A simple basic induction motor has
+A: poor starting torque, good running torque
+B: good starting torque, poor running torque
+C: poor starting torque, poor running torque
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q478 ===
+Text: If the frequency to a capacitor increases, the current through it
+A: is zero
+B: increases
+C: decreases
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q479 ===
+Text: In a 3-phase delta wound circuit, line current is
+A: same as the phase current
+B: in phase with the phase current
+C: the vectorial sum of all 3 phase currents
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q480 ===
+Text: 594. Conductance of a circuit is 2 milliMhos. What is its resistance?
+A: 5 MegaOhms
+B: 500 Ohms
+C: 5000 Ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q481 ===
+Text: located in a magnetic field?
+A: Maxwells corkscrew rule
+B: Flemings right hand rule
+C: Fleming's left hand rule
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q482 ===
+Text: If in an electrical circuit there is a difference between the capacitive
+A: Unity
+B: Less than unity
+C: More than unity
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q483 ===
+Text: 598. What is the SI unit of conductance?
+A: Sieman
+B: Ohm
+C: Ohm-metre
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q484 ===
+Text: 599. What is the SI unit of resistivity?
+A: Ohm metre
+B: Ohms/metre
+C: Ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q485 ===
+Text: 602. What is the formula for conductance?
+A: 1/R
+B: 1 - R
+C: R + 1
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q486 ===
+Text: What happens if you reverse the supply to the field and armature of a
+A: Reverses direction of rotation
+B: Continues to rotate in same direction
+C: Fails to start
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q487 ===
+Text: The internal resistance of a battery off load compared to on load is
+A: same
+B: increased
+C: decreased
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q488 ===
+Text: What is the rating of a monolithic capacitor with 103 on it
+A: 10000pf
+B: 100000pf
+C: 1000pf
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q489 ===
+Text: dielectric constant, A = area of the plates, d = distance plates apart?
+A: c = KA/d
+B: c = Kd/A
+C: c = d/KA
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q490 ===
+Text: 607. 115V RMS 2.5A at 60 degrees what is the power disipated?
+A: 79 W
+B: 143 W
+C: 300 VA
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q491 ===
+Text: If cobalt has a permeability of 4800 it is a
+A: ferromagnetic
+B: paramagnetic
+C: diamagnetic
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q492 ===
+Text: The output from a generator to a commutator is
+A: AC
+B: DC
+C: pulsed DC
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q493 ===
+Text: When light hits a photodiode resistance
+A: increases
+B: decreases
+C: stays the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q494 ===
+Text: What type of wave is it when the vertical and horizontal distances are
+A: Square
+B: Rectangular
+C: Sawtooth
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q495 ===
+Text: Cobalt has permeability
+A: greater than unity
+B: same as unity
+C: less than unity
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q496 ===
+Text: In an aircraft brushless alternator the armature is
+A: in series with the field
+B: star wound
+C: delta wound
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q497 ===
+Text: To supply a 24 volt output with a transformer with a 5:1 turns ratio, the
+A: 120V
+B: 4.8V
+C: 24V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q498 ===
+Text: in a resonant parallel circuit, current is
+A: max
+B: min
+C: zero
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q499 ===
+Text: A combination of 1 megohm and 8 microfarad would give a time
+A: 40 seconds
+B: 8 seconds
+C: 400 ms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q500 ===
+Text: 620. What is the main disadvantage of a starter generator?
+A: Will not supply output at low rpm
+B: Heavier than like for like
+C: Can only be used on piston engines
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q501 ===
+Text: 621. What is the voltage across a fully charged capacitor?
+A: Same as circuit voltage
+B: Less than circuit voltage
+C: More than circuit voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q502 ===
+Text: Back-EMF is the greatest when a motor is
+A: at operating speed
+B: just starting to rotate
+C: under heavy load
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q503 ===
+Text: 625. What are the factors affecting the frequency of an ac generator?
+A: Number of turns in the armature coil and rpm
+B: Number of pole pairs and rpm
+C: Number of turns in the armature coil and number of pole pairs
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q504 ===
+Text: Which of the following applications would require a "continuously rated"
+A: Flap drive actuator
+B: Fuel pump motor
+C: Cargo door actuator
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q505 ===
+Text: 627. What would you use for the core in a generator current transformer?
+A: Air core
+B: Laminated core
+C: Steel Core
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q506 ===
+Text: Spontaneous magnetisation occurs in a
+A: permomagnet
+B: ferromagnet
+C: diamagnet
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q507 ===
+Text: An aircraft transformer is needed to step up a voltage. What sort would
+A: Air core
+B: Laminated core
+C: Solid core
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q508 ===
+Text: 630. A conductor is placed in a magnetized coil. What will happen?
+A: A force will be created
+B: Nothing will happen unless the conductor is moved
+C: The conductor will move
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q509 ===
+Text: An atom with less than 4 electrons in its outer shell has
+A: low electrical resistance
+B: high electrical resistance
+C: no electrical resistance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q510 ===
+Text: load on the secondary is 1600 Ohms. What is the current in the primary?
+A: 0.075A
+B: 1.2A
+C: 3A
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q511 ===
+Text: Two 12V, 40Ah cells in series gives
+A: 24V 40Ah
+B: 24V 80Ah
+C: 12V 40Ah
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q512 ===
+Text: A 2 Megohm resistor can be written
+A: M20F
+B: 2M0F
+C: 20MF
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q513 ===
+Text: else is it's value indicated?
+A: Dots
+B: Letter code
+C: Number code
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q514 ===
+Text: Elements such as phosphorus with 5 electrons in their outer shell,
+A: donor
+B: acceptor
+C: isotopic
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q515 ===
+Text: A centrifugal speed switch is used
+A: to cut out the resistor/inductor circuit on an AC motor
+B: to cut out the capacitor circuit on an AC motor
+C: to cut in the resistor/inductor circuit on an AC motor
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q516 ===
+Text: Disconnecting one of the phases from a 3-phase motor will cause the
+A: stop
+B: run a 2/3 speed
+C: run at the same speed
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q517 ===
+Text: To find the internal resistance of a battery in a circuit of known current
+A: use the formula R = V x I
+B: find the lost volts of the circuit
+C: find the EMF of the circuit
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q518 ===
+Text: A capacitor has Brown Black Orange bands. It's value is
+A: 10 picofarads
+B: 10 nanofarads
+C: 100 picofarads
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q519 ===
+Text: Hydrogen atom consist of
+A: Proton, Neutron and Electron
+B: Proton and Electron only
+C: Neutron and proton only
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.1
+
+=== Q520 ===
+Text: A generator with more than two phases is known as
+A: polyphase
+B: delta phase
+C: multiphase
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q521 ===
+Text: Magnetic lines are flowing parallel they will
+A: repel each other
+B: attract each other
+C: have no effect on each other
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q522 ===
+Text: In electrical circuit, direct current power in represented by
+A: Ampere
+B: Watt
+C: Joules
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q523 ===
+Text: In S.I. units, work is denoted by
+A: Newton-meter which is Joules
+B: Kilogram-force-meter/sec which is Metric Horsepower
+C: Joules/sec which is Watts
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q524 ===
+Text: When a conductor carrying a current and placed in a magnetic field it
+A: an electrostatic force
+B: an electromagnetic force
+C: a magnetic force
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q525 ===
+Text: The horizontal component of the earth's magnetic field is most strongly
+A: poles
+B: equator
+C: 45 degrees latitude
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q526 ===
+Text: Voltage measured between the plates of a capacitor will be
+A: same as applied voltage
+B: less than applied voltage
+C: can dangerously higher than applied voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.9
+
+=== Q527 ===
+Text: In a Series LC circuit if the value of the capacitance is increased then
+A: greater than 1
+B: equal to 1
+C: less than 1
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q528 ===
+Text: A heater which consumes 800 Kilojoules/sec is on for 4hrs 15min. The
+A: 3400 kWh
+B: 3.4 kWh
+C: 340 kWh
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q529 ===
+Text: the power supplied?
+A: 100W
+B: 10VA
+C: 10W
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q530 ===
+Text: 657. A 24V 40AH battery discharges at 200mA. How long will it last?
+A: 200 hours
+B: 300 hours
+C: 400 hours
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q531 ===
+Text: In a Wheatstone bridge at balance the galvanometer reads zero
+A: volts
+B: amps
+C: ohms
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q532 ===
+Text: 1 Volt is produced when a current of 1 Amp per second is varied in a
+A: 1 Henry
+B: 1 Coulomb per second
+C: 1 Ampere per meter
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q533 ===
+Text: what is the phase current?
+A: 15 A
+B: 1.5 A
+C: 25.5 A
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q534 ===
+Text: Band pass filter in a circuit
+A: allows frequencies above a cut-off frequency to pass
+B: allows frequencies below a cut-off frequency to pass
+C: only allows a narrow band of frequency to pass
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q535 ===
+Text: Eddy current losses is due to
+A: resistant of the copper conductors used in windings
+B: I flowing in transformer core caused by induced V
+C: magnetic flux produced by primary winding not linking with secondary
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q536 ===
+Text: The ability of a circuit to produce a magnetic flux under the influence of
+A: permeability
+B: permeance
+C: permanence
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q537 ===
+Text: Two inductor coils in very close proximity; if one of the coils is rotated
+A: increases
+B: decreases
+C: remains the same
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q538 ===
+Text: Magnetic flux saturation takes place when
+A: the magnetised medium will accept no further lines of flux
+B: the magnetic field starts to reduce with increased magnetising force
+C: the magnetic field drops to zero
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q539 ===
+Text: The type of motor used in a linear actuator is
+A: compound
+B: series
+C: parallel (shunt wound)
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q540 ===
+Text: The phases on a three phase a.c generator are spaced at
+A: 90 degrees
+B: 180 degrees
+C: 120 degrees
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q541 ===
+Text: The controlling wave in a CRT is
+A: sinusoidal
+B: square
+C: sawtooth
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q542 ===
+Text: If the speed of a coil in a magnetic field is doubled and the field
+A: half
+B: stay the same
+C: quadruple
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q543 ===
+Text: A wave form having equal amplitude and time base is a
+A: square waveform
+B: sawtooth
+C: rectangular
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q544 ===
+Text: An inductor is said to be saturated when
+A: the current is at a maximum
+B: it will no longer accept lines of flux
+C: the current through it is zero
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q545 ===
+Text: The controlling phase on a two phase generator is of a
+A: fixed amplitude
+B: variable amplitude
+C: direct current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.09
+
+=== Q546 ===
+Text: How many brushes are used in an 8 pole wave wound machine
+A: 2
+B: 6
+C: 8
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q547 ===
+Text: For an atom to become a negative ion it must
+A: gain at least one electron
+B: lose at least one electron
+C: have undergone ionisation by the sun
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.1
+
+=== Q548 ===
+Text: 678. A neutral atom with an atomic no. of 3 has how many electrons?
+A: 1
+B: 3
+C: Dependant on type of atom
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q549 ===
+Text: The nucleus of an atom is
+A: +ve charged
+B: neutral
+C: -ve charged
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q550 ===
+Text: Electron orbits are called
+A: shells
+B: waves
+C: valences
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.1
+
+=== Q551 ===
+Text: The unit of energy is the
+A: Watt
+B: Joule
+C: Coulomb
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(a)
+
+=== Q552 ===
+Text: Potential difference is another term for
+A: energy
+B: voltage
+C: charge
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q553 ===
+Text: The electrolyte level of a ni-cad battery
+A: falls during discharge
+B: falls during charge
+C: rises during discharge
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.7(a)
+
+=== Q554 ===
+Text: XL is the symbol of
+A: inductive reactance
+B: capacitive reactance
+C: impedance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q555 ===
+Text: In the shunt generator the field is supplied by
+A: a separate supply
+B: the armature
+C: the load
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q556 ===
+Text: Increasing the speed of an aircraft generator results in an automa
+A: field circuit resistance increase
+B: field circuit resistance decrease
+C: armature circuit resistance increase
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q557 ===
+Text: 688. Which generators are usually used on aircraft?
+A: Series
+B: Shunt
+C: Compound
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q558 ===
+Text: In a cumulative compound wound generator the
+A: the series and shunt fields oppose each other
+B: the series and shunt fields assist each other
+C: the voltage falls suddenly with an increase in load
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q559 ===
+Text: The shunt wound generator is controlled by a variable resistance in
+A: series with the armature
+B: series with the field
+C: parallel with the field
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q560 ===
+Text: Increasing the load on a permanent magnet generator will
+A: reduce the terminal voltage by a large amount
+B: reduce the terminal voltage by a small amount
+C: increase the terminal voltage by a small amount
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q561 ===
+Text: The series wound generator's terminal voltage will, when below
+A: increase with an increase in load
+B: decrease with an increase in load
+C: decrease with a decrease in rotational speed
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q562 ===
+Text: The shunt wound generator is normally started
+A: off load
+B: on load
+C: Either of the above
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q563 ===
+Text: Two 3 phase generators operating in parallel with different phase and
+A: star configuration
+B: delta configuration
+C: Parallel configuration
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q564 ===
+Text: Extra windings in a 3 phase AC generator are to sense
+A: overvolt
+B: phase shift
+C: field oscillations
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q565 ===
+Text: Cables are shielded to prevent "H" magnetic interference in wires with
+A: Copper braiding
+B: Ferromagnetic material
+C: Diamagnetic material
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q566 ===
+Text: Using Ohm's law
+A: current is directly proportional to the EMF
+B: resistance is directly proportional to EMF
+C: current is directly proportional to the resistance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q567 ===
+Text: the primary, and 0.285 A flowing through the secondary what is the efficiency?
+A: 90%
+B: 95%
+C: 85%
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q568 ===
+Text: 699. When light energises a component, what is the component?
+A: Photodiode
+B: Lazerdiode
+C: Light emitting diode
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q569 ===
+Text: Delta wound alternator currents are
+A: the same as line current
+B: the same as phase current
+C: the phase current multiplied be the square root of 3
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q570 ===
+Text: Aircraft autotransformers are of what type
+A: Open core
+B: Twin core
+C: Laminated core
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q571 ===
+Text: In a series circuit with 3 resistors, the current is
+A: lower than the smallest
+B: even in all 3
+C: the total of all 3 using ohms law to find the current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q572 ===
+Text: An oxygen atom has
+A: electrons, neutrons and protons
+B: protons and electrons only
+C: protons and neutrons only
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q573 ===
+Text: 704. What is the voltage dropped across resistor 'A'?
+A: 2 V
+B: 10 V
+C: 20 V
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q574 ===
+Text: 705. What is the current through resistor C?
+A: 9A
+B: 4.5A
+C: 18A
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q575 ===
+Text: One volt is induced into a circuit with a current varying at 1 amp per
+A: 1 Henry
+B: 1 ampere turn
+C: 1 Tesla
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q576 ===
+Text: 707. How do you reduce ripple on the output of a DC generator?
+A: Increase the speed of the armature and add more turns
+B: Increase the commutator segments and connect each to a separate
+C: 
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q577 ===
+Text: Resistors required to carry a comparatively high current and dissipate
+A: Carbon compound type
+B: Wire wound metal type
+C: Wire wound ceramic type
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.07(b)
+
+=== Q578 ===
+Text: The property of a conductor of electricity that limits or restricts the flow
+A: limiter
+B: fuse
+C: resistance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.04
+
+=== Q579 ===
+Text: Armature reaction causes neutral axis to shift in the direction
+A: opposite to the direction of armature rotation
+B: in the direction of armature rotation
+C: either (a) or (b) depending on current flow
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q580 ===
+Text: 713. Which is not thermally operated?
+A: current limiter
+B: fuse
+C: limiting resistor
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q581 ===
+Text: What is the current in the circuit with a resistance of 8 ohms, inductive
+A: 2 amps
+B: 1 amp
+C: 10 amps
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q582 ===
+Text: Formation of white crystals of potassium carbonate on a properly
+A: full charged
+B: under charged
+C: over charged
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q583 ===
+Text: Thermal runaway causes
+A: violent gassing
+B: boiling of electrolyte and melting of plates and casing
+C: both (a) and (b)
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q584 ===
+Text: In smaller single or twin engine aircraft the primary DC power is
+A: frequency wild ac generator
+B: under charged
+C: over charged
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q585 ===
+Text: The unit for resistivity
+A: ohms/square meter
+B: ohmmeter
+C: ohms/meter
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q586 ===
+Text: An auto transformer is
+A: primary and secondary coils
+B: primary and secondary coils on single bar
+C: primary coil only
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q587 ===
+Text: A neutral atom gains electrons.
+A: It gains a positive charge
+B: It remains neutral
+C: It gains a negative charge
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q588 ===
+Text: Two parallel lines of magnetic flux
+A: attract each other
+B: repel each other
+C: have no effect on each other
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q589 ===
+Text: One micro farad is
+A: 1 x 10 12 farads
+B: 1 x 10 -6 farads
+C: 1 x 10 -12 farads
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q590 ===
+Text: Spontaneous magnetism is associated with
+A: ferromagnetic materials
+B: diamagnetic materials
+C: paramagnetic materials
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q591 ===
+Text: The difference in speed between a synchronous motor's rotor and
+A: phase lag
+B: slip speed
+C: rotor lag
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q592 ===
+Text: 727. A voltage of 250V causes a current of 30mA. What is the wattage?
+A: 0.225W
+B: 7.5W
+C: 7500W
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q593 ===
+Text: 728. The EMF of a generator can be calculated from which law?
+A: Lenzs law
+B: Kirchhoff's law
+C: Faradays law
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q594 ===
+Text: A primary cell
+A: can be recharged
+B: can not recharged
+C: can be recharged but only a few times
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q595 ===
+Text: If the insulation resistance of a lead/acid battery is down it indicates
+A: intercell leakage
+B: case leakage
+C: leakage between positive and negative terminals
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q596 ===
+Text: An indication of good commutation on a DC machine would be
+A: silent operation of the machine
+B: little or no sparking at the commutator
+C: high armature currents
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q597 ===
+Text: Under frequency in an AC supply would cause
+A: overheating of inductive devices
+B: overspeeding of AC motors
+C: overvoltage of capacitive devices
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q598 ===
+Text: The line voltage of a 3 phase star connected AC generator is
+A: less than the phase voltage
+B: greater than the phase voltage
+C: equal to the phase voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q599 ===
+Text: In an AC generator of the brushless type the rotating field winding is
+A: DC via the slip rings from an external supply
+B: DC via diodes from the main exciter winding on the rotor
+C: AC via rotating exciter windings
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q600 ===
+Text: To adjust the voltage of an AC generator, whilst maintaining constant
+A: alter the driving speed
+B: alter the field current
+C: alter the reactance of the starter winding circuit
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q601 ===
+Text: If compound DC generators are operated in parallel they must
+A: all rotate at the same speed
+B: have an equilising or load sharing loop
+C: all use the same voltage
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q602 ===
+Text: The Sine wave signals of a circular time base are
+A: phase separated by 90o
+B: phase separated by 180o
+C: in phase
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q603 ===
+Text: In a Delta connecte the line current is
+A: 1.7 X phase I
+B: 1.7 X phase V
+C: phase I
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q604 ===
+Text: In a Desynn indicator system, the rotor is
+A: a permanent magnet
+B: an electromagnet
+C: an AC magnet
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q605 ===
+Text: A thyristor
+A: has a positive temperature coefficient
+B: if energized on, will switch on a circuit
+C: if energized on, will switch off a circuit
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q606 ===
+Text: A circuit with a capacitor has 6 volts applied to it with a charge of 2400
+A: 2400 x 10-12 coulombs
+B: 600 x 10-9 coulombs
+C: 600 x 10-12 coulombs
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q607 ===
+Text: A circuit containing a resistor, capacitor and inductor where resonant
+A: zero
+B: resistance across the resistor
+C: maximum
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q608 ===
+Text: What temp scale is used?
+A: Centigrade
+B: Fahrenheit
+C: Absolute
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q609 ===
+Text: When battery connected to the aircraft, which terminal should connect
+A: +ve
+B: -ve
+C: any
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q610 ===
+Text: An ammeter in a battery charging system is for the purpose of
+A: amperage available for use
+B: total amperes being used in the aeroplane
+C: rate of current used to charge the battery
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q611 ===
+Text: The maximum output voltage from a basic single loop generator is
+A: cutting maximum lines of magnetic flux
+B: rotating anti -clockwise relative to the direction of the magnetic flux
+C: at 45o to the magnetic flux
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q612 ===
+Text: Prolonged reactive sparking in a DC generator could damage the
+A: commutator
+B: armature
+C: pole pieces
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q613 ===
+Text: The poles of a d.c generator are laminated to
+A: reduce hysterisis losses
+B: reduce flux losses
+C: reduce eddy current losses
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q614 ===
+Text: 756. Which requires the most electrical power during operation?
+A: A 12-volt motor requiring 8 amperes
+B: Four 30-watt lamps in a 12-volt parallel circuit
+C: Two lights requiring 3 amperes each in a 24-volt parallel system
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.03
+
+=== Q615 ===
+Text: A 47K Ohm resistor with a 10% tolerance has the following color code:
+A: Yellow, Violet, Orange, Silver
+B: Orange, Violet, Red, Gold
+C: Red, Orange, Yellow, Silver
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q616 ===
+Text: 758. For how many hours will a 140AH battery deliver 15A?
+A: 15.15 hours
+B: 9.33 hours
+C: 27.25 hours
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.1.5
+
+=== Q617 ===
+Text: 759. What part of a nickel-cadmium cell helps to prevent thermal runaway?
+A: The positive plate
+B: The negative plate
+C: The separator
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q618 ===
+Text: When charging current is applied to a nickel-cadmium battery, the cells
+A: toward the end of the charging cycle
+B: when the electrolyte level is low
+C: if the cells are defective
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.7(a)
+
+=== Q619 ===
+Text: Three capacitors connected in series, each having a value of 12
+A: 36 picofarads
+B: 12 picofarads
+C: 4 picofarads
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.08
+
+=== Q620 ===
+Text: Magnetic fields around two parallel conductors carrying current in the
+A: attract
+B: repel
+C: will attract or repel depending on the type of current
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q621 ===
+Text: Magnetic field on a solenoid is
+A: strongest outside the coil
+B: weakest outside the coil
+C: the same both inside and outside the coil
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q622 ===
+Text: 766. What is the power factor in a purely resistive circuit?
+A: Greater than 1
+B: Less than 1 but greater than zero
+C: Equal to 1
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q623 ===
+Text: One advantage of a DC motor over an AC motor is
+A: the DC motor will use less current
+B: the direction of rotation of the rotor can be changed
+C: less voltage is required in DC than AC
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q624 ===
+Text: A load that is subject to a potential difference with a current running
+A: dissipate power in the form of heat
+B: have a magnetic field around it with the magnitude and direction of the
+C: will move in a
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.3.2
+
+=== Q625 ===
+Text: In a shunt wound direct current
+A: independent of load
+B: propotional to the current in the armature
+C: inversely proportional to the current in the armature
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: 
+
+=== Q626 ===
+Text: The power dissipated in a circuit with a known potential difference and
+A: finding the current and multiplying the answer by the resistance
+B: dividing the square of the potential difference by the resistance
+C: multiplying the square of the potential difference by the resistance
+D: 
+Source: 261722955-Module-3.pdf
+Syllabus: M3.03.07
+
+=== Q627 ===
+Text: Question 2: How is mass related to the amount of matter in an object?
+A: Mass is independent of the amount of matter.
+B: The more matter in an object, the less mass it has.
+C: The more matter in an object, the more mass it has.
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q628 ===
+Text: What is the difference between mass and weight?
+A: Mass is determined by gravity, while weight is the amount of matter.
+B: Mass is the amount of matter, while weight is determined by how much something is pulled by gravity.
+C: Mass and weight are the same.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q629 ===
+Text: Question 4: How is mass indirectly determined, as described in the passage?
+A: By measuring an object's volume.
+B: By measuring the amount of matter in an object.
+C: By measuring how much something is pulled by gravity.
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q630 ===
+Text: Question 5: For the purposes of the aircraft technician, which states of matter are considered?
+A: Solids and gases
+B: Solids, liquids, and gases
+C: Solids and plasma
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q631 ===
+Text: Question 6: What is an element?
+A: A substance that can be easily reduced to simpler forms.
+B: A substance that can be transformed into other elements through chemical means.
+C: A substance that cannot be reduced to a simpler form by chemical means.
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q632 ===
+Text: Question 7: Which of the following is NOT an example of an element mentioned in the passage?
+A: Iron
+B: Silver
+C: Water
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q633 ===
+Text: Question 8: What happens to an element when it reaches the point of reduction?
+A: It becomes a compound.
+B: It ceases to exist.
+C: It remains the same element.
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q634 ===
+Text: Question 10: What is a compound?
+A: A chemical combination of two or more elements.
+B: A single element.
+C: A substance made up of only one type of atom.
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q635 ===
+Text: Question 11: What is the chemical composition of water?
+A: Two hydrogen atoms and two oxygen atoms.
+B: Two hydrogen atoms and one oxygen atom.
+C: One hydrogen atom and one oxygen atom.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q636 ===
+Text: Question 12: Which of the following is an example of a compound?
+A: Oxygen
+B: Hydrogen
+C: Water
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q637 ===
+Text: Question 13: What is the definition of a molecule?
+A: The smallest particle of matter that can exist but does not retain its identity.
+B: The smallest particle of matter that can exist and still retain its identity.
+C: A combination of two or more elements.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q638 ===
+Text: Question 14: What is the term for substances composed of only one type of atom, according to the passage?
+A: Molecules
+B: Compounds
+C: Elements
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q639 ===
+Text: Question 15: What would happen to water if it were compounded of one atom of hydrogen and two atoms of oxygen?
+A: It would remain the same.
+B: It would no longer retain its characteristics as water.
+C: It would become a different compound.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q640 ===
+Text: Question 16: What happens to a drop of water when it is divided repeatedly?
+A: It turns into a different substance.
+B: It becomes smaller but still retains its identity as water.
+C: It cannot be divided any longer.
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q641 ===
+Text: Question 17: What is considered the most basic building block of all matter?
+A: Protons
+B: Electrons
+C: Atoms
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q642 ===
+Text: Question 18: What are the three subatomic particles that compose an atom?
+A: Electrons, protons, and photons.
+B: Neutrons, electrons, and positrons.
+C: Protons, neutrons, and electrons.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q643 ===
+Text: Question 19: What determines the properties of specific atoms?
+A: The number of electrons.
+B: The number of neutrons.
+C: The number of protons, neutrons, and electrons.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q644 ===
+Text: How do hydrogen and helium differ from each other in terms of their atomic properties?
+A: They have the same number of neutrons, protons, and electrons.
+B: They have different numbers of neutrons, protons, and electrons.
+C: They both lack neutrons.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q645 ===
+Text: How are elements categorized in the periodic table?
+A: Alphabetically.
+B: According to their atomic number.
+C: According to their chemical reactions.
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q646 ===
+Text: Question 23: According to the kinetic theory of matter, what is the behaviour of the particles that make up matter?
+A: They are stationary.
+B: They are always moving.
+C: They only move in a vacuum.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.1
+
+=== Q647 ===
+Text: Question 24: Why does matter contract when it is cool and expand when it is hot?
+A: Because of thermal expansion.
+B: Because of chemical reactions.
+C: Because of the kinetic theory.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.1
+
+=== Q648 ===
+Text: Question 25: Where are protons and neutrons primarily located within the atom?
+A: In the outer electron shells
+B: In the nucleus
+C: In the electron cloud
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.1
+
+=== Q649 ===
+Text: Question 26: Which subatomic particle is described as having a neutrally charged particle?
+A: Protons
+B: Electrons
+C: Neutrons
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q650 ===
+Text: Question 27: What is the relative mass comparison between a proton and an electron?
+A: The mass of a proton is greater.
+B: The mass of an electron is greater.
+C: The mass of a proton and an electron is approximately the same.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.1
+
+=== Q651 ===
+Text: Question 28: Why is it the electron that undergoes changes during chemical reactions?
+A: Because electrons change their mass.
+B: Because electrons change their charge.
+C: Because electrons change their location in the atom.
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q652 ===
+Text: Question 29: What determines the overall weight of an atom?
+A: The number of electrons
+B: The number of protons
+C: The number of protons and neutrons in the nucleus
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q653 ===
+Text: Question 30: In the context of determining the weight of an atom, what is not considered?
+A: The weight of electrons
+B: The weight of protons
+C: The weight of neutrons
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q654 ===
+Text: Question 31: What remains uncertain about the nature of electricity?
+A: The charge of electrons
+B: The charge of protons
+C: Whether electrons have mass
+D: 
+Source: 3.1.docx
+Syllabus: M3.03.04
+
+=== Q655 ===
+Text: Question 32: Which atom represents the simplest form?
+A: Helium
+B: Oxygen
+C: Hydrogen
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q656 ===
+Text: Question 33: When is an atom said to have a neutral charge?
+A: When there are no electrons in the atom.
+B: When the total positive charge of protons equals the total negative charge of electrons.
+C: When the atom has an equal number of protons and neutrons.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q657 ===
+Text: Question 34: What determines the radius of an electron's orbit?
+A: Its kinetic energy
+B: Its potential energy
+C: Its total energy
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.07(a)
+
+=== Q658 ===
+Text: Question 35: What do we call the specific quantity of energy required to keep an electron in orbit?
+A: Kinetic energy
+B: Potential energy
+C: Energy level
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.1
+
+=== Q659 ===
+Text: Question 36: Why are certain energy levels grouped together into electron shells?
+A: To determine the chemical properties of elements
+B: To catalogue the elements
+C: To create electron configurations
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.1
+
+=== Q660 ===
+Text: Question 37: What is the maximum number of electrons that can be contained in the second shell?
+A: 2
+B: 8
+C: 18
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q661 ===
+Text: Question 38: How many energy levels are there in the heaviest atoms?
+A: 3
+B: 6
+C: 7
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.07(a)
+
+=== Q662 ===
+Text: Question 39: How does the filling of electron shells typically occur in atoms?
+A: From the outermost shell to the innermost shell
+B: From the innermost shell to the outermost shell
+C: Randomly
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.1
+
+=== Q663 ===
+Text: Question 40: When does an energy level start to fill up with electrons?
+A: Only when the previous energy level is completely filled
+B: Immediately upon reaching its capacity
+C: After the outermost shell is filled
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.7(a)
+
+=== Q664 ===
+Text: Question 41: Where can you find information about an element's electron configuration?
+A: In a chemistry textbook
+B: In the electron shell diagram
+C: In the Periodic Table of Elements
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.1
+
+=== Q665 ===
+Text: Question 42: What does valence represent in terms of an atom's chemistry?
+A: The number of electrons in the nucleus
+B: The number of chemical bonds an atom can form
+C: The atomic number of the element
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q666 ===
+Text: Question 43: What are valence electrons?
+A: Electrons in the innermost shell
+B: Electrons that can participate in chemical bonds
+C: Electrons in the nucleus
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q667 ===
+Text: Question 44: What is the determining factor in an atom's valence?
+A: The number of electrons in the nucleus
+B: The number of protons
+C: The number of electrons in the outermost shell
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q668 ===
+Text: Question 45: What is ionization in the context of atoms?
+A: The process of converting atoms into molecules
+B: The process of an atom losing or gaining electrons
+C: The process of breaking an atom apart
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q669 ===
+Text: Question 46: What happens to an atom when it loses an electron?
+A: It becomes negatively charged.
+B: It becomes positively charged.
+C: It remains neutral.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.1
+
+=== Q670 ===
+Text: Question 48: How is an atom described when it gains extra electrons?
+A: As positively charged
+B: As negatively charged
+C: As neutrally charged
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q671 ===
+Text: Question 50: In what state are atoms when they are neutral?
+A: The protons are more than the electrons.
+B: The electrons are more than the protons.
+C: The positively charged protons and the negatively charged electrons are equal in number.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q672 ===
+Text: Question 51: Where are valence electrons typically found in an atom?
+A: In the nucleus
+B: Drifting midway between two nuclei
+C: In the innermost shell
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q673 ===
+Text: Question 52: Why are some electrons in an atom described as being more loosely bound?
+A: Because they are positioned closer to the nucleus
+B: Because they are positioned farther from the nucleus
+C: Because they have a higher energy level
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.7(a)
+
+=== Q674 ===
+Text: Question 53: What is the term for the outermost electrons that can be easily dislodged from the atom?
+A: Bound electrons
+B: Valence electrons
+C: Inner electrons
+D: 
+Source: 3.1.docx
+Syllabus: M3.1.5
+
+=== Q675 ===
+Text: Question 54: What can valence electrons become when they are dislodged from the atom?
+A: Neutrons
+B: Protons
+C: Free electrons
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q676 ===
+Text: Question 55: What is the term for the flow of electrons in a practical electrical circuit?
+A: Atomic motion
+B: Electron drift
+C: Current
+D: 
+Source: 3.1.docx
+Syllabus: M3.03.01
+
+=== Q677 ===
+Text: Question 56: What determines the chemical and electrical properties of an atom?
+A: The number of protons in the atom
+B: The valence of the atom
+C: The size of the atom
+D: 
+Source: 3.1.docx
+Syllabus: M3.03.03
+
+=== Q678 ===
+Text: Question 57: How can the properties of a material be categorized?
+A: As conductor, semiconductor, or insulator
+B: As metallic, non-metallic, or metalloid
+C: As reactive, non-reactive, or inert
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q679 ===
+Text: Question 58: What determines a material's ability to conduct a greater current?
+A: The number of protons in the material
+B: The valence of the material
+C: The availability of free electrons in the material
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q680 ===
+Text: Question 59: What type of elements make good conductors of electricity?
+A: Noble gases
+B: Non-metals
+C: Gold, copper, and silver
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q681 ===
+Text: Question 60: What characterizes the outer orbits of the atoms in good conductors?
+A: They are empty.
+B: They have many free electrons.
+C: They have tightly bound electrons.
+D: 
+Source: 3.1.docx
+Syllabus: 
+
+=== Q682 ===
+Text: Question 61: What can cause the electrons in the outer orbit of conductor atoms to break loose and move through the material?
+A: Pressure applied to the material
+B: Energy in the form of heat
+C: Magnetic fields
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.07(a)
+
+=== Q683 ===
+Text: Question 62: How many electrons are typically in the outer orbit of copper and silver atoms at room temperature?
+A: None
+B: One
+C: Billions
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q684 ===
+Text: Question 63: How do insulators generally behave in terms of conducting electrical current?
+A: They conduct electrical current very well.
+B: They conduct electrical current moderately.
+C: They do not conduct electrical current well or not at all.
+D: 
+Source: 3.1.docx
+Syllabus: M3.03.03
+
+=== Q685 ===
+Text: Question 65: What typically prevents electrical current from being conducted in insulators?
+A: The presence of free electrons
+B: The absence of free electrons
+C: The material's high temperature
+D: 
+Source: 3.1.docx
+Syllabus: M3.03.03
+
+=== Q686 ===
+Text: Question 66: In what condition can the outer electrons in insulator atoms be dislodged to allow electrical current to flow?
+A: Under normal conditions
+B: In an extremely strong electrical field
+C: In the presence of other insulators
+D: 
+Source: 3.1.docx
+Syllabus: M3.03.03
+
+=== Q687 ===
+Text: Question 68: How do the characteristics of semiconductors generally compare to conductors and insulators?
+A: Semiconductors are better conductors than conductors.
+B: Semiconductors are not good at conducting or insulating.
+C: Semiconductors are excellent insulators.
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q688 ===
+Text: Question 69: What are the two most widely used semiconductor materials?
+A: Gold and silver
+B: Silicon and germanium
+C: Glass and ceramic
+D: 
+Source: 3.1.docx
+Syllabus: M3.3.2
+
+=== Q689 ===
+Text: **2. How is static electricity defined in the text?
+A: As the motion of electrons
+B: As a build-up of electrical charge on an object's surface
+C: As the flow of current in AC or DC electricity
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.02
+
+=== Q690 ===
+Text: **3. What causes static electricity, according to the text?
+A: Conductive materials
+B: Rubbing non-conductive materials together
+C: The flow of electrons
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.02
+
+=== Q691 ===
+Text: **4. Why is it called "static" electricity?
+A: Because it involves the motion of electrons
+B: Because it occurs in conductive materials
+C: Because there is no current flowing
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.02
+
+=== Q692 ===
+Text: **6. What results from the transfer of electrons between non-conductive materials?
+A: A decrease in charge
+B: An imbalance of charges
+C: A flow of current
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q693 ===
+Text: **7. What force can objects with an imbalance of charges exhibit?
+A: No force
+B: Attractive or repulsive force
+C: Gravitational force
+D: 
+Source: 3.2.docx
+Syllabus: 
+
+=== Q694 ===
+Text: **8. Which type of electricity involves the motion of electrons?
+A: Static electricity
+B: Dynamic electricity
+C: Electromagnetic electricity
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.02
+
+=== Q695 ===
+Text: **9. In which type of electricity is there no current flowing?
+A: Dynamic electricity
+B: Electromagnetic electricity
+C: Static electricity
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.02
+
+=== Q696 ===
+Text: **10. What causes dynamic electricity?
+A: Rubbing conductive materials together
+B: The motion of electrons in a circuit
+C: An imbalance of charges
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.04
+
+=== Q697 ===
+Text: **11. What are common examples of conductive materials mentioned in the text?
+A: Rubber and plastic
+B: Metal and wood
+C: Glass and ceramics
+D: 
+Source: 3.2.docx
+Syllabus: M3.3.2
+
+=== Q698 ===
+Text: **12. Which type of electricity is associated with AC and DC electricity?
+A: Static electricity
+B: Electromagnetic electricity
+C: Dynamic electricity
+D: 
+Source: 3.2.docx
+Syllabus: M3.3.2
+
+=== Q699 ===
+Text: **13. What happens when there is an imbalance of charges between two materials?
+A: No effect on the materials
+B: They repel each other
+C: They exhibit an attractive or repulsive force
+D: 
+Source: 3.2.docx
+Syllabus: 
+
+=== Q700 ===
+Text: **14. Which of the following is NOT a non-conductive material mentioned in the text?
+A: Rubber
+B: Plastic
+C: Copper
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q701 ===
+Text: **15. What kind of electricity is considered "static"?
+A: Electricity with constant motion
+B: Electricity with no charges
+C: Electricity with no current flow
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.02
+
+=== Q702 ===
+Text: **16. What happens when rubber and plastic are rubbed together?
+A: They create dynamic electricity
+B: They exhibit an attractive force
+C: They may generate static electricity
+D: 
+Source: 3.2.docx
+Syllabus: M3.3.2
+
+=== Q703 ===
+Text: **17. Which type of electricity is characterized by an electrical charge buildup on an object's surface?
+A: Electromagnetic electricity
+B: Dynamic electricity
+C: Static electricity
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.02
+
+=== Q704 ===
+Text: **18. In which type of electricity are electrons at rest?
+A: Dynamic electricity
+B: Electromagnetic electricity
+C: Static electricity
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.02
+
+=== Q705 ===
+Text: **19. What kind of electricity involves AC and DC current flow?
+A: Electromagnetic electricity
+B: Dynamic electricity
+C: Static electricity
+D: 
+Source: 3.2.docx
+Syllabus: M3.3.2
+
+=== Q706 ===
+Text: **20. What causes the imbalance of charges between materials in static electricity?
+A: The absence of electrons
+B: The flow of protons
+C: The transfer of electrons
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.02
+
+=== Q707 ===
+Text: 1. What is the charge carried by a single proton or electron?
+A: Coulomb
+B: Ampere
+C: Elementary charge
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q708 ===
+Text: 2. Which unit is used to measure electrical charge in the International System of Units (SI)?
+A: Coulomb
+B: Ampere
+C: Electronvolt
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q709 ===
+Text: 3. How many electrons flow through a point in one second to constitute 1 ampere of current?
+A: 1
+B: 6.241 x 10^18
+C: 10
+D: 
+Source: 3.2.docx
+Syllabus: 
+
+=== Q710 ===
+Text: 4. When two objects become charged through friction, one becomes positively charged. What happens to the other object?
+A: It becomes negatively charged.
+B: It remains uncharged.
+C: It becomes neutral.
+D: 
+Source: 3.2.docx
+Syllabus: 
+
+=== Q711 ===
+Text: 5. If a positively charged rod touches an uncharged metal bar, what is the resulting charge on the metal bar?
+A: Positively charged
+B: Negatively charged
+C: Neutral
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q712 ===
+Text: 7. In charging by induction, where do electrons in the metal bar get attracted to?
+A: The side farthest from the charged rod
+B: The side nearest to the charged rod
+C: The middle of the bar
+D: 
+Source: 3.2.docx
+Syllabus: 
+
+=== Q713 ===
+Text: 8. What happens when a neutral object touches the positively charged end of a metal bar charged by induction?
+A: Electrons flow out of the metal bar.
+B: Electrons flow into the metal bar.
+C: The metal bar remains unchanged.
+D: 
+Source: 3.2.docx
+Syllabus: 
+
+=== Q714 ===
+Text: 9. How is a coulomb defined in terms of amperes and time?
+A: 1 ampere for 1 second
+B: 6.241 x 10^18 amperes for 1 second
+C: 6.241 x 10^18 amperes for 6 seconds
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q715 ===
+Text: 10. Which unit represents the flow of electrons?
+A: Coulomb
+B: Ampere
+C: Volt
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q716 ===
+Text: 11. What is the charge of an electron?
+A: Positive
+B: Negative
+C: Neutral
+D: 
+Source: 3.2.docx
+Syllabus: M3.3.1
+
+=== Q717 ===
+Text: 12. In the context of electrical charge, what is the significance of 6.241 x 10^18?
+A: The charge of a proton
+B: The charge of an electron
+C: The number of electrons in 1 coulomb
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.01
+
+=== Q718 ===
+Text: 13. What is the term for charging objects through friction?
+A: Conduction
+B: Induction
+C: Triboelectricity
+D: 
+Source: 3.2.docx
+Syllabus: M3.03.02
+
+=== Q719 ===
+Text: 14. When objects become charged by friction, what type of charge does the object losing electrons acquire?
+A: Positive charge
+B: Negative charge
+C: Neutral charge
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q720 ===
+Text: 15. How is a coulomb related to an ampere?
+A: 1 ampere = 1 coulomb per hour
+B: 1 ampere = 1 coulomb per minute
+C: 1 ampere = 1 coulomb per second
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q721 ===
+Text: 16. What is the charge carried by a single proton?
+A: Positive charge
+B: Negative charge
+C: Neutral charge
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q722 ===
+Text: 17. In charging by contact, what happens to the uncharged object when it touches a positively charged object?
+A: It becomes negatively charged.
+B: It becomes positively charged.
+C: It remains uncharged.
+D: 
+Source: 3.2.docx
+Syllabus: 
+
+=== Q723 ===
+Text: 18. What is the primary unit for measuring electric current?
+A: Coulomb
+B: Ampere
+C: Ohm
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q724 ===
+Text: 20. Which unit represents the smallest unit of charge in the text?
+A: Coulomb
+B: Ampere
+C: Elementary charge
+D: 
+Source: 3.2.docx
+Syllabus: M3.1.5
+
+=== Q725 ===
+Text: 1.1 What factors are involved in defining work in the field of physical science?
+A: Force and distance
+B: Velocity and time
+C: Mass and acceleration
+D: 
+Source: 3.3.docx
+Syllabus: M3.3.2
+
+=== Q726 ===
+Text: 1.2 When is work considered to be accomplished in a physical sense?
+A: When a stationary object is moved
+B: When a moving object changes velocity
+C: When a force is applied
+D: 
+Source: 3.3.docx
+Syllabus: 
+
+=== Q727 ===
+Text: 1.3 How is energy defined in the context of performing work?
+A: The ability to do work
+B: The force applied
+C: The product of force and distance
+D: 
+Source: 3.3.docx
+Syllabus: M3.3.07(a)
+
+=== Q728 ===
+Text: 1.4 What is kinetic energy?
+A: Energy due to motion
+B: Energy due to position
+C: Energy due to elevation
+D: 
+Source: 3.3.docx
+Syllabus: M3.3.07(a)
+
+=== Q729 ===
+Text: 2.1 What unit is adopted for measuring charges in electrical systems?
+A: Coulomb
+B: Volt
+C: Watt
+D: 
+Source: 3.3.docx
+Syllabus: M3.1.5
+
+=== Q730 ===
+Text: 2.2 What is the relationship between potential difference and charges in an electrical system?
+A: One coulomb of charge creates one volt of potential difference
+B: One coulomb of charge creates one ampere of current
+C: One coulomb of charge creates one joule of energy
+D: 
+Source: 3.3.docx
+Syllabus: M3.3.07(a)
+
+=== Q731 ===
+Text: 3.1 How is current measured in an electrical circuit?
+A: Ampere (A)
+B: Volt (V)
+C: Ohm (Ω)
+D: 
+Source: 3.3.docx
+Syllabus: M3.03.03
+
+=== Q732 ===
+Text: 3.2 What is the unit of resistance?
+A: Volt (V)
+B: Ohm (Ω)
+C: Ampere (A)
+D: 
+Source: 3.3.docx
+Syllabus: M3.03.07
+
+=== Q733 ===
+Text: 3.3 What term refers to the ability of a system to conduct electricity?
+A: Resistance
+B: Conductance
+C: 
+D: 
+Source: 3.3.docx
+Syllabus: M3.03.04
+
+=== Q734 ===
+Text: 3.6 In electron flow, which terminal do electrons flow out of?
+A: Positive
+B: Negative
+C: 
+D: 
+Source: 3.3.docx
+Syllabus: M3.3.1
+
+=== Q735 ===
+Text: 4.1 According to Benjamin Franklin's convention, which direction did he assume positive charge carriers to flow?
+A: From positive to negative terminals
+B: From negative to positive terminals
+C: 
+D: 
+Source: 3.3.docx
+Syllabus: M3.1.5
+
+=== Q736 ===
+Text: 4.2 Which type of charge carriers actually constitute electron current?
+A: Electrons with a negative charge
+B: Protons with a positive charge
+C: 
+D: 
+Source: 3.3.docx
+Syllabus: M3.1.5
+
+=== Q737 ===
+Text: 4.3 What cultural factor influences the choice between conventional flow notation and electron flow notation?
+A: Geographic location and engineering practices
+B: Temperature and humidity
+C: 
+D: 
+Source: 3.3.docx
+Syllabus: M3.3.1
+
+=== Q738 ===
+Text: Question 2: Which materials are commonly used for piezoelectric generation?
+A: Crystalline quartz and copper
+B: Copper and Rochelle salt
+C: Crystalline quartz and Rochelle salt
+D: 
+Source: 3.4.docx
+Syllabus: M3.1.5
+
+=== Q739 ===
+Text: Question 3: What happens when a mechanical stress is applied to a piezoelectric crystal?
+A: It produces heat.
+B: It generates an electric polarization.
+C: It creates light.
+D: 
+Source: 3.4.docx
+Syllabus: 
+
+=== Q740 ===
+Text: Question 4: What can be observed when a circuit is connected across a piezoelectric crystal that is loaded (pressure is applied)?
+A: No change in the crystal
+B: A flow of current
+C: The crystal emits a sound
+D: 
+Source: 3.4.docx
+Syllabus: M3.1.5
+
+=== Q741 ===
+Text: Question 5: What is the opposite effect of the piezoelectric effect, where a mechanical output is derived from an electrical signal input?
+A: Photoelectric effect
+B: Electrostatic effect
+C: Piezoelectric effect
+D: 
+Source: 3.4.docx
+Syllabus: M3.03.03
+
+=== Q742 ===
+Text: Question 6: In what type of devices are piezoelectric materials used for converting a mechanical strain into an electrical signal?
+A: Thermometers
+B: Microphones and phonograph pickups
+C: Light bulbs
+D: 
+Source: 3.4.docx
+Syllabus: M3.03.03
+
+=== Q743 ===
+Text: Question 8: What is the most common form of converting chemical energy into electricity?
+A: Solar panels
+B: Batteries
+C: Wind turbines
+D: 
+Source: 3.4.docx
+Syllabus: M3.03.04
+
+=== Q744 ===
+Text: Question 9: How does a primary battery produce electricity?
+A: By converting light energy
+B: By heating a chemical solution
+C: By a chemical reaction between two different metals
+D: 
+Source: 3.4.docx
+Syllabus: M3.03.04
+
+=== Q745 ===
+Text: Question 10: What is the role of the alkaline electrolyte in a primary battery?
+A: It generates heat.
+B: It stores electrical charge.
+C: It facilitates the chemical reaction between metals.
+D: 
+Source: 3.4.docx
+Syllabus: M3.03.03
+
+=== Q746 ===
+Text: Question 11: What happens at one terminal of a battery when electrons are freed during a chemical reaction?
+A: It develops a positive charge.
+B: It develops a negative charge.
+C: It remains neutral.
+D: 
+Source: 3.4.docx
+Syllabus: M3.1.5
+
+=== Q747 ===
+Text: Question 12: How do electrons flow in a battery circuit?
+A: From the negative end to the positive end
+B: From the positive end to the negative end
+C: They don't flow in a closed circuit.
+D: 
+Source: 3.4.docx
+Syllabus: 
+
+=== Q748 ===
+Text: Question 13: What is the most common source of thermal electricity in the aviation industry?
+A: Solar panels
+B: Thermocouples
+C: Fuel cells
+D: 
+Source: 3.4.docx
+Syllabus: M3.03.04
+
+=== Q749 ===
+Text: Question 14: What is one significant advantage of using thermocouples as temperature sensors in aviation?
+A: They are expensive.
+B: They are not interchangeable.
+C: They are cheap and interchangeable.
+D: 
+Source: 3.4.docx
+Syllabus: M3.3.2
+
+=== Q750 ===
+Text: Question 15: What is the phenomenon that generates a voltage between two dissimilar metal wires in a thermocouple and is proportional to the temperature at the junction?
+A: The Faraday effect
+B: The Seebeck effect
+C: The Edison effect
+D: 
+Source: 3.4.docx
+Syllabus: M3.3.2
+
+=== Q751 ===
+Text: Question 16: Who is credited with first noticing the Seebeck effect in 1821?
+A: Thomas Edison
+B: Thomas Seebeck
+C: Albert Einstein
+D: 
+Source: 3.4.docx
+Syllabus: 
+
+=== Q752 ===
+Text: Question 17: How are thermocouples utilized in aviation?
+A: To generate electricity
+B: To measure cylinder head temperatures, inter-turbine temperature, and exhaust gas temperature
+C: To power aircraft engines
+D: 
+Source: 3.4.docx
+Syllabus: M3.3.2
+
+=== Q753 ===
+Text: Question 18: What is the primary function of a solar cell or photovoltaic cell?
+A: To convert heat energy into electricity
+B: To convert light energy into electricity
+C: To store electrical energy
+D: 
+Source: 3.4.docx
+Syllabus: M3.3.07(a)
+
+=== Q754 ===
+Text: Question 19: What happens when certain chemical elements in a solar cell are exposed to light energy?
+A: They produce heat.
+B: They release electrons.
+C: They emit photons.
+D: 
+Source: 3.4.docx
+Syllabus: M3.3.07(a)
+
+=== Q755 ===
+Text: Question 20: What are photons in sunlight absorbed by in a solar cell?
+A: Conductive materials
+B: Semiconductor materials
+C: Insulating materials
+D: 
+Source: 3.4.docx
+Syllabus: 
+
+=== Q756 ===
+Text: Question 22: What are the complementary positive charges created in a solar cell when electrons are released?
+A: Electrons
+B: Holes
+C: Photons
+D: 
+Source: 3.4.docx
+Syllabus: 
+
+=== Q757 ===
+Text: Question 23: In which direction do the holes in a silicon solar panel flow relative to the electrons?
+A: In the same direction
+B: In the opposite direction
+C: In a random direction
+D: 
+Source: 3.4.docx
+Syllabus: M3.1.5
+
+=== Q758 ===
+Text: Question 24: Where have solar cells historically been used as a power source?
+A: In automobiles
+B: In wristwatches
+C: In cooking appliances
+D: 
+Source: 3.4.docx
+Syllabus: 
+
+=== Q759 ===
+Text: Question 25: What is the production of electricity by friction primarily related to?
+A: The generation of heat
+B: The buildup of static electricity
+C: The creation of light
+D: 
+Source: 3.4.docx
+Syllabus: M3.03.04
+
+=== Q760 ===
+Text: Question 26: When non-conductive materials are rubbed together, what phenomenon occurs?
+A: The production of heat
+B: A transfer of electrons
+C: The generation of light
+D: 
+Source: 3.4.docx
+Syllabus: M3.03.04
+
+=== Q761 ===
+Text: Question 27: What happens to the charges between materials when a transfer of electrons occurs during friction?
+A: They remain balanced.
+B: They become neutral.
+C: They become imbalanced.
+D: 
+Source: 3.4.docx
+Syllabus: 
+
+=== Q762 ===
+Text: Question 28: What is created when a conductor is moved through the magnetic lines of flux created by a magnet or electromagnet?
+A: Heat
+B: Electromotive force
+C: Light
+D: 
+Source: 3.4.docx
+Syllabus: 
+
+=== Q763 ===
+Text: Question 29: What is the result of the creation of electromotive force when a conductor is moved through magnetic lines of flux?
+A: Production of heat
+B: Production of sound
+C: Production of current flow
+D: 
+Source: 3.4.docx
+Syllabus: 
+
+=== Q764 ===
+Text: Question 30: For what purpose is the current flow produced by the movement of a conductor through magnetic lines of flux typically used?
+A: To generate radio waves
+B: To create mechanical motion
+C: To power electrically operated devices and components
+D: 
+Source: 3.4.docx
+Syllabus: M3.3.2
+
+=== Q765 ===
+Text: 27. What does a photo-cell detect and respond to?
+A: Changes in temperature
+B: Changes in light intensity
+C: Changes in humidity
+D: 
+Source: 3.5.docx
+Syllabus: M3.3.2
+
+=== Q766 ===
+Text: 2. Which term represents the maximum potential difference across a battery’s terminals?
+A: Current
+B: Voltage
+C: Resistance
+D: 
+Source: Aviators Question1.docx
+Syllabus: M3.03.07
+
+=== Q767 ===
+Text: 3. What is the SI unit for electromotive force?
+A: Ampere (A)
+B: Volt (V)
+C: Ohm (Ω)
+D: 
+Source: Aviators Question1.docx
+Syllabus: M3.1.5
+
+=== Q768 ===
+Text: 4. Which of the following measures the flow of electric charge in a circuit?
+A: Voltage
+B: Resistance
+C: Current
+D: 
+Source: Aviators Question1.docx
+Syllabus: M3.1.5
+
+=== Q769 ===
+Text: 5. Which quantity is responsible for opposing the flow of electric current in a circuit?
+A: Voltage
+B: Resistance
+C: Conductance
+D: 
+Source: Aviators Question1.docx
+Syllabus: M3.1.5
+
+=== Q770 ===
+Text: A stronger magnetic strength of a core in a coil of wire will......the Electromotive force.
+A: decrease
+B: reduced
+C: increase
+D: 
+Source: Group Charlie .docx
+Syllabus: 
+
+=== Q771 ===
+Text: The force that makes current flow is.....
+A: a charge
+B: voltage
+C: electric
+D: 
+Source: Group Charlie .docx
+Syllabus: M3.1.5
+
+=== Q772 ===
+Text: ohms is an S.I unit of resistance which is symbolized by a
+A: French word
+B: Greek word
+C: Hebrew word
+D: 
+Source: Group Charlie .docx
+Syllabus: M3.03.07
+
+=== Q773 ===
+Text: The S.I unit of Conductance is...
+A: volts
+B: current
+C: siemens
+D: 
+Source: Group Charlie .docx
+Syllabus: M3.1.5
+
+=== Q774 ===
+Text: coulomb as unit was named after a French Physicist called
+A: Charles Augustin
+B: Henry Augustin de Coulomb
+C: Charles-Augustin de Coulomb
+D: 
+Source: Group Charlie .docx
+Syllabus: M3.1.5
+
+=== Q775 ===
+Text: The increase in the length of a conductor........ the electrical resistance of the material.
+A: remains the same as
+B: decreases
+C: increases
+D: 
+Source: Group Charlie .docx
+Syllabus: M3.3.07(a)
+
+=== Q776 ===
+Text: Alessandro Volta discovered....
+A: current
+B: volta
+C: volts
+D: 
+Source: Group Charlie .docx
+Syllabus: M3.1.5
+
+=== Q777 ===
+Text: Conductivity in a material is affected by the following, except
+A: Temperature
+B: Impurities
+C: Pressure
+D: 
+Source: PistonsQuestions.docx
+Syllabus: 
+
+=== Q778 ===
+Text: The first color band (nearest the end of the resistor) will indicate the first digit in the numerical
+A: The second color band will always indicate the second digit of ohmic value. It will never be gold or
+B: The third color band indicates the number of zeros to be added to the two digits derived from the first and second bands, except in the following two cases: (A) If the third band is gold in color, the first two digits must be multiplied by 10 percent. (B) If the third band is silver in color, the first two digits must be multiplied by 1 percent.
+C: If there is a fourth color band, it is used as a multiplier for percentage of tolerance, as indicated
+D: 
+Source: Revision Sub Module 1&4&7.docx
+Syllabus: M3.03.07
+
+=== Q779 ===
+Text: What is the unit for Volts
+A: Vo
+B: Ω
+C: V
+D: 
+Source: Team November.pdf
+Syllabus: M3.1.5
+
+=== Q780 ===
+Text: Conventional flow is a flow from
+A: Positive to negative
+B: Negative to positive
+C: Positive to Neutral
+D: 
+Source: Team November.pdf
+Syllabus: 
+
+=== Q781 ===
+Text: Resistance is measured in
+A: Mho
+B: Ohm
+C: Hom
+D: 
+Source: Team November.pdf
+Syllabus: M3.03.07
+
+=== Q782 ===
+Text: The two fundamental properties of current and voltage are related by a third party known as
+A: Resistance
+B: Potential difference
+C: Electromotive Force
+D: 
+Source: Team November.pdf
+Syllabus: M3.03.07
+
+=== Q783 ===
+Text: Conductance is measured in
+A: Ohms
+B: Siemen
+C: Mho
+D: 
+Source: Team November.pdf
+Syllabus: 
+
+=== Q784 ===
+Text: Voltage is measured in
+A: Volts
+B: Watts
+C: Ohms
+D: 
+Source: Team November.pdf
+Syllabus: M3.1.5
+
+=== Q785 ===
+Text: Conductance is the ability of a material to
+A: Allow flow of current
+B: Resist flow of current
+C: Discharge current
+D: 
+Source: Team November.pdf
+Syllabus: 
+
+=== Q786 ===
+Text: Charge is measured in
+A: Candela
+B: Coulomb
+C: Current
+D: 
+Source: Team November.pdf
+Syllabus: M3.1.5
+
+=== Q787 ===
+Text: Energy required to move a charge from one point to another point is
+A: Ohms energy
+B: Kinetic energy
+C: Potential difference
+D: 
+Source: Team November.pdf
+Syllabus: M3.3.07(a)
+
+=== Q788 ===
+Text: Which of the following is the wrong expression?
+A: IN=IN
+B: IV= IV
+C: IN = IN
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q789 ===
+Text: to the secondary?
+A: n2 times the secondary impedance
+B: n times secondary impedance
+C: secondary impedance/n2
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q790 ===
+Text: The power transformed in an ideal transformer with turns ratio x is equal to _______
+A: x2 times primary
+B: x times primary
+C: primary power
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q791 ===
+Text: For a transformer with primary turns 100, secondary turns 400, if 200 V is applied at primary we will
+A: 80 V at secondary
+B: 800 V at secondary
+C: 1600 V at secondary
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q792 ===
+Text: 6. What is the no-load current drawn by transformer?
+A: 2 to 5 per cent
+B: 12 to 15 per cent
+C: 0.20 to 0.30 per cent
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q793 ===
+Text: Purpose of no-load test on a transformer is to measure ___________
+A: Copper loss
+B: Magnetising, current and loss
+C: Efficiency of the transformer
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.3.2
+
+=== Q794 ===
+Text: 8. Which of the following statement is true for no-load current of the transformer?
+A: has high magnitude and low power factor
+B: has high magnitude and high power factor
+C: has small magnitude and low power factor
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q795 ===
+Text: In no-load test we keep secondary terminals __________
+A: Shorted via a fixed resistor
+B: Shorted via a variable resistor
+C: Open
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.03.07
+
+=== Q796 ===
+Text: Induced emf in the primary of transformer is equal to terminal voltage applied at primary.
+A: True
+B: False
+C: Neither
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q797 ===
+Text: 11. Which is the most common, famous and adopted method of cooling of a power transformer?
+A: Air blast cooling
+B: Natural air cooling
+C: Oil cooling
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.3.2
+
+=== Q798 ===
+Text: Natural oil cooling method have some limitations due to which it is adopted for transformers up
+A: 3000 kVA
+B: 1000 kVA
+C: 500 KVA
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q799 ===
+Text: 13. What is the function of spacers?
+A: To insulate the coils from each other
+B: To provide free passage to the cooling oil
+C: To insulate coils and provide free passage
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.3.2
+
+=== Q800 ===
+Text: can be used perfectly in an electrical transformer?
+A: Ionizing air
+B: Absorbing moisture
+C: Cleansing the transformer oil
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q801 ===
+Text: 15. Which chemical is used in breather?
+A: Silica sand
+B: Sodium chloride
+C: Silica gel
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q802 ===
+Text: A transformer oil used in an electrical transformer must be free from ________
+A: Gases
+B: Sludge
+C: Moisture
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.03.03
+
+=== Q803 ===
+Text: 17. On which of the following transformer, Buchholz’s relay can be fixed on?
+A: Auto-transformers
+B: Air-cooled transformers
+C: Oil cooled transformers
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.03.09
+
+=== Q804 ===
+Text: Gas is liberated due to temperature limit and due to dissociation of transformer oil after
+A: 80°C
+B: 100°C
+C: 150°C
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.3.2
+
+=== Q805 ===
+Text: 19. What should be the ideal volatility and ideal viscosity of the transformer oil?
+A: Low, low
+B: High, high
+C: Low, high
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.3.2
+
+=== Q806 ===
+Text: 20. What is the function of breather in a transformer?
+A: To cool the coils during reduced load
+B: To cool the transformer oil
+C: To arrest flow of moisture when outside air enters the transformer
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q807 ===
+Text: Natural air cooling method can’t be adopted because of some unavoidable effects, beyond
+A: 1.5 MVA
+B: 5 MVA
+C: 15 MVA
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q808 ===
+Text: A transformer transforms ________________
+A: voltage
+B: current
+C: power
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q809 ===
+Text: 24. Which of the following is not for the purpose of iron core in a step-up transformer?
+A: to provide coupling between primary and secondary
+B: to increase the magnitude of mutual flux
+C: to decrease the magnitude of magnetizing current
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q810 ===
+Text: In a transformer the tappings are generally provided on
+A: Primary side
+B: Secondary side
+C: Can be connected to any side
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q811 ===
+Text: In real transformer, primary winding has _________
+A: Infinite resistance
+B: Zero resistance
+C: Some finite resistance
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.03.07
+
+=== Q812 ===
+Text: Both resistances and leakage reactances of the transformer windings are __________
+A: Series effects
+B: Parallel effects
+C: Series-parallel effects
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.3.2
+
+=== Q813 ===
+Text: To consider an ideal transformer as a practical transformer we consider____________
+A: Primary winding resistance and secondary winding resistance
+B: Primary winding leakage reactance and secondary winding leakage reactance
+C: Primary winding resistance, leakage and secondary winding leakage reactance
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.03.07
+
+=== Q814 ===
+Text: values of primary and secondary currents?
+A: Primary current = 602.4A, Secondary current = 22.7A
+B: Secondary current = 202.7A, Primary current = 602.4A
+C: Primary current = 22.7A, Secondary current = 602.4A
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.3.2
+
+=== Q815 ===
+Text: The maximum load that a power transformer can carry is limited because of its ___________
+A: temperature rise
+B: dielectric strength of oil
+C: voltage ratio
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q816 ===
+Text: The voltage transformation ratio of a transformer is defined as ratio of _____________
+A: primary turns to secondary turns
+B: secondary current to primary current
+C: secondary induced emf to primary induced emf
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q817 ===
+Text: If a transformer is made to run on to a voltage which is more than the rated voltage _______
+A: its power factor will deteriorate
+B: its power factor will increase
+C: its power factor will remain unaffected
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q818 ===
+Text: 36. Which winding of the transformer has less cross-sectional area?
+A: Primary winding
+B: Secondary winding
+C: High voltage winding
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q819 ===
+Text: Exciting current in an electrical transformer will not be affected much if primary is excited with E
+A: True
+B: False
+C: Cannot be determined
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.03.03
+
+=== Q820 ===
+Text: irrespective of load changes?
+A: Friction and windage losses
+B: Copper losses
+C: Hysteresis and eddy current losses
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q821 ===
+Text: The full-load copper loss of a transformer is 1600 W. At half-load, the copper loss will be _____
+A: 1600 W
+B: 800 W
+C: 400 W
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q822 ===
+Text: Silicon steel used in laminations, because it reduces ________________
+A: Hysteresis loss
+B: Eddy current losses
+C: Copper losses
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q823 ===
+Text: If the supply frequency to the transformer is increased, the iron loss will ___________
+A: Not change
+B: Decrease
+C: Increase
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: 
+
+=== Q824 ===
+Text: Losses which occur in rotating electric machines and do not occur in transformer are ______
+A: Friction and windage losses
+B: Magnetic losses
+C: Hysteresis and eddy current losses
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.3.2
+
+=== Q825 ===
+Text: In a given transformer for a given applied voltage, which losses remain constant irrespective of
+A: Hysteresis and eddy current losses
+B: Friction and windage losses
+C: Copper losses
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+
+=== Q826 ===
+Text: 45. Which of the following loss in a transformer is zero even at full load?
+A: Core loss
+B: Friction loss
+C: Eddy current loss
+D: 
+Source: TRANSFORMER 4 (1)_230801_085906.pdf
+Syllabus: M3.1.5
+

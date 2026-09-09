@@ -1,0 +1,277 @@
+--- Page 1 ---
+11
+AEROJET M2 SAMPLE SET
+1. With respect to the behaviour of waves, Figure 11.10 illustrates:
+a. Diffraction
+b. reinforcement
+c. destructive interference Figure 11.10
+2. What is the SI unit for plane angles?
+a. degrees
+b. radians
+c. gradient
+3. If we assume that as an approximation 14.5 psi = 1 bar then, convert 15 bar into psi.
+a. 217.5 psi
+b. 271.5 psi
+c. 215.7 psi
+4. If the capacity of a light aircraft’s fuel tanks is 800 UK gallons, what is the volume of the fuel in
+litres?
+a. 6363 L
+b. 3636 L
+c. 4000 L
+5. A missile having a mass of 25,000 kg is launched from sea level on a course for the moon. What
+is the weight of the missile? Take g=10 m/s 2
+a. 250,000 kg
+b. 2,500,000 N
+c. 250,000 N
+6. What is likely to happen to the density of pure water as its temperature increases?
+a. become less dense
+b. become more dense
+c. have the same density
+7. Why does relative density have no units?
+a. because it is unitless
+b. because it is a ratio
+c. because it is a proportion
+8. Determine the acceleration in m/s2, when a force of 1000 N is applied to a mass of 500 lb
+a. 4.4 m/s2
+b. 2.0 m/s2
+c. 1.5 m/s2
+9. Inertia is :
+a. the force resisting change in momentum
+b. the force at rest
+c. the force of motion
+10. A body has a weight of 550 N on the surface of the earth, a force is applied to give it an
+acceleration of 6 m/s2. What will be the inertia reaction of the body when given this
+acceleration?
+a. 330 N
+b. 3300 N
+c. 33000 N
+11. The ionic bond is also sometimes referred to as :
+a. the metallic bond
+b. the electrovalent bond
+c. van der Waals bond.
+
+--- Page 2 ---
+2 | P age
+Figure 11.11
+12. What if the x-component of the result force in Figure 11.11?
+a. 17 – 8cos850
+b. 17 + 8cos850
+c. 17 – 8sin850
+13. The equilibrant, is that force which acting alone against the other forces acting on a body in the
+system, :
+a. places the body in equilibrium
+b. places the body in zero
+c. places the body under no stress
+14. Fulcrum:
+a. is the point or axis about which rotation takes place.
+b. is the angle of rotation of a body with a turning effect
+c. is the point of action of all forces in the plane
+15. A uniform horizontal beam of negligible mass is supported on a fulcrum (Figure 11.12). Calculate
+the force F necessary to ensure the beam remains in equilibrium.
+a. 360 Nm
+b. 600 N
+c. 360 N
+Figure 11.12
+16. Torque is also the turning moment of a :
+a. force
+b. lever
+c. couple
+17. A nut is to be torque loaded to a maximum of 100 Nm. What is the maximum force that may be
+applied, perpendicular to the end of the spanner, if the spanner is of length 30 cm?
+a. 3.3 N
+b. 333 N
+c. 333.3 N
+18. Liquids and gases have
+a. Modulus of elasticity
+b. Modulus rigidity
+c. K
+19. A rectangular steel bar 10 mm × 16 mm × 200 mm long extends by 0.12 mm under a tensile
+force of 20 kN. Find the stress :
+a. 125 N𝑚2
+b. 125 N𝑚𝑚2
+c. 135 N𝑚𝑚2
+
+--- Page 3 ---
+3 | P age
+20. Malleability is the :
+a. ability to be rolled into sheets or shaped under pressure.
+b. ability of a material to return to its original shape once external forces have been removed.
+c. Internal atomic binding forces stretched but
+21. Sound waves are :
+a. mechanical waves and transverse waves.
+b. mechanical waves and can travel long distances.
+c. mechanical waves and cannot travel long distances.
+22. When you hear an echo, you are hearing a ________ sound
+a. reflected
+b. refracted
+c. diffracted
+23. 1200 waves are produced in 2 minutes and the wave speed is 50 m/s. Calculate the wave length.
+a. 0.083 m
+b. 5 m
+c. 500 m
+24. Infra-red radiation and ultraviolet radiation are two forms of electrostatic waves that sit in the
+electromagnetic spectrum. Which type of radiation has the highest energy?
+a. infrared
+b. ultraviolet
+c. they have equal energy levels
+25. What is meant by constructive and destructive interference?
+a. Diffraction of transverse waves takes place, where they spread out to produce straight wave
+fronts
+b. Reflection of transverse waves takes place, where they spread out to produce circular wave
+fronts
+c. Diffraction of transverse waves takes place, where they spread out to produce circular wave
+fronts
+26. The approximate range of wavelengths for microwaves is :
+1 1
+a. to
+50 100
+1 1
+b. to
+100 200
+1 1
+c. to
+50 10
+27. The speed of light in a vacuum is approximately 3 × 108 m/s. The distance in miles, travelled by
+light travel through space, in 1 h is approximately :
+a. 716 million miles
+b. 617 million miles
+c. 671 million miles
+28. Upon what principle does light propagation through a fiber optic cable depend?
+a. Total internal refraction
+b. Total internal reflection
+c. Total internal diffraction
+29. Image height from a lens determined by calculation using the relationship :
+image distance × object height
+a. Image height=
+object distance
+image distance × object distance
+b. Image height=
+object height
+image height × object distance
+c. Image height=
+object distance
+
+--- Page 4 ---
+4 | P age
+30. A convex lens has a/an :
+a. real focus.
+b. imaginary focus.
+c. magnified focus.
+31. A small object 6 mm high stands on and perpendicular to the principal axis of a convex lens, at a
+distance of 25 mm from the lens. If the focal length of the lens is 15 mm, what is the height
+image?
+a. 6 mm
+b. 9 mm
+c. 12 mm
+32. In using this lens equation if the lens is convex :
+a. f is taken as positive,
+b. f is take as negative
+c. f can be positive or negative
+33. An object stands on the principal axis of a concave mirror at a distance of 150 mm. If the focal
+length of the mirror is 50 mm, what is the position of the image?
+a. 75 cm
+b. 7.5 cm
+c. 37 mm
+34. We can calculate the critical angle by considering the relation :
+a. Critical angle = arcsin (
+𝑛2)
+𝑛1
+b. Critical angle = arcsin (
+𝑛1)
+𝑛2
+c. Critical angle = arcsin (
+𝑛2)
+𝑛0
+35. It is a closed system
+a. Gas turbine
+b. Cylinder and piston assembly
+c. Boiling water in rain
+36. Enthalpy (H) =
+a. Kinetic energy (KE) + Pressure energy (pV)
+b. Internal energy (U) + Pressure energy (pV)
+c. Potential energy (KE) + Pressure energy (pV)
+37. They represent the 2nd law of thermodynamics
+a. Q – Q = W and Q > W
+in out net in
+b. Q – Q = W and Q < W
+in out net in
+c. Q – Q = W and Q = W
+in out net in
+38. Under what circumstances is a closed system able to do work on its surroundings?
+a. When it has a moveable boundary
+b. When there is fluid exchange
+c. When there is no pressure
+39. What is the essential difference between a closed system and an open system?
+a. In a closed system working fluid crosses the system boundary, as it does not in an open
+system
+b. In a closed system no working fluid crosses the system boundary, as it does not in an open
+system
+c. In a closed system no working fluid crosses the system boundary, as it does in an open
+system
+
+--- Page 5 ---
+5 | P age
+40. What does the second law of thermodynamics tell us about the efficiency of a machine?
+a. Net work done is always less than the heat supplied
+b. Net work done is always greater than the heat supplied
+c. Net work done is always equal to the heat supplied
+41. Detail the three ways in which a liquid can be made to evaporate more readily.
+a. increase temperature, reduce pressure, or increase the surface area
+b. increase temperature, increase pressure, or increase the surface area
+c. increase temperature, reduce pressure, or increase the volume
+42. What is the purpose of the evaporator within a typical refrigeration system?
+a. The evaporator allows refrigerants to absorb heat from the medium being cooled
+b. The evaporator allows heat to be dissipated to an external medium, so reducing the
+temperature of the refrigerant
+c. The evaporator allows refrigerator not to heat up
+43. Take the specific latent heat of vaporization for water as 2.26 MJ/kgK. What thermal energy is
+required to condense 0.2 kg of steam into water at 100 0C?
+a. 445.2 J
+b. 4452 kJ
+c. 445.2 kJ
+44. A body starts from rest and accelerates with constant acceleration of 2.0 m/s2 up to a speed of 9
+m/s. Find the time taken.
+a. 5.4 s
+b. 4.5 s
+c. 9 s
+For which of the following velocity-time graphs IN Figure 11.13 is acceleration 0?
+Figure 11.13
+45. The slope of the velocity–time graph measures _______.
+a. distance
+b. velocity
+c. acceleration
+46. 1 rev = :
+a. 2π rad
+b. 2πr rad
+c. πr2 rad
+47. A 540 mm diameter wheel is rotating at 1500/π rpm. Determine the angular velocity of wheel in
+rad/s
+a. 50 rad/s
+b. 30 rad/s
+c. 20 rad/s
+
+--- Page 6 ---
+6 | P age
+48. When the natural frequency of a system coincides with the frequency of a driving oscillation we
+have :
+a. vibration
+b. resonance
+c. forced frequency
+49. In SHM, under what circumstances is the velocity a maximum?
+a. velocity is a maximum at the pole position of the motion
+b. velocity is a maximum at the equilibrium position of the motion
+c. velocity is a maximum at the maximum position of the motion
+50. A body moves with SHM with amplitude 50 mm and frequency 2.5 Hz. Find the maximum
+acceleration.
+a. 12.34 m/s2
+b. 12,340 m/s2
+c. 123.4 m/s2
+51. The angular distance moved in radian, divided by the time taken = :
+a. angular displacement
+b. angular velocity
+c. linear velocity
+52. Detail the forms of energy input and output for a radio.
+a. mechanical energy into electrical energy
+b. chemical and sound energy
+c. electrical energy into sound energy
+END

@@ -1,0 +1,186 @@
+--- Page 1 ---
+Aerojet M1 Sample set 4 40 minutes
+1. The sum of 12,000 and 1200 is:
+A. 24,200
+B. 13,200
+C. 23,200
+2. The equivalent of 326 × 12.82/0.62 , correct to two decimal places is:
+A. 6740.84
+B. 674.08
+C. 67.41
+1
+3. 2 written in decimal form is:
+50
+A. 2.2
+B. 2.01
+C. 2.02
+4. The number 0.00009307, expressed in standard form is:
+A. 9.307 × 10−5
+B. 9.307 × 10−4
+C. 9.307 × 104
+5. An aircraft supplier buys 200 packs of rivets for £100.00 and sells them for 70 pence a pack. His
+percentage profit is:
+A. 30%
+B. 40%
+C. 59%
+6. An aircraft travelling at constant velocity covers the first 800 km of a journey in 1.5 h. How long does
+it take to complete the total journey of 2800 km, assuming constant velocity?
+A. 3.5 h
+B. 5.25 h
+C. 6.25 h
+7. The mass of an electrical part is 23 g, so the total mass, in kg, of 80 such parts is:
+A. 1840
+B. 184
+C. 1.84
+8. The product of 3x, x, −2x2, is:
+A. −6x4
+B. −5x4
+C. 4x − 2x2
+(12𝑥2 + 16𝑥4 − 24𝑥6)
+9. When simplified is equivalent to:
+4𝑥2
+A. 4x2 − 9x4
+B. 4x2 − 2x4
+C. 3 + 4x2 − 6x4
+(𝑎2𝑏3𝑐)(𝑎2)(𝑎2𝑏)𝑑 (𝑎6𝑏3𝑐−2𝑑)
+10. The expression simplified −[ ]+1
+(𝑎𝑏2𝑐2) 𝑎𝑏𝑐−1
+A. −1
+B. 0
+C. 1
+11. The formula, 𝑋 = √𝑍2−𝑅2, correctly transposed for 𝑅 is:
+A. 𝑅 = √𝑍2−𝑋2
+B. 𝑅 = √𝑍2+𝑋2
+C. 𝑅 = 𝑍−𝑋
+
+--- Page 2 ---
+2 | P age
+12. If a is a positive integer and a2 + a − 30 = 0, then the value of a is:
+A. 6
+B. 5
+C. 4
+13. From the tables, the antilogarithm of 2̅..4177 is:
+A. 0.02617
+B. 0.02607
+C. 0.2607
+14. A circle of radius = 15 cm, will have an area of:
+A. 707.14 cm2
+B. 1414.28 cm2
+C. 94.25 cm2
+15. In the equation of the straight line graph y = mx + c, which of the following statements is true?
+A. y is the independent variable
+B. m is the gradient of the line
+C. c is the dependent variable
+16. The straight line graph shown in Figure 1.10 takes the form y = mx + c, the value of m will be
+approximately:
+A. 40
+B. −30
+C. 1.5
+Figure 1.10 Straight line graph of effort against load
+17. From tables the cos 57◦ 50/ is:
+A. 0.5324
+B. 0.5334
+C. 0.5319
+18. The rectangular co-ordinates (5, 12) in polar form are:
+A. (13 , ∠ 67.4°)
+B. (11.79 , ∠ 67.4°)
+C. (12 , ∠ 112.6°)
+
+--- Page 3 ---
+3 | P age
+19. Natural numbers are known as:
+A. positive integers
+B. positive whole numbers
+C. positive rational numbers
+20. Find the value of a(b + c − d), where a = 3, b = −4, c = 6 and d = −1
+A. 3
+B. – 27
+C. 9
+21. 0.0000000234876 in standard form to two significant figures is :
+A. 2.35 x 10 -8
+B. 2.3 x 10 8
+C. 2.3 x 10 -8
+5 7 3
+22. 2 ÷ − =∶
+8 16 8
+1
+A. 5
+8
+3
+B. 5
+8
+5
+C. 5
+8
+23. A contract supplier buys an undercarriage door retraction actuator for £1700.00 and because it is
+reaching the end of its shelf life, he must sell it for £1400.00. What is the supplier’s percentage loss?
+A. 17.7%
+B. 17.6%
+C. 17%
+24. Two gear wheels mesh together as shown in Figure 2.1. One has 60 teeth, the other has 45 teeth. If
+the larger gear rotates at an angular velocity of 150 rpm, what is the angular velocity of the smaller
+gear wheel, in rpm?
+A. 18 rpm
+B. 200 rpm
+C. 45 rpm
+25. Convert the denary number 23 to binary
+A. 10111
+B. 11011
+C. 10011
+26. Convert the hexadecimal number 6E to denary.
+A. 120
+B. 110
+C. 100
+
+--- Page 4 ---
+4 | P age
+𝑎3𝑎−8𝑎2
+27. Simplify:
+𝑎0𝑎−5
+A. 𝑎2
+B. 𝑎−2
+C. 𝑎5
+28. Factorise y2 – 3y − 18
+A. (y – 3)( y + 6)
+B. y = 6, y = - 3
+C. (y – 6)( y + 3)
+m𝑣2
+29. Transpose the formula F= for v,
+𝑟
+Fr
+A. v =
+m
+Fr
+B. v = √
+m
+Fr
+C. v = ±√
+m
+30. Use logarithms to find the value of: 192.5 × 0.714
+A. 152.4
+B. 132.4
+C. 142.4
+31. A pipe of thickness 5 mm has an external diameter of 120 mm. Find the volume of 2.4 m of pipe.
+A. 0.0043 m3
+B. 0.0022 m3
+C. 0.0089 m3
+32. 3(x − 2) = 2(x − 1)
+A. x = 2
+B. x = - 2
+C. x = 4
+
+--- Page 5 ---
+5 | P age
+Mathematical Tables
+Logarithms
+Antilogarithms
+Sines
+
+--- Page 6 ---
+6 | P age
+Cosines
+Tangents
+Square roots
+
+--- Page 7 ---
+7 | P age

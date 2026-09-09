@@ -14,12 +14,7 @@ import {
 } from '@/lib/internal-exam/import/extractors'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
-
-function questionHash(text: string, options: string[]): string {
-  const normalized = text.toLowerCase().replace(/\s+/g, ' ').trim()
-  const sorted = [...options].sort()
-  return `${normalized}:${JSON.stringify(sorted)}`
-}
+import { questionHash } from '@/lib/internal-exam/import/dedupe'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const user = await requireInstructor()

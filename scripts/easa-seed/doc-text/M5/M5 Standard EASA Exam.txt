@@ -1,0 +1,289 @@
+M5 Standard EASA Exam
+1. What is the primary function of the Electronic Flight Instruments System (EFIS)?
+   a. To provide pilots with critical flight data through electronic displays
+   b. To control aircraft navigation systems
+   c. To monitor engine performance parameters
+2. Which system primarily uses the Primary Flight Display (PFD) and Navigation Display (ND)?
+   a. EADI and EHSI
+   b. Electronic Flight Instruments System (EFIS)
+   c. Fly-by-Wire System
+3. What does the acronym EFIS stand for?
+   a. Electronic Flight Integration System
+   b. Electronic Flight Instrument System
+   c. Enhanced Flight Instrument System
+4. Which aircraft manufacturer uses the specific electronic instrument system that includes the EICAS?
+   a. Boeing
+   b. Airbus
+   c. Embraer
+5. What is the base of the binary numbering system?
+   a. 8
+   b. 10
+   c. 2
+6. How do you convert the decimal number 10 to binary?
+   a. 1010
+   b. 1100
+   c. 1110
+7. What is the hexadecimal representation of the binary number 1011?
+   a. A
+   b. B
+   c. C
+8. In an octal system, what is the value of the decimal number 7?
+   a. 8
+   b. 7
+   c. 6
+9. How is the number 15 represented in the hexadecimal system?
+   a. E
+   b. F
+   c. D
+10. What is the main function of an Analog-to-Digital Converter (ADC)?
+    a. Convert digital signals to analog signals
+    b. Convert analog signals to digital signals
+    c. Store digital data
+11. Which component is used to convert digital data to an analog signal?
+    a. ADC
+    b. DAC
+    c. CPU
+12. What is a key limitation of digital to analog converters?
+    a. Resolution
+    b. Speed
+    c. Power consumption
+13. What is the purpose of data conversion in aircraft systems?
+    a. To simplify data storage
+    b. To enable interaction between different types of electronic systems
+    c. To increase data processing speed
+14. What is the primary purpose of a data bus in an aircraft system?
+    a. To transfer data between different components
+    b. To power electronic devices
+    c. To store flight data
+15. Which specification is commonly used for data buses in commercial aircraft?
+    a. IEEE 1394
+    b. ARINC 429
+    c. USB
+16. What is the main function of ARINC 629?
+    a. To provide a standardized communication protocol for aircraft systems
+    b. To monitor engine parameters
+    c. To manage aircraft navigation
+17. How does the MIL-STD-1553B bus differ from ARINC 429?
+    a. It uses fiber optics
+    b. It supports multiple terminals with a single data bus
+    c. It is specific to commercial aviation
+18. What is the role of parity checking in data buses?
+    a. To increase data transmission speed
+    b. To detect errors in data transmission
+    c. To convert data formats
+19. Which gate performs the logical operation of addition?
+    a. AND
+    b. OR
+    c. NOT
+20. What is the output of a NAND gate when both inputs are high (1)?
+    a. High (1)
+    b. Low (0)
+    c. Undefined
+21. Which logic gate is used to invert the input signal?
+    a. NOT
+    b. AND
+    c. OR
+22. What is the primary application of a flip-flop circuit?
+    a. To store binary data
+    b. To amplify signals
+    c. To convert data formats
+23. In a logic diagram, what does a bubble on the input of a gate indicate?
+    a. High input
+    b. Inverted input
+    c. Low input
+24. How is an AND gate represented in a logic diagram?
+    a. A flat symbol with multiple inputs and one output
+    b. A curved symbol with one input and multiple outputs
+    c. A diamond-shaped symbol
+25. Which logic gate is represented by a symbol with a curved back and an output arrow?
+    a. OR
+    b. AND
+    c. NOT
+26. In a combined logic circuit, what does a dot on the connecting line represent?
+    a. A junction where signals combine
+    b. An end of the circuit
+    c. A switch
+27. What does CPU stand for in computer terminology?
+    a. Computer Processing Unit
+    b. Central Processing Unit
+    c. Control Processing Unit
+28. What is the primary function of RAM in a computer system?
+    a. To store data temporarily for quick access
+    b. To store data permanently
+    c. To process data
+29. How does a microprocessor differ from a microcontroller?
+    a. A microprocessor is designed for general-purpose tasks, while a microcontroller includes built-in peripherals for specific tasks
+    b. A microprocessor is larger than a microcontroller
+    c. A microcontroller requires more power than a microprocessor
+30. What is the role of the control unit in a CPU?
+    a. To perform arithmetic operations
+    b. To direct operations within the CPU and manage data flow
+    c. To store data
+31. Which memory device retains data even when power is turned off?
+    a. ROM
+    b. RAM
+    c. Cache
+32. What is the purpose of a bus system in a computer?
+    a. To execute instructions
+    b. To connect different components and enable data transfer
+    c. To store instructions
+33. What type of memory is used to store the BIOS in a computer system?
+    a. ROM
+    b. RAM
+    c. Cache
+34. How does an interrupt signal affect CPU operations?
+    a. It temporarily halts the current operations to execute a higher-priority task
+    b. It speeds up data processing
+    c. It clears the CPU registers
+35. What is the primary function of the arithmetic logic unit (ALU) in a microprocessor?
+    a. To store data
+    b. To perform arithmetic and logical operations
+    c. To control data flow
+36. Which component provides the timing signals in a microprocessor?
+    a. ALU
+    b. Clock
+    c. Register
+37. What is the purpose of a register in a microprocessor?
+    a. To perform arithmetic operations
+    b. To temporarily hold data and instructions
+    c. To connect external devices
+38. How does the control unit in a microprocessor function?
+    a. It manages the execution of instructions and controls data flow
+    b. It performs mathematical calculations
+    c. It stores data permanently
+39. What is the main advantage of using integrated circuits in electronic systems?
+    a. They are easier to repair
+    b. They allow for smaller and more efficient designs
+    c. They consume more power
+40. Which type of integrated circuit is used to encode data?
+    a. Decoder
+    b. Encoder
+    c. Multiplexer
+41. What is VLSI in the context of integrated circuits?
+    a. Very Low System Integration
+    b. Very Large-Scale Integration
+    c. Variable Logic System Integration
+42. What is the primary function of a decoder in digital circuits?
+    a. To combine signals
+    b. To convert coded data back to its original form
+    c. To amplify signals
+43. How do medium-scale integrated circuits differ from large-scale integrated circuits?
+    a. They contain fewer components
+    b. They are used for simpler applications
+    c. They consume more power
+44. What is the purpose of multiplexing in digital communication?
+    a. To increase signal strength
+    b. To combine multiple signals into one for transmission
+    c. To convert analog signals to digital
+45. How does a demultiplexer function in a communication system?
+    a. It separates a multiplexed signal into its original components
+    b. It combines multiple signals into one
+    c. It amplifies signals
+46. What is a key benefit of using multiplexing in aircraft systems?
+    a. It reduces the need for multiple channels
+    b. It improves data transmission efficiency
+    c. It increases power consumption
+47. Which device is used to combine multiple signals in a multiplexing system?
+    a. Demultiplexer
+    b. Multiplexer
+    c. Decoder
+48. What is the primary advantage of using fibre optics in communication systems?
+    a. Higher data transmission rates and greater bandwidth
+    b. Lower cost of installation
+    c. Greater resistance to physical damage
+49. How do fibre optics transmit data?
+    a. By using light signals
+    b. By using electrical signals
+    c. By using sound waves
+50. What material is typically used in the core of fibre optic cables?
+    a. Plastic
+    b. Glass
+    c. Copper
+51. What type of display technology is commonly used in modern avionics systems?
+    a. Cathode Ray Tube (CRT)
+    b. Liquid Crystal Display (LCD)
+    c. Light Emitting Diode (LED)
+52. What is a primary benefit of using LCD displays in aircraft?
+    a. They are lightweight and energy-efficient
+    b. They are more durable than CRTs
+    c. They offer better color contrast
+53. What does MFD stand for in the context of aircraft displays?
+    a. Multifunction Display
+    b. Main Flight Display
+    c. Modular Flight Display
+54. How does an LED display differ from an LCD display?
+    a. LED displays use light-emitting diodes for backlighting
+    b. LED displays are less energy-efficient
+    c. LCD displays have better resolution
+55. What is the primary risk to electrostatic sensitive devices (ESDs) in electronic systems?
+    a. Damage from static electricity
+    b. Corrosion from moisture
+    c. Overheating
+56. How can electrostatic discharge (ESD) be prevented in a work environment?
+    a. By using non-conductive materials
+    b. By grounding personnel and equipment
+    c. By increasing humidity levels
+57. What type of packaging is recommended for ESD-sensitive components?
+    a. Antistatic bags
+    b. Plastic containers
+    c. Metal boxes
+58. What does the acronym ESD stand for?
+    a. Electronic Static Device
+    b. Electrostatic Discharge
+    c. Electromagnetic Sensitive Device
+59. Which tool is essential for working with ESD-sensitive components?
+    a. Insulated gloves
+    b. Grounding wrist strap
+    c. Magnetic screwdriver
+60. What is the primary objective of software management control in avionics?
+    a. To ensure software updates are frequent
+    b. To maintain software integrity and reliability
+    c. To reduce software costs
+61. Which document typically outlines the procedures for software management control?
+    a. Software Configuration Management Plan (SCMP)
+    b. Maintenance Manual
+    c. Flight Operations Manual
+62. What is the role of version control in software management?
+    a. To increase software speed
+    b. To track changes and maintain versions of software
+    c. To reduce software complexity
+63. What is the impact of electromagnetic interference (EMI) on aircraft systems?
+    a. Increased power consumption
+    b. Potential disruption of electronic systems
+    c. Reduced signal clarity
+64. How can EMI be minimized in avionics installations?
+    a. By using shielded cables and grounding techniques
+    b. By increasing signal power
+    c. By reducing the number of electronic devices
+65. What does the acronym EMC stand for?
+    a. Electromagnetic Conduction
+    b. Electromagnetic Compatibility
+    c. Electromagnetic Calibration
+66. What is the purpose of electromagnetic shielding in aircraft?
+    a. To prevent signal loss
+    b. To protect sensitive electronics from external electromagnetic fields
+    c. To increase data transmission speed
+67. Which system is used to monitor and manage engine performance in modern aircraft?
+    a. EFIS
+    b. FADEC (Full Authority Digital Engine Control)
+    c. EICAS
+68. What is the primary function of an autopilot system?
+    a. To manage fuel consumption
+    b. To maintain a set course and altitude without pilot intervention
+    c. To monitor cabin pressure
+69. How does the TCAS (Traffic Collision Avoidance System) enhance flight safety?
+    a. By providing pilots with information about nearby aircraft and potential collision threats
+    b. By managing air traffic control communications
+    c. By monitoring weather conditions
+70. What does the acronym EICAS stand for?
+    a. Engine Indicating and Crew Alerting System
+    b. Electronic Information and Control System
+    c. Environmental Control and Indication System
+71. What is the role of the FMS (Flight Management System) in modern aircraft?
+    a. To monitor engine health
+    b. To provide navigation, flight planning, and performance management
+    c. To control landing gear
+72. How does the Fly-by-Wire (FBW) system improve aircraft control?
+    a. By replacing mechanical flight controls with electronic systems for better responsiveness
+    b. By reducing aircraft weight
+    c. By simplifying pilot operations

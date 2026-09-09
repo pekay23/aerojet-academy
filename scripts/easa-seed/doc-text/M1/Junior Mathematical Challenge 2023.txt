@@ -1,0 +1,159 @@
+--- Page 1 ---
+U T
+K M
+M K
+T U
+UKMT
+United Kingdom
+Mathematics Trust
+Junior Mathematical Challenge
+Wednesday 26 April 2023
+© 2023 UK Mathematics Trust
+England&Wales: Year8orbelow
+Scotland: S2orbelow
+NorthernIreland: Year9orbelow
+Instructions
+1. Do not open the paper until the invigilator tells you to do so.
+2. Time allowed: 60 minutes.
+No answers, or personal details, may be entered after the allowed time is over.
+3. The use of blank or lined paper for rough working is allowed; squared paper, calculators
+and measuring instruments are forbidden.
+4. Use a B or an HB non-propelling pencil. Mark at most one of the options A, B, C, D, E
+on the Answer Sheet for each question. Do not mark more than one option.
+5. Do not expect to finish the whole paper in the time allowed. The questions in this paper
+have been arranged in approximate order of difficulty with the harder questions towards the
+end. You are not expected to complete all the questions during the time. You should bear
+this in mind when deciding which questions to tackle.
+6. Scoring rules:
+5 marks are awarded for each correct answer to Questions 1-15;
+6 marks are awarded for each correct answer to Questions 16-25.
+7. Your Answer Sheet will be read by a machine. Do not write or doodle on the sheet except
+to mark your chosen options. The machine will read all black pencil markings even if they
+are in the wrong places. If you mark the sheet in the wrong place, or leave bits of eraser
+stuck to the page, the machine will interpret the mark in its own way.
+8. Thequestionsonthispaperaredesignedtochallengeyoutothink,nottoguess. Youwill
+gain more marks, and more satisfaction, by doing one question carefully than by guessing
+lots of answers. This paper is about solving interesting problems, not about lucky guessing.
+Enquiries about the Junior Mathematical Challenge should be sent to:
+challenges@ukmt.org.uk
+www.ukmt.org.uk
+
+--- Page 2 ---
+Junior Mathematical Challenge Wednesday26April2023
+1. What is the value of 3202−2023?
+A 821 B 1001 C 1179 D 1221 E 1279
+2. How many of the following five options are factors of 30?
+A 1 B 2 C 3 D 4 E 5
+1+2+3+4+5
+3. What is the value of ?
+6+7+8+9+10
+1 3 7 9 1
+A B C D E
+2 8 16 20 3
+4. One of these is the largest two-digit positive integer that is divisible by the product of its digits.
+Which is it?
+A 12 B 24 C 36 D 72 E 96
+5. The record for travelling 100m on a skateboard by a dog is 19.65 seconds. This was achieved by
+Jumpy in 2013. What was Jumpy’s approximate average speed?
+A 0.2m/s B 0.5m/s C 2m/s D 2.5m/s E 5m/s
+6. When this prime number square is completed, the eight circles contain eight
+13 23
+different primes, and each of the four sides has total 43.
+What is the sum of the five missing primes?
+A 51 B 53 C 55 D 57 E 59
+29
+7. What is the difference between the largest two-digit multiple of 2 and the smallest three-digit multiple
+of 3?
+A 5 B 4 C 3 D 2 E 1
+8. How many of these six numbers are prime?
+02 +12 12 +22 22 +32 32 +42 42 +52 52 +62
+A 1 B 2 C 3 D 4 E 5
+9. Triangle 𝐿𝑀𝑁 is isosceles with 𝐿𝑀 = 𝐿𝑁. 𝐿
+What is the value of 𝑦? (4𝑦−8)◦
+A 15 B 17 C 19 D 21 E 23
+(2𝑥+8)◦ (3𝑥−20)◦
+𝑀 𝑁
+©2023UKMathematicsTrust www.ukmt.org.uk
+
+--- Page 3 ---
+Junior Mathematical Challenge Wednesday26April2023
+10. In the diagram, all distances shown are incm. The perimeter of the shape
+is 60cm. What is the area, in cm2, of the shape? 6
+A 192 B 204 C 212 D 232 E 252 8
+18
+11. To save money, Scrooge is reusing tea bags. After a first ‘decent’ cup of tea, he dries the bag and uses
+two such dried bags to make a new ‘decent’ cup of tea. These bags are then dried again and four such
+bags now make a ‘decent’ cup of tea. After that they are put on the compost heap.
+How many ‘decent’ cups of tea can Scrooge get out of a new box of 120 tea bags?
+A 480 B 240 C 210 D 195 E 180
+12. One afternoon, Brian the snail went for a slither at a constant speed. By 1:50 pm he had slithered
+150 centimetres. By 2:10 pm he had slithered 210 centimetres. When did Brian start his slither?
+A Noon B 12:20 pm C 12:30 pm D 12:45 pm E 1 pm
+13. Four congruent rectangles are arranged as shown to form an inner square of area
+20cm2 and an outer square of area 64cm2.
+What is the perimeter of one of the four congruent rectangles?
+A 6cm B 8cm C 9.75cm D 16cm E 20cm
+14. In the addition shown, 𝑥 and 𝑦 represent different single digits.
+7 7 𝑥
+What is the value of 𝑥 + 𝑦? 6 𝑦 𝑥
++ 𝑦 𝑦 𝑥
+A 10 B 11 C 12 D 13 E 14
+1 𝑥 𝑥 7
+15. My train was scheduled to leave at 17:48 and to arrive at my destination at 18:25. However, it started
+four minutes late, and the journey took twice as long as scheduled.
+When did I arrive?
+A 19:39 B 19:06 C 19:02 D 18:29 E 17:52
+16. Amrita needs to select a new PIN. She decides it will be made up of four non-zero digits with the
+following properties:
+i) The first two digits and the last two digits each make up a two-digit number which is a multiple
+of 11.
+ii) The sum of all the digits is a multiple of 11.
+How many different possibilities are there for Amrita’s PIN?
+A 1 B 2 C 4 D 8 E 16
+17. Two numbers 𝑝 and 𝑞 are such that 0 < 𝑝 < 𝑞 < 1.
+Which is the largest of these expressions?
+𝑝 + 𝑞 𝑝 𝑞
+A 𝑞 − 𝑝 B 𝑝 − 𝑞 C D E
+2 𝑞 𝑝
+©2023UKMathematicsTrust www.ukmt.org.uk
+
+--- Page 4 ---
+Junior Mathematical Challenge Wednesday26April2023
+18. What is the sum of the four marked angles in the diagram?
+A 540◦ B 560◦ C 570◦ D 600◦ E 720◦
+19. In a football match, Rangers beat Rovers 5 – 4. The only time Rangers were ahead was after they
+scored the final goal. How many possible half-time scores were there?
+A 9 B 10 C 15 D 16 E 25
+20. Each cell in the crossnumber is to be filled with a single digit.
+1
+Across Down
+1. A cube 1. A prime 2
+2. A square
+Which of these could be the sum of the four digits in the crossnumber?
+A 17 B 16 C 15 D 14 E 13
+21. Eleanor’s Elephant Emporium has four types of elephant. There are twice as many grey elephants as
+pygmy elephants, three times as many white elephants as grey elephants and four times as many pink
+elephants as white elephants. There are 20 more white elephants than pygmy elephants.
+How many elephants are in Eleanor’s Emporium?
+A 123 B 132 C 213 D 231 E 312
+22. The positive integers from 1 to 9 inclusive are placed in the grid, one to a cell,
+18
+so that the product of the three numbers in each row or column is as shown.
+What number should be placed in the bottom right-hand cell? 105
+A 9 B 6 C 4 D 3 E 2 ? 192
+56 180 36
+23. Regular pentagon 𝑃𝑄𝑅𝑆𝑇 has centre 𝑂. Lines 𝑃𝐻, 𝐹𝐼 and 𝐺𝐽 go through 𝑂. 𝑃
+The six angles at 𝑂 are equal. 𝐽 𝐹
+What is the size of angle𝑇𝐺𝑂? 𝑄 𝑇
+A 60◦ B 72◦ C 75◦ D 76◦ E 78◦ 𝐼 𝑂 𝐺
+𝑅 𝐻 𝑆
+24. Beatrix was born in this century. On her birthday this year, her age was equal to the sum of the digits
+of the year in which she was born. In which of these years will her age on her birthday be twice the
+sum of the digits of that year?
+A 2027 B 2029 C 2031 D 2033 E 2035
+25. Granny gave away her entire collection of antique spoons to three people. Her daughter received
+8 more than a third of the total; her son received 8 more than a third of what was then left; finally her
+neighbour received 8 more than a third of what was then left.
+What is the sum of the digits of the number of spoons which were in Granny’s collection?
+A 14 B 12 C 10 D 8 E 6
+©2023UKMathematicsTrust www.ukmt.org.uk

@@ -686,115 +686,10 @@
   "M7": [
     {
       "module": "M7",
-      "code": "M7.0.001",
-      "title": "inch, while Metric Verniers have an accuracy of 0.02 mm.",
-      "level": null,
-      "page": 145
-    },
-    {
-      "module": "M7",
-      "code": "M7.0.03",
-      "title": "OF CABLE INSULATION",
-      "level": null,
-      "page": 227
-    },
-    {
-      "module": "M7",
-      "code": "M7.0.05",
-      "title": "ohm",
-      "level": null,
-      "page": 221
-    },
-    {
-      "module": "M7",
-      "code": "M7.0.3",
-      "title": "sectioned, and, if the inside of the component is symmetrical, (Thin) edges.",
-      "level": null,
-      "page": 174
-    },
-    {
-      "module": "M7",
-      "code": "M7.0.5",
-      "title": "mm (two threads per millimetre), so that the thimble moves sary to decide on the number of divisions, on the fiducial line,",
-      "level": null,
-      "page": 139
-    },
-    {
-      "module": "M7",
-      "code": "M7.0.7",
-      "title": "ing lines being drawn in different directions or with different (Thick) edges.",
-      "level": null,
-      "page": 174
-    },
-    {
-      "module": "M7",
-      "code": "M7.07.01",
-      "title": "Safety Precautions - Aircraft And Classes of Fire 34",
-      "level": null,
-      "page": 9
-    },
-    {
-      "module": "M7",
-      "code": "M7.07.03",
-      "title": "Tools",
-      "level": null,
-      "page": 10
-    },
-    {
-      "module": "M7",
-      "code": "M7.07.04",
-      "title": "Reserved",
-      "level": null,
-      "page": 11
-    },
-    {
-      "module": "M7",
-      "code": "M7.07.05",
-      "title": "Engineering Drawings, Diagrams & DANIELS CRIMPING TOOLS",
-      "level": null,
-      "page": 11
-    },
-    {
-      "module": "M7",
-      "code": "M7.07.06",
-      "title": "Fits & Clearances WIRING INSTALLATION",
-      "level": null,
-      "page": 11
-    },
-    {
-      "module": "M7",
-      "code": "M7.07.08",
-      "title": "RIVETING HANDLING ANO CLEANING OF BEARINGS",
-      "level": null,
-      "page": 12
-    },
-    {
-      "module": "M7",
-      "code": "M7.07.09",
-      "title": "Pipes And Hoses",
-      "level": null,
-      "page": 12
-    },
-    {
-      "module": "M7",
       "code": "M7.2.4",
       "title": "metres.",
       "level": null,
       "page": 397
-    },
-    {
-      "module": "M7",
-      "code": "M7.7.00",
-      "title": "Body temperature ,&4.30 Minimal body temperature",
-      "level": null,
-      "page": 568
-    },
-    {
-      "module": "M7",
-      "code": "M7.9.00",
-      "title": "Production of",
-      "level": null,
-      "page": 568
     }
   ],
   "M11A": [
@@ -982,20 +877,6 @@
     },
     {
       "module": "M11A",
-      "code": "M11A.13.1(a)",
-      "title": "Aeroplane aerodynamics and flight controls",
-      "level": null,
-      "page": 14
-    },
-    {
-      "module": "M11A",
-      "code": "M11A.13.1(b)",
-      "title": "Aeroplane: other aerodynamic devices 68",
-      "level": null,
-      "page": 14
-    },
-    {
-      "module": "M11A",
       "code": "M11A.2.0",
       "title": "volts (Nominal) L",
       "level": null,
@@ -1014,30 +895,9 @@
       "title": "p.s.i. system pressure can pressurise the reservoir fluid",
       "level": null,
       "page": 670
-    },
-    {
-      "module": "M11A",
-      "code": "M11A.81.2",
-      "title": "Longitudinal balance fuel systems.",
-      "level": null,
-      "page": 10
     }
   ],
   "M13": [
-    {
-      "module": "M13",
-      "code": "M13.0.1",
-      "title": "SECS 0.55SECS 1 SEC",
-      "level": null,
-      "page": 488
-    },
-    {
-      "module": "M13",
-      "code": "M13.0.3",
-      "title": "to the rudder to counteract sideslip during the transient",
-      "level": null,
-      "page": 143
-    },
     {
       "module": "M13",
       "code": "M13.1.0",
@@ -1082,146 +942,6 @@
     },
     {
       "module": "M13",
-      "code": "M13.12.000",
-      "title": "tenna coupler. Through the R/T switch the signal goes",
-      "level": null,
-      "page": 222
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.01",
-      "title": "Theory of Flight",
-      "level": null,
-      "page": 14
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.03",
-      "title": "Autoflight (ATA 22) Dual Channel Fail Passive System 109",
-      "level": null,
-      "page": 15
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.04",
-      "title": "Communication/ Navigation (ATA 23/34)",
-      "level": null,
-      "page": 17
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.05",
-      "title": "Electric Power (ATA 24)",
-      "level": null,
-      "page": 23
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.06",
-      "title": "Equipment And Furnishings (ATA 25) Ground Spoilers 513",
-      "level": null,
-      "page": 26
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.07",
-      "title": "Flight Controls (ATA 27) THS Actuator 523",
-      "level": null,
-      "page": 26
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.09",
-      "title": "LIGHTS (ATA 33) Passenger Compartment Lights 740",
-      "level": null,
-      "page": 32
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.1(a)",
-      "title": "Aeroplane aerodynamics and flight controls",
-      "level": null,
-      "page": 14
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.1(b)",
-      "title": "Rotary wing aerodynamics",
-      "level": null,
-      "page": 14
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.2(a)",
-      "title": "General Concepts",
-      "level": null,
-      "page": 14
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.2(b)",
-      "title": "Fundamentals of structural systems",
-      "level": null,
-      "page": 14
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.3(a)",
-      "title": "Fundamentals of automatic flight control",
-      "level": null,
-      "page": 15
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.3(b)",
-      "title": "Autothrottle systems • RETARD• Provides control of throttles to reduce thrust",
-      "level": null,
-      "page": 158
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.4(b)",
-      "title": "Fundamentals of air These reply pulses are coded to supply identification and auto",
-      "level": null,
-      "page": 333
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.7(a)",
-      "title": "Primary and secondary flight controls: 510",
-      "level": null,
-      "page": 26
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.7(b)",
-      "title": "Actuation and protec",
-      "level": null,
-      "page": 555
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.7(c)",
-      "title": "System operation The basics of flight control 574",
-      "level": null,
-      "page": 28
-    },
-    {
-      "module": "M13",
-      "code": "M13.13.7(d)",
-      "title": "Rotorcraft flight con",
-      "level": null,
-      "page": 575
-    },
-    {
-      "module": "M13",
-      "code": "M13.14.5",
-      "title": "NH oTHS 14.5.N Fig 08.1 37 - A350 EFIS and ECAM systems displays",
-      "level": null,
-      "page": 699
-    },
-    {
-      "module": "M13",
       "code": "M13.2.0",
       "title": "volts (Nominal) 0 21.IV -------------DISCHARGED---------- ---",
       "level": null,
@@ -1236,13 +956,6 @@
     },
     {
       "module": "M13",
-      "code": "M13.30.05",
-      "title": "dial for 100,000 feet if the instrument were to go that high. The",
-      "level": null,
-      "page": 625
-    },
-    {
-      "module": "M13",
       "code": "M13.5.05",
       "title": "metres (5050mm) at't ofs1n1lon zero. Fig 02. 4 • Waterline s1a1lo11s",
       "level": null,
@@ -1254,123 +967,165 @@
       "title": "DA Rwy 1390",
       "level": null,
       "page": 280
-    },
-    {
-      "module": "M13",
-      "code": "M13.88.7",
-      "title": "FULL FUEL",
-      "level": null,
-      "page": 664
     }
   ],
   "M14": [],
-  "M15": [
+  "M15": [],
+  "M17": [],
+  "M8": [
     {
-      "module": "M15",
-      "code": "M15.0.9",
-      "title": "N2 0.4",
-      "level": null,
-      "page": 447
+      "module": "M8",
+      "code": "M8.1",
+      "title": "Physics of the Atmosphere International Standard Atmosphere (ISA), Application to Aerodynamics.",
+      "level": 2
     },
     {
-      "module": "M15",
-      "code": "M15.15.01",
-      "title": "Fundamentals",
-      "level": null,
-      "page": 9
+      "module": "M8",
+      "code": "M8.2",
+      "title": "Aerodynamics Airflow around a body; Boundary Layer, Laminar and Turbulent Flow, Free Stream Flow, Relative Airflow, Up-Wash and Downwash, Vortices, Stagnation; The Terms: Camber, Chord, Mean Aerodynamic Chord, Profile (Parasite) Drag, Induced Drag, Centre of Pressure, Angle of Attack, Wash In and Wash Out, Fineness Ratio, Wing Shape and Aspect Ratio; Thrust, Weight, Aerodynamic Resultant; Generation of Lift and Drag: Angle of Attack, Lift Coefficient, Drag Coefficient, Polar Curve, Stall; Aerofoil Contamination including Ice, Snow, Frost.",
+      "level": 2
     },
     {
-      "module": "M15",
-      "code": "M15.15.03",
-      "title": "Inlet",
-      "level": null,
-      "page": 10
+      "module": "M8",
+      "code": "M8.3",
+      "title": "Theory of Flight a Relationship between Lift, Weight, Thrust and Drag / Glide Ratio; Steady State Flights, Performance / Theory of the turn / Influence of Load Factor: Stall, Flight Envelope and Structural Limitations / Lift Augmentation.",
+      "level": 2
     },
     {
-      "module": "M15",
-      "code": "M15.15.04",
-      "title": "Compressors",
-      "level": null,
-      "page": 10
+      "module": "M8",
+      "code": "M8.4",
+      "title": "High-Speed Airflow & Speed of sound, subsonic flight, transonic flight, supersonic flight, @ Mach number, critical Mach number, compressibility buffet, shock wave, aerodynamic heating, area rule; Factors that affect airflow in engine intakes of high-speed aircraft; Effects of sweepback on critical Mach number.",
+      "level": 2
     },
     {
-      "module": "M15",
-      "code": "M15.15.05",
-      "title": "Combustion Section",
-      "level": null,
-      "page": 12
-    },
-    {
-      "module": "M15",
-      "code": "M15.15.06",
-      "title": "Turbine Section 213",
-      "level": null,
-      "page": 12
-    },
-    {
-      "module": "M15",
-      "code": "M15.15.08",
-      "title": "Bearings and Seals",
-      "level": null,
-      "page": 12
-    },
-    {
-      "module": "M15",
-      "code": "M15.15.09",
-      "title": "Lubricants and Fluids",
-      "level": null,
-      "page": 13
+      "module": "M8",
+      "code": "M8.5",
+      "title": "Flight Stability and Dynamics Longitudinal, Lateral and Directional Stability (Active and Passive).",
+      "level": 2
     }
   ],
-  "M17": [
+  "M9": [
     {
-      "module": "M17",
-      "code": "M17.17.01",
-      "title": "Fundamentals FORCES ACTING ON A PROPELLER",
-      "level": null,
-      "page": 6
+      "module": "M9",
+      "code": "M9.1",
+      "title": "General The need to take human factors into account: Incidents attrib- utable to human factors/human error; ‘Murphy’s’ law.",
+      "level": 2
     },
     {
-      "module": "M17",
-      "code": "M17.17.02",
-      "title": "Propeller Construction",
-      "level": null,
-      "page": 5
+      "module": "M9",
+      "code": "M9.10",
+      "title": "The Dirty Dozen and Risk Mitigation The twelve most common human-factors errors in maintenance; Risk-mitigation methods.",
+      "level": 2
     },
     {
-      "module": "M17",
-      "code": "M17.17.03",
-      "title": "Propeller Pitch Control",
-      "level": null,
-      "page": 5
+      "module": "M9",
+      "code": "M9.2",
+      "title": "Human Performance and Limitations Vision; Hearing; Information processing; Attention and per- ception; Memory; Claustrophobia and physical access.",
+      "level": 2
     },
     {
-      "module": "M17",
-      "code": "M17.17.04",
-      "title": "Propeller Synchronising",
-      "level": null,
-      "page": 5
+      "module": "M9",
+      "code": "M9.3",
+      "title": "Social Psychology Accountability and responsibility: individual and group; Moti- vation and de-motivation; Peer pressure; ‘Culture’ issues; Team work; Management, supervision and leadership.",
+      "level": 1
     },
     {
-      "module": "M17",
-      "code": "M17.17.05",
-      "title": "Propeller Ice Protection",
-      "level": null,
-      "page": 5
+      "module": "M9",
+      "code": "M9.4",
+      "title": "Factors that affect performance — Fitness/health; Stress: domestic and work related; Time pres- sure and deadlines; Workload: overload, underload and work- load management; Sleep and fatigue, shift-work; Alcohol, med- ication, drug abuse. Lack of manpower.",
+      "level": 2
     },
     {
-      "module": "M17",
-      "code": "M17.17.06",
-      "title": "Propeller Maintenance",
-      "level": null,
-      "page": 5
+      "module": "M9",
+      "code": "M9.5",
+      "title": "Physical Environment Noise and fumes; Illumination; Climate and temperature; Mo- tion and vibration; Working environment, Situational Aware- ness",
+      "level": 1
     },
     {
-      "module": "M17",
-      "code": "M17.17.07",
-      "title": "Propeller Storage And Preservation",
-      "level": null,
-      "page": 5
+      "module": "M9",
+      "code": "M9.6",
+      "title": "Tasks Physical work; Repetitive tasks, complacency; Visual inspec- tion; Complex systems; Critical maintenance tasks and er- ror-capturing methods; Technical documentation: access, use, and quality.",
+      "level": 1
+    },
+    {
+      "module": "M9",
+      "code": "M9.7",
+      "title": "Communication Within and between teams; Work logging and recording; Shift handover; Keeping up to date, currency; Dissemination of information.",
+      "level": 2
+    },
+    {
+      "module": "M9",
+      "code": "M9.8",
+      "title": "Human Error Error models and theories; Types of error in maintenance tasks; Implications of errors; Organizational errors; Avoiding and managing errors.",
+      "level": 2
+    },
+    {
+      "module": "M9",
+      "code": "M9.9",
+      "title": "Safety Management Risk management; Occurrence reporting; Safety culture; Just culture; Identifying, avoiding, and reporting hazards; Organisational human-factors programme.",
+      "level": 2
+    }
+  ],
+  "M10": [
+    {
+      "module": "M10",
+      "code": "M10.1",
+      "title": "Regulatory Framework Role of: — the International Civil Aviation Organization (ICAO); — the European Commission (EC); — the European Union Aviation Safety Agency (EASA); — the European Union Member States and national aviation authorities; — the bilateral agreements concluded by the European Com- mission; — Regulation (EU) 2018/1139 (the Basic Regulation) and its im- plementing acts: Regulations (EU) No 748/2012 (Initial Airworthiness) and (EU) No 1321/2014 (Continuing Airworthiness); — the relationship between regulations (hard law) and AMC, GM and CSs (soft law); — occurrence reporting according to Regulation (EU) No 376/2014; — the relationship between the various annexes (parts) relat- ing to Initial and Continuing Airworthiness (such as Part-21, Part-M, Part-145, Part-66, Part- 147, Part-T, Part-ML,",
+      "level": 1
+    },
+    {
+      "module": "M10",
+      "code": "M10.10",
+      "title": "Cybersecurity in aviation maintenance Regulation on the introduction of organisation requirements for the management of information security risks related to aeronautical information systems used in civil aviation.",
+      "level": 1
+    },
+    {
+      "module": "M10",
+      "code": "M10.2",
+      "title": "Certifying Staff — Maintenance Deep understanding of Part-66 maintenance licences with the associated privileges and authorisations, and how to exercise them properly for the different aircraft categories.",
+      "level": 2
+    },
+    {
+      "module": "M10",
+      "code": "M10.3",
+      "title": "Approved Maintenance Organisations General understanding of Part-145 and Part-CAO.",
+      "level": 2
+    },
+    {
+      "module": "M10",
+      "code": "M10.4",
+      "title": "Independent certifying staff Privileges, responsibilities, record-keeping, limitations, and oversight according to Part-M, Part-66 and Part-ML.",
+      "level": 3
+    },
+    {
+      "module": "M10",
+      "code": "M10.5",
+      "title": "Air operations General understanding of Regulation (EU) No 965/2012 (the Air Operations Regulation); Differences between commercial and non-commercial air op- erations, and their influence on aircraft maintenance; Air Operator Certificates (AOCs) and self-declaration authori- sations; Air operator responsibilities, in particular regarding continu- ing airworthiness and maintenance; Specialised operations / specific approvals: ETOPS, CAT I/II/II, and BRNAV.",
+      "level": 1
+    },
+    {
+      "module": "M10",
+      "code": "M10.6",
+      "title": "Certification of aircraft, parts and appliances Basic understanding of Part-21 and of the following EASA certi- fication specifications: CS-22, CS-23, CS-25, CS-27, CS-29, and CS- STAN.",
+      "level": 2
+    },
+    {
+      "module": "M10",
+      "code": "M10.7",
+      "title": "Continuing airworthiness General understanding of the Part-21 requirements on continu- ing airworthiness; General understanding of Part-M, Part-ML and Part-CAMO;",
+      "level": 2
+    },
+    {
+      "module": "M10",
+      "code": "M10.8",
+      "title": "Oversight Principles in Continuing Airworthiness",
+      "level": 1
+    },
+    {
+      "module": "M10",
+      "code": "M10.9",
+      "title": "Maintenance and Certification Beyond Current EU Regulations",
+      "level": 1
     }
   ]
 }

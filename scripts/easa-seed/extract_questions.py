@@ -137,31 +137,38 @@ def _split_questions(paragraphs: list[str]) -> list[str]:
     return [b for b in blocks if b]
 
 
-def _parse_block_letter(block: str) -> tuple[str, list[str]] | None:
+def _parse_block_letter(block: str) -> tuple[str, list[str], int | None] | None:
     """Parse '1. Q\n   a. opt\n   b. opt\n   c. opt' style.
 
-    Returns (question, [optA, optB, optC, ...]) or None.
+    Returns (question, [optA, optB, optC, ...], correct_index) or None.
     """
     lines = block.split("\n")
-    # First line is the question number + question text
     first = lines[0]
     m = re.match(r"^\d+\s*[\.\)]\s*(.+)", first)
     if not m:
         return None
     q_text = m.group(1).strip()
     opts: list[str] = []
-    opt_re = re.compile(r"^\s*([a-dA-D])\s*[\.\)]\s*(.+)$")
+    correct_idx = None
+    opt_re = re.compile(r"^\s*(?:#\s+)?([a-dA-D])\s*[\.\)]\s*(.+)$")
     for line in lines[1:]:
         m2 = opt_re.match(line)
         if m2:
-            opts.append(m2.group(2).strip())
+            letter = m2.group(1).upper()
+            text = m2.group(2).strip()
+            opts.append(text)
+            if line.strip().startswith("#"):
+                correct_idx = ord(letter) - ord("A")
     if not opts:
         return None
-    return q_text, opts
+    return q_text, opts, correct_idx
 
 
-def _parse_block_number(block: str) -> tuple[str, list[str]] | None:
-    """Parse '1. Q\n1. opt\n2. opt\n3. opt' style (M10)."""
+def _parse_block_number(block: str) -> tuple[str, list[str], int | None] | None:
+    """Parse '1. Q\n1. opt\n2. opt\n3. opt' style (M10).
+    
+    Also handles multi-line options and stops at 'Correct'/'Incorrect' markers.
+    """
     lines = block.split("\n")
     first = lines[0]
     m = re.match(r"^\d+\s*[\.\)]\s*(.+)", first)
@@ -169,14 +176,48 @@ def _parse_block_number(block: str) -> tuple[str, list[str]] | None:
         return None
     q_text = m.group(1).strip()
     opts: list[str] = []
-    opt_re = re.compile(r"^\s*(\d)\s*[\.\)]\s*(.+)$")
-    for line in lines[1:]:
+    correct_idx = None
+    opt_re = re.compile(r"^\s*(?:#\s+)?(\d)\s*[\.\)]\s*(.*)$")
+    footer_re = re.compile(r"^(Correct|Incorrect|Category:|Answer:|Answers:|Key:)", re.IGNORECASE)
+    
+    i = 1
+    current_idx = None
+    current_text_parts = []
+    
+    while i < len(lines):
+        line = lines[i]
+        # Stop at footer lines
+        if footer_re.match(line.strip()):
+            if current_idx is not None:
+                opts.append(" ".join(current_text_parts).strip())
+            current_idx = None  # prevent double-save
+            break
         m2 = opt_re.match(line)
         if m2:
-            opts.append(m2.group(2).strip())
+            # Save previous option if exists
+            if current_idx is not None:
+                opts.append(" ".join(current_text_parts).strip())
+            current_idx = int(m2.group(1)) - 1
+            current_text_parts = [m2.group(2)] if m2.group(2) else []
+            if line.strip().startswith("#"):
+                correct_idx = current_idx
+            i += 1
+        elif current_idx is not None:
+            # Continuation of current option text
+            text = line.strip()
+            if text and not re.match(r"^\d+\s*[\.\)]", text):
+                current_text_parts.append(text)
+            i += 1
+        else:
+            i += 1
+    
+    # Save last option
+    if current_idx is not None:
+        opts.append(" ".join(current_text_parts).strip())
+    
     if not opts:
         return None
-    return q_text, opts
+    return q_text, opts, correct_idx
 
 
 def _parse_block_markdown(block: str) -> tuple[str, list[str]] | None:
@@ -384,9 +425,19 @@ def _parse_blocks(blocks: list[str], source_file: str, module: str, fmt: str) ->
             parsed = _parse_block_number(block)
         if not parsed:
             continue
-        q_text, opts = parsed
+        q_text = opts = correct_idx = None
+        if len(parsed) == 3:
+            q_text, opts, correct_idx = parsed
+        else:
+            q_text, opts = parsed
         opts = [o.strip().strip("*").strip() for o in opts]
-        correct, ans_text = _find_answer(block, opts)
+        correct = None
+        ans_text = None
+        if correct_idx is not None and 0 <= correct_idx < len(opts):
+            correct = chr(ord("A") + correct_idx)
+            ans_text = opts[correct_idx]
+        else:
+            correct, ans_text = _find_answer(block, opts)
         questions.append(
             Question(
                 raw=block.strip(),
@@ -578,7 +629,6 @@ def main() -> int:
         "EASA Module 04",
         "EASA-MODULE-04",
         "EASA Module 08",
-        "EASA Module 09",
         "EASA MODULE 8",
         "EASA Module 11",
         "module 3 easa book",

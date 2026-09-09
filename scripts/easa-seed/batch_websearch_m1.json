@@ -1,0 +1,1378 @@
+[
+  {
+    "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+    "questions": [
+      {
+        "row_index": 193,
+        "id": 194,
+        "text": "They are positive integers and have at least one positive divisor other than one and themselves.",
+        "options": ["Prime numbers", "Integers", "Composite numbers"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 195,
+        "id": 196,
+        "text": "It is not one of the following numbers 7.89, 7½, √5",
+        "options": ["Irrational number", "Integer", "Rational number"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 196,
+        "id": 197,
+        "text": "If a number is not real then it is ….",
+        "options": ["a complex number", "a rational number", "an integer"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 197,
+        "id": 198,
+        "text": "In multiplying two numbers, if the signs of the factors are the same, then the sign of the product is",
+        "options": ["Positive", "Negative", "Unknown"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 198,
+        "id": 199,
+        "text": "In the division = 3, the 24 is the",
+        "options": ["Divisor", "Dividend", "number"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 199,
+        "id": 200,
+        "text": "Solve 2 + 5 – 3 × 6 ÷ 2(3 – 1)",
+        "options": ["14", "6", "-11"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 200,
+        "id": 201,
+        "text": "Which remainder is larger,",
+        "options": ["I", "II", "Cannot be determined"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 201,
+        "id": 202,
+        "text": "Rama puts a 2-digit whole number into her calculator. She multiplies the number by 10. State one",
+        "options": ["Cannot be determined", "10", "0"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 202,
+        "id": 203,
+        "text": "Given that 2 − 3 = . find the numerical value of A – B",
+        "options": ["1", "– 1", "17/18"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 204,
+        "id": 205,
+        "text": "15. Apples cost $2.37 for 3 kg. How much did Abdul pay for 5 kg ?",
+        "options": ["$3.95", "$1.42", "$39.50"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 206,
+        "id": 207,
+        "text": "Find 24.784 up to one decimal place plus 34.4425 rounded down to two decimal places.",
+        "options": ["59.24", "59.14", "59.22"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 208,
+        "id": 209,
+        "text": "19. Given that 112 = 2𝐴×𝐵1, What is the value of B – A ?",
+        "options": ["– 3", "3", "7"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 212,
+        "id": 213,
+        "text": "to propellers to engines?",
+        "options": ["6:10:17", "10:6:17", "6:17:10"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 215,
+        "id": 216,
+        "text": "The ratio of nails to hammer in a toolbox is 2:5. How many nails would be there if there are total of",
+        "options": ["24", "60", "33"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 216,
+        "id": 217,
+        "text": "132. Determine how many engines are serviceable?",
+        "options": ["84", "48", "77"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 219,
+        "id": 220,
+        "text": "It is not an average.",
+        "options": ["Range of a data set", "Mean age of a group engineers", "Speed of a car"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 224,
+        "id": 225,
+        "text": "company did the highest sales in terms of percentage?",
+        "options": ["Airbus", "Boeing", "Same percentage sales"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 225,
+        "id": 226,
+        "text": "A bag of sugar contains 420g. A special offer packet contains an extra 15%. Work out how much",
+        "options": ["36 g", "63 g", "483 g"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 226,
+        "id": 227,
+        "text": "Engineer Nana Akua wants to buy a specialist multimeter that costs GHC600. She saves 30% of her",
+        "options": ["7 months", "6 months", "5 months"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 227,
+        "id": 228,
+        "text": "Rexford claims if he increases a number by 10% and increases his answer by 10%, that would be an",
+        "options": ["Rexford is correct", "Rexford is wrong", "Not enough information to decides"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 228,
+        "id": 229,
+        "text": "Some aviation students sit an exam. The pass mark is 80%. There are 40 marks in the exam.",
+        "options": ["Godsable passed", "Godsable failed", "Godsable neither passed nor failed"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 229,
+        "id": 230,
+        "text": "contains less orange juice?",
+        "options": ["Neither", "400ml", "300ml"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 230,
+        "id": 231,
+        "text": "when a weight of 16 000 lb. is placed on it?",
+        "options": ["4800 kg", "3000 kg", "1800 kg"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 231,
+        "id": 232,
+        "text": "Evaluate 32 – 22 + 23",
+        "options": ["13", "9", "7"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 232,
+        "id": 233,
+        "text": "Find x, if 64 2/3 + 64 1/6 - 641/2",
+        "options": ["10", "2", "0"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 233,
+        "id": 234,
+        "text": "Find y, given that 3 y = 18. – 3 y",
+        "options": ["– 2", "0", "2"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 234,
+        "id": 235,
+        "text": "Find x, given that = 0.1",
+        "options": ["40", "20", "2"],
+        "source": "AEROJET REVISION M1 1_230808_091651.pdf",
+        "difficulty": "EASY"
+      }
+    ]
+  },
+  {
+    "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+    "questions": [
+      {
+        "row_index": 238,
+        "id": 239,
+        "text": "52. In the UK, stamps are 19p. Peter wants to buy 9 stamps. How much does he have to pay less than £2 ?",
+        "options": ["£1.71", "£9", "£0.09"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 240,
+        "id": 241,
+        "text": "What percentage of 600 is the same as 40% of 1200",
+        "options": ["80%", "60%", "40%"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 241,
+        "id": 242,
+        "text": "discount of 30% off the marked price, while shop is giving 1/3 off. Which shop is selling the tool cheaper?",
+        "options": ["Shop A", "Shop B", "The discounts are the same"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 242,
+        "id": 243,
+        "text": "Find Log (XY)",
+        "options": ["1.6001", "2.6001", "1̅.6001"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 247,
+        "id": 248,
+        "text": "The sum of the interior angles of a pentagon are divided up in the ratio 4:5:11:15:13. What is the size of the",
+        "options": ["146.25 degrees", "168.75 degree", "123.75 degrees"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 251,
+        "id": 252,
+        "text": "Insert one of >, < or = into the space. 1024 1/10 ______ 128 3/7",
+        "options": [">", "<", "="],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 252,
+        "id": 253,
+        "text": "A pinion gear with 10 teeth is driving a spur gear with 40 teeth. The spur gear is rotating at 160 revolutions",
+        "options": ["640 rpm", "460 rpm", "604 rpm"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 254,
+        "id": 255,
+        "text": "In a shipment of 80 wingtip lights, 15% of the lights were defective. How many of the lights were non",
+        "options": ["12", "68", "78"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 255,
+        "id": 256,
+        "text": "efficiency expressed as a percent?",
+        "options": ["89%", "90%", "112%"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 256,
+        "id": 257,
+        "text": "Two hundred and thirty-four ohms represents 52% of a microphone's total resistance. Find the total resistance",
+        "options": ["450 mΩ", "450 MΩ", "0.45 kΩ"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 262,
+        "id": 263,
+        "text": "Find the sum 3.5 A + 0.42 kA + 81.3 mA, giving your answer in the basic unit.",
+        "options": ["42.35813 A", "423.5813 A", "4.235813 A"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 263,
+        "id": 264,
+        "text": "Solve 3500 Hz + 6 GHz + 39 MHz",
+        "options": ["3 456 000 Hz", "3 456 000 MHz", "3 456 000 kHz"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 266,
+        "id": 267,
+        "text": "85. What is the definition of proportion?",
+        "options": [
+          "A statement of equality between two or more ratios.",
+          "A statement of inequity between two or more ratios.",
+          "All ratios are proportionate."
+        ],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 269,
+        "id": 270,
+        "text": "88. What is the speed of a spur gear with 42 teeth driven by a pinion gear with 14 teeth turning 420 RPM?",
+        "options": ["588 RPM", "160 RPM", "140 RPM"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 270,
+        "id": 271,
+        "text": "89. 56% of T is 182. What is T?",
+        "options": ["350", "364", "325"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 271,
+        "id": 272,
+        "text": "maximum marks of the exam?",
+        "options": ["100", "200", "150"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 273,
+        "id": 274,
+        "text": "The sum of three numbers is 285. The ratio between the second and third numbers is 6:5, while the ratio",
+        "options": ["150", "105", "124"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 275,
+        "id": 276,
+        "text": "$612. If the first discount was 10%, what was the second discount?",
+        "options": ["10%", "!5%", "20%"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 276,
+        "id": 277,
+        "text": "95. A tricycle moves with a speed of 180km/h. What is this speed in m/s?",
+        "options": ["5", "30", "50"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 277,
+        "id": 278,
+        "text": "actual speed of the car?",
+        "options": ["25 km/h", "30 km/h", "35 km/h"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 279,
+        "id": 280,
+        "text": "of of × of 1008 is",
+        "options": ["200", "END", "64"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 281,
+        "id": 282,
+        "text": "Simplify ((3x3x3x3x3x3) 6 ÷ (3x3x3x3) 7 × 3 4)",
+        "options": ["27 9", "27 4", "3 15"],
+        "source": "AEROJET REVISION  M1  PART 2_230808_115224.pdf",
+        "difficulty": "EASY"
+      }
+    ]
+  },
+  {
+    "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+    "questions": [
+      {
+        "row_index": 158,
+        "id": 159,
+        "text": "What is the value of 4−−22×(−5)2",
+        "options": ["0", "104", "400"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 160,
+        "id": 161,
+        "text": "The M in BIDMAS represents",
+        "options": ["Minus", "Multiple", "Product"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 162,
+        "id": 163,
+        "text": "6. If 58x962 = 55 796, what is the value of 5.8x96.2?",
+        "options": ["557.96", "55.796", "5579.6"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 163,
+        "id": 164,
+        "text": "7. If 10𝑛 = 10 000×103, what is the value of n?",
+        "options": ["5", "6", "7"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 165,
+        "id": 166,
+        "text": "Work out 19 – (42 – 16) + 32",
+        "options": ["25", "39", "– 39"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 166,
+        "id": 167,
+        "text": "Calculate 36 ÷9+3−54 ÷9+2",
+        "options": ["– 1", "3", "2"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 167,
+        "id": 168,
+        "text": "Approximately 76 000 fans watched Manchester United play Wrexham. This is the attendance to the",
+        "options": ["hundreds", "thousands", "ten thousands"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 169,
+        "id": 170,
+        "text": "Sum 50% of $210 + 20% of $1100",
+        "options": ["105", "220", "325"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 172,
+        "id": 173,
+        "text": "Expand and simplify (x + 3)(x + 2)",
+        "options": ["x2+6x+5", "x2+3x+2x+6", "x2+5x+6"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 173,
+        "id": 174,
+        "text": "Expand (m – 6)2",
+        "options": ["m2 - 36", "m2 – 12m + 36", "m2 - -12m -36"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 174,
+        "id": 175,
+        "text": "Work out (7 ) −(2 )",
+        "options": ["5", "50", "55"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 175,
+        "id": 176,
+        "text": "64002−𝑡2 = (𝑝−𝑡)(𝑝+𝑡).Find 𝑝.",
+        "options": ["8", "64", "80"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 176,
+        "id": 177,
+        "text": "Find angle c For questions 21 and 22",
+        "options": ["135 degrees", "45 degrees", "35 degrees"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 177,
+        "id": 178,
+        "text": "Angles a and c are",
+        "options": ["alternate", "co-interior", "corresponding"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 179,
+        "id": 180,
+        "text": "24. What is the geometrical name of figure ABCDEF in the diagram?",
+        "options": ["Pentagon", "Hexagon", "Regular hexagon"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 180,
+        "id": 181,
+        "text": "What is the size of angle c from the diagram? For questions 23, 24 and 25.",
+        "options": ["30 degrees", "60 degrees", "90 degrees"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 181,
+        "id": 182,
+        "text": "26. What is the bearing from B to A in diagram for Q26?",
+        "options": ["050 degrees For Q26", "320 degrees", "40 degrees"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 182,
+        "id": 183,
+        "text": "Find the area of the washer in diagram X",
+        "options": ["65.94 sq. mm", "65.49 sq. mm", "56.94 sq. mm"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 186,
+        "id": 187,
+        "text": "31. What is the place of the digit 8 in the number 45,805?",
+        "options": ["eight", "eighty", "hundreds"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 187,
+        "id": 188,
+        "text": "Doubling a number means the same as adding 2 to it.",
+        "options": ["never", "sometimes", "always JOURNEY OF CAR"],
+        "source": "AEROJET M1 SAMPLE TEST 2 WITHOUT ANSWERS (1)_230822_094249.pdf",
+        "difficulty": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+    "questions": [
+      {
+        "row_index": 71,
+        "id": 72,
+        "text": "discounted price of the watch at Store B ?",
+        "options": ["$1.75", "$5.00", "$5.25"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 74,
+        "id": 75,
+        "text": "in dollars, for ounces of organic blueberries?",
+        "options": ["10/2.7 = x/30", "2.7/10 = 30/x", "10/2.7 = 30/x"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 76,
+        "id": 77,
+        "text": "of chili were sold?",
+        "options": ["36", "54", "90"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 78,
+        "id": 79,
+        "text": "mowers in the one month?",
+        "options": ["12.3", "24.6", "36.9"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 79,
+        "id": 80,
+        "text": "does the machine make nails?",
+        "options": ["2/3", "3 ¾", "1 ½"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 82,
+        "id": 83,
+        "text": "12. What is the value of the expression - 36/9 + 3( - 7 ) + 2?",
+        "options": ["– 23", "– 19", "9"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 83,
+        "id": 84,
+        "text": "per pound, at which the cook uses salt to make pasta?",
+        "options": ["½", "1", "1 ¾"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 84,
+        "id": 85,
+        "text": "the length, in feet, of each side of the square?",
+        "options": ["12p – 4", "12p -16", "24p – 8"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 86,
+        "id": 87,
+        "text": "16. Which expression is equivalent to the expression shown below?",
+        "options": ["7 + 6x", "17 + 2x", "17 + 6x"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 87,
+        "id": 88,
+        "text": "17. John eats 3:5 of a candy bar. What percent of the candy bar does he eat?",
+        "options": ["6%", "35%", "60%"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 88,
+        "id": 89,
+        "text": "represents the submarine’s depth after seven minutes?",
+        "options": ["–210 feet", "–23 feet", "210 feet"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 90,
+        "id": 91,
+        "text": "the total attendance at the concerts?",
+        "options": ["800 + 600 + 800", "900 + 700 + 900", "900 + 600 + 900"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 94,
+        "id": 95,
+        "text": "money to buy the DVD player. How many weeks before Chrismond has enough for the DVD player?",
+        "options": ["6 weeks", "8 weeks", "10 weeks"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 96,
+        "id": 97,
+        "text": "26. What is the value of the expression 8x – 10 when x = y – 3 and y = 8?",
+        "options": ["3", "4", "30"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 97,
+        "id": 98,
+        "text": "A shopper spent $100 at the store. How many dollars did the shopper spend on dinner?",
+        "options": ["$10", "$18", "$42 Money spent on food"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 99,
+        "id": 100,
+        "text": "Find the difference between the mean and mode of the data",
+        "options": ["45", "65", "20"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 100,
+        "id": 101,
+        "text": "30. What id the distance between the points in the graph?",
+        "options": ["81", "9", "√99"],
+        "source": "AEROJET M1 SAMPLE SET 3 WITHOUT ANSWERS_230824_114532.pdf",
+        "difficulty": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+    "questions": [
+      {
+        "row_index": 104,
+        "id": 105,
+        "text": "The equivalent of 326 × 12.82/0.62 , correct to two decimal places is:",
+        "options": ["6740.84", "674.08", "67.41"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 107,
+        "id": 108,
+        "text": "An aircraft supplier buys 200 packs of rivets for £100.00 and sells them for 70 pence a pack. His",
+        "options": ["30%", "40%", "59%"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 109,
+        "id": 110,
+        "text": "The mass of an electrical part is 23 g, so the total mass, in kg, of 80 such parts is:",
+        "options": ["1840", "184", "1.84"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 110,
+        "id": 111,
+        "text": "The product of 3x, x, −2x2, is:",
+        "options": ["−6x4", "−5x4", "4x − 2x2"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 111,
+        "id": 112,
+        "text": "When simplified is equivalent to:",
+        "options": ["4x2 − 9x4", "4x2 − 2x4", "3 + 4x2 − 6x4"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 112,
+        "id": 113,
+        "text": "The expression simplified −[ ]+1",
+        "options": ["−1", "0", "1"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 113,
+        "id": 114,
+        "text": "The formula, 𝑋 = √𝑍2−𝑅2, correctly transposed for 𝑅 is:",
+        "options": ["𝑅 = √𝑍2−𝑋2", "𝑅 = √𝑍2+𝑋2", "𝑅 = 𝑍−𝑋"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 114,
+        "id": 115,
+        "text": "If a is a positive integer and a2 + a − 30 = 0, then the value of a is:",
+        "options": ["6", "5", "4"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 115,
+        "id": 116,
+        "text": "From the tables, the antilogarithm of 2̅..4177 is:",
+        "options": ["0.02617", "0.02607", "0.2607"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 116,
+        "id": 117,
+        "text": "A circle of radius = 15 cm, will have an area of:",
+        "options": ["707.14 cm2", "1414.28 cm2", "94.25 cm2"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 119,
+        "id": 120,
+        "text": "From tables the cos 57◦ 50/ is:",
+        "options": ["0.5324", "0.5334", "0.5319"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 121,
+        "id": 122,
+        "text": "Natural numbers are known as:",
+        "options": ["positive integers", "positive whole numbers", "positive rational numbers"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 122,
+        "id": 123,
+        "text": "Find the value of a(b + c − d), where a = 3, b = −4, c = 6 and d = −1",
+        "options": ["3", "– 27", "9"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 124,
+        "id": 125,
+        "text": "reaching the end of its shelf life, he must sell it for £1400.00. What is the supplier’s percentage loss?",
+        "options": ["17.7%", "17.6%", "17%"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 129,
+        "id": 130,
+        "text": "Transpose the formula F= for v,",
+        "options": ["v =", "v = √", "v = ±√"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 130,
+        "id": 131,
+        "text": "Use logarithms to find the value of: 192.5 × 0.714",
+        "options": ["152.4", "132.4", "142.4"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 131,
+        "id": 132,
+        "text": "A pipe of thickness 5 mm has an external diameter of 120 mm. Find the volume of 2.4 m of pipe.",
+        "options": ["0.0043 m3", "0.0022 m3", "0.0089 m3"],
+        "source": "AEROJET M1 SAMPLE SET 4 WITHOUT ANSWERS_230828_082029.pdf",
+        "difficulty": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "source": "DOC-20230901-WA0018_230901_121931.pdf",
+    "questions": [
+      {
+        "row_index": 291,
+        "id": 292,
+        "text": "pence each. What percentage profit does the supplier make?",
+        "options": ["33%", "33.3%", "30%"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 292,
+        "id": 293,
+        "text": "Solve for x, if 200 : 4 :: 350 : x",
+        "options": ["7", "6", "5"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 295,
+        "id": 296,
+        "text": "Convert the denary number 40 to an octal number.",
+        "options": ["5", "50", "500"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 296,
+        "id": 297,
+        "text": "Evaluate the expression: (6)(20)−36 − 2+16 − 4",
+        "options": ["5", "5", "−42"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 297,
+        "id": 298,
+        "text": "Simplify: (12a2 − 2)(2ab2)2",
+        "options": ["48a4b4 – 8a2b4", "48a4b3 – 8a2b4", "48a4b4 – 8a3b4"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 299,
+        "id": 300,
+        "text": "What is the value of (g − h)(g 2 + gh + h 2), when g = 0.7, h = 0.4",
+        "options": ["0.279", "2.79", "0.0279"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 300,
+        "id": 301,
+        "text": "Make a the subject of the formula s = [2a + (n − 1)d].",
+        "options": ["a =", "a =", "a = − +"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 301,
+        "id": 302,
+        "text": "The cross-section of a tube is shown in the diagram. Find the area correct to four significant figures.",
+        "options": ["5241.7 mm2", "5241 mm2", "5242 mm2"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 302,
+        "id": 303,
+        "text": "Determine the area of the annulus shown in the diagram with inner radius 5 cm and outer diameter",
+        "options": ["123", "122", "121"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 305,
+        "id": 306,
+        "text": "Reduce the following fraction to its lowest term: (21𝑥3𝑦4)÷(28𝑥9𝑦2)",
+        "options": ["(75 , - 130)", "(- 130 , 75)", "(75 , 130)"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 311,
+        "id": 312,
+        "text": "The denary number 37 is the binary number:",
+        "options": ["101001", "10101", "100101"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 312,
+        "id": 313,
+        "text": "Use logarithm tables to find the value of Log (986.78) :",
+        "options": ["2.9939", "2.9943", "2̅.9939"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 313,
+        "id": 314,
+        "text": "The area of the curved surface of a cone whose base radius is 3 cm and whose vertical height is 4 cm",
+        "options": ["47 cm2", "46 cm2", "45 cm2"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 314,
+        "id": 315,
+        "text": "The y solution of the simultaneous equations 5x + 4y = 22; 3x + 5y = 21 is :",
+        "options": ["3", "2", "– 3"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 315,
+        "id": 316,
+        "text": "An isosceles triangle has a base of 5.0 cm and the equal sides are each 6.5 cm long. Find the base",
+        "options": ["67.40", "65.20.", "66.40"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 316,
+        "id": 317,
+        "text": "A man stands on the top of a hill 80 m high in line with a traffic cone in the road below. If the angle of",
+        "options": ["125 m", "40 m", "46 m"],
+        "source": "DOC-20230901-WA0018_230901_121931.pdf",
+        "difficulty": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+    "questions": [
+      {
+        "row_index": 35,
+        "id": 36,
+        "text": "If 77.95 – x = 22.05, find x",
+        "options": ["– 100", "100", "55.9"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 38,
+        "id": 39,
+        "text": "Find the length of line BC in Fig. 1, given that OBC and EDC are straight lines, line DC is 6 m long,",
+        "options": ["14 cm", "10 cm", "2 cm"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 39,
+        "id": 40,
+        "text": "Any number that can be expressed as the product of an integer and the reciprocal of an integer",
+        "options": ["a rational number", "a fraction", "an irrational number"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 41,
+        "id": 42,
+        "text": "Solve for y if ( 1 +𝑎)𝑏2 = 𝐶",
+        "options": ["y = −𝑎", "y = −𝑎", "y ="],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 42,
+        "id": 43,
+        "text": "10. Find angle ABD in Fig. 2, given that triangle ABC is equilateral, BC = CD and angle BCD is 40°?",
+        "options": ["130°", "70°", "100°"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 43,
+        "id": 44,
+        "text": "If CD = 7 cm and BD = 5 cm, then find the perimeter of triangle ABC in Fig. 2.",
+        "options": ["19 cm", "17 cm", "21 cm"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 45,
+        "id": 46,
+        "text": "5(5((5−1)−1))+1 =",
+        "options": ["100", "124", "76"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 46,
+        "id": 47,
+        "text": "14. Which of the following does not contain parallel sides?",
+        "options": ["Kite", "Rhombus", "Trapezium"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 48,
+        "id": 49,
+        "text": "16. Excluding 1, what is the lowest common factor of 36, 54 and 162?",
+        "options": ["9", "6", "2"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 50,
+        "id": 51,
+        "text": "18. Does the line 𝑦 = 3x + 3 pass through the point (−2,3)?",
+        "options": ["Yes", "No", "Cannot be determined"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 54,
+        "id": 55,
+        "text": "Evaluate 4(2(5 – 8) – 3) +4(5 – 7)",
+        "options": ["– 44", "44", "158"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 55,
+        "id": 56,
+        "text": "Division of an integer by zero is",
+        "options": ["0", "1", "at infinity"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 61,
+        "id": 62,
+        "text": "Solve x/4 +3/5 = 3x/2 – 2",
+        "options": ["25/52", "52/25", "– 52/25"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 63,
+        "id": 64,
+        "text": "Make r the subject of the relation 2√ = 𝑏",
+        "options": ["𝑟 =", "𝑟 =", "𝑟 ="],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 64,
+        "id": 65,
+        "text": "A certain type of motor car cost seven times as much as a certain make of motor cycle. If two",
+        "options": ["£3500", "£500", "£3000"],
+        "source": "AEROJET M1  MOCK  AUG TT3 EXTRA 1_230817_091323.pdf",
+        "difficulty": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+    "questions": [
+      {
+        "row_index": 134,
+        "id": 135,
+        "text": "Solve for F in terms of T, =",
+        "options": ["T+32", "T−32", "T+32"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 135,
+        "id": 136,
+        "text": "Using the equation in question 2 above, find F, when T = 55",
+        "options": ["131", "67", "63"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 140,
+        "id": 141,
+        "text": "Which pair of rational fractions sum to ?",
+        "options": [",", ",", ","],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 141,
+        "id": 142,
+        "text": "9. What result will be shown on the calculator for the following sequence of keystrokes below?",
+        "options": ["35", "12", "19"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 143,
+        "id": 144,
+        "text": "Given that a = 4 and b = 3",
+        "options": ["+ <", "+ >", "+ ="],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 144,
+        "id": 145,
+        "text": "14. What units are obtained when a mass in grams is divided by a volume in milliliters?",
+        "options": ["g/mL", "g/cm3", "g/m3"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 147,
+        "id": 148,
+        "text": "Subtract and round the answer to the nearest hundreds: 3835 – 1278",
+        "options": ["2600", "2700", "3000"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 148,
+        "id": 149,
+        "text": "20. Which is the largest?",
+        "options": ["0.00576", "0.02010", "0.04006"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 149,
+        "id": 150,
+        "text": "Multiply 7 ÷",
+        "options": ["20", "21"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 151,
+        "id": 152,
+        "text": "At the beginning of January the parts department at aerojet had 458 plugs in stock. It is estimated that they will",
+        "options": ["698", "780", "802"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 152,
+        "id": 153,
+        "text": "f x=a and y=2 is a solution of the equation x + ay – 3 = 0, then the value of a is:",
+        "options": ["2", "1", "– 1"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 154,
+        "id": 155,
+        "text": "The gradient of the red line in graph 2 is",
+        "options": ["positive", "negative", "zero"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 156,
+        "id": 157,
+        "text": "Calculate the twice the length of side BC in the diagram below",
+        "options": ["17.5 cm", "35 cm", "70 cm"],
+        "source": "AEROJET M1 SAMPLE TEST 1 WITHOUT ANSWERS_230822_081651.pdf",
+        "difficulty": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "source": "Module 1 Questions.doc",
+    "questions": [
+      {
+        "row_index": 331,
+        "id": 332,
+        "text": "exerted 2 feet from its axis?",
+        "options": ["100 lbs./ft", "251 lbs./ft", "600 lbs.ft"],
+        "source": "Module 1 Questions.doc",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 337,
+        "id": 338,
+        "text": "wrench. What will the actual reading?",
+        "options": ["54 lbs./ins", "40 lbs./ins", "60 lbs./ins"],
+        "source": "Module 1 Questions.doc",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 343,
+        "id": 344,
+        "text": "the third side be?",
+        "options": ["6 inches", "5 inches", "5.5 inches"],
+        "source": "Module 1 Questions.doc",
+        "difficulty": "EASY"
+      },
+      {
+        "row_index": 426,
+        "id": 427,
+        "text": "In a rhombus",
+        "options": [
+          "all sides are equal length with no angles 90(",
+          "adjacent sides are different lengths with no angles 90(",
+          "all sides are different length with no angles 90("
+        ],
+        "source": "Module 1 Questions.doc",
+        "difficulty": "EASY"
+      }
+    ]
+  },
+  {
+    "source": "AEROJET MOCK M1 EXTRA 2 TT3_230817_112709.pdf",
+    "questions": [
+      {
+        "row_index": 188,
+        "id": 189,
+        "text": "Any number that can be expressed as the ratio of two integers is",
+        "options": ["a fraction", "a rational number", "an irrational number"],
+        "source": "AEROJET MOCK M1 EXTRA 2 TT3_230817_112709.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 190,
+        "id": 191,
+        "text": "13. Which of the following has all sides equal?",
+        "options": ["Kite", "Rhombus", "Trapezium"],
+        "source": "AEROJET MOCK M1 EXTRA 2 TT3_230817_112709.pdf",
+        "difficulty": "EASY"
+      }
+    ]
+  },
+  {
+    "source": "AEROJET REVISION M1 WRITTEN_230815_093529.pdf",
+    "questions": [
+      {
+        "row_index": 282,
+        "id": 283,
+        "text": "WHICH OF THE FOLLOWING SYSTEM OF LINEAR EQUATIONS HAS NO SOLUTION?",
+        "options": ["𝑦 = 5𝑥+7", "𝑦 = 18𝑥+1", "𝑦 = 6𝑥+2"],
+        "source": "AEROJET REVISION M1 WRITTEN_230815_093529.pdf",
+        "difficulty": "MEDIUM"
+      },
+      {
+        "row_index": 283,
+        "id": 284,
+        "text": "5. WHAT IS THE EQUATION OF THE SLOPING LINE IN THE GRAPH BELOW?",
+        "options": ["THE RANGE,", "MODE,", "MEDIAN,", "MEAN OF DATA SET A"],
+        "source": "AEROJET REVISION M1 WRITTEN_230815_093529.pdf",
+        "difficulty": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "source": "DGCA MODULE 01 GEOMETRI 03 2023-06-02 16_30_10.pdf",
+    "questions": [
+      {
+        "row_index": 286,
+        "id": 287,
+        "text": "What is the",
+        "options": ["(a+b)+(a'+b')i.", "(a+a')i+(b+b').", "(a+a')+(b+b')i."],
+        "source": "DGCA MODULE 01 GEOMETRI 03 2023-06-02 16_30_10.pdf",
+        "difficulty": "EASY"
+      }
+    ]
+  },
+  {
+    "source": "DGCA MODULE 1 MATHS  -1 2023-06-02 16_30_09.pdf",
+    "questions": [
+      {
+        "row_index": 288,
+        "id": 289,
+        "text": "A car travels 24 Correct Answer is. 2.88 m3 .",
+        "options": ["nothing.", "infinity.", "twenty four."],
+        "source": "DGCA MODULE 1 MATHS  -1 2023-06-02 16_30_09.pdf",
+        "difficulty": "EASY"
+      }
+    ]
+  },
+  {
+    "source": "EASA PART66 MODULE 01 NEW PART 1 (1) 2023-06-02 16_30_11.pdf",
+    "questions": [
+      {
+        "row_index": 320,
+        "id": 321,
+        "text": "If 20% of 120 is 24, what is 24% of 20?",
+        "options": ["8", "."],
+        "source": "EASA PART66 MODULE 01 NEW PART 1 (1) 2023-06-02 16_30_11.pdf",
+        "difficulty": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "source": "JMC_2022_Paper.pdf",
+    "questions": [
+      {
+        "row_index": 322,
+        "id": 323,
+        "text": "How many of the following take integer values?",
+        "options": [
+          "The diagram shows the square 𝑅𝑆𝑇𝑈 and two equilateral triangles, 𝑃𝑈𝑇",
+          "Kiwi fruit contain roughly two and a half times as much vitamin C as the same weight of oranges."
+        ],
+        "source": "JMC_2022_Paper.pdf",
+        "difficulty": "MEDIUM"
+      }
+    ]
+  },
+  {
+    "source": "Junior Mathematical Challenge 2023.pdf",
+    "questions": [
+      {
+        "row_index": 323,
+        "id": 324,
+        "text": "What is the value of ?",
+        "options": [
+          "One of these is the largest two-digit positive integer that is divisible by the product of its digits.",
+          "The record for travelling 100m on a skateboard by a dog is 19.65 seconds. This was achieved by",
+          "When this prime number square is completed, the eight circles contain eight",
+          "What is the difference between the largest two-digit multiple of 2 and the smallest three-digit multiple"
+        ],
+        "source": "Junior Mathematical Challenge 2023.pdf",
+        "difficulty": "MEDIUM"
+      }
+    ]
+  }
+]

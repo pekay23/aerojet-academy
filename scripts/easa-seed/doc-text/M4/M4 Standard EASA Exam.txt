@@ -1,0 +1,161 @@
+M4 Standard EASA Exam
+1. Which material is commonly used to make diodes?
+    a) Silicon
+    b) Germanium
+    c) Gallium Arsenide
+2. What is the primary characteristic of a Zener diode?
+    a) It allows current to flow in both directions.
+    b) It emits light when forward biased.
+    c) It has a variable resistance.
+3. Which of the following is true about LED (Light Emitting Diode)?
+    a) It operates only in reverse bias.
+    b) It emits light when forward biased.
+    c) It requires a high voltage to operate.
+4. A diode in a circuit acts primarily as:
+    a) A switch that allows current in one direction.
+    b) A resistor that controls current flow.
+    c) A capacitor that stores charge.
+5. What happens to the voltage across a forward biased silicon diode?
+    a) It remains approximately constant at around 0.7 volts.
+    b) It decreases as current increases.
+    c) It increases linearly with current.
+6. The term "breakdown voltage" in diodes refers to:
+    a) The voltage at which the diode fails permanently.
+    b) The voltage at which a diode conducts heavily in reverse bias.
+    c) The voltage required to forward bias the diode.
+7. Which type of diode is used to regulate voltage in power supplies?
+    a) Light Emitting Diode (LED)
+    b) Zener Diode
+    c) Schottky Diode
+8. In terms of construction, what distinguishes a Schottky diode from a regular diode?
+    a) It has a metal-semiconductor junction.
+    b) It is made from organic materials.
+    c) It has a higher forward voltage drop.
+9. In a rectifier circuit, the diode's primary function is to:
+    a) Convert AC to DC.
+    b) Amplify signals.
+    c) Store charge.
+10. What happens in a halfwave rectifier circuit?
+     a) The entire AC waveform is used.
+     b) Only one half of the AC waveform is used.
+     c) The output is pure DC.
+11. How does a diode function in a clamping circuit?
+     a) It fixes the voltage to a specific level.
+     b) It increases the voltage amplitude.
+     c) It filters the AC signal.
+12. In a voltage doubler circuit, diodes are used to:
+     a) Reduce the voltage.
+     b) Increase the output voltage to twice the input voltage.
+     c) Stabilize the voltage.
+13. What is the role of a diode in an electronic switching application?
+     a) To store charge.
+     b) To control the direction of current flow.
+     c) To increase current flow.
+14. When a diode is reverse-biased, it:
+     a) Blocks current flow.
+     b) Allows maximum current flow.
+     c) Operates as a conductor.
+15. In a bridge rectifier circuit, how many diodes are typically used?
+     a) Two
+     b) Four
+     c) Six
+16. Which of the following is a type of transistor?
+     a) Bipolar Junction Transistor (BJT)
+     b) Light Emitting Transistor (LET)
+     c) Capacitive Transistor (CT)
+17. A primary characteristic of an NPN transistor is:
+     a) It is positively charged.
+     b) It has two N-type and one P-type regions.
+     c) It emits light when current flows through it.
+18. The three terminals of a BJT are called:
+     a) Source, Drain, Gate
+     b) Emitter, Base, Collector
+     c) Anode, Cathode, Gate
+19. Which material is commonly used to make transistors?
+     a) Gallium Nitride
+     b) Silicon
+     c) Indium Phosphide
+20. In an NPN transistor, the current flows from:
+     a) Collector to Emitter
+     b) Emitter to Base
+     c) Collector to Base
+21. The transistor operates in active region when:
+     a) Both junctions are forward biased.
+     b) Emitter-Base junction is forward biased and Collector-Base junction is reverse biased.
+     c) Both junctions are reverse biased.
+22. Which mode of operation is used for switching applications?
+     a) Active mode
+     b) Saturation and Cutoff modes
+     c) Inversion mode
+23. A transistor in saturation mode acts as:
+     a) A closed switch
+     b) An open switch
+     c) A variable resistor
+24. In a common emitter amplifier, the output signal is:
+     a) In phase with the input
+     b) Out of phase with the input
+     c) Doubled in amplitude
+25. The function of the base in a BJT transistor is to:
+     a) Control the current flow between emitter and collector
+     b) Provide power
+     c) Act as a ground
+26. In a field-effect transistor (FET), the current flow is controlled by:
+     a) The Base current
+     b) The Gate voltage
+     c) The Collector current
+27. An integrated circuit is a:
+     a) A miniaturized electronic circuit manufactured on a thin semiconductor substrate
+     b) Collection of discrete components found in electronic devices
+     c) Type of printed circuit board that is used in devices related to aircraft
+28. The primary advantage of integrated circuits over discrete circuits is:
+     a) Higher reliability and reduced size
+     b) Lower cost for small quantities
+     c) Easier to repair
+29. Which of the following is a type of integrated circuit?
+     a) Monolithic
+     b) Hybrid
+     c) Both a and b
+30. A monolithic IC is characterized by:
+     a) All components being fabricated in a single piece of semiconductor material
+     b) Components being connected by wires
+     c) Using separate chips for each function
+31. What is a hybrid IC?
+     a) An IC that combines monolithic and film components
+     b) An IC made from organic materials
+     c) An IC with only passive components
+32. Film integrated circuits are used for:
+     a) Active components
+     b) Passive components
+     c) Both active and passive components
+33. A printed circuit board (PCB) primarily serves to:
+     a) Provide mechanical support and electrical connections for electronic components
+     b) Store electrical energy
+     c) Act as a heat sink
+34. Which method is NOT commonly used for PCB manufacturing?
+     a) Photoengraving
+     b) Silk Screen
+     c) Wire wrapping
+35. PCBs are preferred in electronic devices because they:
+     a) Are rugged, inexpensive, and reliable
+     b) Require less design effort
+     c) Have high initial costs for small volume production
+36. A servomechanism is a:
+     a) Control system that uses feedback to achieve a desired output
+     b) Power supply regulator
+     c) Type of signal amplifier
+37. Servomechanisms are essential in:
+     a) Automatic Flight Control Systems (AFCS)
+     b) Battery charging circuits
+     c) Simple lighting systems
+38. Servomechanisms can be used to control:
+     a) Position, velocity, and acceleration
+     b) Only position
+     c) Only velocity
+39. In a servo system, the control signal:
+     a) Directly moves the load
+     b) Is amplified to move the load
+     c) Acts as the power source
+40. Which of the following is a type of servomechanism?
+     a) Electrohydraulic
+     b) Thermomechanical
+     c) Electrothermal

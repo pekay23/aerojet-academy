@@ -2,11 +2,9 @@
 
 import Link from 'next/link'
 import {
-  ChevronDown,
   ChevronRight,
   MapPin,
   Users,
-  Calendar,
   ClipboardCheck,
   BarChart3,
   BookOpen,
@@ -66,7 +64,6 @@ function getCategoryColor(category?: string | null) {
 }
 
 function getCategoryTextColor(category?: string | null) {
-  // Return contrasting text color for each category background
   switch (category?.toUpperCase()) {
     case 'CORE':
       return 'text-white'
@@ -109,6 +106,7 @@ function formatDate(date: string | Date) {
 function ClassRow({ cls }: { cls: ClassData }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null)
 
   const categoryName =
     typeof cls.course.category === 'object' && cls.course.category
@@ -127,6 +125,7 @@ function ClassRow({ cls }: { cls: ClassData }) {
     const handleClickOutside = (event: MouseEvent) => {
       if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false)
+        setMenuPosition(null)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -135,11 +134,18 @@ function ClassRow({ cls }: { cls: ClassData }) {
 
   const handleMenuToggle = (e: React.MouseEvent) => {
     e.stopPropagation()
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setMenuPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.right + window.scrollX - 176,
+      })
+    }
     setIsMenuOpen(!isMenuOpen)
   }
 
   return (
-    <tr className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+    <tr className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           <div className={cn('flex h-8 w-8 items-center justify-center rounded-xl', categoryColor)}>
@@ -236,39 +242,40 @@ function ClassRow({ cls }: { cls: ClassData }) {
             >
               <MoreVertical className="h-5 w-5" />
             </button>
-            {isMenuOpen &&
-              createPortal(
-                <div
-                  className="animate-in fade-in zoom-in-95 fixed z-50 w-44 origin-top-right rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg dark:border-slate-800 dark:bg-slate-900"
-                  style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-                >
-                  <Link
-                    href={`/instructor/classes/${cls.id}?tab=grades`}
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-                    onClick={() => setIsMenuOpen(false)}
+            {isMenuOpen && menuPosition
+              ? createPortal(
+                  <div
+                    className="animate-in fade-in zoom-in-95 fixed z-50 w-44 origin-top-right rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg dark:border-slate-800 dark:bg-slate-900"
+                    style={{ top: menuPosition.top, left: menuPosition.left }}
                   >
-                    <BarChart3 className="h-4 w-4" />
-                    Grades
-                  </Link>
-                  <Link
-                    href={`/instructor/classes/${cls.id}?tab=materials`}
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    Materials
-                  </Link>
-                  <Link
-                    href={`/instructor/messages?class=${cls.id}`}
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    Message Students
-                  </Link>
-                </div>,
-                document.body
-              )}
+                    <Link
+                      href={`/instructor/classes/${cls.id}?tab=grades`}
+                      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      Grades
+                    </Link>
+                    <Link
+                      href={`/instructor/classes/${cls.id}?tab=materials`}
+                      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      Materials
+                    </Link>
+                    <Link
+                      href={`/instructor/messages?class=${cls.id}`}
+                      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      Message Students
+                    </Link>
+                  </div>,
+                  document.body
+                )
+              : null}
           </div>
         </div>
       </td>
@@ -276,65 +283,60 @@ function ClassRow({ cls }: { cls: ClassData }) {
   )
 }
 
-function IntakeSection({ group }: { group: IntakeGroup }) {
+function IntakeSection({
+  group,
+  isLast,
+}: {
+  group: IntakeGroup
+  isFirst: boolean
+  isLast: boolean
+}) {
   const [isExpanded, setIsExpanded] = useState(true)
   const totalStudents = group.classes.reduce((sum, c) => sum + c.currentStudents, 0)
   const totalCapacity = group.classes.reduce((sum, c) => sum + c.maxStudents, 0)
 
   return (
-    <table className="w-full">
-      <thead>
-        <tr className="bg-slate-100 dark:bg-slate-800/50">
-          <th className="px-4 py-3 text-left">
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="flex w-full items-center gap-3 text-left focus:outline-none"
+    <>
+      {/* Intake Section Header — spans all columns */}
+      <tr className="bg-slate-100 dark:bg-slate-800/50">
+        <td colSpan={6} className="px-4 py-3">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex w-full items-center gap-3 text-left focus:outline-none"
+          >
+            <span
+              className={cn(
+                'flex h-6 w-6 items-center justify-center rounded border border-slate-300 text-slate-500 transition-transform',
+                isExpanded ? 'rotate-90' : ''
+              )}
             >
-              <span
-                className={cn(
-                  'flex h-6 w-6 items-center justify-center rounded border border-slate-300 text-slate-500 transition-transform',
-                  isExpanded ? 'rotate-90' : ''
-                )}
-              >
-                <ChevronRight className="h-3.5 w-3.5" />
-              </span>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-500/10">
-                  <ChevronDown className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <p className="font-bold text-slate-900 dark:text-white">
-                    {group.academicYear?.name || 'Unknown Year'}
-                    {group.semester && ` • ${group.semester.name}`}
-                  </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {group.classes.length} class{group.classes.length !== 1 ? 'es' : ''} •
-                    {totalStudents} / {totalCapacity} students
-                  </p>
-                </div>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </span>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-500/10">
+                <School className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
-            </button>
-          </th>
-          <th className="px-4 py-3 text-left text-xs font-bold tracking-widest text-slate-400 uppercase">
-            Category
-          </th>
-          <th className="px-4 py-3 text-left text-xs font-bold tracking-widest text-slate-400 uppercase">
-            Status & Dates
-          </th>
-          <th className="px-4 py-3 text-left text-xs font-bold tracking-widest text-slate-400 uppercase">
-            Enrollment
-          </th>
-          <th className="px-4 py-3 text-left text-xs font-bold tracking-widest text-slate-400 uppercase">
-            Classroom
-          </th>
-          <th className="px-4 py-3 text-right text-xs font-bold tracking-widest text-slate-400 uppercase">
-            Actions
-          </th>
-        </tr>
-      </thead>
+              <div>
+                <p className="font-bold text-slate-900 dark:text-white">
+                  {group.academicYear?.name || 'Unknown Year'}
+                  {group.semester && ` • ${group.semester.name}`}
+                </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {group.classes.length} class{group.classes.length !== 1 ? 'es' : ''} •
+                  {totalStudents} / {totalCapacity} students
+                </p>
+              </div>
+            </div>
+          </button>
+        </td>
+      </tr>
 
-      <tbody>{isExpanded && group.classes.map((cls) => <ClassRow key={cls.id} cls={cls} />)}</tbody>
-    </table>
+      {/* Class Rows */}
+      {isExpanded && group.classes.map((cls) => <ClassRow key={cls.id} cls={cls} />)}
+
+      {/* Section Divider */}
+      {!isLast && <tr className="h-[1px] bg-slate-100 dark:bg-slate-800" />}
+    </>
   )
 }
 
@@ -356,15 +358,41 @@ export default function IntakeGroupTable({ groups }: IntakeGroupTableProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {groups.map((group) => (
-        <div
-          key={group.intakeKey}
-          className="overflow-hidden rounded-2xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900"
-        >
-          <IntakeSection group={group} />
-        </div>
-      ))}
+    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <table className="w-full">
+        <thead>
+          <tr className="bg-slate-50 dark:bg-slate-800/50">
+            <th className="px-4 py-3 text-left text-xs font-bold tracking-widest text-slate-400 uppercase">
+              Course
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-bold tracking-widest text-slate-400 uppercase">
+              Category
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-bold tracking-widest text-slate-400 uppercase">
+              Status & Dates
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-bold tracking-widest text-slate-400 uppercase">
+              Enrollment
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-bold tracking-widest text-slate-400 uppercase">
+              Classroom
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-bold tracking-widest text-slate-400 uppercase">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {groups.map((group, index) => (
+            <IntakeSection
+              key={group.intakeKey}
+              group={group}
+              isFirst={index === 0}
+              isLast={index === groups.length - 1}
+            />
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }

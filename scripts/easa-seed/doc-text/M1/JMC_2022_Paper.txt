@@ -1,0 +1,167 @@
+--- Page 1 ---
+U T
+K M
+M K
+T U
+UKMT
+United Kingdom
+Mathematics Trust
+Junior Mathematical Challenge
+Wednesday 27 and Thursday 28 April 2022
+© 2022 UK Mathematics Trust
+supportedby
+England&Wales: Year8orbelow
+Scotland: S2orbelow
+NorthernIreland: Year9orbelow
+Instructions
+1. Do not open the paper until the invigilator tells you to do so.
+2. Time allowed: 60 minutes.
+No answers, or personal details, may be entered after the allowed time is over.
+3. The use of blank or lined paper for rough working is allowed; squared paper, calculators
+and measuring instruments are forbidden.
+4. Use a B or an HB non-propelling pencil. Mark at most one of the options A, B, C, D, E
+on the Answer Sheet for each question. Do not mark more than one option.
+5. Do not expect to finish the whole paper in the time allowed. The questions in this paper
+have been arranged in approximate order of difficulty with the harder questions towards the
+end. You are not expected to complete all the questions during the time. You should bear
+this in mind when deciding which questions to tackle.
+6. Scoring rules:
+5 marks are awarded for each correct answer to Questions 1-15;
+6 marks are awarded for each correct answer to Questions 16-25.
+7. YourAnswerSheetwillbereadbyamachine. Donotwriteordoodleonthesheetexcept
+to mark your chosen options. The machine will read all black pencil markings even if
+they are in thewrong places. If you mark the sheetin the wrong place, or leavebits of eraser
+stuck to the page, the machine will interpret the mark in its own way.
+8. The questions on this paper are designed to challenge you to think, not to guess. You
+willgainmoremarks,andmoresatisfaction,bydoingonequestioncarefullythanbyguessing
+lots of answers. This paper is about solving interesting problems, not about lucky guessing.
+Enquiries about the Junior Mathematical Challenge should be sent to:
+UK Mathematics Trust, 84/85 Pure Offices, 4100 Park Approach Leeds, LS15 8GB
+(cid:84)
++44 (0) 113 365 1121 challenges@ukmt.org.uk www.ukmt.org.uk
+
+--- Page 2 ---
+Junior Mathematical Challenge Wednesday27andThursday28April2022
+1. Which of these has the greatest value?
+A 20+22 B 202+2 C 202×2 D 2×0×2×2 E 20×22
+2. The number 5012 is reflected in the mirror-line shown.
+Onto which number is it reflected?
+A 5102 B 2015 C 5012 D 2105 E 5105
+3. Think of any number. Add five; multiply by two; add ten; divide by two; subtract your original
+number; add three. What is the resulting number?
+A 10 B 11 C 12 D 13 E 14
+2
+4. What is the value of 0.6+ ?
+5
+A 0.15 B 0.24 C 0.8 D 1 E 2.4
+5. How many of the following take integer values?
+1 11 111 1111 11111
+1 1+1 1+1+1 1+1+1+1 1+1+1+1+1
+A 0 B 1 C 2 D 3 E 4
+6. The diagram shows the square 𝑅𝑆𝑇𝑈 and two equilateral triangles, 𝑃𝑈𝑇
+P
+and 𝑄𝑅𝑈.
+T
+What is the size of angle 𝑄𝑃𝑈? U
+Q
+A 10° B 15° C 20° D 25° E 30°
+R S
+7. Kiwi fruit contain roughly two and a half times as much vitamin C as the same weight of oranges.
+What weight of kiwi fruit contains approximately the same amount of vitamin C as 1kg of oranges?
+A 100g B 200g C 250g D 400g E 550g
+8. Today is Thursday. What day will it be in 100 days’ time?
+A Tuesday B Wednesday C Thursday D Friday E Saturday
+9. How many squares of any size can be seen in the diagram?
+A 25 B 27 C 28 D 39 E 40
+1 1 1
+10. Half of a quarter of an eighth of a number is equal to + + .
+2 4 8
+What is the number?
+A 14 B 28 C 42 D 56 E 64
+©2022UKMathematicsTrust www.ukmt.org.uk
+
+--- Page 3 ---
+Junior Mathematical Challenge Wednesday27andThursday28April2022
+11. Nine of the numbers 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 are to be put in two groups so that the sum of the
+numbers in each group is a multiple of four.
+What is the largest number that could be left out?
+A 3 B 4 C 5 D 6 E 7
+12. When my pot of paint is half full, it weighs 5.8kg. When my pot of paint is one quarter full, it weighs
+3.1kg. What is the weight of the full pot?
+A 8.9kg B 11.2kg C 11.6kg D 12kg E 12.4kg
+13. The diagram shows five squares whose side-lengths, in cm, are 1, 2, 3, 4 and 5.
+What percentage of the area of the outer square is shaded?
+A 25% B 30% C 36% D 40% E 42%
+14. A group of children stand evenly spaced around a circular ring and are numbered consecutively 1, 2,
+3, and so on. Number 13 is directly opposite number 35. How many children are there in the ring?
+A 42 B 44 C 46 D 48 E 50
+15. What is the value of 2 ÷ (4 ÷ (6 ÷ (8 ÷ 10)))?
+1 1 3 1 15
+A B C D E
+960 5 8 2 4
+16. The diagram shows a seven-sided polygon, 𝑃𝑄𝑅𝑆𝑇𝑈𝑉. It is formed
+U
+from two equilateral triangles 𝑃𝑄𝑊 and 𝑆𝑇𝑈 of side-length 5cm P
+and 8cm respectively. The two triangles overlap in an equilateral
+V
+triangle of side-length 2cm. 5cm 8cm
+What is the perimeter of 𝑃𝑄𝑅𝑆𝑇𝑈𝑉? 2cm
+Q R W
+A 27cm B 30cm C 33cm D 36cm
+E 39cm S T
+17. Amrita and Beatrix play a game in which each player starts with 10 counters. In each round of the
+game, one player wins and is given 3 counters; and her opponent has 1 counter removed. At the end
+of the game, Amrita and Beatrix have 40 counters and 16 counters respectively.
+How many rounds of the game did Amrita win?
+A 10 B 11 C 12 D 13 E 14
+18. The diagram shows a parallelogram.
+What is the value of 𝑦? ( 3 𝑥− 40 )◦ ( 4 𝑦− 50 )◦
+A 22 B 24 C 25 D 28 E 30
+( 𝑥− )◦
+2 30
+19. At the start of the day I had three times as many apples as pears. By the end of the day, after eating
+five apples but no pears, I had twice as many pears as apples.
+How many pieces of fruit did I have at the start of the day?
+A 4 B 8 C 12 D 16 E 20
+©2022UKMathematicsTrust www.ukmt.org.uk
+
+--- Page 4 ---
+Junior Mathematical Challenge Wednesday27andThursday28April2022
+20. During a particularly troublesome lesson, the following conversation occurs:
+Pam: "I always tell the truth." Quentin: "Pam is lying."
+Roger: "Both Pam and Quentin are lying." Susan: "Everyone is lying."
+Terry: "Everyone is telling the truth."
+How many people are telling the truth?
+A 0 B 1 C 2 D 3 E 4
+21. Two lists of numbers are as shown below.
+List S: 3 5 8 11 13 14
+List T: 2 5 6 10 12 13
+Jenny decidedshewouldmoveonenumber fromListS toListTand onenumberfrom List TtoListS
+so that the sum of the numbers in the new List S is equal to the sum of the numbers in the new List T.
+In how many ways could she do this?
+A 1 B 2 C 3 D 4 E 5
+22. A triangular pyramid with vertices𝑇,𝑈,𝑉 and 𝑄 is removed from the solid
+W V
+cube shown.
+T
+How many edges does the remaining solid have? U
+A 4 B 6 C 8 D 10 E 12 S
+R
+P Q
+23. The price of a train ticket increased by 5% and then decreased by 20% in a special offer. It was then
+£4 less expensive than its original price. What was the original price of the ticket?
+A £8.60 B £13 C £20.40 D £25 E £26.40
+24. Flori’s Flower shop contains fewer than 150 flowers. All the flowers are purple, yellow, red or white.
+The ratio of purple flowers to yellow flowers is 1 : 2, the ratio of yellow flowers to red flowers is 3 : 4
+and the ratio of red flowers to white flowers is 5 : 6.
+How many flowers are there in Flori’s shop?
+A 133 B 136 C 139 D 142 E 145
+25. In the number pyramid shown, each cell above the bottom row contains
+61
+the sum of the numbers in the two cells immediately below it. The sum of
+the numbers in the bottom row is 17.
+16
+What is the central number of the bottom row?
+?
+A 2 B 3 C 4 D 5 E 6
+©2022UKMathematicsTrust www.ukmt.org.uk

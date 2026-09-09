@@ -1,7 +1,6 @@
 """Source-of-truth PDF map for EASA Part-66 question bank.
 
-Only Suntech-approved training books are authoritative. Modules 8, 9, 10 are
-intentionally absent (awaiting approved docs).
+Only Suntech-approved training books are authoritative.
 """
 from __future__ import annotations
 
@@ -20,8 +19,7 @@ class ModuleSource:
     textbook_pdfs: tuple[Path, ...]
 
 
-# Order: 1, 2, 3, 4, 5, 6, 7, 11A, 13, 14, 15, 17.
-# M8, M9, M10 intentionally omitted (awaiting Suntech-approved docs).
+# Order: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11A, 13, 14, 15, 17.
 SOURCES: tuple[ModuleSource, ...] = (
     ModuleSource(
         "M1",
@@ -75,6 +73,27 @@ SOURCES: tuple[ModuleSource, ...] = (
             AEROJET_ROOT / "Module 7 - Maintenance Practices" / "suntech" / "M7 — Maintenance Practices.pdf",
             AEROJET_ROOT / "Module 7 - Maintenance Practices" / "suntech" / "M7 — Maintenance Practices_250624_103445.pdf",
             AEROJET_ROOT / "Module 7 - Maintenance Practices" / "suntech" / "M7cmp1 — Maintenance Practices.pdf",
+        ),
+    ),
+    ModuleSource(
+        "M8",
+        "Module 8 - Aerodynamics",
+        (
+            AEROJET_ROOT / "Module 8 - Aerodynamics" / "suntech" / "EASA-Module-8-Aerodynamics.pdf",
+        ),
+    ),
+    ModuleSource(
+        "M9",
+        "Module 9 - Human Factors",
+        (
+            AEROJET_ROOT / "Module 9 - Human Factors" / "suntech" / "EASA-Module-9a-Human-Factors-Complete.pdf",
+        ),
+    ),
+    ModuleSource(
+        "M10",
+        "Module 10 - Aviation Legislation",
+        (
+            AEROJET_ROOT / "Module 10 - Aviation Legislation" / "suntech" / "EASA-Module-10-Aviation-Legislation.pdf",
         ),
     ),
     ModuleSource(

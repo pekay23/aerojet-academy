@@ -65,7 +65,7 @@ interface DashboardSidebarProps {
   backLabel?: string
 }
 
-/* â”€â”€ Mobile Top Bar with inline breadcrumb â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Mobile Top Bar with inline breadcrumb ─────────────────────────── */
 function segmentToLabel(segment: string): string {
   if (segment.length > 20) return '...'
   return segment
@@ -140,7 +140,7 @@ function MobileTopBar({
     </div>
   )
 }
-/* â”€â”€ Nav item with optional tooltip when collapsed â”€â”€ */
+/* ── Nav item with optional tooltip when collapsed ── */
 function NavItem({
   href,
   icon: Icon,
@@ -221,7 +221,7 @@ function NavItem({
   return content
 }
 
-/* â”€â”€ Group item with optional tooltip when collapsed â”€â”€ */
+/* ── Group item with optional tooltip when collapsed ── */
 function GroupItem({
   link,
   collapsed,
@@ -347,7 +347,7 @@ function GroupItem({
   )
 }
 
-/* â”€â”€ User profile panel â”€â”€ */
+/* ── User profile panel ── */
 const THEME_OPTIONS = [
   { value: 'light', icon: Sun, label: 'Light' },
   { value: 'dark', icon: Moon, label: 'Dark' },
@@ -787,8 +787,7 @@ export default function DashboardSidebar({
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   useEffect(() => {
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 

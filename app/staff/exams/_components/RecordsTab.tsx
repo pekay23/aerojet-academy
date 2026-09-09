@@ -95,9 +95,9 @@ const ATTEMPT_TYPES = [
 ]
 
 const BOOKING_TYPES = [
-  { value: 'INDIVIDUAL', label: 'Individual Exam (â‚¬520)', seats: 1 },
-  { value: 'TWIN_PACK', label: 'Twin Pack (â‚¬980)', seats: 2 },
-  { value: 'FOUR_PACK', label: '4-Pack Bundle (â‚¬1900)', seats: 4 },
+  { value: 'INDIVIDUAL', label: 'Individual Exam (€520)', seats: 1 },
+  { value: 'TWIN_PACK', label: 'Twin Pack (€980)', seats: 2 },
+  { value: 'FOUR_PACK', label: '4-Pack Bundle (€1900)', seats: 4 },
 ]
 
 function statusBadgeClass(result?: string | null) {
@@ -186,16 +186,14 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
 
   // Reset pagination when filters change
   useEffect(() => {
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1)
   }, [tableFilter, categoryFilter])
 
   // Debounced student search
   useEffect(() => {
-   
     if (studentQuery.length < 2) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStudentResults([])
       setShowDropdown(false)
       return
@@ -224,10 +222,10 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
   }
 
   // Adjust module slots when booking type changes
-   
+
   useEffect(() => {
     const seats = BOOKING_TYPES.find((t) => t.value === bookingType)?.seats || 1
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setModuleSelections((prev) => {
       const next = [...prev]
       if (next.length < seats) {
@@ -431,7 +429,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
 
   return (
     <div className="space-y-8">
-      {/* â”€â”€ Add Record Form â”€â”€ */}
+      {/* ── Add Record Form ── */}
       <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-6 flex items-center gap-3">
           <div className="bg-aerojet-blue flex h-10 w-10 items-center justify-center rounded-xl text-white">
@@ -752,7 +750,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
         </form>
       </div>
 
-      {/* â”€â”€ Records Table â”€â”€ */}
+      {/* ── Records Table ── */}
       <div className="space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
@@ -1151,7 +1149,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
             </table>
           </div>
 
-          {/* â”€â”€ Pagination Controls â”€â”€ */}
+          {/* ── Pagination Controls ── */}
           <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-100 bg-slate-50/50 px-6 py-4 sm:flex-row dark:border-slate-800 dark:bg-slate-800/20">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">

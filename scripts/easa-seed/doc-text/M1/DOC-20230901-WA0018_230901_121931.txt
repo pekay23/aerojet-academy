@@ -1,0 +1,212 @@
+--- Page 1 ---
+10
+Aerojet M1 Set 10 40 minutes
+1
+1. as a recurring decimal is:
+7
+A. 0.1̅̅4̅̅2̅̅8̅
+B. 0.1̅̅4̅̅2̅̅8̅̅5̅
+C. 0.1̅̅4̅̅2̅̅8̅5̅̅7̅
+2. 8762.87412355 in standard form with three decimal place accuracy is:
+A. 8.762 x 10 3
+B. 8.763 x 10 -3
+C. 8.763 x 10 3
+3 3 5 1
+3. ×( + − )=∶
+4 8 16 2
+3
+A.
+16
+9
+B.
+64
+9
+C.
+16
+4. An aircraft supplier buys 100 packs of rivets for £60.00 and sells them to the airline operator for 80
+pence each. What percentage profit does the supplier make?
+A. 33%
+B. 33.3%
+C. 30%
+5. Solve for x, if 200 : 4 :: 350 : x
+A. 7
+B. 6
+C. 5
+6. A car travels 50 km at 50 km/h and 70 km at 70 km/h. What is its average speed?
+A. 60 km/h
+B. 120 km/h
+C. 75 km/h
+7. A car travels 205 km on 20 L of petrol. How much petrol is needed for a journey of 340 km?
+A. 33.2 L
+B. 33 L
+C. 32.9 L
+8. Convert the denary number 40 to an octal number.
+A. 5
+B. 50
+C. 500
+1 3
+9. Evaluate the expression: (6)(20)−36 − 2+16 − 4
+1
+A. 5
+24
+23
+B. 5
+24
+C. −42
+5/4
+16
+10. Simplify: ( )
+81
+243
+A.
+32
+5
+16
+B. 4
+5
+81
+4
+32
+C.
+243
+
+--- Page 2 ---
+2 | P age
+11. Simplify: (12a2 − 2)(2ab2)2
+A. 48a4b4 – 8a2b4
+B. 48a4b3 – 8a2b4
+C. 48a4b4 – 8a3b4
+12. Factorize the expression : x 2 + 2x – 3
+A. (x – 3)(x + 1)
+B. x = - 3, x = 1
+C. (x – 1)(x + 3)
+13. What is the value of (g − h)(g 2 + gh + h 2), when g = 0.7, h = 0.4
+A. 0.279
+B. 2.79
+C. 0.0279
+n
+14. Make a the subject of the formula s = [2a + (n − 1)d].
+2
+2s−n(n−1)d
+A. a =
+n
+2s−n(n+1)d
+B. a =
+2n
+s 𝑛𝑑 𝑑
+C. a = − +
+n 2 2
+15. The cross-section of a tube is shown in the diagram. Find the area correct to four significant figures.
+Figure 10.1
+A. 5241.7 mm2
+B. 5241 mm2
+C. 5242 mm2
+16. Determine the area of the annulus shown in the diagram with inner radius 5 cm and outer diameter
+16 cm. [Take pi = 22/7]
+Figure 10.2
+A. 123
+B. 122
+C. 121
+
+--- Page 3 ---
+3 | P age
+17. Solve the following quadratic equations: 6x2 + x − 2 = 0
+A. (2x – 1)(3x+2)
+1 2
+B. x = , x = −
+2 3
+1 2
+C. x = − , x =
+2 3
+18. Find the angles marked θ, in the right-angled triangle shown in Figure 10.3
+A. 0.57°
+B. 45°
+C. 60° 2 m
+θ
+200 cm
+19. Convert the rectangular co-ordinates (−5, −12) into polar co-ordinates.
+A. (13 , 2470)
+B. (13 , 670)
+C. (13 , 1130)
+20. Reduce the following fraction to its lowest term: (21𝑥3𝑦4)÷(28𝑥9𝑦2)
+3𝑦6
+A.
+4𝑥2
+3𝑦2
+B.
+4𝑥6
+3𝑦2
+C.
+4𝑥−6
+21. Convert the polar co-ordinates (150 , ∠3000) into rectangular co-ordinates.
+A. (75 , - 130)
+B. (- 130 , 75)
+C. (75 , 130)
+22. Put brackets in the following statement to make it true, 6 x 7 + 3 – 8 = 52
+A. (6 x 7 + 3) – 8 = 52
+B. 6 x 7 + (3 – 8) = 52
+C. 6 x (7 + 3) – 8 = 52
+23. Find using the appropriate table: cos(270 14/)
+A. 0.8829
+B. 0.8892
+C. 0.8886
+24. The factors of 3x2 − 2x − 8 are:
+A. (3x − 2)(x + 4)
+B. (3x + 4)(x − 2)
+C. (3x + 2)(x − 4)
+25. Determine the product of : (3u − 1)(2u + 2)
+A. 3u + 4u - 2
+B. 3u2 – 4u - 2
+C. 3u2 + 4u - 2
+26. If the area of a circle is 80 mm2, its diameter to two significant figures is:
+A. 5 mm
+B. 10 mm
+C. 25 mm
+
+--- Page 4 ---
+4 | P age
+27. The denary number 37 is the binary number:
+A. 101001
+B. 10101
+C. 100101
+28. Use logarithm tables to find the value of Log (986.78) :
+A. 2.9939
+B. 2.9943
+C. 2̅.9939
+29. The area of the curved surface of a cone whose base radius is 3 cm and whose vertical height is 4 cm
+is:
+A. 47 cm2
+B. 46 cm2
+C. 45 cm2
+30. The y solution of the simultaneous equations 5x + 4y = 22; 3x + 5y = 21 is :
+A. 3
+B. 2
+C. – 3
+31. An isosceles triangle has a base of 5.0 cm and the equal sides are each 6.5 cm long. Find the base
+angle.
+A. 67.40
+B. 65.20.
+C. 66.40
+32. A man stands on the top of a hill 80 m high in line with a traffic cone in the road below. If the angle of
+depression of the traffic cone from the man is 600 . The horizontal distance of the traffic cone from the
+foot of the hill is :
+A. 125 m
+B. 40 m
+C. 46 m
+FIND MATHEMATICAL TABLES BELOW
+
+--- Page 5 ---
+5 | P age
+Mathematical Tables
+Logarithms
+Antilogarithms
+
+--- Page 6 ---
+6 | P age
+Sines
+Cosines
+Tangents
+
+--- Page 7 ---
+7 | P age
+Square roots

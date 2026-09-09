@@ -1,0 +1,797 @@
+What property defines a metal’s ability to withstand deformation under stress without breaking?
+A. Elasticity
+B. Toughness
+C. Strength*
+Which property of metals describes their ability to return to their original shape after a deforming force is removed?
+A. Elasticity*
+B. Ductility
+C. Brittleness
+What term is used for the weight of a material per unit volume?
+A. Conductivity
+B. Density*
+C. Malleability
+Which metal property makes it suitable for forming into wires under tensile stress?
+A. Fusibility
+B. Ductility*
+C. Hardness
+What property makes copper an example of a malleable metal?
+A. Resistance to corrosion
+B. Ability to withstand compression without cracking*
+C. Ability to conduct electricity efficiently
+Which type of steel contains 0.25% to 0.7% carbon?
+A. Low-carbon steel
+B. Medium-carbon steel*
+C. High-carbon steel
+What process involves heating steel to its upper critical point and cooling slowly in still air to relieve internal stresses?
+A. Hardening
+B. Tempering
+C. Normalising*
+What is the primary purpose of annealing steel?
+A. Increase brittleness
+B. Soften the steel*
+C. Improve wear resistance
+Which heat treatment process reduces brittleness and improves toughness after hardening?
+A. Annealing
+B. Tempering*
+C. Cyanide hardening
+What is the critical point of steel heating related to structural transformation?
+A. Lower critical point*
+B. Melting point
+C. Tempering point
+What element, when alloyed with steel, improves resistance to corrosion and increases hardness?
+A. Chromium*
+B. Nickel
+C. Molybdenum
+What alloying element enhances toughness in steels by limiting grain growth during heat treatment?
+A. Vanadium
+B. Nickel*
+C. Tungsten
+What type of steel contains 36% nickel and has a negligible coefficient of expansion?
+A. Invar steel*
+B. Maraging steel
+C. Chrome-molybdenum steel
+What is a key advantage of maraging steel?
+A. High cost
+B. Simpler heat treatment*
+C. High ductility at high temperatures
+Which element in chrome-molybdenum steel allows it to harden throughout during heat treatment?
+A. Tungsten
+B. Chromium
+C. Molybdenum*
+Which test measures the ability of a material to withstand a compressive force?
+A. Tensile test
+B. Impact test
+C. Compression test*
+What is measured by an impact test on a material?
+A. Toughness*
+B. Elasticity
+C. Brittleness
+What is the significance of Young’s Modulus in a tensile test?
+A. It measures hardness.
+B. It measures elasticity. *
+C. It measures density.
+What property is determined by the proof stress of a material?
+A. Ultimate tensile strength
+B. Elastic limit before permanent deformation*
+C. Maximum compressive force
+Which type of test is classified as destructive testing?
+A. Ultrasonic inspection
+B. Bend test*
+C. Visual inspection
+Which type of corrosion occurs when different metals are in contact in a conductive solution?
+A. Pitting corrosion
+B. Galvanic corrosion*
+C. Stress corrosion
+What is the key cause of intergranular corrosion in steel?
+A. Improper cooling during heat treatment*
+B. Corrosive agents in water
+C. Stress from mechanical loads
+Which corrosion type is characterized by localized attacks causing small holes in the surface?
+A. Pitting corrosion*
+B. Crevice corrosion
+C. Laminar corrosion
+What is used to detect early-stage corrosion in composite materials?
+A. Ultrasonic inspection*
+B. Visual inspection
+C. Impact testing
+What type of aircraft fastener is identified by its core and collar structure?
+A. Hi-Lok fastener*
+B. Self-locking bolt
+C. Dowel pin
+What is the primary purpose of a cotter pin?
+A. Strengthen bolt heads
+B. Prevent loosening of nuts*
+C. Secure riveted joints
+What material is commonly used as the core in honeycomb structures?
+A. PVC foam*
+B. Aramid fiber
+C. Balsa wood
+Which inspection method is commonly used for detecting delamination in composites?
+A. Coin tapping*
+B. Radiography
+C. Thermography
+What advantage do prepreg materials offer in composite manufacturing?
+A. Longer shelf life
+B. Pre-applied resin for uniform distribution*
+C. Resistance to UV degradation
+Which type of wood is commonly used for aircraft structural components?
+A. Deciduous hardwoods*
+B. Coniferous softwoods
+C. Bamboo
+What is the most critical factor when evaluating wood for aircraft use?
+A. Grain orientation
+B. Moisture content*
+C. Density
+What is the main cause of glued joint failure in wooden structures?
+A. Improper pressure during gluing
+B. High temperature
+C. Excessive moisture*
+What is the primary purpose of aircraft plywood?
+A. To act as a lightweight core material
+B. To form structural components with grain strength in multiple directions*
+C. To enhance thermal resistance
+What is the primary characteristic of fabric used in aircraft covering?
+A. Resistance to UV damage
+B. Ability to be tautened*
+C. High electrical conductivity
+How is fabric covering attached to the aircraft structure?
+A. Glued directly to the frame
+B. Laced with stringing or rib stitching*
+C. Riveted along the edges
+What type of corrosion is commonly found at bolt holes and fastener sites?
+A. Stress corrosion
+B. Filiform corrosion
+C. Crevice corrosion*
+What fundamental process forms galvanic corrosion?
+A. Stress-induced oxidation
+B. Contact between dissimilar metals in an electrolyte*
+C. Prolonged exposure to UV radiation
+Which corrosion type is associated with layered structures, such as composites?
+A. Laminar corrosion*
+B. Fretting corrosion
+C. Intergranular corrosion
+What is the first step in controlling corrosion in aircraft components?
+A. Inspect regularly for signs of corrosion*
+B. Apply a protective coating
+C. Replace corroded parts immediately
+Which thread type is commonly used in aircraft fasteners?
+A. Unified National Thread*
+B. Metric thread
+C. Whitworth thread
+What is the primary purpose of a tab washer in fasteners?
+A. Prevent rotation of the bolt*
+B. Provide load distribution
+C. Absorb vibrations
+What type of aircraft rivet is used for areas with limited access?
+A. Solid rivet
+B. Blind rivet*
+C. Flush rivet
+What is the primary advantage of Hi-Lok fasteners in aircraft assembly?
+A. Self-locking capability
+B. Precise torque control*
+C. Corrosion resistance
+What is the key purpose of flared pipe couplings?
+A. To prevent leaks in high-pressure systems*
+B. To ensure flexibility in piping systems
+C. To reduce weight
+Which material is commonly used for rigid pipes in aircraft hydraulic systems?
+A. Copper
+B. Stainless steel
+C. Aluminium alloy*
+What type of pipe fitting is used to connect flexible hoses to rigid pipes?
+A. Swaged coupling
+B. Flareless fitting
+C. Quick disconnect coupling*
+What type of bearing is typically used to support radial and axial loads?
+A. Roller bearing
+B. Ball bearing*
+C. Needle bearing
+Which type of bearing is commonly used in high-load areas of landing gears?
+A. Angular contact bearing
+B. Plain bearing
+C. Tapered roller bearing*
+What type of gear is used to change the direction of power by 90 degrees?
+A. Spur gear
+B. Bevel gear*
+C. Helical gear
+Which gear system allows for multiplication or reduction of torque?
+A. Planetary gear system*
+B. Helical gear system
+C. Worm gear system
+What type of belt is commonly used in aircraft engine transmissions?
+A. V-belt
+B. Flat belt
+C. Timing belt*
+What is the primary purpose of an idler gear in a gear train?
+A. To change torque ratios
+B. To reverse the direction of rotation *
+C. To increase power
+What type of cable is most commonly used in aircraft control systems?
+A. Steel braided cable *
+B. Bowden cable
+C. Nylon-coated cable
+What is the purpose of turnbuckles in control cable systems?
+A. To secure the cable to the pulley system
+B. To adjust cable tension *
+C. To prevent cable fraying
+What component prevents cables from chafing against other surfaces?
+A. Pulleys
+B. Fairleads *
+C. Cable clamps
+What is the function of a Bowden cable in aircraft systems?
+A. Transmit push-pull motion *
+B. Increase tensile strength of cables
+C. Secure control cable ends
+What material is commonly used for high-conductivity electrical cables in aircraft?
+A. Aluminium
+B. Copper *
+C. Titanium
+What is the purpose of cable shielding in aircraft electrical systems?
+A. To reduce weight
+B. To protect cables from electromagnetic interference*
+C. To improve conductivity
+What tool is used to attach pins and sockets to wires in connectors?
+A. Crimping tool*
+B. Splicing tool
+C. Soldering iron
+What is the purpose of a coaxial cable in aircraft systems?
+A. To carry high-current loads
+B. To transmit high-frequency signals with minimal loss*
+C. To reduce thermal expansion in electrical circuits
+What is the recommended minimum bend radius for electrical cables?
+A. Twice the cable diameter
+B. Five times the cable diameter*
+C. Ten times the cable diameter
+What type of spring is typically used in aircraft landing gear systems?
+A. Compression spring
+B. Torsion spring
+C. Belleville spring *
+What is the function of a flat spring in aircraft systems?
+A. Absorb torsional loads
+B. Act as a flexible structural member *
+C. Provide damping for vibrations
+What property makes torsion springs suitable for aircraft control mechanisms?
+A. Ability to absorb axial loads
+B. Resistance to rotational forces *
+C. Elasticity under tensile stress
+Which type of bearing allows linear motion along its axis?
+A. Roller bearing
+B. Ball bearing
+C. Plain bearing *
+What type of bearing is commonly used in high-speed turbine engines?
+A. Roller bearing
+B. Angular contact bearing *
+C. Needle bearing
+What is the main purpose of a thrust bearing?
+A. To reduce friction in radial motion
+B. To support axial loads *
+C. To align shafts
+What is the primary function of a locking plate in fasteners?
+A. To prevent loosening due to vibration *
+B. To increase the torque capacity of bolts
+C. To protect threads from corrosion
+What type of rivet requires heat treatment before installation?
+A. Cherry rivet
+B. Solid rivet *
+C. Blind rivet
+What type of corrosion occurs due to repetitive mechanical contact between surfaces?
+A. Fretting corrosion *
+B. Pitting corrosion
+C. Stress corrosion
+What is the primary cause of microbial corrosion in aircraft systems?
+A. Presence of organic material in fuel systems *
+B. High moisture levels in insulation
+C. Stress concentration at joints
+Which corrosion type appears as fine thread-like lines under protective coatings?
+A. Filiform corrosion *
+B. Intergranular corrosion 
+C. Crevice corrosion
+
+What is the best method to prevent galvanic corrosion?
+A. Apply a protective coating
+B. Use cathodic protection systems
+C. Use similar metals in contact areas
+Which type of pipe is used in high-pressure hydraulic systems?
+A. Flexible pipe
+B. Rigid pipe *
+C. Braided hose
+What is the function of flareless pipe fittings?
+A. Provide a leak-proof seal without flaring the pipe end *
+B. Increase pressure resistance in the system
+C. Allow quick disconnection
+What type of clamp is typically used for low-pressure hose connections?
+A. V-band clamp
+B. Tinnerman clamp *
+C. Swaged coupling
+Which component is commonly used for joining pipes in aircraft fuel systems?
+A. Flared coupling *
+B. Quick-release coupling
+C. Brazed nipple
+What is the primary advantage of blind rivets in aircraft assembly?
+A. Increased tensile strength
+B. Installation from one side of the structure *
+C. High resistance to corrosion
+What material is commonly used for aircraft rivets?
+A. Stainless steel
+B. Aluminium alloy *
+C. Brass
+What is the purpose of heat-treating solid rivets before installation?
+A. To improve corrosion resistance
+B. To soften the rivet for easier installation *
+C. To increase the rivet’s shear strength
+Which type of spring is used to provide constant tension in control cables?
+A. Compression spring
+B. Tension spring *
+C. Spiral spring
+What is a key feature of Belleville springs?
+A. They provide large deflections with minimal space requirements. *
+B. They maintain a constant load over long stretches.
+C. They are primarily used in torsional applications.
+What type of bearing is typically used for applications with high radial loads?
+A. Needle bearing
+B. Tapered roller bearing*
+C. Plain bearing
+Which type of bearing is commonly used to reduce friction in low-speed, heavy-load applications?
+A. Ball bearing
+B. Plain bearing*
+C. Angular contact bearing
+What characteristic makes needle bearings suitable for aircraft systems?
+A. High-speed capability
+B. Ability to handle high radial loads in limited space*
+C. High axial load resistance
+What is the primary purpose of a hardness test on a metal?
+A. Measure the metal’s resistance to permanent deformation*
+B. Determine its tensile strength
+C. Evaluate its ductility
+Which hardness test uses a steel ball to indent the surface of a material?
+A. Rockwell test
+B. Vickers test
+C. Brinell test*
+What does an Izod test measure?
+A. Fatigue strength
+B. Toughness of the material *
+C. Tensile strength
+What does a creep test evaluate in materials?
+A. Resistance to deformation over time under constant load*
+B. Resistance to repeated impact
+C. Strength at elevated temperatures
+What type of corrosion results from cyclical loading and environmental exposure?
+A. Fatigue corrosion*
+B. Fretting corrosion
+C. Intergranular corrosion
+What type of inspection method is most effective for detecting intergranular corrosion and internal defects in composite structures?
+A. Visual inspection
+B. Ultrasonic inspection
+C. Radiography*
+What type of corrosion occurs when moisture enters small, confined spaces?
+A. Crevice corrosion*
+B. Pitting corrosion
+C. Laminar corrosion
+What is the primary benefit of using crimped connections in aircraft electrical systems?
+A. Increased current-carrying capacity
+B. Better mechanical strength and electrical conductivity*
+C. Improved resistance to electromagnetic interference
+What is the purpose of high-tension cables in aircraft systems?
+A. To transmit low-voltage signals
+B. To carry high-voltage electricity*
+C. To reduce electromagnetic interference
+What is the typical core material of coaxial cables used in avionics?
+A. Aluminium
+B. Copper*
+C. Carbon fiber
+What is the primary role of the matrix in composite materials?
+A. Provide reinforcement
+B. Bind fibers and transfer loads between them*
+C. Reduce weight
+Which fiber is used in composites for its high stiffness and low weight?
+A. Aramid fiber
+B. Carbon fiber *
+C. Glass fiber
+What is the primary advantage of sandwich construction in composites?
+A. Enhanced conductivity
+B. High strength-to-weight ratio *
+C. Improved thermal expansion resistance
+What is the purpose of using honeycomb cores in composite structures?
+A. To improve electrical conductivity
+B. To increase stiffness while reducing weight *
+C. To enhance fire resistance
+What is the primary purpose of tempering steel?
+A. To increase hardness
+B. To reduce brittleness and improve toughness *
+C. To refine the grain structure
+What process involves slow cooling of steel to relieve internal stresses?
+A. Annealing *
+B. Normalising
+C. Quenching
+Which heat treatment process adds carbon to the surface of low-carbon steel?
+A. Nitriding
+B. Carburising*
+C. Cyanide hardening
+What type of heat treatment involves using ammonia gas to harden the surface of steel?
+A. Gas carburising
+B. Flame hardening
+C. Nitriding *
+What is the purpose of the refining process in steel?
+A. To produce a fine grain structure for improved toughness*
+B. To increase surface hardness
+C. To reduce ductility for machining
+Which type of defect in composite materials involves layers separating from each other?
+A. Fiber breakage
+B. Delamination*
+C. Corrosion fatigue
+What is a common cause of flawed fastener holes in composite structures?
+A. Poor adhesive bonding
+B. Improper drilling techniques*
+C. Moisture absorption
+What is the main disadvantage of using carbon fiber in composites?
+A. High density
+B. Low tensile strength
+C. Susceptibility to galvanic corrosion when in contact with metals*
+What material is commonly used as the matrix in composite construction?
+A. Polyester resin*
+B. Copper alloy
+C. Tungsten carbide
+What is the best way to protect aircraft structures from filiform corrosion?
+A. Apply an anodic coating
+B. Ensure proper sealing of protective coatings*
+C. Use cathodic protection
+\
+What type of corrosion occurs when stress combines with a corrosive environment?
+A. Stress corrosion cracking*
+B. Galvanic corrosion
+C. Pitting corrosion
+Which metals are most susceptible to corrosion in saltwater environments?
+A. Titanium and magnesium
+B. Aluminium and magnesium*
+C. Copper and stainless steel
+What corrosion inspection method uses infrared cameras to detect thermal changes?
+A. Radiography
+B. Thermography*
+C. Ultrasonic testing
+What is the first step in treating corrosion on an aircraft?
+A. Replace the corroded part
+B. Remove all corrosion products*
+C. Apply a primer and protective coating
+Which fastener type is primarily used in shear applications?
+A. Bolts
+B. Rivets*
+C. Self-locking nuts
+What type of locking device uses pre-drilled holes for wire locking?
+A. Tab washer
+B. Split pin
+C. Castle nut*
+What distinguishes a Jo-bolt from a Hi-Lok fastener?
+A. Jo-bolts are installed from both sides.
+B. Jo-bolts provide higher torque resistance.
+C. Jo-bolts can be installed from one side only. *
+What is the purpose of a split pin in aircraft fasteners?
+A. To distribute load evenly
+B. To prevent rotation of a fastener*
+C. To absorb vibrations
+What are the key advantages of titanium fasteners in aviation?
+A. Corrosion resistance and lightweight properties*
+B. High strength and cost-effectiveness
+C. Electrical conductivity and durability
+What determines the current-carrying capacity of a wire?
+A. Wire insulation material
+B. Wire gauge and length*
+C. Voltage drop
+What is the main advantage of using a data bus cable in aircraft systems?
+A. High current capacity
+B. Reduced electromagnetic interference
+C. Efficient transmission of digital signals*
+What tool is used to ensure proper insertion of connectors during maintenance?
+A. Soldering tool
+B. Alignment jig
+C. Crimping tool*
+What is the key purpose of wire shielding in aircraft systems?
+A. Increase voltage capacity
+B. Reduce signal loss and prevent interference*
+C. Improve thermal conductivity
+What type of connector is commonly used for coaxial cables in avionics?
+A. Bayonet connector*
+B. Ring terminal
+C. Spade connector
+What is the main purpose of the Charpy test?
+A. Measure tensile strength
+B. Determine toughness under impact loads*
+C. Evaluate hardness of the surface
+Which hardness test uses a pyramid-shaped diamond to measure indentation?
+A. Brinell test
+B. Vickers test*
+C. Rockwell test
+What is the key parameter measured in a fatigue test?
+A. Time to fracture under repeated loading*
+B. Maximum tensile load
+C. Yield stress under static load
+Which type of test involves gradually increasing force until material rupture occurs?
+A. Impact test
+B. Tensile test*
+C. Creep test
+What does the Brinell hardness number (BHN) represent?
+A. The force required to create an indentation
+B. The depth of penetration
+C. The diameter of the indentation left on the material*
+What is the main purpose of adding vanadium to steel?
+A. Increase ductility
+B. Produce fine-grain structure and improve toughness*
+C. Improve thermal conductivity
+Which steel is commonly used in aircraft components for its high strength and resistance to wear?
+A. Chrome-molybdenum steel*
+B. Stainless steel
+C. Carbon steel
+What property is achieved by adding tungsten to tool steels?
+A. High-temperature strength and hardness*
+B. Corrosion resistance
+C. Increased ductility
+What type of steel is strengthened by precipitation heat treatment instead of carbon content?
+A. Invar steel
+B. Maraging steel*
+C. High-carbon steel
+What is the typical carbon content of high-carbon steel?
+A. 0.2–0.5%
+B. 0.7–1.5%*
+C. 0.3–0.7%
+What is the primary reason for using aluminium alloys in aircraft construction?
+A. High strength-to-weight ratio*
+B. High thermal conductivity
+C. Low cost
+What non-ferrous metal is typically alloyed with magnesium to improve its strength?
+A. Copper
+B. Aluminium*
+C. Titanium
+What is a disadvantage of magnesium alloys in aircraft applications?
+A. High density
+B. Susceptibility to corrosion*
+C. Low strength
+What is the primary advantage of titanium alloys in aircraft structures?
+A. High electrical conductivity
+B. Corrosion resistance and high strength*
+C. Low melting point
+Which material is commonly used in high-temperature areas such as jet engine components?
+A. Nickel alloys*
+B. Copper alloys
+C. Aluminium alloys
+What happens to steel during the annealing process?
+A. It hardens and becomes brittle.
+B. It softens and becomes more ductile. *
+C. It becomes resistant to corrosion.
+What is the purpose of quenching during hardening?
+A. To reduce internal stresses
+B. To trap carbon in a hard structure*
+C. To refine grain structure
+Which case-hardening method involves the diffusion of carbon into the surface layer of steel?
+A. Cyanide hardening
+B. Gas carburising*
+C. Nitriding
+What heat treatment process results in an intensely hard surface without quenching?
+A. Annealing
+B. Nitriding*
+C. Flame hardening
+What is the purpose of tempering colors in steel?
+A. To measure carbon content
+B. To determine tempering temperature*
+C. To detect surface flaws
+What is the primary advantage of aramid fibers (e.g., Kevlar) in composites?
+A. Resistance to heat and high corrosion resistance
+B. High impact resistance and lightweight properties*
+C. Low production cost and high strength
+What type of weave in composite fibers provides strength in one direction?
+A. Bidirectional weave
+B. Unidirectional weave*
+C. Plain weave
+Which matrix material is commonly used in high-performance composite structures?
+A. Epoxy resin*
+B. Polyester resin
+C. Polyurethane resin
+What is the purpose of using a curing cycle during composite repair?
+A. Ensure proper adhesion of fibers and resin*
+B. Reduce thermal expansion of fibres and resin
+C. Minimize resin shrinkage and fibre growth
+What is the key disadvantage of ceramic fibers in composites?
+A. Low tensile strength
+B. Brittle nature*
+C. Susceptibility to UV degradation
+What is the primary application of Huck fasteners in aircraft?
+A. High-strength, vibration-resistant joints *
+B. Temporary assemblies and quick release
+C. Low-load applications
+Correct Answer: A. High-strength, vibration-resistant joints
+What type of rivet has a preformed head and is designed for high shear strength?
+A. Blind rivet
+B. Solid rivet *
+C. Cherry rivet
+What is the purpose of a locking wire in fastener systems?
+A. To increase strength under load
+B. To prevent loosening due to vibration *
+C. To allow quick removal
+Which type of fastener combines a threaded pin and a locking collar?
+A. Jo-bolt
+B. Hi-Lok fastener *
+C. Lockbolt
+What is the primary function of V-band clamps in aircraft systems?
+A. To provide a flexible connection
+B. To secure flanged joints *
+C. To seal high-pressure pipe connections
+
+What type of union is typically used in fuel and hydraulic systems?
+A. Swaged pipe coupling
+B. Flareless fitting *
+C. Brazed nipple coupling
+What is a key characteristic of flexible pipes used in aircraft systems?
+A. High pressure tolerance
+B. Resistance to vibration and movement *
+C. High thermal conductivity and rigidity
+What does the color coding on aircraft pipes indicate?
+A. The type of fluid carried *
+B. Pressure rating
+C. Pipe material
+What is the primary advantage of quick-disconnect couplings in aircraft systems?
+A. Corrosion resistance
+B. Easy maintenance and rapid assembly/disassembly *
+C. Increased load capacity
+What is the main purpose of angular contact bearings?
+A. Support axial and radial loads simultaneously *
+B. Reduce friction in high-speed applications
+C. Provide alignment in misaligned shafts
+
+Which bearing is designed for very high radial loads in compact spaces?
+A. Needle bearing *
+B. Ball bearing
+C. Tapered roller bearing
+What is the primary purpose of lubrication in bearings?
+A. Increase friction for stability
+B. Reduce wear and heat buildup *
+C. Prevent shaft misalignment
+What type of bearing is commonly used in reciprocating engine crankshafts?
+A. Plain bearing *
+B. Roller bearing
+C. Angular contact bearing
+What is the purpose of a reduction gear system in aircraft?
+A. Increase engine RPM
+B. Reduce engine RPM for efficient propeller operation *
+C. Change the direction of power transmission
+What is the main advantage of using a planetary gear system?
+A. High torque transmission in a compact space *
+B. Simplified manufacturing and ease of use
+C. Reduced noise in high-speed applications
+Which gear type is known for its smooth and quiet operation?
+A. Spur gear
+B. Helical gear *
+C. Bevel gear
+What type of gear is used in applications requiring high torque at low speeds?
+A. Worm gear *
+B. Bevel gear
+C. Helical gear
+What is the purpose of a mesh pattern inspection in gear systems?
+A. Ensure proper alignment and load distribution *
+B. Measure the gear hardness
+C. Determine gear ratio
+What type of cable is used for transmitting radio-frequency signals in aircraft?
+A. Coaxial cable *
+B. Data bus cable
+C. Shielded power cable
+What does the American Wire Gauge (AWG) system indicate?
+A. Wire resistance
+B. Wire diameter *
+C. Wire conductivity
+What type of crimping tool is recommended for aircraft connectors?
+A. Handheld manual crimper
+B. Ratcheting crimping tool *
+C. Hydraulic crimping tool
+What component protects electrical cables from bending or vibration damage?
+A. Cable clamps*
+B. Insulators
+C. Wire shielding
+What is the purpose of torque strips on fasteners?
+A. To ensure proper thread engagement
+B. To indicate loosening during operation*
+C. To prevent over-tightening
+What is the key characteristic of self-locking nuts?
+A. They require a locking washer.
+B. They resist loosening under vibration. *
+C. They allow for quick removal.
+What is the primary feature of Dzus fasteners in aircraft panels?
+A. High load-bearing capacity
+B. Quick-release mechanism*
+C. Corrosion resistance
+What is the function of a palnut in a fastener assembly?
+A. Provide additional locking for nuts*
+B. Act as a load distributor
+C. Seal fastener holes
+Which part of a threaded fastener prevents loosening due to vibration?
+A. Tab washer
+B. Split pin
+C. Thread insert*
+What material is often used as a sacrificial anode for corrosion protection?
+A. Zinc*
+B. Copper
+C. Nickel
+What is the most effective way to protect aluminium from corrosion?
+A. Apply an anodizing process*
+B. Use a zinc coating
+C. Add chromium to the alloy
+What type of sealant is used to protect riveted joints from corrosion?
+A. Epoxy resin
+B. Polysulfide sealant*
+C. Acrylic sealant
+What type of inspection is most suitable for detecting hidden corrosion in airframes?
+A. Ultrasonic testing*
+B. Visual inspection
+C. Magnetic particle inspection
+What is the purpose of passivation in stainless steel?
+A. Increase ductility
+B. Enhance corrosion resistance by forming a protective oxide layer*
+C. Improve hardness
+What is the primary purpose of resin curing in composite repairs?
+A. Bond fibers together and provide structural integrity*
+B. Reduce brittleness in the composite
+C. Prevent thermal expansion
+What inspection method is most effective for detecting water ingress in composite materials?
+A. Thermography*
+B. Coin tapping
+C. Radiography
+What type of core material is commonly used in lightweight composite panels?
+A. Honeycomb structure*
+B. Polyurethane foam
+C. Carbon fiber
+What safety precaution must be taken when working with composite fibers?
+A. Use heat-resistant gloves
+B. Wear a dust mask or respirator*
+C. Avoid using sharp tools
+What defect involves the separation of layers in a composite material?
+A. Delamination*
+B. Fiber breakage
+C. Matrix cracking
+What property makes brass useful in aircraft applications?
+A. High tensile strength
+B. Corrosion resistance and machinability*
+C. Lightweight construction
+Which property is most important for materials used in stressed skin aircraft structures?
+A. Thermal conductivity
+B. Strength-to-weight ratio*
+C. High elasticity
+What is the purpose of lightning protection in composite structures?
+A. Minimize static buildup
+B. Disperse electrical energy safely*
+C. Prevent composite delamination
+What material is commonly used for leading edges of aircraft wings?
+A. Titanium
+B. Aluminium alloy*
+C. Stainless steel
+What inspection method is commonly used for detecting cracks in metallic aircraft parts?
+A. Magnetic particle inspection*
+B. Coin tapping
+C. Ultrasonic testing
+What property of metals allows them to resist penetration and distortion?
+A. Malleability
+B. Hardness*
+C. Elasticity
+Which process is used to increase the ductility of steel while reducing hardness?
+A. Hardening
+B. Tempering
+C. Annealing*
+At what approximate temperature does aluminium alloy fuse?
+A. 1,100°F*
+B. 2,600°F
+C. 700°F
+What is the key purpose of nickel in alloy steels?
+A. To improve conductivity
+B. To increase toughness and reduce grain growth*
+C. To lower the melting point
+Which heat treatment process involves quenching to achieve surface hardness while keeping the core tough?
+A. Tempering
+B. Carburising*
+C. Nitriding
+What is the effect of increasing carbon content in steel up to 0.83%?
+A. It becomes more brittle and less ductile.
+B. It becomes stronger and tougher. *
+C. It becomes softer and easier to machine.
+Which mechanical test measures the ability of a material to resist mechanical shock?
+A. Tensile test
+B. Compression test
+C. Impact test*
+What is the significance of a material’s elastic limit?
+A. The point beyond which plastic deformation begins*
+B. The maximum stress the material can withstand before breaking
+C. The temperature at which the material begins to fuse

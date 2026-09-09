@@ -1,0 +1,643 @@
+--- Page 1 ---
+www.easaquestionpapers.blogspot.com
+1.2a Algebra.
+Question Number. 1. Solve the following equation: 5x = 3x + 2.
+Option A. 3.
+Option B. 5.
+Option C. 1.
+Correct Answer is. 1.
+Explanation. 5x-3x = 2, 2x = 2, x = 1.
+Question Number. 2. Simplify the following (w + z)(x - y)(y - w) / (y - x)(w - y)(w + z).
+Option A. -1.
+Option B. 0.
+Option C. +1.
+Correct Answer is. +1.
+Explanation. First cancel the (w+z) because they are the same. Then multiply out the top and
+bottom lines (remember the smiley face) and cancel what you can (everything cancels - leaving you
+with just 1/1=1).
+Question Number. 3. Given 43-x = 21, find the value of x.
+Option A. 43-21.
+Option B. 43/21.
+Option C. 43+21.
+Correct Answer is. 43-21.
+Explanation. 43 = 21 + x 43-21 = x.
+Question Number. 4. Make L the subject of the formula 2pfL = x.
+Option A. L = 2pf.
+Option B. L = 2pf / x.
+Option C. L = x / 2pf.
+Correct Answer is. L = x / 2pf.
+Explanation. Divide the x by 2pf.
+Question Number. 5. Given that A = X+BY, what is Y equal to?.
+Option A. A-X add B.
+Option B. A-X divided by B.
+Option C. A-X minus B.
+Correct Answer is. A-X divided by B.
+Explanation. Basic transposition.
+Question Number. 6. If y/x = 4 and y = 5 then x =.
+Option A. 20.
+Option B. 4/5.
+Option C. 1 ¼.
+Correct Answer is. 1¼.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 2 ---
+www.easaquestionpapers.blogspot.com
+Explanation. 5/x = 4, x = 5/4 = 1 1/4.
+Question Number. 7. (x - 3)(x + 5)=.
+Option A. x2 +2x.
+Option B. x2 +2x-15.
+Option C. x2 -15.
+Correct Answer is. x2 +2x-15.
+Explanation. Multiply x by x and +5, then multiply -3 by x and +5. Then gather together all like
+terms.
+Question Number. 8. 21=43- , is equal to.
+Option A. 21-43.
+Option B. 43+21.
+Option C. 43-21.
+Correct Answer is. 43-21.
+Explanation. 21=43- , 21+ = 43, = 43-21.
+Question Number. 9. Evaluate. 2X2 Z2 (3X-Z2 ) =.
+Option A. 6X2 z2 +3x-z2 .
+Option B. 6x2 z2 -2x2 z2 .
+Option C. 6x3 z2 -2x2 z4 .
+Correct Answer is. 6x3 z2 -2x2 z4 .
+Explanation. Multiply out the brackets and add the indices where necessary.
+Question Number. 10. (a * b)(a * b) =.
+Option A. a2 + 2ab + b2 .
+Option B. a2 b2.
+Option C. a2 + b2.
+Correct Answer is. a2 b2 .
+Explanation. Do a x (a-b) (i.e. expand that bracket), then do b x (a-b) (i.e. expand that bracket too).
+Then gather together like terms. You will find that ab and -ab cancel.
+Question Number. 11. If y/x = 4 and x = 5 then y =.
+Option A. 1 ¼.
+Option B. 20.
+Option C. 4/5.
+Correct Answer is. 20.
+Explanation. y/5 = 4. y = 5x4 = 20.
+Question Number. 12. Determine x.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 3 ---
+www.easaquestionpapers.blogspot.com
+Option A. 9.029.
+Option B. 9.570.
+Option C. 8.971.
+Correct Answer is. 9.029.
+Explanation. Root of 81 is 9, so it must be 9.xxx (which rules out b). (Since the content of the
+brackets comes to a negative number, it is positive when it is squared).
+Question Number. 13. Find L in the following expression.
+Option A. Q2 C / R2 .
+Option B. Q2 C2 / R.
+Option C. Q2 R2 C.
+Correct Answer is. Q2 R2 C.
+Explanation. QxR to remove the R from RHS. Square both sides to remove the root from RHS.
+Multiply LHS by C to remove the C from RHS and you are left with L.
+Question Number. 14. The heat of a resistor is given by the equation h = I2 RT. Find the
+current I.
+Option A. .
+Option B. .
+Option C. .
+Correct Answer is. .
+Explanation. h/RT Square root ALL.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 4 ---
+www.easaquestionpapers.blogspot.com
+Question Number. 15. Factorise the following : x2 -x-6=0.
+Option A. (x-2)(x+3).
+Option B. (x-2)(x-3).
+Option C. (x+2)(x-3).
+Correct Answer is. (x+2)(x-3).
+Explanation. Choose 2 numbers where the sum = -1 (the coefficient of x) and the product
+(multiple) is -6 (the constant). Alternatively, multiply out the answers a, b, c until you get the
+question.
+Question Number. 16. Factorise the following : 4x2 -6x-28 = 0.
+Option A. (4x-14) (x+2).
+Option B. (2x+7) (x-2).
+Option C. (2x2 +7) (x + 2).
+Correct Answer is. (4x-14) (x + 2).
+Explanation. Expand each answer in turn until you get the question. Remember the smiley face.
+Question Number. 17. Solve for x in the equation: 3(x + 2) = 30 + 2(x-4).
+Option A. 8.
+Option B. 16.
+Option C. 15.
+Correct Answer is. 16.
+Explanation. Multiply out the bracket first. 3x + 6 = 30 + 2x-8. Then take all 'x' terms to left, and
+all 'non-x' terms to right. 3x-2x = 30-8-6 etc.
+Question Number. 18. 2x = 4(x-3), Evaluate x.
+Option A. 6.
+Option B. 0.5.
+Option C. 2.
+Correct Answer is. 6.
+Explanation. Expand the bracket 2x = 4x-12, Take 4x to LHS 2x-4x = -12, -2x = -12, x = -12/-2 =
+6.
+Question Number. 19. 12x/2y + 14 = 50, When y = 2, solve for x.
+Option A. 11.6.
+Option B. 14.
+Option C. 12.
+Correct Answer is. 12.
+Explanation. 12x/(2x2) = 50-14. 12x = 36 x 4. 12x = 144. x = 144/12 = 12.
+Question Number. 20. 27y = 3 so y is equal to:.
+Option A. 1/9.
+Option B. 1/3.
+Option C. 9/1.
+Correct Answer is. 1/9.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 5 ---
+www.easaquestionpapers.blogspot.com
+Explanation. 3/27 = 1/9.
+Question Number. 21. Determine x in the following: (2x-1)(3x+2) = 0.
+Option A. 1.5, 1.
+Option B. 0.5, 3.
+Option C. -0.67, 0.5.
+Correct Answer is. -0.67, 0.5.
+Explanation. Two values of x, either 2x-1 = 0 (2x = 1, x = 1/2) or 3x + 2 = 0 (3x = -2, x=-2/3).
+Question Number. 22. (x + y + z)(x + y + z) =.
+Option A. 2(x + y + z).
+Option B. 2x + 2y +2z.
+Option C. (x + y + z)2 .
+Correct Answer is. (x + y + z)2 .
+Explanation. NIL.
+Question Number. 23. If x in an equation equals Ly + 7cb, define the formula for finding the
+subject y.
+Option A. x-7cb/L.
+Option B. x-7cb/L.
+Option C. x-L/7cb.
+Correct Answer is. x-7cb/L.
+Explanation. Subtract the 7cb (x-7cb) then divide all by L.
+Question Number. 24. 64y = 64 what does y =.
+Option A. 1.
+Option B. 0.
+Option C. 0.5.
+Correct Answer is. 1.
+Explanation. Anything to the power of 1 is itself.
+Question Number. 25. Simplify 3a-2b +6a-3b-2a.
+Option A. 7a-5b.
+Option B. 7a +5b.
+Option C. 7a +b.
+Correct Answer is. 7a-5b.
+Explanation. Collect together like terms: 3a +6a-2a-2b-3b = 7a-5b.
+Question Number. 26. Simplify 3x-2xy-3y +5xy-2x +2y.
+Option A. x + 3xy-y.
+Option B. 5x + 3xy-y.
+Option C. x-3xy + y.
+Correct Answer is. x + 3xy-y.
+Explanation. Collect together like terms: 3x-2x +5xy-2xy +2y-3y = x +3xy-y.
+Question Number. 27. Simplify 5(x-2y) + 3(2y-x).
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 6 ---
+www.easaquestionpapers.blogspot.com
+Option A. 4x +4y.
+Option B. 2x +4y.
+Option C. 2x-4y.
+Correct Answer is. 2x-4y.
+Explanation. Remove the brackets first: 5x-10y +6y-3x Collect like terms: 5x-3x +6y-10y = 2x-4y.
+Question Number. 28. simplify (a+b)(a-c)(b-c) divided by (b+a)(c-a)(c-b).
+Option A. -1.
+Option B. (a+b)(a-c)(b-c).
+Option C. 1.
+Correct Answer is. 1.
+Explanation. Because this is a series of multiplications on both top and bottom we can do the
+following: (a+b)/(b+a) = 1 (a-c)/(c-a) =(a-c)/-(a-c) = -1 (b-c)/-(b-c) = -1 hence the result is 1x-1x-1
+=1.
+Question Number. 29. Make P the subject of the formula I =PRT/100.
+Option A. P = IRT/100.
+Option B. P = 100I/RT.
+Option C. P = 100RT/I.
+Correct Answer is. P = 100I/RT.
+Explanation. Multiply both sides by 100 then divide both sides by RT to get P =100I/RT.
+Question Number. 30. Make u the subject of the formula v2 = u2 + 2as.
+Option A. u = v-2as.
+Option B. u = √(v2 -2as).
+Option C. u = √(v2 +2as).
+Correct Answer is. u = √(v2 -2as).
+Explanation. u = √(v2 -2as).
+Question Number. 31. Remove the brackets and simplify: (x-y)(x-y).
+Option A. x2 -2xy-y2 .
+Option B. x2 +y2 .
+Option C. x2 -2xy+y2 .
+Correct Answer is. x2 -2xy+y2 .
+Explanation. Multiply both the x and the -y in the first bracket by both the x and -y in the second
+bracket. X2 -xy-yx + y2 x2 -2xy + y2 ( remember -x- = + and yx is the same as xy).
+Question Number. 32. Evaluate (3X2 -6xy) / (x-2y).
+Option A. cannot be simplified further.
+Option B. 3x-3y.
+Option C. 3x.
+Correct Answer is. 3x.
+Explanation. 3x2 -6xy=3x(x-2y) Dividing by x-2y leaves 3x.
+Question Number. 33. Evaluate (3a + 2b)(2a-3b).
+Option A. 6a2 -5ab-6b2 .
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 7 ---
+www.easaquestionpapers.blogspot.com
+Option B. 6a-5ab-6b.
+Option C. 6a2 + 5ab-6b2 .
+Correct Answer is. 6a2 -5ab-6b2 .
+Explanation. Multiply 3a(2a-3b) =6a2 -9ab then multiply 2b(2a-3b) = 4ab-6b2 collect like terms to
+give 6a2 -5ab-6b2 .
+1.2b Algebra.
+Question Number. 1. Solve the following equations for x: 4x+8y=64 2x-8y=86.
+Option A. 125.
+Option B. 25.
+Option C. 5.
+Correct Answer is. 25.
+Explanation. Add like terms to eliminate y term. Thus 6x = 150, x = 25.
+Question Number. 2. 11001+11001 =.
+Option A. 502.
+Option B. 5010.
+Option C. 508.
+Correct Answer is. 5010.
+Explanation. NIL.
+Question Number. 3. 100000 in binary is what number in decimal?.
+Option A. 32.
+Option B. 16.
+Option C. 64.
+Correct Answer is. 32.
+Explanation. From the right (lsb) binary goes - ones, twos, fours, eights, sixteens, thirtytwos,
+sixtyfours etc.
+Question Number. 4. D in hexidecimal is what number in decimal?.
+Option A. 17.
+Option B. 13.
+Option C. 8.
+Correct Answer is. 13.
+Explanation. In hexidecimal, 10 is A, 11 is B, 12 is C, 13 is D, 14 is E and 15 is F.
+Question Number. 5. 10101 +11001 =.
+2 2
+Option A. 46
+10.
+Option B. 46 .
+8
+Option C. 46
+2 .
+Correct Answer is. 46
+10.
+Explanation. Add the two binary numbers then convert the result to decimal. Note: answer 'a'
+cannot be a binary number so is wrong by default.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 8 ---
+www.easaquestionpapers.blogspot.com
+Question Number. 6. What is 738 in binary coded decimal?.
+Option A. 1011110010.
+Option B. 111100010.
+Option C. 11100111000.
+Correct Answer is. 11100111000.
+Explanation. Binary Coded Decimal is not the same as binary.
+Question Number. 7. (A+B)4 is (A+B)2 .
+Option A. (A+B)6 .
+Option B. (A+B)2 .
+Option C. A+B.
+Correct Answer is. (A+B)2 .
+Explanation. Subtract the indices.
+Question Number. 8. log 9-log 3=.
+Option A. log 6.
+Option B. log 3.
+Option C. log 9.
+Correct Answer is. log 3.
+Explanation. log 9 = log (3x3) = 2 log 3. 2 log 3-log 3 = log 3.
+Question Number. 9. What is y in the formula shown? a=(X+B)/y.
+Option A. (a + X) / B.
+Option B. (X - B) /a.
+Option C. (X +B)/ a.
+Correct Answer is. (X +B)/ a.
+Explanation. The A and y can be swapped in this situation.
+Question Number. 10. 67 divided by 127 is equal to.
+Option A. 1/2.
+Option B. 1/20.
+Option C. 1/128.
+Correct Answer is. 1/128.
+Explanation. Cannot subtract the indices when the base is different. 127 =27 x67 . Now cancel the 67
+top and bottom. 1/27 = 1/(2x2x2x2x2x2x2) = 1/128.
+Question Number. 11. If 2x-8y=14 and 4x+8y=16; then x=.
+Option A. -1/2.
+Option B. 5.
+Option C. 3.
+Correct Answer is. 5.
+Explanation. Add the x terms, add the y terms and add the numbers on the right of the equal sign.
+The y terms cancel so you are then left with a formula that can be solved for x.
+Question Number. 12. 2x-3 = 4; x =.
+Option A. 7.
+Option B. -3.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 9 ---
+www.easaquestionpapers.blogspot.com
+Option C. 3.50.
+Correct Answer is. 3.50.
+Explanation. 2x-3=4, 2x=4+3, 2x=7, x=7/2=3.5.
+Question Number. 13. V = (a+b) r2 Find a.
+Option A. V – r2 – b.
+Option B. (V – b)/ r2
+Option C. V / r2 – b.
+Correct Answer is. V / r2 – b.
+Explanation. Basic transposition.
+Question Number. 14. Make m the subject of the formula in y=mx+c.
+Option A. y-x/c.
+Option B. y-c/x.
+Option C. y+c/x.
+Correct Answer is. y-c/x.
+Explanation. Basic transposition.
+Question Number. 15. Make x the subject of the formula in y = mx+c.
+Option A. (y-c)/m.
+Option B. y-c/m.
+Option C. y-m/c.
+Correct Answer is. (y-c)/m.
+Explanation. Basic transposition.
+Question Number. 16. Make c the subject of the formula in y = mx+c.
+Option A. y-mx.
+Option B. mx-y.
+Option C. y+mx.
+Correct Answer is. y-mx.
+Explanation. Basic transposition.
+Question Number. 17. Octal is to the base of.
+Option A. 2.
+Option B. 16.
+Option C. 8.
+Correct Answer is. 8.
+Explanation. Octal is base 8 numbering system.
+Question Number. 18. 101110 in binary is.
+Option A. 46 base 8.
+Option B. 46 base 2.
+Option C. 46 base 10.
+Correct Answer is. 46
+10.
+Explanation. In binary, each term means 32, 16, 8, 4, 2, 1. Write down 101110 underneath and add
+up the numbers above the 1's.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 10 ---
+www.easaquestionpapers.blogspot.com
+Question Number. 19. What is octal 13 in base 10?.
+Option A. 11.
+Option B. 5.
+Option C. 4.
+Correct Answer is. 11.
+Explanation. Octal numbering is 64, 8, 1 etc. So 13 is 1 x 8's, and 3 x 1's = 11.
+Question Number. 20. What type of equation is this? ax2 +bx+c = 0.
+Option A. Quadratic equation.
+Option B. Polynomic equation.
+Option C. Gradient of the line.
+Correct Answer is. Quadratic equation.
+Explanation. Quadratic.
+Question Number. 21. What is (X2 x X3 )3 ?.
+Option A. X36.
+Option B. X 15.
+Option C. X 10.
+Correct Answer is. X 15.
+Explanation. X2 * X3 = X5 X5 raised to the power 3 is X15.
+Question Number. 22. Hexadecimal is base.
+Option A. 16.
+Option B. 8.
+Option C. 2.
+Correct Answer is. 16.
+Explanation. Hexadecimal is base 16.
+Question Number. 23. y=mx+c can also be written.
+Option A. x=y-c/m.
+Option B. x=y/m+c.
+Option C. x=y/m-c.
+Correct Answer is. x=y-c/m.
+Explanation. Basic transposition.
+Question Number. 24. (x+y)2 ÷ (x + y)8 has a base and exponent of.
+Option A. (x+y)10.
+Option B. (x+y)-6.
+Option C. (x+y)1/4.
+Correct Answer is. (x+y)-6 .
+Explanation. If the bases are the same, keep it the same, but subtract the indices (exponents) if
+dividing.(Add the indices if multiplying).
+Question Number. 25. Rewrite the following with a positive index: z pwr-2 and x pwr-3.
+Option A. (ZX2 )2 ; and (X)3
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 11 ---
+www.easaquestionpapers.blogspot.com
+Option B. 1/z2 and 1/x3 .
+Option C. Z/22; and 1/X
+Correct Answer is. 1/Z2 and 1/X3 .
+Explanation. Invert the variable (e.g. 1/z and write the power with the opposite sign).
+Question Number. 26. 10011 =.
+2
+Option A. 29 .
+2
+Option B. 19
+10.
+Option C. 35
+10.
+Correct Answer is. 19
+10.
+Explanation. (1 * 16) + (0 * 8) + (0 * 4) + (1 * 2) + (1 * 1) = 19.
+Question Number. 27. y = 2x + 4, When x = -1, y =.
+Option A. 4.
+Option B. 2.
+Option C. 0.5.
+Correct Answer is. 2.
+Explanation. y=2(-1)+4=-2+4 =+2.
+Question Number. 28. What is 011100001 in Octal?.
+2
+Option A. 341.
+Option B. 324.
+Option C. 452.
+Correct Answer is. 341.
+Explanation. A binary number ending in 1 must be an odd number when converted to any base.
+Question Number. 29. BCD format of numbering system has a base of.
+Option A. 8.
+Option B. 2.
+Option C. 10.
+Correct Answer is. 2.
+Explanation. BCD is base 2.
+Question Number. 30. The characteristic of Log 0.698 is.
+Option A. 1.
+Option B. -1.
+Option C. -2.
+Correct Answer is. -1.
+Explanation. The characteristic of a logarithm is the integral part of the logarithm. The mantissa is
+the decimal part. So, for example Log8(29345) = 4.94694 the characteristic is 4 and the mantissa
+0.94694. The log definition y=bx, logb(y)=x. So 0.698 = 10powerx. x must be -1.*** (i.e minus one-
+point-something).
+Question Number. 31. Log 59,000 is equal to.
+Option A. 0.77452.
+Option B. 4.7745.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 12 ---
+www.easaquestionpapers.blogspot.com
+Option C. 5.77452.
+Correct Answer is. 4.7745.
+Explanation. Log 10=1, Log 100 = 2, Log 1000=3. Log 59,000 = Log 59+Log 1000 = something
+between 1 and 2, + 3.
+Question Number. 32. If 2x2 + kx-8 = 0 has two equal real roots, then.
+Option A. k is an imaginary number.
+Option B. k=±8.
+Option C. k=-8.
+Correct Answer is. k is an imaginary number.
+Explanation. Because of the +/- part of the quadratic solution formula, it is not possible for the
+equation to have two equal roots. k is therefore an imaginary number.
+Question Number. 33. Given the log of A exceeds that of B by 4, find the correct statement
+about A and B.
+Option A. A is 4000 times the value of B.
+Option B. A is 10,000 times the value of B.
+Option C. A is 1000 times the value of B.
+Correct Answer is. A is 10,000 times the value of B.
+Explanation. log 10=1, log 100=2, log 1000=3, log 10000=4, log 100,000=5.
+Question Number. 34. What is 11110001 base2 in Octal?.
+Option A. 72.
+Option B. 684.
+Option C. 361.
+Correct Answer is. 361.
+Explanation. Divide into blocks of 3 (from right to left), and convert each block into DECIMAL -
+you have just converted to OCTAL. (Note: 'c' is automatically out, since you cannot have '7' in octal).
+Question Number. 35. If x2 -3=6, then x=.
+Option A. ±3.
+Option B. 18.
+Option C. ± 2.
+Correct Answer is. ±3.
+Explanation. x2 =6 +3, x2 =9, x=+/-3.
+Question Number. 36. Given that s=0, solve the equation s=ut+½at2 for the two possible
+values of t.
+Option A. t=0, t=2u/a.
+Option B. t=0, t=a/2u.
+Option C. t=0, t=-2u/a.
+Correct Answer is. t=0, t=-2u/a.
+Explanation. s=ut+½at2 Make s=0, 0=ut+½at2 Divide all terms by u, 0 = t + a/2ut2 Factorise,
+0=t(1+a/2ut) So either t=0, or -2u/a=0 (so everything in the brackets=0).
+Question Number. 37. What is Log 9-Log 3 + Log 4.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 13 ---
+www.easaquestionpapers.blogspot.com
+Option A. Log 12.
+Option B. Log 10.
+Option C. Log 16.
+Correct Answer is. Log 12.
+Explanation. Log 9 = 2Log3, therefore 2Log3-Log3 + Log 4 = Log3 + Log4 = Log(3 x 4) =
+Log12.
+Question Number. 38. What is log 0.1?.
+Option A. -0.1.
+Option B. 0.
+Option C. -1.
+Correct Answer is. -1.
+Explanation. Log of 0.1 is always -1, (log 0.01 = -2, log 0.001 = -3 etc).
+Question Number. 39. What is log 1?.
+Option A. 10.
+Option B. 1.
+Option C. 0.
+Correct Answer is. 0.
+Explanation. Log of 1 is always 0.
+Question Number. 40. What is the log of 20000.2?.
+Option A. 0.47892.
+Option B. 4.7892.
+Option C. 47.892.
+Correct Answer is. 4.7892.
+Explanation. Log of a 5-figure number (not including the decimal) is always 4 point something.
+Question Number. 41. A quadratic equation has the real roots x=6 and x=9. Determine the
+equation which is satisfied by these roots.
+Option A. x2 -54x+15=0.
+Option B. x2 -15x+54=0.
+Option C. x2 +15x-15=0.
+Correct Answer is. X2 -15x+54=0.
+Explanation. Change the sign of each root -6, -9. Coefficient of x is the addition, the constant is the
+multiplication. http://www.themathpage.com/alg/quadratic-equations.htm.
+Question Number. 42. What is 10111 -1001 ?.
+2 2
+Option A. 1100 .
+2
+Option B. 1110 .
+2
+Option C. 1010 .
+2
+Correct Answer is. 1110 .
+2
+Explanation. NIL.
+Question Number. 43. What is the characteristic of 5.74?.
+Option A. 1.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 14 ---
+www.easaquestionpapers.blogspot.com
+Option B. -1.
+Option C. 0.
+Correct Answer is. 0.
+Explanation. If you find the Log of 5.74, it will be 0.--- The '0' is the characteristic.
+Question Number. 44. What is log63?.
+Option A. 6log3.
+Option B. log18.
+Option C. 3log6.
+Correct Answer is. 3log6.
+Explanation. 3log6.
+Question Number. 45. Solve for x: 5x-7=3.
+Option A. x=-4/5.
+Option B. x=-2.
+Option C. x=2.
+Correct Answer is. x=2.
+Explanation. 5x-7 = 3add 7 to both sides to give 5x = 10 divide both sides by 5 to give x = 2.
+Question Number. 46. Octal is the word given to what base?.
+Option A. 8.
+Option B. 2.
+Option C. 16.
+Correct Answer is. 8.
+Explanation. NIL.
+Question Number. 47. Which of the following is a quadratic equation?.
+Option A. 3x2 +2x+1=0.
+Option B. 3x+2y+4=0.
+Option C. 3x3 +3x-2 = 0.
+Correct Answer is. 3x2 +2x+1=0.
+Explanation. A quadratic equation has only one unknown and the highest power is two.
+Question Number. 48. What is log 1000?.
+Option A. 2.0787.
+Option B. 1.0787.
+Option C. 3.0787.
+Correct Answer is. 3.0787.
+Explanation. Log 10 = 1 Log 100 = 2 Log 1000 = 3 Log 10000 = 4 etc.
+Question Number. 49. What is log AB?.
+Option A. log (A+B).
+Option B. log A+log B.
+Option C. Log A-Log B.
+Correct Answer is. log A+log B.
+Explanation. External website.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers
+
+--- Page 15 ---
+www.easaquestionpapers.blogspot.com
+Question Number. 50. What is LogA/B?.
+Option A. log A+Log B.
+Option B. log A-Log B.
+Option C. Log (A-B).
+Correct Answer is. log A-Log B.
+Explanation. External website.
+Question Number. 51. log 100+2 =.
+Option A. 4.
+Option B. Log 200.
+Option C. Log 200.
+Correct Answer is. 4.
+Explanation. log 100=2, 2+2 = 4.
+Question Number. 52. Log 100/2 =.
+Option A. Log 200.
+Option B. Log 98.
+Option C. 1.
+Correct Answer is. 1.
+Explanation. log 100=2, 2/2 = 1.
+Question Number. 53. Log 100+cos60.
+Option A. 0.25.
+Option B. 25.
+Option C. 2.5.
+Correct Answer is. 2.5.
+Explanation. Log 100=2, cos60=0.5, 2+0.5=2.5.
+Share your documents with us at (aviatorslinks@gmail.com) DownloadOur Mobile App For Recent
+Papers

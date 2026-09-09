@@ -87,7 +87,7 @@ export async function generatePoolRosterCSV(poolId: string): Promise<string> {
 }
 
 export async function getEasaComplianceReport(): Promise<EasaComplianceReport> {
-  const passMark = ACADEMIC_RULES.EASA_PASS_MARK ?? 70
+  const passMark = ACADEMIC_RULES.EASA_PASS_MARK
 
   // Fetch all exam results with their exam component and course/module info
   const results = await prismaUnfiltered.examResult.findMany({

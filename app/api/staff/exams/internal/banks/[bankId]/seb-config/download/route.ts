@@ -10,6 +10,7 @@ import {
 } from '@/lib/internal-exam/seb-config'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 import { Prisma } from '@prisma/client'
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 
 /**
  * GET /api/staff/exams/internal/banks/[bankId]/seb-config/download
@@ -37,7 +38,7 @@ export const GET = withErrorHandler(
 
     const bankSebConfig = (bank.sebConfig as BankSebConfig | null) ?? null
     const startUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/student/exams/internal/take/${bankId}`
-    const examDurationSecs = bank.mcqCount * 75
+    const examDurationSecs = bank.mcqCount * ACADEMIC_RULES.TIME_PER_QUESTION_SECS
 
     const sebConfig = buildSebConfig({
       bekPair: { publicKey: '', privateKey: '', configKey: '' },
