@@ -79,17 +79,22 @@ For candidates who cannot use the lockdown interface:
 | EASA certification | 10x required count | High-stakes; defeat memorisation |
 | High-stakes modules | 20x required count | Maximum security |
 
-### 3.2 Question Metadata
+### 3.2 Question Structure
 
-Every question must include:
+Every question must conform to the following structure enforced by `selectInternalExamQuestions` (`lib/exams/engine.ts:99`):
 
-| Field | Type | EASA Requirement |
-|-------|------|------------------|
+| Field | Type | Requirement |
+|-------|------|-------------|
+| `options` | JSON array of 3 strings | Exactly 3 options per question (EASA Part-66 standard) |
+| `correctAnswer` | string | Exact option text; stored server-side only |
 | `moduleCode` | string | M1–M17, type modules |
 | `moduleSubsection` | string | Part-66 Appendix I taxonomy |
 | `knowledgeLevel` | int | 1, 2, or 3 per EASA |
 | `syllabusRef` | string | Reference to EASA syllabus paragraph |
 | `points` | int | Scoring weight |
+| `explanation` | string | 5-10 questions per bank have explanations (results page "Show Explanations") |
+
+**Note:** The exam UI renders options as large A/B/C buttons with letter badges. `correctAnswer` is never sent to the client during an active exam session (verified in `app/api/student/exams/internal/session/route.ts`).
 
 ### 3.3 Approval Workflow
 
@@ -149,9 +154,10 @@ Violations: {violationCount}
 
 ### 5.2 Blind Grading
 
-- Correct answers are stored server-side only
-- Grading executed in PostgreSQL `SECURITY DEFINER` function
-- Client never receives `isCorrect` or `correctAnswer`
+- Correct answers are stored server-side only in `InternalExamQuestion.correctAnswer`
+- Grading executed by `lib/exams/engine.ts` on the server
+- The client exam interface (`app/student/exams/internal/_components/InternalExamInterface.tsx`) renders options as A/B/C buttons but **never receives `correctAnswer`** during an active session
+- Results page (`app/student/exams/internal/results/[sessionId]/page.tsx`) only shows answers when the student toggles `showAnswers`; hidden by default until an admin sets `isPublished: true`
 - Server-side paper binding validates answer integrity
 
 ### 5.3 Result Lock
