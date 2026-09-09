@@ -44,6 +44,7 @@ describe('FileField', () => {
 
   it('disables button when disabled is true', () => {
     render(<FileField {...defaultProps} disabled />)
-    expect(screen.getByTestId('upload-thing-button')).toBeDisabled()
+    const wrapper = screen.getByTestId('upload-thing-button')
+    expect(wrapper.querySelector('input[type="file"]')).toBeDisabled()
   })
 })

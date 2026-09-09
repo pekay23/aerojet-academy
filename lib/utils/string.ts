@@ -11,7 +11,8 @@ export function truncate(str: string, maxLength: number = 100): string {
   return str.substring(0, maxLength) + '...'
 }
 
-export function slugify(str: string): string {
+export function slugify(str: string | null | undefined): string {
+  if (!str) return ''
   return str
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
