@@ -61,6 +61,12 @@ prisma/migrations
 # temp / scratch / one-off scripts
 /tsc-errors*.txt
 /tsc-app-lib-errors.txt
+/tsc_check*.txt
+/tsc_final.txt
+/tsc_output*.txt
+/tsc_sig*.txt
+/tsc_upload*.txt
+/test_output.txt
 /temp.*
 /scratch.*
 /scratch/
