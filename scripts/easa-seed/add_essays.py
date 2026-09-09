@@ -191,7 +191,10 @@ def add_essays(module: str, essays: list) -> None:
         reader = csv.DictReader(f)
         fieldnames = reader.fieldnames
         rows = list(reader)
-    count = 0
+
+    existing_keys = {(r["syllabusRef"], r["text"][:80]) for r in rows}
+    updated = 0
+    added = 0
     for syllabus, difficulty, text, answer_mark, source in essays:
         raw = json.dumps(
             {
@@ -212,34 +215,44 @@ def add_essays(module: str, essays: list) -> None:
             },
             ensure_ascii=False,
         )
-        rows.append(
-            {
-                "module": module,
-                "syllabusRef": syllabus,
-                "level": "",
-                "text": text,
-                "optionA": "",
-                "optionB": "",
-                "optionC": "",
-                "optionD": "",
-                "correctAnswer": "",
-                "difficulty": difficulty,
-                "subTopic": syllabus,
-                "aiSourceRef": "",
-                "aiConfidence": "",
-                "status": "APPROVED",
-                "reviewNote": "",
-                "points": 5,
-                "sourceFile": source,
-                "rawJson": raw,
-            }
-        )
-        count += 1
+        key = (syllabus, text[:80])
+        if key in existing_keys:
+            for r in rows:
+                if r["syllabusRef"] == syllabus and r["text"][:80] == text[:80]:
+                    r["isEssay"] = "True"
+                    updated += 1
+                    break
+        else:
+            rows.append(
+                {
+                    "module": module,
+                    "syllabusRef": syllabus,
+                    "level": "",
+                    "text": text,
+                    "optionA": "",
+                    "optionB": "",
+                    "optionC": "",
+                    "optionD": "",
+                    "correctAnswer": "",
+                    "difficulty": difficulty,
+                    "subTopic": syllabus,
+                    "aiSourceRef": "",
+                    "aiConfidence": "",
+                    "status": "APPROVED",
+                    "reviewNote": "",
+                    "points": 5,
+                    "sourceFile": source,
+                    "rawJson": raw,
+                    "isEssay": "True",
+                }
+            )
+            existing_keys.add(key)
+            added += 1
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
-    print(f"{module}: added {count} essay questions, total now {len(rows)}")
+    print(f"{module}: added {added}, updated {updated}, total now {len(rows)}")
 
 
 def main() -> int:
