@@ -6,6 +6,36 @@ import { getPDFSettings } from '@/lib/pdf-settings'
 import { TranscriptTemplate, TranscriptRecord } from '@/components/pdf/templates/TranscriptTemplate'
 import { createVerificationRecord, generateVerificationQrDataUrl } from '@/lib/document-verification'
 
+async function renderTranscriptPdf(props: {
+  logoUrl: string
+  watermarkUrl?: string
+  watermarkOpacity?: number
+  footerText?: string
+  studentName: string
+  studentId: string
+  programName: string
+  enrollmentDate: string
+  generatedDate: string
+  records: TranscriptRecord[]
+  qrDataUrl?: string
+}) {
+  return renderToStream(
+    <TranscriptTemplate
+      logoUrl={props.logoUrl}
+      watermarkUrl={props.watermarkUrl}
+      footerText={props.footerText}
+      watermarkOpacity={props.watermarkOpacity}
+      studentName={props.studentName}
+      studentId={props.studentId}
+      programName={props.programName}
+      enrollmentDate={props.enrollmentDate}
+      generatedDate={props.generatedDate}
+      records={props.records}
+      qrDataUrl={props.qrDataUrl}
+    />
+  )
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getAuthSession()
@@ -104,32 +134,28 @@ export async function GET(req: NextRequest) {
 
     const qrDataUrl = await generateVerificationQrDataUrl(verification.code)
 
-    // eslint-disable-next-line react-hooks/error-boundaries
-    const stream = await renderToStream(
-      <TranscriptTemplate
-        logoUrl={pdfSettings.logoUrl}
-        watermarkUrl={pdfSettings.watermarkUrl}
-        footerText={pdfSettings.footerText}
-        watermarkOpacity={pdfSettings.watermarkOpacity}
-        studentName={fullName}
-        studentId={profile.studentId ?? '—'}
-        programName={programName}
-        enrollmentDate={
-          profile.enrollmentDate?.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-          }) ?? '—'
-        }
-        generatedDate={now.toLocaleDateString('en-GB', {
+    const stream = await renderTranscriptPdf({
+      logoUrl: pdfSettings.logoUrl,
+      watermarkUrl: pdfSettings.watermarkUrl,
+      footerText: pdfSettings.footerText,
+      watermarkOpacity: pdfSettings.watermarkOpacity,
+      studentName: fullName,
+      studentId: profile.studentId ?? '—',
+      programName,
+      enrollmentDate:
+        profile.enrollmentDate?.toLocaleDateString('en-GB', {
           day: '2-digit',
           month: 'short',
           year: 'numeric',
-        })}
-        records={records}
-        qrDataUrl={qrDataUrl}
-      />
-    )
+        }) ?? '—',
+      generatedDate: now.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }),
+      records,
+      qrDataUrl,
+    })
 
     const safeId = (profile.studentId ?? 'student').replace(/[^a-zA-Z0-9-]/g, '_')
 
