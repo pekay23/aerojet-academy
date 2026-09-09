@@ -141,9 +141,11 @@ The following features were planned or implied in earlier versions and are now f
 
 > **Detailed plan:** [`docs/plans/pdf-template-system.md`](./pdf-template-system.md)
 
+> **Status:** Decisions resolved (2026-09-07) — awaiting implementation. Access control: ADMIN/SUPER_ADMIN only. No signature approval workflow required.
+
 ### Template Configuration
 
-- [ ] Data-driven PDF templates — staff can edit text content, labels, and descriptions via UI
+- [ ] Data-driven PDF templates — ADMIN/SUPER_ADMIN can edit all text content, labels, and descriptions via UI
 - [ ] Template lifecycle management (Draft → Active → Archived) with cloning
 - [ ] Per-template branding overrides (logo, watermark, footer)
 - [ ] Configurable certificate numbering format (`CERT-{YYYY}-{SEQ:4}`)
@@ -151,9 +153,10 @@ The following features were planned or implied in earlier versions and are now f
 ### Signature Management
 
 - [ ] Upload and manage digital signature images (PNG/JPG, Supabase Storage)
-- [ ] Assign signatures to template positions (left/right slots)
+- [ ] Assign signatures to template positions (left/right slots) — different templates can have different signers
 - [ ] Signature expiry tracking for role changes
 - [ ] Signer name and role label management
+- [ ] Audit log entries for signature uploads
 
 ### Document Verification (QR Codes)
 
@@ -214,6 +217,7 @@ Use this queue to pick the next item to implement.
 | 18  | Visual weekly schedule UI (calendar-based class scheduling) | ~1-2 days | 1       | **Done** |
 | 19  | Classroom/room mapping + capacity enforcement               | ~1 day    | 1       | **Done** |
 | 20  | Stripe/Paystack checkout flow for students                  | ~2-3 days | 5       | **Deferred** |
+| 25  | PDF Template System (Schema + Backend + UI + Integration)  | ~3-4 days | 7       |          |
 
 ### Tier 5 — Major Projects (3+ days each)
 

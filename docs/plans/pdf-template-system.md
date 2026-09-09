@@ -25,22 +25,30 @@ Configurable per-template numbering format (e.g., `CERT-{YYYY}-{SEQ:4}` → `CER
 
 ---
 
-## User Review Required
+## Key Design Decisions
 
 > [!WARNING]
-> **Template Types**: Currently there are 2 template layouts (Certificate, Transcript). New layouts require code changes, but all **content** within them is editable by staff. Staff can clone templates to create variations (e.g., "Certificate - B1.1", "Certificate - B2").
+> **Template Types**: 2 template layouts exist (Certificate, Transcript). New layouts require developer work. All **content** within layouts is editable by ADMIN/SUPER_ADMIN. Staff clone templates to create variations (e.g., "Certificate - B1.1", "Certificate - B2").
 
 > [!IMPORTANT]
-> **Signature Storage**: Signatures will be stored in Supabase Storage (`aerojet-documents/signatures/`) as PNG/JPG. They're read at PDF generation time and embedded as base64 data URIs.
+> **Signature Storage**: Signatures stored in Supabase Storage (`aerojet-documents/signatures/`) as PNG/JPG. Read at PDF generation time and embedded as base64 data URIs. No secondary approval required for uploads — admin uploads with the consent of the person whose signature is needed.
+
+> [!IMPORTANT]
+> **Per-Template Signatures**: Different templates can have different signers. The `PdfSignature` library is shared, but admin assigns specific signatures to specific positions per template via the join table. A single signature can be assigned to multiple templates.
+
+> [!IMPORTANT]
+> **Access Control**: All template and signature management actions (`saveTemplateAction`, `uploadSignatureAction`, `cloneTemplateAction`, etc.) require `ADMIN` or `SUPER_ADMIN` role. The staff settings UI for PDF Templates tab should also be gated at the layout/UI level.
 
 > [!IMPORTANT]
 > **QR Verification**: This creates a **public** verification route (`/verify/[code]`) that anyone can access without authentication. It only reveals: document type, recipient name, issue date, certificate number, and verification status. No sensitive academic data is exposed.
 
-## Open Questions
+## Resolved Decisions
 
-1. **Signature approval workflow?** — Should uploaded signatures require secondary approval, or is the uploading staff member's authority sufficient?
-2. **Per-student vs. global signatures?** — Are signatures always global (one "Academy Director" signature for all), or could different certificates need different signers?
-3. **QR code placement** — Bottom-right corner of the first page? Or in the footer? I'll default to bottom-right of the accreditation/disclaimer area.
+1. **Signature approval workflow?** — No secondary approval required. The uploading admin's authority is sufficient. Signature must be added with the consent of the person whose signature is needed.
+2. **Per-student vs. global signatures?** — Different certificates can have different signers. The signature library is shared across templates, but admin assigns specific signatures to specific template positions on a per-template basis.
+3. **QR code placement** — Bottom-right of the accreditation/disclaimer area, or an appropriate position within the layout. Template editors cannot change placement (it's a layout-level decision, not content).
+4. **Access control** — Template editing, signature management, and all template actions restricted to `ADMIN` and `SUPER_ADMIN` only.
+5. **Editable content** — All text content within templates is editable by ADMIN and SUPER_ADMIN: title, subtitle, completionText, accreditationText, signatureLabels, sectionHeaders, disclaimerText.
 
 ---
 
@@ -210,6 +218,8 @@ Core template logic:
 
 #### [NEW] `app/staff/settings/_actions/pdf-template-actions.ts`
 
+> ⚠️ **Access control**: All actions require `ADMIN` or `SUPER_ADMIN` role. Call `requireAdmin()` at the top of each action. Gate the settings tab UI at `app/staff/settings/_components/SettingsLayout.tsx` or equivalent.
+
 Server actions:
 
 - `saveTemplateAction(formData)` — upsert template content + branding
@@ -217,7 +227,7 @@ Server actions:
 - `cloneTemplateAction(id, newName)` — clone a template
 - `archiveTemplateAction(id)` — set status to ARCHIVED
 - `activateTemplateAction(id)` — set status to ACTIVE
-- `uploadSignatureAction(formData)` — upload to Supabase Storage, create record
+- `uploadSignatureAction(formData)` — upload to Supabase Storage, create record (no secondary approval; record `uploadedBy`)
 - `deleteSignatureAction(id)` — remove signature (check not in active use)
 - `assignSignatureAction(templateId, signatureId, position)` — assign to slot
 - `removeSignatureAssignmentAction(templateId, position)` — unassign
@@ -250,12 +260,14 @@ Restructure into a tabbed panel with 3 sub-sections:
 
 #### [NEW] `app/staff/settings/_components/TemplateEditor.tsx`
 
-Form-based editor for template content:
+> ⚠️ **Access control**: Only render for `ADMIN` or `SUPER_ADMIN` users. Gate the Templates tab in the settings UI.
+
+Form-based editor — **all text fields editable by ADMIN/SUPER_ADMIN**:
 
 - **Header**: template name, type badge, status toggle (Draft/Active/Archived)
-- **Content Fields**: dynamic form fields based on template type
-  - Certificate: title, subtitle, completion text, accreditation text
-  - Transcript: section headers, disclaimer text
+- **Content Fields** (editable text):
+  - Certificate: title, subtitle, completionText, accreditationText, signatureLabels[]
+  - Transcript: section headers (studentInfo, academicRecord), disclaimerText, signatureLabels[]
 - **Numbering**: certificate number format with live preview (e.g., type `CERT-{YYYY}-{SEQ:4}` → see `CERT-2026-0001`)
 - **Signature Slots**: dropdown pickers for each position, preview thumbnails
 - **Branding Overrides**: optional per-template logo/watermark/footer (expandable section, defaults to global)
@@ -264,14 +276,17 @@ Form-based editor for template content:
 
 #### [NEW] `app/staff/settings/_components/SignatureManager.tsx`
 
+> ⚠️ **Access control**: Only render for `ADMIN` or `SUPER_ADMIN` users.
+
 - Card grid of uploaded signatures showing:
   - Preview thumbnail (the signature image)
   - Label (role title), signer name
   - Expiry date (with warning badge if expired/expiring soon)
   - Which templates use this signature
 - Upload dialog: drag-and-drop PNG/JPG, max 500KB, transparent background recommended
-- Edit inline: label, signer name, expiry date
+- Inline edit: label, signer name, expiry date
 - Delete with confirmation (blocked if assigned to an active template)
+- **No secondary approval required** — admin uploads with consent of the signer; `uploadedBy` recorded in audit log
 
 #### [MODIFY] `app/staff/settings/_components/LivePDFViewer.tsx`
 
