@@ -38,7 +38,7 @@ export default function UsersTableRow({
             : `/staff/users/${user.id}`
         )
       }
-      className={`cursor-pointer transition-all duration-150 ease-out hover:bg-accent hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:hover:bg-accent ${isSelected ? 'bg-aerojet-blue/5' : ''}`}
+      className={`hover:bg-accent dark:hover:bg-accent cursor-pointer transition-all duration-150 ease-out hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] ${isSelected ? 'bg-aerojet-blue/5' : ''}`}
     >
       <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
         <button
@@ -61,6 +61,7 @@ export default function UsersTableRow({
                 src={user.profile.profilePhotoUrl}
                 alt={fullName}
                 fill
+                sizes="32px"
                 className="object-cover"
               />
             ) : (
