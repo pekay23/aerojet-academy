@@ -61,12 +61,11 @@ export default function CourseCategoriesPage() {
   }
 
   useEffect(() => {
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCategories()
   }, [])
 
-  // â”€â”€ CREATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─ CREATE ─
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newName) return
@@ -95,7 +94,7 @@ export default function CourseCategoriesPage() {
     }
   }
 
-  // â”€â”€ EDIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─ EDIT ─
   const openEdit = (cat: DbCourseCategory) => {
     setEditTarget(cat)
     setEditName(cat.name.replace(/_/g, ' '))
@@ -128,7 +127,7 @@ export default function CourseCategoriesPage() {
     }
   }
 
-  // â”€â”€ DELETE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─ DELETE
   const handleDelete = async () => {
     if (!deleteTarget) return
 
@@ -152,7 +151,7 @@ export default function CourseCategoriesPage() {
     }
   }
 
-  // â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─ RENDER
   return (
     <div className="mx-auto max-w-[1800px]">
       {/* Header */}
@@ -165,7 +164,7 @@ export default function CourseCategoriesPage() {
             <ArrowLeft className="h-5 w-5 text-slate-500" />
           </Link>
           <div>
-            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+            <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
               Course Categories
             </h1>
             <p className="text-slate-500 dark:text-slate-400">
@@ -241,13 +240,13 @@ export default function CourseCategoriesPage() {
               className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
             >
               {/* Accent stripe */}
-              <div className="h-1 w-full bg-linear-to-r from-aerojet-blue to-aerojet-sky" />
+              <div className="from-aerojet-blue to-aerojet-sky h-1 w-full bg-linear-to-r" />
 
               <div className="flex flex-1 flex-col p-6">
                 {/* Top row: name + actions */}
                 <div className="mb-3 flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <h3 className="truncate font-black text-aerojet-blue dark:text-white">
+                    <h3 className="text-aerojet-blue truncate font-black dark:text-white">
                       {cat.name.replace(/_/g, ' ')}
                     </h3>
                     <code className="font-mono text-[10px] text-slate-400">{cat.id}</code>
@@ -285,7 +284,7 @@ export default function CourseCategoriesPage() {
                 <div className="flex items-center justify-between border-t border-slate-50 pt-4 dark:border-slate-800">
                   <div className="flex items-center gap-2">
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                      <BookOpen className="h-3.5 w-3.5 text-aerojet-sky" />
+                      <BookOpen className="text-aerojet-sky h-3.5 w-3.5" />
                     </div>
                     <span className="text-sm font-black text-slate-700 dark:text-slate-300">
                       {cat._count?.courses ?? 0}
@@ -296,9 +295,9 @@ export default function CourseCategoriesPage() {
                   </div>
                   <Link
                     href={`/staff/courses?category=${cat.id}`}
-                    className="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-sky transition-all duration-150 ease-out hover:bg-aerojet-sky/10 hover:shadow-sm"
+                    className="text-aerojet-sky hover:bg-aerojet-sky/10 inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold transition-all duration-150 ease-out hover:shadow-sm"
                   >
-                    View courses â†’
+                    View courses →
                   </Link>
                 </div>
               </div>
@@ -307,7 +306,7 @@ export default function CourseCategoriesPage() {
         )}
       </div>
 
-      {/* â”€â”€ Edit Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Edit Dialog ─────────────────────────────────────────────────────── */}
       <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
         <DialogContent>
           <form onSubmit={handleEdit}>
@@ -346,7 +345,7 @@ export default function CourseCategoriesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* â”€â”€ Delete Confirm Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Delete Confirm Dialog ────────────────────────────────────────────── */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
@@ -356,7 +355,7 @@ export default function CourseCategoriesPage() {
               <strong>{deleteTarget?.name.replace(/_/g, ' ')}</strong>? This cannot be undone.
               {(deleteTarget?._count?.courses ?? 0) > 0 && (
                 <span className="mt-2 block rounded-lg bg-red-50 px-3 py-2 text-xs font-bold text-red-700 dark:bg-red-900/20 dark:text-red-400">
-                  âš  This category has {deleteTarget?._count?.courses} course(s). You must reassign
+                  ⚠ This category has {deleteTarget?._count?.courses} course(s). You must reassign
                   them before deleting.
                 </span>
               )}

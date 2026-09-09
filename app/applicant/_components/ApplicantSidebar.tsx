@@ -17,19 +17,40 @@ import {
 
 // Stages where the applicant has access beyond the basics
 const DOCUMENT_STAGES = [
-  'PAYMENT_VERIFIED', 'APTITUDE_PENDING', 'APTITUDE_COMPLETED',
-  'SHORTLISTED', 'INTERVIEW_PENDING', 'INTERVIEW_SCHEDULED',
-  'INTERVIEW_COMPLETED', 'SELECTED', 'MEDICAL_PENDING',
-  'MEDICAL_SUBMITTED', 'MEDICAL_CLEARED', 'ENROLLED',
+  'PAYMENT_VERIFIED',
+  'APTITUDE_PENDING',
+  'APTITUDE_COMPLETED',
+  'SHORTLISTED',
+  'INTERVIEW_PENDING',
+  'INTERVIEW_SCHEDULED',
+  'INTERVIEW_COMPLETED',
+  'SELECTED',
+  'MEDICAL_PENDING',
+  'MEDICAL_SUBMITTED',
+  'MEDICAL_CLEARED',
+  'ENROLLED',
 ]
 const APTITUDE_STAGES = ['APTITUDE_PENDING', 'APTITUDE_COMPLETED']
-const INTERVIEW_STAGES = ['INTERVIEW_PENDING', 'INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED', 'SELECTED']
+const INTERVIEW_STAGES = [
+  'INTERVIEW_PENDING',
+  'INTERVIEW_SCHEDULED',
+  'INTERVIEW_COMPLETED',
+  'SELECTED',
+]
 const MEDICAL_STAGES = ['MEDICAL_PENDING', 'MEDICAL_SUBMITTED', 'MEDICAL_CLEARED']
 const POST_PAYMENT_STAGES = [
-  'PAYMENT_VERIFIED', 'APTITUDE_PENDING', 'APTITUDE_COMPLETED',
-  'SHORTLISTED', 'INTERVIEW_PENDING', 'INTERVIEW_SCHEDULED',
-  'INTERVIEW_COMPLETED', 'SELECTED', 'MEDICAL_PENDING',
-  'MEDICAL_SUBMITTED', 'MEDICAL_CLEARED', 'ENROLLED',
+  'PAYMENT_VERIFIED',
+  'APTITUDE_PENDING',
+  'APTITUDE_COMPLETED',
+  'SHORTLISTED',
+  'INTERVIEW_PENDING',
+  'INTERVIEW_SCHEDULED',
+  'INTERVIEW_COMPLETED',
+  'SELECTED',
+  'MEDICAL_PENDING',
+  'MEDICAL_SUBMITTED',
+  'MEDICAL_CLEARED',
+  'ENROLLED',
 ]
 
 interface ApplicantSidebarProps {
@@ -65,8 +86,8 @@ export default function ApplicantSidebar({
     links = buildPipelineLinks(applicationStage, isExamOnly, enabledStageGroups)
   } else if (isExamOnly) {
     links = [
-      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'Wallet', href: '/wallet-top-up', icon: Wallet },
+      { label: 'Dashboard', href: '/exam-only/dashboard', icon: LayoutDashboard },
+      { label: 'Wallet', href: '/exam-only/top-up', icon: Wallet },
       { label: 'Exams', href: '/exam-only', icon: ClipboardList },
       { label: 'Courses', href: '/courses', icon: BookOpen },
       { label: 'Notifications', href: '/notifications', icon: Bell },
@@ -74,7 +95,12 @@ export default function ApplicantSidebar({
   } else if (hasPathway) {
     links = [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'My Application', href: '/application/status', icon: FileText, tourId: 'nav-application' },
+      {
+        label: 'My Application',
+        href: '/application/status',
+        icon: FileText,
+        tourId: 'nav-application',
+      },
       { label: 'Wallet', href: '/wallet-top-up', icon: Wallet },
       { label: 'Browse Courses', href: '/courses', icon: BookOpen },
       { label: 'Exam Bookings', href: '/exam-bookings', icon: ClipboardList },
@@ -83,7 +109,12 @@ export default function ApplicantSidebar({
   } else {
     links = [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'My Application', href: '/application/status', icon: FileText, tourId: 'nav-application' },
+      {
+        label: 'My Application',
+        href: '/application/status',
+        icon: FileText,
+        tourId: 'nav-application',
+      },
       { label: 'Notifications', href: '/notifications', icon: Bell },
     ]
   }
@@ -97,9 +128,7 @@ export default function ApplicantSidebar({
       userName={userName}
       userRole={userRole}
       userImage={userImage}
-      userMenuItems={[
-        { label: 'Profile', href: '/profile', icon: User },
-      ]}
+      userMenuItems={[{ label: 'Profile', href: '/profile', icon: User }]}
     />
   )
 }
@@ -107,7 +136,7 @@ export default function ApplicantSidebar({
 function buildPipelineLinks(
   stage: string,
   isExamOnly?: boolean,
-  enabledStageGroups = { documents: true, aptitude: true, interview: true, medical: true },
+  enabledStageGroups = { documents: true, aptitude: true, interview: true, medical: true }
 ): SidebarLink[] {
   const links: SidebarLink[] = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -149,6 +178,11 @@ function buildPipelineLinks(
     links.push({ label: 'Exam Bookings', href: '/exam-bookings', icon: ClipboardList })
   }
 
-  links.push({ label: 'Notifications', href: '/notifications', icon: Bell, tourId: 'nav-notifications' })
+  links.push({
+    label: 'Notifications',
+    href: '/notifications',
+    icon: Bell,
+    tourId: 'nav-notifications',
+  })
   return links
 }

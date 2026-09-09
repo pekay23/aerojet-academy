@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Mail, Plus, Trash2, Lock, Edit2, Save, X } from 'lucide-react'
+import { Mail, Plus, Trash2, Lock, Edit2, Save, X, Sparkles } from 'lucide-react'
 
 interface RegistryEntry {
   id: string
@@ -14,6 +14,9 @@ interface RegistryEntry {
   isSystem: boolean
   createdAt: string
   updatedAt: string
+  /** Canonical (code-defined) address — present on AUTO entries so the UI
+   *  can detect when an admin has customized the address. */
+  canonicalAddress: string | null
 }
 
 const PILL_COLOURS: Record<RegistryEntry['category'], string> = {
@@ -45,8 +48,7 @@ export default function EmailRegistryTab() {
   }
 
   useEffect(() => {
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void reload()
   }, [])
 
@@ -77,8 +79,7 @@ export default function EmailRegistryTab() {
     if (editDraft.description !== (entry.description ?? ''))
       payload.description = editDraft.description
     const trimmedAddress = editDraft.address.trim()
-    if (trimmedAddress !== '' && trimmedAddress !== entry.address)
-      payload.address = trimmedAddress
+    if (trimmedAddress !== '' && trimmedAddress !== entry.address) payload.address = trimmedAddress
 
     if (Object.keys(payload).length === 0) {
       toast.info('No changes to save')
@@ -102,12 +103,6 @@ export default function EmailRegistryTab() {
   }
 
   const onDelete = async (entry: RegistryEntry) => {
-    if (entry.category === 'AUTO') {
-      toast.error(
-        'Auto-synced entries cannot be deleted — update the source code or change the address instead'
-      )
-      return
-    }
     if (!confirm(`Remove "${entry.title}" from the registry?`)) return
     const res = await fetch(`/api/staff/settings/email-registry/${entry.id}`, {
       method: 'DELETE',
@@ -118,6 +113,24 @@ export default function EmailRegistryTab() {
       return
     }
     toast.success('Removed')
+    await reload()
+  }
+
+  const onCleanupDuplicates = async () => {
+    if (!confirm('Remove all duplicate system auto-senders? This cannot be undone.')) return
+    const res = await fetch('/api/staff/settings/email-registry?cleanup=duplicates', {
+      method: 'GET',
+    })
+    const json = await res.json()
+    if (!res.ok || json?.success === false) {
+      toast.error(json?.error || 'Failed to clean up duplicates')
+      return
+    }
+    if (json.removed > 0) {
+      toast.success(`Removed ${json.removed} duplicate${json.removed === 1 ? '' : 's'}`)
+    } else {
+      toast.info('No duplicates found')
+    }
     await reload()
   }
 
@@ -133,8 +146,9 @@ export default function EmailRegistryTab() {
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Every email address used by the application — both code-synced senders and admin-added
-          entries. Edit any entry's title, description, or address. Auto-synced entries (tagged
-          "AUTO") are re-linked on each visit but your edits are preserved.
+          entries. Edit any entry's title, description, or address. System entries (tagged "AUTO")
+          are editable: your customizations are preserved across seed syncs and take effect for
+          outgoing emails immediately.
         </p>
       </div>
 
@@ -142,15 +156,22 @@ export default function EmailRegistryTab() {
 
       {!loading && (
         <>
-          {/* â”€â”€ AUTO entries (read-only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* System auto-senders (admin-editable) */}
           <section className="space-y-3">
             <header className="flex items-baseline justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
               <h3 className="text-sm font-bold tracking-widest text-slate-500 uppercase">
                 System auto-senders
               </h3>
               <span className="text-xs text-slate-400">
-                {autoEntries.length} entries · synced from code
+                {autoEntries.length} entries · system senders · fully editable
               </span>
+              <button
+                onClick={onCleanupDuplicates}
+                className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                title="Remove duplicate system entries"
+              >
+                Clean up duplicates
+              </button>
             </header>
             <ul className="space-y-2">
               {autoEntries.map((entry) => (
@@ -209,6 +230,14 @@ export default function EmailRegistryTab() {
                           >
                             auto
                           </span>
+                          {entry.canonicalAddress && entry.address !== entry.canonicalAddress && (
+                            <span
+                              className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-black tracking-widest text-amber-700 uppercase dark:bg-amber-900/30 dark:text-amber-300"
+                              title="Customized — differs from the code-defined address"
+                            >
+                              <Sparkles className="h-3 w-3" /> Customized
+                            </span>
+                          )}
                         </div>
                         <p className="text-aerojet-blue font-mono text-xs">{entry.address}</p>
                         {entry.description && (
@@ -230,6 +259,18 @@ export default function EmailRegistryTab() {
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
+                        <button
+                          onClick={() => onDelete(entry)}
+                          className="rounded-lg p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                          aria-label="Delete"
+                          title={
+                            entry.isSystem
+                              ? 'Delete duplicate (keeps the customized copy)'
+                              : 'Delete'
+                          }
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                   )}
@@ -238,7 +279,7 @@ export default function EmailRegistryTab() {
             </ul>
           </section>
 
-          {/* â”€â”€ CUSTOM entries (admin editable) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── CUSTOM entries (admin editable) ───────────────────────────── */}
           <section className="space-y-3">
             <header className="flex items-baseline justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
               <h3 className="text-sm font-bold tracking-widest text-slate-500 uppercase">
@@ -343,7 +384,7 @@ export default function EmailRegistryTab() {
             </ul>
           </section>
 
-          {/* â”€â”€ Add custom entry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── Add custom entry ──────────────────────────────────────────── */}
           <section className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/40">
             <h3 className="mb-3 text-sm font-bold tracking-widest text-slate-500 uppercase">
               Add a custom entry

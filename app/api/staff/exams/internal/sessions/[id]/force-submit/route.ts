@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 import { getBankRules } from '@/lib/internal-exam/engine'
+import { validateSessionTransition } from '@/lib/internal-exam/state-machine'
 
 export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const staff = await requireStaff()
@@ -17,7 +18,11 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
     },
   })
   if (!examSession) return apiError('Session not found', 404)
-  if (examSession.status !== 'IN_PROGRESS') return apiError('Session is not in progress', 400)
+  try {
+    validateSessionTransition(examSession.status, 'COMPLETED')
+  } catch {
+    return apiError('Session is not in progress', 400)
+  }
 
   const now = new Date()
 
@@ -70,5 +75,10 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
     changes: { status: 'COMPLETED', autoSubmitted: true, ...result },
   })
 
-  return apiSuccess({ success: true, status: 'COMPLETED', submittedAt: now.toISOString(), ...result })
+  return apiSuccess({
+    success: true,
+    status: 'COMPLETED',
+    submittedAt: now.toISOString(),
+    ...result,
+  })
 })

@@ -2,6 +2,20 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { WalletConfirmModal } from '@/components/shared/WalletConfirmModal'
 
+vi.mock('@radix-ui/react-alert-dialog', () => ({
+  Root: ({ children }: any) => <div>{children}</div>,
+  Trigger: ({ children }: any) => <div>{children}</div>,
+  Portal: ({ children }: any) => <div>{children}</div>,
+  Overlay: () => null,
+  Content: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  Header: ({ children }: any) => <div>{children}</div>,
+  Footer: ({ children }: any) => <div>{children}</div>,
+  Title: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  Description: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  Action: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  Cancel: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+}))
+
 describe('WalletConfirmModal', () => {
   it('renders children trigger', () => {
     render(

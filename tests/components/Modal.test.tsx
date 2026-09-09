@@ -46,7 +46,7 @@ describe('Modal', () => {
         <p>Content</p>
       </Modal>
     )
-    const dialog = container.querySelector('[class*="max-w-lg"]')
+    const dialog = document.querySelector('[class*="max-w-lg"]')
     expect(dialog).toBeTruthy()
   })
 })

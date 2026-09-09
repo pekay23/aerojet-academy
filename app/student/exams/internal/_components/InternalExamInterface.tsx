@@ -140,7 +140,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     load()
   }, [sessionId])
 
-  // â”€â”€â”€ Fullscreen lockdown mode â”€â”€â”€
+  // ─── Fullscreen lockdown mode ───
   const enterFullscreen = useCallback(async () => {
     try {
       await document.documentElement.requestFullscreen()
@@ -272,36 +272,39 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     }
   }, [data, result, sessionId])
 
-  const handleSubmit = useCallback(async (auto = false) => {
-    if (submitting) return
-    setSubmitting(true)
+  const handleSubmit = useCallback(
+    async (auto = false) => {
+      if (submitting) return
+      setSubmitting(true)
 
-    try {
-      const res = await fetch('/api/student/exams/internal/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          answers: Object.entries(answers).map(([questionId, selectedAnswer]) => ({
-            questionId,
-            selectedAnswer,
-          })),
-          autoSubmitted: auto,
-        }),
-      })
-      const json = await res.json()
-      if (json.success && json.data) {
-        setResult(json.data)
-      } else {
-        setError(json.error || 'Failed to submit')
+      try {
+        const res = await fetch('/api/student/exams/internal/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            answers: Object.entries(answers).map(([questionId, selectedAnswer]) => ({
+              questionId,
+              selectedAnswer,
+            })),
+            autoSubmitted: auto,
+          }),
+        })
+        const json = await res.json()
+        if (json.success && json.data) {
+          setResult(json.data)
+        } else {
+          setError(json.error || 'Failed to submit')
+        }
+      } catch {
+        setError('An error occurred during submission')
+      } finally {
+        setSubmitting(false)
+        setShowConfirm(false)
       }
-    } catch {
-      setError('An error occurred during submission')
-    } finally {
-      setSubmitting(false)
-      setShowConfirm(false)
-    }
-  }, [submitting, answers, sessionId])
+    },
+    [submitting, answers, sessionId]
+  )
 
   // SSE timer from server-authoritative clock
   useEffect(() => {
@@ -454,7 +457,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     )
   }
 
-  // â”€â”€â”€ Pending Review Result Screen â”€â”€â”€
+  // ─── Pending Review Result Screen ───
   if (result) {
     return (
       <div className="mx-auto max-w-lg py-12">
@@ -585,7 +588,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
             {tabSwitchCount > 0 && (
               <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
                 <p className="text-xs font-bold text-red-700 dark:text-red-300">
-                  âš  Tab switches detected: {tabSwitchCount}. This activity is logged.
+                  ⚠  Tab switches detected: {tabSwitchCount}. This activity is logged.
                 </p>
               </div>
             )}

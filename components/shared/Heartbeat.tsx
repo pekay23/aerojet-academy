@@ -18,10 +18,13 @@ export default function Heartbeat({ intervalMs = 30_000 }: { intervalMs?: number
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null
 
-    const ping = () => {
-      // `keepalive: true` lets the request survive a tab close so the last
-      // heartbeat lands before lastSeenAt freezes.
-      void fetch('/api/me/heartbeat', { method: 'POST', keepalive: true }).catch(() => null)
+    const ping = async () => {
+      try {
+        const res = await fetch('/api/me/heartbeat', { method: 'POST', keepalive: true })
+        if (!res.ok) return // silently ignore 401/403/etc. during unauthenticated states
+      } catch {
+        // network errors are also harmless for a best-effort ping
+      }
     }
 
     const start = () => {

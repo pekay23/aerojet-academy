@@ -17,34 +17,34 @@ interface LivePDFViewerProps {
 }
 
 const sampleRecords: TranscriptRecord[] = [
-  { code: 'M1', courseName: 'Mathematics', credits: 4, grade: 'Pass', status: 'Pass' },
-  { code: 'M2', courseName: 'Physics', credits: 4, grade: 'Pass', status: 'Pass' },
+  { code: 'M1', courseName: 'Mathematics', credits: 4, grade: '82%', status: 'Pass' },
+  { code: 'M2', courseName: 'Physics', credits: 4, grade: '75%', status: 'Pass' },
   {
     code: 'M3',
     courseName: 'Electrical Fundamentals',
     credits: 3,
-    grade: 'Pass',
-    status: 'Pass',
+    grade: '68%',
+    status: 'Fail',
   },
   {
     code: 'M4',
     courseName: 'Electronic Fundamentals',
     credits: 3,
-    grade: 'Pass',
+    grade: '79%',
     status: 'Pass',
   },
   {
     code: 'M5',
     courseName: 'Digital Techniques / Electronic Instrument Systems',
     credits: 4,
-    grade: 'Pass',
+    grade: '85%',
     status: 'Pass',
   },
   {
     code: 'M6',
     courseName: 'Materials and Hardware',
     credits: 4,
-    grade: 'Pass',
+    grade: '71%',
     status: 'Pass',
   },
   {
@@ -54,13 +54,13 @@ const sampleRecords: TranscriptRecord[] = [
     grade: 'In Progress',
     status: 'In Progress',
   },
-  { code: 'M8', courseName: 'Basic Aerodynamics', credits: 3, grade: 'Fail', status: 'Fail' },
-  { code: 'M9', courseName: 'Human Factors', credits: 2, grade: 'Pass', status: 'Pass' },
+  { code: 'M8', courseName: 'Basic Aerodynamics', credits: 3, grade: '62%', status: 'Fail' },
+  { code: 'M9', courseName: 'Human Factors', credits: 2, grade: '88%', status: 'Pass' },
   {
     code: 'M10',
     courseName: 'Aviation Legislation',
     credits: 3,
-    grade: 'Pass',
+    grade: '91%',
     status: 'Pass',
   },
 ]

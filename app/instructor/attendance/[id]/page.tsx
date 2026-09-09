@@ -67,7 +67,7 @@ export default async function Page({
                 const record = records.find((r) => r.userId === enrollment.userId)
                 return (
                   <AttendanceRow
-                    key={enrollment.userId}
+                    key={enrollment.id}
                     classId={id}
                     userId={enrollment.userId}
                     studentName={`${enrollment.user.profile?.firstName} ${enrollment.user.profile?.lastName}`}

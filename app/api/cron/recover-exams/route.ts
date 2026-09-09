@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { transitionExamSession } from '@/lib/internal-exam/state-machine'
 
 /**
  * POST /api/cron/recover-exams
@@ -51,18 +52,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const passMarkPct = rules?.passMarkPct ?? 75
     const passed = percentage >= passMarkPct
 
-    await prismaUnfiltered.internalExamSession.update({
-      where: { id: session.id },
-      data: {
-        status: 'TIMED_OUT',
-        submittedAt: now,
-        autoSubmitted: true,
-        score,
-        totalPoints,
-        percentage,
-        passed,
-      },
-    })
+    await transitionExamSession(
+      session.id,
+      'TIMED_OUT',
+      session.student.id,
+      'Auto-submitted by recovery cron: session expired',
+      { autoSubmitted: true, score, totalPoints, percentage, passed }
+    )
 
     await createAuditLog({
       action: AuditAction.EXAM_SESSION_SUBMITTED,

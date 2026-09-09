@@ -27,7 +27,6 @@ import {
   Eye as _Eye,
 } from 'lucide-react'
 
-
 interface BankOption {
   id: string
   name: string
@@ -140,7 +139,10 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
           detail,
           deviceInfo: {
             userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-            platform: typeof navigator !== 'undefined' ? (navigator as Navigator & { platform?: string }).platform : undefined,
+            platform:
+              typeof navigator !== 'undefined'
+                ? (navigator as Navigator & { platform?: string }).platform
+                : undefined,
             language: typeof navigator !== 'undefined' ? navigator.language : undefined,
           },
           ...(opts?.severity ? { severity: opts.severity } : {}),
@@ -253,7 +255,7 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
   }
 
-  // â”€â”€â”€ Fullscreen lockdown mode â”€â”€â”€
+  // ─── Fullscreen lockdown mode ───
   useEffect(() => {
     if (!data || result || showConfirm) return
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -370,7 +372,10 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
           bankId: data.bank.id,
           type: 'EXAM_INTERFACE_UNLOAD',
           detail: 'Staff navigated away or closed preview during active mode',
-          deviceInfo: { userAgent: navigator.userAgent, platform: (navigator as Navigator & { platform?: string }).platform },
+          deviceInfo: {
+            userAgent: navigator.userAgent,
+            platform: (navigator as Navigator & { platform?: string }).platform,
+          },
         }),
       })
     document.addEventListener('beforeunload', onUnload)

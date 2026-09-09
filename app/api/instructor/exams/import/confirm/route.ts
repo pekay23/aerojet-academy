@@ -8,6 +8,7 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { z } from 'zod'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
+import { questionHash } from '@/lib/internal-exam/import/dedupe'
 
 const questionSchema = z
   .object({
@@ -23,12 +24,6 @@ const questionSchema = z
     message: 'correctAnswer must be one of the provided options',
     path: ['correctAnswer'],
   })
-
-function questionHash(text: string, options: string[]): string {
-  const normalized = text.toLowerCase().replace(/\s+/g, ' ').trim()
-  const sorted = [...options].sort()
-  return `${normalized}:${JSON.stringify(sorted)}`
-}
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const user = await requireInstructor()

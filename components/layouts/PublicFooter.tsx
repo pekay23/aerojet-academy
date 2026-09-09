@@ -42,6 +42,7 @@ const quickLinks = [
     label: 'Revision Support',
     href: '/courses/aircraft-engineering/easa-part-66/revision-support',
   },
+  { label: 'Module Requirements', href: '/courses/module-requirements' },
 ]
 
 const admissionsLinks = [
@@ -49,8 +50,6 @@ const admissionsLinks = [
   { label: 'Fees & Payment', href: '/admissions/fees-and-payment' },
   { label: 'FAQ', href: '/admissions/faq' },
   { label: 'Register', href: '/register' },
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Application Terms', href: '/online-application-terms' },
 ]
 
 const companyLinks = [

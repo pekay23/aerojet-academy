@@ -4,6 +4,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
+import { transitionExamSession, validateSessionTransition } from '@/lib/internal-exam/state-machine'
 
 const voidSchema = z.object({
   sessionId: z.string(),
@@ -35,16 +36,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   })
 
   if (!before) return apiError('Session not found', 404)
-  if (before.status === 'VOIDED') return apiError('Session is already voided')
 
-  await prismaUnfiltered.internalExamSession.update({
-    where: { id: sessionId },
-    data: {
-      status: 'VOIDED',
-      voidedAt: new Date(),
-      voidedBy: staff.id,
-      voidReason,
-    },
+  try {
+    validateSessionTransition(before.status, 'VOIDED')
+  } catch {
+    return apiError('Session is already voided')
+  }
+
+  await transitionExamSession(sessionId, 'VOIDED', staff.id, reason, {
+    voidedAt: new Date(),
+    voidedBy: staff.id,
+    voidReason,
   })
 
   // Auto-resolve any pending student-issued reports for this session

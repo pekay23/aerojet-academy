@@ -1,7 +1,7 @@
 'use server'
 
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import type { AttendanceStatus } from '@prisma/client'
+import type { AttendanceStatus, Prisma } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -66,7 +66,7 @@ export async function getInstructorDashboardData() {
     },
     select: { userId: true },
   })
-  const totalStudents = new Set(enrollmentsForCount.map(e => e.userId)).size
+  const totalStudents = new Set(enrollmentsForCount.map((e) => e.userId)).size
 
   // 4. Pending Grades Count
   const pendingGradesCount = await prismaUnfiltered.grade.count({
@@ -319,25 +319,182 @@ export async function getGradingHistory() {
   )
 }
 
-export async function getMyClasses() {
+export async function getMyClasses(options?: {
+  academicYearId?: string
+  semesterId?: string
+  categoryId?: string
+  status?: 'upcoming' | 'active' | 'completed'
+  sortBy?: 'startDate' | 'name' | 'enrollment'
+  sortOrder?: 'asc' | 'desc'
+  page?: number
+  pageSize?: number
+}) {
+  const session = await getAuthSession()
+  if (!session || session.user.role !== 'INSTRUCTOR') return { classes: [], total: 0 }
+
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
+  const now = new Date()
+
+  const where: Prisma.ClassWhereInput = { instructorId }
+
+  if (options?.academicYearId) where.academicYearId = options.academicYearId
+  if (options?.semesterId) where.semesterId = options.semesterId
+  if (options?.categoryId) where.course = { categoryId: options.categoryId }
+
+  if (options?.status) {
+    if (options.status === 'upcoming') where.startDate = { gt: now }
+    else if (options.status === 'active') {
+      where.startDate = { lte: now }
+      where.endDate = { gte: now }
+    } else if (options.status === 'completed') where.endDate = { lt: now }
+  }
+
+  const orderBy: Prisma.ClassOrderByWithRelationInput = {}
+  const sortBy = options?.sortBy || 'startDate'
+  const sortOrder = options?.sortOrder || 'desc'
+  if (sortBy === 'enrollment') {
+    orderBy.currentStudents = sortOrder
+  } else if (sortBy === 'name') {
+    orderBy.course = { name: sortOrder }
+  } else {
+    orderBy.startDate = sortOrder
+  }
+
+  const page = options?.page || 1
+  const pageSize = options?.pageSize || 20
+  const skip = (page - 1) * pageSize
+
+  const [classes, total] = await Promise.all([
+    prismaUnfiltered.class.findMany({
+      where,
+      include: {
+        course: { include: { category: { select: { id: true, name: true } } } },
+        semester: { select: { id: true, name: true } },
+        academicYear: { select: { id: true, name: true } },
+        classroom: { select: { id: true, name: true } },
+      },
+      orderBy,
+      skip,
+      take: pageSize,
+    }),
+    prismaUnfiltered.class.count({ where }),
+  ])
+
+  return serializePrisma({ classes, total })
+}
+
+export async function getMyClassesGroupedByIntake(options?: {
+  academicYearId?: string
+  semesterId?: string
+  categoryId?: string
+  status?: 'upcoming' | 'active' | 'completed'
+}) {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return []
 
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
+  const now = new Date()
 
-  return serializePrisma(
-    await prismaUnfiltered.class.findMany({
-      where: {
-        instructorId,
-      },
-      include: {
-        course: true,
-      },
-      orderBy: {
-        startDate: 'desc',
-      },
+  const where: Prisma.ClassWhereInput = { instructorId }
+
+  if (options?.academicYearId) where.academicYearId = options.academicYearId
+  if (options?.semesterId) where.semesterId = options.semesterId
+  if (options?.categoryId) where.course = { categoryId: options.categoryId }
+
+  if (options?.status) {
+    if (options.status === 'upcoming') where.startDate = { gt: now }
+    else if (options.status === 'active') {
+      where.startDate = { lte: now }
+      where.endDate = { gte: now }
+    } else if (options.status === 'completed') where.endDate = { lt: now }
+  }
+
+  const classes = await prismaUnfiltered.class.findMany({
+    where,
+    include: {
+      course: { include: { category: { select: { id: true, name: true } } } },
+      semester: { select: { id: true, name: true } },
+      academicYear: { select: { id: true, name: true } },
+      classroom: { select: { id: true, name: true } },
+    },
+    orderBy: [
+      { academicYear: { name: 'desc' } },
+      { semester: { name: 'desc' } },
+      { startDate: 'asc' },
+    ],
+  })
+
+  // Group by academicYear + semester (intake)
+  const grouped = new Map<
+    string,
+    {
+      academicYear: { id: string; name: string } | null
+      semester: { id: string; name: string } | null
+      classes: typeof classes
+    }
+  >()
+
+  for (const cls of classes) {
+    const yearKey = cls.academicYear?.id || 'no-year'
+    const semKey = cls.semester?.id || 'no-semester'
+    const key = `${yearKey}|${semKey}`
+
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        academicYear: cls.academicYear,
+        semester: cls.semester,
+        classes: [],
+      })
+    }
+    grouped.get(key)!.classes.push(cls)
+  }
+
+  // Convert to array and sort by year/semester desc
+  const result = Array.from(grouped.entries())
+    .map(([key, value]) => ({
+      intakeKey: key,
+      academicYear: value.academicYear,
+      semester: value.semester,
+      classes: value.classes,
+    }))
+    .sort((a, b) => {
+      const aYear = a.academicYear?.name || ''
+      const bYear = b.academicYear?.name || ''
+      if (aYear !== bYear) return bYear.localeCompare(aYear)
+      const aSem = a.semester?.name || ''
+      const bSem = b.semester?.name || ''
+      return bSem.localeCompare(aSem)
     })
-  )
+
+  return serializePrisma(result)
+}
+
+export async function getMyClassesFilterOptions() {
+  const session = await getAuthSession()
+  if (!session || session.user.role !== 'INSTRUCTOR')
+    return { academicYears: [], semesters: [], categories: [] }
+
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
+
+  const [academicYears, semesters, categories] = await Promise.all([
+    prismaUnfiltered.academicYear.findMany({
+      where: { classes: { some: { instructorId } } },
+      select: { id: true, name: true },
+      orderBy: { name: 'desc' },
+    }),
+    prismaUnfiltered.semester.findMany({
+      where: { classes: { some: { instructorId } } },
+      select: { id: true, name: true },
+      orderBy: { name: 'desc' },
+    }),
+    prismaUnfiltered.courseCategory.findMany({
+      where: { courses: { some: { classes: { some: { instructorId } } } } },
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+    }),
+  ])
+
+  return serializePrisma({ academicYears, semesters, categories })
 }
 
 export async function getClassData(classId: string) {
@@ -469,11 +626,29 @@ export async function getCourseDetails(courseId: string) {
   )
 }
 
-export async function getInstructorResources() {
+interface GetInstructorResourcesParams {
+  page?: number
+  limit?: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  search?: string
+  category?: string
+}
+
+export async function getInstructorResources(params: GetInstructorResourcesParams = {}) {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return null
 
   const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
+
+  const {
+    page = 1,
+    limit = 20,
+    sortBy = 'updatedAt',
+    sortOrder = 'desc',
+    search = '',
+    category = 'ALL',
+  } = params
 
   // 1. Fetch assigned courses (Dynamic Academic Resources)
   const assignedCourses = await prismaUnfiltered.course.findMany({
@@ -494,10 +669,25 @@ export async function getInstructorResources() {
     },
   })
 
-  // 2. Fetch General Resources from Database
+  const assignedCourseIds = assignedCourses.map((c) => c.id)
+
+  // 2. Fetch General Resources from Database - filtered by instructor's courses
+  // Instructors see: global resources + resources linked to courses they teach
   const generalResources = await prismaUnfiltered.generalResource.findMany({
     where: {
       showToInstructors: true,
+      AND: [
+        {
+          OR: [
+            { courses: { none: {} } }, // Global resource
+            { courses: { some: { id: { in: assignedCourseIds } } } }, // Linked to their courses
+          ],
+        },
+      ],
+    },
+    include: {
+      courses: { select: { id: true, code: true, name: true } },
+      pathways: { select: { id: true, code: true, name: true } },
     },
     orderBy: {
       createdAt: 'desc',
@@ -532,7 +722,83 @@ export async function getInstructorResources() {
     return resources
   })
 
-  return serializePrisma([...academicResources, ...generalResources])
+  // Combine all resources
+  interface UnifiedResource {
+    id: string
+    name: string
+    type: string
+    category: string
+    url: string
+    updatedAt: string | Date
+    courseCode?: string
+    description?: string | null
+    showToInstructors?: boolean
+    showToStaff?: boolean
+    showToStudents?: boolean
+    createdAt?: Date
+  }
+
+  let allResources: UnifiedResource[] = [
+    ...academicResources,
+    ...generalResources,
+  ] as UnifiedResource[]
+
+  // Apply category filter
+  if (category !== 'ALL') {
+    allResources = allResources.filter((r) => r.category === category)
+  }
+
+  // Apply search filter
+  if (search) {
+    const searchLower = search.toLowerCase()
+    allResources = allResources.filter(
+      (r) =>
+        r.name.toLowerCase().includes(searchLower) ||
+        r.courseCode?.toLowerCase().includes(searchLower) ||
+        r.type.toLowerCase().includes(searchLower)
+    )
+  }
+
+  // Apply sorting
+  const sortFieldMap: Record<string, keyof (typeof allResources)[0]> = {
+    name: 'name',
+    category: 'category',
+    type: 'type',
+    updatedAt: 'updatedAt',
+    courseCode: 'courseCode',
+  }
+  const sortField = sortFieldMap[sortBy] || 'updatedAt'
+
+  allResources.sort((a, b) => {
+    const valA = a[sortField]
+    const valB = b[sortField]
+
+    if (valA === undefined && valB === undefined) return 0
+    if (valA === undefined) return 1
+    if (valB === undefined) return -1
+
+    const comparison = String(valA).localeCompare(String(valB), undefined, {
+      sensitivity: 'base',
+      numeric: true,
+    })
+    return sortOrder === 'asc' ? comparison : -comparison
+  })
+
+  // Apply pagination
+  const total = allResources.length
+  const totalPages = Math.ceil(total / limit)
+  const skip = (page - 1) * limit
+  const paginatedResources = allResources.slice(skip, skip + limit)
+
+  return serializePrisma({
+    resources: paginatedResources,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages,
+    },
+  })
 }
 
 export async function getInstructorStudents() {

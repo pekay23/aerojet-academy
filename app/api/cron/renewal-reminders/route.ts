@@ -100,11 +100,11 @@ export async function GET(req: NextRequest) {
 
     const reminderSet = new Set(existingReminders.map((r) => `${r.userId}:${r.title}`))
 
-    const _fromEmail = process.env.FROM_EMAIL || 'Aerojet Academy <admissions@mail.aerojet-academy.com>'
-
     // Send document reminders
     for (const doc of expiringDocs) {
-      const days = Math.ceil((new Date(doc.expiresAt!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      const days = Math.ceil(
+        (new Date(doc.expiresAt!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      )
       const reminderKey = `${doc.userId}:Renewal Reminder: ${doc.title}`
       if (reminderSet.has(reminderKey)) continue
 
@@ -136,13 +136,17 @@ export async function GET(req: NextRequest) {
 
         results.remindersSent++
       } catch (err: unknown) {
-        results.errors.push(`Document ${doc.id}: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        results.errors.push(
+          `Document ${doc.id}: ${err instanceof Error ? err.message : 'Unknown error'}`
+        )
       }
     }
 
     // Send license reminders
     for (const lic of expiringLicenses) {
-      const days = Math.ceil((new Date(lic.expiresAt!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      const days = Math.ceil(
+        (new Date(lic.expiresAt!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      )
       const reminderKey = `${lic.studentProfile.userId}:Renewal Reminder: ${lic.licenseCategory.name}`
       if (reminderSet.has(reminderKey)) continue
 
@@ -174,7 +178,9 @@ export async function GET(req: NextRequest) {
 
         results.remindersSent++
       } catch (err: unknown) {
-        results.errors.push(`License ${lic.id}: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        results.errors.push(
+          `License ${lic.id}: ${err instanceof Error ? err.message : 'Unknown error'}`
+        )
       }
     }
 
@@ -186,6 +192,9 @@ export async function GET(req: NextRequest) {
     })
   } catch (error: unknown) {
     console.error('Cron renewal-reminders error:', error)
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    )
   }
 }
