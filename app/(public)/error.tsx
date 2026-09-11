@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 
-export default function PublicError({ error, reset }: { error: Error; reset: () => void }) {
+export default function PublicError({ _error, reset }: { _error: Error; reset: () => void }) {
   useEffect(() => {
     document.body.classList.add('force-navbar-solid')
     return () => document.body.classList.remove('force-navbar-solid')

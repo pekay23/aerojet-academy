@@ -4,7 +4,6 @@ import Link from 'next/link'
 import NextImage from 'next/image'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Pause, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const slides = [
