@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface EditStaffProfileDialogProps {
   userId: string
@@ -38,9 +39,12 @@ export default function EditStaffProfileDialog({
     position: initialData.position || '',
   })
 
+  const { markDirty, markClean } = useFormDirty()
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+    markDirty()
   }
 
   const handleSave = async () => {
@@ -58,6 +62,7 @@ export default function EditStaffProfileDialog({
       }
 
       toast.success('Staff details updated')
+      markClean()
       setOpen(false)
       router.refresh()
     } catch (error: unknown) {
@@ -79,7 +84,7 @@ export default function EditStaffProfileDialog({
           <Pencil className="mr-1 h-3 w-3" /> Edit Details
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[400px]">
+      <DialogContent className="sm:max-w-100">
         <DialogHeader>
           <DialogTitle>Edit Staff Details</DialogTitle>
           <DialogDescription className="sr-only">

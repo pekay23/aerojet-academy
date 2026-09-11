@@ -10,6 +10,7 @@ import {
   rejectRefund,
   approveAndProcessRefund,
 } from '@/lib/refund/actions'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface StudentOption {
   id: string
@@ -65,6 +66,8 @@ export default function RefundsManager({
     reason: '',
     currency: 'EUR' as 'EUR' | 'USD' | 'GHS',
   })
+
+  const { markDirty, markClean } = useFormDirty()
 
   // ── Student search (debounced typeahead) ─────────────────────────────
   const [studentQuery, setStudentQuery] = useState('')
@@ -150,6 +153,7 @@ export default function RefundsManager({
         }),
       'Refund request created'
     )
+    markClean()
     setForm({ student: '', studentId: '', amount: '', reason: '', currency: 'EUR' })
     setStudentQuery('')
     setShowCreate(false)
@@ -196,7 +200,7 @@ export default function RefundsManager({
             <label className="mb-1 block text-[10px] font-black tracking-widest text-slate-500 uppercase">
               Student
             </label>
-            <Search className="pointer-events-none absolute top-[34px] left-3 h-4 w-4 text-slate-400" />
+            <Search className="pointer-events-none absolute top-8.5 left-3 h-4 w-4 text-slate-400" />
             <input
               value={studentQuery}
               onChange={(e) => {
@@ -255,18 +259,22 @@ export default function RefundsManager({
                   min={0}
                   step={0.01}
                   value={form.amount}
-                  onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+                  onChange={(e) => {
+                    setForm((f) => ({ ...f, amount: e.target.value }))
+                    markDirty()
+                  }}
                   placeholder="0.00"
                   className="w-full rounded-l-lg border border-r-0 border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
                 <select
                   value={form.currency}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setForm((f) => ({
                       ...f,
                       currency: e.target.value as typeof form.currency,
                     }))
-                  }
+                    markDirty()
+                  }}
                   className="rounded-r-lg border border-l-0 border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-700 dark:text-slate-100"
                   aria-label="Currency"
                 >
@@ -286,7 +294,10 @@ export default function RefundsManager({
               </label>
               <input
                 value={form.reason}
-                onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, reason: e.target.value }))
+                  markDirty()
+                }}
                 placeholder="Why is this refund being issued?"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
               />
@@ -354,7 +365,7 @@ export default function RefundsManager({
                   <td className="px-4 py-3 font-mono font-black text-slate-800 dark:text-slate-200">
                     {r.currency} {r.amount.toFixed(2)}
                   </td>
-                  <td className="max-w-[280px] px-4 py-3 text-slate-600 dark:text-slate-300">
+                  <td className="max-w-70 px-4 py-3 text-slate-600 dark:text-slate-300">
                     <p className="line-clamp-2">{r.reason}</p>
                     {r.rejectedReason && (
                       <p className="mt-1 text-xs text-red-500">Note: {r.rejectedReason}</p>

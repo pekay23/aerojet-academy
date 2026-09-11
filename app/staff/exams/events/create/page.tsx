@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
 import { createExamEventSchema } from '@/lib/validation/schemas'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 type ExamEventFormValues = z.input<typeof createExamEventSchema>
 
@@ -40,6 +41,14 @@ export default function CreateExamEventPage() {
       minRevenueTarget: 25000,
       minRevenueCurrency: 'EUR',
     },
+  })
+
+  const { markDirty, markClean } = useFormDirty()
+
+  // Track form changes for unsaved changes warning
+  useEffect(() => {
+    const subscription = form.watch(() => markDirty())
+    return () => subscription.unsubscribe()
   })
 
   async function onSubmit(values: ExamEventFormValues) {
@@ -68,6 +77,7 @@ export default function CreateExamEventPage() {
       }
 
       toast.success('Exam event created successfully')
+      markClean()
       router.push('/staff/exams/events')
       router.refresh()
     } catch (error: unknown) {
@@ -83,11 +93,11 @@ export default function CreateExamEventPage() {
       {/* Header Section */}
       <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-sm font-bold text-aerojet-blue uppercase tracking-wider">
-            <span className="h-1 w-6 bg-aerojet-blue rounded-full" />
+          <div className="text-aerojet-blue flex items-center gap-2 text-sm font-bold tracking-wider uppercase">
+            <span className="bg-aerojet-blue h-1 w-6 rounded-full" />
             Exam Management
           </div>
-          <h1 className="text-4xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-4xl font-black tracking-tight dark:text-white">
             Create Exam Event
           </h1>
           <p className="text-lg text-slate-500 dark:text-slate-400">
@@ -105,7 +115,7 @@ export default function CreateExamEventPage() {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200/60 bg-white p-1 shadow-xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/60">
+      <div className="rounded-3xl border border-slate-200/60 bg-white p-1 shadow-xl shadow-slate-200/40 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
         <div className="overflow-hidden rounded-[calc(1.5rem-4px)] bg-slate-50/20 p-8 dark:bg-slate-950/20">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
@@ -113,7 +123,7 @@ export default function CreateExamEventPage() {
                 {/* Column 1: Core Details */}
                 <div className="space-y-8">
                   <div>
-                    <h3 className="mb-6 text-sm font-black uppercase tracking-[0.2em] text-aerojet-blue/70">
+                    <h3 className="text-aerojet-blue/70 mb-6 text-sm font-black tracking-[0.2em] uppercase">
                       Core Information
                     </h3>
                     <FormField
@@ -121,7 +131,11 @@ export default function CreateExamEventPage() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel id="label-event-name" htmlFor="input-event-name" className="text-xs font-black uppercase tracking-widest text-slate-500">
+                          <FormLabel
+                            id="label-event-name"
+                            htmlFor="input-event-name"
+                            className="text-xs font-black tracking-widest text-slate-500 uppercase"
+                          >
                             Event Name <span className="text-red-500">*</span>
                           </FormLabel>
                           <FormControl>
@@ -129,7 +143,7 @@ export default function CreateExamEventPage() {
                               id="input-event-name"
                               placeholder="e.g., Spring 2026 EASA Exams"
                               autoComplete="off"
-                              className="h-12 border-slate-200 bg-white px-4 text-base focus:ring-4 focus:ring-aerojet-blue/10 dark:border-slate-800 dark:bg-slate-900"
+                              className="focus:ring-aerojet-blue/10 h-12 border-slate-200 bg-white px-4 text-base focus:ring-4 dark:border-slate-800 dark:bg-slate-900"
                               {...field}
                             />
                           </FormControl>
@@ -140,7 +154,7 @@ export default function CreateExamEventPage() {
                   </div>
 
                   <div className="space-y-6">
-                    <h3 className="text-sm font-black uppercase tracking-[0.2em] text-aerojet-blue/70">
+                    <h3 className="text-aerojet-blue/70 text-sm font-black tracking-[0.2em] uppercase">
                       Revenue Targets
                     </h3>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
@@ -149,25 +163,29 @@ export default function CreateExamEventPage() {
                         name="minRevenueTarget"
                         render={({ field }) => (
                           <FormItem className="sm:col-span-2">
-                            <FormLabel id="label-revenue" htmlFor="input-revenue" className="text-xs font-black uppercase tracking-widest text-slate-500">
+                            <FormLabel
+                              id="label-revenue"
+                              htmlFor="input-revenue"
+                              className="text-xs font-black tracking-widest text-slate-500 uppercase"
+                            >
                               Min Revenue Target
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-400">
+                                <span className="absolute top-1/2 left-4 -translate-y-1/2 text-lg font-bold text-slate-400">
                                   €
                                 </span>
                                 <Input
                                   id="input-revenue"
                                   type="number"
                                   autoComplete="off"
-                                  className="h-12 border-slate-200 bg-white pl-10 text-base focus:ring-4 focus:ring-aerojet-blue/10 dark:border-slate-800 dark:bg-slate-900"
+                                  className="focus:ring-aerojet-blue/10 h-12 border-slate-200 bg-white pl-10 text-base focus:ring-4 dark:border-slate-800 dark:bg-slate-900"
                                   placeholder="25000.00"
                                   {...field}
                                 />
                               </div>
                             </FormControl>
-                            <FormDescription className="text-[10px] font-medium leading-relaxed text-slate-400">
+                            <FormDescription className="text-[10px] leading-relaxed font-medium text-slate-400">
                               Estimated target for financial feasibility (Go/No-Go).
                             </FormDescription>
                             <FormMessage />
@@ -179,14 +197,18 @@ export default function CreateExamEventPage() {
                         name="minRevenueCurrency"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel id="label-currency" htmlFor="select-currency" className="text-xs font-black uppercase tracking-widest text-slate-500">
+                            <FormLabel
+                              id="label-currency"
+                              htmlFor="select-currency"
+                              className="text-xs font-black tracking-widest text-slate-500 uppercase"
+                            >
                               Currency
                             </FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger
                                   id="select-currency"
-                                  className="h-12 border-slate-200 bg-white focus:ring-4 focus:ring-aerojet-blue/10 dark:border-slate-800 dark:bg-slate-900"
+                                  className="focus:ring-aerojet-blue/10 h-12 border-slate-200 bg-white focus:ring-4 dark:border-slate-800 dark:bg-slate-900"
                                 >
                                   <SelectValue placeholder="EUR" />
                                 </SelectTrigger>
@@ -206,8 +228,8 @@ export default function CreateExamEventPage() {
                 </div>
 
                 {/* Column 2: Scheduling & Deadlines */}
-                <div className="space-y-8 rounded-2xl bg-white p-8 border border-slate-100 dark:bg-slate-900/40 dark:border-slate-800/50">
-                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-aerojet-blue/70">
+                <div className="space-y-8 rounded-2xl border border-slate-100 bg-white p-8 dark:border-slate-800/50 dark:bg-slate-900/40">
+                  <h3 className="text-aerojet-blue/70 text-sm font-black tracking-[0.2em] uppercase">
                     Session Schedule & Deadlines
                   </h3>
 
@@ -217,7 +239,11 @@ export default function CreateExamEventPage() {
                       name="startDate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel id="label-start" htmlFor="input-start" className="text-xs font-black uppercase tracking-widest text-slate-500">
+                          <FormLabel
+                            id="label-start"
+                            htmlFor="input-start"
+                            className="text-xs font-black tracking-widest text-slate-500 uppercase"
+                          >
                             Start Date & Time
                           </FormLabel>
                           <FormControl>
@@ -225,7 +251,7 @@ export default function CreateExamEventPage() {
                               id="input-start"
                               type="datetime-local"
                               autoComplete="off"
-                              className="h-12 border-slate-200 bg-slate-50/50 px-4 text-sm focus:bg-white focus:ring-4 focus:ring-aerojet-blue/10 dark:border-slate-800 dark:bg-slate-950"
+                              className="focus:ring-aerojet-blue/10 h-12 border-slate-200 bg-slate-50/50 px-4 text-sm focus:bg-white focus:ring-4 dark:border-slate-800 dark:bg-slate-950"
                               {...field}
                             />
                           </FormControl>
@@ -238,7 +264,11 @@ export default function CreateExamEventPage() {
                       name="endDate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel id="label-end" htmlFor="input-end" className="text-xs font-black uppercase tracking-widest text-slate-500">
+                          <FormLabel
+                            id="label-end"
+                            htmlFor="input-end"
+                            className="text-xs font-black tracking-widest text-slate-500 uppercase"
+                          >
                             End Date & Time
                           </FormLabel>
                           <FormControl>
@@ -246,7 +276,7 @@ export default function CreateExamEventPage() {
                               id="input-end"
                               type="datetime-local"
                               autoComplete="off"
-                              className="h-12 border-slate-200 bg-slate-50/50 px-4 text-sm focus:bg-white focus:ring-4 focus:ring-aerojet-blue/10 dark:border-slate-800 dark:bg-slate-950"
+                              className="focus:ring-aerojet-blue/10 h-12 border-slate-200 bg-slate-50/50 px-4 text-sm focus:bg-white focus:ring-4 dark:border-slate-800 dark:bg-slate-950"
                               {...field}
                             />
                           </FormControl>
@@ -256,13 +286,17 @@ export default function CreateExamEventPage() {
                     />
                   </div>
 
-                  <div className="space-y-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="space-y-6 border-t border-slate-100 pt-4 dark:border-slate-800">
                     <FormField
                       control={form.control as any}
                       name="paymentDeadline"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel id="label-payment" htmlFor="input-payment" className="text-xs font-black uppercase tracking-widest text-slate-500">
+                          <FormLabel
+                            id="label-payment"
+                            htmlFor="input-payment"
+                            className="text-xs font-black tracking-widest text-slate-500 uppercase"
+                          >
                             Payment Deadline (Go/No-Go)
                           </FormLabel>
                           <FormControl>
@@ -270,11 +304,11 @@ export default function CreateExamEventPage() {
                               id="input-payment"
                               type="datetime-local"
                               autoComplete="off"
-                              className="h-12 border-slate-200 bg-slate-50/50 px-4 text-sm focus:bg-white focus:ring-4 focus:ring-aerojet-blue/10 dark:border-slate-800 dark:bg-slate-950"
+                              className="focus:ring-aerojet-blue/10 h-12 border-slate-200 bg-slate-50/50 px-4 text-sm focus:bg-white focus:ring-4 dark:border-slate-800 dark:bg-slate-950"
                               {...field}
                             />
                           </FormControl>
-                          <FormDescription className="text-[10px] font-medium leading-relaxed text-slate-400 italic">
+                          <FormDescription className="text-[10px] leading-relaxed font-medium text-slate-400 italic">
                             Students must settle all pending fees before this date to participate.
                           </FormDescription>
                           <FormMessage />
@@ -286,7 +320,11 @@ export default function CreateExamEventPage() {
                       name="joinDeadline"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel id="label-join" htmlFor="input-join" className="text-xs font-black uppercase tracking-widest text-slate-500">
+                          <FormLabel
+                            id="label-join"
+                            htmlFor="input-join"
+                            className="text-xs font-black tracking-widest text-slate-500 uppercase"
+                          >
                             Join Deadline
                           </FormLabel>
                           <FormControl>
@@ -295,12 +333,12 @@ export default function CreateExamEventPage() {
                               type="datetime-local"
                               autoComplete="off"
                               placeholder="Optional"
-                              className="h-12 border-slate-200 bg-slate-50/50 px-4 text-sm focus:bg-white focus:ring-4 focus:ring-aerojet-blue/10 dark:border-slate-800 dark:bg-slate-950"
+                              className="focus:ring-aerojet-blue/10 h-12 border-slate-200 bg-slate-50/50 px-4 text-sm focus:bg-white focus:ring-4 dark:border-slate-800 dark:bg-slate-950"
                               {...field}
                               value={field.value || ''}
                             />
                           </FormControl>
-                          <FormDescription className="text-[10px] font-medium leading-relaxed text-slate-400 italic">
+                          <FormDescription className="text-[10px] leading-relaxed font-medium text-slate-400 italic">
                             Last date for new registrations (optional).
                           </FormDescription>
                           <FormMessage />
@@ -312,7 +350,7 @@ export default function CreateExamEventPage() {
               </div>
 
               <div className="flex items-center justify-between border-t border-slate-200/60 pt-10 dark:border-slate-800">
-                <p className="hidden text-xs font-medium text-slate-400 sm:block italic">
+                <p className="hidden text-xs font-medium text-slate-400 italic sm:block">
                   * All fields marked with asterisk are strictly required for event publication.
                 </p>
                 <div className="flex w-full gap-4 sm:w-auto">
@@ -327,7 +365,7 @@ export default function CreateExamEventPage() {
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 bg-aerojet-blue px-12 py-6 text-base font-black uppercase tracking-wider shadow-lg shadow-aerojet-blue/20 transition-all hover:bg-aerojet-blue/90 hover:shadow-xl active:scale-[0.98] sm:flex-none"
+                    className="bg-aerojet-blue shadow-aerojet-blue/20 hover:bg-aerojet-blue/90 flex-1 px-12 py-6 text-base font-black tracking-wider uppercase shadow-lg transition-all hover:shadow-xl active:scale-[0.98] sm:flex-none"
                     disabled={isLoading}
                   >
                     {isLoading ? (

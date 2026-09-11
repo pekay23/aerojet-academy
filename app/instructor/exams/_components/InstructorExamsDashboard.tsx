@@ -288,7 +288,8 @@ function MyQuestionsTab() {
       )
       setQuestions(res.data)
       setTotal(res.total)
-    } catch {
+    } catch (err) {
+      console.error('[MyQuestionsTab] Failed to load questions:', err)
       toast.error('Failed to load your questions')
     } finally {
       setLoading(false)
@@ -364,7 +365,8 @@ function MyBanksTab() {
       )
       setBanks(res.data)
       setTotal(res.total)
-    } catch {
+    } catch (err) {
+      console.error('[MyBanksTab] Failed to load banks:', err)
       toast.error('Failed to load your banks')
     } finally {
       setLoading(false)
@@ -487,7 +489,8 @@ function BankQuestionPanel({ bankId, instructorId }: { bankId: string; instructo
         `/api/instructor/exams/banks/${bankId}/questions?${params.toString()}`
       )
       setQuestions(res)
-    } catch {
+    } catch (err) {
+      console.error('[BankQuestionPanel] Failed to load questions for bank:', err)
       toast.error('Failed to load questions for this bank')
     } finally {
       setLoading(false)
@@ -635,7 +638,8 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
       )
       setBanks(res.data)
       setTotal(res.total)
-    } catch {
+    } catch (err) {
+      console.error('[ModuleBankTab] Failed to load module banks:', err)
       toast.error('Failed to load module banks')
     } finally {
       setLoading(false)
@@ -823,7 +827,8 @@ function MyClassesTab() {
       )
       setClasses(res.data)
       setTotal(res.total)
-    } catch {
+    } catch (err) {
+      console.error('[MyClassesTab] Failed to load classes:', err)
       toast.error('Failed to load your classes')
     } finally {
       setLoading(false)
@@ -910,7 +915,8 @@ function ClassScheduleTab() {
       )
       setClasses(res.data)
       setTotal(res.total)
-    } catch {
+    } catch (err) {
+      console.error('[ClassScheduleTab] Failed to load schedules:', err)
       toast.error('Failed to load schedules')
     } finally {
       setLoading(false)
@@ -1025,7 +1031,10 @@ function LiveMonitorTab() {
         setClasses(res.data)
         if (res.data.length > 0) setSelectedClass(res.data[0].id)
       })
-      .catch(() => toast.error('Failed to load classes'))
+      .catch((err) => {
+        console.error('[LiveMonitorTab] Failed to load classes:', err)
+        toast.error('Failed to load classes')
+      })
   }, [])
 
   const refresh = useCallback(async () => {
@@ -1036,7 +1045,8 @@ function LiveMonitorTab() {
         `/api/instructor/exams/classes/${selectedClass}/monitor`
       )
       setSessions(data)
-    } catch {
+    } catch (err) {
+      console.error('[LiveMonitorTab] Failed to refresh monitor:', err)
       toast.error('Failed to refresh monitor')
     } finally {
       setRefreshing(false)

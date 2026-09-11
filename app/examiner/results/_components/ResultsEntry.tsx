@@ -5,6 +5,7 @@ import { Calendar, Users, Save, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { submitExaminerResults } from '../actions'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface Assignment {
   id: string
@@ -60,6 +61,7 @@ export default function ResultsEntry({
   const [scores, setScores] = useState<Record<string, string>>({})
   const [absent, setAbsent] = useState<Record<string, boolean>>({})
   const [isPending, startTransition] = useTransition()
+  const { markDirty, markClean } = useFormDirty()
   const { items, requestSort, sortConfig } = useSort(sitting.assignments, {
     key: 'user.profile.lastName',
     order: 'asc',
@@ -114,6 +116,7 @@ export default function ResultsEntry({
       const res = await submitExaminerResults(sitting.id, entries)
       if (res.error) toast.error(res.error)
       else {
+        markClean()
         toast.success(`${res.recorded} result(s) recorded`)
         setScores({})
         setAbsent({})
@@ -122,6 +125,7 @@ export default function ResultsEntry({
   }
 
   const reset = () => {
+    markClean()
     setScores({})
     setAbsent({})
   }
@@ -251,7 +255,10 @@ export default function ResultsEntry({
                       inputMode="numeric"
                       disabled={absent[a.id]}
                       value={scores[a.id] ?? ''}
-                      onChange={(e) => setScores((s) => ({ ...s, [a.id]: e.target.value }))}
+                      onChange={(e) => {
+                        setScores((s) => ({ ...s, [a.id]: e.target.value }))
+                        markDirty()
+                      }}
                       onBlur={() => handleBlur(a.id, scores[a.id] ?? '')}
                       placeholder={ex?.score != null ? String(ex.score) : '—'}
                       aria-label={`Score for ${a.user.profile ? `${a.user.profile.firstName} ${a.user.profile.lastName}` : a.userId}`}
@@ -262,7 +269,10 @@ export default function ResultsEntry({
                     <input
                       type="checkbox"
                       checked={!!absent[a.id]}
-                      onChange={(e) => setAbsent((s) => ({ ...s, [a.id]: e.target.checked }))}
+                      onChange={(e) => {
+                        setAbsent((s) => ({ ...s, [a.id]: e.target.checked }))
+                        markDirty()
+                      }}
                       aria-label={`Mark ${a.user.profile ? `${a.user.profile.firstName} ${a.user.profile.lastName}` : a.userId} as absent`}
                       className="h-4 w-4 rounded border-slate-300"
                     />

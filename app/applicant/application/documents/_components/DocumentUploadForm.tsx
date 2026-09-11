@@ -3,14 +3,8 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { UploadButton } from '@/lib/uploads/uploadthing'
-import {
-  CheckCircle2,
-  XCircle,
-  Clock,
-  FileText,
-  AlertTriangle,
-  RefreshCw,
-} from 'lucide-react'
+import { CheckCircle2, XCircle, Clock, FileText, AlertTriangle, RefreshCw } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 export interface DocumentType {
   id: string
@@ -69,18 +63,25 @@ export default function DocumentUploadForm({
   onRefresh,
 }: DocumentUploadFormProps) {
   const [uploading, setUploading] = useState<string | null>(null)
+  const { markDirty, markClean } = useFormDirty()
 
   const getUploadedDoc = (typeId: string) =>
-    uploadedDocuments.find(d => d.documentTypeId === typeId)
+    uploadedDocuments.find((d) => d.documentTypeId === typeId)
 
-  const requiredTypes = documentTypes.filter(dt => dt.isRequired)
-  const optionalTypes = documentTypes.filter(dt => !dt.isRequired)
-  const allRequired = requiredTypes.every(dt => {
+  const requiredTypes = documentTypes.filter((dt) => dt.isRequired)
+  const optionalTypes = documentTypes.filter((dt) => !dt.isRequired)
+  const allRequired = requiredTypes.every((dt) => {
     const doc = getUploadedDoc(dt.id)
     return doc && doc.status !== 'REJECTED'
   })
 
-  async function linkUploadedFile(typeId: string, fileUrl: string, fileName: string, fileSize: number, fileType: string) {
+  async function linkUploadedFile(
+    typeId: string,
+    fileUrl: string,
+    fileName: string,
+    fileSize: number,
+    fileType: string
+  ) {
     setUploading(typeId)
     try {
       const res = await fetch('/api/applicant/documents', {
@@ -98,6 +99,7 @@ export default function DocumentUploadForm({
       if (res.ok) {
         toast.success('Document uploaded successfully')
         onRefresh()
+        markClean()
       } else {
         const data = await res.json()
         toast.error(data.error || 'Failed to save document')
@@ -115,7 +117,7 @@ export default function DocumentUploadForm({
       <div className="rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-6 shadow-sm dark:border-slate-700 dark:from-slate-900 dark:to-slate-800">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-black text-aerojet-blue dark:text-white">
+            <h2 className="text-aerojet-blue text-lg font-black dark:text-white">
               Document Upload Progress
             </h2>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -136,9 +138,9 @@ export default function DocumentUploadForm({
         {/* Progress bar */}
         <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
           <div
-            className="h-full rounded-full bg-linear-to-r from-aerojet-blue to-aerojet-sky transition-all duration-700"
+            className="from-aerojet-blue to-aerojet-sky h-full rounded-full bg-linear-to-r transition-all duration-700"
             style={{
-              width: `${documentTypes.length > 0 ? (uploadedDocuments.filter(d => d.status !== 'REJECTED').length / documentTypes.length) * 100 : 0}%`,
+              width: `${documentTypes.length > 0 ? (uploadedDocuments.filter((d) => d.status !== 'REJECTED').length / documentTypes.length) * 100 : 0}%`,
             }}
           />
         </div>
@@ -147,18 +149,21 @@ export default function DocumentUploadForm({
       {/* Required Documents */}
       {requiredTypes.length > 0 && (
         <div>
-          <h3 className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-red-600">
+          <h3 className="mb-4 flex items-center gap-2 text-sm font-black tracking-widest text-red-600 uppercase">
             <AlertTriangle className="h-4 w-4" />
             Required Documents
           </h3>
           <div className="grid gap-4 sm:grid-cols-2">
-            {requiredTypes.map(dt => (
+            {requiredTypes.map((dt) => (
               <DocumentCard
                 key={dt.id}
                 docType={dt}
                 uploaded={getUploadedDoc(dt.id)}
                 uploading={uploading === dt.id}
-                onUploaded={(url, name, size, type) => linkUploadedFile(dt.id, url, name, size, type)}
+                onUploaded={(url, name, size, type) =>
+                  linkUploadedFile(dt.id, url, name, size, type)
+                }
+                onUploadBegin={markDirty}
               />
             ))}
           </div>
@@ -168,17 +173,20 @@ export default function DocumentUploadForm({
       {/* Optional Documents */}
       {optionalTypes.length > 0 && (
         <div>
-          <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-slate-400">
+          <h3 className="mb-4 text-sm font-black tracking-widest text-slate-400 uppercase">
             Optional Documents
           </h3>
           <div className="grid gap-4 sm:grid-cols-2">
-            {optionalTypes.map(dt => (
+            {optionalTypes.map((dt) => (
               <DocumentCard
                 key={dt.id}
                 docType={dt}
                 uploaded={getUploadedDoc(dt.id)}
                 uploading={uploading === dt.id}
-                onUploaded={(url, name, size, type) => linkUploadedFile(dt.id, url, name, size, type)}
+                onUploaded={(url, name, size, type) =>
+                  linkUploadedFile(dt.id, url, name, size, type)
+                }
+                onUploadBegin={markDirty}
               />
             ))}
           </div>
@@ -193,11 +201,13 @@ function DocumentCard({
   uploaded,
   uploading: _uploading,
   onUploaded,
+  onUploadBegin,
 }: {
   docType: DocumentType
   uploaded?: UploadedDocument
   uploading: boolean
   onUploaded: (url: string, name: string, size: number, type: string) => void
+  onUploadBegin: () => void
 }) {
   const status = uploaded ? STATUS_CONFIG[uploaded.status] : null
   const StatusIcon = status?.icon
@@ -208,22 +218,30 @@ function DocumentCard({
       className={`relative overflow-hidden rounded-2xl border p-5 transition-all ${
         uploaded
           ? `${status?.bg} ${status?.border}`
-          : 'border-dashed border-slate-300 bg-white hover:border-aerojet-blue/40 hover:bg-blue-50/30 dark:border-slate-600 dark:bg-slate-900 dark:hover:border-aerojet-sky/40'
+          : 'hover:border-aerojet-blue/40 dark:hover:border-aerojet-sky/40 border-dashed border-slate-300 bg-white hover:bg-blue-50/30 dark:border-slate-600 dark:bg-slate-900'
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <h4 className="font-black text-slate-800 dark:text-white">{docType.name}</h4>
           {docType.description && (
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{docType.description}</p>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              {docType.description}
+            </p>
           )}
           <p className="mt-1 text-[10px] font-bold text-slate-400">
-            Max {docType.maxSizeMB} MB · {docType.fileTypes.split(',').map(t => t.split('/')[1]).join(', ')}
+            Max {docType.maxSizeMB} MB ·{' '}
+            {docType.fileTypes
+              .split(',')
+              .map((t) => t.split('/')[1])
+              .join(', ')}
           </p>
         </div>
 
         {status && StatusIcon && (
-          <div className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 ${status.bg} ${status.text}`}>
+          <div
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 ${status.bg} ${status.text}`}
+          >
             <StatusIcon className="h-3.5 w-3.5" />
             <span className="text-[10px] font-black">{status.label}</span>
           </div>
@@ -241,7 +259,7 @@ function DocumentCard({
             href={uploaded.fileUpload.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[10px] font-bold text-aerojet-blue hover:underline"
+            className="text-aerojet-blue text-[10px] font-bold hover:underline"
           >
             View
           </a>
@@ -267,7 +285,9 @@ function DocumentCard({
           )}
           <UploadButton
             endpoint="applicantDocument"
-            onUploadBegin={() => {/* uploading state handled by parent */}}
+            onUploadBegin={() => {
+              onUploadBegin()
+            }}
             onClientUploadComplete={(res) => {
               if (res?.[0]) {
                 const file = res[0]
@@ -283,7 +303,8 @@ function DocumentCard({
               toast.error(error.message || 'Upload failed')
             }}
             appearance={{
-              button: 'bg-aerojet-blue hover:bg-aerojet-blue/90 text-white text-xs font-bold px-4 py-2 rounded-xl ut-uploading:bg-slate-400',
+              button:
+                'bg-aerojet-blue hover:bg-aerojet-blue/90 text-white text-xs font-bold px-4 py-2 rounded-xl ut-uploading:bg-slate-400',
               allowedContent: 'text-[10px] text-slate-400',
             }}
           />

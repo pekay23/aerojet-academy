@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Plus, Loader2, X, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 const ATTEMPT_TYPES = [
   { value: 'FIRST', label: '1st Attempt' },
@@ -40,6 +41,8 @@ export default function AddExamRecordDialog({
 }: Props) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  const { markDirty, markClean } = useFormDirty()
 
   const [moduleId, setModuleId] = useState('')
   const [examDate, setExamDate] = useState('')
@@ -114,7 +117,10 @@ export default function AddExamRecordDialog({
               courseId: selectedModule?.course?.id,
               moduleCode: selectedModule?.course?.code || selectedModule?.code,
               score: parsedScore,
-              resultOverride: resultOverride !== 'auto' && resultOverride !== 'pending' ? resultOverride : undefined,
+              resultOverride:
+                resultOverride !== 'auto' && resultOverride !== 'pending'
+                  ? resultOverride
+                  : undefined,
             },
           ],
           bookingType: 'INDIVIDUAL',
@@ -122,7 +128,8 @@ export default function AddExamRecordDialog({
           attemptType,
           examCategory,
           notes,
-          isPending: !isFinalized || resultOverride === 'pending' || (!score && resultOverride === 'auto'),
+          isPending:
+            !isFinalized || resultOverride === 'pending' || (!score && resultOverride === 'auto'),
         }),
       })
 
@@ -134,6 +141,7 @@ export default function AddExamRecordDialog({
       }
 
       toast.success('Exam record added successfully!')
+      markClean()
       setOpen(false)
       resetForm()
       onSuccess()
@@ -166,7 +174,7 @@ export default function AddExamRecordDialog({
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:border-aerojet-sky hover:text-aerojet-sky dark:border-slate-700 dark:bg-slate-800"
+          className="hover:border-aerojet-sky hover:text-aerojet-sky flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all dark:border-slate-700 dark:bg-slate-800"
         >
           <Plus className="h-3.5 w-3.5" />
           Add Record
@@ -179,8 +187,15 @@ export default function AddExamRecordDialog({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-900">
               <div>
-                <h2 className="text-lg font-black text-slate-800 dark:text-white">Add Exam Record</h2>
-                <p className="text-xs text-slate-400">For: <span className="font-bold text-slate-600 dark:text-slate-300">{studentName}</span></p>
+                <h2 className="text-lg font-black text-slate-800 dark:text-white">
+                  Add Exam Record
+                </h2>
+                <p className="text-xs text-slate-400">
+                  For:{' '}
+                  <span className="font-bold text-slate-600 dark:text-slate-300">
+                    {studentName}
+                  </span>
+                </p>
               </div>
               <button
                 onClick={() => {
@@ -202,8 +217,11 @@ export default function AddExamRecordDialog({
                 <select
                   id="exam-record-module"
                   value={moduleId}
-                  onChange={(e) => setModuleId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-aerojet-blue focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  onChange={(e) => {
+                    setModuleId(e.target.value)
+                    markDirty()
+                  }}
+                  className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   <option value="">— Select module —</option>
                   {sortedModules.map((m) => (
@@ -223,8 +241,11 @@ export default function AddExamRecordDialog({
                   <select
                     id="exam-record-category"
                     value={examCategory}
-                    onChange={(e) => setExamCategory(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-aerojet-blue focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    onChange={(e) => {
+                      setExamCategory(e.target.value)
+                      markDirty()
+                    }}
+                    className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value="OFFICIAL_EASA">Official EASA</option>
                     <option value="INTERNAL">Academy Internal</option>
@@ -238,8 +259,11 @@ export default function AddExamRecordDialog({
                   <select
                     id="exam-record-attempt"
                     value={attemptType}
-                    onChange={(e) => setAttemptType(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-aerojet-blue focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    onChange={(e) => {
+                      setAttemptType(e.target.value)
+                      markDirty()
+                    }}
+                    className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     {ATTEMPT_TYPES.map((at) => (
                       <option key={at.value} value={at.value}>
@@ -259,10 +283,15 @@ export default function AddExamRecordDialog({
                   id="exam-record-date"
                   type="date"
                   value={examDate}
-                  onChange={(e) => setExamDate(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-aerojet-blue focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  onChange={(e) => {
+                    setExamDate(e.target.value)
+                    markDirty()
+                  }}
+                  className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
-                <p className="mt-1 text-[10px] text-slate-400">Leave empty for pending/future exams</p>
+                <p className="mt-1 text-[10px] text-slate-400">
+                  Leave empty for pending/future exams
+                </p>
               </div>
 
               {/* Score + Result Override (2 col) */}
@@ -276,11 +305,14 @@ export default function AddExamRecordDialog({
                       id="exam-record-score"
                       type="number"
                       value={score}
-                      onChange={(e) => setScore(e.target.value)}
+                      onChange={(e) => {
+                        setScore(e.target.value)
+                        markDirty()
+                      }}
                       placeholder="0–100"
                       min={0}
                       max={100}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm focus:border-aerojet-blue focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
                   </div>
                 </div>
@@ -292,8 +324,11 @@ export default function AddExamRecordDialog({
                   <select
                     id="exam-record-result"
                     value={resultOverride}
-                    onChange={(e) => setResultOverride(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-aerojet-blue focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    onChange={(e) => {
+                      setResultOverride(e.target.value)
+                      markDirty()
+                    }}
+                    className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     {RESULT_OPTIONS.map((r) => (
                       <option key={r.value} value={r.value}>
@@ -307,12 +342,19 @@ export default function AddExamRecordDialog({
               {/* Status Toggle */}
               <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-800/30">
                 <div>
-                  <p className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Finalize Record</p>
-                  <p className="text-[10px] text-slate-400">Mark as completed and update academic history</p>
+                  <p className="text-xs font-black tracking-wider text-slate-700 uppercase dark:text-slate-200">
+                    Finalize Record
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    Mark as completed and update academic history
+                  </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsFinalized(!isFinalized)}
+                  onClick={() => {
+                    setIsFinalized(!isFinalized)
+                    markDirty()
+                  }}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isFinalized ? 'bg-aerojet-blue' : 'bg-slate-200 dark:bg-slate-700'}`}
                 >
                   <span
@@ -322,7 +364,9 @@ export default function AddExamRecordDialog({
               </div>
 
               {/* Result Preview */}
-              <div className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold ${resultColor}`}>
+              <div
+                className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold ${resultColor}`}
+              >
                 {computedResult === 'pass' ? (
                   <CheckCircle className="h-4 w-4" />
                 ) : computedResult === 'fail' ? (
@@ -341,10 +385,13 @@ export default function AddExamRecordDialog({
                 <textarea
                   id="exam-record-notes"
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={(e) => {
+                    setNotes(e.target.value)
+                    markDirty()
+                  }}
                   placeholder="Any notes about this exam..."
                   rows={2}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-aerojet-blue focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
             </div>
@@ -363,7 +410,7 @@ export default function AddExamRecordDialog({
               <button
                 onClick={handleSubmit}
                 disabled={loading || !moduleId}
-                className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-2 text-sm font-bold text-white transition-all hover:bg-[#001f45] disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-6 py-2 text-sm font-bold text-white transition-all hover:bg-[#001f45] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Add Record

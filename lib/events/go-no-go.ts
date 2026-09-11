@@ -2,6 +2,8 @@ import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { confirmPoolInternal, failPool } from '@/lib/pools/confirm'
 import { sendEventGoEmail, sendEventNoGoEmail, sendEventPostponedEmail } from '@/lib/email/service'
+import { createAuditLog } from '@/lib/audit/logger'
+import { createNotification } from '@/lib/email/service'
 import { evaluateEventViability, type EventViabilityEvaluation } from '@/lib/exams/viability'
 import {
   rollForwardGuaranteedBookingsFromCancelledEvent,
@@ -72,7 +74,22 @@ export async function executeGo(eventId: string, _adminId: string) {
   })
 
   if (result.success) {
+    // Audit log for the Go decision
+    await createAuditLog({
+      userId: _adminId,
+      action: 'UPDATE',
+      entity: 'ExamEvent',
+      entityId: eventId,
+      description: `Go decision executed: event "${event.name}" confirmed`,
+      changes: {
+        eventStatus: 'CONFIRMED',
+        poolsConfirmed: event.pools.filter((p) => p.status === 'CONFIRMED' || p.status === 'LOCKED')
+          .length,
+      },
+    })
+
     const notified = new Set<string>()
+    const dispatchPromises: Promise<unknown>[] = []
     for (const pool of event.pools) {
       for (const membership of pool.memberships) {
         if (
@@ -82,12 +99,23 @@ export async function executeGo(eventId: string, _adminId: string) {
           notified.add(membership.userId)
           const email = membership.user.academyEmail || membership.user.email
           const name = membership.user.profile?.firstName || 'Student'
-          sendEventGoEmail(email, name, event.name).catch((error) =>
-            console.error('[EMAIL ERROR]', error)
+          dispatchPromises.push(
+            sendEventGoEmail(email, name, event.name).catch((error) =>
+              console.error('[EMAIL ERROR]', error)
+            )
+          )
+          dispatchPromises.push(
+            createNotification(prisma, membership.userId, {
+              type: 'POOL_UPDATE',
+              title: 'Exam Event Confirmed',
+              message: `The exam event "${event.name}" has been confirmed. Please check your pool status for updates.`,
+              link: '/student/exams',
+            }).catch((err) => console.error('[NOTIFICATION ERROR]', err))
           )
         }
       }
     }
+    await Promise.allSettled(dispatchPromises)
   }
 
   return result
@@ -153,19 +181,46 @@ export async function executeNoGo(eventId: string, adminId: string) {
 
   const rollForwardResult = await rollForwardGuaranteedBookingsFromCancelledEvent(eventId, adminId)
 
+  // Audit log for the overall No-Go decision
+  await createAuditLog({
+    userId: adminId,
+    action: 'UPDATE',
+    entity: 'ExamEvent',
+    entityId: eventId,
+    description: `No-Go decision executed: event "${eventName}" cancelled, ${eventPools.length} pool(s) failed, ${rollForwardResult.rolledForwardCount} booking(s) rolled forward`,
+    changes: {
+      eventStatus: 'CANCELLED',
+      poolsAffected: eventPools.length,
+      rolledForward: rollForwardResult.rolledForwardCount,
+      deferred: rollForwardResult.deferredCount,
+    },
+  })
+
   const notified = new Set<string>()
+  const dispatchPromises: Promise<unknown>[] = []
   for (const pool of eventPools) {
     for (const membership of pool.memberships) {
       if (!notified.has(membership.userId)) {
         notified.add(membership.userId)
         const email = membership.user.academyEmail || membership.user.email
         const name = membership.user.profile?.firstName || 'Student'
-        sendEventNoGoEmail(email, name, eventName).catch((error) =>
-          console.error('[EMAIL ERROR]', error)
+        dispatchPromises.push(
+          sendEventNoGoEmail(email, name, eventName).catch((error) =>
+            console.error('[EMAIL ERROR]', error)
+          )
+        )
+        dispatchPromises.push(
+          createNotification(prisma, membership.userId, {
+            type: 'POOL_UPDATE',
+            title: 'Exam Event Cancelled',
+            message: `The exam event "${eventName}" has been cancelled. Please check your bookings for roll-forward or refund details.`,
+            link: '/student/exams',
+          }).catch((err) => console.error('[NOTIFICATION ERROR]', err))
         )
       }
     }
   }
+  await Promise.allSettled(dispatchPromises)
 
   return {
     success: true,
@@ -195,6 +250,8 @@ export async function executePostponement(
 
   const eventName = event.name
   const eventPools = event.pools
+  const eventStartDate = event.startDate
+  const eventEndDate = event.endDate
 
   return prisma.$transaction(async (tx) => {
     const newPaymentDeadline = new Date(newStartDate)
@@ -263,6 +320,21 @@ export async function executePostponement(
   // Wire in the dormant postponed-booking roll-forward helper
   await rollForwardPostponedBookingsForEvent(eventId, _adminId)
 
+  // Audit log for the postponement decision
+  await createAuditLog({
+    userId: _adminId,
+    action: 'UPDATE',
+    entity: 'ExamEvent',
+    entityId: eventId,
+    description: `Event "${eventName}" postponed to ${newStartDate.toLocaleDateString()} – ${newEndDate.toLocaleDateString()}`,
+    changes: {
+      oldStartDate: eventStartDate.toISOString(),
+      oldEndDate: eventEndDate.toISOString(),
+      newStartDate: newStartDate.toISOString(),
+      newEndDate: newEndDate.toISOString(),
+    },
+  })
+
   const uniqueUserIds = new Set<string>()
   for (const pool of eventPools) {
     for (const membership of pool.memberships) {
@@ -272,33 +344,53 @@ export async function executePostponement(
     }
   }
 
-  for (const userId of uniqueUserIds) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { email: true, academyEmail: true, profile: { select: { firstName: true } } },
-    })
-    if (!user?.email) continue
+  const newStartDateStr = newStartDate.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+  const newEndDateStr = newEndDate.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
 
-    const name = (user as NonNullable<typeof user>).profile?.firstName || 'Student'
-    const email =
-      (user as NonNullable<typeof user>).academyEmail || (user as NonNullable<typeof user>).email
-    const newStartDateStr = newStartDate.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })
-    const newEndDateStr = newEndDate.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })
+  // Fetch all affected users in parallel
+  const users = await prisma.user.findMany({
+    where: { id: { in: Array.from(uniqueUserIds) } },
+    select: {
+      id: true,
+      email: true,
+      academyEmail: true,
+      profile: { select: { firstName: true } },
+    },
+  })
 
-    sendEventPostponedEmail(email, name, eventName, newStartDateStr, newEndDateStr).catch(
-      (error) => {
-        console.error('[EMAIL ERROR] Failed to send POSTPONED to', email, error)
-      }
+  const dispatchPromises: Promise<unknown>[] = []
+  for (const user of users) {
+    if (!user.email) continue
+
+    const name = user.profile?.firstName || 'Student'
+    const email = user.academyEmail || user.email
+
+    dispatchPromises.push(
+      sendEventPostponedEmail(email, name, eventName, newStartDateStr, newEndDateStr).catch(
+        (error) => {
+          console.error('[EMAIL ERROR] Failed to send POSTPONED to', email, error)
+        }
+      )
+    )
+
+    dispatchPromises.push(
+      createNotification(prisma, user.id, {
+        type: 'POOL_UPDATE',
+        title: 'Exam Event Postponed',
+        message: `The exam event "${eventName}" has been postponed to ${newStartDateStr}. Your booking has been updated.`,
+        link: '/student/exams',
+      }).catch((err) => console.error('[NOTIFICATION ERROR]', err))
     )
   }
+  await Promise.allSettled(dispatchPromises)
 
   return {
     success: true,

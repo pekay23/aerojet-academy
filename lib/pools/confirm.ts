@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { format } from 'date-fns'
 import { sendPoolConfirmedEmail, sendPoolFailedEmail } from '@/lib/email/service'
+import { createNotification } from '@/lib/email/service'
 import { logAuditEvent } from '../audit/logger'
 import { captureFunds, releaseFunds } from '@/lib/wallet/operations'
 
@@ -71,6 +72,17 @@ export async function confirmPoolInternal(poolId: string, tx: Prisma.Transaction
     },
     tx
   )
+
+  // In-app notifications for confirmed memberships
+  const notifPromises = memberships.map((m) =>
+    createNotification(tx, m.userId, {
+      type: 'POOL_UPDATE',
+      title: 'Exam Pool Confirmed',
+      message: `Your exam pool "${pool?.name}" has been confirmed. Your seat is now locked.`,
+      link: '/student/exams',
+    }).catch((err) => console.error('[NOTIFICATION ERROR]', err))
+  )
+  await Promise.allSettled(notifPromises)
 
   // Send emails (non-blocking, outside tx)
   for (const m of memberships) {

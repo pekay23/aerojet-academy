@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Edit2, Loader2, GraduationCap } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface AcademicYear {
   id: string
@@ -39,6 +40,8 @@ export default function EditAcademicPeriodDialog({
   const [semesterId, setSemesterId] = useState(currentSemesterId || '')
   const [error, setError] = useState<string | null>(null)
 
+  const { markDirty, markClean } = useFormDirty()
+
   // Fetched data
   const [academicYears, setAcademicYears] = useState<AcademicYear[]>([])
   const [loadingYears, setLoadingYears] = useState(false)
@@ -46,14 +49,18 @@ export default function EditAcademicPeriodDialog({
   // Fetch active academic years when dialog opens
   useEffect(() => {
     if (open) {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingYears(true)
       fetch('/api/staff/academic-years')
         .then((res) => res.json())
         .then((data) => {
           setAcademicYears(Array.isArray(data) ? data : data.academicYears || [])
         })
-        .catch(() => setAcademicYears([]))
+        .catch((err) => {
+          console.error('[EditAcademicPeriodDialog] Failed to fetch academic years:', err)
+          setError('Failed to load academic years')
+          setAcademicYears([])
+        })
         .finally(() => setLoadingYears(false))
     }
   }, [open])
@@ -67,6 +74,7 @@ export default function EditAcademicPeriodDialog({
     setAcademicYearId(yearId)
     setSemesterId('') // Always reset semester when year changes
     setError(null)
+    markDirty()
   }
 
   // Clear both if academic year is cleared
@@ -74,6 +82,7 @@ export default function EditAcademicPeriodDialog({
     setAcademicYearId('')
     setSemesterId('')
     setError(null)
+    markDirty()
   }
 
   const hasChanges =
@@ -103,6 +112,7 @@ export default function EditAcademicPeriodDialog({
         throw new Error(data.error || 'Failed to update academic period')
       }
 
+      markClean()
       setOpen(false)
       router.refresh()
     } catch (err: unknown) {
@@ -119,10 +129,10 @@ export default function EditAcademicPeriodDialog({
           <Edit2 className="h-4 w-4" />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[440px]">
+      <DialogContent className="sm:max-w-110">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-aerojet-sky" />
+            <GraduationCap className="text-aerojet-sky h-5 w-5" />
             Edit Academic Period
           </DialogTitle>
           <DialogDescription className="sr-only">
@@ -138,7 +148,10 @@ export default function EditAcademicPeriodDialog({
 
           {/* Academic Year */}
           <div className="space-y-2">
-            <label htmlFor="academic-year-select" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="academic-year-select"
+              className="text-sm font-bold text-slate-700 dark:text-slate-300"
+            >
               Academic Year <span className="text-red-500">*</span>
             </label>
             {loadingYears ? (
@@ -176,7 +189,12 @@ export default function EditAcademicPeriodDialog({
               academicYearId ? 'opacity-100' : 'pointer-events-none opacity-40'
             }`}
           >
-            <label htmlFor="semester-select" className="text-sm font-bold text-slate-700 dark:text-slate-300">Semester</label>
+            <label
+              htmlFor="semester-select"
+              className="text-sm font-bold text-slate-700 dark:text-slate-300"
+            >
+              Semester
+            </label>
             {semesters.length === 0 && academicYearId ? (
               <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:border-amber-800/50 dark:bg-amber-900/10 dark:text-amber-300">
                 No semesters found for this academic year.
@@ -189,6 +207,7 @@ export default function EditAcademicPeriodDialog({
                 onChange={(e) => {
                   setSemesterId(e.target.value)
                   setError(null)
+                  markDirty()
                 }}
                 disabled={!academicYearId}
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800"

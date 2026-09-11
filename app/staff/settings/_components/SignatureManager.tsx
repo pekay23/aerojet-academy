@@ -23,6 +23,7 @@ import {
   updateSignatureAction,
 } from '@/app/staff/settings/_actions/pdf-template-actions'
 import SignatureCanvas from './SignatureCanvas'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 export type Signature = {
   id: string
@@ -71,6 +72,8 @@ export default function SignatureManager() {
   const [editSignerName, setEditSignerName] = useState('')
   const [editExpiresAt, setEditExpiresAt] = useState('')
   const [saving, setSaving] = useState(false)
+
+  const { markDirty, markClean } = useFormDirty()
 
   const fetchSignatures = useCallback(async () => {
     try {
@@ -146,6 +149,7 @@ export default function SignatureManager() {
         contentType: file.type,
       })
       toast.success('Signature uploaded')
+      markClean()
       resetUploadForm()
       fetchSignatures()
     } catch (err) {
@@ -172,6 +176,7 @@ export default function SignatureManager() {
         contentType: 'image/png',
       })
       toast.success('Signature drawn and saved')
+      markClean()
       resetUploadForm()
       fetchSignatures()
     } catch (err) {
@@ -218,6 +223,7 @@ export default function SignatureManager() {
         expiresAt: editExpiresAt || null,
       })
       toast.success('Signature updated')
+      markClean()
       setEditingId(null)
       fetchSignatures()
     } catch (err) {
@@ -323,21 +329,30 @@ export default function SignatureManager() {
                         <input
                           type="text"
                           value={editLabel}
-                          onChange={(e) => setEditLabel(e.target.value)}
+                          onChange={(e) => {
+                            setEditLabel(e.target.value)
+                            markDirty()
+                          }}
                           placeholder="Label"
                           className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                         <input
                           type="text"
                           value={editSignerName}
-                          onChange={(e) => setEditSignerName(e.target.value)}
+                          onChange={(e) => {
+                            setEditSignerName(e.target.value)
+                            markDirty()
+                          }}
                           placeholder="Signer name"
                           className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                         <input
                           type="date"
                           value={editExpiresAt}
-                          onChange={(e) => setEditExpiresAt(e.target.value)}
+                          onChange={(e) => {
+                            setEditExpiresAt(e.target.value)
+                            markDirty()
+                          }}
                           className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                         <div className="flex gap-1">
@@ -564,7 +579,10 @@ export default function SignatureManager() {
                   <input
                     type="text"
                     value={label}
-                    onChange={(e) => setLabel(e.target.value)}
+                    onChange={(e) => {
+                      setLabel(e.target.value)
+                      markDirty()
+                    }}
                     placeholder="e.g. Training Manager"
                     className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
@@ -576,7 +594,10 @@ export default function SignatureManager() {
                   <input
                     type="text"
                     value={signerName}
-                    onChange={(e) => setSignerName(e.target.value)}
+                    onChange={(e) => {
+                      setSignerName(e.target.value)
+                      markDirty()
+                    }}
                     placeholder="e.g. Capt. John Doe"
                     className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
@@ -588,7 +609,10 @@ export default function SignatureManager() {
                   <input
                     type="date"
                     value={expiresAt}
-                    onChange={(e) => setExpiresAt(e.target.value)}
+                    onChange={(e) => {
+                      setExpiresAt(e.target.value)
+                      markDirty()
+                    }}
                     className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>

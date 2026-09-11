@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 export function TopupActions({
   paymentId,
@@ -28,6 +29,8 @@ export function TopupActions({
   const [loadingReject, setLoadingReject] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [isRejectModalOpen, setRejectModalOpen] = useState(false)
+
+  const { markDirty, markClean } = useFormDirty()
 
   const handleApprove = async () => {
     if (!confirm(`Are you sure you want to approve ${amount} for ${userName}?`)) return
@@ -61,6 +64,7 @@ export function TopupActions({
       })
       if (!res.ok) throw new Error((await res.json()).error)
       toast.success('Wallet top-up rejected.')
+      markClean()
       setRejectModalOpen(false)
       router.refresh()
     } catch (err: unknown) {
@@ -99,7 +103,7 @@ export function TopupActions({
             <XCircle className="mr-1 h-4 w-4" /> Reject
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>Reject Top-up Request</DialogTitle>
           </DialogHeader>
@@ -111,7 +115,10 @@ export function TopupActions({
             <Textarea
               placeholder="e.g. The payment proof uploaded is blurry."
               value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
+              onChange={(e) => {
+                setRejectReason(e.target.value)
+                markDirty()
+              }}
               className="rounded-xl text-sm"
             />
             <div className="flex justify-end gap-3 pt-4">

@@ -4,11 +4,13 @@ import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Loader2, Send, CheckCircle2 } from 'lucide-react'
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 export default function ContactForm() {
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const { executeRecaptcha } = useGoogleReCaptcha()
+  const { markDirty, markClean } = useFormDirty()
   const [data, setData] = useState({
     firstName: '',
     lastName: '',
@@ -50,6 +52,7 @@ export default function ContactForm() {
         const responseData = await res.json()
 
         if (res.ok) {
+          markClean()
           setSubmitted(true)
           toast.success('Message sent successfully!')
         } else {
@@ -62,7 +65,7 @@ export default function ContactForm() {
         setLoading(false)
       }
     },
-    [data, executeRecaptcha]
+    [data, executeRecaptcha, markClean]
   )
 
   if (submitted) {
@@ -71,12 +74,13 @@ export default function ContactForm() {
         <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
           <CheckCircle2 className="h-8 w-8 text-green-600" />
         </div>
-        <h3 className="mb-2 text-xl font-black text-aerojet-blue">Message Sent!</h3>
+        <h3 className="text-aerojet-blue mb-2 text-xl font-black">Message Sent!</h3>
         <p className="max-w-xs text-sm text-slate-500">
           Thank you for reaching out. Our admissions team will get back to you via email shortly.
         </p>
         <button
           onClick={() => {
+            markClean()
             setSubmitted(false)
             setData({
               firstName: '',
@@ -88,7 +92,7 @@ export default function ContactForm() {
               confirm_email: '',
             })
           }}
-          className="mt-6 text-xs font-bold tracking-widest text-aerojet-sky uppercase hover:underline"
+          className="text-aerojet-sky mt-6 text-xs font-bold tracking-widest uppercase hover:underline"
         >
           Send another message
         </button>
@@ -100,7 +104,10 @@ export default function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="firstName" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+          <label
+            htmlFor="firstName"
+            className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase"
+          >
             First Name
           </label>
           <input
@@ -108,13 +115,19 @@ export default function ContactForm() {
             required
             type="text"
             placeholder="John"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+            className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2"
             value={data.firstName}
-            onChange={(e) => setData({ ...data, firstName: e.target.value })}
+            onChange={(e) => {
+              setData({ ...data, firstName: e.target.value })
+              markDirty()
+            }}
           />
         </div>
         <div>
-          <label htmlFor="lastName" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+          <label
+            htmlFor="lastName"
+            className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase"
+          >
             Last Name
           </label>
           <input
@@ -122,15 +135,21 @@ export default function ContactForm() {
             required
             type="text"
             placeholder="Doe"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+            className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2"
             value={data.lastName}
-            onChange={(e) => setData({ ...data, lastName: e.target.value })}
+            onChange={(e) => {
+              setData({ ...data, lastName: e.target.value })
+              markDirty()
+            }}
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="email" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+        <label
+          htmlFor="email"
+          className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase"
+        >
           Email Address
         </label>
         <input
@@ -138,32 +157,42 @@ export default function ContactForm() {
           required
           type="email"
           placeholder="john@example.com"
-          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+          className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2"
           value={data.email}
-          onChange={(e) => setData({ ...data, email: e.target.value })}
+          onChange={(e) => {
+            setData({ ...data, email: e.target.value })
+            markDirty()
+          }}
         />
       </div>
 
       <div>
-        <label htmlFor="phone" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+        <label
+          htmlFor="phone"
+          className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase"
+        >
           Phone Number <span className="font-normal text-slate-400 normal-case">(optional)</span>
         </label>
         <input
           id="phone"
           type="tel"
           placeholder="+233 XX XXX XXXX"
-          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+          className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2"
           value={data.phone}
           onChange={(e) => {
             // strip out any characters that are not numbers, spaces, or valid symbols
             const val = e.target.value.replace(/[^0-9+\-\s()]/g, '')
             setData({ ...data, phone: val })
+            markDirty()
           }}
         />
       </div>
 
       <div>
-        <label htmlFor="subject" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+        <label
+          htmlFor="subject"
+          className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase"
+        >
           Subject
         </label>
         <div className="relative">
@@ -171,8 +200,11 @@ export default function ContactForm() {
             id="subject"
             required
             value={data.subject}
-            onChange={(e) => setData({ ...data, subject: e.target.value })}
-            className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+            onChange={(e) => {
+              setData({ ...data, subject: e.target.value })
+              markDirty()
+            }}
+            className="focus:ring-aerojet-sky w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none focus:border-transparent focus:ring-2"
           >
             <option value="" disabled>
               Select a subject...
@@ -199,7 +231,10 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="message" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+        <label
+          htmlFor="message"
+          className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase"
+        >
           Message
         </label>
         <textarea
@@ -208,9 +243,12 @@ export default function ContactForm() {
           minLength={10}
           rows={5}
           placeholder="Tell us about your enquiry..."
-          className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+          className="focus:ring-aerojet-sky w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2"
           value={data.message}
-          onChange={(e) => setData({ ...data, message: e.target.value })}
+          onChange={(e) => {
+            setData({ ...data, message: e.target.value })
+            markDirty()
+          }}
         />
       </div>
 
@@ -224,14 +262,17 @@ export default function ContactForm() {
           autoComplete="off"
           tabIndex={-1}
           value={data.confirm_email}
-          onChange={(e) => setData({ ...data, confirm_email: e.target.value })}
+          onChange={(e) => {
+            setData({ ...data, confirm_email: e.target.value })
+            markDirty()
+          }}
         />
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-4 font-bold text-white shadow-lg transition-all hover:bg-aerojet-sky"
+        className="bg-aerojet-blue hover:bg-aerojet-sky flex w-full items-center justify-center gap-2 rounded-xl py-4 font-bold text-white shadow-lg transition-all"
       >
         {loading ? (
           <Loader2 className="h-5 w-5 animate-spin" />

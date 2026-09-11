@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface EditInstructorProfileDialogProps {
   userId: string
@@ -41,9 +42,12 @@ export default function EditInstructorProfileDialog({
     department: initialData.department || '',
   })
 
+  const { markDirty, markClean } = useFormDirty()
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+    markDirty()
   }
 
   const handleSave = async () => {
@@ -61,6 +65,7 @@ export default function EditInstructorProfileDialog({
       }
 
       toast.success('Instructor details updated')
+      markClean()
       setOpen(false)
       router.refresh()
     } catch (error: unknown) {
@@ -81,7 +86,7 @@ export default function EditInstructorProfileDialog({
           <Pencil className="mr-1 h-3 w-3" /> Edit Details
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle>Edit Instructor Details</DialogTitle>
           <DialogDescription className="sr-only">
