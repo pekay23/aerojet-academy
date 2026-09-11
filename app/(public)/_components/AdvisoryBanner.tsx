@@ -57,7 +57,7 @@ export default function AdvisoryBanner({ message }: { message: string }) {
       ref={bannerRef}
       className="fixed top-0 right-0 left-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-3 shadow-sm sm:px-6 lg:px-8"
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-center gap-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-center gap-3 sm:justify-start">
         <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" />
         <p className="text-center text-sm leading-snug font-semibold text-amber-900">{message}</p>
       </div>

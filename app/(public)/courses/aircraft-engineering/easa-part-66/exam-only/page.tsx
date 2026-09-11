@@ -6,9 +6,7 @@ import TMinusTooltip from '@/components/shared/TMinusTooltip'
 import {
   CheckCircle2,
   Users,
-  Calendar as _Calendar,
   AlertTriangle,
-  Clock as _Clock,
   Award,
   BookOpen,
   MonitorPlay,
