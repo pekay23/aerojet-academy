@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RetentionHeatmap } from './RetentionHeatmap'
 
-export default function RetentionAnalysis() {
+export function RetentionAnalysis() {
   const [cohort, setCohort] = useState('')
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -63,3 +63,4 @@ export default function RetentionAnalysis() {
     </div>
   )
 }
+export default RetentionAnalysis;

@@ -4,7 +4,7 @@ import { subDays, subMonths, startOfDay, endOfDay, startOfMonth, endOfMonth } fr
 import { AnalyticsEventName, AnalyticsEntity } from './events'
 
 // Allow injecting a prisma client for testing
-type PrismaLike = ReturnType<typeof defaultPrisma.$extends>
+type PrismaLike = typeof defaultPrisma
 let prisma: PrismaLike = defaultPrisma
 
 export function __setPrisma(client: PrismaLike) {
@@ -129,7 +129,7 @@ function formatEventLabel(event: string): string {
 // Cohort Retention
 // ============================================================================
 
-export async function getCohortRetention(cohortDate?: Date): Promise<RetentionCohhort[]> {
+export async function getCohortRetention(cohortDate?: Date): Promise<RetentionCohort[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cohortRetention: any[] = []
   
@@ -188,9 +188,9 @@ export async function getCohortRetention(cohortDate?: Date): Promise<RetentionCo
     }),
   ])
 
-  const d1Set = new Set(d1Active.map((e) => e.userId))
-  const d7Set = new Set(d7Active.map((e) => e.userId))
-  const d30Set = new Set(d30Active.map((e) => e.userId))
+  const d1Set = new Set(d1Active.map((e: any) => e.userId))
+  const d7Set = new Set(d7Active.map((e: any) => e.userId))
+  const d30Set = new Set(d30Active.map((e: any) => e.userId))
 
   return [
     {
@@ -234,7 +234,7 @@ export async function getFeatureAdoption(feature: string, from?: Date, to?: Date
   const avgTimeToAdopt =
     adopters.length > 0
       ? Math.round(
-          adopters.reduce((sum, e) => {
+          adopters.reduce((sum: number, e: any) => {
             const user = { createdAt: e.createdAt }
             const adoptDate = new Date(e.createdAt)
             const days = (adoptDate.getTime() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24)
@@ -274,7 +274,7 @@ export async function getPageViews(from?: Date, to?: Date, limit = 20): Promise<
   })
 
   // Get unique visitors per page
-  const uniqueVisitorsPromises = pageViews.map((pv) =>
+  const uniqueVisitorsPromises = pageViews.map((pv: any) =>
     prisma.auditLog.findMany({
       where: {
         action: 'PAGE_VIEW',
@@ -289,7 +289,7 @@ export async function getPageViews(from?: Date, to?: Date, limit = 20): Promise<
 
   const uniqueVisitorsLists = await Promise.all(uniqueVisitorsPromises)
 
-  return pageViews.map((pv, i) => ({
+  return pageViews.map((pv: any, i: number) => ({
     path: pv.entityId,
     views: pv._count.id,
     uniqueVisitors: uniqueVisitorsLists[i].length,
@@ -317,7 +317,7 @@ export async function getUserJourney(userId: string, limit = 50): Promise<UserJo
     },
   })
 
-  return events.map((e) => ({
+  return events.map((e: any) => ({
     event: e.action as AnalyticsEventName,
     entity: e.entity ?? 'UNKNOWN',
     timestamp: e.createdAt.toISOString(),

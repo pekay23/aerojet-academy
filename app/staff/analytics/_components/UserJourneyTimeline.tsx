@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -13,7 +13,7 @@ interface UserJourneyTimelineProps {
   }>
 }
 
-export default function UserJourneyTimeline({ events }: UserJourneyTimelineProps) {
+export function UserJourneyTimeline({ events }: UserJourneyTimelineProps) {
   return (
     <Card>
       <CardHeader>
@@ -51,3 +51,4 @@ export default function UserJourneyTimeline({ events }: UserJourneyTimelineProps
     </Card>
   )
 }
+export default UserJourneyTimeline;

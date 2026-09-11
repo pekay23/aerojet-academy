@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
@@ -15,7 +15,7 @@ interface RetentionHeatmapProps {
   }
 }
 
-export default function RetentionHeatmap({ data }: RetentionHeatmapProps) {
+export function RetentionHeatmap({ data }: RetentionHeatmapProps) {
   const chartData = data.cohorts.map((cohort) => {
     const date = new Date(cohort.cohortDate)
     const label = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
@@ -68,3 +68,4 @@ export default function RetentionHeatmap({ data }: RetentionHeatmapProps) {
     </div>
   )
 }
+export default RetentionHeatmap;

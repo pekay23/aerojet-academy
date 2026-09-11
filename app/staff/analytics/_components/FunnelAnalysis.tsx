@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,7 +9,7 @@ import { FunnelChart } from './FunnelChart'
 
 type FunnelName = 'registration' | 'enrollment' | 'exam' | 'payment'
 
-export default function FunnelAnalysis() {
+export function FunnelAnalysis() {
   const [funnel, setFunnel] = useState<FunnelName>('registration')
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
@@ -84,3 +84,4 @@ export default function FunnelAnalysis() {
     </div>
   )
 }
+export default FunnelAnalysis;
