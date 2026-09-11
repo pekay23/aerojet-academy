@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+﻿import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle, TrendingUp, Users, GraduationCap, CreditCard } from 'lucide-react'
 import { formatCurrency } from '@/lib/currency'
 import type { DashboardAlert } from '@/lib/analytics/dashboard-alerts'
@@ -8,7 +8,7 @@ interface MetricsOverviewProps {
   metrics: any
 }
 
-export default function MetricsOverview({ alerts, metrics }: MetricsOverviewProps) {
+export function MetricsOverview({ alerts, metrics }: MetricsOverviewProps) {
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
@@ -122,3 +122,4 @@ function MetricCard({
     </Card>
   )
 }
+export default MetricsOverview;

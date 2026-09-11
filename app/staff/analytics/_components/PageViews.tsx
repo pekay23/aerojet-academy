@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { PageViewsTable } from './PageViewsTable'
 
-export default function PageViews() {
+export function PageViews() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [data, setData] = useState<any>(null)
@@ -66,3 +66,4 @@ export default function PageViews() {
     </div>
   )
 }
+export default PageViews;

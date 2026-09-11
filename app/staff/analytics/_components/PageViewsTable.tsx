@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +14,7 @@ interface PageViewsTableProps {
   }
 }
 
-export default function PageViewsTable({ data }: PageViewsTableProps) {
+export function PageViewsTable({ data }: PageViewsTableProps) {
   return (
     <Card>
       <CardHeader>
@@ -53,3 +53,4 @@ export default function PageViewsTable({ data }: PageViewsTableProps) {
     </Card>
   )
 }
+export default PageViewsTable;

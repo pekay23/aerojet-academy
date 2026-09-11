@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
@@ -17,7 +17,7 @@ interface FunnelChartProps {
   }
 }
 
-export default function FunnelChart({ data }: FunnelChartProps) {
+export function FunnelChart({ data }: FunnelChartProps) {
   const chartData = data.steps.map((step) => ({
     name: step.label,
     count: step.count,
@@ -40,10 +40,10 @@ export default function FunnelChart({ data }: FunnelChartProps) {
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip
-                formatter={(value: any, name: string) => [
+                formatter={((value: any, name: any) => [
                   name === 'count' ? value.toLocaleString() : `${value}%`,
                   name === 'count' ? 'Users' : name === 'conversionRate' ? 'Conversion' : 'Drop-off',
-                ]}
+                ]) as any}
               />
               <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                 {chartData.map((entry, index) => (
@@ -101,3 +101,4 @@ export default function FunnelChart({ data }: FunnelChartProps) {
     </div>
   )
 }
+export default FunnelChart;

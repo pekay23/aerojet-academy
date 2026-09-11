@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
@@ -13,7 +13,7 @@ interface FeatureChartProps {
   }
 }
 
-export default function FeatureChart({ data }: FeatureChartProps) {
+export function FeatureChart({ data }: FeatureChartProps) {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <Card>
@@ -76,3 +76,4 @@ export default function FeatureChart({ data }: FeatureChartProps) {
     </div>
   )
 }
+export default FeatureChart;

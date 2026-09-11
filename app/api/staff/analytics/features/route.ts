@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { withErrorHandler, apiSuccess, apiError, apiNotFound } from '@/lib/api/response'
 import { getFeatureAdoption } from '@/lib/analytics/queries'
 
 export const GET = withErrorHandler(async (req) => {
