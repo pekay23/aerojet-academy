@@ -1,15 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import {
-  Info,
-  AlertTriangle,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  X,
-  Siren,
-} from 'lucide-react'
+import { Info, AlertTriangle, AlertCircle, CheckCircle2, Clock, X, Siren } from 'lucide-react'
 import { dismissStaffNotification } from '@/app/staff/actions/index'
 import { Notification } from '@prisma/client'
 import Link from 'next/link'
@@ -19,7 +11,10 @@ interface StaffNotificationCardProps {
   onDismiss?: (id: string) => void
 }
 
-export default function StaffNotificationCard({ notification, onDismiss }: StaffNotificationCardProps) {
+export default function StaffNotificationCard({
+  notification,
+  onDismiss,
+}: StaffNotificationCardProps) {
   const [isRead, setIsRead] = useState(notification.isRead)
   const [isPending, _startTransition] = useTransition()
   const [isDismissing, startDismissTransition] = useTransition()
@@ -79,7 +74,7 @@ export default function StaffNotificationCard({ notification, onDismiss }: Staff
               {notification.title}
             </h3>
             {isCritical && (
-              <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-red-700 dark:bg-red-900/30 dark:text-red-400">
+              <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black tracking-wider text-red-700 uppercase dark:bg-red-900/30 dark:text-red-400">
                 Critical
               </span>
             )}
@@ -112,7 +107,7 @@ export default function StaffNotificationCard({ notification, onDismiss }: Staff
         {notification.linkUrl && (
           <div className="mt-4">
             <Link
-              href={notification.linkUrl}
+              href={`${notification.linkUrl}?returnUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/staff/notifications')}`}
               className="inline-flex items-center gap-2 text-xs font-black text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
               {notification.linkText || 'View Details'}

@@ -14,6 +14,7 @@ import {
   RotateCcw,
   Eye,
   EyeOff,
+  ArrowUpDown,
 } from 'lucide-react'
 
 interface Question {
@@ -29,6 +30,7 @@ interface Question {
   explanation: string | null
   isActive: boolean
   status: string
+  createdAt?: string
 }
 
 interface QuestionEditorProps {
@@ -59,6 +61,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
   // Retired questions state
   const [showRetired, setShowRetired] = useState(false)
   const [restoring, setRestoring] = useState<string | null>(null)
+  const [sortBy, setSortBy] = useState<string>('default')
 
   const [form, setForm] = useState({
     text: '',
@@ -75,7 +78,12 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
 
   const fetchQuestions = useCallback(async () => {
     try {
-      const res = await fetch(`/api/staff/exams/internal/banks/${bankId}/questions`)
+      const url = new URL(
+        `/api/staff/exams/internal/banks/${bankId}/questions`,
+        window.location.origin
+      )
+      if (sortBy && sortBy !== 'default') url.searchParams.set('sort', sortBy)
+      const res = await fetch(url.pathname + url.search)
       if (!res.ok) throw new Error(`Failed to load questions (${res.status})`)
       const json = await res.json()
       if (json.data) setQuestions(json.data)
@@ -84,10 +92,10 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
     } finally {
       setLoading(false)
     }
-  }, [bankId])
+  }, [bankId, sortBy])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchQuestions()
   }, [fetchQuestions])
 
@@ -593,6 +601,20 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
                 : `Show Retired (${questions.filter((q) => !q.isActive).length})`}
             </button>
           )}
+          <div className="flex items-center gap-1.5">
+            <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:text-slate-300"
+            >
+              <option value="default">Default Sort</option>
+              <option value="dateAdded">Date Added</option>
+              <option value="category">Category / Syllabus</option>
+              <option value="syllabusRef">Syllabus Ref</option>
+              <option value="difficulty">Difficulty</option>
+            </select>
+          </div>
         </div>
         <div className="flex gap-2">
           <button
@@ -827,6 +849,12 @@ function QuestionList({
                       <span>{q.subTopic}</span>
                     </>
                   )}
+                  {q.createdAt && (
+                    <>
+                      <span>•</span>
+                      <span>Added: {new Date(q.createdAt).toLocaleDateString()}</span>
+                    </>
+                  )}
                   {!q.isActive && (
                     <>
                       <span>•</span>
@@ -841,7 +869,11 @@ function QuestionList({
                   <span>A: {q.options[0]}</span>
                   <span>B: {q.options[1]}</span>
                   <span>C: {q.options[2]}</span>
-                  <span className="font-bold text-emerald-600">Ans: {q.correctAnswer}</span>
+                  <span
+                    className={`font-bold ${q.correctAnswer ? 'text-emerald-600' : 'text-amber-600'}`}
+                  >
+                    Ans: {q.correctAnswer || 'Answer not set'}
+                  </span>
                 </div>
                 {q.explanation && (
                   <p className="mt-1.5 line-clamp-2 text-xs text-slate-400 italic">

@@ -1,9 +1,12 @@
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { confirmPoolInternal, failPool } from '@/lib/pools/confirm'
 import { sendEventGoEmail, sendEventNoGoEmail, sendEventPostponedEmail } from '@/lib/email/service'
 import { evaluateEventViability, type EventViabilityEvaluation } from '@/lib/exams/viability'
-import { rollForwardGuaranteedBookingsFromCancelledEvent } from '@/lib/exams/rollforward'
+import {
+  rollForwardGuaranteedBookingsFromCancelledEvent,
+  rollForwardPostponedBookingsForEvent,
+} from '@/lib/exams/rollforward'
 import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export type GoNoGoEvaluation = EventViabilityEvaluation
@@ -102,27 +105,62 @@ export async function executeNoGo(eventId: string, adminId: string) {
   })
   if (!event) throw new Error('Event not found')
 
-  for (const pool of event.pools) {
-    if (!['COMPLETED', 'FAILED', 'CANCELLED'].includes(pool.status)) {
-      await failPool(pool.id)
-    }
-  }
+  const eventName = event.name
+  const eventPools = event.pools
 
-  await prisma.examEvent.update({
-    where: { id: eventId },
-    data: { status: 'CANCELLED' },
+  // Fail active pools and cancel the event atomically
+  await prisma.$transaction(async (tx) => {
+    for (const pool of eventPools) {
+      if (!['COMPLETED', 'FAILED', 'CANCELLED'].includes(pool.status)) {
+        await failPool(pool.id, tx)
+      }
+    }
+
+    await tx.examEvent.update({
+      where: { id: eventId },
+      data: { status: 'CANCELLED' },
+    })
+
+    // Cancel all non-terminal bookings linked to this event
+    await tx.examBooking.updateMany({
+      where: {
+        eventId,
+        deletedAt: null,
+        demandStatus: { notIn: ['EXECUTED', 'ROLLED_FORWARD', 'CANCELLED'] },
+      },
+      data: {
+        demandStatus: 'CANCELLED',
+        cancellationReason: 'Event cancelled — No-Go decision',
+        cancelledAt: new Date(),
+        cancelledBy: adminId,
+      },
+    })
+
+    // Cancel stale sittings and assignments for this event
+    await tx.examSittingAssignment.updateMany({
+      where: {
+        sitting: { eventId },
+        status: { notIn: ['CANCELLED', 'ATTENDED', 'EXCUSED'] },
+      },
+      data: { status: 'CANCELLED' },
+    })
+
+    await tx.examSitting.updateMany({
+      where: { eventId, status: { notIn: ['COMPLETED', 'CANCELLED'] } },
+      data: { status: 'CANCELLED' },
+    })
   })
 
   const rollForwardResult = await rollForwardGuaranteedBookingsFromCancelledEvent(eventId, adminId)
 
   const notified = new Set<string>()
-  for (const pool of event.pools) {
+  for (const pool of eventPools) {
     for (const membership of pool.memberships) {
       if (!notified.has(membership.userId)) {
         notified.add(membership.userId)
         const email = membership.user.academyEmail || membership.user.email
         const name = membership.user.profile?.firstName || 'Student'
-        sendEventNoGoEmail(email, name, event.name).catch((error) =>
+        sendEventNoGoEmail(email, name, eventName).catch((error) =>
           console.error('[EMAIL ERROR]', error)
         )
       }
@@ -155,6 +193,9 @@ export async function executePostponement(
   })
   if (!event) throw new Error('Event not found')
 
+  const eventName = event.name
+  const eventPools = event.pools
+
   return prisma.$transaction(async (tx) => {
     const newPaymentDeadline = new Date(newStartDate)
     newPaymentDeadline.setDate(newPaymentDeadline.getDate() - 21)
@@ -185,7 +226,7 @@ export async function executePostponement(
       (newStartDate.getTime() - event.startDate.getTime()) / (1000 * 60 * 60 * 24)
     )
 
-    for (const pool of event.pools) {
+    for (const pool of eventPools) {
       if (['FAILED', 'CANCELLED', 'COMPLETED'].includes(pool.status)) continue
 
       const newExamDate = new Date(pool.examDate.getTime() + daysDiff * 24 * 60 * 60 * 1000)
@@ -203,48 +244,67 @@ export async function executePostponement(
       })
     }
 
-    const uniqueUserIds = new Set<string>()
-    for (const pool of event.pools) {
-      for (const membership of pool.memberships) {
-        if (ACTIVE_MEMBERSHIP_STATUSES.includes(membership.status)) {
-          uniqueUserIds.add(membership.userId)
-        }
+    // Cancel stale sittings/assignments for the old event window so old dates
+    // and venues don't continue to display after postponement.
+    await tx.examSittingAssignment.updateMany({
+      where: {
+        sitting: { eventId },
+        status: { notIn: ['CANCELLED', 'ATTENDED', 'EXCUSED'] },
+      },
+      data: { status: 'CANCELLED' },
+    })
+
+    await tx.examSitting.updateMany({
+      where: { eventId, status: { notIn: ['COMPLETED', 'CANCELLED'] } },
+      data: { status: 'CANCELLED' },
+    })
+  })
+
+  // Wire in the dormant postponed-booking roll-forward helper
+  await rollForwardPostponedBookingsForEvent(eventId, _adminId)
+
+  const uniqueUserIds = new Set<string>()
+  for (const pool of eventPools) {
+    for (const membership of pool.memberships) {
+      if (ACTIVE_MEMBERSHIP_STATUSES.includes(membership.status)) {
+        uniqueUserIds.add(membership.userId)
       }
     }
+  }
 
-    for (const userId of uniqueUserIds) {
-      const user = await tx.user.findUnique({
-        where: { id: userId },
-        select: { email: true, academyEmail: true, profile: { select: { firstName: true } } },
-      })
-      if (!user) continue
+  for (const userId of uniqueUserIds) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, academyEmail: true, profile: { select: { firstName: true } } },
+    })
+    if (!user?.email) continue
 
-      const name = user.profile?.firstName || 'Student'
-      const email = user.academyEmail || user.email
-      const newStartDateStr = newStartDate.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      })
-      const newEndDateStr = newEndDate.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      })
+    const name = (user as NonNullable<typeof user>).profile?.firstName || 'Student'
+    const email =
+      (user as NonNullable<typeof user>).academyEmail || (user as NonNullable<typeof user>).email
+    const newStartDateStr = newStartDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+    const newEndDateStr = newEndDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
 
-      sendEventPostponedEmail(email, name, event.name, newStartDateStr, newEndDateStr).catch(
-        (error) => {
-          console.error('[EMAIL ERROR] Failed to send POSTPONED to', email, error)
-        }
-      )
-    }
+    sendEventPostponedEmail(email, name, eventName, newStartDateStr, newEndDateStr).catch(
+      (error) => {
+        console.error('[EMAIL ERROR] Failed to send POSTPONED to', email, error)
+      }
+    )
+  }
 
-    return {
-      success: true,
-      message: `Event postponed to ${newStartDate.toLocaleDateString()}. ${uniqueUserIds.size} candidates notified.`,
-      affectedCandidates: uniqueUserIds.size,
-    }
-  })
+  return {
+    success: true,
+    message: `Event postponed to ${newStartDate.toLocaleDateString()}. ${uniqueUserIds.size} candidates notified.`,
+    affectedCandidates: uniqueUserIds.size,
+  }
 }
 
 /**

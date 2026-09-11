@@ -112,12 +112,16 @@ export async function failPool(poolId: string, txClient?: Prisma.TransactionClie
     if (!pool) return null
 
     const memberships = await tx.poolMembership.findMany({
-      where: { poolId, status: 'RESERVED' },
+      where: {
+        poolId,
+        status: { in: ['RESERVED', 'CONFIRMED'] },
+      },
       include: { user: { include: { profile: true } } },
     })
 
     for (const m of memberships) {
-      const releaseAmount = Number(m.amountReserved) || Number(pool.seatPrice) || 300
+      const releaseAmount =
+        Number(m.amountReserved) || Number(m.amountPaid) || Number(pool.seatPrice) || 300
 
       await releaseFunds(
         tx,
@@ -135,6 +139,7 @@ export async function failPool(poolId: string, txClient?: Prisma.TransactionClie
           where: { id: m.bookingId },
           data: {
             status: 'FAILED',
+            demandStatus: 'CANCELLED',
             refundAmount: releaseAmount,
             cancellationReason: 'Pool failed Go/No-Go criteria',
             cancelledAt: new Date(),

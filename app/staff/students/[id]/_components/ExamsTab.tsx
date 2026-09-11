@@ -19,11 +19,12 @@ import { updateExamBooking, deleteExamRecord } from '@/app/staff/actions/index'
 import BookExamForStudentDialog from './BookExamForStudentDialog'
 import AddExamRecordDialog from './AddExamRecordDialog'
 import CertificateReleaseControl from './CertificateReleaseControl'
-import { deriveBookingDisplayResult } from '@/lib/exams/fulfillment'
-import type {
-  SerializedExamComponent,
-  SerializedExamBundle,
-} from '@/lib/types/staff'
+import {
+  deriveBookingDisplayResult,
+  isUpcomingBooking as isUpcomingBookingFromLib,
+  isMissedBooking as isMissedBookingFromLib,
+} from '@/lib/exams/fulfillment'
+import type { SerializedExamComponent, SerializedExamBundle } from '@/lib/types/staff'
 
 const EXAM_FILTERS = [
   { key: 'all', label: 'All' },
@@ -33,6 +34,7 @@ const EXAM_FILTERS = [
   { key: 'internal', label: 'Internal' },
   { key: 'official', label: 'Official EASA' },
   { key: 'upcoming', label: 'Upcoming' },
+  { key: 'missed', label: 'Missed / Unresolved' },
   { key: 'completed', label: 'Completed' },
 ] as const
 
@@ -57,10 +59,12 @@ export type UnifiedExamRecord = {
   attemptType: string | null
   isResit: boolean
   eventName: string | null | undefined
+  eventStatus?: string | null | undefined
   bookedAt: string | null | undefined
   amountPaid: number
   examCategory: string | null | undefined
   attendanceStatus: string | null
+  demandStatus?: string | null | undefined
   sittingLabel?: string | null
   hasResult?: boolean
   resultId?: string
@@ -107,13 +111,26 @@ export default function ExamsTab({
 
     // From examBookings
     for (const b of student.examBookings || []) {
+      const moduleCode =
+        b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—'
+
+      const examDate =
+        b.examDate ||
+        b.bookedAt ||
+        b.event?.startDate ||
+        (b.exam?.examDate
+          ? typeof b.exam.examDate === 'string'
+            ? b.exam.examDate
+            : (b.exam.examDate?.toISOString() ?? null)
+          : null)
+
       records.push({
         id: b.id,
         source: 'booking',
-        moduleCode: b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—',
+        moduleCode,
         examName:
           b.exam?.name || b.course?.name || b.exam?.examComponent?.course?.name || 'Manual Record',
-        examDate: b.examDate,
+        examDate,
         courseId: b.course?.id || null,
         score: b.score != null ? Number(b.score) : null,
         percentage: b.percentage != null ? Number(b.percentage) : null,
@@ -142,6 +159,8 @@ export default function ExamsTab({
             : b.attemptType,
         isResit: b.isResit || (b.attemptType?.toUpperCase().startsWith('RESIT') ?? false),
         eventName: b.event?.name,
+        eventStatus: b.event?.status || null,
+        demandStatus: b.demandStatus || null,
         bookedAt: b.bookedAt,
         amountPaid: Number(b.amountPaid || 0),
         examCategory: b.examCategory,
@@ -207,7 +226,7 @@ export default function ExamsTab({
           source: 'result',
           moduleCode: rModuleCode,
           examName: r.exam?.name || 'Manual Result',
-          examDate: r.exam?.examDate != null ? String(r.exam.examDate) : r.createdAt ?? undefined,
+          examDate: r.exam?.examDate != null ? String(r.exam.examDate) : (r.createdAt ?? undefined),
           score: Number(r.score),
           percentage: Number(r.percentage),
           result: r.passed ? 'pass' : 'fail',
@@ -241,6 +260,24 @@ export default function ExamsTab({
     return records
   }, [student.examBookings, student.examResults])
 
+  // ---- Upcoming / Missed helpers ----
+  const isUpcomingBooking = (r: UnifiedExamRecord) =>
+    isUpcomingBookingFromLib({
+      examDate: r.examDate,
+      result: r.result,
+      demandStatus: r.demandStatus,
+      eventStatus: r.eventStatus,
+    })
+
+  const isMissedBooking = (r: UnifiedExamRecord) =>
+    isMissedBookingFromLib({
+      examDate: r.examDate,
+      result: r.result,
+      score: r.score,
+      demandStatus: r.demandStatus,
+      hasResult: r.hasResult,
+    })
+
   // Apply filters
   const filteredRecords = useMemo(() => {
     let filtered = allExamRecords
@@ -254,9 +291,9 @@ export default function ExamsTab({
         (r) => r.isResit || ['RESIT_1', 'RESIT_2', 'RESIT_3'].includes(r.attemptType || '')
       )
     } else if (filter === 'upcoming') {
-      filtered = filtered.filter(
-        (r) => r.examDate && new Date(r.examDate) > new Date() && r.status !== 'COMPLETED'
-      )
+      filtered = filtered.filter((r) => isUpcomingBooking(r))
+    } else if (filter === 'missed') {
+      filtered = filtered.filter((r) => isMissedBooking(r))
     } else if (filter === 'completed') {
       filtered = filtered.filter((r) => r.status === 'COMPLETED')
     } else if (filter === 'internal') {
@@ -290,7 +327,7 @@ export default function ExamsTab({
     })
 
     return sorted
-  }, [allExamRecords, filter, search, sortBy, sortOrder])
+  }, [allExamRecords, filter, search, sortBy, sortOrder, isMissedBooking, isUpcomingBooking])
 
   // Filter counts
   const counts = useMemo(
@@ -301,15 +338,14 @@ export default function ExamsTab({
       resit: allExamRecords.filter(
         (r) => r.isResit || ['RESIT_1', 'RESIT_2', 'RESIT_3'].includes(r.attemptType || '')
       ).length,
-      upcoming: allExamRecords.filter(
-        (r) => r.examDate && new Date(r.examDate) > new Date() && r.status !== 'COMPLETED'
-      ).length,
+      upcoming: allExamRecords.filter((r) => isUpcomingBooking(r)).length,
+      missed: allExamRecords.filter((r) => isMissedBooking(r)).length,
       completed: allExamRecords.filter((r) => r.status === 'COMPLETED').length,
       internal: allExamRecords.filter((r) => r.examCategory === 'INTERNAL').length,
       official: allExamRecords.filter((r) => r.examCategory === 'OFFICIAL_EASA' || !r.examCategory)
         .length,
     }),
-    [allExamRecords]
+    [allExamRecords, isMissedBooking, isUpcomingBooking]
   )
 
   // Handle inline edit save
@@ -578,7 +614,7 @@ export default function ExamsTab({
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <SummaryCard
           icon={CheckCircle2}
           label="Passed"
@@ -599,6 +635,13 @@ export default function ExamsTab({
           value={counts.upcoming}
           color="text-blue-600"
           bg="bg-blue-50 dark:bg-blue-900/20"
+        />
+        <SummaryCard
+          icon={XCircle}
+          label="Missed / Unresolved"
+          value={counts.missed}
+          color="text-amber-600"
+          bg="bg-amber-50 dark:bg-amber-900/20"
         />
         <SummaryCard
           icon={FileCheck}
@@ -890,19 +933,26 @@ export default function ExamsTab({
                   </td>
                   <td className="px-4 py-3 text-center">
                     <div className="flex flex-col items-center gap-1">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                          record.status === 'COMPLETED'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : record.status === 'PENDING'
-                              ? 'bg-amber-100 text-amber-700'
-                              : record.status === 'FAILED' || record.status === 'NO_SHOW'
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-slate-100 text-slate-500'
-                        }`}
-                      >
-                        {record.status}
-                      </span>
+                      {isMissedBooking(record) && (
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black text-amber-700 uppercase">
+                          MISSED
+                        </span>
+                      )}
+                      {!isMissedBooking(record) && (
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
+                            record.status === 'COMPLETED'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : record.status === 'PENDING'
+                                ? 'bg-amber-100 text-amber-700'
+                                : record.status === 'FAILED' || record.status === 'NO_SHOW'
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-slate-100 text-slate-500'
+                          }`}
+                        >
+                          {record.status}
+                        </span>
+                      )}
                       {record.attendanceStatus && (
                         <span
                           className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
