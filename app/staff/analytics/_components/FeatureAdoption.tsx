@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,7 +17,7 @@ const DEFAULT_FEATURES = [
   'transcript',
 ]
 
-export default function FeatureAdoption() {
+export function FeatureAdoption() {
   const [features, setFeatures] = useState<string[]>(DEFAULT_FEATURES)
   const [selectedFeature, setSelectedFeature] = useState('')
   const [data, setData] = useState<any>(null)
@@ -70,3 +70,4 @@ export default function FeatureAdoption() {
     </div>
   )
 }
+export default FeatureAdoption;

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { withErrorHandler, apiSuccess } from '@/lib/api/response'
 import { getDashboardAlerts } from '@/lib/analytics/dashboard-alerts'
 import { getDashboardMetrics } from '@/lib/analytics/metrics'
 
