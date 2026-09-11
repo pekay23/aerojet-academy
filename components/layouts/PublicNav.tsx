@@ -180,9 +180,7 @@ export default function PublicNav() {
 
   const headerClasses = `fixed left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled || mobileOpen || forceSolid ? 'bg-white/95 backdrop-blur-xl shadow-sm border-slate-100 dark:bg-slate-950/95 dark:border-slate-800' : 'bg-transparent border-transparent'}`
   const linkColorClasses =
-    scrolled || mobileOpen || forceSolid ? 'text-slate-700 dark:text-slate-200' : 'text-white'
-  const _activeLinkColorClasses =
-    scrolled || mobileOpen || forceSolid ? 'text-public-secondary' : 'text-white'
+    scrolled || mobileOpen || forceSolid ? 'text-slate-700 dark:text-slate-200' : 'text-white/70 hover:text-white'
 
   return (
     <>

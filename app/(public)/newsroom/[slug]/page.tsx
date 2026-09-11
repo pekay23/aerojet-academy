@@ -85,7 +85,7 @@ async function getArticleAndIncrementViews(slug: string) {
 
   // Increment views in background
   try {
-    await prisma.newsArticle.update({
+    void prisma.newsArticle.update({
       where: { id: article.id },
       data: { viewCount: { increment: 1 } },
     })
@@ -152,7 +152,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
       />
 
       {/* Immersive Hero Section */}
-      <div className="relative h-[60vh] min-h-100 w-full overflow-hidden sm:h-[70vh]">
+        <div className="relative h-[60vh] min-h-[400px] w-full overflow-hidden sm:h-[70vh]">
         {article.coverImage ? (
           <>
             <Image
