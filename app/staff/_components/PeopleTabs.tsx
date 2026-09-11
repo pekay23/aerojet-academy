@@ -10,6 +10,7 @@ import StudentsTable from './StudentsTable'
 import InstructorsTable from './InstructorsTable'
 import ExaminersTable from './ExaminersTable'
 import type { ApplicantSummary, ApplicantCounts } from '@/lib/types/staff'
+import { toast } from 'sonner'
 
 const TAB_DEFS = [
   { key: 'all', label: 'All Users', icon: Users },
@@ -67,7 +68,10 @@ export default function PeopleTabs({
       .then((data) => {
         if (data.success && data.data) setCounts(data.data)
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error('[PeopleTabs] Failed to fetch user counts:', err)
+        toast.error('Failed to load user counts')
+      })
   }, [])
 
   const tabs = TAB_DEFS.map((t) => ({

@@ -103,7 +103,8 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
       setSelectedGrade(null)
       setScore('')
       setComments('')
-    } catch (_error) {
+    } catch (err) {
+      console.error('[GradingQueueView] Failed to submit grade:', err)
       toast.error('Failed to submit grade. Please try again.')
     } finally {
       setIsSubmitting(false)

@@ -6,6 +6,7 @@ import { Shield, ShieldCheck, ShieldOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface TwoFactorSettingsProps {
   twoFactorEnabled: boolean
@@ -17,6 +18,8 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
   const [loading, setLoading] = useState(false)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [code, setCode] = useState('')
+
+  const { markDirty, markClean } = useFormDirty()
 
   async function handleStartSetup() {
     setLoading(true)
@@ -53,6 +56,7 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
       setStep('idle')
       setCode('')
       setQrCodeUrl('')
+      markClean()
       toast.success('Two-factor authentication enabled')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to verify code'
@@ -81,6 +85,7 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
       setEnabled(false)
       setStep('idle')
       setCode('')
+      markClean()
       toast.success('Two-factor authentication disabled')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to disable 2FA'
@@ -204,7 +209,10 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
                   maxLength={6}
                   placeholder="000000"
                   value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={(e) => {
+                    setCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                    markDirty()
+                  }}
                   className="w-40 text-center font-mono text-lg tracking-[0.3em]"
                 />
                 <Button
@@ -251,7 +259,10 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
                 maxLength={6}
                 placeholder="000000"
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onChange={(e) => {
+                  setCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                  markDirty()
+                }}
                 className="w-40 text-center font-mono text-lg tracking-[0.3em]"
               />
               <Button

@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Mail, Plus, Trash2, Lock, Edit2, Save, X, Sparkles } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface RegistryEntry {
   id: string
@@ -32,6 +33,8 @@ export default function EmailRegistryTab() {
   const [editing, setEditing] = useState<string | null>(null)
   const [draft, setDraft] = useState({ title: '', description: '', address: '' })
   const [editDraft, setEditDraft] = useState({ title: '', description: '', address: '' })
+
+  const { markDirty, markClean } = useFormDirty()
 
   const reload = async () => {
     setLoading(true)
@@ -68,6 +71,7 @@ export default function EmailRegistryTab() {
       return
     }
     toast.success('Entry added')
+    markClean()
     setDraft({ title: '', description: '', address: '' })
     await reload()
     startTransition(() => router.refresh())
@@ -98,6 +102,7 @@ export default function EmailRegistryTab() {
       return
     }
     toast.success('Saved')
+    markClean()
     setEditing(null)
     await reload()
   }
@@ -183,22 +188,29 @@ export default function EmailRegistryTab() {
                     <div className="space-y-2">
                       <input
                         value={editDraft.title}
-                        onChange={(e) => setEditDraft({ ...editDraft, title: e.target.value })}
+                        onChange={(e) => {
+                          setEditDraft({ ...editDraft, title: e.target.value })
+                          markDirty()
+                        }}
                         placeholder="Title"
                         className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                       />
                       <input
                         value={editDraft.address}
-                        onChange={(e) => setEditDraft({ ...editDraft, address: e.target.value })}
+                        onChange={(e) => {
+                          setEditDraft({ ...editDraft, address: e.target.value })
+                          markDirty()
+                        }}
                         placeholder="Email address"
                         type="email"
                         className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                       />
                       <input
                         value={editDraft.description}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setEditDraft({ ...editDraft, description: e.target.value })
-                        }
+                          markDirty()
+                        }}
                         placeholder="Description / note"
                         className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                       />
@@ -297,22 +309,29 @@ export default function EmailRegistryTab() {
                     <div className="space-y-2">
                       <input
                         value={editDraft.title}
-                        onChange={(e) => setEditDraft({ ...editDraft, title: e.target.value })}
+                        onChange={(e) => {
+                          setEditDraft({ ...editDraft, title: e.target.value })
+                          markDirty()
+                        }}
                         placeholder="Title"
                         className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                       />
                       <input
                         value={editDraft.address}
-                        onChange={(e) => setEditDraft({ ...editDraft, address: e.target.value })}
+                        onChange={(e) => {
+                          setEditDraft({ ...editDraft, address: e.target.value })
+                          markDirty()
+                        }}
                         placeholder="Email address"
                         type="email"
                         className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                       />
                       <input
                         value={editDraft.description}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setEditDraft({ ...editDraft, description: e.target.value })
-                        }
+                          markDirty()
+                        }}
                         placeholder="Description / note"
                         className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                       />
@@ -392,20 +411,29 @@ export default function EmailRegistryTab() {
             <div className="grid gap-2 sm:grid-cols-2">
               <input
                 value={draft.title}
-                onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                onChange={(e) => {
+                  setDraft({ ...draft, title: e.target.value })
+                  markDirty()
+                }}
                 placeholder="Title (e.g. Internal comms)"
                 className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
               />
               <input
                 value={draft.address}
-                onChange={(e) => setDraft({ ...draft, address: e.target.value })}
+                onChange={(e) => {
+                  setDraft({ ...draft, address: e.target.value })
+                  markDirty()
+                }}
                 placeholder="Email address"
                 type="email"
                 className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
               />
               <input
                 value={draft.description}
-                onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                onChange={(e) => {
+                  setDraft({ ...draft, description: e.target.value })
+                  markDirty()
+                }}
                 placeholder="What is this used for? (optional)"
                 className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm sm:col-span-2 dark:border-slate-700 dark:bg-slate-800"
               />

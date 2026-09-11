@@ -83,7 +83,7 @@ export default function NotificationCard({ notification }: NotificationCardProps
         {notification.linkUrl && (
           <div className="mt-4">
             <Link
-              href={notification.linkUrl}
+              href={`${notification.linkUrl}?returnUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/student/notifications')}`}
               className="inline-flex items-center gap-2 text-xs font-black text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
               {notification.linkText || 'View Details'}

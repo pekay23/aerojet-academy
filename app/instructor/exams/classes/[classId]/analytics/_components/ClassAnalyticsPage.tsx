@@ -81,7 +81,8 @@ export default function ClassAnalyticsPage({
         setQuestionStats(json.meta?.questionStats || [])
         setStudents(json.data || [])
       }
-    } catch {
+    } catch (err) {
+      console.error('[ClassAnalyticsPage] Failed to load analytics:', err)
       toast.error('Failed to load analytics')
     } finally {
       setLoading(false)
@@ -99,7 +100,8 @@ export default function ClassAnalyticsPage({
       a.download = `class-${classId}-analytics.csv`
       a.click()
       URL.revokeObjectURL(url)
-    } catch {
+    } catch (err) {
+      console.error('[ClassAnalyticsPage] Failed to export CSV:', err)
       toast.error('Failed to export CSV')
     } finally {
       setExporting(false)

@@ -49,7 +49,10 @@ interface MonitorSession {
   correctCount: number
   timeRemaining: number | null
   answerCount: number
-  answers?: { question: { id: string; text: string; correctAnswer: string; points: number }; selectedAnswer: string | null }[]
+  answers?: {
+    question: { id: string; text: string; correctAnswer: string; points: number }
+    selectedAnswer: string | null
+  }[]
 }
 
 type StatusFilter = 'all' | 'IN_PROGRESS' | 'COMPLETED' | 'TIMED_OUT' | 'VOIDED' | 'NOT_STARTED'
@@ -62,15 +65,40 @@ function formatDuration(seconds: number) {
 
 function SessionStatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
-    IN_PROGRESS: { label: 'Active', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', icon: <Clock className="h-3 w-3" /> },
-    COMPLETED: { label: 'Finished', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300', icon: <CheckCircle2 className="h-3 w-3" /> },
-    TIMED_OUT: { label: 'Timeout', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', icon: <XCircle className="h-3 w-3" /> },
-    VOIDED: { label: 'Voided', cls: 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300', icon: <AlertCircle className="h-3 w-3" /> },
-    NOT_STARTED: { label: 'Not started', cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300', icon: <Clock className="h-3 w-3" /> },
+    IN_PROGRESS: {
+      label: 'Active',
+      cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+      icon: <Clock className="h-3 w-3" />,
+    },
+    COMPLETED: {
+      label: 'Finished',
+      cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+      icon: <CheckCircle2 className="h-3 w-3" />,
+    },
+    TIMED_OUT: {
+      label: 'Timeout',
+      cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+      icon: <XCircle className="h-3 w-3" />,
+    },
+    VOIDED: {
+      label: 'Voided',
+      cls: 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+      icon: <AlertCircle className="h-3 w-3" />,
+    },
+    NOT_STARTED: {
+      label: 'Not started',
+      cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+      icon: <Clock className="h-3 w-3" />,
+    },
   }
   const s = map[status] || map.NOT_STARTED
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-full border-transparent px-2.5 py-0.5 text-xs font-bold', s.cls)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border-transparent px-2.5 py-0.5 text-xs font-bold',
+        s.cls
+      )}
+    >
       {s.icon}
       {s.label}
     </span>
@@ -87,7 +115,10 @@ function ScoreBar({ value }: { value: number | null }) {
         : 'bg-red-500'
   return (
     <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-      <div className={cn('h-full rounded-full transition-all', color)} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
+      <div
+        className={cn('h-full rounded-full transition-all', color)}
+        style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+      />
     </div>
   )
 }
@@ -111,10 +142,12 @@ export default function ClassMonitorPage({
   const [extendModalOpen, setExtendModalOpen] = useState<string | null>(null)
   const [extendMinutes, setExtendMinutes] = useState(5)
 
-  const filteredSessions = statusFilter === 'all'
-    ? sessions
-    : sessions.filter((s) => s.status === statusFilter)
-  const { items, requestSort, sortConfig } = useSort(filteredSessions, { key: 'student.name', order: 'asc' })
+  const filteredSessions =
+    statusFilter === 'all' ? sessions : sessions.filter((s) => s.status === statusFilter)
+  const { items, requestSort, sortConfig } = useSort(filteredSessions, {
+    key: 'student.name',
+    order: 'asc',
+  })
 
   const refresh = useCallback(async () => {
     setRefreshing(true)
@@ -122,7 +155,8 @@ export default function ClassMonitorPage({
       const res = await fetch(`/api/instructor/exams/classes/${classId}/monitor`)
       const json = await res.json()
       if (json.success) setSessions(json.data)
-    } catch {
+    } catch (err) {
+      console.error('[ClassMonitorPage] Failed to refresh monitor:', err)
       toast.error('Failed to refresh monitor')
     } finally {
       setRefreshing(false)
@@ -134,9 +168,10 @@ export default function ClassMonitorPage({
   const activeCount = sessions.filter((s) => s.status === 'IN_PROGRESS').length
   const completedCount = sessions.filter((s) => s.status === 'COMPLETED').length
   const timeoutCount = sessions.filter((s) => s.status === 'TIMED_OUT').length
-  const avgScore = sessions.length > 0
-    ? Math.round(sessions.reduce((sum, s) => sum + (s.percentage ?? 0), 0) / sessions.length)
-    : 0
+  const avgScore =
+    sessions.length > 0
+      ? Math.round(sessions.reduce((sum, s) => sum + (s.percentage ?? 0), 0) / sessions.length)
+      : 0
 
   const handleStartExam = async () => {
     setStartConfirmOpen(false)
@@ -154,7 +189,8 @@ export default function ClassMonitorPage({
       } else {
         toast.error(json.error || 'Failed to start exam')
       }
-    } catch {
+    } catch (err) {
+      console.error('[ClassMonitorPage] Failed to start exam:', err)
       toast.error('Failed to start exam')
     } finally {
       setActionLoading(null)
@@ -176,7 +212,8 @@ export default function ClassMonitorPage({
       } else {
         toast.error(json.error || 'Failed to void session')
       }
-    } catch {
+    } catch (err) {
+      console.error('[ClassMonitorPage] Failed to void session:', err)
       toast.error('Failed to void session')
     } finally {
       setActionLoading(null)
@@ -199,7 +236,8 @@ export default function ClassMonitorPage({
       } else {
         toast.error(json.error || 'Failed to extend time')
       }
-    } catch {
+    } catch (err) {
+      console.error('[ClassMonitorPage] Failed to extend time:', err)
       toast.error('Failed to extend time')
     } finally {
       setActionLoading(null)
@@ -220,7 +258,8 @@ export default function ClassMonitorPage({
       } else {
         toast.error(json.error || 'Failed to force submit')
       }
-    } catch {
+    } catch (err) {
+      console.error('[ClassMonitorPage] Failed to force submit:', err)
       toast.error('Failed to force submit')
     } finally {
       setActionLoading(null)
@@ -241,7 +280,8 @@ export default function ClassMonitorPage({
       } else {
         toast.error(json.error || 'Failed to send reminder')
       }
-    } catch {
+    } catch (err) {
+      console.error('[ClassMonitorPage] Failed to send reminder:', err)
       toast.error('Failed to send reminder')
     } finally {
       setActionLoading(null)
@@ -252,7 +292,9 @@ export default function ClassMonitorPage({
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
         <AlertCircle className="h-10 w-10 text-amber-500" />
-        <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Internal Exams Disabled</h2>
+        <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          Internal Exams Disabled
+        </h2>
         <p className="max-w-md text-sm text-slate-500">
           The internal exam system is not currently enabled. Contact an administrator.
         </p>
@@ -274,7 +316,7 @@ export default function ClassMonitorPage({
           <button
             onClick={refresh}
             disabled={refreshing}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300"
           >
             <RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} />
             Refresh
@@ -298,7 +340,9 @@ export default function ClassMonitorPage({
               <Users className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Active</p>
+              <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                Active
+              </p>
               <p className="text-2xl font-black text-slate-900 dark:text-white">{activeCount}</p>
             </div>
           </div>
@@ -309,7 +353,9 @@ export default function ClassMonitorPage({
               <CheckCircle2 className="h-4 w-4 text-emerald-600" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Finished</p>
+              <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                Finished
+              </p>
               <p className="text-2xl font-black text-slate-900 dark:text-white">{completedCount}</p>
             </div>
           </div>
@@ -320,7 +366,9 @@ export default function ClassMonitorPage({
               <Hourglass className="h-4 w-4 text-red-600" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Timed Out</p>
+              <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                Timed Out
+              </p>
               <p className="text-2xl font-black text-slate-900 dark:text-white">{timeoutCount}</p>
             </div>
           </div>
@@ -331,7 +379,9 @@ export default function ClassMonitorPage({
               <Award className="h-4 w-4 text-amber-600" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Avg Score</p>
+              <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                Avg Score
+              </p>
               <p className="text-2xl font-black text-slate-900 dark:text-white">{avgScore}%</p>
             </div>
           </div>
@@ -340,14 +390,16 @@ export default function ClassMonitorPage({
 
       {/* Status Filter */}
       <div className="flex flex-wrap gap-2">
-        {([
-          ['all', 'All'],
-          ['IN_PROGRESS', 'Active'],
-          ['COMPLETED', 'Finished'],
-          ['TIMED_OUT', 'Timed Out'],
-          ['VOIDED', 'Voided'],
-          ['NOT_STARTED', 'Not Started'],
-        ] as const).map(([key, label]) => (
+        {(
+          [
+            ['all', 'All'],
+            ['IN_PROGRESS', 'Active'],
+            ['COMPLETED', 'Finished'],
+            ['TIMED_OUT', 'Timed Out'],
+            ['VOIDED', 'Voided'],
+            ['NOT_STARTED', 'Not Started'],
+          ] as const
+        ).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setStatusFilter(key as StatusFilter)}
@@ -369,19 +421,57 @@ export default function ClassMonitorPage({
       ) : filteredSessions.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 py-16 dark:border-slate-800">
           <CheckCircle2 className="mb-3 h-10 w-10 text-slate-200 dark:text-slate-700" />
-          <p className="text-sm font-medium text-slate-400">No sessions match the current filter.</p>
+          <p className="text-sm font-medium text-slate-400">
+            No sessions match the current filter.
+          </p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 dark:bg-slate-800">
               <tr>
-                <SortHeader label="Student" sortKey="student.name" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300" />
-                <SortHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} align="center" className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300" />
-                <SortHeader label="Progress" sortKey="percentage" currentSort={sortConfig} onSort={requestSort} align="right" className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300" />
-                <SortHeader label="Time Left" sortKey="timeRemaining" currentSort={sortConfig} onSort={requestSort} align="right" className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300" />
-                <SortHeader label="Score" sortKey="score" currentSort={sortConfig} onSort={requestSort} align="right" className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300" />
-                <th className="px-4 py-3 font-semibold text-right text-slate-600 dark:text-slate-300">Actions</th>
+                <SortHeader
+                  label="Student"
+                  sortKey="student.name"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300"
+                />
+                <SortHeader
+                  label="Status"
+                  sortKey="status"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  align="center"
+                  className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300"
+                />
+                <SortHeader
+                  label="Progress"
+                  sortKey="percentage"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  align="right"
+                  className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300"
+                />
+                <SortHeader
+                  label="Time Left"
+                  sortKey="timeRemaining"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  align="right"
+                  className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300"
+                />
+                <SortHeader
+                  label="Score"
+                  sortKey="score"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  align="right"
+                  className="px-4 py-3 font-semibold text-slate-600 dark:text-slate-300"
+                />
+                <th className="px-4 py-3 text-right font-semibold text-slate-600 dark:text-slate-300">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -392,7 +482,10 @@ export default function ClassMonitorPage({
                   expanded={expandedSession === s.id}
                   onToggle={() => setExpandedSession(expandedSession === s.id ? null : s.id)}
                   onVoid={handleVoid}
-                  onExtend={(id) => { setExtendModalOpen(id); setExtendMinutes(5) }}
+                  onExtend={(id) => {
+                    setExtendModalOpen(id)
+                    setExtendMinutes(5)
+                  }}
                   onForceSubmit={handleForceSubmit}
                   onRemind={handleRemind}
                   actionLoading={actionLoading}
@@ -457,20 +550,26 @@ function SessionRow({
     <>
       <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
         <td className="px-4 py-3">
-          <p className="truncate font-medium text-slate-900 dark:text-white">{session.student.name}</p>
+          <p className="truncate font-medium text-slate-900 dark:text-white">
+            {session.student.name}
+          </p>
           <p className="truncate text-xs text-slate-500">{session.bank.name}</p>
         </td>
-        <td className="px-4 py-3 text-center"><SessionStatusBadge status={session.status} /></td>
-        <td className="px-4 py-3 w-40 tabular-nums">
+        <td className="px-4 py-3 text-center">
+          <SessionStatusBadge status={session.status} />
+        </td>
+        <td className="w-40 px-4 py-3 tabular-nums">
           <ScoreBar value={session.percentage} />
           <span className="mt-1 block text-xs text-slate-400">
-            {session.percentage != null ? `${session.percentage}%` : `${session.answerCount} answered`}
+            {session.percentage != null
+              ? `${session.percentage}%`
+              : `${session.answerCount} answered`}
           </span>
         </td>
-        <td className="px-4 py-3 text-right tabular-nums text-slate-500">
+        <td className="px-4 py-3 text-right text-slate-500 tabular-nums">
           {session.timeRemaining != null ? formatDuration(session.timeRemaining) : '—'}
         </td>
-        <td className="px-4 py-3 text-right tabular-nums font-semibold text-slate-700 dark:text-slate-200">
+        <td className="px-4 py-3 text-right font-semibold text-slate-700 tabular-nums dark:text-slate-200">
           {session.score != null ? `${session.score}/${session.totalPoints ?? '?'}` : '—'}
         </td>
         <td className="px-4 py-3 text-right">
@@ -530,10 +629,12 @@ function SessionRow({
           <td colSpan={6} className="bg-slate-50 px-4 py-4 dark:bg-slate-800/30">
             <div className="space-y-2">
               <p className="text-xs font-bold text-slate-500">Session Detail</p>
-              <div className="grid gap-2 text-xs text-slate-600 dark:text-slate-400 sm:grid-cols-3">
+              <div className="grid gap-2 text-xs text-slate-600 sm:grid-cols-3 dark:text-slate-400">
                 <span>Started: {session.startedAt ? formatDateTime(session.startedAt) : '—'}</span>
                 <span>Expires: {session.expiresAt ? formatDateTime(session.expiresAt) : '—'}</span>
-                <span>Submitted: {session.submittedAt ? formatDateTime(session.submittedAt) : '—'}</span>
+                <span>
+                  Submitted: {session.submittedAt ? formatDateTime(session.submittedAt) : '—'}
+                </span>
                 <span>Correct: {session.correctCount}</span>
                 <span>Answers: {session.answerCount}</span>
                 <span>Passed: {session.passed == null ? '—' : session.passed ? 'Yes' : 'No'}</span>
@@ -546,7 +647,9 @@ function SessionRow({
         <tr>
           <td colSpan={6} className="bg-blue-50 px-4 py-4 dark:bg-blue-900/10">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Extend time by:</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Extend time by:
+              </span>
               {[5, 10, 15, 20, 30].map((m) => (
                 <button
                   key={m}
@@ -555,7 +658,7 @@ function SessionRow({
                     'rounded-lg px-3 py-1 text-xs font-bold',
                     extendMinutes === m
                       ? 'bg-blue-600 text-white'
-                      : 'bg-white text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                      : 'border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
                   )}
                 >
                   {m} min

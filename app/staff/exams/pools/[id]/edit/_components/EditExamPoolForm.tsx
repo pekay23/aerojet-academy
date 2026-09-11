@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, type Resolver } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2, DollarSign, Users, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,6 +23,7 @@ import { createExamPoolSchema } from '@/lib/validation/schemas'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { EASA_MODULE_CODES } from '@/lib/constants/easa-modules'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 // Omit eventId as we are editing an existing pool
 const editExamPoolSchema = createExamPoolSchema.omit({ eventId: true })
@@ -77,6 +78,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
     },
   })
 
+  const { markDirty, markClean } = useFormDirty()
+
+  // Track form changes for unsaved changes warning
+  useEffect(() => {
+    const subscription = form.watch(() => markDirty())
+    return () => subscription.unsubscribe()
+  })
+
   async function onSubmit(values: ExamPoolFormValues) {
     setIsLoading(true)
     try {
@@ -102,6 +111,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
       }
 
       toast.success('Exam booking updated successfully')
+      markClean()
       router.push(`/staff/exams/pools/${pool.id}`)
       router.refresh()
     } catch (error: unknown) {
@@ -142,12 +152,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
               <FormItem>
                 <FormLabel htmlFor="pool-exam-date">Exam Date (Reference)</FormLabel>
                 <FormControl>
-                  <Input
-                    id="pool-exam-date"
-                    type="datetime-local"
-                    autoComplete="off"
-                    {...field}
-                  />
+                  <Input id="pool-exam-date" type="datetime-local" autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -160,12 +165,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
               <FormItem>
                 <FormLabel htmlFor="pool-start">Start Time</FormLabel>
                 <FormControl>
-                  <Input
-                    id="pool-start"
-                    type="datetime-local"
-                    autoComplete="off"
-                    {...field}
-                  />
+                  <Input id="pool-start" type="datetime-local" autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -178,12 +178,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
               <FormItem>
                 <FormLabel htmlFor="pool-end">End Time</FormLabel>
                 <FormControl>
-                  <Input
-                    id="pool-end"
-                    type="datetime-local"
-                    autoComplete="off"
-                    {...field}
-                  />
+                  <Input id="pool-end" type="datetime-local" autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -325,7 +320,9 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
                               }}
                             />
                           </FormControl>
-                          <FormLabel htmlFor={`module-${moduleCode}`} className="font-normal">{moduleCode}</FormLabel>
+                          <FormLabel htmlFor={`module-${moduleCode}`} className="font-normal">
+                            {moduleCode}
+                          </FormLabel>
                         </FormItem>
                       )
                     }}
@@ -367,7 +364,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
           </Button>
           <Button
             type="submit"
-            className="bg-aerojet-blue px-8 hover:bg-aerojet-blue/90"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 px-8"
             disabled={isLoading}
           >
             {isLoading ? (

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 import { UploadDropzone } from '@/lib/uploads/uploadthing'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -41,6 +42,7 @@ export default function PathwayPaymentForm({
   const [customAmount, setCustomAmount] = useState<string>('')
 
   const router = useRouter()
+  const { markDirty, markClean } = useFormDirty()
 
   // Find by both id and amount to handle duplicate IDs (e.g. WALLET_TOPUP used on top-up page)
   const selectedOption = options.find((o) => o.id === selectedOptionId)
@@ -83,7 +85,7 @@ export default function PathwayPaymentForm({
       {/* Step 1: Payment Plan Selection */}
       <div className="space-y-4 rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-aerojet-blue text-xs font-bold text-white">
+          <div className="bg-aerojet-blue flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">
             1
           </div>
           <h2 className="font-bold text-slate-900 dark:text-slate-100">Choose Your Payment Plan</h2>
@@ -105,6 +107,7 @@ export default function PathwayPaymentForm({
                 onClick={() => {
                   setSelectedOptionId(opt.id)
                   setCustomAmount('')
+                  markDirty()
                 }}
                 className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
                   isSelected
@@ -115,7 +118,7 @@ export default function PathwayPaymentForm({
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 shrink-0">
                     {isSelected ? (
-                      <CircleDot className="h-5 w-5 text-aerojet-blue dark:text-blue-400" />
+                      <CircleDot className="text-aerojet-blue h-5 w-5 dark:text-blue-400" />
                     ) : (
                       <Circle className="h-5 w-5 text-slate-300 dark:text-slate-600" />
                     )}
@@ -136,7 +139,7 @@ export default function PathwayPaymentForm({
                     </p>
 
                     {!opt.customMin && (
-                      <p className="mt-2 text-lg font-black text-aerojet-blue dark:text-blue-400">
+                      <p className="text-aerojet-blue mt-2 text-lg font-black dark:text-blue-400">
                         {currency} {opt.amount.toLocaleString()}
                       </p>
                     )}
@@ -188,12 +191,15 @@ export default function PathwayPaymentForm({
                           <input
                             type="number"
                             value={customAmount}
-                            onChange={(e) => setCustomAmount(e.target.value)}
+                            onChange={(e) => {
+                              setCustomAmount(e.target.value)
+                              markDirty()
+                            }}
                             onClick={(e) => e.stopPropagation()}
                             min={opt.customMin}
                             step="0.01"
                             placeholder={`Min. ${opt.customMin.toLocaleString()}`}
-                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-bold outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
+                            className="focus:border-aerojet-blue w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
                           />
                         </div>
                         {customAmount && !isCustomValid() && (
@@ -250,7 +256,7 @@ export default function PathwayPaymentForm({
       {selectedOption && isCustomValid() && getPaymentAmount() > 0 && (
         <div className="space-y-4 rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-aerojet-blue text-xs font-bold text-white">
+            <div className="bg-aerojet-blue flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">
               2
             </div>
             <h2 className="font-bold text-slate-900 dark:text-slate-100">Upload Payment Proof</h2>
@@ -326,6 +332,7 @@ export default function PathwayPaymentForm({
                 toast.error('Upload failed — no file URL returned.')
                 return
               }
+              markDirty()
 
               try {
                 const paymentAmount = getPaymentAmount()
@@ -345,6 +352,7 @@ export default function PathwayPaymentForm({
                   return
                 }
                 toast.success('Tuition payment submitted!')
+                markClean()
                 setSubmitted(true)
                 router.refresh()
               } catch {

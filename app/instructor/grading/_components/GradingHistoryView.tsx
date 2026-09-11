@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
-import {
-  Search,
-  History,
-  Edit2,
-  Clock,
-} from 'lucide-react'
+import { Search, History, Edit2, Clock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const MotionDiv = motion.div
@@ -96,7 +91,8 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
       })
       toast.success(`Grade updated for ${selectedGrade.user.profile?.firstName || 'Student'}`)
       setSelectedGrade(null)
-    } catch (_error) {
+    } catch (err) {
+      console.error('[GradingHistoryView] Failed to update grade:', err)
       toast.error('Failed to update grade. Please try again.')
     } finally {
       setIsSubmitting(false)

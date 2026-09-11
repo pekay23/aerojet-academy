@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Plus, Loader2, Briefcase, Clock } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface OjtPeriod {
   id: string
@@ -41,6 +42,8 @@ export default function OjtSection({
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const { markDirty, markClean } = useFormDirty()
 
   const [enrollmentId, setEnrollmentId] = useState('')
   const [companyName, setCompanyName] = useState('')
@@ -84,6 +87,7 @@ export default function OjtSection({
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to create')
+      markClean()
       setOpen(false)
       router.refresh()
     } catch (err: unknown) {
@@ -125,18 +129,26 @@ export default function OjtSection({
               <Plus className="h-3 w-3" /> Add OJT
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[480px]">
+          <DialogContent className="sm:max-w-120">
             <DialogHeader>
               <DialogTitle>Add OJT Period</DialogTitle>
             </DialogHeader>
             <div className="mt-4 space-y-3">
               <div>
-                <label htmlFor="ojt-enrollment" className="mb-1 block text-xs font-bold text-slate-600">Enrollment</label>
+                <label
+                  htmlFor="ojt-enrollment"
+                  className="mb-1 block text-xs font-bold text-slate-600"
+                >
+                  Enrollment
+                </label>
                 <select
                   id="ojt-enrollment"
                   name="enrollmentId"
                   value={enrollmentId}
-                  onChange={(e) => setEnrollmentId(e.target.value)}
+                  onChange={(e) => {
+                    setEnrollmentId(e.target.value)
+                    markDirty()
+                  }}
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 >
                   <option value="">Select Enrollment</option>
@@ -148,47 +160,79 @@ export default function OjtSection({
                 </select>
               </div>
               <div>
-                <label htmlFor="ojt-company-name" className="mb-1 block text-xs font-bold text-slate-600">Company Name</label>
+                <label
+                  htmlFor="ojt-company-name"
+                  className="mb-1 block text-xs font-bold text-slate-600"
+                >
+                  Company Name
+                </label>
                 <input
                   id="ojt-company-name"
                   name="companyName"
                   value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
+                  onChange={(e) => {
+                    setCompanyName(e.target.value)
+                    markDirty()
+                  }}
                   placeholder="e.g. Lufthansa Technik"
                   autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
               <div>
-                <label htmlFor="ojt-company-address" className="mb-1 block text-xs font-bold text-slate-600">Company Address</label>
+                <label
+                  htmlFor="ojt-company-address"
+                  className="mb-1 block text-xs font-bold text-slate-600"
+                >
+                  Company Address
+                </label>
                 <input
                   id="ojt-company-address"
                   name="companyAddress"
                   value={companyAddress}
-                  onChange={(e) => setCompanyAddress(e.target.value)}
+                  onChange={(e) => {
+                    setCompanyAddress(e.target.value)
+                    markDirty()
+                  }}
                   autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="ojt-sup-name" className="mb-1 block text-xs font-bold text-slate-600">Supervisor Name</label>
+                  <label
+                    htmlFor="ojt-sup-name"
+                    className="mb-1 block text-xs font-bold text-slate-600"
+                  >
+                    Supervisor Name
+                  </label>
                   <input
                     id="ojt-sup-name"
                     name="supervisorName"
                     value={supervisorName}
-                    onChange={(e) => setSupervisorName(e.target.value)}
+                    onChange={(e) => {
+                      setSupervisorName(e.target.value)
+                      markDirty()
+                    }}
                     autoComplete="off"
                     className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
                 <div>
-                  <label htmlFor="ojt-sup-email" className="mb-1 block text-xs font-bold text-slate-600">Supervisor Email</label>
+                  <label
+                    htmlFor="ojt-sup-email"
+                    className="mb-1 block text-xs font-bold text-slate-600"
+                  >
+                    Supervisor Email
+                  </label>
                   <input
                     id="ojt-sup-email"
                     name="supervisorEmail"
                     value={supervisorEmail}
-                    onChange={(e) => setSupervisorEmail(e.target.value)}
+                    onChange={(e) => {
+                      setSupervisorEmail(e.target.value)
+                      markDirty()
+                    }}
                     autoComplete="off"
                     className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
@@ -196,25 +240,41 @@ export default function OjtSection({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                   <label htmlFor="ojt-start-date" className="mb-1 block text-xs font-bold text-slate-600">Start Date</label>
+                  <label
+                    htmlFor="ojt-start-date"
+                    className="mb-1 block text-xs font-bold text-slate-600"
+                  >
+                    Start Date
+                  </label>
                   <input
                     id="ojt-start-date"
                     name="startDate"
                     type="date"
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={(e) => {
+                      setStartDate(e.target.value)
+                      markDirty()
+                    }}
                     autoComplete="off"
                     className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
                 <div>
-                  <label htmlFor="ojt-hours-req" className="mb-1 block text-xs font-bold text-slate-600">Hours Required</label>
+                  <label
+                    htmlFor="ojt-hours-req"
+                    className="mb-1 block text-xs font-bold text-slate-600"
+                  >
+                    Hours Required
+                  </label>
                   <input
                     id="ojt-hours-req"
                     name="hoursRequired"
                     type="number"
                     value={hoursRequired}
-                    onChange={(e) => setHoursRequired(e.target.value)}
+                    onChange={(e) => {
+                      setHoursRequired(e.target.value)
+                      markDirty()
+                    }}
                     autoComplete="off"
                     className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
@@ -239,9 +299,10 @@ export default function OjtSection({
       ) : (
         <div className="space-y-3">
           {allOjt.map((ojt) => {
-            const progress = ojt.hoursRequired > 0
-              ? Math.min(100, Math.round((ojt.hoursCompleted / ojt.hoursRequired) * 100))
-              : 0
+            const progress =
+              ojt.hoursRequired > 0
+                ? Math.min(100, Math.round((ojt.hoursCompleted / ojt.hoursRequired) * 100))
+                : 0
 
             return (
               <div
@@ -254,8 +315,8 @@ export default function OjtSection({
                       {ojt.companyName}
                     </p>
                     <p className="text-xs text-slate-500">
-                      {ojt.programmeName} &middot;{' '}
-                      Started {new Date(ojt.startDate).toLocaleDateString()}
+                      {ojt.programmeName} &middot; Started{' '}
+                      {new Date(ojt.startDate).toLocaleDateString()}
                       {ojt.supervisorName && ` &middot; Supervisor: ${ojt.supervisorName}`}
                     </p>
                   </div>

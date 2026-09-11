@@ -11,10 +11,12 @@ import {
   MessageSquare,
   MoreVertical,
   School,
+  Inbox,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { EmptyState } from '@/components/shared/EmptyState'
 
 interface CourseData {
   id: string
@@ -155,7 +157,7 @@ function ClassRow({ cls }: { cls: ClassData }) {
             <p className="truncate font-medium text-slate-900 dark:text-slate-100">
               {cls.course.code}
             </p>
-            <p className="max-w-[200px] truncate text-sm text-slate-500 dark:text-slate-400">
+            <p className="max-w-50 truncate text-sm text-slate-500 dark:text-slate-400">
               {cls.course.name}
             </p>
           </div>
@@ -332,16 +334,42 @@ function IntakeSection({
       </tr>
 
       {/* Class Rows */}
-      {isExpanded && group.classes.map((cls) => <ClassRow key={cls.id} cls={cls} />)}
+      {isExpanded && group.classes.length === 0 ? (
+        <tr>
+          <td colSpan={6} className="p-0">
+            <EmptyState
+              icon={Inbox}
+              title="No classes in this intake"
+              description="There are no classes assigned to this intake group yet."
+            />
+          </td>
+        </tr>
+      ) : (
+        isExpanded && group.classes.map((cls) => <ClassRow key={cls.id} cls={cls} />)
+      )}
 
       {/* Section Divider */}
-      {!isLast && <tr className="h-[1px] bg-slate-100 dark:bg-slate-800" />}
+      {!isLast && <tr className="h-px bg-slate-100 dark:bg-slate-800" />}
     </>
   )
 }
 
 export default function IntakeGroupTable({ groups }: IntakeGroupTableProps) {
-  if (!groups || groups.length === 0) {
+  // Defensive: deduplicate classes by ID within each group to prevent
+  // React "two children with the same key" warnings from data anomalies
+  const dedupedGroups = (groups || []).map((group) => {
+    const seen = new Set<string>()
+    return {
+      ...group,
+      classes: group.classes.filter((cls) => {
+        if (seen.has(cls.id)) return false
+        seen.add(cls.id)
+        return true
+      }),
+    }
+  })
+
+  if (!dedupedGroups || dedupedGroups.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50/50 p-20 text-center dark:border-slate-800 dark:bg-slate-900/50">
         <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-100 dark:bg-slate-800">
@@ -383,12 +411,12 @@ export default function IntakeGroupTable({ groups }: IntakeGroupTableProps) {
           </tr>
         </thead>
         <tbody>
-          {groups.map((group, index) => (
+          {dedupedGroups.map((group, index) => (
             <IntakeSection
               key={group.intakeKey}
               group={group}
               isFirst={index === 0}
-              isLast={index === groups.length - 1}
+              isLast={index === dedupedGroups.length - 1}
             />
           ))}
         </tbody>

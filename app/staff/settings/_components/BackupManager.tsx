@@ -49,7 +49,10 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
         setCustomDays(data.customDays || '7')
         setLastRun(data.lastRun || null)
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error('[BackupManager] Failed to fetch schedule:', err)
+        toast.error('Failed to load backup schedule')
+      })
       .finally(() => setLoadingSchedule(false))
   }, [adminEmail])
 
@@ -171,9 +174,7 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
             <Database className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">
-              Database Backup
-            </h3>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Database Backup</h3>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Export all data from the database. Backups are available in two formats:
             </p>
@@ -300,7 +301,7 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
               <button
                 onClick={handleSaveSchedule}
                 disabled={savingSchedule}
-                className="inline-flex items-center gap-2 rounded-lg bg-aerojet-blue px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#003d82] disabled:opacity-50"
+                className="bg-aerojet-blue inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#003d82] disabled:opacity-50"
               >
                 {savingSchedule && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 Save Schedule
@@ -332,7 +333,7 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
           <button
             onClick={() => handleDownload('json')}
             disabled={downloading !== null}
-            className="inline-flex items-center gap-2 rounded-lg bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#003d82] disabled:opacity-50"
+            className="bg-aerojet-blue inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#003d82] disabled:opacity-50"
           >
             {downloading === 'json' ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -376,7 +377,7 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@example.com"
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 transition-colors outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
             />
           </div>
           <button
@@ -384,11 +385,7 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
             disabled={emailing || !email.trim()}
             className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
           >
-            {emailing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Mail className="h-4 w-4" />
-            )}
+            {emailing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
             {emailing ? 'Sending...' : 'Send Backup'}
           </button>
         </div>
@@ -410,7 +407,9 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
                 review
               </li>
               <li>Passwords are exported as bcrypt hashes (secure, not reversible)</li>
-              <li>Email attachments are limited to ~25MB — for very large databases, use download</li>
+              <li>
+                Email attachments are limited to ~25MB — for very large databases, use download
+              </li>
               <li>Store backups securely — they contain sensitive user data</li>
               <li>Automatic backups run daily at 4:00 AM UTC via Vercel Cron</li>
             </ul>

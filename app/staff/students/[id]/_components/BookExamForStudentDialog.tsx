@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Loader2, ShoppingCart, AlertCircle, Wallet, X } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 const BOOKING_TYPES = [
   { value: 'INDIVIDUAL', label: 'Single Exam', modules: 1, desc: 'Individual exam seat' },
@@ -65,6 +66,8 @@ export default function BookExamForStudentDialog({
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  const { markDirty, markClean } = useFormDirty()
+
   const [bookingType, setBookingType] = useState<string>('INDIVIDUAL')
   const [selectedModules, setSelectedModules] = useState<string[]>([])
   const [eventId, setEventId] = useState<string>('')
@@ -105,6 +108,7 @@ export default function BookExamForStudentDialog({
       if (prev.length >= selectedType.modules) return prev
       return [...prev, id]
     })
+    markDirty()
   }
 
   const handleSubmit = async () => {
@@ -160,6 +164,7 @@ export default function BookExamForStudentDialog({
       toast.success(
         `Exam booked successfully! ${paymentMethod === 'AUTO_DEBIT' ? `€${price} debited from wallet.` : 'Payment pending.'}`
       )
+      markClean()
       setOpen(false)
       resetForm()
       onSuccess()
@@ -180,6 +185,7 @@ export default function BookExamForStudentDialog({
     setPaymentMethod('AUTO_DEBIT')
     setAttemptType('FIRST')
     setNotes('')
+    markClean()
   }
 
   return (
@@ -188,7 +194,7 @@ export default function BookExamForStudentDialog({
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white transition-all hover:bg-[#001f45]"
+          className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all hover:bg-[#001f45]"
         >
           <ShoppingCart className="h-3.5 w-3.5" />
           Book Exam
@@ -235,10 +241,11 @@ export default function BookExamForStudentDialog({
                         setSelectedModules([])
                         if (type.value === 'RESIT') setAttemptType('RESIT_1')
                         else setAttemptType('FIRST')
+                        markDirty()
                       }}
                       className={`rounded-xl border p-3 text-left transition-all ${
                         bookingType === type.value
-                          ? 'border-aerojet-blue bg-aerojet-blue/5 ring-1 ring-aerojet-blue'
+                          ? 'border-aerojet-blue bg-aerojet-blue/5 ring-aerojet-blue ring-1'
                           : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
                       }`}
                     >
@@ -246,7 +253,7 @@ export default function BookExamForStudentDialog({
                         {type.label}
                       </div>
                       <div className="text-[10px] text-slate-400">{type.desc}</div>
-                      <div className="mt-1 text-sm font-black text-aerojet-blue">
+                      <div className="text-aerojet-blue mt-1 text-sm font-black">
                         €{DEFAULT_PRICES[type.value]}
                       </div>
                     </button>
@@ -271,7 +278,7 @@ export default function BookExamForStudentDialog({
                         disabled={isFull}
                         className={`rounded-lg border px-3 py-2 text-left text-xs transition-all ${
                           isSelected
-                            ? 'border-aerojet-blue bg-aerojet-blue/10 font-bold text-aerojet-blue'
+                            ? 'border-aerojet-blue bg-aerojet-blue/10 text-aerojet-blue font-bold'
                             : isFull
                               ? 'cursor-not-allowed border-slate-100 bg-slate-100/50 text-slate-300'
                               : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900'
@@ -300,7 +307,10 @@ export default function BookExamForStudentDialog({
                       <label className="mb-1 block text-xs text-slate-500">Academic Year</label>
                       <select
                         value={academicYearId}
-                        onChange={(e) => setAcademicYearId(e.target.value)}
+                        onChange={(e) => {
+                          setAcademicYearId(e.target.value)
+                          markDirty()
+                        }}
                         className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                       >
                         <option value="">— Select year —</option>
@@ -315,7 +325,10 @@ export default function BookExamForStudentDialog({
                       <label className="mb-1 block text-xs text-slate-500">Semester</label>
                       <select
                         value={semesterId}
-                        onChange={(e) => setSemesterId(e.target.value)}
+                        onChange={(e) => {
+                          setSemesterId(e.target.value)
+                          markDirty()
+                        }}
                         className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                       >
                         <option value="">— Select semester —</option>
@@ -341,6 +354,7 @@ export default function BookExamForStudentDialog({
                     onChange={(e) => {
                       setEventId(e.target.value)
                       if (e.target.value) setExamDate('')
+                      markDirty()
                     }}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   >
@@ -368,6 +382,7 @@ export default function BookExamForStudentDialog({
                     onChange={(e) => {
                       setExamDate(e.target.value)
                       if (e.target.value) setEventId('')
+                      markDirty()
                     }}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
@@ -382,7 +397,10 @@ export default function BookExamForStudentDialog({
                   </label>
                   <select
                     value={attemptType}
-                    onChange={(e) => setAttemptType(e.target.value)}
+                    onChange={(e) => {
+                      setAttemptType(e.target.value)
+                      markDirty()
+                    }}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   >
                     {ATTEMPT_TYPES.map((at) => (
@@ -401,15 +419,18 @@ export default function BookExamForStudentDialog({
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    onClick={() => setPaymentMethod('AUTO_DEBIT')}
+                    onClick={() => {
+                      setPaymentMethod('AUTO_DEBIT')
+                      markDirty()
+                    }}
                     className={`rounded-xl border p-3 text-left transition-all ${
                       paymentMethod === 'AUTO_DEBIT'
-                        ? 'border-aerojet-blue bg-aerojet-blue/5 ring-1 ring-aerojet-blue'
+                        ? 'border-aerojet-blue bg-aerojet-blue/5 ring-aerojet-blue ring-1'
                         : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <Wallet className="h-4 w-4 text-aerojet-blue" />
+                      <Wallet className="text-aerojet-blue h-4 w-4" />
                       <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
                         Auto-Debit Wallet
                       </span>
@@ -425,10 +446,13 @@ export default function BookExamForStudentDialog({
                     )}
                   </button>
                   <button
-                    onClick={() => setPaymentMethod('MANUAL_LATER')}
+                    onClick={() => {
+                      setPaymentMethod('MANUAL_LATER')
+                      markDirty()
+                    }}
                     className={`rounded-xl border p-3 text-left transition-all ${
                       paymentMethod === 'MANUAL_LATER'
-                        ? 'border-aerojet-blue bg-aerojet-blue/5 ring-1 ring-aerojet-blue'
+                        ? 'border-aerojet-blue bg-aerojet-blue/5 ring-aerojet-blue ring-1'
                         : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
                     }`}
                   >
@@ -449,7 +473,10 @@ export default function BookExamForStudentDialog({
                 </label>
                 <textarea
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={(e) => {
+                    setNotes(e.target.value)
+                    markDirty()
+                  }}
                   placeholder="Any notes about this booking..."
                   rows={2}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
@@ -481,7 +508,7 @@ export default function BookExamForStudentDialog({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Price</span>
-                    <span className="text-lg font-black text-aerojet-blue">€{price}</span>
+                    <span className="text-aerojet-blue text-lg font-black">€{price}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Payment</span>
@@ -512,7 +539,7 @@ export default function BookExamForStudentDialog({
                   (!eventId && !examDate) ||
                   (paymentMethod === 'AUTO_DEBIT' && !canAfford)
                 }
-                className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-2 text-sm font-bold text-white transition-all hover:bg-[#001f45] disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-6 py-2 text-sm font-bold text-white transition-all hover:bg-[#001f45] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {paymentMethod === 'AUTO_DEBIT'
