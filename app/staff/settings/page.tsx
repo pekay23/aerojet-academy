@@ -110,6 +110,14 @@ const GENERAL_FEATURES_FIELDS = [
     default: 'true',
   },
   {
+    key: 'exam_reconciliation_grace_hours',
+    label: 'Exam Reconciliation Grace Period (hours)',
+    description:
+      'Hours after an exam date passes before the cron job marks it as missed/absent. Used by the automated exam reconciliation cron. Default: 24 hours.',
+    type: 'NUMBER' as const,
+    default: '24',
+  },
+  {
     key: 'certificates_enabled',
     label: 'Enable Certificate Generation',
     description:
@@ -439,7 +447,9 @@ export default async function SettingsPage({
 }
 
 async function WelcomeMessagesContent() {
-  const welcomeMessages = await getWelcomeMessagesGrouped(prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient)
+  const welcomeMessages = await getWelcomeMessagesGrouped(
+    prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient
+  )
   return <WelcomeMessagesManager initialMessages={welcomeMessages} />
 }
 async function SecurityContent({ userId }: { userId: string }) {

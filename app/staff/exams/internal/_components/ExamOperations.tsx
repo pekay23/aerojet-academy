@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Loader2,
-  RefreshCw,
+  RefreshCcw,
   Eye as _Eye,
   XCircle,
   CheckCircle2,
   Clock,
-  AlertTriangle as _AlertTriangle,
+  AlertTriangle,
   Send as _Send,
   ChevronDown,
   ChevronRight,
@@ -18,9 +18,10 @@ import {
   Users,
   Activity,
   Hourglass,
-  RefreshCcw,
+  RefreshCcw as _RefreshCcw,
   ShieldAlert as _ShieldAlert,
   Award as _Award,
+  X,
 } from 'lucide-react'
 import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
 import ViolationReviewPanel from './ViolationReviewPanel'
@@ -88,6 +89,7 @@ export default function ExamOperations() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [violationsMap, setViolationsMap] = useState<Record<string, Violation[]>>({})
   const [violationsLoadingMap, setViolationsLoadingMap] = useState<Set<string>>(new Set())
+  const [sessionErrorMap, setSessionErrorMap] = useState<Record<string, string | null>>({})
 
   // Confirmation modal state
   const [confirmState, setConfirmState] = useState<{
@@ -106,6 +108,22 @@ export default function ExamOperations() {
     onConfirm: () => {},
   })
 
+  const [editGradeState, setEditGradeState] = useState<{
+    open: boolean
+    sessionId: string | null
+    score: string
+    percentage: string
+    passed: boolean
+    totalPoints: number | null
+  }>({
+    open: false,
+    sessionId: null,
+    score: '',
+    percentage: '',
+    passed: false,
+    totalPoints: null,
+  })
+
   const fetchSessions = useCallback(async () => {
     setError(null)
     try {
@@ -116,8 +134,9 @@ export default function ExamOperations() {
       } else {
         setError(json.error || 'Failed to load sessions')
       }
-    } catch {
-      setError('Could not connect to server')
+    } catch (err) {
+      console.error('[ExamOperations] Failed to fetch session detail:', err)
+      setError('Failed to load session detail')
     } finally {
       setLoading(false)
     }
@@ -165,14 +184,20 @@ export default function ExamOperations() {
   // returns only counts + reports to keep the page payload small; this
   // is called the first time an admin expands a row.
   const fetchSessionDetail = useCallback(async (sessionId: string) => {
+    setSessionErrorMap((prev) => ({ ...prev, [sessionId]: null }))
     try {
       const res = await fetch(`/api/staff/exams/internal/operations/sessions/${sessionId}`)
       const json = await res.json()
-      if (!json.success || !json.data) return
+      if (!json.success || !json.data) {
+        const msg = json.error || 'Failed to load session detail'
+        setSessionErrorMap((prev) => ({ ...prev, [sessionId]: msg }))
+        return
+      }
       const detail = json.data as SessionData
       setSessions((prev) => prev.map((row) => (row.id === sessionId ? { ...row, ...detail } : row)))
-    } catch {
-      // Silent — the row stays at "Loading…" until the next refresh
+    } catch (err) {
+      console.error('[ExamOperations] Failed to fetch session detail:', err)
+      setSessionErrorMap((prev) => ({ ...prev, [sessionId]: 'Failed to load session detail' }))
     }
   }, [])
 
@@ -287,9 +312,9 @@ export default function ExamOperations() {
   const handleRegrade = async (sessionId: string) => {
     setConfirmState({
       open: true,
-      title: 'Regrade this session?',
+      title: 'Recalculate Score?',
       description: 'This will recalculate the score against the current question bank answers.',
-      confirmLabel: 'Regrade',
+      confirmLabel: 'Recalculate',
       variant: 'warning',
       onConfirm: async () => {
         setConfirmState((prev) => ({ ...prev, open: false }))
@@ -304,22 +329,73 @@ export default function ExamOperations() {
           if (json.success) {
             const detail = json.data.details?.[0]
             if (detail?.changed) {
-              setSuccessMsg(`Regraded: ${detail.oldPct}% → ${detail.newPct}%`)
+              setSuccessMsg(`Recalculated: ${detail.oldPct}% → ${detail.newPct}%`)
             } else {
-              setSuccessMsg('Regraded — no score change.')
+              setSuccessMsg('Recalculated — no score change.')
             }
             setTimeout(() => setSuccessMsg(null), 5000)
             fetchSessions()
           } else {
-            setError(json.error || 'Failed to regrade')
+            setError(json.error || 'Failed to recalculate score')
           }
         } catch {
-          setError('Regrade failed')
+          setError('Score recalculation failed')
         } finally {
           setActionLoading(null)
         }
       },
     })
+  }
+
+  const handleEditGrade = (session: SessionData) => {
+    setEditGradeState({
+      open: true,
+      sessionId: session.id,
+      score: String(session.score ?? ''),
+      percentage: String(session.percentage ?? ''),
+      passed: session.passed ?? false,
+      totalPoints: session.totalPoints ?? null,
+    })
+  }
+
+  const handleSaveEditGrade = async () => {
+    if (!editGradeState.sessionId) return
+    const score = Number(editGradeState.score)
+    const percentage = Number(editGradeState.percentage)
+    if (isNaN(score) || isNaN(percentage)) {
+      setError('Score and percentage must be valid numbers')
+      return
+    }
+    if (editGradeState.totalPoints != null && editGradeState.totalPoints > 0) {
+      const expectedPct = Math.round((score / editGradeState.totalPoints) * 100)
+      if (Math.abs(expectedPct - percentage) > 15) {
+        setError(
+          `Percentage (${percentage}%) is inconsistent with score (${score}/${editGradeState.totalPoints} ≈ ${expectedPct}%)`
+        )
+        return
+      }
+    }
+    setActionLoading(editGradeState.sessionId)
+    setEditGradeState((prev) => ({ ...prev, open: false }))
+    try {
+      const res = await fetch(`/api/staff/exams/internal/sessions/${editGradeState.sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score, percentage, passed: editGradeState.passed }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setSuccessMsg('Grade updated successfully')
+        setTimeout(() => setSuccessMsg(null), 5000)
+        fetchSessions()
+      } else {
+        setError(json.error || 'Failed to update grade')
+      }
+    } catch {
+      setError('Failed to update grade')
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   const _handleExtend = async (sessionId: string) => {
@@ -506,7 +582,7 @@ export default function ExamOperations() {
               onClick={fetchSessions}
               className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
+              <RefreshCcw className="h-3.5 w-3.5" />
               Refresh
             </button>
             {activeTab === 'review' && filteredSessions('review').length > 0 && (
@@ -752,7 +828,21 @@ export default function ExamOperations() {
                         <h4 className="mb-2 text-xs font-bold tracking-widest text-slate-400 uppercase">
                           Answers
                         </h4>
-                        {!session.answers ? (
+                        {sessionErrorMap[session.id] ? (
+                          <div className="flex flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-900/20">
+                            <AlertTriangle className="mb-2 h-8 w-8 text-red-500" />
+                            <p className="text-sm font-bold text-red-700 dark:text-red-300">
+                              {sessionErrorMap[session.id]}
+                            </p>
+                            <button
+                              onClick={() => void fetchSessionDetail(session.id)}
+                              className="mt-3 flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700"
+                            >
+                              <RefreshCcw className="h-3 w-3" />
+                              Retry
+                            </button>
+                          </div>
+                        ) : !session.answers ? (
                           <div className="space-y-1.5">
                             {Array.from({ length: 6 }).map((_, i) => (
                               <div
@@ -896,6 +986,21 @@ export default function ExamOperations() {
                         {(session.status === 'COMPLETED' || session.status === 'TIMED_OUT') &&
                           !session.isPublished && (
                             <button
+                              onClick={() => handleEditGrade(session)}
+                              disabled={actionLoading === session.id}
+                              className="flex items-center gap-1.5 rounded-lg border border-purple-200 bg-purple-50 px-3 py-2 text-xs font-bold text-purple-700 hover:bg-purple-100 disabled:opacity-50 dark:border-purple-800 dark:bg-purple-900/20 dark:text-purple-300"
+                            >
+                              {actionLoading === session.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <RefreshCcw className="h-3 w-3" />
+                              )}
+                              Edit Grade
+                            </button>
+                          )}
+                        {(session.status === 'COMPLETED' || session.status === 'TIMED_OUT') &&
+                          !session.isPublished && (
+                            <button
                               onClick={() => handleRegrade(session.id)}
                               disabled={actionLoading === session.id}
                               className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 disabled:opacity-50 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300"
@@ -905,7 +1010,7 @@ export default function ExamOperations() {
                               ) : (
                                 <RefreshCcw className="h-3 w-3" />
                               )}
-                              Regrade
+                              Recalculate Score
                             </button>
                           )}
                         {session.isPublished && (
@@ -923,6 +1028,88 @@ export default function ExamOperations() {
           </div>
         )}
       </div>
+
+      {/* Edit Grade Modal */}
+      {editGradeState.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop:blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex items-start justify-between gap-4">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Edit Grade</h3>
+              <button
+                onClick={() => setEditGradeState((prev) => ({ ...prev, open: false }))}
+                disabled={actionLoading !== null}
+                aria-label="Close dialog"
+                className="shrink-0 rounded-lg p-1 text-slate-400 hover:text-slate-600 disabled:opacity-50"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+              Manually adjust the grade for this session. This will override the calculated score.
+            </p>
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Score</label>
+                <input
+                  type="number"
+                  value={editGradeState.score}
+                  onChange={(e) =>
+                    setEditGradeState((prev) => ({ ...prev, score: e.target.value }))
+                  }
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                  min="0"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Percentage (%)</label>
+                <input
+                  type="number"
+                  value={editGradeState.percentage}
+                  onChange={(e) =>
+                    setEditGradeState((prev) => ({ ...prev, percentage: e.target.value }))
+                  }
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                  min="0"
+                  max="100"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="edit-passed"
+                  checked={editGradeState.passed}
+                  onChange={(e) =>
+                    setEditGradeState((prev) => ({ ...prev, passed: e.target.checked }))
+                  }
+                  className="h-4 w-4 rounded border-slate-300"
+                />
+                <label
+                  htmlFor="edit-passed"
+                  className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                >
+                  Passed
+                </label>
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setEditGradeState((prev) => ({ ...prev, open: false }))}
+                disabled={actionLoading !== null}
+                className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEditGrade}
+                disabled={actionLoading !== null}
+                className="flex-1 rounded-lg bg-purple-600 px-4 py-2 text-sm font-bold text-white hover:bg-purple-700 disabled:opacity-50"
+              >
+                Save Grade
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConfirmModal
         open={confirmState.open}

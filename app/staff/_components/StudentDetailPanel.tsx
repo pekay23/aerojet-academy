@@ -22,6 +22,11 @@ import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import ManualWalletAdjustmentDialog from '../users/[id]/_components/ManualWalletAdjustmentDialog'
 import { UserStatus, EnrollmentStatus, PaymentStatus } from '@/types/enums'
 import Image from 'next/image'
+import {
+  deriveBookingFulfillmentState,
+  isUpcomingBooking as isUpcomingBookingFromLib,
+  isMissedBooking as isMissedBookingFromLib,
+} from '@/lib/exams/fulfillment'
 import type { ExamHistoryItem, SerializedExamBooking } from '@/lib/types/staff'
 
 interface Student {
@@ -173,13 +178,24 @@ export default function StudentDetailPanel({
   const isCompletedResult = (result: string | null | undefined) =>
     !!result && COMPLETED_RESULT_VALUES.includes(result.toLowerCase())
 
-  // Helper: check if a booking status means it's still upcoming/pending
-  const UPCOMING_STATUSES = ['APPROVED', 'PENDING', 'CONFIRMED']
+  // Helper: fulfillment-aware upcoming check
   const isUpcomingBooking = (booking: NonNullable<Student['examBookings']>[number]) =>
-    !isCompletedResult(booking.result) &&
-    booking.score == null &&
-    (UPCOMING_STATUSES.includes(booking.status) ||
-      (!booking.result && booking.status !== 'COMPLETED'))
+    isUpcomingBookingFromLib({
+      examDate: booking.examDate,
+      result: booking.result,
+      demandStatus: booking.demandStatus,
+      eventStatus: booking.event?.status || null,
+    })
+
+  // Helper: detect past exams with no attendance/result record
+  const isPastNoRecordBooking = (booking: NonNullable<Student['examBookings']>[number]) =>
+    isMissedBookingFromLib({
+      examDate: booking.examDate,
+      result: booking.result,
+      score: booking.score,
+      demandStatus: booking.demandStatus,
+      hasResult: false,
+    })
 
   // ---- Build separate lists ----
 
@@ -206,9 +222,9 @@ export default function StudentDetailPanel({
       id: b.id,
       source: 'booking' as const,
       type: 'MANUAL',
-      moduleCode: b.moduleCode || '—',
+      moduleCode: b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—',
       examName: b.exam?.name || 'Exam Booking',
-      date: b.examDate || b.bookedAt || null,
+      date: b.examDate || b.bookedAt || b.event?.startDate || null,
       score: b.score != null ? Number(b.score) : null,
       passed: b.result?.toLowerCase() === 'pass',
       result: b.result?.toUpperCase() || (b.score != null ? 'SCORED' : null),
@@ -223,9 +239,32 @@ export default function StudentDetailPanel({
       id: b.id,
       source: 'booking' as const,
       type: b.exam?.name ? 'BOOKED' : 'MANUAL',
-      moduleCode: b.moduleCode || '—',
+      moduleCode: b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—',
       examName: b.exam?.name || 'Upcoming Exam',
-      date: b.examDate || b.bookedAt || null,
+      date: b.examDate || b.bookedAt || b.event?.startDate || null,
+      score: null,
+      passed: undefined,
+      result: null,
+      paymentStatus: b.status,
+      examCategory: b.examCategory,
+      attemptType: b.attemptType,
+    }))
+    .sort((a: ExamHistoryItem, b: ExamHistoryItem) => {
+      const da = a.date ? new Date(a.date).getTime() : 0
+      const db = b.date ? new Date(b.date).getTime() : 0
+      return da - db
+    })
+
+  // 4. Past bookings with no attendance/result — unresolved/missed
+  const pastNoRecordExamsList = (currentStudent.examBookings || [])
+    .filter((b: SerializedExamBooking) => isPastNoRecordBooking(b))
+    .map((b: SerializedExamBooking) => ({
+      id: b.id,
+      source: 'booking' as const,
+      type: b.exam?.name ? 'BOOKED' : 'MANUAL',
+      moduleCode: b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—',
+      examName: b.exam?.name || 'Past Exam — No Record',
+      date: b.examDate || b.bookedAt || b.event?.startDate || null,
       score: null,
       passed: undefined,
       result: null,
@@ -600,7 +639,11 @@ export default function StudentDetailPanel({
             )}
 
             {tab === 'Exams' && (
-              <ExamTabContent upcomingExams={upcomingExamsList} allExamHistory={allExamHistory} />
+              <ExamTabContent
+                upcomingExams={upcomingExamsList}
+                pastNoRecordExams={pastNoRecordExamsList}
+                allExamHistory={allExamHistory}
+              />
             )}
           </>
         )}
@@ -613,9 +656,11 @@ type ExamFilter = 'ALL' | 'PASSED' | 'FAILED' | 'PENDING'
 
 function ExamTabContent({
   upcomingExams,
+  pastNoRecordExams,
   allExamHistory,
 }: {
   upcomingExams: ExamHistoryItem[]
+  pastNoRecordExams: ExamHistoryItem[]
   allExamHistory: ExamHistoryItem[]
 }) {
   const [filter, setFilter] = useState<ExamFilter>('ALL')
@@ -712,6 +757,53 @@ function ExamTabContent({
                       : exam.paymentStatus === PaymentStatus.REJECTED
                         ? 'REJECTED'
                         : 'PAYMENT PENDING'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Past — No Record */}
+      {pastNoRecordExams.length > 0 && (
+        <Section title="Past — No Record">
+          <div className="space-y-2">
+            {pastNoRecordExams.map((exam, idx) => (
+              <div
+                key={`past-${exam.id}-${idx}`}
+                className="flex items-center justify-between rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 dark:border-amber-900/30 dark:bg-amber-900/20"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
+                      {exam.moduleCode}
+                    </span>
+                    <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-700 uppercase">
+                      {exam.type}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 truncate text-xs text-slate-500">
+                    <span>{exam.examName}</span>
+                    {exam.examCategory && (
+                      <span
+                        className={`shrink-0 rounded-full px-1 py-0.5 text-[8px] font-bold ${
+                          exam.examCategory === 'INTERNAL'
+                            ? 'bg-amber-100/50 text-amber-700'
+                            : 'bg-blue-100/50 text-blue-700'
+                        }`}
+                      >
+                        {exam.examCategory === 'INTERNAL' ? 'INT' : 'EASA'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-[10px] text-slate-400">
+                    {exam.date ? new Date(exam.date).toLocaleDateString() : '—'}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black text-amber-700 uppercase">
+                    MISSED / UNRESOLVED
                   </span>
                 </div>
               </div>

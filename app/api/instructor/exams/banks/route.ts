@@ -1,7 +1,13 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiPaginated, apiError, apiForbidden, apiCreated, withErrorHandler } from '@/lib/api/response'
+import {
+  apiPaginated,
+  apiError,
+  apiForbidden,
+  apiCreated,
+  withErrorHandler,
+} from '@/lib/api/response'
 import { parsePagination } from '@/lib/api/response'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
@@ -97,13 +103,24 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
               },
             },
           },
-          orderBy: { name: 'asc' },
+          // Natural sort by moduleCode after fetch to ensure M2 < M10
+          // Prisma string ASC is lexicographic and breaks numeric module codes.
+          // take/skip are applied before sort, so we must sort the in-memory array.
+          // For very large datasets, consider a dedicated numeric sort column.
           take: limit,
           skip,
         })
       : Promise.resolve([]),
     prismaUnfiltered.internalExamBank.count({ where: { id: { in: bankIds } } }),
   ])
+
+  // Natural sort by moduleCode
+  banks.sort((a, b) =>
+    (a.moduleCode || '').localeCompare(b.moduleCode || '', undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    })
+  )
 
   const pendingCounts = bankIds.length
     ? await prismaUnfiltered.internalExamQuestion.groupBy({
@@ -126,6 +143,14 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     }
   })
 
+  // Natural sort by moduleCode before pagination so M2 comes before M10.
+  enrichedBanks.sort((a, b) =>
+    (a.moduleCode || '').localeCompare(b.moduleCode || '', undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    })
+  )
+
   // Bankless placeholders so the UI can offer "Create bank" inline.
   const banklessEntries = pendingBanklessCourses.map((c) => ({
     id: `bankless:${c.id}`,
@@ -144,7 +169,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     bankless: true,
   }))
 
-  return apiPaginated([...enrichedBanks, ...banklessEntries], total + banklessEntries.length, page, limit)
+  const allEntries = [...enrichedBanks, ...banklessEntries]
+  const paginated = allEntries.slice(skip, skip + limit)
+
+  return apiPaginated(paginated, allEntries.length, page, limit)
 })
 
 /**

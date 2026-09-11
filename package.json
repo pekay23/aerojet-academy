@@ -32,6 +32,7 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
     "docs:html": "bun scripts/build-docs-html.mjs",
+    "scripts:reconcile-exam-bookings": "bun scripts/reconcile-exam-bookings.ts",
     "flipbook": "bun tools/flipbook-scraper/index.ts",
     "flipbook:inspect": "bun tools/flipbook-scraper/inspect.ts",
     "release": "bun scripts/release.mjs",
