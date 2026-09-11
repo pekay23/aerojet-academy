@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import Image from 'next/image'
 import SectionReveal from './SectionReveal'
 
@@ -14,14 +13,14 @@ const careerPoints = [
 
 export default function Careers() {
   return (
-    <section className="relative min-h-105 overflow-hidden border-t border-[#1b2430]/15 text-[#f7f3ec] sm:min-h-0">
+    <section className="relative w-full min-h-105 overflow-hidden border-t border-[#1b2430]/15 text-[#f7f3ec] sm:min-h-0">
       {/* Background Image — mobile */}
       <div className="absolute inset-0 z-0 sm:hidden">
         <Image
           src="/images/home/careerwidemobile.webp"
           alt="Careers at Aerojet Academy"
           fill
-          sizes="100vw"
+          sizes="(max-width: 640px) 100vw, 0px"
           className="object-cover object-center"
           quality={90}
           priority
@@ -33,7 +32,7 @@ export default function Careers() {
           src="/images/home/careerwide.webp"
           alt="Careers at Aerojet Academy"
           fill
-          sizes="100vw"
+          sizes="(min-width: 640px) 100vw, 0px"
           className="object-cover object-center sm:object-top-right"
           quality={90}
           priority
