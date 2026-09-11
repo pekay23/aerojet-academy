@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSettingsDirty } from './SettingsTabs'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface SettingField {
   key: string
@@ -26,6 +27,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
   const formRef = useRef<HTMLFormElement>(null)
   const router = useRouter()
   const { markDirty, markClean, isDirty } = useSettingsDirty()
+  const { markDirty: markFormDirty, markClean: markFormClean } = useFormDirty()
 
   // Pristine baseline = the values that were last loaded or saved.
   // Dirty comparison is against this baseline, not against each individual default.
@@ -76,7 +78,8 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
       // For uncontrolled inputs, we read the current DOM value
       if (typeof document !== 'undefined' && formRef.current) {
         const el = formRef.current.elements.namedItem(key)
-        if (el && 'value' in el) return (el as unknown as HTMLInputElement | HTMLSelectElement).value
+        if (el && 'value' in el)
+          return (el as unknown as HTMLInputElement | HTMLSelectElement).value
       }
       return baseline[key]
     },
@@ -97,18 +100,21 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
   const handleToggle = useCallback(
     (key: string) => {
       setToggles((prev) => ({ ...prev, [key]: !prev[key] }))
+      markFormDirty()
     },
-    []
+    [markFormDirty]
   )
 
   const handleFieldChange = useCallback(() => {
     // After a DOM change on select/text, recompute dirty against baseline
     if (isBaselineDirty()) {
       markDirty()
+      markFormDirty()
     } else {
       markClean()
+      markFormClean()
     }
-  }, [isBaselineDirty, markDirty, markClean])
+  }, [isBaselineDirty, markDirty, markClean, markFormDirty, markFormClean])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -133,6 +139,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
       if (res.ok) {
         toast.success(`${groupLabel || 'Settings'} saved successfully`)
         markClean()
+        markFormClean()
         router.refresh()
       } else {
         toast.error('Failed to save settings')

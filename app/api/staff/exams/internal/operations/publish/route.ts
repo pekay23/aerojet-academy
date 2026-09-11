@@ -4,6 +4,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
+import { createNotification } from '@/lib/email/service'
 import { getCertificatesEnabled, createCertificate } from '@/lib/certificates/generator'
 import { getBankRules } from '@/lib/internal-exam/engine'
 
@@ -65,6 +66,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       after: { isPublished: true },
     },
   })
+
+  // Notify students that their results are published
+  const notifPromises = candidates.map((c) =>
+    createNotification(prismaUnfiltered, c.studentId, {
+      type: 'SUCCESS',
+      title: 'Exam Results Published',
+      message: `Your internal exam result has been published. You can now view your score.`,
+      link: '/student/exams/internal',
+    }).catch((err) => console.error('[NOTIFICATION ERROR]', err))
+  )
+  await Promise.allSettled(notifPromises)
 
   // Auto-generate certificates for students who passed (feature-gated).
   // Requires both the global toggle AND the per-bank certificateEnabled flag.

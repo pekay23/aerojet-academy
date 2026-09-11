@@ -71,8 +71,9 @@ export default function SchedulingMatrix({
       if (!res.ok) throw new Error('Failed to refresh')
       const data = await res.json()
       setPathways(data.data?.pathways ?? data.pathways ?? [])
-    } catch {
-      // Silent — data will be stale but user already saw the toast
+    } catch (err) {
+      console.error('[SchedulingMatrix] Failed to refresh pathways:', err)
+      toast.error('Failed to refresh scheduling data')
     }
   }, [])
 

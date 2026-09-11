@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface EditProfileDialogProps {
   userId: string
@@ -54,9 +55,12 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
     dateOfBirth: formatDate(initialData.dateOfBirth),
   })
 
+  const { markDirty, markClean } = useFormDirty()
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+    markDirty()
   }
 
   const handleSave = async () => {
@@ -74,6 +78,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
       }
 
       toast.success('Profile updated successfully')
+      markClean()
       setOpen(false)
       router.refresh()
     } catch (error: unknown) {
@@ -95,7 +100,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
           <Pencil className="mr-1 h-3 w-3" /> Edit Profile
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle>Edit Personal Information</DialogTitle>
           <DialogDescription className="sr-only">
@@ -147,9 +152,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
               onChange={handleChange}
               autoComplete="email"
             />
-            <p className="text-xs text-slate-400">
-              Used for signing in and academy correspondence
-            </p>
+            <p className="text-xs text-slate-400">Used for signing in and academy correspondence</p>
           </div>
 
           <div className="grid gap-2">

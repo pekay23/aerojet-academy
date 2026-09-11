@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { ChevronLeft, ChevronRight, Check, Loader2 } from 'lucide-react'
 import TestTimer from './TestTimer'
 import QuestionCard from './QuestionCard'
@@ -42,8 +43,9 @@ export default function TestInterface({ session }: TestInterfaceProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId: session.id, questionId, answer }),
       })
-    } catch (_e) {
-      console.error('Failed to sync answer')
+    } catch (e) {
+      console.error('Failed to sync answer', e)
+      toast.error('Failed to save answer. Your progress is stored locally and will retry.')
     }
   }
 
@@ -58,7 +60,8 @@ export default function TestInterface({ session }: TestInterfaceProps) {
       })
       router.push('/applicant/application/aptitude-test')
     } catch (e) {
-      console.error(e)
+      console.error('Failed to submit test', e)
+      toast.error('Failed to submit. Please try again.')
       setSubmitting(false)
     }
   }, [session.id, submitting, router])

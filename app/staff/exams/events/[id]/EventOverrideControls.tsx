@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { setEventOverride } from './actions'
 import { EventOverrideStatus } from '@prisma/client'
 import { Shield, ChevronDown, CheckCircle2, XCircle, RotateCcw } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface Props {
   eventId: string
@@ -13,12 +14,16 @@ interface Props {
 export default function EventOverrideControls({ eventId, currentOverride }: Props) {
   const [isPending, setIsPending] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const { markDirty, markClean } = useFormDirty()
 
   const handleOverride = async (status: EventOverrideStatus) => {
+    // Mark dirty before mutation — user may have pending override changes
+    markDirty()
     setIsPending(true)
     try {
       await setEventOverride(eventId, status)
       setIsOpen(false)
+      markClean()
     } finally {
       setIsPending(false)
     }

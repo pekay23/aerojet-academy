@@ -3,6 +3,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AttendanceStatus } from '@prisma/client'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { z } from 'zod'
 
 const STATUSES = Object.values(AttendanceStatus) as [AttendanceStatus, ...AttendanceStatus[]]
@@ -58,9 +59,15 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
   })
 
   // Get course enrollments as class roster
+  // Include PENDING enrollments — students may be marked attendance before
+  // their enrollment is fully approved, and excluding them silently drops
+  // the entire roster when the course has only pending approvals.
   const enrollments = classData
     ? await prismaUnfiltered.enrollment.findMany({
-        where: { courseId: classData.courseId, status: { in: ['ENROLLED', 'ACTIVE', 'APPROVED'] } },
+        where: {
+          courseId: classData.courseId,
+          status: { in: ['ENROLLED', 'ACTIVE', 'APPROVED', 'PENDING'] },
+        },
         select: {
           user: {
             select: {
@@ -144,6 +151,20 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContex
       })
     )
   )
+
+  // Audit log
+  await createAuditLog({
+    userId: staff.id,
+    action: AuditAction.UPDATE,
+    entity: 'AttendanceRecord',
+    description: `Marked attendance for ${results.length} student(s) in class ${classId} on ${date}`,
+    changes: {
+      classId,
+      date,
+      recordCount: results.length,
+      statuses: records.map((r) => ({ userId: r.userId, status: r.status })),
+    },
+  })
 
   return apiSuccess({ saved: results.length })
 })

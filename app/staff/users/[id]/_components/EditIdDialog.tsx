@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface EditIdDialogProps {
   userId: string
@@ -29,6 +30,8 @@ export default function EditIdDialog({ userId, currentId, type, label }: EditIdD
   const [value, setValue] = useState(currentId)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+
+  const { markDirty, markClean } = useFormDirty()
 
   const handleSave = async () => {
     if (!value || value === currentId) {
@@ -50,6 +53,7 @@ export default function EditIdDialog({ userId, currentId, type, label }: EditIdD
       }
 
       toast.success(`${label} updated successfully`)
+      markClean()
       setOpen(false)
       router.refresh()
     } catch (error: unknown) {
@@ -67,7 +71,7 @@ export default function EditIdDialog({ userId, currentId, type, label }: EditIdD
           <Pencil className="h-4 w-4" />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>Edit {label}</DialogTitle>
           <DialogDescription className="sr-only">
@@ -81,7 +85,10 @@ export default function EditIdDialog({ userId, currentId, type, label }: EditIdD
               id="id-value"
               name="id-value"
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={(e) => {
+                setValue(e.target.value)
+                markDirty()
+              }}
               placeholder={`Enter new ${label}`}
               autoComplete="off"
             />

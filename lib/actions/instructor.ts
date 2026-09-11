@@ -425,16 +425,25 @@ export async function getMyClassesGroupedByIntake(options?: {
   })
 
   // Group by academicYear + semester (intake)
+  // Defensive: deduplicate classes by ID before grouping to prevent
+  // React "two children with the same key" warnings from data anomalies
+  const seenIds = new Set<string>()
+  const uniqueClasses = classes.filter((cls) => {
+    if (seenIds.has(cls.id)) return false
+    seenIds.add(cls.id)
+    return true
+  })
+
   const grouped = new Map<
     string,
     {
       academicYear: { id: string; name: string } | null
       semester: { id: string; name: string } | null
-      classes: typeof classes
+      classes: typeof uniqueClasses
     }
   >()
 
-  for (const cls of classes) {
+  for (const cls of uniqueClasses) {
     const yearKey = cls.academicYear?.id || 'no-year'
     const semKey = cls.semester?.id || 'no-semester'
     const key = `${yearKey}|${semKey}`

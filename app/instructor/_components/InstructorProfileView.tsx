@@ -114,7 +114,8 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
         toast.success('Profile updated successfully')
         setIsEditing(false)
       }
-    } catch (_error) {
+    } catch (err) {
+      console.error('[InstructorProfileView] Failed to update profile:', err)
       toast.error('Failed to update profile')
     } finally {
       setIsSubmitting(false)

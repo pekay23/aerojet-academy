@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 import { toast } from 'sonner'
 import { Plus, Trash2, ExternalLink, UploadCloud } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -54,11 +55,16 @@ export default function MaterialsManager({
     visibility: 'CLASS' as 'CLASS' | 'COURSE' | 'ALL_STUDENTS',
   })
 
+  const { markDirty, markClean } = useFormDirty()
+
   const run = (fn: () => Promise<{ error?: string; success?: boolean }>, ok: string) =>
     startTransition(async () => {
       const res = await fn()
       if (res.error) toast.error(res.error)
-      else toast.success(ok)
+      else {
+        toast.success(ok)
+        markClean()
+      }
     })
 
   const upload = (input: HTMLInputElement) => {
@@ -88,13 +94,19 @@ export default function MaterialsManager({
         <div className="grid gap-3 sm:grid-cols-6">
           <input
             value={form.title}
-            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, title: e.target.value }))
+              markDirty()
+            }}
             placeholder="Title *"
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
           />
           <input
             value={form.fileUrl}
-            onChange={(e) => setForm((f) => ({ ...f, fileUrl: e.target.value }))}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, fileUrl: e.target.value }))
+              markDirty()
+            }}
             placeholder="File URL *"
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2 dark:border-slate-700 dark:bg-slate-800"
           />
@@ -102,6 +114,7 @@ export default function MaterialsManager({
             value={form.courseId}
             onChange={(e) => {
               setForm((f) => ({ ...f, courseId: e.target.value, classId: '' }))
+              markDirty()
             }}
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
           >
@@ -114,7 +127,10 @@ export default function MaterialsManager({
           </select>
           <select
             value={form.classId}
-            onChange={(e) => setForm((f) => ({ ...f, classId: e.target.value }))}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, classId: e.target.value }))
+              markDirty()
+            }}
             disabled={!form.courseId}
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800"
           >
@@ -129,9 +145,10 @@ export default function MaterialsManager({
           </select>
           <select
             value={form.visibility}
-            onChange={(e) =>
+            onChange={(e) => {
               setForm((f) => ({ ...f, visibility: e.target.value as typeof f.visibility }))
-            }
+              markDirty()
+            }}
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
           >
             <option value="CLASS">Class</option>
@@ -167,7 +184,7 @@ export default function MaterialsManager({
         <span className="font-bold text-slate-600 dark:text-slate-300">
           Or upload a file (Supabase storage):
         </span>
-        <input type="file" id="tm-file" className="text-xs" />
+        <input type="file" id="tm-file" className="text-xs" onChange={() => markDirty()} />
         <button
           disabled={isPending}
           onClick={() => upload(document.getElementById('tm-file') as HTMLInputElement)}

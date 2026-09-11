@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 export interface UnifiedCalendarEvent {
   id: string
@@ -106,6 +107,7 @@ export default function AcademicCalendar({
   const [showModal, setShowModal] = useState(false)
   const [editingEvent, setEditingEvent] = useState<UnifiedCalendarEvent | null>(null)
   const [isPending, startTransition] = useTransition()
+  const { markDirty, markClean } = useFormDirty()
 
   // Form state
   const [formTitle, setFormTitle] = useState('')
@@ -208,6 +210,7 @@ export default function AcademicCalendar({
       } else {
         toast.success(editingEvent ? 'Event updated!' : 'Event created!')
         setShowModal(false)
+        markClean()
       }
     })
   }
@@ -221,6 +224,7 @@ export default function AcademicCalendar({
       } else {
         toast.success('Event deleted')
         setPopupEvent(null)
+        markClean()
       }
     })
   }
@@ -245,7 +249,7 @@ export default function AcademicCalendar({
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="flex flex-col items-center justify-between gap-4 rounded-4xlxl border border-slate-100 bg-white p-4 shadow-sm md:flex-row dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-4xlxl flex flex-col items-center justify-between gap-4 border border-slate-100 bg-white p-4 shadow-sm md:flex-row dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center gap-3">
           <button
             aria-label="Previous period"
@@ -272,7 +276,7 @@ export default function AcademicCalendar({
           </button>
         </div>
         <div className="flex gap-2">
-          <div className="flex items-center rounded-4xll border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
+          <div className="rounded-4xll flex items-center border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
             <button
               onClick={() => setViewMode('Month')}
               className={cn(
@@ -310,7 +314,7 @@ export default function AcademicCalendar({
           {canCreate && (
             <button
               onClick={openAdd}
-              className="flex items-center gap-2 rounded-4xll bg-[#FF4F33] px-6 py-2 text-sm font-bold text-white shadow-lg shadow-[#FF4F33]/20 transition-all hover:scale-105 hover:bg-[#E6462D] active:scale-95"
+              className="rounded-4xll flex items-center gap-2 bg-[#FF4F33] px-6 py-2 text-sm font-bold text-white shadow-lg shadow-[#FF4F33]/20 transition-all hover:scale-105 hover:bg-[#E6462D] active:scale-95"
             >
               New Event <Plus className="h-4 w-4" />
             </button>
@@ -318,7 +322,7 @@ export default function AcademicCalendar({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-4xlxl border border-slate-100 bg-white px-4 py-3 text-xs font-bold text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-4xlxl flex flex-wrap items-center gap-3 border border-slate-100 bg-white px-4 py-3 text-xs font-bold text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-full bg-[#4A72E8]" /> Classes
         </span>
@@ -333,7 +337,7 @@ export default function AcademicCalendar({
         </span>
       </div>
 
-      <div className="space-y-2 rounded-4xlxl border border-slate-100 bg-white p-4 shadow-sm md:hidden dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-4xlxl space-y-2 border border-slate-100 bg-white p-4 shadow-sm md:hidden dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center justify-between">
           <span className="text-xs font-black tracking-widest text-slate-400 uppercase">
             Daily Agenda
@@ -351,7 +355,7 @@ export default function AcademicCalendar({
             <button
               key={evt.id}
               onClick={() => setPopupEvent(evt)}
-              className="flex w-full items-start gap-3 rounded-4xll border border-slate-100 p-3 text-left dark:border-slate-800"
+              className="rounded-4xll flex w-full items-start gap-3 border border-slate-100 p-3 text-left dark:border-slate-800"
             >
               <span className="mt-1 h-3 w-3 rounded-full" style={{ backgroundColor: evt.color }} />
               <span className="min-w-40 flex-1">
@@ -402,7 +406,7 @@ export default function AcademicCalendar({
                         onClick={() => setPopupEvent(evt)}
                         title={`${evt.title} - ${format(new Date(evt.startDate), 'hh:mm a')}`}
                         className={cn(
-                          'w-full rounded-4xlxl p-3 text-left text-sm font-black shadow-sm',
+                          'rounded-4xlxl w-full p-3 text-left text-sm font-black shadow-sm',
                           getEventStyles(evt.source, evt.color)
                         )}
                         style={
@@ -510,7 +514,7 @@ export default function AcademicCalendar({
                       >
                         <div
                           className={cn(
-                            'flex h-full w-full flex-col overflow-hidden rounded-4xlxl border-l-4 p-3 shadow-sm transition-all hover:shadow-md',
+                            'rounded-4xlxl flex h-full w-full flex-col overflow-hidden border-l-4 p-3 shadow-sm transition-all hover:shadow-md',
                             getEventStyles(evt.source, evt.color)
                           )}
                           style={
@@ -638,7 +642,7 @@ export default function AcademicCalendar({
 
             <div className="mb-6 flex items-center gap-3">
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-4xlxl text-lg font-black text-white shadow-lg"
+                className="rounded-4xlxl flex h-10 w-10 items-center justify-center text-lg font-black text-white shadow-lg"
                 style={{ backgroundColor: popupEvent.color }}
               >
                 {popupEvent.title.charAt(0).toUpperCase()}
@@ -661,7 +665,7 @@ export default function AcademicCalendar({
               )}
 
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3 rounded-4xlxl bg-slate-50 p-3 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                <div className="rounded-4xlxl flex items-center gap-3 bg-slate-50 p-3 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                   <CalendarDays className="text-aerojet-blue h-4 w-4" />
                   <div>
                     <div className="text-[10px] font-black text-slate-400 uppercase">
@@ -680,14 +684,14 @@ export default function AcademicCalendar({
                 <div className="flex gap-2 pt-2">
                   <button
                     onClick={() => openEdit(popupEvent)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-4xll border border-slate-200 py-3 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="rounded-4xll flex flex-1 items-center justify-center gap-2 border border-slate-200 py-3 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                   >
                     <Pencil className="h-4 w-4" /> Edit
                   </button>
                   <button
                     aria-label="Delete event"
                     onClick={() => handleDelete(popupEvent)}
-                    className="flex w-12 items-center justify-center rounded-4xll bg-red-50 text-red-600 transition-all hover:bg-red-100 dark:bg-red-950/20"
+                    className="rounded-4xll flex w-12 items-center justify-center bg-red-50 text-red-600 transition-all hover:bg-red-100 dark:bg-red-950/20"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -705,7 +709,7 @@ export default function AcademicCalendar({
             {/* Simple form implementation for personal events or admin events */}
             <div className="mb-8 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-4xll bg-orange-100 text-orange-600 dark:bg-orange-900/20">
+                <div className="rounded-4xll flex h-10 w-10 items-center justify-center bg-orange-100 text-orange-600 dark:bg-orange-900/20">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <h3 className="text-xl font-black tracking-tight text-slate-900 uppercase dark:text-white">
@@ -728,9 +732,12 @@ export default function AcademicCalendar({
                 </label>
                 <input
                   value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
+                  onChange={(e) => {
+                    setFormTitle(e.target.value)
+                    markDirty()
+                  }}
                   placeholder="What's happening?"
-                  className="focus:border-aerojet-blue w-full rounded-4xlxl border-2 border-slate-50 bg-slate-50/50 px-5 py-4 text-sm font-bold text-slate-900 shadow-sm transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                  className="focus:border-aerojet-blue rounded-4xlxl w-full border-2 border-slate-50 bg-slate-50/50 px-5 py-4 text-sm font-bold text-slate-900 shadow-sm transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                 />
               </div>
 
@@ -742,8 +749,11 @@ export default function AcademicCalendar({
                   <input
                     type="datetime-local"
                     value={formStart}
-                    onChange={(e) => setFormStart(e.target.value)}
-                    className="focus:border-aerojet-blue w-full rounded-4xlxl border-2 border-slate-50 bg-slate-50/50 px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                    onChange={(e) => {
+                      setFormStart(e.target.value)
+                      markDirty()
+                    }}
+                    className="focus:border-aerojet-blue rounded-4xlxl w-full border-2 border-slate-50 bg-slate-50/50 px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                   />
                 </div>
                 <div>
@@ -753,8 +763,11 @@ export default function AcademicCalendar({
                   <input
                     type="datetime-local"
                     value={formEnd}
-                    onChange={(e) => setFormEnd(e.target.value)}
-                    className="focus:border-aerojet-blue w-full rounded-4xlxl border-2 border-slate-50 bg-slate-50/50 px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                    onChange={(e) => {
+                      setFormEnd(e.target.value)
+                      markDirty()
+                    }}
+                    className="focus:border-aerojet-blue rounded-4xlxl w-full border-2 border-slate-50 bg-slate-50/50 px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -762,7 +775,7 @@ export default function AcademicCalendar({
               <button
                 onClick={handleSave}
                 disabled={isPending}
-                className="bg-aerojet-blue shadow-aerojet-blue/20 w-full rounded-4xlxl py-5 text-sm font-black tracking-widest text-white uppercase shadow-xl transition-all hover:scale-[1.02] hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
+                className="bg-aerojet-blue shadow-aerojet-blue/20 rounded-4xlxl w-full py-5 text-sm font-black tracking-widest text-white uppercase shadow-xl transition-all hover:scale-[1.02] hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
               >
                 {isPending ? 'Saving...' : editingEvent ? 'Update Event' : 'Create Event'}
               </button>

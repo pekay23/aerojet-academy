@@ -5,6 +5,7 @@ import { UploadDropzone } from '@/lib/uploads/uploadthing'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, FileImage, RefreshCw } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface Props {
   existingProofUrl: string | null | undefined
@@ -14,6 +15,7 @@ export default function PaymentUploadForm({ existingProofUrl }: Props) {
   const [uploading, setUploading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
+  const { markDirty, markClean } = useFormDirty()
 
   if (submitted || existingProofUrl) {
     return (
@@ -47,7 +49,7 @@ export default function PaymentUploadForm({ existingProofUrl }: Props) {
   }
 
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+    <div className="space-y-4 rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
       <h2 className="font-bold text-slate-900 dark:text-slate-100">Upload Your Payment Proof</h2>
       <p className="text-sm text-slate-500 dark:text-slate-400">
         Upload a screenshot, scan, or PDF of your bank transfer receipt or payment confirmation.
@@ -56,7 +58,10 @@ export default function PaymentUploadForm({ existingProofUrl }: Props) {
 
       <UploadDropzone
         endpoint="paymentProof"
-        onUploadBegin={() => setUploading(true)}
+        onUploadBegin={() => {
+          setUploading(true)
+          markDirty()
+        }}
         onClientUploadComplete={async (res) => {
           setUploading(false)
           if (!res?.[0]?.url) {
@@ -65,7 +70,6 @@ export default function PaymentUploadForm({ existingProofUrl }: Props) {
           }
 
           try {
-            // Save the URL to the user's record
             const response = await fetch('/api/applicant/upload-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -79,6 +83,7 @@ export default function PaymentUploadForm({ existingProofUrl }: Props) {
             toast.success('Payment proof submitted! Awaiting review.')
             setSubmitted(true)
             router.refresh()
+            markClean()
           } catch {
             toast.error('Network error while saving payment proof.')
           }
@@ -97,7 +102,11 @@ export default function PaymentUploadForm({ existingProofUrl }: Props) {
         }}
       />
 
-      {uploading && <p className="animate-pulse text-center text-sm text-slate-500 dark:text-slate-400">Uploading…</p>}
+      {uploading && (
+        <p className="animate-pulse text-center text-sm text-slate-500 dark:text-slate-400">
+          Uploading…
+        </p>
+      )}
     </div>
   )
 }

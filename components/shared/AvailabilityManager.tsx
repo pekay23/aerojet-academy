@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Plus, Trash2, CalendarClock } from 'lucide-react'
 import { addAvailabilitySlot, deleteAvailabilitySlot } from '@/lib/availability/actions'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface Slot {
   id: string
@@ -23,8 +24,12 @@ interface AvailabilityManagerProps {
   role?: 'instructor' | 'examiner'
 }
 
-export default function AvailabilityManager({ slots, role = 'instructor' }: AvailabilityManagerProps) {
+export default function AvailabilityManager({
+  slots,
+  role = 'instructor',
+}: AvailabilityManagerProps) {
   const [isPending, startTransition] = useTransition()
+  const { markDirty, markClean } = useFormDirty()
   const [form, setForm] = useState({
     kind: 'RECURRING_WEEKLY' as 'RECURRING_WEEKLY' | 'SPECIFIC_DATE',
     dayOfWeek: 1,
@@ -39,7 +44,10 @@ export default function AvailabilityManager({ slots, role = 'instructor' }: Avai
     startTransition(async () => {
       const res = await fn()
       if (res.error) toast.error(res.error)
-      else toast.success(ok)
+      else {
+        markClean()
+        toast.success(ok)
+      }
     })
 
   return (
@@ -47,9 +55,10 @@ export default function AvailabilityManager({ slots, role = 'instructor' }: Avai
       <div className="grid gap-2 rounded-2xl border border-slate-100 bg-white p-4 sm:grid-cols-7 dark:border-slate-800 dark:bg-slate-900">
         <select
           value={form.kind}
-          onChange={(e) =>
+          onChange={(e) => {
             setForm((f) => ({ ...f, kind: e.target.value as typeof f.kind }))
-          }
+            markDirty()
+          }}
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
         >
           <option value="RECURRING_WEEKLY">Weekly</option>
@@ -58,7 +67,10 @@ export default function AvailabilityManager({ slots, role = 'instructor' }: Avai
         {form.kind === 'RECURRING_WEEKLY' ? (
           <select
             value={form.dayOfWeek}
-            onChange={(e) => setForm((f) => ({ ...f, dayOfWeek: Number(e.target.value) }))}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, dayOfWeek: Number(e.target.value) }))
+              markDirty()
+            }}
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
           >
             {DAYS.map((d, i) => (
@@ -71,25 +83,37 @@ export default function AvailabilityManager({ slots, role = 'instructor' }: Avai
           <input
             type="date"
             value={form.date}
-            onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, date: e.target.value }))
+              markDirty()
+            }}
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
           />
         )}
         <input
           type="time"
           value={form.startTime}
-          onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
+          onChange={(e) => {
+            setForm((f) => ({ ...f, startTime: e.target.value }))
+            markDirty()
+          }}
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
         />
         <input
           type="time"
           value={form.endTime}
-          onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
+          onChange={(e) => {
+            setForm((f) => ({ ...f, endTime: e.target.value }))
+            markDirty()
+          }}
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
         />
         <select
           value={form.available ? '1' : '0'}
-          onChange={(e) => setForm((f) => ({ ...f, available: e.target.value === '1' }))}
+          onChange={(e) => {
+            setForm((f) => ({ ...f, available: e.target.value === '1' }))
+            markDirty()
+          }}
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
         >
           <option value="1">Available</option>
@@ -97,7 +121,10 @@ export default function AvailabilityManager({ slots, role = 'instructor' }: Avai
         </select>
         <input
           value={form.notes}
-          onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+          onChange={(e) => {
+            setForm((f) => ({ ...f, notes: e.target.value }))
+            markDirty()
+          }}
           placeholder={role === 'examiner' ? 'Invigilation notes' : 'Notes'}
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
         />
@@ -118,7 +145,7 @@ export default function AvailabilityManager({ slots, role = 'instructor' }: Avai
             )
           }
           disabled={isPending}
-          className="flex items-center justify-center gap-1.5 rounded-lg bg-aerojet-blue px-3 py-2 text-sm font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
+          className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
         >
           <Plus className="h-4 w-4" /> Add
         </button>
@@ -128,10 +155,18 @@ export default function AvailabilityManager({ slots, role = 'instructor' }: Avai
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/80 text-left dark:border-slate-800 dark:bg-slate-900/50">
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">When</th>
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Time</th>
-              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Status</th>
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Notes</th>
+              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                When
+              </th>
+              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Time
+              </th>
+              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Status
+              </th>
+              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Notes
+              </th>
               <th className="px-4 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase"></th>
             </tr>
           </thead>
@@ -151,9 +186,7 @@ export default function AvailabilityManager({ slots, role = 'instructor' }: Avai
                 <td className="px-4 py-3 text-center">
                   <span
                     className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                      s.available
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-red-100 text-red-700'
+                      s.available ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
                     }`}
                   >
                     {s.available ? 'Available' : 'Unavailable'}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 import {
   Plus as _Plus,
   Search,
@@ -15,7 +16,6 @@ import {
   Settings,
 } from 'lucide-react'
 
-
 import { cn, formatDate } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -28,7 +28,11 @@ interface BankQuestion {
   correctAnswer: string
   points: number
   createdAt?: string
-  submittedBy?: { id: string; name: string | null; profile?: { firstName: string | null; lastName: string | null } | null } | null
+  submittedBy?: {
+    id: string
+    name: string | null
+    profile?: { firstName: string | null; lastName: string | null } | null
+  } | null
 }
 
 interface BankManagerProps {
@@ -55,7 +59,12 @@ function StatusBadge({ status }: { status: string }) {
     REJECTED: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
   }
   return (
-    <span className={cn('rounded-full border-transparent px-2.5 py-0.5 text-[10px] font-bold', map[status] || 'bg-slate-100 text-slate-600')}>
+    <span
+      className={cn(
+        'rounded-full border-transparent px-2.5 py-0.5 text-[10px] font-bold',
+        map[status] || 'bg-slate-100 text-slate-600'
+      )}
+    >
       {status.replace(/_/g, ' ')}
     </span>
   )
@@ -68,7 +77,12 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
     HARD: 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
   }
   return (
-    <span className={cn('rounded-md px-2 py-0.5 text-[10px] font-bold uppercase', map[difficulty] || 'bg-slate-100 text-slate-600')}>
+    <span
+      className={cn(
+        'rounded-md px-2 py-0.5 text-[10px] font-bold uppercase',
+        map[difficulty] || 'bg-slate-100 text-slate-600'
+      )}
+    >
       {difficulty}
     </span>
   )
@@ -96,6 +110,8 @@ export default function BankManager({
   const [mcqCount, setMcqCount] = useState(40)
   const [savingDuration, setSavingDuration] = useState(false)
 
+  const { markDirty, markClean } = useFormDirty()
+
   // Calculate total exam duration
   const totalMinutes = Math.round((timePerQuestion * mcqCount) / 60)
 
@@ -110,11 +126,13 @@ export default function BankManager({
       const json = await res.json()
       if (json.success) {
         toast.success('Exam duration updated')
+        markClean()
         setDurationModalOpen(false)
       } else {
         toast.error(json.error || 'Failed to update duration')
       }
-    } catch {
+    } catch (err) {
+      console.error('[BankManager] Failed to update duration:', err)
       toast.error('Failed to update duration')
     } finally {
       setSavingDuration(false)
@@ -134,7 +152,8 @@ export default function BankManager({
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white">{bankName}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            {courseCode && <span className="font-mono font-bold">{courseCode}</span>} {courseName && `· ${courseName}`}
+            {courseCode && <span className="font-mono font-bold">{courseCode}</span>}{' '}
+            {courseName && `· ${courseName}`}
           </p>
         </div>
         <button
@@ -149,47 +168,72 @@ export default function BankManager({
       {/* Pool Health + Duration Summary */}
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pool Health</p>
+          <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+            Pool Health
+          </p>
           <div className="mt-2 flex items-center gap-2">
-            <div className={cn(
-              'h-3 w-3 rounded-full',
-              poolHealth === 'GREEN' ? 'bg-emerald-500' :
-              poolHealth === 'AMBER' ? 'bg-amber-500' : 'bg-red-500'
-            )} />
+            <div
+              className={cn(
+                'h-3 w-3 rounded-full',
+                poolHealth === 'GREEN'
+                  ? 'bg-emerald-500'
+                  : poolHealth === 'AMBER'
+                    ? 'bg-amber-500'
+                    : 'bg-red-500'
+              )}
+            />
             <span className="text-lg font-black text-slate-900 dark:text-white">{poolHealth}</span>
           </div>
-          <p className="mt-1 text-xs text-slate-500">{approvedCount} / {requiredMinimum} required questions</p>
+          <p className="mt-1 text-xs text-slate-500">
+            {approvedCount} / {requiredMinimum} required questions
+          </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pending Review</p>
-          <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{pendingCount ?? 0}</p>
+          <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+            Pending Review
+          </p>
+          <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">
+            {pendingCount ?? 0}
+          </p>
           <p className="mt-1 text-xs text-slate-500">questions awaiting approval</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Exam Duration</p>
+          <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+            Exam Duration
+          </p>
           <div className="mt-2 flex items-center gap-2">
             <Clock className="h-5 w-5 text-blue-600" />
-            <span className="text-lg font-black text-slate-900 dark:text-white">{totalMinutes} min</span>
+            <span className="text-lg font-black text-slate-900 dark:text-white">
+              {totalMinutes} min
+            </span>
           </div>
-          <p className="mt-1 text-xs text-slate-500">{mcqCount} questions × {timePerQuestion}s each</p>
+          <p className="mt-1 text-xs text-slate-500">
+            {mcqCount} questions × {timePerQuestion}s each
+          </p>
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Search questions..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            onChange={(e) => {
+              setSearch(e.target.value)
+              markDirty()
+            }}
+            className="w-full rounded-xl border border-slate-200 bg-white py-2 pr-4 pl-10 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           />
         </div>
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            setStatusFilter(e.target.value)
+            markDirty()
+          }}
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
         >
           <option value="all">All statuses</option>
@@ -219,9 +263,12 @@ export default function BankManager({
               className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 p-4 dark:border-slate-800"
             >
               <div className="min-w-0 flex-1">
-                <p className="line-clamp-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{q.text}</p>
+                <p className="line-clamp-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  {q.text}
+                </p>
                 <p className="mt-1 text-xs text-slate-500">
-                  {q.points} pt{q.points !== 1 ? 's' : ''} · {formatDate(q.createdAt || new Date().toISOString())}
+                  {q.points} pt{q.points !== 1 ? 's' : ''} ·{' '}
+                  {formatDate(q.createdAt || new Date().toISOString())}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
@@ -247,7 +294,8 @@ export default function BankManager({
               </button>
             </div>
             <p className="mt-1 text-sm text-slate-500">
-              Configure the exam duration for <strong>{bankName}</strong>. These settings apply to every student who takes this exam.
+              Configure the exam duration for <strong>{bankName}</strong>. These settings apply to
+              every student who takes this exam.
             </p>
 
             <div className="mt-6 space-y-4">
@@ -260,10 +308,15 @@ export default function BankManager({
                   min={5}
                   max={200}
                   value={mcqCount}
-                  onChange={(e) => setMcqCount(Number(e.target.value))}
+                  onChange={(e) => {
+                    setMcqCount(Number(e.target.value))
+                    markDirty()
+                  }}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
-                <p className="mt-1 text-xs text-slate-400">Number of questions each student receives</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  Number of questions each student receives
+                </p>
               </div>
 
               <div>
@@ -275,7 +328,10 @@ export default function BankManager({
                   min={10}
                   max={300}
                   value={timePerQuestion}
-                  onChange={(e) => setTimePerQuestion(Number(e.target.value))}
+                  onChange={(e) => {
+                    setTimePerQuestion(Number(e.target.value))
+                    markDirty()
+                  }}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
                 <p className="mt-1 text-xs text-slate-400">Seconds allocated per question</p>
@@ -285,16 +341,24 @@ export default function BankManager({
                 <div className="flex items-center gap-3">
                   <Clock className="h-8 w-8 text-blue-600" />
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-blue-600">Total Exam Duration</p>
-                    <p className="text-2xl font-black text-slate-900 dark:text-white">{totalMinutes} minutes</p>
-                    <p className="text-xs text-slate-500">{mcqCount} questions × {timePerQuestion} seconds</p>
+                    <p className="text-xs font-bold tracking-widest text-blue-600 uppercase">
+                      Total Exam Duration
+                    </p>
+                    <p className="text-2xl font-black text-slate-900 dark:text-white">
+                      {totalMinutes} minutes
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {mcqCount} questions × {timePerQuestion} seconds
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-xl bg-amber-50 p-3 dark:bg-amber-900/10">
                 <p className="text-xs text-amber-700 dark:text-amber-300">
-                  <strong>Note:</strong> This duration applies to every student taking this exam. Each student gets the full {totalMinutes} minutes from when they personally start. The exam auto-submits when time expires.
+                  <strong>Note:</strong> This duration applies to every student taking this exam.
+                  Each student gets the full {totalMinutes} minutes from when they personally start.
+                  The exam auto-submits when time expires.
                 </p>
               </div>
             </div>

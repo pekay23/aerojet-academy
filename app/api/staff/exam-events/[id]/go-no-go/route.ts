@@ -1,7 +1,13 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
-import { apiSuccess, apiError, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
+import {
+  apiSuccess,
+  apiError,
+  apiNotFound,
+  withErrorHandler,
+  RouteContext,
+} from '@/lib/api/response'
 import { executeGo, executeNoGo, executePostponement } from '@/lib/events/go-no-go'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
@@ -22,7 +28,11 @@ export const POST = withErrorHandler(
     const event = await prismaUnfiltered.examEvent.findUnique({ where: { id } })
     if (!event) return apiNotFound('Event not found')
 
-    let result: Record<string, unknown>
+    let result: Awaited<
+      | ReturnType<typeof executeGo>
+      | ReturnType<typeof executeNoGo>
+      | ReturnType<typeof executePostponement>
+    >
 
     if (decision === 'go') {
       result = await executeGo(id, admin.id)

@@ -44,7 +44,12 @@ export function serializePrisma<T>(data: T): SerializedPrisma<T> {
 
   // Handle objects
   if (typeof data === 'object') {
-    const candidate = data as unknown as { constructor?: { name: string }; toNumber?: () => number; d?: unknown; s?: unknown }
+    const candidate = data as unknown as {
+      constructor?: { name: string }
+      toNumber?: () => number
+      d?: unknown
+      s?: unknown
+    }
     // Check if it's a Prisma Decimal object
     if (
       candidate.constructor?.name === 'Decimal' ||
@@ -60,10 +65,9 @@ export function serializePrisma<T>(data: T): SerializedPrisma<T> {
 
     // Recursively serialize object properties
     const result: Record<string, unknown> = {}
-    for (const key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        result[key] = serializePrisma((data as Record<string, unknown>)[key])
-      }
+    const dataRecord = data as Record<string, unknown>
+    for (const key of Object.keys(dataRecord)) {
+      result[key] = serializePrisma(dataRecord[key])
     }
     return result as SerializedPrisma<T>
   }

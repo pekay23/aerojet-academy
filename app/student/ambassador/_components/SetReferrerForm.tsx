@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 import { setReferrerAction } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight } from 'lucide-react'
@@ -8,6 +9,8 @@ import { Loader2, ArrowRight } from 'lucide-react'
 export default function SetReferrerForm() {
   const [input, setInput] = useState('')
   const [isPending, startTransition] = useTransition()
+
+  const { markDirty, markClean } = useFormDirty()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,6 +27,7 @@ export default function SetReferrerForm() {
           toast.error(res.error)
         } else {
           toast.success('Referrer set successfully!')
+          markClean()
           setInput('')
         }
       } catch (_err) {
@@ -38,10 +42,13 @@ export default function SetReferrerForm() {
         type="text"
         placeholder="Email or Referral Code"
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={(e) => {
+          setInput(e.target.value)
+          markDirty()
+        }}
         disabled={isPending}
         required
-        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium outline-none transition-all focus:border-blue-800 focus:ring-4 focus:ring-blue-800/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium transition-all outline-none focus:border-blue-800 focus:ring-4 focus:ring-blue-800/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
       />
       <button
         type="submit"

@@ -91,6 +91,7 @@ const REVIEW_STATE_CONFIG: Record<string, { label: string; color: string; bg: st
 export default function ExamBankManager() {
   const [banks, setBanks] = useState<ExamBank[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
@@ -125,8 +126,9 @@ export default function ExamBankManager() {
       const res = await fetch('/api/staff/exams/internal/banks')
       const json = await res.json()
       if (json.data) setBanks(json.data)
-    } catch {
-      // silent
+    } catch (err) {
+      console.error('[ExamBankManager] Failed to fetch banks:', err)
+      setError('Failed to load exam banks')
     } finally {
       setLoading(false)
     }
@@ -172,7 +174,9 @@ export default function ExamBankManager() {
         .then((j) => {
           if (j.data) setCourses(j.data)
         })
-        .catch(() => {})
+        .catch((err) => {
+          console.error('[ExamBankManager] Failed to fetch courses:', err)
+        })
     }
   }, [showCreateModal, courses.length])
 
@@ -194,6 +198,20 @@ export default function ExamBankManager() {
     return (
       <div className="flex items-center justify-center py-16">
         <Loader2 className="text-aerojet-blue h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-900/60 dark:bg-red-950/30">
+        <p className="text-sm font-bold text-red-700 dark:text-red-200">{error}</p>
+        <button
+          onClick={fetchBanks}
+          className="mt-3 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700"
+        >
+          Retry
+        </button>
       </div>
     )
   }

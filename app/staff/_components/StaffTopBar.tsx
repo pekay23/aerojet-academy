@@ -85,8 +85,7 @@ function LiveClock() {
   const [now, setNow] = useState<Date | null>(null)
 
   useEffect(() => {
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNow(new Date())
     const interval = setInterval(() => setNow(new Date()), 60_000)
     return () => clearInterval(interval)
@@ -108,16 +107,19 @@ function LiveClock() {
   )
 }
 
-export default function StaffTopBar({ initialCounts, welcomeMessages, userName }: StaffTopBarProps) {
+export default function StaffTopBar({
+  initialCounts,
+  welcomeMessages,
+  userName,
+}: StaffTopBarProps) {
   const _router = useRouter()
   const [welcomeMsg, setWelcomeMsg] = useState<string | null>(null)
   const [dismissingIds, setDismissingIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (welcomeMessages?.length) {
-   
       const idx = Math.floor(Math.random() * welcomeMessages.length)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setWelcomeMsg(welcomeMessages[idx] ?? welcomeMessages[0])
     } else {
       setWelcomeMsg('Welcome back')
@@ -146,16 +148,21 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
       .then((r) =>
         r.ok
           ? r.json()
-          : { notifications: [], messages: [], pendingItems: { applicants: [], payments: [], enrollments: [] } }
+          : {
+              notifications: [],
+              messages: [],
+              pendingItems: { applicants: [], payments: [], enrollments: [] },
+            }
       )
       .then((data) => {
         setNotifications(data.notifications ?? [])
         setMessages(data.messages ?? [])
-        setPendingItems(
-          data.pendingItems ?? { applicants: [], payments: [], enrollments: [] }
-        )
+        setPendingItems(data.pendingItems ?? { applicants: [], payments: [], enrollments: [] })
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error('[StaffTopBar] Failed to fetch topbar items:', err)
+        toast.error('Failed to load pending items')
+      })
   }, [])
 
   const notifCount =
@@ -169,7 +176,8 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
   const hasPendingPayments = pendingItems.payments.length > 0
   const hasPendingEnrollments = pendingItems.enrollments.length > 0
   const hasNotifications = notifications.length > 0
-  const hasAnyPending = hasPendingApplicants || hasPendingPayments || hasPendingEnrollments || hasNotifications
+  const hasAnyPending =
+    hasPendingApplicants || hasPendingPayments || hasPendingEnrollments || hasNotifications
   const hasAnyMessages = messages.length > 0
 
   const handleDismissNotification = async (id: string, e: React.MouseEvent) => {
@@ -243,7 +251,11 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
           <div id="welcome-banner" className="hidden max-w-md items-center gap-2 xl:flex">
             <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
             <p className="truncate text-xs text-slate-500 italic dark:text-slate-400">
-              {userName && <span className="not-italic font-medium text-slate-500 dark:text-slate-400">Hi {userName}</span>}
+              {userName && (
+                <span className="font-medium text-slate-500 not-italic dark:text-slate-400">
+                  Hi {userName}
+                </span>
+              )}
               {userName && <span className="mx-1">—</span>}
               {welcomeMsg}
             </p>
@@ -284,17 +296,13 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
             <DropdownMenuLabel className="flex items-center justify-between">
               <span>Pending Actions</span>
               {notifCount > 0 && (
-                <span className="text-xs font-normal text-slate-400">
-                  {notifCount} pending
-                </span>
+                <span className="text-xs font-normal text-slate-400">{notifCount} pending</span>
               )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
 
             {!hasAnyPending ? (
-              <div className="px-4 py-6 text-center text-sm text-slate-400">
-                No pending actions
-              </div>
+              <div className="px-4 py-6 text-center text-sm text-slate-400">No pending actions</div>
             ) : (
               <div className="max-h-[340px] overflow-y-auto">
                 {/* Pending Applicants */}
@@ -342,7 +350,8 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
                               {p.userName}
                             </p>
                             <p className="text-[11px] text-slate-400">
-                              {p.currency} {p.amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                              {p.currency}{' '}
+                              {p.amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
                               {' · '}
                               {formatDistanceToNow(new Date(p.createdAt), { addSuffix: true })}
                             </p>
@@ -398,11 +407,13 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
                         <div
                           key={n.id}
                           className={`flex items-start gap-3 px-3 py-2 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
-                            isCritical ? 'border-l-2 border-l-red-500 bg-red-50/30 dark:bg-red-900/5' : ''
+                            isCritical
+                              ? 'border-l-2 border-l-red-500 bg-red-50/30 dark:bg-red-900/5'
+                              : ''
                           } ${isDismissing ? 'opacity-50' : ''}`}
                         >
                           <Link
-                            href={n.linkUrl || '/staff/notifications'}
+                            href={`${n.linkUrl || '/staff/notifications'}?returnUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/staff/dashboard')}`}
                             className="flex min-w-0 flex-1 items-start gap-3"
                           >
                             <TypeIcon className={`mt-0.5 h-4 w-4 shrink-0 ${cfg.className}`} />
@@ -412,9 +423,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
                               >
                                 {n.title}
                               </p>
-                              <p className="mt-0.5 truncate text-xs text-slate-400">
-                                {n.message}
-                              </p>
+                              <p className="mt-0.5 truncate text-xs text-slate-400">{n.message}</p>
                               <p className="mt-0.5 text-[11px] text-slate-400/60">
                                 {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
                               </p>
@@ -450,7 +459,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
               <DropdownMenuItem asChild>
                 <Link
                   href="/staff/notifications"
-                  className="justify-center text-center text-xs font-medium text-aerojet-sky"
+                  className="text-aerojet-sky justify-center text-center text-xs font-medium"
                 >
                   View All Notifications
                 </Link>
@@ -460,7 +469,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
               <DropdownMenuItem asChild>
                 <Link
                   href="/staff/payments?tab=PENDING"
-                  className="justify-center text-center text-xs font-medium text-aerojet-sky"
+                  className="text-aerojet-sky justify-center text-center text-xs font-medium"
                 >
                   View All Pending
                 </Link>
@@ -491,14 +500,14 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
                 {unreadMessageCount > 0 && (
                   <button
                     onClick={handleMarkAllMessagesRead}
-                    className="text-[10px] font-bold text-slate-400 uppercase tracking-wider transition-colors hover:text-aerojet-sky"
+                    className="hover:text-aerojet-sky text-[10px] font-bold tracking-wider text-slate-400 uppercase transition-colors"
                   >
                     Mark all read
                   </button>
                 )}
                 <Link
                   href="/staff/messages?compose=true"
-                  className="text-xs font-normal text-aerojet-sky hover:underline"
+                  className="text-aerojet-sky text-xs font-normal hover:underline"
                 >
                   New Message
                 </Link>
@@ -514,9 +523,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
                 <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
                   No messages yet
                 </p>
-                <p className="mt-1 text-xs text-slate-400">
-                  Conversations will appear here
-                </p>
+                <p className="mt-1 text-xs text-slate-400">Conversations will appear here</p>
               </div>
             ) : (
               <div className="max-h-[300px] overflow-y-auto">
@@ -536,7 +543,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
                           !msg.isRead ? 'bg-blue-50/40 dark:bg-blue-900/5' : ''
                         }`}
                       >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold uppercase text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500 uppercase dark:bg-slate-800 dark:text-slate-400">
                           {initials}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -566,7 +573,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
             <DropdownMenuItem asChild>
               <Link
                 href="/staff/messages"
-                className="justify-center text-center text-sm font-medium text-aerojet-sky"
+                className="text-aerojet-sky justify-center text-center text-sm font-medium"
               >
                 View All Messages
               </Link>

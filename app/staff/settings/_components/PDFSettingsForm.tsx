@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { FileText, Award } from 'lucide-react'
 import TemplateList from './TemplateList'
 import SignatureManager from './SignatureManager'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 // Dynamically import PDFViewer with SSR disabled — @react-pdf/renderer needs DOM APIs
 const LivePDFViewer = dynamic(() => import('./LivePDFViewer'), {
@@ -66,10 +67,12 @@ interface PDFSettingsFormProps {
 
 export default function PDFSettingsForm({ values, pdfSettings }: PDFSettingsFormProps) {
   const [liveSettings, setLiveSettings] = useState(pdfSettings)
-
   const [isGenerating, setIsGenerating] = useState<string | null>(null)
+  const { markDirty, markClean } = useFormDirty()
 
   const handleFormChange = (e: React.FormEvent<HTMLDivElement>) => {
+    // Warn user before closing/refreshing if they have unsaved changes
+    markDirty()
     const form = (e.currentTarget as HTMLElement).querySelector('form')
     if (form) {
       const formData = new FormData(form)

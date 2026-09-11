@@ -143,6 +143,7 @@ function createAdapter(connectionString: string) {
     max: isDev ? 16 : 8,
     connectionTimeoutMillis: timeout,
     idleTimeoutMillis: 30_000,
+    ssl: isDev ? { rejectUnauthorized: false } : undefined,
   })
 
   // Log full error objects, not just .message (which can be undefined)
