@@ -206,7 +206,7 @@ export default function PortalTopbar({
             <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
             <p className="truncate text-xs text-slate-500 italic dark:text-slate-400">
               {userName && (
-                <span className="not-italic font-medium text-slate-500 dark:text-slate-400">
+                <span className="font-medium text-slate-500 not-italic dark:text-slate-400">
                   Hi {userName}
                 </span>
               )}
@@ -247,7 +247,9 @@ export default function PortalTopbar({
             <DropdownMenuLabel className="flex items-center justify-between">
               <span>Notifications</span>
               {unreadNotifCount > 0 && (
-                <span className="text-xs font-normal text-slate-400">{unreadNotifCount} unread</span>
+                <span className="text-xs font-normal text-slate-400">
+                  {unreadNotifCount} unread
+                </span>
               )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -267,7 +269,7 @@ export default function PortalTopbar({
                       }`}
                     >
                       <Link
-                        href={n.linkUrl || notificationsHref}
+                        href={`${n.linkUrl || notificationsHref}?returnUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/student/dashboard')}`}
                         className="flex min-w-0 flex-1 items-start gap-3"
                       >
                         <TypeIcon className={`mt-0.5 h-4 w-4 shrink-0 ${cfg.className}`} />
@@ -307,7 +309,7 @@ export default function PortalTopbar({
                 <DropdownMenuItem asChild>
                   <Link
                     href={notificationsHref}
-                    className="justify-center text-center text-xs font-medium text-aerojet-sky"
+                    className="text-aerojet-sky justify-center text-center text-xs font-medium"
                   >
                     View All Notifications
                   </Link>
@@ -339,7 +341,7 @@ export default function PortalTopbar({
                 {messages.filter((m) => !m.isRead).length > 0 && (
                   <button
                     onClick={handleMarkAllMessagesRead}
-                    className="text-[10px] font-bold uppercase tracking-wider text-slate-400 transition-colors hover:text-aerojet-sky"
+                    className="hover:text-aerojet-sky text-[10px] font-bold tracking-wider text-slate-400 uppercase transition-colors"
                   >
                     Mark all read
                   </button>
@@ -347,7 +349,7 @@ export default function PortalTopbar({
                 {composeHref && (
                   <Link
                     href={composeHref}
-                    className="text-xs font-normal text-aerojet-sky hover:underline"
+                    className="text-aerojet-sky text-xs font-normal hover:underline"
                   >
                     New Message
                   </Link>
@@ -360,7 +362,9 @@ export default function PortalTopbar({
                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
                   <Mail className="h-6 w-6 text-slate-300 dark:text-slate-600" />
                 </div>
-                <p className="text-sm font-bold text-slate-500 dark:text-slate-400">No messages yet</p>
+                <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                  No messages yet
+                </p>
                 <p className="mt-1 text-xs text-slate-400">Conversations will appear here</p>
               </div>
             ) : (
@@ -381,7 +385,7 @@ export default function PortalTopbar({
                           !msg.isRead ? 'bg-blue-50/40 dark:bg-blue-900/5' : ''
                         }`}
                       >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold uppercase text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500 uppercase dark:bg-slate-800 dark:text-slate-400">
                           {initials}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -412,7 +416,7 @@ export default function PortalTopbar({
                 <DropdownMenuItem asChild>
                   <Link
                     href={messagesHref}
-                    className="justify-center text-center text-sm font-medium text-aerojet-sky"
+                    className="text-aerojet-sky justify-center text-center text-sm font-medium"
                   >
                     View All Messages
                   </Link>

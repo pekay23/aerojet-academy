@@ -212,6 +212,14 @@ export const GET = withErrorHandler(async () => {
     },
   })
 
+  // Natural sort by moduleCode so M2 comes before M10, M11A, etc.
+  allBanks.sort((a, b) =>
+    (a.moduleCode || '').localeCompare(b.moduleCode || '', undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    })
+  )
+
   const eligibleBanks = allBanks.filter((bank) =>
     categoryMatchesTarget(getInternalBankCategoryCode(bank), targetCategories)
   )

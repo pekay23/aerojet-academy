@@ -1,12 +1,15 @@
-import "server-only"
-import { readFileSync, readdirSync, existsSync } from "node:fs"
-import path from "node:path"
-import { parse } from "csv-parse/sync"
-import { prismaUnfiltered } from "../lib/prisma/client"
-import { calculateMinimumPoolSize, getMaxCategoryQuestionCount } from "../lib/easa/module-requirements"
-import { normalizeCategoryCode } from "../lib/easa/category-selection"
+import 'server-only'
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import path from 'node:path'
+import { parse } from 'csv-parse/sync'
+import { prismaUnfiltered } from '../lib/prisma/client'
+import {
+  calculateMinimumPoolSize,
+  getMaxCategoryQuestionCount,
+} from '../lib/easa/module-requirements'
+import { normalizeCategoryCode } from '../lib/easa/category-selection'
 
-const EASA_SEED_DIR = path.join(process.cwd(), "scripts", "easa-seed", "csvs")
+const EASA_SEED_DIR = path.join(process.cwd(), 'scripts', 'easa-seed', 'csvs')
 
 interface CsvRow {
   module: string
@@ -32,38 +35,36 @@ interface CsvRow {
 }
 
 const QUESTION_DIFFICULTY = {
-  EASY: "EASY",
-  MEDIUM: "MEDIUM",
-  HARD: "HARD",
+  EASY: 'EASY',
+  MEDIUM: 'MEDIUM',
+  HARD: 'HARD',
 } as const
 
 const QUESTION_STATUS = {
-  DRAFT: "DRAFT",
-  PENDING_APPROVAL: "PENDING_APPROVAL",
-  APPROVED: "APPROVED",
-  REJECTED: "REJECTED",
+  DRAFT: 'DRAFT',
+  PENDING_APPROVAL: 'PENDING_APPROVAL',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
 } as const
 
 type Difficulty = (typeof QUESTION_DIFFICULTY)[keyof typeof QUESTION_DIFFICULTY]
 type Status = (typeof QUESTION_STATUS)[keyof typeof QUESTION_STATUS]
 
-const ALLOWED_DIFFICULTIES = new Set<Difficulty>(
-  Object.values(QUESTION_DIFFICULTY) as Difficulty[],
-)
+const ALLOWED_DIFFICULTIES = new Set<Difficulty>(Object.values(QUESTION_DIFFICULTY) as Difficulty[])
 const ALLOWED_STATUSES = new Set<Status>(Object.values(QUESTION_STATUS) as Status[])
 
 function toDifficulty(v: string): Difficulty {
   const up = v.toUpperCase()
-  return ALLOWED_DIFFICULTIES.has(up as Difficulty) ? (up as Difficulty) : "MEDIUM"
+  return ALLOWED_DIFFICULTIES.has(up as Difficulty) ? (up as Difficulty) : 'MEDIUM'
 }
 
 function toStatus(v: string): Status {
   const up = v.toUpperCase()
-  return ALLOWED_STATUSES.has(up as Status) ? (up as Status) : "DRAFT"
+  return ALLOWED_STATUSES.has(up as Status) ? (up as Status) : 'DRAFT'
 }
 
 function cleanOptionText(text: string): string {
-  return text.replace(/\*/g, "").trim()
+  return text.replace(/\*/g, '').trim()
 }
 
 function normalizeOptions(row: CsvRow): string[] {
@@ -73,21 +74,31 @@ function normalizeOptions(row: CsvRow): string[] {
   if (cleaned.length > 3) return cleaned.slice(0, 3)
   if (cleaned.length < 3) {
     // Pad with empty strings — seed script will skip if < 2
-    while (cleaned.length < 3) cleaned.push("")
+    while (cleaned.length < 3) cleaned.push('')
   }
   return cleaned
 }
 
 function resolveCorrectAnswer(row: CsvRow, options: string[]): string {
   const raw = row.correctAnswer.trim()
-  if (!raw) return ""
+  if (!raw) return ''
   // If it's a single letter, resolve to the corresponding option text
   if (/^[A-D]$/i.test(raw)) {
-    const idx = raw.toUpperCase().charCodeAt(0) - "A".charCodeAt(0)
+    const idx = raw.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0)
     return options[idx] ?? raw
   }
   // Otherwise assume it's already full option text
   return raw
+}
+
+function isValidQuestion(row: CsvRow, options: string[], correctAnswer: string): boolean {
+  // Must have at least 2 valid options
+  if (options.length < 2) return false
+  // correctAnswer must not be empty
+  if (!correctAnswer) return false
+  // correctAnswer must match one of the options (or be the raw letter)
+  if (!options.includes(correctAnswer) && !/^[A-D]$/i.test(row.correctAnswer.trim())) return false
+  return true
 }
 
 async function ensureBank(moduleCode: string): Promise<string> {
@@ -106,7 +117,7 @@ async function ensureBank(moduleCode: string): Promise<string> {
     update: {
       moduleCode,
       name: `EASA Part-66 ${moduleCode} Question Bank`,
-      ruleSet: "EASA",
+      ruleSet: 'EASA',
       isActive: true,
       mcqCount: recommendedMcqCount,
       minimumPoolSize: easaMinimum,
@@ -115,7 +126,7 @@ async function ensureBank(moduleCode: string): Promise<string> {
       id: `easa-${moduleCode.toLowerCase()}`,
       courseId: course.id,
       moduleCode,
-      ruleSet: "EASA",
+      ruleSet: 'EASA',
       name: `EASA Part-66 ${moduleCode} Question Bank`,
       description: `Seeded from C:/Users/Pekay/OneDrive - Ghana Communication Technology University/AerojetAviation (Module ${moduleCode}). Suntech-approved source of truth.`,
       mcqCount: recommendedMcqCount,
@@ -132,7 +143,7 @@ async function seedModule(moduleCode: string): Promise<number> {
     console.log(`  ${moduleCode}: no CSV at ${csvPath} — skipping`)
     return 0
   }
-  const raw = readFileSync(csvPath, "utf-8")
+  const raw = readFileSync(csvPath, 'utf-8')
   const rows: CsvRow[] = parse(raw, { columns: true, skip_empty_lines: true })
 
   const bankId = await ensureBank(moduleCode)
@@ -150,8 +161,16 @@ async function seedModule(moduleCode: string): Promise<number> {
       const options = normalizeOptions(row)
       if (options.length < 2) return null
 
-      const isEssay = row.isEssay === "true" || (!options.some((o) => o) && row.text.trim().length > 0)
+      const isEssay =
+        row.isEssay === 'true' || (!options.some((o) => o) && row.text.trim().length > 0)
       const correct = resolveCorrectAnswer(row, options)
+
+      // Skip questions with missing or invalid answers
+      if (!isValidQuestion(row, options, correct)) {
+        console.warn(`  ⚠️ Skipping question with invalid answer: ${row.text.substring(0, 50)}...`)
+        return null
+      }
+
       const levelNum = row.level ? Number(row.level) : null
       const points = Number(row.points) || 1
       const categoryCode = row.categoryCode ? normalizeCategoryCode(row.categoryCode) : null
@@ -190,20 +209,20 @@ async function seedModule(moduleCode: string): Promise<number> {
 }
 
 async function main() {
-  console.log("🌱 Seeding EASA Part-66 question banks...")
+  console.log('🌱 Seeding EASA Part-66 question banks...')
 
   if (!existsSync(EASA_SEED_DIR)) {
     throw new Error(
-      `CSV directory not found: ${EASA_SEED_DIR}. Run scripts/easa-seed/extract_questions.py + consolidate.py first.`,
+      `CSV directory not found: ${EASA_SEED_DIR}. Run scripts/easa-seed/extract_questions.py + consolidate.py first.`
     )
   }
   const files = readdirSync(EASA_SEED_DIR)
-    .filter((f) => f.endsWith(".csv"))
-    .map((f) => f.replace(/\.csv$/, ""))
-    .filter((m) => !m.includes("_answered") && !m.includes("_final") && !m.includes("_backup"))
+    .filter((f) => f.endsWith('.csv'))
+    .map((f) => f.replace(/\.csv$/, ''))
+    .filter((m) => !m.includes('_answered') && !m.includes('_final') && !m.includes('_backup'))
     .sort()
 
-  console.log(`Found CSV files for modules: ${files.join(", ")}`)
+  console.log(`Found CSV files for modules: ${files.join(', ')}`)
 
   let total = 0
   for (const moduleCode of files) {
@@ -219,7 +238,7 @@ async function main() {
   console.log(`\nDone. Seeded ${total} questions across ${files.length} modules.`)
 }
 
-import { fileURLToPath } from "node:url"
+import { fileURLToPath } from 'node:url'
 
 const __filename = fileURLToPath(import.meta.url)
 if (process.argv[1] === __filename) {

@@ -3,8 +3,6 @@
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
-
-
 import { getRegistrationConfig, getExamsConfig } from '@/lib/settings'
 
 const _DISMISSABLE_TITLES = new Set([
@@ -16,13 +14,16 @@ const _DISMISSABLE_TITLES = new Set([
   'Internal Exam Reports Pending',
 ])
 
-async function createIfMissing(userId: string, data: {
-  type: 'CRITICAL' | 'WARNING' | 'ERROR' | 'INFO'
-  title: string
-  message: string
-  linkUrl?: string
-  linkText?: string
-}) {
+async function createIfMissing(
+  userId: string,
+  data: {
+    type: 'CRITICAL' | 'WARNING' | 'ERROR' | 'INFO'
+    title: string
+    message: string
+    linkUrl?: string
+    linkText?: string
+  }
+) {
   const existing = await prismaUnfiltered.notification.findFirst({
     where: {
       userId,
@@ -103,46 +104,60 @@ export async function ensureSystemNotifications() {
       emailFailures24h,
       pendingExamReports,
     ] = await Promise.all([
-      prismaUnfiltered.payment.count({
-        where: { status: 'PENDING', createdAt: { lt: todayMinus7 } },
-      }).catch(() => 0),
+      prismaUnfiltered.payment
+        .count({
+          where: { status: 'PENDING', createdAt: { lt: todayMinus7 } },
+        })
+        .catch(() => 0),
 
-      prismaUnfiltered.dataSubjectRequest.count({
-        where: {
-          dueBy: { lt: now },
-          status: { in: ['RECEIVED', 'IN_PROGRESS', 'AWAITING_USER'] },
-        },
-      }).catch(() => 0),
+      prismaUnfiltered.dataSubjectRequest
+        .count({
+          where: {
+            dueBy: { lt: now },
+            status: { in: ['RECEIVED', 'IN_PROGRESS', 'AWAITING_USER'] },
+          },
+        })
+        .catch(() => 0),
 
-      prismaUnfiltered.referral.count({
-        where: { fraudScore: { gte: 50 }, reviewedAt: null },
-      }).catch(() => 0),
+      prismaUnfiltered.referral
+        .count({
+          where: { fraudScore: { gte: 50 }, reviewedAt: null },
+        })
+        .catch(() => 0),
 
-      prismaUnfiltered.examBundle.count({
-        where: {
-          validUntil: { gte: tomorrow, lte: sevenDaysOut },
-          status: 'ACTIVE',
-        },
-      }).catch(() => 0),
+      prismaUnfiltered.examBundle
+        .count({
+          where: {
+            validUntil: { gte: tomorrow, lte: sevenDaysOut },
+            status: 'ACTIVE',
+          },
+        })
+        .catch(() => 0),
 
-      prismaUnfiltered.fileUpload.count({
-        where: {
-          mirroredAt: null,
-          supabasePath: { not: null },
-          createdAt: { lt: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
-        },
-      }).catch(() => 0),
+      prismaUnfiltered.fileUpload
+        .count({
+          where: {
+            mirroredAt: null,
+            supabasePath: { not: null },
+            createdAt: { lt: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
+          },
+        })
+        .catch(() => 0),
 
-      prismaUnfiltered.emailDelivery.count({
-        where: {
-          status: 'FAILED',
-          createdAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
-        },
-      }).catch(() => 0),
+      prismaUnfiltered.emailDelivery
+        .count({
+          where: {
+            status: 'FAILED',
+            createdAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
+          },
+        })
+        .catch(() => 0),
 
-      prismaUnfiltered.internalExamReport.count({
-        where: { status: 'PENDING' },
-      }).catch(() => 0),
+      prismaUnfiltered.internalExamReport
+        .count({
+          where: { status: 'PENDING' },
+        })
+        .catch(() => 0),
     ])
 
     // ── CRITICAL (non-dismissable) ──────────────────────────────────────
@@ -152,8 +167,7 @@ export async function ensureSystemNotifications() {
       await createIfMissing(user.id, {
         type: 'CRITICAL',
         title: 'Registration Closed',
-        message:
-          'Training programs and new registrations are currently paused on the public site.',
+        message: 'Training programs and new registrations are currently paused on the public site.',
         linkUrl: '/staff/settings?tab=general',
         linkText: 'Manage Settings',
       })
@@ -166,8 +180,7 @@ export async function ensureSystemNotifications() {
       await createIfMissing(user.id, {
         type: 'CRITICAL',
         title: 'Exam Bookings Closed',
-        message:
-          'Public exam booking and enrollment are currently disabled.',
+        message: 'Public exam booking and enrollment are currently disabled.',
         linkUrl: '/staff/settings?tab=general',
         linkText: 'Manage Settings',
       })
@@ -261,7 +274,7 @@ export async function ensureSystemNotifications() {
         type: pendingExamReports >= 5 ? 'WARNING' : 'INFO',
         title: 'Internal Exam Reports Pending',
         message: `${pendingExamReports} internal exam report${pendingExamReports === 1 ? '' : 's'} awaiting review.`,
-        linkUrl: '/staff/exams/internal?view=operations',
+        linkUrl: '/staff/exams/internal?tab=operations',
         linkText: 'Review Reports',
       })
     } else {

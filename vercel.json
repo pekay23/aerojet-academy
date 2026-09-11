@@ -82,6 +82,10 @@
     {
       "path": "/api/cron/recover-exams",
       "schedule": "*/1 * * * *"
+    },
+    {
+      "path": "/api/cron/exam-reconciliation",
+      "schedule": "0 4 * * *"
     }
   ]
 }

@@ -1,5 +1,9 @@
 import type { UserRole, UserStatus } from '@/types/enums'
-import type { PracticalDeliveryMethod, PracticalResult, PracticalTaskCategory } from '@prisma/client'
+import type {
+  PracticalDeliveryMethod,
+  PracticalResult,
+  PracticalTaskCategory,
+} from '@prisma/client'
 
 export interface SerializedProfile {
   firstName: string
@@ -125,7 +129,13 @@ export interface SerializedExamBooking {
       course?: { id?: string; name: string; code: string } | null
     } | null
   } | null
-  event?: { id?: string; name: string; startDate?: string | null; endDate?: string | null } | null
+  event?: {
+    id?: string
+    name: string
+    startDate?: string | null
+    endDate?: string | null
+    status?: string | null
+  } | null
 }
 
 export interface SerializedExamResult {

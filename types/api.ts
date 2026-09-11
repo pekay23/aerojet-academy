@@ -141,6 +141,8 @@ export interface NotificationInfo {
   read: boolean
   readAt?: string | null
   createdAt: string
+  linkUrl?: string | null
+  linkText?: string | null
 }
 
 export interface TransactionInfo {
