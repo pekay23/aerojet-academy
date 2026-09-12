@@ -9,6 +9,10 @@ const skipFiles = new Set([
   'docs/audits/2026-09-08-encoding-mojibake-fixes.md',
   'docs/operations/encoding-fix-scripts.md',
   'docs/operations/encoding-prevention.md',
+  // Generated HTML mirrors of the docs above intentionally document mojibake examples
+  'docs/html/audits/2026-09-08-encoding-mojibake-fixes.html',
+  'docs/html/operations/encoding-fix-scripts.html',
+  'docs/html/operations/encoding-prevention.html',
 ])
 
 const badPrefixes = ['â', 'Ã', 'Â', 'ð']

@@ -66,11 +66,12 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  /* Font Family */
+  /* Font Family — design tokens (docs/html/aerojet-design-tokens.css)
+     sans=Inter · serif=Playfair Display · outfit=Outfit · mono=JetBrains Mono */
   --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-outfit: var(--font-outfit), sans-serif;
-  --font-heading: var(--font-cal), var(--font-inter), system-ui, sans-serif;
   --font-serif: var(--font-playfair), Georgia, serif;
+  --font-outfit: var(--font-outfit), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, sans-serif;
 
   /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
@@ -87,12 +88,20 @@
 
 /* ── Keyframes (must be at top level) ──────────────────────────────────── */
 @keyframes accordion-down {
-  from { height: 0; }
-  to { height: var(--radix-accordion-content-height); }
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
 }
 @keyframes accordion-up {
-  from { height: var(--radix-accordion-content-height); }
-  to { height: 0; }
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
 }
 
 /* ── Base Layer ───────────────────────────────────────────────────────────── */
