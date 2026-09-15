@@ -162,6 +162,11 @@ export async function GET(req: NextRequest) {
         })
         if (existingResult) continue
 
+        // Skip OFFICIAL_EASA bookings that still have no result (pending upload)
+        if (booking.examCategory === 'OFFICIAL_EASA' && !booking.result) {
+          continue
+        }
+
         // Mark as NO_SHOW via markExamAttendance
         await markExamAttendance({
           bookingId: booking.id,
@@ -319,29 +324,27 @@ async function flushStaffNotifications(
 
     if (staff.email) {
       const html = `
-        <p>Dear Admin,</p>
-        <p>The following ${missedCount} exam(s) were marked as missed by the automated reconciliation cron:</p>
-        <ul>
-          ${globalEntry.names
-            .map(
-              (name: string, i: number) => `
-            <li><strong>Student:</strong> ${name}</li>
-            <li><strong>Module:</strong> ${globalEntry.modules[i]}</li>
-            <li><strong>Date:</strong> ${globalEntry.dates[i]}</li>
-          `
-            )
-            .join('\n')}
-        </ul>
-        <p>Please review and take appropriate action (refund or rebook).</p>
-      `
-      sendEmail({
+          <p>Dear Admin,</p>
+          <p>The following ${missedCount} exam(s) were marked as missed by the automated reconciliation cron:</p>
+          <ul>
+            ${globalEntry.names
+              .map(
+                (name: string, i: number) => `
+              <li><strong>Student:</strong> ${name}</li>
+              <li><strong>Module:</strong> ${globalEntry.modules[i]}</li>
+              <li><strong>Date:</strong> ${globalEntry.dates[i]}</li>
+            `
+              )
+              .join('\n')}
+          </ul>
+          <p>Please review and take appropriate action (refund or rebook).</p>
+        `
+      await sendEmail({
         to: staff.email,
         subject: `${missedCount} Exam(s) Missed — Action Required`,
         html,
         template: 'exam-missed-staff',
         userId: staff.id,
-      }).catch((error) => {
-        console.error('[EMAIL ERROR] Failed to send missed exam summary to staff:', error)
       })
     }
   }

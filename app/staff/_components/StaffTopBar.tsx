@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import {
   Bell,
   MessageSquare,
@@ -31,6 +32,7 @@ import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import { ensureSystemNotifications } from '@/app/staff/actions/notifications'
 import { markMessageAsRead } from '@/app/staff/actions/messages'
 import { toast } from 'sonner'
+import { appendReturnNavigation } from '@/components/shared/ReturnLink'
 
 interface StaffTopBarProps {
   initialCounts: {
@@ -115,6 +117,9 @@ export default function StaffTopBar({
   const _router = useRouter()
   const [welcomeMsg, setWelcomeMsg] = useState<string | null>(null)
   const [dismissingIds, setDismissingIds] = useState<Set<string>>(new Set())
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const currentHref = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
 
   useEffect(() => {
     if (welcomeMessages?.length) {
@@ -413,7 +418,7 @@ export default function StaffTopBar({
                           } ${isDismissing ? 'opacity-50' : ''}`}
                         >
                           <Link
-                            href={`${n.linkUrl || '/staff/notifications'}?returnUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/staff/dashboard')}`}
+                            href={`${n.linkUrl || '/staff/notifications'}?returnUrl=${encodeURIComponent(currentHref)}`}
                             className="flex min-w-0 flex-1 items-start gap-3"
                           >
                             <TypeIcon className={`mt-0.5 h-4 w-4 shrink-0 ${cfg.className}`} />
