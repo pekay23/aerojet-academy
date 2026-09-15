@@ -20,6 +20,9 @@ export default function StaffNotificationCard({
   const [isRead, setIsRead] = useState(notification.isRead)
   const [isPending, _startTransition] = useTransition()
   const [isDismissing, startDismissTransition] = useTransition()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const currentHref = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
 
   const _handleMarkAsRead = () => {
     if (isRead || isPending) return
@@ -108,13 +111,13 @@ export default function StaffNotificationCard({
 
         {notification.linkUrl && (
           <div className="mt-4">
-            <ReturnLink
-              fallbackHref="/staff/notifications"
-              returnType="notification"
-              label={notification.linkText || 'View Details'}
-              className="text-xs font-black text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-            />
-            <span className="text-lg">→</span>
+            <Link
+              href={appendReturnNavigation(notification.linkUrl, currentHref)}
+              className="inline-flex items-center gap-2 text-xs font-black text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              {notification.linkText || 'View Details'}
+              <span className="text-lg">→</span>
+            </Link>
           </div>
         )}
       </div>
