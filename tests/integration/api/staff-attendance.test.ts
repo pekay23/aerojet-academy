@@ -139,6 +139,14 @@ describe('POST /api/staff/attendance', () => {
 
   it('creates and updates attendance records in a transaction', async () => {
     prismaMock.classSession.findMany.mockResolvedValue([])
+    prismaMock.class.findUnique.mockResolvedValue({
+      id: 'class-1',
+      courseId: 'course-1',
+    })
+    prismaMock.enrollment.findMany.mockResolvedValue([
+      { userId: 'user-1' },
+      { userId: 'user-2' },
+    ])
     prismaMock.$transaction.mockImplementation(async (fn: any) => {
       if (typeof fn === 'function') {
         return fn(prismaMock)

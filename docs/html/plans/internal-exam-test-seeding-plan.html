@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Internal Exam System — Test Data Seeding Plan · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Plans</p>
+  <h1 class="he-title">Internal Exam System — Test Data Seeding Plan</h1>
+  <p class="he-deck">Create a fully correlated test environment with one student and one instructor so the complete internal exam journey can be tested: application → acceptance → enrollment → class attendance (historical + current) → theory completion → in-class sessions → internal exam preparation → internal exam sitting → EASA exam prep.</p>
+</header>
+<section class="he-section" id="objective"><div class="he-section__num">01 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Create a fully correlated test environment with one student and one instructor so the complete internal exam journey can be tested: application → acceptance → enrollment → class attendance (historical + current) → theory completion → in-class sessions → internal exam preparation → internal exam sitting → EASA exam prep.</p>
+<p><strong>Status:</strong> Post Rounds 1, 2 &amp; 3 Council Review (Data Architecture, Security &amp; Auth, EASA Compliance, Business Logic, QA Strategy, DevOps Execution, Edge Cases, Performance, Integration)</p>
+<hr />
+<section class="he-section" id="0-seed-script-guardrails-r1-sec-1"><div class="he-section__num">02 · 0. Seed Script Guardrails (R1-SEC-1)</div><h2 class="he-section__title">0. Seed Script Guardrails (R1-SEC-1)</h2></section>
+<pre><code class="language-typescript">// Top of seed-internal-exam-test.ts
+const TEST_EMAIL_DOMAIN = '@test.aerojet-academy.com'
+const NOW = new Date()
+const SESSION_DURATION_MS = 50 * 60 * 1000 // 50 minutes for active exam
+
+if (process.env.NODE_ENV === 'production' &amp;&amp; !process.env.ALLOW_TEST_SEED) {
+  throw new Error('Refusing to run test seed in production. Set ALLOW_TEST_SEED=true to override.')
+}
+
+// All operations use upsert keyed on email/code to make seed idempotent
+</code></pre>
+<p>All timestamps in this plan are <strong>relative to NOW</strong> — the seed script computes <code>new Date(NOW.getTime() + offset)</code> for every date field.</p>
+<h3 id="systemsettings-r3-int-1-critical-must-be-step-0">SystemSettings (R3-INT-1 — CRITICAL, must be Step 0)</h3>
+<pre><code class="language-typescript">// Without these, ALL internal exam APIs return 403
+await prismaUnfiltered.systemSetting.upsert({
+  where: { key: 'internal_exam_system_enabled' },
+  update: { value: 'true' },
+  create: { key: 'internal_exam_system_enabled', value: 'true' },
+})
+await prismaUnfiltered.systemSetting.upsert({
+  where: { key: 'certificates_enabled' },
+  update: { value: 'true' },
+  create: { key: 'certificates_enabled', value: 'true' },
+})
+await prismaUnfiltered.systemSetting.upsert({
+  where: { key: 'pdf_template_system_enabled' },
+  update: { value: 'true' },
+  create: { key: 'pdf_template_system_enabled', value: 'true' },
+})
+</code></pre>
+<hr />
+<section class="he-section" id="0a-easa-question-csv-state-amp-audit-history"><div class="he-section__num">03 · 0A. EASA Question CSV State &amp;amp; Audit History</div><h2 class="he-section__title">0A. EASA Question CSV State &amp; Audit History</h2></section>
+<h3 id="current-module-inventory-scriptseasa-seedcsvsanswered">Current Module Inventory (<code>scripts/easa-seed/csvs_answered/</code>)</h3>
+<table>
+<thead>
+<tr><th>Module</th><th>CSV File</th><th>Total Rows</th><th>Unanswered</th><th>Garbage Removed</th><th>Replacements Added</th><th>Known Issues</th></tr>
+</thead>
+<tbody>
+<tr><td>M1</td><td>M1.csv</td><td>455</td><td>0</td><td>8</td><td>17</td><td>14 rows with &lt;3 valid options; <code>(</code> instead of ° symbol</td></tr>
+<tr><td>M2</td><td>M2.csv</td><td>536</td><td>0</td><td>1</td><td>1</td><td>Corrupted row 59 replaced</td></tr>
+<tr><td>M3</td><td>M3.csv</td><td>1003</td><td>0</td><td>38</td><td>22</td><td>Diagram-dependent questions removed; replaced with text-based</td></tr>
+<tr><td>M4</td><td>M4.csv</td><td>191</td><td>0</td><td>0</td><td>0</td><td>Clean</td></tr>
+<tr><td>M5</td><td>M5.csv</td><td>635</td><td>0</td><td>0</td><td>0</td><td>Clean</td></tr>
+<tr><td>M6</td><td>M6.csv</td><td>245</td><td>0</td><td>0</td><td>0</td><td>Markdown <code>**</code> bold markers in question text</td></tr>
+<tr><td>M7</td><td>M7.csv</td><td>97</td><td>0</td><td>0</td><td>0</td><td>Clean</td></tr>
+<tr><td>M11A</td><td>M11A.csv</td><td>371</td><td>0</td><td>0</td><td>0</td><td>Clean</td></tr>
+<tr><td>M13</td><td>M13.csv</td><td>519</td><td>0</td><td>0</td><td>0</td><td>Unicode smart quotes present</td></tr>
+<tr><td>M17</td><td>M17.csv</td><td>63</td><td>0</td><td>0</td><td>0</td><td>Clean</td></tr>
+<tr><td><strong>Total</strong></td><td>—</td><td><strong>4,115</strong></td><td><strong>0</strong></td><td><strong>47</strong></td><td><strong>40</strong></td><td>See details below</td></tr>
+</tbody>
+</table>
+<h3 id="audit-history">Audit History</h3>
+<table>
+<thead>
+<tr><th>Date</th><th>Action</th><th>Outcome</th></tr>
+</thead>
+<tbody>
+<tr><td>2026-09-08</td><td><code>audit_all_unanswered.py</code> — scanned all 10 CSVs for <code>correctAnswer: ''</code> / <code>NEEDS_ANSWER</code></td><td><strong>0/4115 unanswered (100% completion)</strong></td></tr>
+<tr><td>2026-09-08</td><td>Removed 37 fake <code>InternalExamQuestion</code> records + 3 <code>InternalExamBank</code> seeds</td><td>Cleaned dead weight from prior seeding runs</td></tr>
+<tr><td>2026-09-08</td><td><code>replace_all_unanswered.py</code> — generated EASA-compliant text questions for M1 (110) + M3 (276)</td><td>All unanswered questions replaced with verified answers</td></tr>
+<tr><td>2026-09-08</td><td>M1 manual cleanup: removed 8 non-aviation questions, added 17 EASA replacements</td><td>Non-aviation garbage eliminated</td></tr>
+<tr><td>2026-09-08</td><td>M3 manual cleanup: removed 38 diagram-dependent questions, added 22 text-based replacements</td><td>Diagram-dependent questions replaced for text-only exam environment</td></tr>
+</tbody>
+</table>
+<h3 id="data-quality-issues-deferred-not-blockers">Data-Quality Issues (Deferred — Not Blockers)</h3>
+<ol>
+<li><strong>14 M1 rows with fewer than 3 valid options</strong> — These fail <code>valid_options_count &lt; 3</code> in <code>audit_all_unanswered.py</code>. They have non-empty <code>correctAnswer</code> so they are not counted as &quot;unanswered,&quot; but they violate the EASA 3-option rule. Fix by normalizing option delimiters or regenerating rows.</li>
+<li><strong>M1 degree symbol corruption</strong> — <code>°</code> rendered as <code>(</code> in some cells. Cosmetic; does not affect answer correctness.</li>
+<li><strong>M6 markdown bold markers</strong> — <code>**word**</code> present in question text. Renderer must strip or display as literal.</li>
+<li><strong>M13 Unicode smart quotes</strong> — <code>''</code> / <code>&quot;&quot;</code> present. Normalize to straight quotes if mobile rendering breaks.</li>
+<li><strong>Blank <code>syllabusRef</code> / <code>knowledgeLevel</code></strong> — Many rows have empty metadata. Populate from EASA Appendix I taxonomy if regulatory reporting requires it.</li>
+<li><strong>M1 <code>correctAnswer</code> uses letter codes (A/B/C)</strong> while other modules use full option text. Normalize to full option text for consistency.</li>
+</ol>
+<h3 id="safe-modify-rule">Safe-Modify Rule</h3>
+<p>When editing CSVs in place:</p>
+<ul>
+<li><strong>Allowed:</strong> <code>correctAnswer</code>, <code>reviewNote</code>, and row text content</li>
+<li><strong>Forbidden:</strong> Adding/removing DB seed references or changing column count in <code>prisma/seed-easa-questions.ts</code></li>
+<li>All edits must preserve the existing CSV parse behavior in <code>prisma/seed-easa-questions.ts</code></li>
+</ul>
+<hr />
+<section class="he-section" id="1-test-accounts"><div class="he-section__num">04 · 1. Test Accounts</div><h2 class="he-section__title">1. Test Accounts</h2></section>
+<h3 id="security-critical-fields-r1-sec-2-r1-sec-3">Security-Critical Fields (R1-SEC-2, R1-SEC-3)</h3>
+<p>Both accounts MUST have:</p>
+<ul>
+<li><code>emailVerified: NOW</code> — INSTRUCTOR and STUDENT login is blocked when null</li>
+<li><code>loginAttempts: 0</code>, <code>lockedUntil: null</code></li>
+<li><code>mustChangePassword: false</code>, <code>passwordChanged: false</code></li>
+<li><code>status: 'ACTIVE'</code></li>
+<li><code>deletedAt: null</code></li>
+</ul>
+<h3 id="instructor-account">Instructor Account</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>email</td><td><code>instructor.internal@test.aerojet-academy.com</code></td></tr>
+<tr><td>role</td><td><code>INSTRUCTOR</code></td></tr>
+<tr><td>status</td><td><code>ACTIVE</code></td></tr>
+<tr><td>Academy email</td><td>generated from name</td></tr>
+<tr><td>Password</td><td>bcrypt hash of known test password</td></tr>
+<tr><td>twoFactorEnabled</td><td><code>true</code> (R1-SEC-3)</td></tr>
+<tr><td>twoFactorSecret</td><td><code>JBSWY3DPEHPK3PXP</code> (known test TOTP secret)</td></tr>
+<tr><td>Profile</td><td>full name, DOB, nationality, phone, address</td></tr>
+<tr><td>InstructorProfile</td><td>employeeId, department: &quot;Flight Training&quot;, specialization: &quot;Aircraft Systems&quot;, modulesQualified: [&quot;M1&quot;,&quot;M2&quot;,&quot;M3&quot;,&quot;M4&quot;,&quot;M5&quot;,&quot;M6&quot;,&quot;M7&quot;]</td></tr>
+<tr><td>Passkey</td><td>1 credential via direct <code>prismaUnfiltered.passkey.create()</code> (R2-DEV-2) — NOT via API call</td></tr>
+<tr><td>Wallet</td><td>balance: 0, reserved: 0, available: 0</td></tr>
+</tbody>
+</table>
+<h3 id="student-account">Student Account</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>email</td><td><code>student.internal@test.aerojet-academy.com</code></td></tr>
+<tr><td>role</td><td><code>STUDENT</code></td></tr>
+<tr><td>status</td><td><code>ACTIVE</code></td></tr>
+<tr><td>programmeChoice</td><td><code>FULL_TIME_2YEAR</code></td></tr>
+<tr><td>selectedLicenseCategories</td><td><code>[&quot;B1&quot;, &quot;B2&quot;]</code></td></tr>
+<tr><td>Academy email</td><td>generated</td></tr>
+<tr><td>Password</td><td>bcrypt hash of known test password</td></tr>
+<tr><td>emailVerified</td><td>NOW</td></tr>
+<tr><td>Profile</td><td>full name, DOB, nationality, phone, address</td></tr>
+<tr><td>StudentProfile</td><td>studentId, enrollmentType: FULL_TIME, currentYearNumber: 1, currentSemesterNumber: 1</td></tr>
+<tr><td>Wallet</td><td>balance: 5000.00, reserved: 0, available: 5000.00</td></tr>
+</tbody>
+</table>
+<h3 id="system-user-for-audit-logs">System User (for audit logs)</h3>
+<ul>
+<li><code>SUPER_ADMIN</code> user with email <code>system@test.aerojet-academy.com</code> — used as <code>grantedBy</code>/<code>createdBy</code> in audit logs</li>
+</ul>
+<h3 id="staff-test-account-r3-int-9">Staff Test Account (R3-INT-9)</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>email</td><td><code>staff.exam@test.aerojet-academy.com</code></td></tr>
+<tr><td>role</td><td><code>STAFF</code></td></tr>
+<tr><td>status</td><td><code>ACTIVE</code></td></tr>
+<tr><td>emailVerified</td><td>NOW</td></tr>
+<tr><td>Password</td><td>bcrypt hash</td></tr>
+<tr><td>Profile</td><td>full name, DOB, nationality, phone, address</td></tr>
+<tr><td>StaffProfile</td><td>employeeId, department: &quot;Exams Department&quot;</td></tr>
+<tr><td>Wallet</td><td>balance: 0</td></tr>
+<tr><td>Permissions</td><td>All <code>EXAM_*</code> permissions via RoleGrant</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="2-reference-lookup-tables-r1-da-1"><div class="he-section__num">05 · 2. Reference / Lookup Tables (R1-DA-1)</div><h2 class="he-section__title">2. Reference / Lookup Tables (R1-DA-1)</h2></section>
+<h3 id="intakecycle">IntakeCycle</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>name</td><td><code>2025-2026 Intake</code></td></tr>
+<tr><td>startDate</td><td>2025-08-01</td></tr>
+<tr><td>endDate</td><td>2026-07-31</td></tr>
+<tr><td>isActive</td><td>true</td></tr>
+<tr><td>maxStudents</td><td>200</td></tr>
+</tbody>
+</table>
+<h3 id="applicationdocumenttype-r1-da-1-r2-dev-1">ApplicationDocumentType (R1-DA-1, R2-DEV-1)</h3>
+<table>
+<thead>
+<tr><th>Code</th><th>Name</th><th>Description</th><th>fileTypes</th><th>maxSizeMB</th><th>isRequired</th><th>applicableProgrammes</th><th>sortOrder</th></tr>
+</thead>
+<tbody>
+<tr><td><code>ID_COPY</code></td><td>National ID Copy</td><td>Scanned ID document</td><td>application/pdf,image/jpeg,image/png</td><td>4</td><td>true</td><td>[]</td><td>1</td></tr>
+<tr><td><code>PASSPORT_PHOTO</code></td><td>Passport Photo</td><td>Recent passport photo</td><td>image/jpeg,image/png</td><td>4</td><td>true</td><td>[]</td><td>2</td></tr>
+<tr><td><code>MEDICAL_CERT</code></td><td>Medical Certificate</td><td>Class 2 medical certificate</td><td>application/pdf</td><td>4</td><td>true</td><td>[]</td><td>3</td></tr>
+<tr><td><code>QUALIFICATION_CERT</code></td><td>Academic Qualifications</td><td>Degree/diploma certificates</td><td>application/pdf</td><td>10</td><td>true</td><td>[]</td><td>4</td></tr>
+<tr><td><code>PASSPORT</code></td><td>Passport Copy</td><td>Valid passport scan</td><td>application/pdf,image/jpeg,image/png</td><td>4</td><td>true</td><td>[]</td><td>5</td></tr>
+</tbody>
+</table>
+<h3 id="interviewschedule-interviewslot-r1-da-1">InterviewSchedule + InterviewSlot (R1-DA-1)</h3>
+<ul>
+<li>InterviewSchedule: date, startTime, endTime, location, maxCandidates: 10</li>
+<li>InterviewSlot: scheduleId, startTime, endTime, interviewer (instructor userId), candidate (student userId), status: COMPLETED</li>
+</ul>
+<h3 id="studypathwaymodel">StudyPathwayModel</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>name</td><td><code>Full-Time 2-Year B1/B2</code></td></tr>
+<tr><td>description</td><td>Standard full-time pathway for B1 and B2 license categories</td></tr>
+<tr><td>programmeType</td><td>FULL_TIME</td></tr>
+<tr><td>durationYears</td><td>2</td></tr>
+<tr><td>isActive</td><td>true</td></tr>
+<tr><td><strong>includesOjt</strong></td><td><strong>true</strong> (R2-BL-9 — OJT validation depends on this)</td></tr>
+</tbody>
+</table>
+<h3 id="academicterm-r1-da-1">AcademicTerm (R1-DA-1)</h3>
+<table>
+<thead>
+<tr><th>Pathway</th><th>YearNumber</th><th>SemesterNumber</th><th>LicenseCategory</th><th>StartDate</th><th>EndDate</th></tr>
+</thead>
+<tbody>
+<tr><td>pathway</td><td>1</td><td>1</td><td>B1</td><td>2025-09-01</td><td>2026-01-30</td></tr>
+<tr><td>pathway</td><td>1</td><td>1</td><td>B2</td><td>2025-09-01</td><td>2026-01-30</td></tr>
+</tbody>
+</table>
+<h3 id="termcourseassignment-r1-da-1">TermCourseAssignment (R1-DA-1)</h3>
+<table>
+<thead>
+<tr><th>Term</th><th>Course</th><th>IsCore</th><th>SortOrder</th></tr>
+</thead>
+<tbody>
+<tr><td>term-Y1S1-B1</td><td>M1</td><td>true</td><td>1</td></tr>
+<tr><td>term-Y1S1-B1</td><td>M2</td><td>true</td><td>2</td></tr>
+<tr><td>term-Y1S1-B1</td><td>M3</td><td>true</td><td>3</td></tr>
+<tr><td>term-Y1S1-B1</td><td>M4</td><td>true</td><td>4</td></tr>
+<tr><td>term-Y1S1-B1</td><td>M6</td><td>true</td><td>5</td></tr>
+<tr><td>term-Y1S1-B1</td><td>M7</td><td>true</td><td>6</td></tr>
+<tr><td>term-Y1S1-B2</td><td>M1</td><td>true</td><td>1</td></tr>
+<tr><td>term-Y1S1-B2</td><td>M2</td><td>true</td><td>2</td></tr>
+<tr><td>term-Y1S1-B2</td><td>M3</td><td>true</td><td>3</td></tr>
+<tr><td>term-Y1S1-B2</td><td>M5</td><td>true</td><td>4</td></tr>
+<tr><td>term-Y1S1-B2</td><td>M6</td><td>true</td><td>5</td></tr>
+<tr><td>term-Y1S1-B2</td><td>M7</td><td>true</td><td>6</td></tr>
+</tbody>
+</table>
+<h3 id="fulltimeprogramme-programmeyear-r1-da-1">FullTimeProgramme + ProgrammeYear (R1-DA-1)</h3>
+<ul>
+<li>FullTimeProgramme: <code>FULL_TIME_2YEAR</code>, name, durationMonths: 24</li>
+<li>ProgrammeYear Year 1: programmeId, yearNumber: 1, semesterCount: 2</li>
+<li>ProgrammeYear Year 2: programmeId, yearNumber: 2, semesterCount: 2</li>
+</ul>
+<h3 id="licensecategory-r1-da-1">LicenseCategory (R1-DA-1)</h3>
+<table>
+<thead>
+<tr><th>Code</th><th>Name</th><th>Description</th><th>IsEasaCategory</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B1</code></td><td>B1 Mechanical</td><td>Mechanical maintenance license</td><td>true</td></tr>
+<tr><td><code>B2</code></td><td>B2 Avionics</td><td>Avionics/electrical maintenance license</td><td>true</td></tr>
+</tbody>
+</table>
+<h3 id="studentlicensetarget-r1-da-1">StudentLicenseTarget (R1-DA-1)</h3>
+<table>
+<thead>
+<tr><th>Student</th><th>Category</th></tr>
+</thead>
+<tbody>
+<tr><td>student</td><td>B1</td></tr>
+<tr><td>student</td><td>B2</td></tr>
+</tbody>
+</table>
+<h3 id="classroom-r1-da-1">Classroom (R1-DA-1)</h3>
+<table>
+<thead>
+<tr><th>Name</th><th>Building</th><th>Floor</th><th>Capacity</th><th>HasProjector</th></tr>
+</thead>
+<tbody>
+<tr><td><code>CR-A</code></td><td>Main Building</td><td>1</td><td>30</td><td>true</td></tr>
+<tr><td><code>CR-B</code></td><td>Main Building</td><td>2</td><td>28</td><td>true</td></tr>
+<tr><td><code>CR-C</code></td><td>Workshop</td><td>1</td><td>20</td><td>false</td></tr>
+<tr><td><code>CR-D</code></td><td>Workshop</td><td>2</td><td>20</td><td>false</td></tr>
+</tbody>
+</table>
+<h3 id="atachapter-r1-da-1">ATAChapter (R1-DA-1)</h3>
+<table>
+<thead>
+<tr><th>Code</th><th>Title</th><th>SubTitle</th></tr>
+</thead>
+<tbody>
+<tr><td><code>ATA-11</code></td><td>Placards and Markings</td><td>General</td></tr>
+<tr><td><code>ATA-20</code></td><td>Standard Practices</td><td>General</td></tr>
+<tr><td><code>ATA-21</code></td><td>Air Conditioning</td><td>Environmental Systems</td></tr>
+<tr><td><code>ATA-24</code></td><td>Electrical Power</td><td>AC/DC Generation</td></tr>
+<tr><td><code>ATA-30</code></td><td>Ice and Rain Protection</td><td>De-icing Systems</td></tr>
+<tr><td><code>ATA-32</code></td><td>Landing Gear</td><td>Hydraulic Systems</td></tr>
+<tr><td><code>ATA-33</code></td><td>Lights</td><td>Navigation/Positioning</td></tr>
+<tr><td><code>ATA-34</code></td><td>Navigation</td><td>GPS/INS</td></tr>
+<tr><td><code>ATA-36</code></td><td>Pneumatic</td><td>Compressor Systems</td></tr>
+<tr><td><code>ATA-49</code></td><td>APU</td><td>Auxiliary Power Unit</td></tr>
+<tr><td><code>ATA-71</code></td><td>Power Plant</td><td>Turbine Engines</td></tr>
+<tr><td><code>ATA-72</code></td><td>Turbine Engine</td><td>Hot Section</td></tr>
+</tbody>
+</table>
+<h3 id="pdftemplate-r1-da-1-r1-da-10">PdfTemplate (R1-DA-1, R1-DA-10)</h3>
+<table>
+<thead>
+<tr><th>slug</th><th>name</th><th>isActive</th></tr>
+</thead>
+<tbody>
+<tr><td><code>internal_exam</code></td><td>Internal Exam Certificate</td><td>true</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="3-application-amp-acceptance-flow-r1-da-2-r1-da-3"><div class="he-section__num">06 · 3. Application &amp;amp; Acceptance Flow (R1-DA-2, R1-DA-3)</div><h2 class="he-section__title">3. Application &amp; Acceptance Flow (R1-DA-2, R1-DA-3)</h2></section>
+<h3 id="application-record">Application Record</h3>
+<ul>
+<li><code>userId</code> → student</li>
+<li><code>stage</code> → <code>ENROLLED</code></li>
+<li><code>programmeChoice</code> → <code>FULL_TIME_2YEAR</code></li>
+<li><code>fundingType</code> → <code>SELF_FUNDED</code></li>
+<li><code>intakeCycleId</code> → intake cycle (R1-DA-1)</li>
+<li><code>interviewSlotId</code> → interview slot (R1-DA-1)</li>
+<li><code>medicalStatus</code> → <code>CLEARED</code></li>
+</ul>
+<h3 id="bondingcontract-r2-dev-1">BondingContract (R2-DEV-1)</h3>
+<ul>
+<li>Create BondingContract <strong>with <code>applicationId</code></strong> FK after Application exists</li>
+<li>Do NOT add <code>bondingContractId</code> to Application (schema mismatch)</li>
+</ul>
+<h3 id="interviewschedule-interviewslot-r2-dev-1">InterviewSchedule + InterviewSlot (R2-DEV-1)</h3>
+<ul>
+<li>InterviewSchedule: date, startTime, endTime, location, maxCandidates: 10</li>
+<li>InterviewSlot: scheduleId, startTime, endTime, <strong>interviewer</strong> (instructor userId), status: COMPLETED</li>
+<li><strong>NO <code>candidate</code> column</strong> — candidate linked via <code>Application.interviewSlotId</code></li>
+</ul>
+<h3 id="applicationstagelog-r1-da-2">ApplicationStageLog (R1-DA-2)</h3>
+<p>Create log entries for each transition:</p>
+<ol>
+<li>REGISTERED → 2025-07-15</li>
+<li>PAYMENT_PENDING → 2025-07-15</li>
+<li>PAYMENT_SUBMITTED → 2025-07-16</li>
+<li>PAYMENT_VERIFIED → 2025-07-18</li>
+<li>APTITUDE_PENDING → 2025-07-20</li>
+<li>APTITUDE_COMPLETED → 2025-07-22</li>
+<li>SHORTLISTED → 2025-07-25</li>
+<li>INTERVIEW_PENDING → 2025-07-26</li>
+<li>INTERVIEW_SCHEDULED → 2025-07-28</li>
+<li>INTERVIEW_COMPLETED → 2025-08-01</li>
+<li>SELECTED → 2025-08-05</li>
+<li>MEDICAL_PENDING → 2025-08-06</li>
+<li>MEDICAL_SUBMITTED → 2025-08-10</li>
+<li>MEDICAL_CLEARED → 2025-08-15</li>
+<li>ENROLLED → 2025-08-20</li>
+</ol>
+<h3 id="supporting-documents-r1-da-1">Supporting Documents (R1-DA-1)</h3>
+<p>For each ApplicationDocumentType, create ApplicationDocument + FileUpload:</p>
+<ol>
+<li>ID_COPY → FileUpload with test PDF, status: APPROVED</li>
+<li>PASSPORT_PHOTO → FileUpload with test image, status: APPROVED</li>
+<li>MEDICAL_CERT → FileUpload with test PDF, status: APPROVED</li>
+<li>QUALIFICATION_CERT → FileUpload with test PDF, status: APPROVED</li>
+<li>PASSPORT → FileUpload with test PDF, status: APPROVED</li>
+</ol>
+<p>Each ApplicationDocument: <code>@@unique([applicationId, documentTypeId])</code> respected.</p>
+<hr />
+<section class="he-section" id="4-academic-structure"><div class="he-section__num">07 · 4. Academic Structure</div><h2 class="he-section__title">4. Academic Structure</h2></section>
+<h3 id="academic-year-amp-semester-r1-da-1">Academic Year &amp; Semester (R1-DA-1)</h3>
+<ul>
+<li>AcademicYear: <code>2025-2026</code>, <code>isCurrent: true</code></li>
+<li>Semester: <code>2025-2026-S1</code>, <code>isCurrent: true</code>, <code>academicYearId</code> → 2025-2026</li>
+</ul>
+<h3 id="course-categories">Course Categories</h3>
+<ul>
+<li><code>AIRFRAME</code> category</li>
+<li><code>POWERPLANT</code> category</li>
+<li><code>CORE</code> category</li>
+</ul>
+<h3 id="courses-r1-easa-9-easa-module-mapping">Courses (R1-EASA-9 — EASA module mapping)</h3>
+<table>
+<thead>
+<tr><th>Course</th><th>Code</th><th>Category</th><th>ModuleType</th><th>Duration</th><th>Price</th><th>EASA Module</th></tr>
+</thead>
+<tbody>
+<tr><td>Mathematics</td><td>M1</td><td>CORE</td><td></td><td>120h</td><td>2500.00</td><td>Module 1</td></tr>
+<tr><td>Physics</td><td>M2</td><td>CORE</td><td></td><td>120h</td><td>2500.00</td><td>Module 3</td></tr>
+<tr><td>Electrical Fundamentals</td><td>M3</td><td>CORE</td><td></td><td>80h</td><td>2000.00</td><td>Module 5</td></tr>
+<tr><td>Airframe Structures</td><td>M4</td><td>SPECIALIST</td><td>AIRFRAME</td><td>100h</td><td>3000.00</td><td>Module 11A</td></tr>
+<tr><td>Powerplant Systems</td><td>M5</td><td>SPECIALIST</td><td>POWERPLANT</td><td>100h</td><td>3000.00</td><td>Module 11B</td></tr>
+<tr><td>Human Factors</td><td>M6</td><td>CORE</td><td></td><td>40h</td><td>1500.00</td><td>Module 10</td></tr>
+<tr><td>Maintenance Practices</td><td>M7</td><td>CORE</td><td></td><td>60h</td><td>1800.00</td><td>Module 7</td></tr>
+</tbody>
+</table>
+<h3 id="exam-components-per-course-r1-easa-2-3-options-not-4">Exam Components (per course) (R1-EASA-2 — 3 options, not 4)</h3>
+<p>Each course gets exam components with <strong>3 options</strong> per MCQ (EASA Part-66 standard):</p>
+<ul>
+<li>M1 → <code>M1-MATH</code> (MCQ, 90min, pass: 75%), <code>M1-MATH-ESSAY</code> (ESSAY, 60min, pass: 75%) — R1-EASA-3: unified 75% threshold</li>
+<li>M2 → <code>M2-PHYS</code> (MCQ, 90min, pass: 75%)</li>
+<li>M3 → <code>M3-ELEC</code> (MCQ, 90min, pass: 75%)</li>
+<li>M4 → <code>M4-AIRFRAME</code> (MCQ, 90min, pass: 75%)</li>
+<li>M5 → <code>M5-POWERPLANT</code> (MCQ, 90min, pass: 75%)</li>
+<li>M6 → <code>M6-HF</code> (MCQ, 60min, pass: 75%)</li>
+<li>M7 → <code>M7-MP</code> (MCQ, 90min, pass: 75%), <code>M7-MP-ESSAY</code> (ESSAY, 60min, pass: 75%)</li>
+</ul>
+<p><strong>Note:</strong> ESSAY components are included but the engine currently filters <code>isEssay: false</code>. This is a known limitation — essay questions cannot be selected by <code>selectInternalExamQuestions</code> (engine.ts:99). Either the engine must be fixed or ESSAY components removed from testing scope.</p>
+<h3 id="programme-amp-pathway-r1-da-1">Programme &amp; Pathway (R1-DA-1)</h3>
+<ul>
+<li>FullTimeProgramme: <code>FULL_TIME_2YEAR</code></li>
+<li>ProgrammeYear: Year 1, Year 2</li>
+<li>StudyPathwayModel → AcademicTerm → TermCourseAssignment (as above)</li>
+<li><code>ProgrammeYear.courses</code> relation populated via CourseToProgrammeYear</li>
+</ul>
+<hr />
+<section class="he-section" id="5-enrollment-amp-class-assignment"><div class="he-section__num">08 · 5. Enrollment &amp;amp; Class Assignment</div><h2 class="he-section__title">5. Enrollment &amp; Class Assignment</h2></section>
+<h3 id="enrollment">Enrollment</h3>
+<ul>
+<li>Enrollment record: userId → student, courseId → each course, status: <code>ACTIVE</code>, amountPaid per course, academicYearId, semesterId</li>
+<li><code>@@unique([userId, courseId, semesterId])</code> respected — all enrollments share semester 2025-2026-S1</li>
+<li>FullTimeEnrollment: userId → student, programmeId, programmeYearId, status: <code>ACTIVE</code>, currentYearNumber: 1, academicYearId</li>
+</ul>
+<h3 id="classes-r1-da-1-with-classroom">Classes (R1-DA-1 — with Classroom)</h3>
+<p>Each course has one active class:</p>
+<table>
+<thead>
+<tr><th>Class</th><th>Course</th><th>Instructor</th><th>AcademicYear</th><th>Semester</th><th>StartDate</th><th>EndDate</th><th>MaxStudents</th><th>CurrentStudents</th><th>Classroom</th></tr>
+</thead>
+<tbody>
+<tr><td>M1-2025-S1</td><td>M1</td><td>instructor</td><td>2025-2026</td><td>S1</td><td>2025-09-01</td><td>2026-01-30</td><td>28</td><td>20</td><td>CR-A</td></tr>
+<tr><td>M2-2025-S1</td><td>M2</td><td>instructor</td><td>2025-2026</td><td>S1</td><td>2025-09-01</td><td>2026-01-30</td><td>28</td><td>20</td><td>CR-B</td></tr>
+<tr><td>M3-2025-S1</td><td>M3</td><td>instructor</td><td>2025-2026</td><td>S1</td><td>2025-09-01</td><td>2026-01-30</td><td>28</td><td>20</td><td>CR-A</td></tr>
+<tr><td>M4-2025-S1</td><td>M4</td><td>instructor</td><td>2025-2026</td><td>S1</td><td>2025-09-01</td><td>2026-01-30</td><td>28</td><td>15</td><td>CR-C</td></tr>
+<tr><td>M5-2025-S1</td><td>M5</td><td>instructor</td><td>2025-2026</td><td>S1</td><td>2025-09-01</td><td>2026-01-30</td><td>28</td><td>15</td><td>CR-D</td></tr>
+<tr><td>M6-2025-S1</td><td>M6</td><td>instructor</td><td>2025-2026</td><td>S1</td><td>2025-09-01</td><td>2026-01-30</td><td>28</td><td>20</td><td>CR-A</td></tr>
+<tr><td>M7-2025-S1</td><td>M7</td><td>instructor</td><td>2025-2026</td><td>S1</td><td>2025-09-01</td><td>2026-01-30</td><td>28</td><td>20</td><td>CR-C</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="6-class-sessions-historical-current"><div class="he-section__num">09 · 6. Class Sessions (Historical + Current)</div><h2 class="he-section__title">6. Class Sessions (Historical + Current)</h2></section>
+<h3 id="past-sessions-completed">Past Sessions (completed)</h3>
+<p>For each course, create <strong>20 sessions</strong> from Sep 2025 to Jan 2026:</p>
+<ul>
+<li>Types: THEORY (15 sessions), PRACTICAL (3 sessions for M4/M5/M7), REVISION (1), ASSESSMENT (1)</li>
+<li>Schedule: Mon/Wed/Fri, 09:00-12:00 or 13:00-16:00</li>
+<li>Actual start/end recorded</li>
+<li>ATAChapter codes tagged in <code>ataChapters</code> String[] (matching ATAChapter table)</li>
+</ul>
+<h3 id="upcoming-sessions-current">Upcoming Sessions (current)</h3>
+<ul>
+<li>3-5 sessions per course (Feb-Mar 2026), status: SCHEDULED</li>
+</ul>
+<hr />
+<section class="he-section" id="7-attendance-records-historical"><div class="he-section__num">10 · 7. Attendance Records (Historical)</div><h2 class="he-section__title">7. Attendance Records (Historical)</h2></section>
+<h3 id="for-each-past-classsession-r1-easa-1-80-threshold">For each past ClassSession (R1-EASA-1 — 80% threshold)</h3>
+<p>Create AttendanceRecord for the test student:</p>
+<ul>
+<li>Distribution: 85% PRESENT, 10% LATE (5-15 min), 5% ABSENT (with notes)</li>
+<li>Ensure calculated attendance &gt; 80% for every course</li>
+<li><code>recordedBy</code>: instructor userId</li>
+</ul>
+<h3 id="example-m1-20-sessions">Example M1 (20 sessions):</h3>
+<ul>
+<li>PRESENT: 17, LATE: 2 (5min, 10min), ABSENT: 1 (&quot;Medical appointment&quot;)</li>
+<li>Calculated: (17 + 2×0.5) / 20 = 90% ✓</li>
+</ul>
+<hr />
+<section class="he-section" id="8-grades-assessments-r1-easa-1-75-threshold"><div class="he-section__num">11 · 8. Grades / Assessments (R1-EASA-1 — 75% threshold)</div><h2 class="he-section__title">8. Grades / Assessments (R1-EASA-1 — 75% threshold)</h2></section>
+<h3 id="internal-continuous-assessment-internalca">Internal Continuous Assessment (INTERNAL_CA)</h3>
+<ul>
+<li>Grade records for ASSESSMENT ClassSessions</li>
+<li>Per course: 2-3 grade entries</li>
+<li>Score range: 75-95 (pass threshold: 75, aligned with EASA)</li>
+<li>Category: <code>INTERNAL_CA</code></li>
+<li><code>resultLocked</code>: true for finalized grades (deprecated field, set explicitly)</li>
+</ul>
+<h3 id="practical-training-records-r1-da-1">Practical Training Records (R1-DA-1)</h3>
+<ul>
+<li>For PRACTICAL sessions in M4, M5, M7</li>
+<li><code>ataChapterId</code> → ATAChapter FK (not just string codes)</li>
+<li><code>PracticalTaskCategory</code>, <code>PracticalDeliveryMethod</code>, <code>PracticalResult</code> enum values used</li>
+<li>Completed: true, competencyRating: 3-5 scale</li>
+</ul>
+<hr />
+<section class="he-section" id="9-ojt-periods-r1-da-1-corrected-model"><div class="he-section__num">12 · 9. OJT Periods (R1-DA-1 — corrected model)</div><h2 class="he-section__title">9. OJT Periods (R1-DA-1 — corrected model)</h2></section>
+<h3 id="ojtlogbook-ojtlogbookentry-ojtmentorassignment">OJTLogbook + OJTLogbookEntry + OJTMentorAssignment</h3>
+<ul>
+<li>OJTLogbook: linked to StudentProfile (not FullTimeEnrollment)</li>
+<li>OJTPeriod entries: startDate, endDate, hoursCompleted, status: COMPLETED</li>
+<li>OJTLogbookEntry: date, hours, tasksPerformed, mentorSignature</li>
+<li>OJTMentorAssignment: mentor (instructor), student, startDate, endDate</li>
+</ul>
+<h3 id="ojt-validation-r1-easa-8">OJT Validation (R1-EASA-8)</h3>
+<ul>
+<li>B1 pathway: minimum 1 year (≈ 2000 hours) practical experience</li>
+<li>B2 pathway: minimum 1 year (≈ 2000 hours) practical experience</li>
+<li>Seeded OJT hours must meet or exceed minimums</li>
+</ul>
+<hr />
+<section class="he-section" id="10-transactions-amp-wallet-history"><div class="he-section__num">13 · 10. Transactions &amp;amp; Wallet History</div><h2 class="he-section__title">10. Transactions &amp; Wallet History</h2></section>
+<h3 id="wallet-transactions-chronological-r1-sec-7-r2-bl-1-r2-bl-2">Wallet Transactions (chronological, R1-SEC-7, R2-BL-1, R2-BL-2)</h3>
+<p><strong>TransactionType enum values: TOP_UP, RESERVE, CAPTURE, RELEASE, CREDIT, PAYMENT, ADJUSTMENT. No <code>DEBIT</code> type exists.</strong></p>
+<p>All amounts computed from a single running balance starting at 15000.00 (increased to avoid negative balance — R2-BL-1):</p>
+<table>
+<thead>
+<tr><th>#</th><th>Type</th><th>Amount</th><th>Description</th><th>Balance After</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>PAYMENT</td><td>350.00</td><td>Registration fee</td><td>14650.00</td></tr>
+<tr><td>2</td><td>PAYMENT</td><td>2500.00</td><td>Course payment - M1</td><td>12150.00</td></tr>
+<tr><td>3</td><td>PAYMENT</td><td>2500.00</td><td>Course payment - M2</td><td>9650.00</td></tr>
+<tr><td>4</td><td>PAYMENT</td><td>2000.00</td><td>Course payment - M3</td><td>7650.00</td></tr>
+<tr><td>5</td><td>PAYMENT</td><td>3000.00</td><td>Course payment - M4</td><td>4650.00</td></tr>
+<tr><td>6</td><td>PAYMENT</td><td>3000.00</td><td>Course payment - M5</td><td>1650.00</td></tr>
+<tr><td>7</td><td>PAYMENT</td><td>1500.00</td><td>Course payment - M6</td><td>150.00</td></tr>
+<tr><td>8</td><td>PAYMENT</td><td>1800.00</td><td>Course payment - M7</td><td>0.00 available</td></tr>
+<tr><td>9</td><td>TOP_UP</td><td>15000.00</td><td>Wallet top-up TXN-2025-001</td><td>15000.00</td></tr>
+<tr><td>10</td><td>RESERVE</td><td>520.00</td><td>Internal exam reserve - M1-MATH</td><td>14480.00 available</td></tr>
+<tr><td>11</td><td>CAPTURE</td><td>520.00</td><td>Internal exam fee - M1-MATH</td><td>14480.00</td></tr>
+<tr><td>12</td><td>RESERVE</td><td>520.00</td><td>Internal exam reserve - M3-ELEC</td><td>13960.00 available</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="11-internal-exam-preparation-r1-easa-1-r1-da-1"><div class="he-section__num">14 · 11. Internal Exam Preparation (R1-EASA-1, R1-DA-1)</div><h2 class="he-section__title">11. Internal Exam Preparation (R1-EASA-1, R1-DA-1)</h2></section>
+<h3 id="internal-exam-banks">Internal Exam Banks</h3>
+<table>
+<thead>
+<tr><th>Bank</th><th>Course</th><th>ModuleCode</th><th>RuleSet</th><th>MCQ Count</th><th>Status</th><th>categoryCode</th></tr>
+</thead>
+<tbody>
+<tr><td>M1-MATH-BANK</td><td>M1</td><td>M1-MATH</td><td>EASA</td><td>40</td><td>APPROVED</td><td>B1</td></tr>
+<tr><td>M2-PHYS-BANK</td><td>M2</td><td>M2-PHYS</td><td>EASA</td><td>40</td><td>APPROVED</td><td>B2</td></tr>
+<tr><td>M3-ELEC-BANK</td><td>M3</td><td>M3-ELEC</td><td>EASA</td><td>40</td><td>APPROVED</td><td>B2</td></tr>
+</tbody>
+</table>
+<h3 id="questions-per-bank-r1-easa-2-r1-easa-3-r3-int-3-r3-int-4">Questions per Bank (R1-EASA-2, R1-EASA-3, R3-INT-3, R3-INT-4)</h3>
+<ul>
+<li>40 MCQ questions per bank (R1-EASA-2: <strong>3 options</strong>, not 4)</li>
+<li><code>submittedById</code>: <strong>instructor User ID</strong> (R3-INT-3 — required for &quot;My Questions&quot; tab)</li>
+<li><code>knowledgeLevel</code> distribution (R1-EASA-3): L1: 10, L2: 14, L3: 16 per bank</li>
+<li><code>explanation</code>: <strong>5-10 questions per bank</strong> have explanations (R3-INT-8 — results page &quot;Show Explanations&quot;)</li>
+<li><code>correctAnswer</code>: exact option text string (R3-INT-16)</li>
+<li><code>options</code>: JSON array of 3 strings (R3-INT-16)</li>
+<li><code>status: APPROVED</code></li>
+</ul>
+<h3 id="rule-overrides-r1-da-1">Rule Overrides (R1-DA-1)</h3>
+<ul>
+<li>Default EASA rules for all 3 banks:
+<ul>
+<li>passMarkPct: 75 (R1-EASA-1: aligned with EASA)</li>
+<li>timePerQuestionSecs: 75</li>
+<li>retakeWaitDays: 90</li>
+<li>maxRetakes: 3</li>
+<li>completionWindowYears: 10</li>
+</ul>
+</li>
+</ul>
+<h3 id="bank-instructor-assignments-r1-da-1-r1-sec-4">Bank-Instructor Assignments (R1-DA-1, R1-SEC-4)</h3>
+<ul>
+<li>Use <code>InternalExamBankInstructor.instructorId</code> → <strong>InstructorProfile.id</strong> (NOT User.id — common footgun)</li>
+<li>canEdit, canReview, canMonitor, canPublish: true</li>
+</ul>
+<h3 id="rbac-permission-grants-r1-sec-4">RBAC Permission Grants (R1-SEC-4)</h3>
+<p>Create <code>RoleGrant</code> rows for the instructor's User ID:</p>
+<ul>
+<li><code>EXAM_BANK_EDIT</code>, <code>EXAM_BANK_REVIEW</code>, <code>EXAM_SESSION_MONITOR</code>, <code>EXAM_RESULTS_PUBLISH</code>, <code>EXAM_SESSION_EXTEND</code>, <code>EXAM_VIOLATION_REVIEW</code></li>
+</ul>
+<h3 id="class-schedules-r1-da-1-r3-int-6">Class Schedules (R1-DA-1, R3-INT-6)</h3>
+<ul>
+<li>Link each bank to its class via <code>InternalExamClassSchedule</code></li>
+<li>sebRequired: <strong>false for M1-MATH and M2-PHYS</strong> (basic test)</li>
+<li>sebRequired: <strong>false for M3-ELEC</strong> (SEB test deferred — all false keeps routes accessible)</li>
+<li><code>sebConfig</code> JSON: NOT set on banks (avoids SEB validation gate)</li>
+<li>scheduledStart/End for exam window</li>
+</ul>
+<hr />
+<section class="he-section" id="12-internal-exam-sessions"><div class="he-section__num">15 · 12. Internal Exam Sessions</div><h2 class="he-section__title">12. Internal Exam Sessions</h2></section>
+<h3 id="completed-sessions-history">Completed Sessions (history)</h3>
+<table>
+<thead>
+<tr><th>Session</th><th>Student</th><th>Bank</th><th>Class</th><th>Status</th><th>Score</th><th>%</th><th>Passed</th><th>Attempt</th><th>StartedAt</th><th>SubmittedAt</th></tr>
+</thead>
+<tbody>
+<tr><td>M1-SESSION-1</td><td>student</td><td>M1-MATH-BANK</td><td>M1-2025-S1</td><td>COMPLETED</td><td>32</td><td>80</td><td>true</td><td>1</td><td>NOW-30d</td><td>NOW-30d+50min</td></tr>
+<tr><td>M2-SESSION-1</td><td>student</td><td>M2-PHYS-BANK</td><td>M2-2025-S1</td><td>COMPLETED</td><td>30</td><td>75</td><td>true</td><td>1</td><td>NOW-15d</td><td>NOW-15d+50min</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="11b-additional-test-scenarios-r2-qa-1-through-r2-qa-4"><div class="he-section__num">16 · 11B. Additional Test Scenarios (R2-QA-1 through R2-QA-4)</div><h2 class="he-section__title">11B. Additional Test Scenarios (R2-QA-1 through R2-QA-4)</h2></section>
+<h3 id="failed-exam-score-below-75">Failed Exam (score below 75%)</h3>
+<table>
+<thead>
+<tr><th>Session</th><th>Bank</th><th>Status</th><th>Score</th><th>%</th><th>Passed</th><th>Attempt</th></tr>
+</thead>
+<tbody>
+<tr><td>M3-SESSION-FAIL</td><td>M3-ELEC-BANK</td><td>COMPLETED</td><td>29</td><td>72.5</td><td>false</td><td>1</td></tr>
+</tbody>
+</table>
+<h3 id="retake-chain-r2-bl-6-r2-qa-2">Retake Chain (R2-BL-6, R2-QA-2)</h3>
+<table>
+<thead>
+<tr><th>Session</th><th>Bank</th><th>Status</th><th>Attempt</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>M1-SESSION-R1</td><td>M1-MATH-BANK</td><td>COMPLETED</td><td>1</td><td>First pass, score 78%</td></tr>
+<tr><td>M1-SESSION-R2</td><td>M1-MATH-BANK</td><td>COMPLETED</td><td>2</td><td>Retake after 91 days, score 85%</td></tr>
+</tbody>
+</table>
+<h3 id="attendance-boundary-values-r2-qa-2">Attendance Boundary Values (R2-QA-2)</h3>
+<ul>
+<li><strong>Exactly 80%</strong>: One course where 16 PRESENT + 4 LATE = 80% (tests pass/fail toggle)</li>
+<li><strong>Exactly 79% (fail)</strong>: One course where 15 PRESENT + 2 LATE + 3 ABSENT = 76% (tests exam eligibility block)</li>
+</ul>
+<h3 id="max-capacity-class-r2-qa-4">Max Capacity Class (R2-QA-4)</h3>
+<ul>
+<li>One class with <code>currentStudents = maxStudents = 28</code></li>
+<li>Additional student attempting to enroll → REJECTED or waitlisted</li>
+</ul>
+<h3 id="easa-booking-lifecycle-r2-qa-1">EASA Booking Lifecycle (R2-QA-1)</h3>
+<ul>
+<li>M1-MATH booking: <code>status: CONFIRMED</code></li>
+<li>M2-PHYS booking: <code>status: REJECTED</code> (tests rejection flow)</li>
+<li>M3-ELEC booking: <code>status: CANCELLED</code> (tests cancellation)</li>
+</ul>
+<h3 id="payment-failure-r2-qa-1">Payment Failure (R2-QA-1)</h3>
+<ul>
+<li>WalletTransaction: type: <code>PAYMENT</code>, amount: 500.00, but balance insufficient → status: FAILED</li>
+<li>Enrollment: <code>status: PENDING_PAYMENT</code> for one course</li>
+</ul>
+<h3 id="document-rejection-r2-qa-1">Document Rejection (R2-QA-1)</h3>
+<ul>
+<li>One ApplicationDocument with <code>status: REJECTED</code>, <code>rejectionReason: &quot;Document unclear, please resubmit&quot;</code></li>
+</ul>
+<h3 id="interview-no-show-r2-qa-1">Interview No-Show (R2-QA-1)</h3>
+<ul>
+<li>InterviewSlot with <code>status: MISSED</code></li>
+</ul>
+<h3 id="medical-clearance-failure-r2-qa-1">Medical Clearance Failure (R2-QA-1)</h3>
+<ul>
+<li>Application with <code>medicalStatus: PENDING_MEDICAL</code> (separate test application, or alternate student)</li>
+</ul>
+<h3 id="expired-access-code-r2-qa-1">Expired Access Code (R2-QA-1)</h3>
+<ul>
+<li>InternalExamAccessCode with <code>expiresAt</code> in past, <code>used: false</code></li>
+</ul>
+<h3 id="wallet-reserve-release-r2-qa-1">Wallet Reserve Release (R2-QA-1)</h3>
+<ul>
+<li>RESERVE for M2-ELEC exam → RELEASE (exam cancelled, no CAPTURE)</li>
+</ul>
+<h3 id="flagged-session-r2-bl-12">FLAGGED Session (R2-BL-12)</h3>
+<table>
+<thead>
+<tr><th>Session</th><th>Bank</th><th>Status</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>M1-SESSION-FLAG</td><td>M1-MATH-BANK</td><td>FLAGGED</td><td>tabSwitchCount: 3, violation logged</td></tr>
+</tbody>
+</table>
+<h3 id="prerequisite-course-r2-bl-5">Prerequisite Course (R2-BL-5)</h3>
+<ul>
+<li>M2 requires <code>requiresPrerequisite: true</code>, prerequisite: M1</li>
+<li>Student has passed M1 → M2 enrollment ALLOWED</li>
+<li>(If testing negative: alternate student without M1 → M2 enrollment BLOCKED)</li>
+</ul>
+<h3 id="retake-wait-boundary-r2-qa-2">Retake Wait Boundary (R2-QA-2)</h3>
+<ul>
+<li>M1-SESSION-TIMEOUT2: startedAt = NOW - 89 days (retake NOT yet eligible)</li>
+<li>M1-SESSION-TIMEOUT3: startedAt = NOW - 91 days (retake ELIGIBLE)</li>
+</ul>
+<h3 id="exam-already-expired-r2-qa-2">Exam Already Expired (R2-QA-2)</h3>
+<ul>
+<li>InternalExamAccessCode with <code>expiresAt = NOW</code> (already expired, tests auto-reject)</li>
+</ul>
+<h3 id="multiple-void-reasons-r2-qa-1">Multiple Void Reasons (R2-QA-1)</h3>
+<table>
+<thead>
+<tr><th>Session</th><th>VoidReason</th></tr>
+</thead>
+<tbody>
+<tr><td>M2-SESSION-VOID</td><td>&quot;Technical issue&quot;</td></tr>
+<tr><td>M3-SESSION-VOID</td><td>&quot;Cheating detected&quot;</td></tr>
+</tbody>
+</table>
+<h3 id="negative-test-accounts-r2-qa-3">Negative Test Accounts (R2-QA-3)</h3>
+<ul>
+<li><code>locked.student@test.aerojet-academy.com</code>: loginAttempts: 5, lockedUntil: NOW + 24h</li>
+<li><code>suspended.student@test.aerojet-academy.com</code>: status: SUSPENDED</li>
+</ul>
+<h3 id="second-instructor-with-limited-rbac-r2-qa-4">Second Instructor with Limited RBAC (R2-QA-4)</h3>
+<ul>
+<li><code>instructor.limited@test.aerojet-academy.com</code>: only EXAM_SESSION_MONITOR grant, no publish rights</li>
+<li>Tests permission boundary</li>
+</ul>
+<section class="he-section" id="11c-ojt-pathway-flag-r2-bl-9"><div class="he-section__num">17 · 11C. OJT Pathway Flag (R2-BL-9)</div><h2 class="he-section__title">11C. OJT Pathway Flag (R2-BL-9)</h2></section>
+<p>StudyPathwayModel must have:</p>
+<ul>
+<li><code>includesOjt: true</code> — required for OJT access validation</li>
+</ul>
+<section class="he-section" id="12-internal-exam-sessions"><div class="he-section__num">18 · 12. Internal Exam Sessions</div><h2 class="he-section__title">12. Internal Exam Sessions</h2></section>
+<h3 id="active-session-seeding-approach-r2-bl-3-r2-bl-10">Active Session Seeding Approach (R2-BL-3, R2-BL-10)</h3>
+<p><strong>Do NOT insert directly as <code>IN_PROGRESS</code>.</strong> Instead:</p>
+<ol>
+<li>Seed as <code>NOT_STARTED</code> with <code>startedAt: null</code>, <code>expiresAt: null</code></li>
+<li>Call the session-start API endpoint (<code>POST /api/student/exams/internal/start</code>) or invoke <code>transitionExamSession</code> to move to <code>IN_PROGRESS</code></li>
+<li>This validates the state machine, eligibility checks, and attemptNumber logic</li>
+</ol>
+<h3 id="completed-sessions-history">Completed Sessions (history)</h3>
+<table>
+<thead>
+<tr><th>Session</th><th>Student</th><th>Bank</th><th>Class</th><th>Status</th><th>Score</th><th>%</th><th>Passed</th><th>Attempt</th><th>StartedAt</th><th>SubmittedAt</th></tr>
+</thead>
+<tbody>
+<tr><td>M1-SESSION-1</td><td>student</td><td>M1-MATH-BANK</td><td>M1-2025-S1</td><td>COMPLETED</td><td>32</td><td>80</td><td>true</td><td>1</td><td>NOW-30d</td><td>NOW-30d+50min</td></tr>
+<tr><td>M2-SESSION-1</td><td>student</td><td>M2-PHYS-BANK</td><td>M2-2025-S1</td><td>COMPLETED</td><td>30</td><td>75</td><td>true</td><td>1</td><td>NOW-15d</td><td>NOW-15d+50min</td></tr>
+</tbody>
+</table>
+<h3 id="active-session-seeded-as-notstarted-transitioned-to-inprogress-via-api">Active Session (seeded as NOT_STARTED, transitioned to IN_PROGRESS via API)</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>studentId</td><td>student</td></tr>
+<tr><td>bankId</td><td>M3-ELEC-BANK</td></tr>
+<tr><td>classId</td><td>M3-2025-S1</td></tr>
+<tr><td>status</td><td><code>NOT_STARTED</code> → <code>IN_PROGRESS</code> (via transitionExamSession)</td></tr>
+<tr><td>ruleSet</td><td><code>EASA</code></td></tr>
+<tr><td>attemptNumber</td><td>1 (set by engine on start)</td></tr>
+<tr><td>tabSwitchCount</td><td>0</td></tr>
+<tr><td>fullscreenExits</td><td>0</td></tr>
+<tr><td>keyboardEvents</td><td>0</td></tr>
+<tr><td>ipAddress</td><td><code>127.0.0.1</code></td></tr>
+<tr><td>userAgent</td><td>test user agent</td></tr>
+<tr><td>supervised</td><td>false</td></tr>
+<tr><td>isPublished</td><td>false</td></tr>
+<tr><td>reserveTxnId</td><td>linked to WalletTransaction #12</td></tr>
+</tbody>
+</table>
+<h3 id="additional-session-states-for-testing-r1-easa-5-r2-qa-1-r2-bl-6-r2-qa-2">Additional Session States for Testing (R1-EASA-5, R2-QA-1, R2-BL-6, R2-QA-2)</h3>
+<table>
+<thead>
+<tr><th>Session</th><th>Bank</th><th>Status</th><th>Score</th><th>%</th><th>Passed</th><th>Attempt</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>M1-SESSION-1</td><td>M1-MATH-BANK</td><td>COMPLETED</td><td>32</td><td>80</td><td>true</td><td>1</td><td>Standard pass</td></tr>
+<tr><td>M2-SESSION-1</td><td>M2-PHYS-BANK</td><td>COMPLETED</td><td>30</td><td>75</td><td>true</td><td>1</td><td>Exactly at threshold</td></tr>
+<tr><td>M3-SESSION-FAIL</td><td>M3-ELEC-BANK</td><td>COMPLETED</td><td>29</td><td>72.5</td><td>false</td><td>1</td><td>Below threshold (R2-QA-1)</td></tr>
+<tr><td>M1-SESSION-TIMEOUT</td><td>M1-MATH-BANK</td><td>TIMED_OUT</td><td>—</td><td>—</td><td>—</td><td>1</td><td>Expired without submission, autoSubmitted: true</td></tr>
+<tr><td>M2-SESSION-VOID</td><td>M2-PHYS-BANK</td><td>VOIDED</td><td>—</td><td>—</td><td>—</td><td>1</td><td>VoidReason: &quot;Technical issue&quot;</td></tr>
+<tr><td>M3-SESSION-VOID</td><td>M3-ELEC-BANK</td><td>VOIDED</td><td>—</td><td>—</td><td>—</td><td>1</td><td>VoidReason: &quot;Cheating detected&quot;</td></tr>
+<tr><td>M1-SESSION-FLAG</td><td>M1-MATH-BANK</td><td>FLAGGED</td><td>—</td><td>—</td><td>—</td><td>1</td><td>tabSwitchCount: 3, violation logged (R2-BL-12)</td></tr>
+<tr><td>M1-SESSION-R1</td><td>M1-MATH-BANK</td><td>COMPLETED</td><td>31</td><td>77.5</td><td>true</td><td>1</td><td>First attempt (R2-BL-6)</td></tr>
+<tr><td>M1-SESSION-R2</td><td>M1-MATH-BANK</td><td>COMPLETED</td><td>34</td><td>85</td><td>true</td><td>2</td><td>Retake after 91 days (R2-QA-2)</td></tr>
+<tr><td>M1-SESSION-TIMEOUT2</td><td>M1-MATH-BANK</td><td>TIMED_OUT</td><td>—</td><td>—</td><td>—</td><td>2</td><td>startedAt: NOW-89d (retake NOT yet eligible)</td></tr>
+<tr><td>M1-SESSION-TIMEOUT3</td><td>M1-MATH-BANK</td><td>TIMED_OUT</td><td>—</td><td>—</td><td>—</td><td>2</td><td>startedAt: NOW-91d (retake ELIGIBLE)</td></tr>
+</tbody>
+</table>
+<h3 id="answers-for-active-session-r3-int-2-5-10-answers-with-questionorder">Answers for Active Session (R3-INT-2 — 5-10 answers with questionOrder)</h3>
+<ul>
+<li>5-10 sample answers (mixing correct/incorrect)</li>
+<li>answeredAt timestamps between startedAt and now</li>
+<li>isCorrect calculated per question</li>
+<li><strong>questionOrder</strong>: JSON array of 10 randomly ordered question IDs from M3-ELEC-BANK (R3-INT-4 — required for resume/render)</li>
+<li>The 5-10 answer rows link to the first 5-10 IDs in questionOrder</li>
+</ul>
+<h3 id="answers-for-completed-sessions">Answers for Completed Sessions</h3>
+<ul>
+<li>40 answers each (all questions answered)</li>
+<li>Score and percentage calculated</li>
+</ul>
+<h3 id="access-codes-r1-sec-10">Access Codes (R1-SEC-10)</h3>
+<pre><code class="language-typescript">const generateAccessCode = () =&gt; crypto.randomBytes(6).toString('hex').toUpperCase() // 12-char hex
+</code></pre>
+<ul>
+<li>Generated for each session</li>
+<li>expiresAt: session expiresAt (for active), session submittedAt (for completed)</li>
+<li>used: false (active), true (completed)</li>
+</ul>
+<h3 id="registrations-r1-da-1">Registrations (R1-DA-1)</h3>
+<ul>
+<li>Linked to each session, <code>@@unique([sessionId, userId])</code> respected</li>
+<li>Full candidate details: fullName, dateOfBirth, nationality, email, phone</li>
+<li>licenceCategoryId → LicenseCategory &quot;B2&quot; (R1-DA-1)</li>
+<li>examDate, examLocation</li>
+<li>candidatePhoto, idDocumentType, idDocumentNumber</li>
+<li>consents: all true</li>
+<li>modules: [&quot;M3-ELEC&quot;]</li>
+</ul>
+<h3 id="internalexamviolation-records-r3-int-6">InternalExamViolation Records (R3-INT-6)</h3>
+<p>For the FLAGGED session (M1-SESSION-FLAG):</p>
+<table>
+<thead>
+<tr><th>Field</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>sessionId</td><td>M1-SESSION-FLAG</td></tr>
+<tr><td>studentId</td><td>student</td></tr>
+<tr><td>classId</td><td>M1-2025-S1</td></tr>
+<tr><td>bankId</td><td>M1-MATH-BANK</td></tr>
+<tr><td>type</td><td><code>TAB_SWITCH</code></td></tr>
+<tr><td>severity</td><td><code>WARNING</code></td></tr>
+<tr><td>detail</td><td>&quot;3 tab switches detected during exam session&quot;</td></tr>
+<tr><td>deviceInfo</td><td><code>{ userAgent: &quot;test-agent&quot;, timestamp: &quot;...&quot; }</code></td></tr>
+<tr><td>reviewed</td><td>false</td></tr>
+<tr><td>reviewOutcome</td><td>null</td></tr>
+</tbody>
+</table>
+<h3 id="internalexamreport-records-r3-int-7">InternalExamReport Records (R3-INT-7)</h3>
+<p>For M2-SESSION-1 (completed):</p>
+<table>
+<thead>
+<tr><th>Field</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>sessionId</td><td>M2-SESSION-1</td></tr>
+<tr><td>studentId</td><td>student</td></tr>
+<tr><td>status</td><td><code>PENDING</code></td></tr>
+<tr><td>reason</td><td>&quot;Question 23 appears to have two correct answers&quot;</td></tr>
+<tr><td>questionId</td><td>(one of the M2-PHYS-BANK question IDs)</td></tr>
+<tr><td>resolvedAt</td><td>null</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="13-certificates-r1-da-10"><div class="he-section__num">19 · 13. Certificates (R1-DA-10)</div><h2 class="he-section__title">13. Certificates (R1-DA-10)</h2></section>
+<h3 id="for-completed-passed-sessions">For completed passed sessions</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>certificateId</td><td><code>CERT-M1-2025-001</code> (unique)</td></tr>
+<tr><td>sessionId</td><td>M1-SESSION-1</td></tr>
+<tr><td>studentId</td><td>student</td></tr>
+<tr><td>courseId</td><td>M1</td></tr>
+<tr><td>moduleCode</td><td>M1-MATH</td></tr>
+<tr><td>score</td><td>32</td></tr>
+<tr><td>percentage</td><td>80.0</td></tr>
+<tr><td>template</td><td><code>internal_exam</code></td></tr>
+<tr><td>pdfUrl</td><td>placeholder</td></tr>
+<tr><td>issuedAt</td><td>session submittedAt</td></tr>
+<tr><td>issuedBy</td><td>instructor</td></tr>
+<tr><td>verified</td><td>true</td></tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> QR codes on PDFs link to <code>/verify/{certificateId}</code> which is a dead endpoint (DocumentVerification model is dead code per project audit). Testers should not expect QR verification to work.</p>
+<hr />
+<section class="he-section" id="14-additional-supporting-data-r1-da-1-corrections"><div class="he-section__num">20 · 14. Additional Supporting Data (R1-DA-1 corrections)</div><h2 class="he-section__title">14. Additional Supporting Data (R1-DA-1 corrections)</h2></section>
+<h3 id="notifications">Notifications</h3>
+<ul>
+<li>Enrollment confirmation, class schedule, exam registration, exam reminder, result published</li>
+</ul>
+<h3 id="messages-r1-da-1-messagereaction-does-not-exist">Messages (R1-DA-1 — MessageReaction does NOT exist)</h3>
+<ul>
+<li>Thread between student and instructor about exam preparation</li>
+<li>NO MessageReaction records (model doesn't exist)</li>
+</ul>
+<h3 id="audit-logs-r1-sec-6-r1-da-1">Audit Logs (R1-SEC-6, R1-DA-1)</h3>
+<p>Every security-critical action gets an AuditLog:</p>
+<ul>
+<li><code>USER_ENROLLED</code> — student enrollment approved</li>
+<li><code>CLASS_ASSIGNED</code> — student assigned to classes</li>
+<li><code>EXAM_BANK_INSTRUCTOR_ASSIGNED</code> — instructor assigned to bank</li>
+<li><code>EXAM_SCHEDULE_CREATED</code> — exam schedule created</li>
+<li><code>EXAM_ACCESS_CODE_GENERATED</code> — access code generated</li>
+<li><code>SESSION_STATUS_CHANGED</code> — session started/completed</li>
+<li><code>EXAM_RESULT_PUBLISHED</code> — result published</li>
+<li><code>CERTIFICATE_ISSUED</code> — certificate issued</li>
+<li>Top-level <code>SYSTEM</code> entry for seed execution</li>
+</ul>
+<h3 id="calendar-events-r1-da-1">Calendar Events (R1-DA-1)</h3>
+<ul>
+<li>AdminCalendarEvent: class schedules, exam sessions</li>
+<li>StudentCalendarEvent: student's personal schedule</li>
+<li>visibleTo: CalendarAudience enum</li>
+<li>classId/examEventId FKs populated</li>
+</ul>
+<h3 id="exam-events-easa-bridge">Exam Events (EASA bridge)</h3>
+<ul>
+<li>EASA-2026-S1: DRAFT, future exam event</li>
+<li>ExamPool: linked to event</li>
+<li>ExamSitting: morning/afternoon sessions</li>
+</ul>
+<h3 id="exam-bookings-easa-bridge">Exam Bookings (EASA bridge)</h3>
+<ul>
+<li>Student booking: examComponentId → M1-MATH exam component</li>
+<li>bookingType: INDIVIDUAL, status: PENDING</li>
+<li>This shows the bridge: internal exam passed → ready for EASA official exam</li>
+</ul>
+<h3 id="cron-job-test-data-r3-int-12-r3-int-13">Cron Job Test Data (R3-INT-12, R3-INT-13)</h3>
+<ul>
+<li><strong>exam-timeout cron</strong>: One IN_PROGRESS session with <code>expiresAt: NOW - 5min</code>, <code>lastActivityAt: NOW - 10min</code> — triggers auto-timeout</li>
+<li><strong>recover-exams cron</strong>: One IN_PROGRESS session with <code>expiresAt: NOW - 1h</code>, <code>submittedAt: null</code> — triggers recovery</li>
+<li>These are separate from the &quot;active but running&quot; M3 session</li>
+</ul>
+<hr />
+<section class="he-section" id="15-seed-script-structure"><div class="he-section__num">21 · 15. Seed Script Structure</div><h2 class="he-section__title">15. Seed Script Structure</h2></section>
+<p>Create <code>prisma/seed-internal-exam-test.ts</code>:</p>
+<pre><code class="language-typescript">// All timestamps computed relative to NOW
+// All creates use upsert for idempotency (R1-SEC-9)
+// Production guard at top (R1-SEC-1)
+// emailVerified set for all accounts (R1-SEC-2)
+// 2FA enabled for instructor (R1-SEC-3)
+// RoleGrant for instructor permissions (R1-SEC-4)
+// Access codes use crypto.randomBytes (R1-SEC-10)
+// Audit logs for every security-critical action (R1-SEC-6)
+
+// Step 1: System user (for audit logs)
+// Step 2: Reference tables (IntakeCycle, ApplicationDocumentType, etc.)
+// Step 3: Instructor user + profile + passkey + RBAC grants
+// Step 4: Student user + profile + studentProfile + license targets
+// Step 5: Application + stage logs + documents
+// Step 6: Academic structure (year, semester, categories, courses, components)
+// Step 7: Pathway, programme, terms, assignments
+// Step 8: Enrollments (Enrollment + FullTimeEnrollment)
+// Step 0: SystemSettings (R3-INT-1 — must be first, blocks all APIs if missing)
+// Step 1: System user (for audit logs)
+// Step 2: Reference tables (IntakeCycle, ApplicationDocumentType, etc.)
+// Step 3: Instructor user + profile + passkey (direct DB insert) + RBAC grants
+// Step 4: Staff user + profile + permissions (R3-INT-9)
+// Step 5: Student user + profile + studentProfile + license targets
+// Step 6: Application + stage logs + documents
+// Step 7: Academic structure (year, semester, categories, courses, components)
+// Step 8: Pathway, programme, terms, assignments
+// Step 9: Enrollments (Enrollment + FullTimeEnrollment)
+// Step 10: Classes + classrooms + sessions
+// Step 11: Attendance records
+// Step 12: Grades + practical training
+// Step 13: OJT logbook + entries + mentor assignments
+// Step 14: Wallet + transactions
+// Step 15: Internal exam banks + questions (3 options, knowledge levels, submittedById, explanations)
+// Step 16: Rule overrides + instructor assignments
+// Step 17: Class schedules
+// Step 18: Exam sessions (completed, timed-out, voided, active, flagged, fail, retake chain)
+// Step 19: Answers (with questionOrder for active session) + access codes + registrations
+// Step 20: InternalExamViolation + InternalExamReport records
+// Step 21: Certificates
+// Step 22: Notifications + messages + audit logs + calendar events
+// Step 23: EASA exam event + pool + sitting + booking
+// Step 24: Cron test data (expired sessions for exam-timeout and recover-exams)
+</code></pre>
+<h3 id="execution-notes-r2-dev-3-r2-dev-4-r3-perf-1-through-r3-perf-10">Execution Notes (R2-DEV-3, R2-DEV-4, R3-PERF-1 through R3-PERF-10)</h3>
+<ul>
+<li><strong>Use <code>prismaUnfiltered</code></strong> for all queries (no RLS overhead in seed context)</li>
+<li><strong>Use dependency-based batches</strong> instead of one giant <code>$transaction</code> (R3-PERF-1) — 8-10 independent batches with <code>Promise.all</code></li>
+<li><strong>Pre-seed Permission keys</strong> before creating RoleGrants</li>
+<li><strong>Use <code>createMany</code></strong> for ALL bulk inserts: ClassSessions, ExamQuestions, ApplicationStageLogs, AttendanceRecords, Answers, Notifications, Messages, OJTEntries, Grades, PracticalTrainingRecords</li>
+<li><strong>Replace HTTP session start with direct DB update</strong> (R3-PERF-5) — no API call during seeding</li>
+<li><strong>Parallelize independent groups</strong> — target <strong>3-5s</strong> execution time (R3-PERF-2)</li>
+<li><strong>Pre-existence batching</strong> to eliminate SELECT overhead in upserts</li>
+<li><strong>Cleanup implementation</strong>: delete by test email domain cascade, plus manual cleanup for tables without User cascade</li>
+</ul>
+<pre><code class="language-typescript">// Cleanup implementation
+export async function cleanupTestData(tx: PrismaClient) {
+  // Cascade delete from User removes: Profile, StudentProfile, InstructorProfile,
+  // Wallet + WalletTransaction, Certificate, InternalExamSession + children,
+  // AttendanceRecord, Grade, PracticalTrainingRecord, OJTLogbook + children,
+  // Application + ApplicationStageLog + ApplicationDocument,
+  // Notification, Message, ExamBooking, ExamResult, ExamSittingAssignment,
+  // InternalExamRegistration, InternalExamViolation, InternalExamReport
+  await tx.user.deleteMany({ where: { email: { endsWith: '@test.aerojet-academy.com' } } })
+
+  // Manual cleanup for tables without User cascade
+  await tx.internalExamBank.deleteMany({ where: { name: { startsWith: 'M' } } })
+  await tx.class.deleteMany({ where: { name: { startsWith: 'M' } } })
+  await tx.classroom.deleteMany({ where: { name: { startsWith: 'CR' } } })
+  await tx.ataChapter.deleteMany({ where: { code: { startsWith: 'ATA' } } })
+  await tx.licenseCategory.deleteMany({ where: { code: { in: ['B1', 'B2'] } } })
+  await tx.pdfTemplate.deleteMany({ where: { slug: 'internal_exam' } })
+  await tx.intakeCycle.deleteMany({ where: { name: '2025-2026 Intake' } })
+  await tx.applicationDocumentType.deleteMany({ where: { slug: { in: [...] } } })
+  await tx.permission.deleteMany({ where: { key: { startsWith: 'EXAM_' } } })
+}
+</code></pre>
+<h3 id="execution">Execution</h3>
+<pre><code class="language-bash"># Against test database only
+bun run db:seed -- --seed=prisma/seed-internal-exam-test.ts
+
+# Cleanup (R1-SEC-12)
+bun run db:seed -- --seed=prisma/seed-internal-exam-test.ts --cleanup
+</code></pre>
+<hr />
+<section class="he-section" id="16-verification-checklist"><div class="he-section__num">22 · 16. Verification Checklist</div><h2 class="he-section__title">16. Verification Checklist</h2></section>
+<p>After seeding, verify:</p>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Production guard blocks execution if NODE_ENV=production without ALLOW_TEST_SEED</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>SystemSetting <code>internal_exam_system_enabled = true</code> (R3-INT-1 — without it, all APIs return 403)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>SystemSetting <code>certificates_enabled = true</code> and <code>pdf_template_system_enabled = true</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Student can log in (emailVerified set)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Instructor can log in with 2FA (known TOTP secret works)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Instructor can use passkey (credential exists in DB)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Staff account can access staff exam routes (publish, supervise, extend)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Application shows ENROLLED stage with stage history</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>All 7 courses show in enrollment list</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>All classes show with correct instructor and classroom</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Attendance history shows &gt;80% across all courses</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>One course has exactly 80% attendance (boundary)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>One course has &lt;80% attendance (exam eligibility blocked)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Grades show for assessment sessions (75% threshold)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Wallet shows correct balance and transaction history (no negative)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Internal exam dashboard shows 3 available banks with categoryCode</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Completed sessions (M1, M2) show with certificates</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Failed session (M3-SESSION-FAIL) shows no certificate</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Retake chain visible (M1-SESSION-R1 → M1-SESSION-R2)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Active session (M3) has answers and questionOrder (R3-INT-2, R3-INT-4)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Active session (M3) can be started via state machine transition</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>TIMED_OUT sessions exist (including retake boundary tests)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>VOIDED sessions exist with different reasons</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>FLAGGED session exists with violation logged</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>InternalExamViolation record linked to FLAGGED session (R3-INT-6)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>InternalExamReport record for completed session (R3-INT-7)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>&quot;My Questions&quot; tab shows 120 questions (submittedById set) (R3-INT-3)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Results page shows explanations for some questions (R3-INT-8)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Instructor can manage exam banks (RBAC grants work)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Limited instructor CANNOT publish (RBAC boundary test)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Notifications show relevant alerts (including negative events)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>EASA booking lifecycle (CONFIRMED, REJECTED, CANCELLED)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Calendar events visible to student</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>OJT logbook entries exist and pathway includesOjt is true</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Prerequisite course validation works</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Max capacity class blocks new enrollment</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Expired access codes rejected</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Locked/suspended accounts cannot log in</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Cron test data exists for exam-timeout and recover-exams</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>All upsert-safe (re-running seed doesn't duplicate)</li>
+</ul>
+<hr />
+<section class="he-section" id="17-data-volume-summary"><div class="he-section__num">23 · 17. Data Volume Summary</div><h2 class="he-section__title">17. Data Volume Summary</h2></section>
+<table>
+<thead>
+<tr><th>Entity</th><th>Count</th></tr>
+</thead>
+<tbody>
+<tr><td>System Users</td><td>3 (super_admin, instructor, staff)</td></tr>
+<tr><td>Test Users</td><td>1 (student) + 2 negative test accounts</td></tr>
+<tr><td>Profiles</td><td>3</td></tr>
+<tr><td>Passkeys</td><td>1</td></tr>
+<tr><td>RoleGrants</td><td>8+ (instructor + staff)</td></tr>
+<tr><td>SystemSettings</td><td>3 (internal_exam_system_enabled, certificates_enabled, pdf_template_system_enabled)</td></tr>
+<tr><td>Application</td><td>1</td></tr>
+<tr><td>ApplicationStageLog</td><td>15</td></tr>
+<tr><td>ApplicationDocumentType</td><td>5</td></tr>
+<tr><td>ApplicationDocument + FileUpload</td><td>5</td></tr>
+<tr><td>IntakeCycle</td><td>1</td></tr>
+<tr><td>InterviewSchedule + Slot</td><td>1</td></tr>
+<tr><td>BondingContract</td><td>1</td></tr>
+<tr><td>AcademicYear</td><td>1</td></tr>
+<tr><td>Semester</td><td>1</td></tr>
+<tr><td>CourseCategories</td><td>3</td></tr>
+<tr><td>Courses</td><td>7</td></tr>
+<tr><td>ExamComponents</td><td>10-12</td></tr>
+<tr><td>StudyPathwayModel</td><td>1</td></tr>
+<tr><td>AcademicTerm</td><td>2</td></tr>
+<tr><td>TermCourseAssignment</td><td>12</td></tr>
+<tr><td>FullTimeProgramme + ProgrammeYear</td><td>3</td></tr>
+<tr><td>LicenseCategory</td><td>2</td></tr>
+<tr><td>StudentLicenseTarget</td><td>2</td></tr>
+<tr><td>Classroom</td><td>4</td></tr>
+<tr><td>ATAChapter</td><td>12</td></tr>
+<tr><td>PdfTemplate</td><td>1</td></tr>
+<tr><td>Enrollments</td><td>7</td></tr>
+<tr><td>FullTimeEnrollment</td><td>1</td></tr>
+<tr><td>Classes</td><td>7</td></tr>
+<tr><td>ClassSessions</td><td>~140</td></tr>
+<tr><td>AttendanceRecords</td><td>~140</td></tr>
+<tr><td>Grades</td><td>~15</td></tr>
+<tr><td>PracticalTrainingRecords</td><td>~9</td></tr>
+<tr><td>OJTLogbook + Entries + MentorAssignments</td><td>~10</td></tr>
+<tr><td>WalletTransactions</td><td>12 (+ reserve for active M3 exam)</td></tr>
+<tr><td>InternalExamBanks</td><td>3</td></tr>
+<tr><td>InternalExamQuestions</td><td>120 (with explanations on 5-10 per bank)</td></tr>
+<tr><td>InternalExamRuleOverrides</td><td>3</td></tr>
+<tr><td>InternalExamBankInstructors</td><td>3</td></tr>
+<tr><td>InternalExamClassSchedules</td><td>3</td></tr>
+<tr><td>InternalExamSessions</td><td>14 (2 completed pass, 1 fail, 2 retake chain, 3 timed-out boundary, 2 voided, 1 flagged, 1 active NOT_STARTED, 1 active IN_PROGRESS, 1 expired for cron)</td></tr>
+<tr><td>InternalExamAnswers</td><td>135+ (40 per completed + 10 active with questionOrder)</td></tr>
+<tr><td>InternalExamAccessCodes</td><td>6+ (including expired)</td></tr>
+<tr><td>InternalExamRegistrations</td><td>6+ (including PENDING for active)</td></tr>
+<tr><td>InternalExamViolation</td><td>1 (linked to FLAGGED session)</td></tr>
+<tr><td>InternalExamReport</td><td>1 (linked to completed session)</td></tr>
+<tr><td>Certificates</td><td>2</td></tr>
+<tr><td>Notifications</td><td>15+ (including negative events)</td></tr>
+<tr><td>Messages</td><td>5-10</td></tr>
+<tr><td>AuditLogs</td><td>25+</td></tr>
+<tr><td>CalendarEvents</td><td>20+</td></tr>
+<tr><td>ExamEvent + Pool + Sitting</td><td>1 each</td></tr>
+<tr><td>ExamBooking</td><td>3 (CONFIRMED, REJECTED, CANCELLED)</td></tr>
+<tr><td>CronTestSessions</td><td>2 (for exam-timeout and recover-exams)</td></tr>
+</tbody>
+</table>
+<p><strong>Total records: ~600-700</strong></p>
+<hr />
+<section class="he-section" id="18-round-1-council-findings-applied"><div class="he-section__num">24 · 18. Round 1 Council Findings Applied</div><h2 class="he-section__title">18. Round 1 Council Findings Applied</h2></section>
+<table>
+<thead>
+<tr><th>Finding</th><th>Source</th><th>Applied</th></tr>
+</thead>
+<tbody>
+<tr><td>Production seed guard</td><td>R1-SEC-1</td><td>Section 0</td></tr>
+<tr><td>emailVerified + 2FA for test accounts</td><td>R1-SEC-2, R1-SEC-3</td><td>Section 1</td></tr>
+<tr><td>RoleGrant permissions for instructor</td><td>R1-SEC-4</td><td>Section 11</td></tr>
+<tr><td>Passkey credential for instructor</td><td>R1-SEC-5</td><td>Section 1</td></tr>
+<tr><td>Audit logs for seed actions</td><td>R1-SEC-6</td><td>Section 14</td></tr>
+<tr><td>Email isolation via test domain</td><td>R1-SEC-7</td><td>Throughout</td></tr>
+<tr><td>Crypto-random access codes</td><td>R1-SEC-10</td><td>Section 12</td></tr>
+<tr><td>Idempotent upsert pattern</td><td>R1-SEC-9</td><td>Throughout</td></tr>
+<tr><td>Cleanup function</td><td>R1-SEC-12</td><td>Section 15</td></tr>
+<tr><td>Missing lookup tables (IntakeCycle, etc.)</td><td>R1-DA-1</td><td>Section 2</td></tr>
+<tr><td>ApplicationStageLog + FileUpload</td><td>R1-DA-2</td><td>Section 2</td></tr>
+<tr><td>StudyPathway + AcademicTerm + Assignments</td><td>R1-DA-1</td><td>Section 4</td></tr>
+<tr><td>LicenseCategory + StudentLicenseTarget</td><td>R1-DA-1</td><td>Section 2</td></tr>
+<tr><td>Classroom assignment</td><td>R1-DA-1</td><td>Section 5</td></tr>
+<tr><td>ATAChapter lookup</td><td>R1-DA-1</td><td>Section 2</td></tr>
+<tr><td>PdfTemplate for certificates</td><td>R1-DA-10</td><td>Section 2</td></tr>
+<tr><td>ExamSitting for sessions</td><td>R1-DA-1</td><td>Section 12</td></tr>
+<tr><td>AdminCalendarEvent</td><td>R1-DA-1</td><td>Section 14</td></tr>
+<tr><td>OJT model correction</td><td>R1-DA-1</td><td>Section 9</td></tr>
+<tr><td>3 MCQ options (not 4)</td><td>R1-EASA-2</td><td>Section 4</td></tr>
+<tr><td>Unified 75% pass threshold</td><td>R1-EASA-1, R1-EASA-3</td><td>Section 4, 8</td></tr>
+<tr><td>KnowledgeLevel distribution</td><td>R1-EASA-3</td><td>Section 11</td></tr>
+<tr><td>TIMED_OUT / VOIDED sessions</td><td>R1-EASA-5</td><td>Section 12</td></tr>
+<tr><td>EASA module code mapping</td><td>R1-EASA-9</td><td>Section 4</td></tr>
+<tr><td>Removed MessageReaction (doesn't exist)</td><td>R1-DA-1</td><td>Section 14</td></tr>
+<tr><td>Wallet sequence fixed (no negative balance)</td><td>R2-BL-1</td><td>Section 10</td></tr>
+<tr><td>TransactionType enum compliance (PAYMENT not DEBIT)</td><td>R2-BL-2</td><td>Section 10</td></tr>
+<tr><td>Active session seeded via state machine transition</td><td>R2-BL-3</td><td>Section 12</td></tr>
+<tr><td>includesOjt: true on pathway</td><td>R2-BL-9</td><td>Section 2</td></tr>
+<tr><td>Reserve funds for active M3 exam</td><td>R2-BL-10</td><td>Section 10, 12</td></tr>
+<tr><td>BondingContract schema fix</td><td>R2-DEV-1</td><td>Section 2</td></tr>
+<tr><td>InterviewSlot schema fix</td><td>R2-DEV-1</td><td>Section 2</td></tr>
+<tr><td>ApplicationDocumentType required fields</td><td>R2-DEV-1</td><td>Section 2</td></tr>
+<tr><td>Passkey via direct DB insert</td><td>R2-DEV-2</td><td>Section 1</td></tr>
+<tr><td>Transaction wrapping + prismaUnfiltered</td><td>R2-DEV-3</td><td>Section 15</td></tr>
+<tr><td>Cleanup implementation</td><td>R2-DEV-4</td><td>Section 15</td></tr>
+<tr><td>Permission pre-seeding</td><td>R2-DEV-5</td><td>Section 15</td></tr>
+<tr><td>SystemSetting seeds (internal_exam_system_enabled, etc.)</td><td>R3-INT-1</td><td>Section 0</td></tr>
+<tr><td>Staff test account</td><td>R3-INT-9</td><td>Section 1</td></tr>
+<tr><td>Bank categoryCode set</td><td>R3-INT-10</td><td>Section 11</td></tr>
+<tr><td>submittedById on questions</td><td>R3-INT-3</td><td>Section 11</td></tr>
+<tr><td>questionOrder on active session</td><td>R3-INT-4</td><td>Section 12</td></tr>
+<tr><td>InternalExamAnswer records for active session</td><td>R3-INT-2</td><td>Section 12</td></tr>
+<tr><td>explanations on questions</td><td>R3-INT-8</td><td>Section 11</td></tr>
+<tr><td>InternalExamViolation records</td><td>R3-INT-6</td><td>Section 12</td></tr>
+<tr><td>InternalExamReport records</td><td>R3-INT-7</td><td>Section 12</td></tr>
+<tr><td>Cron job test data</td><td>R3-INT-12, R3-INT-13</td><td>Section 14</td></tr>
+<tr><td>Performance: dependency-based batches + createMany</td><td>R3-PERF</td><td>Section 15</td></tr>
+</tbody>
+</table>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#objective">Objective</a></li>
+    <li class="he-toc__l2"><a href="#0-seed-script-guardrails-r1-sec-1">0. Seed Script Guardrails (R1-SEC-1)</a></li>
+    <li class="he-toc__l3"><a href="#systemsettings-r3-int-1-critical-must-be-step-0">SystemSettings (R3-INT-1 — CRITICAL, must be Step 0)</a></li>
+    <li class="he-toc__l2"><a href="#0a-easa-question-csv-state-audit-history">0A. EASA Question CSV State &amp; Audit History</a></li>
+    <li class="he-toc__l3"><a href="#current-module-inventory-scriptseasa-seedcsvsanswered">Current Module Inventory (`scripts/easa-seed/csvs_answered/`)</a></li>
+    <li class="he-toc__l3"><a href="#audit-history">Audit History</a></li>
+    <li class="he-toc__l3"><a href="#data-quality-issues-deferred-not-blockers">Data-Quality Issues (Deferred — Not Blockers)</a></li>
+    <li class="he-toc__l3"><a href="#safe-modify-rule">Safe-Modify Rule</a></li>
+    <li class="he-toc__l2"><a href="#1-test-accounts">1. Test Accounts</a></li>
+    <li class="he-toc__l3"><a href="#security-critical-fields-r1-sec-2-r1-sec-3">Security-Critical Fields (R1-SEC-2, R1-SEC-3)</a></li>
+    <li class="he-toc__l3"><a href="#instructor-account">Instructor Account</a></li>
+    <li class="he-toc__l3"><a href="#student-account">Student Account</a></li>
+    <li class="he-toc__l3"><a href="#system-user-for-audit-logs">System User (for audit logs)</a></li>
+    <li class="he-toc__l3"><a href="#staff-test-account-r3-int-9">Staff Test Account (R3-INT-9)</a></li>
+    <li class="he-toc__l2"><a href="#2-reference-lookup-tables-r1-da-1">2. Reference / Lookup Tables (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#intakecycle">IntakeCycle</a></li>
+    <li class="he-toc__l3"><a href="#applicationdocumenttype-r1-da-1-r2-dev-1">ApplicationDocumentType (R1-DA-1, R2-DEV-1)</a></li>
+    <li class="he-toc__l3"><a href="#interviewschedule-interviewslot-r1-da-1">InterviewSchedule + InterviewSlot (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#studypathwaymodel">StudyPathwayModel</a></li>
+    <li class="he-toc__l3"><a href="#academicterm-r1-da-1">AcademicTerm (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#termcourseassignment-r1-da-1">TermCourseAssignment (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#fulltimeprogramme-programmeyear-r1-da-1">FullTimeProgramme + ProgrammeYear (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#licensecategory-r1-da-1">LicenseCategory (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#studentlicensetarget-r1-da-1">StudentLicenseTarget (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#classroom-r1-da-1">Classroom (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#atachapter-r1-da-1">ATAChapter (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#pdftemplate-r1-da-1-r1-da-10">PdfTemplate (R1-DA-1, R1-DA-10)</a></li>
+    <li class="he-toc__l2"><a href="#3-application-acceptance-flow-r1-da-2-r1-da-3">3. Application &amp; Acceptance Flow (R1-DA-2, R1-DA-3)</a></li>
+    <li class="he-toc__l3"><a href="#application-record">Application Record</a></li>
+    <li class="he-toc__l3"><a href="#bondingcontract-r2-dev-1">BondingContract (R2-DEV-1)</a></li>
+    <li class="he-toc__l3"><a href="#interviewschedule-interviewslot-r2-dev-1">InterviewSchedule + InterviewSlot (R2-DEV-1)</a></li>
+    <li class="he-toc__l3"><a href="#applicationstagelog-r1-da-2">ApplicationStageLog (R1-DA-2)</a></li>
+    <li class="he-toc__l3"><a href="#supporting-documents-r1-da-1">Supporting Documents (R1-DA-1)</a></li>
+    <li class="he-toc__l2"><a href="#4-academic-structure">4. Academic Structure</a></li>
+    <li class="he-toc__l3"><a href="#academic-year-semester-r1-da-1">Academic Year &amp; Semester (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#course-categories">Course Categories</a></li>
+    <li class="he-toc__l3"><a href="#courses-r1-easa-9-easa-module-mapping">Courses (R1-EASA-9 — EASA module mapping)</a></li>
+    <li class="he-toc__l3"><a href="#exam-components-per-course-r1-easa-2-3-options-not-4">Exam Components (per course) (R1-EASA-2 — 3 options, not 4)</a></li>
+    <li class="he-toc__l3"><a href="#programme-pathway-r1-da-1">Programme &amp; Pathway (R1-DA-1)</a></li>
+    <li class="he-toc__l2"><a href="#5-enrollment-class-assignment">5. Enrollment &amp; Class Assignment</a></li>
+    <li class="he-toc__l3"><a href="#enrollment">Enrollment</a></li>
+    <li class="he-toc__l3"><a href="#classes-r1-da-1-with-classroom">Classes (R1-DA-1 — with Classroom)</a></li>
+    <li class="he-toc__l2"><a href="#6-class-sessions-historical-current">6. Class Sessions (Historical + Current)</a></li>
+    <li class="he-toc__l3"><a href="#past-sessions-completed">Past Sessions (completed)</a></li>
+    <li class="he-toc__l3"><a href="#upcoming-sessions-current">Upcoming Sessions (current)</a></li>
+    <li class="he-toc__l2"><a href="#7-attendance-records-historical">7. Attendance Records (Historical)</a></li>
+    <li class="he-toc__l3"><a href="#for-each-past-classsession-r1-easa-1-80-threshold">For each past ClassSession (R1-EASA-1 — 80% threshold)</a></li>
+    <li class="he-toc__l3"><a href="#example-m1-20-sessions">Example M1 (20 sessions):</a></li>
+    <li class="he-toc__l2"><a href="#8-grades-assessments-r1-easa-1-75-threshold">8. Grades / Assessments (R1-EASA-1 — 75% threshold)</a></li>
+    <li class="he-toc__l3"><a href="#internal-continuous-assessment-internalca">Internal Continuous Assessment (INTERNAL_CA)</a></li>
+    <li class="he-toc__l3"><a href="#practical-training-records-r1-da-1">Practical Training Records (R1-DA-1)</a></li>
+    <li class="he-toc__l2"><a href="#9-ojt-periods-r1-da-1-corrected-model">9. OJT Periods (R1-DA-1 — corrected model)</a></li>
+    <li class="he-toc__l3"><a href="#ojtlogbook-ojtlogbookentry-ojtmentorassignment">OJTLogbook + OJTLogbookEntry + OJTMentorAssignment</a></li>
+    <li class="he-toc__l3"><a href="#ojt-validation-r1-easa-8">OJT Validation (R1-EASA-8)</a></li>
+    <li class="he-toc__l2"><a href="#10-transactions-wallet-history">10. Transactions &amp; Wallet History</a></li>
+    <li class="he-toc__l3"><a href="#wallet-transactions-chronological-r1-sec-7-r2-bl-1-r2-bl-2">Wallet Transactions (chronological, R1-SEC-7, R2-BL-1, R2-BL-2)</a></li>
+    <li class="he-toc__l2"><a href="#11-internal-exam-preparation-r1-easa-1-r1-da-1">11. Internal Exam Preparation (R1-EASA-1, R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#internal-exam-banks">Internal Exam Banks</a></li>
+    <li class="he-toc__l3"><a href="#questions-per-bank-r1-easa-2-r1-easa-3-r3-int-3-r3-int-4">Questions per Bank (R1-EASA-2, R1-EASA-3, R3-INT-3, R3-INT-4)</a></li>
+    <li class="he-toc__l3"><a href="#rule-overrides-r1-da-1">Rule Overrides (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#bank-instructor-assignments-r1-da-1-r1-sec-4">Bank-Instructor Assignments (R1-DA-1, R1-SEC-4)</a></li>
+    <li class="he-toc__l3"><a href="#rbac-permission-grants-r1-sec-4">RBAC Permission Grants (R1-SEC-4)</a></li>
+    <li class="he-toc__l3"><a href="#class-schedules-r1-da-1-r3-int-6">Class Schedules (R1-DA-1, R3-INT-6)</a></li>
+    <li class="he-toc__l2"><a href="#12-internal-exam-sessions">12. Internal Exam Sessions</a></li>
+    <li class="he-toc__l3"><a href="#completed-sessions-history">Completed Sessions (history)</a></li>
+    <li class="he-toc__l2"><a href="#11b-additional-test-scenarios-r2-qa-1-through-r2-qa-4">11B. Additional Test Scenarios (R2-QA-1 through R2-QA-4)</a></li>
+    <li class="he-toc__l3"><a href="#failed-exam-score-below-75">Failed Exam (score below 75%)</a></li>
+    <li class="he-toc__l3"><a href="#retake-chain-r2-bl-6-r2-qa-2">Retake Chain (R2-BL-6, R2-QA-2)</a></li>
+    <li class="he-toc__l3"><a href="#attendance-boundary-values-r2-qa-2">Attendance Boundary Values (R2-QA-2)</a></li>
+    <li class="he-toc__l3"><a href="#max-capacity-class-r2-qa-4">Max Capacity Class (R2-QA-4)</a></li>
+    <li class="he-toc__l3"><a href="#easa-booking-lifecycle-r2-qa-1">EASA Booking Lifecycle (R2-QA-1)</a></li>
+    <li class="he-toc__l3"><a href="#payment-failure-r2-qa-1">Payment Failure (R2-QA-1)</a></li>
+    <li class="he-toc__l3"><a href="#document-rejection-r2-qa-1">Document Rejection (R2-QA-1)</a></li>
+    <li class="he-toc__l3"><a href="#interview-no-show-r2-qa-1">Interview No-Show (R2-QA-1)</a></li>
+    <li class="he-toc__l3"><a href="#medical-clearance-failure-r2-qa-1">Medical Clearance Failure (R2-QA-1)</a></li>
+    <li class="he-toc__l3"><a href="#expired-access-code-r2-qa-1">Expired Access Code (R2-QA-1)</a></li>
+    <li class="he-toc__l3"><a href="#wallet-reserve-release-r2-qa-1">Wallet Reserve Release (R2-QA-1)</a></li>
+    <li class="he-toc__l3"><a href="#flagged-session-r2-bl-12">FLAGGED Session (R2-BL-12)</a></li>
+    <li class="he-toc__l3"><a href="#prerequisite-course-r2-bl-5">Prerequisite Course (R2-BL-5)</a></li>
+    <li class="he-toc__l3"><a href="#retake-wait-boundary-r2-qa-2">Retake Wait Boundary (R2-QA-2)</a></li>
+    <li class="he-toc__l3"><a href="#exam-already-expired-r2-qa-2">Exam Already Expired (R2-QA-2)</a></li>
+    <li class="he-toc__l3"><a href="#multiple-void-reasons-r2-qa-1">Multiple Void Reasons (R2-QA-1)</a></li>
+    <li class="he-toc__l3"><a href="#negative-test-accounts-r2-qa-3">Negative Test Accounts (R2-QA-3)</a></li>
+    <li class="he-toc__l3"><a href="#second-instructor-with-limited-rbac-r2-qa-4">Second Instructor with Limited RBAC (R2-QA-4)</a></li>
+    <li class="he-toc__l2"><a href="#11c-ojt-pathway-flag-r2-bl-9">11C. OJT Pathway Flag (R2-BL-9)</a></li>
+    <li class="he-toc__l2"><a href="#12-internal-exam-sessions">12. Internal Exam Sessions</a></li>
+    <li class="he-toc__l3"><a href="#active-session-seeding-approach-r2-bl-3-r2-bl-10">Active Session Seeding Approach (R2-BL-3, R2-BL-10)</a></li>
+    <li class="he-toc__l3"><a href="#completed-sessions-history">Completed Sessions (history)</a></li>
+    <li class="he-toc__l3"><a href="#active-session-seeded-as-notstarted-transitioned-to-inprogress-via-api">Active Session (seeded as NOT_STARTED, transitioned to IN_PROGRESS via API)</a></li>
+    <li class="he-toc__l3"><a href="#additional-session-states-for-testing-r1-easa-5-r2-qa-1-r2-bl-6-r2-qa-2">Additional Session States for Testing (R1-EASA-5, R2-QA-1, R2-BL-6, R2-QA-2)</a></li>
+    <li class="he-toc__l3"><a href="#answers-for-active-session-r3-int-2-5-10-answers-with-questionorder">Answers for Active Session (R3-INT-2 — 5-10 answers with questionOrder)</a></li>
+    <li class="he-toc__l3"><a href="#answers-for-completed-sessions">Answers for Completed Sessions</a></li>
+    <li class="he-toc__l3"><a href="#access-codes-r1-sec-10">Access Codes (R1-SEC-10)</a></li>
+    <li class="he-toc__l3"><a href="#registrations-r1-da-1">Registrations (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#internalexamviolation-records-r3-int-6">InternalExamViolation Records (R3-INT-6)</a></li>
+    <li class="he-toc__l3"><a href="#internalexamreport-records-r3-int-7">InternalExamReport Records (R3-INT-7)</a></li>
+    <li class="he-toc__l2"><a href="#13-certificates-r1-da-10">13. Certificates (R1-DA-10)</a></li>
+    <li class="he-toc__l3"><a href="#for-completed-passed-sessions">For completed passed sessions</a></li>
+    <li class="he-toc__l2"><a href="#14-additional-supporting-data-r1-da-1-corrections">14. Additional Supporting Data (R1-DA-1 corrections)</a></li>
+    <li class="he-toc__l3"><a href="#notifications">Notifications</a></li>
+    <li class="he-toc__l3"><a href="#messages-r1-da-1-messagereaction-does-not-exist">Messages (R1-DA-1 — MessageReaction does NOT exist)</a></li>
+    <li class="he-toc__l3"><a href="#audit-logs-r1-sec-6-r1-da-1">Audit Logs (R1-SEC-6, R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#calendar-events-r1-da-1">Calendar Events (R1-DA-1)</a></li>
+    <li class="he-toc__l3"><a href="#exam-events-easa-bridge">Exam Events (EASA bridge)</a></li>
+    <li class="he-toc__l3"><a href="#exam-bookings-easa-bridge">Exam Bookings (EASA bridge)</a></li>
+    <li class="he-toc__l3"><a href="#cron-job-test-data-r3-int-12-r3-int-13">Cron Job Test Data (R3-INT-12, R3-INT-13)</a></li>
+    <li class="he-toc__l2"><a href="#15-seed-script-structure">15. Seed Script Structure</a></li>
+    <li class="he-toc__l3"><a href="#execution-notes-r2-dev-3-r2-dev-4-r3-perf-1-through-r3-perf-10">Execution Notes (R2-DEV-3, R2-DEV-4, R3-PERF-1 through R3-PERF-10)</a></li>
+    <li class="he-toc__l3"><a href="#execution">Execution</a></li>
+    <li class="he-toc__l2"><a href="#16-verification-checklist">16. Verification Checklist</a></li>
+    <li class="he-toc__l2"><a href="#17-data-volume-summary">17. Data Volume Summary</a></li>
+    <li class="he-toc__l2"><a href="#18-round-1-council-findings-applied">18. Round 1 Council Findings Applied</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

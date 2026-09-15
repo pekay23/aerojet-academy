@@ -35,8 +35,11 @@ export interface MonitorSessionRow {
   timeRemaining: number | null
   answerCount: number
   answers: {
-    question: { id: string; text: string; correctAnswer: string; points: number }
+    question: { id: string; text: string; correctAnswer: string; points: number } | null
     selectedAnswer: string | null
+    pointsAwarded: number | null
+    isCorrect: boolean | null
+    answeredAt: string | null
   }[]
 }
 
@@ -45,9 +48,15 @@ async function getMonitorSessions(classId: string): Promise<MonitorSessionRow[]>
   const sessions = await prismaUnfiltered.internalExamSession.findMany({
     where: { classId },
     include: {
-      student: { select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } } },
+      student: {
+        select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } },
+      },
       bank: { select: { id: true, name: true } },
-      answers: { include: { question: { select: { id: true, correctAnswer: true, points: true, text: true } } } },
+      answers: {
+        include: {
+          question: { select: { id: true, correctAnswer: true, points: true, text: true } },
+        },
+      },
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -58,7 +67,10 @@ async function getMonitorSessions(classId: string): Promise<MonitorSessionRow[]>
     for (const answer of s.answers) {
       if (answer.question) {
         totalPoints += answer.question.points
-        if (answer.selectedAnswer !== null && answer.selectedAnswer === answer.question.correctAnswer) {
+        if (
+          answer.selectedAnswer !== null &&
+          answer.selectedAnswer === answer.question.correctAnswer
+        ) {
           correctCount++
         }
       }
@@ -73,7 +85,9 @@ async function getMonitorSessions(classId: string): Promise<MonitorSessionRow[]>
       status: s.status,
       student: {
         id: s.student.id,
-        name: `${s.student.profile?.firstName || ''} ${s.student.profile?.lastName || ''}`.trim() || s.student.email,
+        name:
+          `${s.student.profile?.firstName || ''} ${s.student.profile?.lastName || ''}`.trim() ||
+          s.student.email,
         email: s.student.email,
       },
       bank: s.bank,
@@ -90,12 +104,19 @@ async function getMonitorSessions(classId: string): Promise<MonitorSessionRow[]>
       answers: s.answers.map((a) => ({
         question: a.question,
         selectedAnswer: a.selectedAnswer,
+        pointsAwarded: a.pointsAwarded,
+        isCorrect: a.isCorrect,
+        answeredAt: a.answeredAt?.toISOString() || null,
       })),
     }
   })
 }
 
-export default async function ClassMonitorPageServer({ params }: { params: Promise<{ classId: string }> }) {
+export default async function ClassMonitorPageServer({
+  params,
+}: {
+  params: Promise<{ classId: string }>
+}) {
   const user = await requireInstructor()
   const instructorProfile = await getInstructorProfileByUserId(user.id)
   if (!instructorProfile) notFound()
@@ -138,8 +159,12 @@ export default async function ClassMonitorPageServer({ params }: { params: Promi
   }
 
   return (
-    <div className="mx-auto max-w-7xl pb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <ClassMonitorPage classId={classId} initialClass={initialClass} initialSessions={initialSessions} />
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-7xl pb-10 duration-700">
+      <ClassMonitorPage
+        classId={classId}
+        initialClass={initialClass}
+        initialSessions={initialSessions}
+      />
     </div>
   )
 }

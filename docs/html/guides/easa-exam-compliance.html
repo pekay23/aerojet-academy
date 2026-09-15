@@ -97,20 +97,24 @@
 <tr><td>High-stakes modules</td><td>20x required count</td><td>Maximum security</td></tr>
 </tbody>
 </table>
-<h3 id="32-question-metadata">3.2 Question Metadata</h3>
-<p>Every question must include:</p>
+<h3 id="32-question-structure">3.2 Question Structure</h3>
+<p>Every question must conform to the following structure enforced by <code>selectInternalExamQuestions</code> (<code>lib/exams/engine.ts:99</code>):</p>
 <table>
 <thead>
-<tr><th>Field</th><th>Type</th><th>EASA Requirement</th></tr>
+<tr><th>Field</th><th>Type</th><th>Requirement</th></tr>
 </thead>
 <tbody>
+<tr><td><code>options</code></td><td>JSON array of 3 strings</td><td>Exactly 3 options per question (EASA Part-66 standard)</td></tr>
+<tr><td><code>correctAnswer</code></td><td>string</td><td>Exact option text; stored server-side only</td></tr>
 <tr><td><code>moduleCode</code></td><td>string</td><td>M1–M17, type modules</td></tr>
 <tr><td><code>moduleSubsection</code></td><td>string</td><td>Part-66 Appendix I taxonomy</td></tr>
 <tr><td><code>knowledgeLevel</code></td><td>int</td><td>1, 2, or 3 per EASA</td></tr>
 <tr><td><code>syllabusRef</code></td><td>string</td><td>Reference to EASA syllabus paragraph</td></tr>
 <tr><td><code>points</code></td><td>int</td><td>Scoring weight</td></tr>
+<tr><td><code>explanation</code></td><td>string</td><td>5-10 questions per bank have explanations (results page &quot;Show Explanations&quot;)</td></tr>
 </tbody>
 </table>
+<p><strong>Note:</strong> The exam UI renders options as large A/B/C buttons with letter badges. <code>correctAnswer</code> is never sent to the client during an active exam session (verified in <code>app/api/student/exams/internal/session/route.ts</code>).</p>
 <h3 id="33-approval-workflow">3.3 Approval Workflow</h3>
 <ol>
 <li>Instructor creates question → <code>status: 'PENDING_APPROVAL'</code></li>
@@ -167,9 +171,10 @@ Violations: {violationCount}
 </table>
 <h3 id="52-blind-grading">5.2 Blind Grading</h3>
 <ul>
-<li>Correct answers are stored server-side only</li>
-<li>Grading executed in PostgreSQL <code>SECURITY DEFINER</code> function</li>
-<li>Client never receives <code>isCorrect</code> or <code>correctAnswer</code></li>
+<li>Correct answers are stored server-side only in <code>InternalExamQuestion.correctAnswer</code></li>
+<li>Grading executed by <code>lib/exams/engine.ts</code> on the server</li>
+<li>The client exam interface (<code>app/student/exams/internal/_components/InternalExamInterface.tsx</code>) renders options as A/B/C buttons but <strong>never receives <code>correctAnswer</code></strong> during an active session</li>
+<li>Results page (<code>app/student/exams/internal/results/[sessionId]/page.tsx</code>) only shows answers when the student toggles <code>showAnswers</code>; hidden by default until an admin sets <code>isPublished: true</code></li>
 <li>Server-side paper binding validates answer integrity</li>
 </ul>
 <h3 id="53-result-lock">5.3 Result Lock</h3>
@@ -300,7 +305,7 @@ Violations: {violationCount}
     <li class="he-toc__l3"><a href="#23-supervised-alternative-pathway">2.3 Supervised Alternative Pathway</a></li>
     <li class="he-toc__l2"><a href="#3-question-bank-requirements">3. Question Bank Requirements</a></li>
     <li class="he-toc__l3"><a href="#31-minimum-bank-size">3.1 Minimum Bank Size</a></li>
-    <li class="he-toc__l3"><a href="#32-question-metadata">3.2 Question Metadata</a></li>
+    <li class="he-toc__l3"><a href="#32-question-structure">3.2 Question Structure</a></li>
     <li class="he-toc__l3"><a href="#33-approval-workflow">3.3 Approval Workflow</a></li>
     <li class="he-toc__l2"><a href="#4-session-log-requirements">4. Session Log Requirements</a></li>
     <li class="he-toc__l3"><a href="#41-required-fields">4.1 Required Fields</a></li>

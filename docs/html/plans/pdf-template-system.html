@@ -44,24 +44,34 @@
 <h3 id="certificate-numbering">Certificate Numbering</h3>
 <p>Configurable per-template numbering format (e.g., <code>CERT-{YYYY}-{SEQ:4}</code> → <code>CERT-2026-0089</code>). Sequence auto-increments per template type per year.</p>
 <hr />
-<section class="he-section" id="user-review-required"><div class="he-section__num">02 · User Review Required</div><h2 class="he-section__title">User Review Required</h2></section>
+<section class="he-section" id="key-design-decisions"><div class="he-section__num">02 · Key Design Decisions</div><h2 class="he-section__title">Key Design Decisions</h2></section>
 <blockquote>
 <p>[!WARNING]
-<strong>Template Types</strong>: Currently there are 2 template layouts (Certificate, Transcript). New layouts require code changes, but all <strong>content</strong> within them is editable by staff. Staff can clone templates to create variations (e.g., &quot;Certificate - B1.1&quot;, &quot;Certificate - B2&quot;).</p>
+<strong>Template Types</strong>: 2 template layouts exist (Certificate, Transcript). New layouts require developer work. All <strong>content</strong> within layouts is editable by ADMIN/SUPER_ADMIN. Staff clone templates to create variations (e.g., &quot;Certificate - B1.1&quot;, &quot;Certificate - B2&quot;).</p>
 </blockquote>
 <blockquote>
 <p>[!IMPORTANT]
-<strong>Signature Storage</strong>: Signatures will be stored in Supabase Storage (<code>aerojet-documents/signatures/</code>) as PNG/JPG. They're read at PDF generation time and embedded as base64 data URIs.</p>
+<strong>Signature Storage</strong>: Signatures stored in Supabase Storage (<code>aerojet-documents/signatures/</code>) as PNG/JPG. Read at PDF generation time and embedded as base64 data URIs. No secondary approval required for uploads — admin uploads with the consent of the person whose signature is needed.</p>
+</blockquote>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>Per-Template Signatures</strong>: Different templates can have different signers. The <code>PdfSignature</code> library is shared, but admin assigns specific signatures to specific positions per template via the join table. A single signature can be assigned to multiple templates.</p>
+</blockquote>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>Access Control</strong>: All template and signature management actions (<code>saveTemplateAction</code>, <code>uploadSignatureAction</code>, <code>cloneTemplateAction</code>, etc.) require <code>ADMIN</code> or <code>SUPER_ADMIN</code> role. The staff settings UI for PDF Templates tab should also be gated at the layout/UI level.</p>
 </blockquote>
 <blockquote>
 <p>[!IMPORTANT]
 <strong>QR Verification</strong>: This creates a <strong>public</strong> verification route (<code>/verify/[code]</code>) that anyone can access without authentication. It only reveals: document type, recipient name, issue date, certificate number, and verification status. No sensitive academic data is exposed.</p>
 </blockquote>
-<section class="he-section" id="open-questions"><div class="he-section__num">03 · Open Questions</div><h2 class="he-section__title">Open Questions</h2></section>
+<section class="he-section" id="resolved-decisions"><div class="he-section__num">03 · Resolved Decisions</div><h2 class="he-section__title">Resolved Decisions</h2></section>
 <ol>
-<li><strong>Signature approval workflow?</strong> — Should uploaded signatures require secondary approval, or is the uploading staff member's authority sufficient?</li>
-<li><strong>Per-student vs. global signatures?</strong> — Are signatures always global (one &quot;Academy Director&quot; signature for all), or could different certificates need different signers?</li>
-<li><strong>QR code placement</strong> — Bottom-right corner of the first page? Or in the footer? I'll default to bottom-right of the accreditation/disclaimer area.</li>
+<li><strong>Signature approval workflow?</strong> — No secondary approval required. The uploading admin's authority is sufficient. Signature must be added with the consent of the person whose signature is needed.</li>
+<li><strong>Per-student vs. global signatures?</strong> — Different certificates can have different signers. The signature library is shared across templates, but admin assigns specific signatures to specific template positions on a per-template basis.</li>
+<li><strong>QR code placement</strong> — Bottom-right of the accreditation/disclaimer area, or an appropriate position within the layout. Template editors cannot change placement (it's a layout-level decision, not content).</li>
+<li><strong>Access control</strong> — Template editing, signature management, and all template actions restricted to <code>ADMIN</code> and <code>SUPER_ADMIN</code> only.</li>
+<li><strong>Editable content</strong> — All text content within templates is editable by ADMIN and SUPER_ADMIN: title, subtitle, completionText, accreditationText, signatureLabels, sectionHeaders, disclaimerText.</li>
 </ol>
 <hr />
 <section class="he-section" id="proposed-changes"><div class="he-section__num">04 · Proposed Changes</div><h2 class="he-section__title">Proposed Changes</h2></section>
@@ -201,6 +211,9 @@ enum PdfTemplateStatus {
 <li><code>verifyDocument(code)</code> — public lookup for verification page</li>
 </ul>
 <h4 id="new-appstaffsettingsactionspdf-template-actionsts">[NEW] <code>app/staff/settings/_actions/pdf-template-actions.ts</code></h4>
+<blockquote>
+<p>⚠️ <strong>Access control</strong>: All actions require <code>ADMIN</code> or <code>SUPER_ADMIN</code> role. Call <code>requireAdmin()</code> at the top of each action. Gate the settings tab UI at <code>app/staff/settings/_components/SettingsLayout.tsx</code> or equivalent.</p>
+</blockquote>
 <p>Server actions:</p>
 <ul>
 <li><code>saveTemplateAction(formData)</code> — upsert template content + branding</li>
@@ -208,7 +221,7 @@ enum PdfTemplateStatus {
 <li><code>cloneTemplateAction(id, newName)</code> — clone a template</li>
 <li><code>archiveTemplateAction(id)</code> — set status to ARCHIVED</li>
 <li><code>activateTemplateAction(id)</code> — set status to ACTIVE</li>
-<li><code>uploadSignatureAction(formData)</code> — upload to Supabase Storage, create record</li>
+<li><code>uploadSignatureAction(formData)</code> — upload to Supabase Storage, create record (no secondary approval; record <code>uploadedBy</code>)</li>
 <li><code>deleteSignatureAction(id)</code> — remove signature (check not in active use)</li>
 <li><code>assignSignatureAction(templateId, signatureId, position)</code> — assign to slot</li>
 <li><code>removeSignatureAssignmentAction(templateId, position)</code> — unassign</li>
@@ -236,13 +249,16 @@ enum PdfTemplateStatus {
 <li><strong>Signatures</strong> — signature upload and management grid</li>
 </ol>
 <h4 id="new-appstaffsettingscomponentstemplateeditortsx">[NEW] <code>app/staff/settings/_components/TemplateEditor.tsx</code></h4>
-<p>Form-based editor for template content:</p>
+<blockquote>
+<p>⚠️ <strong>Access control</strong>: Only render for <code>ADMIN</code> or <code>SUPER_ADMIN</code> users. Gate the Templates tab in the settings UI.</p>
+</blockquote>
+<p>Form-based editor — <strong>all text fields editable by ADMIN/SUPER_ADMIN</strong>:</p>
 <ul>
 <li><strong>Header</strong>: template name, type badge, status toggle (Draft/Active/Archived)</li>
-<li><strong>Content Fields</strong>: dynamic form fields based on template type
+<li><strong>Content Fields</strong> (editable text):
 <ul>
-<li>Certificate: title, subtitle, completion text, accreditation text</li>
-<li>Transcript: section headers, disclaimer text</li>
+<li>Certificate: title, subtitle, completionText, accreditationText, signatureLabels[]</li>
+<li>Transcript: section headers (studentInfo, academicRecord), disclaimerText, signatureLabels[]</li>
 </ul>
 </li>
 <li><strong>Numbering</strong>: certificate number format with live preview (e.g., type <code>CERT-{YYYY}-{SEQ:4}</code> → see <code>CERT-2026-0001</code>)</li>
@@ -252,6 +268,9 @@ enum PdfTemplateStatus {
 <li>Preview updates live in the <code>LivePDFViewer</code> alongside</li>
 </ul>
 <h4 id="new-appstaffsettingscomponentssignaturemanagertsx">[NEW] <code>app/staff/settings/_components/SignatureManager.tsx</code></h4>
+<blockquote>
+<p>⚠️ <strong>Access control</strong>: Only render for <code>ADMIN</code> or <code>SUPER_ADMIN</code> users.</p>
+</blockquote>
 <ul>
 <li>Card grid of uploaded signatures showing:
 <ul>
@@ -262,8 +281,9 @@ enum PdfTemplateStatus {
 </ul>
 </li>
 <li>Upload dialog: drag-and-drop PNG/JPG, max 500KB, transparent background recommended</li>
-<li>Edit inline: label, signer name, expiry date</li>
+<li>Inline edit: label, signer name, expiry date</li>
 <li>Delete with confirmation (blocked if assigned to an active template)</li>
+<li><strong>No secondary approval required</strong> — admin uploads with consent of the signer; <code>uploadedBy</code> recorded in audit log</li>
 </ul>
 <h4 id="modify-appstaffsettingscomponentslivepdfviewertsx">[MODIFY] <code>app/staff/settings/_components/LivePDFViewer.tsx</code></h4>
 <p>Enhanced preview:</p>
@@ -344,8 +364,8 @@ enum PdfTemplateStatus {
     <li class="he-toc__l3"><a href="#signature-management">Signature Management</a></li>
     <li class="he-toc__l3"><a href="#document-verification-qr-codes">Document Verification (QR Codes)</a></li>
     <li class="he-toc__l3"><a href="#certificate-numbering">Certificate Numbering</a></li>
-    <li class="he-toc__l2"><a href="#user-review-required">User Review Required</a></li>
-    <li class="he-toc__l2"><a href="#open-questions">Open Questions</a></li>
+    <li class="he-toc__l2"><a href="#key-design-decisions">Key Design Decisions</a></li>
+    <li class="he-toc__l2"><a href="#resolved-decisions">Resolved Decisions</a></li>
     <li class="he-toc__l2"><a href="#proposed-changes">Proposed Changes</a></li>
     <li class="he-toc__l3"><a href="#database-schema">Database Schema</a></li>
     <li class="he-toc__l3"><a href="#backend-server-actions-utilities">Backend — Server Actions &amp; Utilities</a></li>

@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { Info, AlertTriangle, AlertCircle, CheckCircle2, Clock, X, Siren } from 'lucide-react'
 import { dismissStaffNotification } from '@/app/staff/actions/index'
 import { Notification } from '@prisma/client'
 import Link from 'next/link'
+import { appendReturnNavigation } from '@/components/shared/ReturnLink'
 
 interface StaffNotificationCardProps {
   notification: Notification
@@ -106,13 +108,13 @@ export default function StaffNotificationCard({
 
         {notification.linkUrl && (
           <div className="mt-4">
-            <Link
-              href={`${notification.linkUrl}?returnUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/staff/notifications')}`}
-              className="inline-flex items-center gap-2 text-xs font-black text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              {notification.linkText || 'View Details'}
-              <span className="text-lg">→</span>
-            </Link>
+            <ReturnLink
+              fallbackHref="/staff/notifications"
+              returnType="notification"
+              label={notification.linkText || 'View Details'}
+              className="text-xs font-black text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            />
+            <span className="text-lg">→</span>
           </div>
         )}
       </div>

@@ -1,7 +1,14 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireInstructor } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiForbidden, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
+import {
+  apiSuccess,
+  apiError,
+  apiForbidden,
+  apiNotFound,
+  withErrorHandler,
+  RouteContext,
+} from '@/lib/api/response'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 
@@ -45,14 +52,15 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext)
   const result = sessions.map((s) => {
     let correctCount = 0
     let totalPoints = 0
-    let _earnedPoints = 0
 
     for (const answer of s.answers) {
       if (answer.question) {
         totalPoints += answer.question.points
-        if (answer.selectedAnswer !== null && answer.selectedAnswer === answer.question.correctAnswer) {
+        if (
+          answer.selectedAnswer !== null &&
+          answer.selectedAnswer === answer.question.correctAnswer
+        ) {
           correctCount++
-          _earnedPoints += answer.question.points
         }
       }
     }
@@ -67,7 +75,9 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext)
       status: s.status,
       student: {
         id: s.student.id,
-        name: `${s.student.profile?.firstName || ''} ${s.student.profile?.lastName || ''}`.trim() || s.student.email,
+        name:
+          `${s.student.profile?.firstName || ''} ${s.student.profile?.lastName || ''}`.trim() ||
+          s.student.email,
         email: s.student.email,
       },
       bank: s.bank,
@@ -81,6 +91,13 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext)
       correctCount,
       timeRemaining,
       answerCount: s.answers.length,
+      answers: s.answers.map((answer) => ({
+        question: answer.question,
+        selectedAnswer: answer.selectedAnswer,
+        pointsAwarded: answer.pointsAwarded,
+        isCorrect: answer.isCorrect,
+        answeredAt: answer.answeredAt?.toISOString() || null,
+      })),
     }
   })
 

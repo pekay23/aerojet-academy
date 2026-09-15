@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: 'Teaching Materials | Instructor Port
 export const dynamic = 'force-dynamic'
 
 export default async function InstructorMaterialsPage() {
-  const user = await requireInstructor()
+  await requireInstructor()
 
   const [materials, options] = await Promise.all([
     getInstructorMaterials(),

@@ -50,8 +50,11 @@ interface MonitorSession {
   timeRemaining: number | null
   answerCount: number
   answers?: {
-    question: { id: string; text: string; correctAnswer: string; points: number }
+    question: { id: string; text: string; correctAnswer: string; points: number } | null
     selectedAnswer: string | null
+    pointsAwarded: number | null
+    isCorrect: boolean | null
+    answeredAt: string | null
   }[]
 }
 
@@ -154,7 +157,19 @@ export default function ClassMonitorPage({
     try {
       const res = await fetch(`/api/instructor/exams/classes/${classId}/monitor`)
       const json = await res.json()
-      if (json.success) setSessions(json.data)
+      if (json.success) {
+        setSessions((previous) => {
+          const previousById = new Map(previous.map((row) => [row.id, row]))
+          return json.data.map((row: MonitorSession) => {
+            const previousRow = previousById.get(row.id)
+            return previousRow && row.answers === undefined
+              ? { ...row, answers: previousRow.answers }
+              : row
+          })
+        })
+      } else {
+        toast.error(json.error || 'Failed to refresh monitor')
+      }
     } catch (err) {
       console.error('[ClassMonitorPage] Failed to refresh monitor:', err)
       toast.error('Failed to refresh monitor')
@@ -576,6 +591,8 @@ function SessionRow({
           <div className="flex items-center gap-1">
             <button
               onClick={onToggle}
+              aria-expanded={expanded}
+              aria-controls={`monitor-session-detail-${session.id}`}
               className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
             >
               {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -625,7 +642,7 @@ function SessionRow({
         </td>
       </tr>
       {expanded && (
-        <tr>
+        <tr id={`monitor-session-detail-${session.id}`}>
           <td colSpan={6} className="bg-slate-50 px-4 py-4 dark:bg-slate-800/30">
             <div className="space-y-2">
               <p className="text-xs font-bold text-slate-500">Session Detail</p>
@@ -640,6 +657,79 @@ function SessionRow({
                 <span>Passed: {session.passed == null ? '—' : session.passed ? 'Yes' : 'No'}</span>
               </div>
             </div>
+
+            {session.answers !== undefined && (
+              <div className="mt-4">
+                <h3 className="text-xs font-bold text-slate-500 uppercase">Submitted Answers</h3>
+                {session.answers.length === 0 ? (
+                  <p className="mt-2 text-xs text-slate-500 italic">
+                    No answers were recorded for this session.
+                  </p>
+                ) : (
+                  <div className="mt-2 space-y-2">
+                    {session.answers.map((answer, index) => {
+                      const question = answer.question
+                      const selected = answer.selectedAnswer ?? 'No answer'
+                      const correct = question?.correctAnswer ?? '—'
+                      const isCorrect =
+                        answer.isCorrect ??
+                        (question != null && answer.selectedAnswer === question.correctAnswer)
+
+                      return (
+                        <div
+                          key={answer.question?.id || `answer-${index}`}
+                          className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                                Question {index + 1}
+                              </p>
+                              <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-300">
+                                {question?.text || 'Question text unavailable'}
+                              </p>
+                            </div>
+                            {isCorrect === null ? (
+                              <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                                Unscored
+                              </span>
+                            ) : isCorrect ? (
+                              <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                                Correct
+                              </span>
+                            ) : (
+                              <span className="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">
+                                Incorrect
+                              </span>
+                            )}
+                          </div>
+                          <dl className="mt-2 grid gap-2 text-xs sm:grid-cols-3">
+                            <div>
+                              <dt className="font-bold text-slate-400">Your answer</dt>
+                              <dd className="mt-0.5 text-slate-700 dark:text-slate-200">
+                                {selected}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="font-bold text-slate-400">Correct answer</dt>
+                              <dd className="mt-0.5 text-slate-700 dark:text-slate-200">
+                                {correct}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="font-bold text-slate-400">Points</dt>
+                              <dd className="mt-0.5 text-slate-700 dark:text-slate-200">
+                                {answer.pointsAwarded ?? question?.points ?? '—'}
+                              </dd>
+                            </div>
+                          </dl>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </td>
         </tr>
       )}

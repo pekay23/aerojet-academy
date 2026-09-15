@@ -65,6 +65,19 @@ interface ResourcesViewProps {
   }
 }
 
+function SortIcon({ field, sortBy, sortOrder }: { field: string; sortBy: string; sortOrder: 'asc' | 'desc' }) {
+  if (sortBy !== field) {
+    return (
+      <ArrowUpDown className="h-3.5 w-3.5 text-slate-400 opacity-40 transition-opacity group-hover:opacity-100" />
+    )
+  }
+  return sortOrder === 'asc' ? (
+    <ArrowUp className="h-3.5 w-3.5 text-blue-600" />
+  ) : (
+    <ArrowDown className="h-3.5 w-3.5 text-blue-600" />
+  )
+}
+
 export default function ResourcesView({
   initialResources,
   meta,
@@ -171,19 +184,6 @@ export default function ResourcesView({
     }
   }
 
-  const SortIcon = ({ field }: { field: string }) => {
-    if (sortBy !== field) {
-      return (
-        <ArrowUpDown className="h-3.5 w-3.5 text-slate-400 opacity-40 transition-opacity group-hover:opacity-100" />
-      )
-    }
-    return sortOrder === 'asc' ? (
-      <ArrowUp className="h-3.5 w-3.5 text-blue-600" />
-    ) : (
-      <ArrowDown className="h-3.5 w-3.5 text-blue-600" />
-    )
-  }
-
   const totalPages = meta?.totalPages || 1
   const total = meta?.total || initialResources.length
   const currentPage = meta?.page || page
@@ -251,47 +251,57 @@ export default function ResourcesView({
             <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
               <TableHead
                 onClick={() => handleSort('name')}
+                aria-label={`Sort by resource, ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+                aria-sort={sortBy === 'name' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 className="group cursor-pointer text-[10px] font-bold tracking-wider uppercase select-none hover:text-slate-900 dark:hover:text-white"
               >
                 <div className="flex items-center gap-1.5">
                   Resource
-                  <SortIcon field="name" />
+                  <SortIcon field="name" sortBy={sortBy} sortOrder={sortOrder} />
                 </div>
               </TableHead>
               <TableHead
                 onClick={() => handleSort('category')}
+                aria-label={`Sort by category, ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+                aria-sort={sortBy === 'category' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 className="group hidden cursor-pointer text-[10px] font-bold tracking-wider uppercase select-none hover:text-slate-900 md:table-cell dark:hover:text-white"
               >
                 <div className="flex items-center gap-1.5">
                   Category
-                  <SortIcon field="category" />
+                  <SortIcon field="category" sortBy={sortBy} sortOrder={sortOrder} />
                 </div>
               </TableHead>
               <TableHead
                 onClick={() => handleSort('type')}
+                aria-label={`Sort by type, ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+                aria-sort={sortBy === 'type' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 className="group hidden cursor-pointer text-[10px] font-bold tracking-wider uppercase select-none hover:text-slate-900 lg:table-cell dark:hover:text-white"
               >
                 <div className="flex items-center gap-1.5">
                   Type
-                  <SortIcon field="type" />
+                  <SortIcon field="type" sortBy={sortBy} sortOrder={sortOrder} />
                 </div>
               </TableHead>
               <TableHead
                 onClick={() => handleSort('courseCode')}
+                aria-label={`Sort by module, ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+                aria-sort={sortBy === 'courseCode' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 className="group hidden cursor-pointer text-[10px] font-bold tracking-wider uppercase select-none hover:text-slate-900 lg:table-cell dark:hover:text-white"
               >
                 <div className="flex items-center gap-1.5">
                   Module
-                  <SortIcon field="courseCode" />
+                  <SortIcon field="courseCode" sortBy={sortBy} sortOrder={sortOrder} />
                 </div>
               </TableHead>
               <TableHead
                 onClick={() => handleSort('updatedAt')}
+                aria-label={`Sort by updated date, ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+                aria-sort={sortBy === 'updatedAt' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 className="group hidden cursor-pointer text-[10px] font-bold tracking-wider uppercase select-none hover:text-slate-900 sm:table-cell dark:hover:text-white"
               >
                 <div className="flex items-center gap-1.5">
                   Updated
-                  <SortIcon field="updatedAt" />
+                  <SortIcon field="updatedAt" sortBy={sortBy} sortOrder={sortOrder} />
                 </div>
               </TableHead>
               <TableHead className="text-right text-[10px] font-bold tracking-wider uppercase">

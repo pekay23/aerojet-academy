@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { getAuthSession, requireStaff } from '@/lib/auth/helpers'
+import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
@@ -45,25 +45,47 @@ export const GET = withErrorHandler(
 
 export const POST = withErrorHandler(
   async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
-    await requireStaff()
+    const staff = await requireStaff()
     if (!(await isInternalExamSystemEnabled())) {
       return apiError('Internal exams are not currently available', 403)
     }
 
     const { id } = (await ctx!.params) as { id: string }
-    const body = await req.json()
-    const { candidateId, candidateDetails } = body || {}
-
-    if (!candidateId) {
-      return apiError('candidateId is required', 400)
-    }
+    const body = (await req.json().catch(() => ({}))) || {}
+    const { candidateId: requestedCandidateId, candidateDetails } = body
 
     const existing = await prismaUnfiltered.internalExamSession.findUnique({
       where: { id },
-      select: { id: true, status: true, supervised: true, studentId: true },
+      select: { id: true, status: true, supervised: true, studentId: true, bankId: true, classId: true },
     })
 
     if (!existing) return apiError('Session not found', 404)
+
+    const candidateId = existing.studentId
+    if (!candidateId) {
+      return apiError('Session has no assigned candidate', 400)
+    }
+    if (requestedCandidateId && requestedCandidateId !== candidateId) {
+      return apiError('Candidate does not match the assigned session student', 400)
+    }
+
+    const candidate = await prismaUnfiltered.user.findFirst({
+      where: { id: candidateId, role: 'STUDENT' },
+      select: { id: true, email: true },
+    })
+    if (!candidate) return apiError(`Candidate ${candidateId} is not a valid student`, 404)
+
+    const bank = await prismaUnfiltered.internalExamBank.findUnique({
+      where: { id: existing.bankId },
+      select: { id: true, courseId: true },
+    })
+    if (!bank) return apiError('Session bank not found', 404)
+
+    const enrollment = await prismaUnfiltered.enrollment.findFirst({
+      where: { userId: candidateId, courseId: bank.courseId },
+      select: { id: true },
+    })
+    if (!enrollment) return apiError(`Candidate ${candidateId} is not enrolled in course ${bank.courseId}`, 403)
 
     try {
       validateSessionTransition(existing.status, 'IN_PROGRESS')
@@ -74,14 +96,14 @@ export const POST = withErrorHandler(
     const updated = await transitionExamSession(
       id,
       'IN_PROGRESS',
-      (await getAuthSession())?.user?.id || 'system',
+      staff.id,
       'Supervised exam started',
-      { supervised: true, studentId: candidateId, startedAt: new Date() }
+      { supervised: true, startedAt: new Date() }
     )
 
     const requestContext = await getRequestContext()
     await createAuditLog({
-      userId: (await getAuthSession())?.user?.id,
+      userId: staff.id,
       action: AuditAction.EXAM_SESSION_STARTED,
       entity: 'InternalExamSession',
       entityId: id,

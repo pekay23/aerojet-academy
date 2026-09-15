@@ -10,8 +10,13 @@ import {
   Users,
   Save,
   AlertTriangle,
-  AlertCircle,
 } from 'lucide-react'
+import { ErrorBanner } from '@/components/shared/ErrorBanner'
+import { LoadingState } from '@/components/shared/LoadingState'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { FormDirtyIndicator } from '@/components/shared/FormDirtyIndicator'
+import { useFormDirty } from '@/hooks/useFormDirty'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 
 const STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const
 type Status = (typeof STATUSES)[number]
@@ -65,7 +70,13 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [dirty, setDirty] = useState(false)
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    title: string
+    description: string
+    onConfirm: () => void
+  }>({ open: false, title: '', description: '', onConfirm: () => {} })
+  const { isDirty: dirty, markDirty, markClean } = useFormDirty()
   // Track the last saved snapshot so we can detect unsaved changes
   const savedSnapshotRef = useRef<string>('')
 
@@ -115,7 +126,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
         })
         setStudents(merged)
         savedSnapshotRef.current = JSON.stringify(merged)
-        setDirty(false)
+        markClean()
       } else {
         throw new Error(json.error || 'Failed to load attendance data')
       }
@@ -124,7 +135,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
     } finally {
       setLoading(false)
     }
-  }, [classId, date])
+  }, [classId, date, markClean])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -133,17 +144,37 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
     return () => clearTimeout(timer)
   }, [fetchRoster])
 
-  // Warn before navigating away / refreshing with unsaved changes
-  useEffect(() => {
-    const beforeUnload = (e: BeforeUnloadEvent) => {
-      if (dirty) {
-        e.preventDefault()
-        e.returnValue = ''
-      }
+  const handleClassChange = (newClassId: string) => {
+    if (dirty && students.length > 0) {
+      setConfirmDialog({
+        open: true,
+        title: 'Discard unsaved changes?',
+        description: 'You have unsaved attendance changes. Changing class will discard them. Continue?',
+        onConfirm: () => {
+          setConfirmDialog((d) => ({ ...d, open: false }))
+          setClassId(newClassId)
+        },
+      })
+      return
     }
-    window.addEventListener('beforeunload', beforeUnload)
-    return () => window.removeEventListener('beforeunload', beforeUnload)
-  }, [dirty])
+    setClassId(newClassId)
+  }
+
+  const handleDateChange = (newDate: string) => {
+    if (dirty && students.length > 0) {
+      setConfirmDialog({
+        open: true,
+        title: 'Discard unsaved changes?',
+        description: 'You have unsaved attendance changes. Changing date will discard them. Continue?',
+        onConfirm: () => {
+          setConfirmDialog((d) => ({ ...d, open: false }))
+          setDate(newDate)
+        },
+      })
+      return
+    }
+    setDate(newDate)
+  }
 
   const setStatus = (userId: string, status: Status) => {
     setStudents((prev) =>
@@ -153,12 +184,12 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
           : s
       )
     )
-    setDirty(true)
+    markDirty()
   }
 
   const markAll = (status: Status) => {
     setStudents((prev) => prev.map((s) => ({ ...s, status })))
-    setDirty(true)
+    markDirty()
   }
 
   const handleSave = async () => {
@@ -182,7 +213,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
       const json = await res.json()
       if (json.success) {
         savedSnapshotRef.current = JSON.stringify(students)
-        setDirty(false)
+        markClean()
         fetchRoster() // refresh stats
       } else {
         setError(json.error || 'Failed to save')
@@ -205,7 +236,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
           <label className="mb-1 block text-xs font-bold text-slate-500">Class</label>
           <select
             value={classId}
-            onChange={(e) => setClassId(e.target.value)}
+            onChange={(e) => handleClassChange(e.target.value)}
             className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium dark:border-slate-700 dark:bg-slate-900"
           >
             {classes.length === 0 ? (
@@ -224,25 +255,20 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
           <input
             type="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => handleDateChange(e.target.value)}
             className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900"
           />
         </div>
       </div>
 
       {/* Error banner */}
-      {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-900/10 dark:text-red-300">
-          <AlertCircle className="h-5 w-5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
+      {error && <ErrorBanner message={error} onRetry={fetchRoster} />}
 
       {/* Unsaved changes warning */}
-      {dirty && !saving && (
-        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-800/50 dark:bg-amber-900/10 dark:text-amber-300">
-          <AlertTriangle className="h-5 w-5 shrink-0" />
-          <span>You have unsaved changes. Refresh or navigate away to discard them.</span>
+      {dirty && (
+        <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-800/50 dark:bg-amber-900/10 dark:text-amber-300">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <span>Unsaved changes — save before navigating away.</span>
         </div>
       )}
 
@@ -308,17 +334,13 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
 
       {/* Student List */}
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="text-aerojet-blue h-8 w-8 animate-spin" />
-        </div>
+        <LoadingState variant="spinner" message="Loading attendance..." />
       ) : students.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-          <Users className="mx-auto mb-4 h-12 w-12 text-slate-300" />
-          <p className="font-bold text-slate-500">
-            {error ? 'Failed to load roster' : 'No students enrolled in this class.'}
-          </p>
-          {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-        </div>
+        <EmptyState
+          icon={Users}
+          title="No students enrolled"
+          description="Students enrolled in this course will appear here."
+        />
       ) : (
         <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
           <div className="divide-y dark:divide-slate-800">
@@ -348,6 +370,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
                       return (
                         <button
                           key={status}
+                          aria-label={config.label}
                           onClick={() => setStatus(s.userId, status)}
                           className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                             active
@@ -355,7 +378,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
                               : 'bg-slate-100 text-slate-400 hover:bg-slate-200 dark:bg-slate-800'
                           }`}
                         >
-                          <Icon className="h-3.5 w-3.5" />
+                          <Icon className="h-3.5 w-3.5" aria-hidden="true" />
                           {config.label}
                         </button>
                       )
@@ -368,6 +391,17 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
         </div>
       )}
 
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog((d) => ({ ...d, open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmLabel="Discard & Continue"
+        cancelLabel="Keep Editing"
+        variant="destructive"
+        onConfirm={confirmDialog.onConfirm}
+      />
+
       {/* Save Button */}
       {students.length > 0 && (
         <div className="flex justify-end">
@@ -378,6 +412,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
           >
             {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
             Save Attendance
+            <FormDirtyIndicator isDirty={dirty} />
           </button>
         </div>
       )}

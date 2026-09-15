@@ -13,6 +13,20 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  *
  *   // Call markDirty() on every form field change
  *   // Call markClean() after a successful save
+ *
+ * VISUAL FEEDBACK PATTERN (recommended):
+ *   // Save button with dirty indicator dot
+ *   <Button disabled={!isDirty}>
+ *     Save
+ *     {isDirty && <span className="ml-2 h-2 w-2 rounded-full bg-destructive" />}
+ *   </Button>
+ *
+ *   // Or use with UnsavedChangesDialog pattern:
+ *   <UnsavedChangesDialog isOpen={isDirty} onSave={handleSave} onDiscard={markClean} />
+ *
+ * The beforeunload listener provides browser-level protection (refresh/close tab).
+ * Components MUST use `isDirty` to show visual feedback — the browser dialog alone
+ * is hostile UX. Combine with save-button indicators, banners, or dialogs.
  */
 export function useFormDirty() {
   const [isDirty, setIsDirty] = useState(false)

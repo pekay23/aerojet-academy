@@ -73,7 +73,7 @@ interface SessionData {
   reports: Report[]
   /** Violation count from the list endpoint — used for the tab badge. */
   violationCount?: number
-  /** Full per-question detail — only populated after the row is expanded. */
+  /** Full per-question detail — populated after expansion and preserved across list polling. */
   answers?: StudentAnswer[]
 }
 
@@ -130,13 +130,23 @@ export default function ExamOperations() {
       const res = await fetch('/api/staff/exams/internal/operations/sessions')
       const json = await res.json()
       if (json.success && json.data) {
-        setSessions(json.data)
+        setSessions((previous) => {
+          const previousById = new Map(previous.map((row) => [row.id, row]))
+          return json.data.map((row: SessionData) => {
+            const previousRow = previousById.get(row.id)
+            // Polling uses the slim list endpoint. Keep an expanded row's
+            // answer detail instead of replacing it with an empty list shape.
+            return previousRow && row.answers === undefined
+              ? { ...row, answers: previousRow.answers }
+              : row
+          })
+        })
       } else {
         setError(json.error || 'Failed to load sessions')
       }
     } catch (err) {
-      console.error('[ExamOperations] Failed to fetch session detail:', err)
-      setError('Failed to load session detail')
+      console.error('[ExamOperations] Failed to fetch sessions:', err)
+      setError('Failed to load sessions')
     } finally {
       setLoading(false)
     }
@@ -194,7 +204,17 @@ export default function ExamOperations() {
         return
       }
       const detail = json.data as SessionData
-      setSessions((prev) => prev.map((row) => (row.id === sessionId ? { ...row, ...detail } : row)))
+      setSessions((prev) =>
+        prev.map((row) =>
+          row.id === sessionId
+            ? {
+                ...row,
+                ...detail,
+                answers: Array.isArray(detail.answers) ? detail.answers : row.answers,
+              }
+            : row
+        )
+      )
     } catch (err) {
       console.error('[ExamOperations] Failed to fetch session detail:', err)
       setSessionErrorMap((prev) => ({ ...prev, [sessionId]: 'Failed to load session detail' }))

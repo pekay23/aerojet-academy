@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { CalendarDays, BookOpen, Plus, X, Check, Loader2, Search } from 'lucide-react'
 import { compareNatural } from '@/lib/utils/natural-sort'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -59,6 +60,13 @@ export default function SchedulingMatrix({
   const [courses] = useState<Course[]>(initialCourses)
   const [selectedPathwayId, setSelectedPathwayId] = useState<string>(initialPathways[0]?.id ?? '')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    title: string
+    description: string
+    onConfirm: () => void
+  }>({ open: false, title: '', description: '', onConfirm: () => {} })
 
   // Mobile specific state
   const [isMobileSidebarExpanded, setIsMobileSidebarExpanded] = useState(false)
@@ -142,28 +150,33 @@ export default function SchedulingMatrix({
   }
 
   const handleRemove = async (termId: string, courseId: string) => {
-    const confirmed = window.confirm('Remove this course from the term? This cannot be undone.')
-    if (!confirmed) return
-
-    const key = `${termId}-${courseId}`
-    setActionLoading(key)
-    try {
-      const res = await fetch(
-        `/api/staff/academic/scheduling?termId=${termId}&courseId=${courseId}`,
-        { method: 'DELETE' }
-      )
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
-        throw new Error(errData.error ?? 'Failed to remove assignment')
-      }
-      toast.success('Course removed from term')
-      await refetchPathways()
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to remove assignment'
-      toast.error(message)
-    } finally {
-      setActionLoading(null)
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Remove course from term?',
+      description: 'This cannot be undone.',
+      onConfirm: async () => {
+        setConfirmDialog((d) => ({ ...d, open: false }))
+        const key = `${termId}-${courseId}`
+        setActionLoading(key)
+        try {
+          const res = await fetch(
+            `/api/staff/academic/scheduling?termId=${termId}&courseId=${courseId}`,
+            { method: 'DELETE' }
+          )
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}))
+            throw new Error(errData.error ?? 'Failed to remove assignment')
+          }
+          toast.success('Course removed from term')
+          await refetchPathways()
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'Failed to remove assignment'
+          toast.error(message)
+        } finally {
+          setActionLoading(null)
+        }
+      },
+    })
   }
 
   const handleCellClick = (termId: string, courseId: string) => {
@@ -466,6 +479,17 @@ export default function SchedulingMatrix({
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog((d) => ({ ...d, open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmLabel="Remove"
+        cancelLabel="Cancel"
+        variant="destructive"
+        onConfirm={confirmDialog.onConfirm}
+      />
     </div>
   )
 }
