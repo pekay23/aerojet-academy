@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { usePathname, useSearchParams } from 'next/navigation'
 import {
   Bell,
   MessageSquare,
@@ -122,6 +123,9 @@ export default function PortalTopbar({
   const [notifications, setNotifications] = useState<TopbarNotification[]>([])
   const [messages, setMessages] = useState<TopbarMessage[]>([])
   const [dismissingIds, setDismissingIds] = useState<Set<string>>(new Set())
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const currentHref = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
 
   useEffect(() => {
     if (!itemsEndpoint) return
@@ -269,7 +273,7 @@ export default function PortalTopbar({
                       }`}
                     >
                       <Link
-                        href={`${n.linkUrl || notificationsHref}?returnUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/student/dashboard')}`}
+                        href={`${n.linkUrl || notificationsHref}?returnUrl=${encodeURIComponent(currentHref)}`}
                         className="flex min-w-0 flex-1 items-start gap-3"
                       >
                         <TypeIcon className={`mt-0.5 h-4 w-4 shrink-0 ${cfg.className}`} />

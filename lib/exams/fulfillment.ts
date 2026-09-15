@@ -183,7 +183,7 @@ export function isMissedBooking(input: {
   if (input.demandStatus === 'EXECUTED') return false
   if (
     input.demandStatus &&
-    ['CANCELLED', 'ROLLED_FORWARD', 'POSTPONED', 'EXECUTED'].includes(input.demandStatus)
+    ['CANCELLED', 'ROLLED_FORWARD', 'POSTPONED', 'EXECUTED', 'ABSENT'].includes(input.demandStatus)
   ) {
     return false
   }
