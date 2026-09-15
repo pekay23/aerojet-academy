@@ -1,14 +1,17 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import {
-  apiSuccess,
   apiError,
   apiCreated,
+  apiPaginated,
   withErrorHandler,
   RouteContext,
+  parsePagination,
 } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { z } from 'zod'
 import { Prisma, QuestionStatus } from '@prisma/client'
 
@@ -28,10 +31,29 @@ const questionSchema = z
     message: 'correctAnswer must be one of the provided options',
     path: ['correctAnswer'],
   })
-  .refine((data) => data.options.includes(data.correctAnswer), {
-    message: 'correctAnswer must be one of the provided options',
-    path: ['correctAnswer'],
+
+async function resolveInstructorBankAccess(
+  bankId: string,
+  instructorId: string,
+): Promise<{ canEdit: boolean; canReview: boolean; canMonitor: boolean } | null> {
+  const profile = await getInstructorProfileByUserId(instructorId)
+  if (!profile) return null
+
+  const grant = await prismaUnfiltered.internalExamBankInstructor.findFirst({
+    where: { bankId, instructorId: profile.id },
+    select: { canEdit: true, canReview: true, canMonitor: true },
   })
+  return grant ?? null
+}
+
+async function stripCorrectAnswer(questions: unknown[], hide: boolean) {
+  if (!hide) return questions
+  return questions.map((q) => {
+    const obj = q as Record<string, unknown>
+    const { correctAnswer: _, ...rest } = obj
+    return rest
+  })
+}
 
 // GET — list questions for a bank
 export const GET = withErrorHandler(
@@ -48,9 +70,21 @@ export const GET = withErrorHandler(
     }
     const { bankId } = await ctx.params
 
+    const isInstructor = session.user.role === 'INSTRUCTOR'
+    let canEdit = false
+    if (isInstructor) {
+      const grant = await resolveInstructorBankAccess(bankId, session.user.id)
+      if (!grant || !(grant.canMonitor || grant.canReview || grant.canEdit)) {
+        return apiError('You do not have access to this bank', 403)
+      }
+      canEdit = grant.canEdit
+    }
+
     const url = new URL(req.url)
-    const status = url.searchParams.get('status')
-    const sort = url.searchParams.get('sort') || 'default'
+    const searchParams = url.searchParams
+    const { page, limit, skip } = parsePagination(searchParams)
+    const status = searchParams.get('status')
+    const sort = searchParams.get('sort') || 'default'
 
     const where: Prisma.InternalExamQuestionWhereInput = { bankId }
     if (status) where.status = status as QuestionStatus
@@ -71,12 +105,19 @@ export const GET = withErrorHandler(
       orderBy = [{ difficulty: 'asc' }, { sortOrder: 'asc' }]
     }
 
-    const questions = await prismaUnfiltered.internalExamQuestion.findMany({
-      where,
-      orderBy,
-    })
+    const [questions, total] = await Promise.all([
+      prismaUnfiltered.internalExamQuestion.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      prismaUnfiltered.internalExamQuestion.count({ where }),
+    ])
 
-    return apiSuccess(questions)
+    const sanitized = await stripCorrectAnswer(questions, isInstructor && !canEdit)
+
+    return apiPaginated(sanitized, total, page, limit)
   }
 )
 
@@ -95,6 +136,14 @@ export const POST = withErrorHandler(
     }
     const { bankId } = await ctx.params
     const body = await req.json()
+
+    const isInstructor = session.user.role === 'INSTRUCTOR'
+    if (isInstructor) {
+      const grant = await resolveInstructorBankAccess(bankId, session.user.id)
+      if (!grant?.canEdit) {
+        return apiError('You do not have permission to add questions to this bank', 403)
+      }
+    }
 
     // Support bulk import with row-level error reporting
     const items = Array.isArray(body) ? body : [body]
@@ -132,6 +181,15 @@ export const POST = withErrorHandler(
       })
       created.push(q)
     }
+
+    await createAuditLog({
+      userId: session.user.id,
+      action: AuditAction.EXAM_QUESTION_IMPORT,
+      entity: 'InternalExamQuestion',
+      entityId: created.length > 0 ? created[0].id : bankId,
+      description: `Imported ${created.length} question(s) into bank ${bankId}`,
+      changes: { bankId, count: created.length, errors },
+    })
 
     return apiCreated({ count: created.length, errors, questions: created })
   }

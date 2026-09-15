@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 
 export default function AntiCheatProvider({
   children,
@@ -17,13 +18,17 @@ export default function AntiCheatProvider({
 
     const reportViolation = async (type: 'TAB_SWITCH' | 'FULLSCREEN_EXIT') => {
       try {
-        await fetch('/api/applicant/aptitude/anti-cheat', {
+        const res = await fetch('/api/applicant/aptitude/anti-cheat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId, eventType: type }),
         })
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        }
       } catch (err) {
         console.error('[AntiCheat] Failed to report violation:', err)
+        toast.error('Anti-cheat reporting failed — session may be flagged for review')
       }
     }
 

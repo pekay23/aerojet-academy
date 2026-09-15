@@ -726,7 +726,7 @@ export default function AppTour({ hasCompletedTour, userRole, data }: Props) {
           fontWeight: '700',
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
-          color: '#94a3b8',
+          color: '#475569',
         },
       }}
       locale={{

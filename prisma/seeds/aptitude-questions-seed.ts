@@ -8,7 +8,7 @@
  */
 
 import 'dotenv/config'
-import { AptitudeCategory, AptitudeQuestionType, Prisma, PrismaClient, QuestionDifficulty } from '@prisma/client'
+import { AptitudeCategory, AptitudeQuestionType, PrismaClient, QuestionDifficulty } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 

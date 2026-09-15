@@ -154,9 +154,12 @@
 <blockquote class="he-pull">
 <p><strong>Detailed plan:</strong> <a href="./pdf-template-system.html"><code>docs/plans/pdf-template-system.md</code></a></p>
 </blockquote>
+<blockquote class="he-pull">
+<p><strong>Status:</strong> Decisions resolved (2026-09-07) — awaiting implementation. Access control: ADMIN/SUPER_ADMIN only. No signature approval workflow required.</p>
+</blockquote>
 <h3 id="template-configuration">Template Configuration</h3>
 <ul>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Data-driven PDF templates — staff can edit text content, labels, and descriptions via UI</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Data-driven PDF templates — ADMIN/SUPER_ADMIN can edit all text content, labels, and descriptions via UI</li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Template lifecycle management (Draft → Active → Archived) with cloning</li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Per-template branding overrides (logo, watermark, footer)</li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Configurable certificate numbering format (<code>CERT-{YYYY}-{SEQ:4}</code>)</li>
@@ -164,9 +167,10 @@
 <h3 id="signature-management">Signature Management</h3>
 <ul>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Upload and manage digital signature images (PNG/JPG, Supabase Storage)</li>
-<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Assign signatures to template positions (left/right slots)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Assign signatures to template positions (left/right slots) — different templates can have different signers</li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Signature expiry tracking for role changes</li>
 <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Signer name and role label management</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Audit log entries for signature uploads</li>
 </ul>
 <h3 id="document-verification-qr-codes">Document Verification (QR Codes)</h3>
 <ul>
@@ -235,6 +239,7 @@ Use this queue to pick the next item to implement.</p>
 <tr><td>18</td><td>Visual weekly schedule UI (calendar-based class scheduling)</td><td>~1-2 days</td><td>1</td><td><strong>Done</strong></td></tr>
 <tr><td>19</td><td>Classroom/room mapping + capacity enforcement</td><td>~1 day</td><td>1</td><td><strong>Done</strong></td></tr>
 <tr><td>20</td><td>Stripe/Paystack checkout flow for students</td><td>~2-3 days</td><td>5</td><td><strong>Deferred</strong></td></tr>
+<tr><td>25</td><td>PDF Template System (Schema + Backend + UI + Integration)</td><td>~3-4 days</td><td>7</td><td></td></tr>
 </tbody>
 </table>
 <h3 id="tier-5-major-projects-3-days-each">Tier 5 — Major Projects (3+ days each)</h3>

@@ -138,8 +138,8 @@
 <tr><th>Item</th><th>Status</th><th>Evidence</th></tr>
 </thead>
 <tbody>
-<tr><td>Accessibility exception documentation</td><td>❌ Missing</td><td>No <code>ACCESSIBILITY.md</code> exists anywhere in the repo. Tracker claims &quot;DOCUMENTED (§14.2, §15)&quot; but those are plan sections, not a deliverable file.</td></tr>
-<tr><td>EASA compliance documentation</td><td>❌ Missing</td><td>No <code>docs/guides/easa-exam-compliance.md</code> exists. Only an unrelated audit <code>docs/audits/portal-audits/staff/staff-easa.md</code> is present.</td></tr>
+<tr><td>Accessibility exception documentation</td><td>✅ Complete</td><td><code>ACCESSIBILITY.md</code> at repo root (WCAG 2.1 compliance decisions, waived criteria with regulatory justification, supervised alternative pathway).</td></tr>
+<tr><td>EASA compliance documentation</td><td>✅ Complete</td><td><code>docs/guides/easa-exam-compliance.md</code> exists and covers EASA Part-147/Part-66 requirements, controlled environment, blind grading, retention, and sign-off.</td></tr>
 <tr><td>Load test thresholds</td><td>✅ Defined (not executed)</td><td>Thresholds defined in plan §12.6 / Phase 5. No executed load-test artifact found; &quot;DEFINED&quot; is accurate.</td></tr>
 <tr><td>Final LLM Council audit</td><td>❌ Pending</td><td>No LLM Council output doc produced for this build. Tracker correctly marks PENDING.</td></tr>
 </tbody>
@@ -147,8 +147,6 @@
 <hr />
 <section class="he-section" id="remaining-gaps-to-close-for-100"><div class="he-section__num">03 · Remaining Gaps to Close for 100%</div><h2 class="he-section__title">Remaining Gaps to Close for 100%</h2></section>
 <ol>
-<li><strong>Phase 5 — EASA compliance guide doc</strong> (<code>docs/guides/easa-exam-compliance.md</code>): create the deliverable referenced by Phase 5. Currently missing.</li>
-<li><strong>Phase 5 — Accessibility exception doc</strong> (<code>ACCESSIBILITY.md</code>): create WCAG-waiver documentation for strict keypress + fullscreen lock + supervised pathway. Currently missing.</li>
 <li><strong>Enable Realtime on <code>internal_exam_sessions</code></strong> in Supabase Console + add to publication so the live monitor actually streams (the RLS migration SQL exists but the table is not enabled live).</li>
 <li><strong>Unit tests</strong> for <code>requireBankAccess</code> and class-start idempotency (tracker PENDING).</li>
 <li><strong>Final LLM Council audit</strong> against the MUST-FIX checklist (tracker PENDING).</li>
@@ -161,7 +159,7 @@
 <ul>
 <li><strong>Phase 2b — Security test harness:</strong> changed <code>PENDING</code> → <code>[x] COMPLETED</code> (evidence: <code>tests/e2e/anticheat-security.spec.ts</code>).</li>
 <li><strong>Phase 4 — Paper randomisation:</strong> changed <code>PENDING</code> → <code>[x] COMPLETED</code> (evidence: <code>lib/internal-exam/engine.ts:110</code>, start <code>:317/333</code>, submit <code>:55-56</code>).</li>
-<li><strong>Phase 5 — Accessibility / EASA docs:</strong> changed the <code>[x] DOCUMENTED</code> claims to reflect that no standalone deliverable files exist (marked as gaps to produce).</li>
+<li><strong>Phase 5 — Accessibility / EASA docs:</strong> both deliverables now exist (<code>ACCESSIBILITY.md</code> at repo root, <code>docs/guides/easa-exam-compliance.md</code>). The prior “missing” status in the Phase 5 table and the “Remaining Gaps” list has been superseded; see corrected status above.</li>
 <li>All other PENDING items (db:push:supabase, Realtime enable, unit tests, LLM Council) remain PENDING and are accurate.</li>
 </ul>
 

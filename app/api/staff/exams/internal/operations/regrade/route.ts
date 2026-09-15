@@ -2,9 +2,9 @@ import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { getBankRules } from '@/lib/internal-exam/engine'
+import { isInternalExamSystemEnabled, getBankRules } from '@/lib/internal-exam/engine'
 import { calculateScore } from '@/lib/internal-exam/grading'
-import { createAuditLog } from '@/lib/audit/logger'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { z } from 'zod'
 
 const regradeSchema = z.object({
@@ -18,6 +18,10 @@ const regradeSchema = z.object({
  */
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const staff = await requireStaff()
+
+  if (!(await isInternalExamSystemEnabled())) {
+    return apiError('Internal exams are not currently available', 403)
+  }
 
   const body = await req.json()
   const parsed = regradeSchema.safeParse(body)
@@ -107,7 +111,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   await createAuditLog({
     userId: staff.id,
-    action: 'UPDATE',
+    action: AuditAction.UPDATE,
     entity: 'InternalExamSession',
     entityId: `batch:${results.length}`,
     description: `Regraded ${results.length} internal exam session(s); ${changedCount} score(s) changed`,

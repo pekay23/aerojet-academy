@@ -146,11 +146,11 @@ export default function ExamsTab({
                 status: b.status,
               }),
         passed: b.result?.toLowerCase() === 'pass',
-        status:
-          (b.result != null && b.result !== '' && !b.result.toUpperCase().includes('MIGRATE')) ||
-          (b.score != null && b.examDate && new Date(b.examDate) < new Date())
-            ? 'COMPLETED'
-            : b.status,
+          status:
+            (b.result != null && b.result !== '' && !b.result.toUpperCase().includes('MIGRATE')) ||
+            (b.score != null && examDate && new Date(examDate) < new Date())
+              ? 'COMPLETED'
+              : b.status,
         bookingType: b.bookingType,
         attemptType:
           b.attemptType?.toUpperCase().includes('MIGRATE') ||

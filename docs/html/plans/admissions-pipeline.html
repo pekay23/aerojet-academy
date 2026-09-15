@@ -964,13 +964,13 @@ New Models:
 <ul>
 <li>Part 147 basic training course: 2,400 hours (~20 months) + 2 years Part-145 experience</li>
 <li>Technical trade school: + 3 years experience</li>
-<li>Part 147 MTO exam path: + 5 years experience (work while studying)</li>
+<li>Part 147 MTO exam path: + 5 years experience (work while studying)
+<strong>Impact on the plan:</strong></li>
 </ul>
-<p><strong>Impact on the plan:</strong></p>
 <ol>
-<li><code>InternalExamBank</code> must store per-module question count (not rely on a global default) since M10 now has 44 MCQs, not the standard 40.</li>
-<li>Essay question support in internal exams can be deprioritized — EASA is removing them. Keep the model field (<code>isEssay</code>) for non-EASA courses only.</li>
-<li>The anti-cheat and question randomization we're building aligns with EASA's upcoming anti-fraud requirements.</li>
+<li>If future EASA module additions exceed the standard question-bank size, <code>InternalExamBank</code> must store per-module question counts rather than relying on a global default.</li>
+<li>Essay question support in internal exams is deprioritized — EASA is moving away from essay questions. The model field (<code>isEssay</code>) is retained for non-EASA courses only.</li>
+<li>The anti-cheat and question randomization already built align with EASA's upcoming anti-fraud requirements.</li>
 <li>Distance learning support (VCE) could be added as a class delivery mode for modular students.</li>
 <li>OJT tracking could be a future module (competence-based assessment records).</li>
 </ol>

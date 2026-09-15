@@ -17,8 +17,13 @@ interface LoadingStateProps {
 export function LoadingState({ message, rows = 5, variant = 'spinner' }: LoadingStateProps) {
   if (variant === 'inline') {
     return (
-      <div className="flex items-center gap-2 text-sm text-slate-500">
-        <Loader2 className="h-4 w-4 animate-spin" />
+      <div
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        className="flex items-center gap-2 text-sm text-muted-foreground"
+      >
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
         {message || 'Loading...'}
       </div>
     )
@@ -26,18 +31,32 @@ export function LoadingState({ message, rows = 5, variant = 'spinner' }: Loading
 
   if (variant === 'skeleton') {
     return (
-      <div className="space-y-3">
+      <div
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        className="space-y-3"
+      >
         {Array.from({ length: rows }).map((_, i) => (
-          <div key={i} className="h-12 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+          <div key={i} className="h-12 animate-pulse rounded-lg bg-muted" />
         ))}
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16">
-      <Loader2 className="text-aerojet-blue h-8 w-8 animate-spin" />
-      {message && <p className="text-sm text-slate-500">{message}</p>}
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      className="flex flex-col items-center justify-center gap-3 py-16"
+    >
+      <Loader2 className="text-aerojet-blue h-8 w-8 animate-spin" aria-hidden="true" />
+      {message ? (
+        <p className="text-sm text-muted-foreground">{message}</p>
+      ) : (
+        <span className="sr-only">Loading...</span>
+      )}
     </div>
   )
 }

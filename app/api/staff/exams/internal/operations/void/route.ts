@@ -3,7 +3,8 @@ import { z } from 'zod'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { createAuditLog } from '@/lib/audit/logger'
+import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { transitionExamSession, validateSessionTransition } from '@/lib/internal-exam/state-machine'
 
 const voidSchema = z.object({
@@ -22,6 +23,10 @@ const voidSchema = z.object({
  */
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const staff = await requireStaff()
+
+  if (!(await isInternalExamSystemEnabled())) {
+    return apiError('Internal exams are not currently available', 403)
+  }
 
   const body = await req.json()
   const parsed = voidSchema.safeParse(body)
@@ -57,7 +62,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   await createAuditLog({
     userId: staff.id,
-    action: 'UPDATE',
+    action: AuditAction.UPDATE,
     entity: 'InternalExamSession',
     entityId: sessionId,
     description: `Voided internal exam session for retake: ${voidReason}`,

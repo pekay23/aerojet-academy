@@ -5,7 +5,7 @@
  * Or: npx tsx prisma/seeds/admissions-seed.ts
  */
 
-import { ATACategory, Prisma } from '@prisma/client'
+import { ATACategory } from '@prisma/client'
 import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 
 // ---------------------------------------------------------------------------

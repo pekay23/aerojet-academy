@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext, parsePagination } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { AttendanceStatus } from '@prisma/client'
+import { AttendanceStatus, AttendanceRecord } from '@prisma/client'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { z } from 'zod'
 
@@ -18,7 +18,7 @@ const batchSchema = z.object({
       minutesLate: z.number().optional(),
       notes: z.string().optional(),
     })
-  ),
+  ).max(200, 'Cannot submit more than 200 records at once'),
 })
 
 // GET — fetch attendance for a class + date, and the class roster (from course enrollments)
@@ -27,30 +27,39 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
   const url = new URL(req.url)
   const classId = url.searchParams.get('classId')
   const date = url.searchParams.get('date')
+  const { page, limit, skip } = parsePagination(url.searchParams)
 
   if (!classId) return apiError('classId is required')
 
   const where: Record<string, unknown> = { classId }
   if (date) {
-    const d = new Date(date)
-    const next = new Date(d.getTime() + 24 * 60 * 60 * 1000)
-    where.date = { gte: d, lt: next }
+    const parsedDate = new Date(date)
+    if (isNaN(parsedDate.getTime())) {
+      return apiError('Invalid date format')
+    }
+    const next = new Date(parsedDate.getTime() + 24 * 60 * 60 * 1000)
+    where.date = { gte: parsedDate, lt: next }
   }
 
-  const records = await prismaUnfiltered.attendanceRecord.findMany({
-    where,
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          profile: { select: { firstName: true, lastName: true } },
-          studentProfile: { select: { studentId: true } },
+  const [records, total] = await Promise.all([
+    prismaUnfiltered.attendanceRecord.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            profile: { select: { firstName: true, lastName: true } },
+            studentProfile: { select: { studentId: true } },
+          },
         },
       },
-    },
-    orderBy: { user: { profile: { firstName: 'asc' } } },
-  })
+      orderBy: { user: { profile: { firstName: 'asc' } } },
+      take: limit,
+      skip,
+    }),
+    prismaUnfiltered.attendanceRecord.count({ where }),
+  ]) as [AttendanceRecord[], number]
 
   // Get the class with its courseId to pull enrolled students
   const classData = await prismaUnfiltered.class.findUnique({
@@ -82,16 +91,18 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
     : []
 
   // Attendance stats
-  const totalRecords = records.length
   const present = records.filter((r) => r.status === 'PRESENT' || r.status === 'LATE').length
-  const rate = totalRecords > 0 ? Math.round((present / totalRecords) * 100) : 0
+  const rate = records.length > 0 ? Math.round((present / records.length) * 100) : 0
 
-  return apiSuccess({
-    records,
-    roster: enrollments.map((e) => e.user),
-    className: classData?.name,
-    stats: { total: totalRecords, present, rate },
-  })
+  return apiSuccess(
+    {
+      records,
+      roster: enrollments.map((e) => e.user),
+      className: classData?.name,
+      stats: { total: records.length, present, rate },
+    },
+    200
+  )
 })
 
 // POST — batch submit attendance
@@ -103,6 +114,9 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContex
 
   const { classId, date, records } = parsed.data
   const dateObj = new Date(date)
+  if (isNaN(dateObj.getTime())) {
+    return apiError('Invalid date format')
+  }
 
   // Validate: check total instructional hours for the day (6h max)
   const sessionsToday = await prismaUnfiltered.classSession.findMany({
@@ -120,6 +134,33 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContex
     console.warn(
       `[Attendance] Day total ${totalHoursToday}h exceeds 6h limit for class ${classId} on ${date}`
     )
+  }
+
+  // Verify class exists and get courseId for enrollment check
+  const classData = await prismaUnfiltered.class.findUnique({
+    where: { id: classId },
+    select: { id: true, courseId: true },
+  })
+
+  if (!classData) {
+    return apiError('Class not found', 404)
+  }
+
+  // Get enrolled student IDs for this class's course
+  const enrolledUsers = await prismaUnfiltered.enrollment.findMany({
+    where: {
+      courseId: classData.courseId,
+      status: { in: ['ENROLLED', 'ACTIVE', 'APPROVED', 'PENDING'] },
+    },
+    select: { userId: true },
+  })
+  const enrolledUserIds = new Set(enrolledUsers.map((e) => e.userId))
+
+  // Filter out records for users not enrolled in the class
+  const invalidRecords = records.filter((r) => !enrolledUserIds.has(r.userId))
+  if (invalidRecords.length > 0) {
+    const invalidUserIds = invalidRecords.map((r) => r.userId).join(', ')
+    return apiError(`Attendance rejected: user(s) not enrolled in class: ${invalidUserIds}`, 400)
   }
 
   // Upsert attendance records

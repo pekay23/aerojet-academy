@@ -89,9 +89,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     }
   }
 
-  const [banks, total] = await Promise.all([
+  const banks =
     bankIds.length > 0
-      ? prismaUnfiltered.internalExamBank.findMany({
+      ? await prismaUnfiltered.internalExamBank.findMany({
           where: { id: { in: bankIds } },
           include: {
             course: { select: { id: true, name: true, code: true } },
@@ -105,14 +105,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           },
           // Natural sort by moduleCode after fetch to ensure M2 < M10
           // Prisma string ASC is lexicographic and breaks numeric module codes.
-          // take/skip are applied before sort, so we must sort the in-memory array.
           // For very large datasets, consider a dedicated numeric sort column.
-          take: limit,
-          skip,
         })
-      : Promise.resolve([]),
-    prismaUnfiltered.internalExamBank.count({ where: { id: { in: bankIds } } }),
-  ])
+      : []
 
   // Natural sort by moduleCode
   banks.sort((a, b) =>

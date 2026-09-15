@@ -5,7 +5,6 @@ import {
   apiError,
   apiCreated,
   withErrorHandler,
-  RouteContext,
 } from '@/lib/api/response'
 import type { Prisma } from '@prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
@@ -13,7 +12,6 @@ import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { getInternalBankCategoryCode, normalizeCategoryCode } from '@/lib/easa/category-selection'
 import {
   calculateMinimumPoolSize,
-  getMaxCategoryQuestionCount,
 } from '@/lib/easa/module-requirements'
 import { z } from 'zod'
 
