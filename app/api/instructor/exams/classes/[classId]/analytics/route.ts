@@ -55,7 +55,7 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext)
   const { searchParams } = new URL(req.url)
   const format = searchParams.get('format')
   const { page, limit, skip } = parsePagination(searchParams)
-  const includePii = searchParams.get('includePii') !== 'false'
+  const includePii = searchParams.get('includePii') === 'true'
 
   const from = searchParams.get('from')
   const to = searchParams.get('to')

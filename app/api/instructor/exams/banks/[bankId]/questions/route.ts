@@ -117,7 +117,6 @@ export const GET = withErrorHandler(
           where: { id: { in: submitterIds } },
           select: {
             id: true,
-            name: true,
             profile: { select: { firstName: true, lastName: true } },
           },
         })
@@ -132,7 +131,9 @@ export const GET = withErrorHandler(
     // JS-side sorts that Prisma can't express.
     if (sort === 'author') {
       const authorKey = (a: (typeof enriched)[number]) =>
-        a.submittedBy?.profile?.firstName ?? a.submittedBy?.name ?? 'zzz'
+        [a.submittedBy?.profile?.firstName, a.submittedBy?.profile?.lastName]
+          .filter(Boolean)
+          .join(' ') || 'zzz'
       enriched.sort((a, b) => {
         const cmp = authorKey(a).localeCompare(authorKey(b), undefined, { sensitivity: 'base' })
         if (cmp !== 0) return cmp

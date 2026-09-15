@@ -63,11 +63,18 @@ export function serializePrisma<T>(data: T): SerializedPrisma<T> {
       return data.toISOString() as SerializedPrisma<T>
     }
 
-    // Recursively serialize object properties
-    const result: Record<string, unknown> = {}
+    // Recursively serialize object properties using a null-prototype object
+    // to prevent prototype pollution via __proto__ keys
+    const result = Object.create(null) as Record<string, unknown>
     const dataRecord = data as Record<string, unknown>
     for (const key of Object.keys(dataRecord)) {
-      result[key] = serializePrisma(dataRecord[key])
+      // Use Object.defineProperty to avoid __proto__ setter issues
+      Object.defineProperty(result, key, {
+        value: serializePrisma(dataRecord[key]),
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      })
     }
     return result as SerializedPrisma<T>
   }

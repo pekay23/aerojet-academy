@@ -52,6 +52,30 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: { params: Pro
   const parsed = createSchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid input')
 
+  // Verify bank exists and get its courseId
+  const bank = await prismaUnfiltered.internalExamBank.findUnique({
+    where: { id: bankId },
+    select: { id: true, courseId: true },
+  })
+
+  if (!bank) {
+    return apiError('Question bank not found', 404)
+  }
+
+  // Verify class exists and courseId matches bank's courseId
+  const classData = await prismaUnfiltered.class.findUnique({
+    where: { id: parsed.data.classId },
+    select: { id: true, courseId: true },
+  })
+
+  if (!classData) {
+    return apiError('Class not found', 404)
+  }
+
+  if (classData.courseId !== bank.courseId) {
+    return apiError('Class course does not match question bank course', 400)
+  }
+
   const schedule = await prismaUnfiltered.internalExamClassSchedule.create({
     data: {
       bankId,

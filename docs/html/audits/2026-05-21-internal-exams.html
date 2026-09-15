@@ -148,6 +148,9 @@ with a Report Issue modal (1000-char limit, dedup on pending report).</li>
 <tr><td><strong>EXAM-12</strong></td><td><code>seed_internal_questions.ts</code> writes only 3 options when many UIs assume 4</td><td><a href="../../scripts/seed_internal_questions.ts#L22">scripts/seed_internal_questions.ts:22</a> provides <code>['Option A is incorrect', 'Option B is the correct answer', 'Option C is also incorrect']</code> — three options. The exam interface renders all options from the array, so 3 will work, but most real EASA questions have 4 (A/B/C/D).</td><td>Either rename to <code>seed_dev_questions.ts</code> (signals it's intentionally minimal), or pad the array to 4. Minor.</td></tr>
 </tbody>
 </table>
+<blockquote class="he-pull">
+<p><strong>Post-fix note (2026-09-08):</strong> The current exam engine (<code>lib/exams/engine.ts:99</code>) enforces exactly 3 options per question as the EASA standard. The 4-option seed was later reverted to 3 options to match the enforced rule.</p>
+</blockquote>
 <h3 id="low-stylistic">🟢 LOW / Stylistic</h3>
 <table>
 <thead>

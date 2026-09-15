@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { requireAuth, requireStaff, requireAdmin } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { Prisma, WithdrawalStatus } from '@prisma/client'
+import { WithdrawalStatus } from '@prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 /**

@@ -1,7 +1,9 @@
 import { NextRequest } from 'next/server'
-import { getAuthSession } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
+import { requireStaff } from '@/lib/auth/helpers'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { z } from 'zod'
 
 const reviewSchema = z.object({
@@ -10,10 +12,9 @@ const reviewSchema = z.object({
 })
 
 export const PATCH = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
-  const session = await getAuthSession()
-  // Only Staff, Admin, Super Admin, Examiner can review
-  if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER'].includes(session.user.role)) {
-    return apiError('Unauthorized', 403)
+  const staff = await requireStaff()
+  if (!(await isInternalExamSystemEnabled())) {
+    return apiError('Internal exams are not currently available', 403)
   }
 
   const { questionId } = (await ctx!.params) as { questionId: string }
@@ -26,6 +27,18 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx?: RouteContex
 
   const question = await prismaUnfiltered.internalExamQuestion.findUnique({
     where: { id: questionId },
+    select: {
+      id: true,
+      bankId: true,
+      status: true,
+      reviewNote: true,
+      reviewedById: true,
+      reviewedAt: true,
+      text: true,
+      subTopic: true,
+      difficulty: true,
+      points: true,
+    },
   })
 
   if (!question) {
@@ -37,10 +50,27 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx?: RouteContex
     data: {
       status: parsed.data.status,
       reviewNote: parsed.data.reviewNote || null,
-      reviewedById: session.user.id,
+      reviewedById: staff.id,
       reviewedAt: new Date(),
     },
   })
 
-  return apiSuccess(updated)
+  await createAuditLog({
+    userId: staff.id,
+    action: AuditAction.EXAM_QUESTION_UPDATED,
+    entity: 'InternalExamQuestion',
+    entityId: questionId,
+    description: `Question ${questionId} review status changed to ${parsed.data.status}`,
+    changes: {
+      questionId,
+      bankId: question.bankId,
+      before: { status: question.status },
+      after: { status: parsed.data.status },
+      reviewNote: parsed.data.reviewNote || null,
+    },
+  })
+
+  const { correctAnswer: _correctAnswer, ...safeQuestion } = updated as unknown as Record<string, unknown>
+
+  return apiSuccess(safeQuestion)
 })

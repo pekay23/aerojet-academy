@@ -1,4 +1,4 @@
-import { BookingDemandStatus, EnrollmentStatus, PaymentStatus, Prisma } from '@prisma/client'
+import { BookingDemandStatus, EnrollmentStatus, PaymentStatus } from '@prisma/client'
 import { prismaUnfiltered as prisma } from '../lib/prisma/client'
 import bcrypt from 'bcryptjs'
 

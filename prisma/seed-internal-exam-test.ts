@@ -1510,6 +1510,50 @@ async function main() {
     where: { id: activeSession.id },
     data: { questionOrder: JSON.stringify(questionOrder) },
   })
+
+  // Answers for completed and timed-out sessions, so staff review and the
+  // instructor monitor have realistic per-question data on first load.
+  const completedAnswerSessions = completedSessions.filter(
+    (session) => session.status === 'COMPLETED' || session.status === 'TIMED_OUT'
+  )
+  const completedAnswerQuestions = await Promise.all(
+    completedAnswerSessions.map(async (session) => {
+      const questions = await prisma.internalExamQuestion.findMany({
+        where: { bankId: bankIds[session.bankCode]! },
+        orderBy: { sortOrder: 'asc' },
+        select: { id: true, correctAnswer: true },
+      })
+      return { session, questions }
+    })
+  )
+  const completedAnswersData: Prisma.InternalExamAnswerCreateManyInput[] = []
+  for (const { session, questions } of completedAnswerQuestions) {
+    const paper = session.status === 'TIMED_OUT' ? questions.slice(0, 10) : questions
+    const correctCount =
+      session.status === 'COMPLETED'
+        ? Math.min(session.score ?? 0, paper.length)
+        : Math.min(5, paper.length)
+
+    for (const [index, question] of paper.entries()) {
+      const isCorrect = index < correctCount
+      completedAnswersData.push({
+        sessionId: session.id,
+        questionId: question.id,
+        selectedAnswer: isCorrect
+          ? question.correctAnswer
+          : `Option ${String.fromCharCode(65 + ((index + 1) % 3))}`,
+        isCorrect,
+        pointsAwarded: isCorrect ? 1 : 0,
+        answeredAt: session.submittedAt || session.startedAt || NOW,
+      })
+    }
+
+    await prisma.internalExamSession.update({
+      where: { id: session.id },
+      data: { questionOrder: JSON.stringify(paper.map((question) => question.id)) },
+    })
+  }
+  await prisma.internalExamAnswer.createMany({ data: completedAnswersData, skipDuplicates: true })
   console.log('✅ Answers seeded')
 
   // Access codes

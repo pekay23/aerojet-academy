@@ -8,6 +8,7 @@ import MotionTabs from '@/components/ui/MotionTabs'
 import { useSettingsDirty } from './SettingsTabs'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { UnsavedChangesDialog } from '@/components/shared/UnsavedChangesDialog'
+import { FormDirtyIndicator } from '@/components/shared/FormDirtyIndicator'
 
 interface WelcomeMessagesManagerProps {
   initialMessages: Record<string, string[]> | string[]
@@ -73,7 +74,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
   }, [markCleanSettings, markCleanLocal])
 
   // Track whether the current role has unsaved edits vs the committed baseline.
-  const _isDirty = JSON.stringify(allMessages) !== JSON.stringify(normalizedInitial)
+  const isDirty = JSON.stringify(allMessages) !== JSON.stringify(normalizedInitial)
 
   const currentMessages = allMessages[activeRole] || []
 
@@ -237,6 +238,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Save All Changes
+          <FormDirtyIndicator isDirty={isDirty} />
         </button>
       </div>
 

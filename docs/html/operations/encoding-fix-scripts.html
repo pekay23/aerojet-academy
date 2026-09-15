@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Encoding Fix Scripts · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Operations</p>
+  <h1 class="he-title">Encoding Fix Scripts</h1>
+  <p class="he-deck">This document describes the encoding fix scripts used to remediate mojibake in the Aerojet Academy codebase.</p>
+</header>
+<section class="he-section" id="overview"><div class="he-section__num">01 · Overview</div><h2 class="he-section__title">Overview</h2></section>
+<p>This document describes the encoding fix scripts used to remediate mojibake in the Aerojet Academy codebase. These scripts are maintained in the repository and should be used for future encoding issues.</p>
+<section class="he-section" id="scripts"><div class="he-section__num">02 · Scripts</div><h2 class="he-section__title">Scripts</h2></section>
+<h3 id="scriptscheck-encodingmjs"><code>scripts/check-encoding.mjs</code></h3>
+<p><strong>Purpose</strong>: Scan source files for mojibake prefixes and fail if any are found.</p>
+<p><strong>Usage</strong>:</p>
+<pre><code class="language-bash">bun run scripts/check-encoding.mjs
+</code></pre>
+<p><strong>Exit codes</strong>:</p>
+<ul>
+<li><code>0</code> — No mojibake detected</li>
+<li><code>1</code> — Mojibake detected; check the output for file paths and instance counts</li>
+</ul>
+<p><strong>What it scans</strong>:</p>
+<ul>
+<li>Directories: <code>app/</code>, <code>lib/</code>, <code>components/</code>, <code>docs/</code>, <code>tests/</code>, <code>prisma/</code></li>
+<li>Extensions: <code>.ts</code>, <code>.tsx</code>, <code>.js</code>, <code>.jsx</code>, <code>.md</code>, <code>.json</code>, <code>.mjs</code>, <code>.html</code></li>
+<li>Excluded: <code>node_modules/</code>, <code>.next/</code>, <code>.venv/</code>, <code>__pycache__/</code>, <code>scripts/</code></li>
+</ul>
+<p><strong>Patterns detected</strong>: <code>â</code>, <code>Ã</code>, <code>Â</code>, <code>ð</code> (common mojibake prefixes)</p>
+<hr />
+<h3 id="scriptsfix-encoding-allmjs"><code>scripts/fix-encoding-all.mjs</code></h3>
+<p><strong>Purpose</strong>: Fix the 9 originally reported files with box-drawing and common patterns.</p>
+<p><strong>Usage</strong>:</p>
+<pre><code class="language-bash">bun run scripts/fix-encoding-all.mjs
+</code></pre>
+<p><strong>Files fixed</strong>:</p>
+<ol>
+<li><code>app/instructor/exams/_components/InstructorExamsDashboard.tsx</code></li>
+<li><code>app/staff/_components/ReportsPanel.tsx</code></li>
+<li><code>app/staff/exams/_components/RecordsTab.tsx</code></li>
+<li><code>app/staff/exams/internal/preview/_components/ExamPreviewClient.tsx</code></li>
+<li><code>app/staff/finance/refunds/_components/RefundsManager.tsx</code></li>
+<li><code>app/staff/settings/_components/EmailRegistryTab.tsx</code></li>
+<li><code>app/student/exams/internal/_components/InternalExamInterface.tsx</code></li>
+<li><code>components/layouts/DashboardSidebar.tsx</code></li>
+<li><code>components/Tour/AppTour.tsx</code></li>
+</ol>
+<p><strong>Replacements</strong>:</p>
+<ul>
+<li><code>â&quot;€</code> → <code>─</code> (box-drawing light horizontal)</li>
+</ul>
+<hr />
+<h3 id="scriptsfix-encoding-remainingmjs"><code>scripts/fix-encoding-remaining.mjs</code></h3>
+<p><strong>Purpose</strong>: Fix arrow patterns in 4 specific files.</p>
+<p><strong>Usage</strong>:</p>
+<pre><code class="language-bash">bun run scripts/fix-encoding-remaining.mjs
+</code></pre>
+<p><strong>Files fixed</strong>:</p>
+<ol>
+<li><code>app/staff/exams/internal/_components/ExamOperations.tsx</code></li>
+<li><code>app/staff/settings/_components/EmailDeliveryTab.tsx</code></li>
+<li><code>components/CurrencyToggle.tsx</code></li>
+<li><code>components/public/SearchModal.tsx</code></li>
+</ol>
+<p><strong>Replacements</strong>:</p>
+<ul>
+<li><code>â†'</code> → <code>→</code> (right arrow)</li>
+<li><code>â†'</code> → <code>↑</code> (up arrow)</li>
+<li><code>â†&quot;</code> → <code>↓</code> (down arrow)</li>
+<li><code>â†µ</code> → <code>↕</code> (up down arrow)</li>
+</ul>
+<hr />
+<h3 id="scriptsfix-encoding-finalmjs"><code>scripts/fix-encoding-final.mjs</code></h3>
+<p><strong>Purpose</strong>: Fix <code>Ã</code>/<code>Â</code>-prefixed patterns in 2 files.</p>
+<p><strong>Usage</strong>:</p>
+<pre><code class="language-bash">bun run scripts/fix-encoding-final.mjs
+</code></pre>
+<p><strong>Files fixed</strong>:</p>
+<ol>
+<li><code>app/staff/exams/internal/_components/ExamBankManager.tsx</code></li>
+<li><code>docs/html/design-system.html</code></li>
+</ol>
+<p><strong>Replacements</strong>:</p>
+<ul>
+<li><code>Ã—</code> → <code>×</code> (multiplication sign)</li>
+<li><code>Â·</code> → <code>·</code> (middle dot)</li>
+<li><code>â€&quot;</code> → <code>–</code> (en dash)</li>
+<li><code>â€&quot;</code> → <code>—</code> (em dash)</li>
+<li><code>âœ…</code> → <code>✅</code> (check mark button)</li>
+<li><code>â‰¥</code> → <code>≥</code> (greater-than or equal)</li>
+<li><code>â†'</code> → <code>←</code> (left arrow)</li>
+<li><code>â€¦</code> → <code>…</code> (horizontal ellipsis)</li>
+</ul>
+<hr />
+<h3 id="scriptsfix-encoding-emojimjs"><code>scripts/fix-encoding-emoji.mjs</code></h3>
+<p><strong>Purpose</strong>: Fix emoji corruption in 3 files.</p>
+<p><strong>Usage</strong>:</p>
+<pre><code class="language-bash">bun run scripts/fix-encoding-emoji.mjs
+</code></pre>
+<p><strong>Files fixed</strong>:</p>
+<ol>
+<li><code>app/staff/dashboard/_components/AlertsCenter.tsx</code></li>
+<li><code>components/exam-only/MyPoolsDashboard.tsx</code></li>
+<li><code>components/public/SearchModal.tsx</code></li>
+</ol>
+<p><strong>Replacements</strong>:</p>
+<ul>
+<li><code>ðŸŽ‰</code> → <code>🎉</code> (party popper)</li>
+<li><code>ðŸ“‹</code> → <code>📋</code> (clipboard)</li>
+<li><code>ðŸ“…</code> → <code>📅</code> (calendar)</li>
+<li><code>ðŸ’°</code> → <code>💰</code> (money bag)</li>
+<li><code>ðŸŽ¯</code> → <code>🎯</code> (direct hit)</li>
+<li><code>ðŸ“¦</code> → <code>📦</code> (package)</li>
+</ul>
+<hr />
+<section class="he-section" id="running-all-fixes"><div class="he-section__num">03 · Running All Fixes</div><h2 class="he-section__title">Running All Fixes</h2></section>
+<p>To run all fix scripts in sequence:</p>
+<pre><code class="language-bash">bun run scripts/fix-encoding-all.mjs
+bun run scripts/fix-encoding-remaining.mjs
+bun run scripts/fix-encoding-final.mjs
+bun run scripts/fix-encoding-emoji.mjs
+</code></pre>
+<section class="he-section" id="after-running-fixes"><div class="he-section__num">04 · After Running Fixes</div><h2 class="he-section__title">After Running Fixes</h2></section>
+<ol>
+<li><strong>Verify</strong>: Run <code>bun run scripts/check-encoding.mjs</code> to confirm no mojibake remains.</li>
+<li><strong>Type-check</strong>: Run <code>bun run type-check</code> to ensure no TypeScript errors.</li>
+<li><strong>Test</strong>: Run <code>bun run test --run --no-file-parallelism --no-color</code> to ensure no test failures.</li>
+<li><strong>Commit</strong>: Commit the fixed files with a descriptive message.</li>
+</ol>
+<section class="he-section" id="adding-new-patterns"><div class="he-section__num">05 · Adding New Patterns</div><h2 class="he-section__title">Adding New Patterns</h2></section>
+<p>If new mojibake patterns are discovered:</p>
+<ol>
+<li>Identify the exact byte sequence in the corrupted file.</li>
+<li>Determine the intended Unicode character.</li>
+<li>Add the replacement to the appropriate fix script.</li>
+<li>Update <code>scripts/check-encoding.mjs</code> if a new prefix is introduced.</li>
+<li>Document the pattern in <code>docs/operations/encoding-prevention.md</code>.</li>
+</ol>
+<section class="he-section" id="notes"><div class="he-section__num">06 · Notes</div><h2 class="he-section__title">Notes</h2></section>
+<ul>
+<li>Fix scripts use exact literal-string matching with <code>split().join()</code> to avoid regex metacharacter issues.</li>
+<li>Patterns are ordered by specificity to avoid partial matches.</li>
+<li>The scripts intentionally contain <code>â</code>, <code>Ã</code>, <code>Â</code>, and <code>ð</code> characters as search patterns — these are not corruption.</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#overview">Overview</a></li>
+    <li class="he-toc__l2"><a href="#scripts">Scripts</a></li>
+    <li class="he-toc__l3"><a href="#scriptscheck-encodingmjs">scripts/check-encoding.mjs</a></li>
+    <li class="he-toc__l3"><a href="#scriptsfix-encoding-allmjs">scripts/fix-encoding-all.mjs</a></li>
+    <li class="he-toc__l3"><a href="#scriptsfix-encoding-remainingmjs">scripts/fix-encoding-remaining.mjs</a></li>
+    <li class="he-toc__l3"><a href="#scriptsfix-encoding-finalmjs">scripts/fix-encoding-final.mjs</a></li>
+    <li class="he-toc__l3"><a href="#scriptsfix-encoding-emojimjs">scripts/fix-encoding-emoji.mjs</a></li>
+    <li class="he-toc__l2"><a href="#running-all-fixes">Running All Fixes</a></li>
+    <li class="he-toc__l2"><a href="#after-running-fixes">After Running Fixes</a></li>
+    <li class="he-toc__l2"><a href="#adding-new-patterns">Adding New Patterns</a></li>
+    <li class="he-toc__l2"><a href="#notes">Notes</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

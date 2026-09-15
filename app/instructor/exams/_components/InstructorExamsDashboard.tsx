@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
+import { ErrorBanner } from '@/components/shared/ErrorBanner'
 import TablePagination from '@/components/shared/TablePagination'
 import { cn, formatDate } from '@/lib/utils'
 import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
@@ -279,9 +280,11 @@ function MyQuestionsTab() {
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetchPaginated<Question>(
         `/api/instructor/exams/questions?view=mine&page=${page}&limit=${limit}`
@@ -289,6 +292,8 @@ function MyQuestionsTab() {
       setQuestions(res.data)
       setTotal(res.total)
     } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load your questions'
+      setError(message)
       console.error('[MyQuestionsTab] Failed to load questions:', err)
       toast.error('Failed to load your questions')
     } finally {
@@ -309,7 +314,9 @@ function MyQuestionsTab() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {loading ? (
+        {error ? (
+          <ErrorBanner message={error} onRetry={load} />
+        ) : loading ? (
           <TableSkeleton rows={6} />
         ) : questions.length === 0 ? (
           <EmptyState label="You haven't submitted any questions yet." />
@@ -318,6 +325,7 @@ function MyQuestionsTab() {
             {questions.map((q) => (
               <button
                 key={q.id}
+                aria-label={`Open question: ${q.text}`}
                 onClick={() => q.bankId && router.push(`/instructor/exams/banks/${q.bankId}`)}
                 className="hover:border-aerojet-sky/40 flex w-full items-center justify-between gap-4 rounded-xl border border-slate-100 p-4 text-left transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
               >
@@ -330,7 +338,7 @@ function MyQuestionsTab() {
                 <div className="flex shrink-0 items-center gap-2">
                   <DifficultyBadge difficulty={q.difficulty} />
                   <StatusBadge status={q.status} />
-                  <ChevronRight className="h-4 w-4 text-slate-300" />
+                  <ChevronRight className="h-4 w-4 text-slate-500" aria-hidden="true" />
                 </div>
               </button>
             ))}
@@ -401,6 +409,7 @@ function MyBanksTab() {
             {banks.map((b) => (
               <button
                 key={b.id}
+                aria-label={`Open question bank: ${b.name}`}
                 onClick={() => router.push(`/instructor/exams/banks/${b.id}`)}
                 className="hover:border-aerojet-sky/40 rounded-2xl border border-slate-100 p-5 text-left transition-all hover:shadow-md dark:border-slate-800"
               >
@@ -519,7 +528,7 @@ function BankQuestionPanel({ bankId, instructorId }: { bankId: string; instructo
     <div className="border-t border-slate-100 bg-slate-50/40 px-5 py-4 dark:border-slate-800 dark:bg-slate-900/40">
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <div className="relative max-w-xs flex-1">
-          <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
           <Input
             placeholder="Search questions…"
             value={search}
@@ -577,7 +586,7 @@ function BankQuestionPanel({ bankId, instructorId }: { bankId: string; instructo
       {loading ? (
         <TableSkeleton rows={4} />
       ) : visible.length === 0 ? (
-        <p className="py-6 text-center text-xs text-slate-400">No questions match your filters.</p>
+        <p className="py-6 text-center text-xs text-slate-500">No questions match your filters.</p>
       ) : (
         <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-950/30">
           {visible.map((q) => (
@@ -777,7 +786,7 @@ function ModuleBankTab({ instructorId }: { instructorId: string }) {
                             type="button"
                             onClick={() => toggle(b.id)}
                             aria-label={isOpen ? 'Collapse' : 'Expand'}
-                            className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
+                            className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
                           >
                             {isOpen ? (
                               <ChevronUp className="h-4 w-4" />
@@ -857,6 +866,7 @@ function MyClassesTab() {
             {classes.map((c) => (
               <button
                 key={c.id}
+                aria-label={`Open monitor for class: ${c.name}`}
                 onClick={() => router.push(`/instructor/exams/classes/${c.id}/monitor`)}
                 className="hover:border-aerojet-sky/40 rounded-2xl border border-slate-100 p-5 text-left transition-all hover:shadow-md dark:border-slate-800"
               >
@@ -962,7 +972,7 @@ function ClassScheduleTab() {
                   </button>
                 </div>
                 {c.schedules.length === 0 ? (
-                  <p className="mt-3 text-xs text-slate-400">
+                  <p className="mt-3 text-xs text-slate-500">
                     No exams scheduled for this class yet.
                   </p>
                 ) : (
@@ -976,7 +986,7 @@ function ClassScheduleTab() {
                           <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
                             {s.bankName}{' '}
                             {s.bankModuleCode && (
-                              <span className="font-mono text-slate-400">({s.bankModuleCode})</span>
+                              <span className="font-mono text-slate-500">({s.bankModuleCode})</span>
                             )}
                           </p>
                           <p className="text-[10px] text-slate-500">
@@ -1104,7 +1114,7 @@ function LiveMonitorTab() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-left text-xs tracking-wide text-slate-400 uppercase dark:border-slate-800">
+                <tr className="border-b border-slate-100 text-left text-xs tracking-wide text-slate-500 uppercase dark:border-slate-800">
                   <SortHeader
                     label="Student"
                     sortKey="student.name"
@@ -1156,14 +1166,14 @@ function LiveMonitorTab() {
                       <p className="truncate font-medium text-slate-800 dark:text-slate-100">
                         {s.student.name}
                       </p>
-                      <p className="truncate text-xs text-slate-400">{s.bank.name}</p>
+                      <p className="truncate text-xs text-slate-500">{s.bank.name}</p>
                     </td>
                     <td className="py-3 pr-4 text-center">
                       <SessionStatusBadge status={s.status} />
                     </td>
                     <td className="w-40 py-3 pr-4 tabular-nums">
                       <ScoreBar value={s.percentage} />
-                      <span className="mt-1 block text-xs text-slate-400">
+                      <span className="mt-1 block text-xs text-slate-500">
                         {s.percentage != null ? `${s.percentage}%` : `${s.answerCount} answered`}
                       </span>
                     </td>
@@ -1177,7 +1187,7 @@ function LiveMonitorTab() {
                 ))}
               </tbody>
             </table>
-            {refreshing ? <p className="mt-2 text-xs text-slate-400">Refreshing…</p> : null}
+            {refreshing ? <p className="mt-2 text-xs text-slate-500">Refreshing…</p> : null}
           </div>
         )}
       </CardContent>
@@ -1187,9 +1197,13 @@ function LiveMonitorTab() {
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 py-16 dark:border-slate-800">
-      <CheckCircle2 className="mb-3 h-10 w-10 text-slate-200 dark:text-slate-700" />
-      <p className="text-sm font-medium text-slate-400">{label}</p>
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 py-16 dark:border-slate-800"
+    >
+      <CheckCircle2 className="mb-3 h-10 w-10 text-slate-300 dark:text-slate-700" aria-hidden="true" />
+      <p className="text-sm font-medium text-slate-500">{label}</p>
     </div>
   )
 }
@@ -1250,7 +1264,7 @@ export default function InstructorExamsDashboard({
           <Card key={s.label}>
             <CardContent className="flex items-center justify-between p-4">
               <div>
-                <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                <p className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                   {s.label}
                 </p>
                 <p className="mt-1 text-2xl font-black text-slate-900 dark:text-white">{s.value}</p>

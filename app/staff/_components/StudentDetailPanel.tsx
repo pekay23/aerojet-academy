@@ -23,7 +23,6 @@ import ManualWalletAdjustmentDialog from '../users/[id]/_components/ManualWallet
 import { UserStatus, EnrollmentStatus, PaymentStatus } from '@/types/enums'
 import Image from 'next/image'
 import {
-  deriveBookingFulfillmentState,
   isUpcomingBooking as isUpcomingBookingFromLib,
   isMissedBooking as isMissedBookingFromLib,
 } from '@/lib/exams/fulfillment'

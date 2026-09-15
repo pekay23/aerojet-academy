@@ -11,6 +11,7 @@ export default async function AttendancePage() {
 
   // Get classes that have upcoming or recent dates, plus any class
   // that has attendance records so marked attendance is always visible.
+  // eslint-disable-next-line react-hooks/purity
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
 
   const [dateFilteredClasses, classIdsWithAttendance] = await Promise.all([
