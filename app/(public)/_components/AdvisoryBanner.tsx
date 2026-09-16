@@ -27,8 +27,7 @@ export default function AdvisoryBanner({ message }: { message: string }) {
     if (!message) return
     const closedMessage = sessionStorage.getItem(storageKey)
     if (closedMessage !== message) {
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsVisible(true)
     }
   }, [message])
@@ -65,7 +64,7 @@ export default function AdvisoryBanner({ message }: { message: string }) {
       <button
         onClick={handleClose}
         type="button"
-        className="absolute right-4 top-1/2 -translate-y-1/2 shrink-0 rounded-md p-1.5 text-amber-600 transition-colors hover:bg-amber-200/50 hover:text-amber-800 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:right-6 lg:right-8"
+        className="absolute top-1/2 right-4 shrink-0 -translate-y-1/2 rounded-md p-1.5 text-amber-600 transition-colors hover:bg-amber-200/50 hover:text-amber-800 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:right-6 lg:right-8"
         aria-label="Dismiss advisory"
       >
         <X className="h-5 w-5" aria-hidden="true" />

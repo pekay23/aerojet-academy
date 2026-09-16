@@ -61,9 +61,11 @@ export default function NewsPagination({ total, page, limit }: NewsPaginationPro
   return (
     <div className="mt-16 flex flex-col items-center justify-between gap-8 border-t border-slate-100 pt-10 sm:flex-row">
       <div className="flex items-center gap-4">
-        <span className="text-xs font-black tracking-widest text-slate-400 uppercase">Per Page</span>
+        <span className="text-xs font-black tracking-widest text-slate-400 uppercase">
+          Per Page
+        </span>
         <Select value={limit.toString()} onValueChange={handleLimitChange}>
-          <SelectTrigger className="h-10 w-[80px] rounded-xl border-slate-200 bg-white text-xs font-bold ring-offset-white focus:ring-aerojet-blue/20">
+          <SelectTrigger className="focus:ring-aerojet-blue/20 h-10 w-[80px] rounded-xl border-slate-200 bg-white text-xs font-bold ring-offset-white">
             <SelectValue placeholder={limit.toString()} />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-slate-100 bg-white p-1.5 shadow-2xl">
@@ -108,7 +110,7 @@ export default function NewsPagination({ total, page, limit }: NewsPaginationPro
               className={`h-10 w-10 rounded-xl text-xs font-black transition-all ${
                 p === page
                   ? 'bg-aerojet-blue text-white shadow-xl shadow-blue-900/20'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-aerojet-blue hover:text-aerojet-blue hover:shadow-lg'
+                  : 'hover:border-aerojet-blue hover:text-aerojet-blue border-slate-200 bg-white text-slate-600 hover:shadow-lg'
               }`}
               onClick={() => handlePageChange(p)}
             >

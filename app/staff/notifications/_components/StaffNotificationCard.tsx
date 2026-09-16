@@ -18,17 +18,10 @@ export default function StaffNotificationCard({
   onDismiss,
 }: StaffNotificationCardProps) {
   const [isRead, setIsRead] = useState(notification.isRead)
-  const [isPending, _startTransition] = useTransition()
   const [isDismissing, startDismissTransition] = useTransition()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const currentHref = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-
-  const _handleMarkAsRead = () => {
-    if (isRead || isPending) return
-    setIsRead(true)
-    // In a real implementation, you'd call a mark-as-read action here
-  }
 
   const handleDismiss = async () => {
     if (isDismissing) return

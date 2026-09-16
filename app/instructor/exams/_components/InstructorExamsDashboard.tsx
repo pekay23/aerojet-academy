@@ -52,7 +52,6 @@ interface BankRef {
 }
 interface AuthorRef {
   id: string
-  name: string | null
   profile?: { firstName: string | null; lastName: string | null } | null
 }
 interface Question {
@@ -263,7 +262,7 @@ function authorName(a?: AuthorRef | null) {
   if (!a) return 'Unknown'
   if (a.profile?.firstName || a.profile?.lastName)
     return `${a.profile.firstName || ''} ${a.profile.lastName || ''}`.trim()
-  return a.name || 'Unknown'
+  return 'Unknown'
 }
 
 function formatDuration(seconds: number) {
@@ -1202,7 +1201,10 @@ function EmptyState({ label }: { label: string }) {
       aria-live="polite"
       className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 py-16 dark:border-slate-800"
     >
-      <CheckCircle2 className="mb-3 h-10 w-10 text-slate-300 dark:text-slate-700" aria-hidden="true" />
+      <CheckCircle2
+        className="mb-3 h-10 w-10 text-slate-300 dark:text-slate-700"
+        aria-hidden="true"
+      />
       <p className="text-sm font-medium text-slate-500">{label}</p>
     </div>
   )

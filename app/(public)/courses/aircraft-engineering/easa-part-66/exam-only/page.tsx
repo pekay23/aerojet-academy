@@ -263,7 +263,7 @@ export default function ExamOnlyPage() {
                     'Real-time status via Portal',
                   ].map((r) => (
                     <li key={r} className="flex gap-2">
-                      <CheckCircle2 className="text-aerojet-sky mt-0.5 h-5 w-5 shrink-0" />
+                      <CheckCircle2 className="text-aerojet-sky mt-0 h-5 w-5 shrink-0 sm:mt-0.5" />
                       {r}
                     </li>
                   ))}
@@ -304,19 +304,19 @@ export default function ExamOnlyPage() {
               </p>
               <ul className="space-y-2 text-sm text-red-800 sm:text-base">
                 <li className="flex items-start gap-2">
-                  <span className="mt-1 block h-1.5 w-1.5 shrink-0 rounded-full bg-red-400"></span>{' '}
+                  <span className="mt-[7px] block h-1.5 w-1.5 shrink-0 rounded-full bg-red-400 sm:mt-[9px]"></span>{' '}
                   Aerojet-initiated postponements: Automatic wallet credit rollover
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="mt-1 block h-1.5 w-1.5 shrink-0 rounded-full bg-red-400"></span>{' '}
+                  <span className="mt-[7px] block h-1.5 w-1.5 shrink-0 rounded-full bg-red-400 sm:mt-[9px]"></span>{' '}
                   Module changes: Admin fee applies (waived for bundle holders)
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="mt-1 block h-1.5 w-1.5 shrink-0 rounded-full bg-red-400"></span>{' '}
+                  <span className="mt-[7px] block h-1.5 w-1.5 shrink-0 rounded-full bg-red-400 sm:mt-[9px]"></span>{' '}
                   Name changes: Admin fee applies
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="mt-1 block h-1.5 w-1.5 shrink-0 rounded-full bg-red-400"></span>{' '}
+                  <span className="mt-[7px] block h-1.5 w-1.5 shrink-0 rounded-full bg-red-400 sm:mt-[9px]"></span>{' '}
                   Non-attendance: 100% loss of fee (No-Show)
                 </li>
               </ul>

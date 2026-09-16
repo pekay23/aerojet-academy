@@ -90,6 +90,7 @@ export default function NotificationCard({ notification }: NotificationCardProps
           <div className="mt-4">
             <Link
               href={appendReturnNavigation(notification.linkUrl, currentHref)}
+              onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-2 text-xs font-black text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
               {notification.linkText || 'View Details'}

@@ -51,25 +51,28 @@ export default function PaymentInstructions({
   }
 
   // Build methods array — prefer paymentMethods prop, fall back to legacy finance prop
-  const methods: PaymentMethodData[] = paymentMethods && paymentMethods.length > 0
-    ? paymentMethods
-    : finance
-      ? [{
-          id: 'legacy',
-          type: 'BANK_TRANSFER',
-          label: finance.bankName || 'Bank Transfer',
-          currency,
-          bankName: finance.bankName,
-          bankAccountName: finance.bankAccountName,
-          bankAccountNumber: finance.bankAccountNumber,
-          bankSwiftCode: finance.bankSwift || null,
-          bankBranch: null,
-          momoProvider: null,
-          momoNumber: null,
-          momoMerchantCode: null,
-          momoAccountName: null,
-        }]
-      : []
+  const methods: PaymentMethodData[] =
+    paymentMethods && paymentMethods.length > 0
+      ? paymentMethods
+      : finance
+        ? [
+            {
+              id: 'legacy',
+              type: 'BANK_TRANSFER',
+              label: finance.bankName || 'Bank Transfer',
+              currency,
+              bankName: finance.bankName,
+              bankAccountName: finance.bankAccountName,
+              bankAccountNumber: finance.bankAccountNumber,
+              bankSwiftCode: finance.bankSwift || null,
+              bankBranch: null,
+              momoProvider: null,
+              momoNumber: null,
+              momoMerchantCode: null,
+              momoAccountName: null,
+            },
+          ]
+        : []
 
   const steps = [
     { label: 'Register', icon: CheckCircle2, done: true },

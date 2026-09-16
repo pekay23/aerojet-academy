@@ -3,24 +3,42 @@
 ## [1.2.4] — 2026-09-15
 
 ### Changed
+
 - Maintenance and stability updates.
 
 ## [1.2.3] — 2026-09-12
 
 ### Changed
+
 - Maintenance and stability updates.
 
 ## [1.2.2] — 2026-09-11
 
-### Changed
+### Added
 
-- Maintenance and stability updates.
+- Audit logging for Go/No-Go, postponement, and pool-confirmation decisions.
+- Student in-app notifications for exam-event lifecycle transitions and published results.
+- Batched user lookup and parallel notification dispatch for exam-event operations.
+
+### Fixed
+
+- Windows pre-push test failures caused by Vitest worker-pool crashes; the hook now runs tests without file parallelism and without color output.
 
 ## [1.2.1] — 2026-09-11
 
-### Changed
+### Added
 
-- Maintenance and stability updates.
+- Automated overdue/missed exam reconciliation through `/api/cron/exam-reconciliation`, including a configurable grace period, idempotent attendance writes, assignment synchronization, and batched staff alerts.
+- Upcoming and missed/unresolved exam filters backed by shared fulfillment helpers.
+- Natural question ordering, pagination, validation, and seed-data integrity improvements for internal and instructor question banks.
+- Return-navigation metadata for staff and student notification links.
+- Regrade/edit-grade safeguards and internal-exam test-session answer fixtures.
+- Go/No-Go propagation and clearer booking-fulfillment display states.
+
+### Fixed
+
+- Missing module/date display fallbacks, stale upcoming/missed classifications, duplicate notification paths, and incomplete exam-result/attendance state transitions.
+- Question-bank ordering and pagination regressions, including natural ordering such as M2 before M10.
 
 ## [1.0.109] — 2026-09-09
 

@@ -330,7 +330,7 @@ export default function ExamBankManager() {
                           {bank.pendingCount} Pending
                         </span>
                       )}
-                      <span className="hidden text-xs text-slate-400 sm:inline">
+                      <span className="hidden text-xs text-slate-500 sm:inline">
                         {bank._count.sessions} sessions
                       </span>
                       <ChevronRight

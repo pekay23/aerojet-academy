@@ -17,9 +17,7 @@ export default function UploadProofForm() {
   useEffect(() => {
     const code = searchParams.get('code')
     if (code) {
-   
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRegistrationCode(code)
     }
   }, [searchParams])
@@ -69,7 +67,7 @@ export default function UploadProofForm() {
           value={registrationCode}
           onChange={handleManualRegistrationCodeChange}
           placeholder="e.g. AERO-2026-123456"
-          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 font-mono text-slate-900 transition-all outline-none focus:border-aerojet-sky focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+          className="focus:border-aerojet-sky w-full rounded-lg border border-slate-300 bg-white px-4 py-3 font-mono text-slate-900 transition-all outline-none focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           required
         />
         <p className="mt-1 text-xs text-slate-500">

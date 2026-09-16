@@ -25,35 +25,38 @@ export default function LoginForm() {
   })
 
   // Complete passkey login after browser returns a credential (shared by button + conditional UI)
-  const completePasskeyLogin = useCallback(async (credential: AuthenticationResponseJSON) => {
-    const verifyRes = await fetch('/api/auth/passkey/login-verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential }),
-    })
+  const completePasskeyLogin = useCallback(
+    async (credential: AuthenticationResponseJSON) => {
+      const verifyRes = await fetch('/api/auth/passkey/login-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      })
 
-    if (!verifyRes.ok) {
-      throw new Error(await verifyRes.text() || 'Passkey verification failed')
-    }
-
-    const { token } = await verifyRes.json()
-
-    startTransition(async () => {
-      const result = await signIn('credentials', { redirect: false, token })
-      if (result?.error) {
-        setError(result.error)
-        return
+      if (!verifyRes.ok) {
+        throw new Error((await verifyRes.text()) || 'Passkey verification failed')
       }
-      const session = await getSession()
-      const userRole = session?.user?.role
-      if (userRole === 'STUDENT' || userRole === 'APPLICANT') {
-        router.push('/student')
-      } else {
-        router.push('/staff')
-      }
-      router.refresh()
-    })
-  }, [router])
+
+      const { token } = await verifyRes.json()
+
+      startTransition(async () => {
+        const result = await signIn('credentials', { redirect: false, token })
+        if (result?.error) {
+          setError(result.error)
+          return
+        }
+        const session = await getSession()
+        const userRole = session?.user?.role
+        if (userRole === 'STUDENT' || userRole === 'APPLICANT') {
+          router.push('/student')
+        } else {
+          router.push('/staff')
+        }
+        router.refresh()
+      })
+    },
+    [router]
+  )
 
   // Conditional UI: automatically prompt passkey when email field is focused (if browser supports it)
   useEffect(() => {
@@ -84,7 +87,10 @@ export default function LoginForm() {
         const { options } = await optionsRes.json()
 
         // Start conditional mediation — browser shows passkey in autofill dropdown
-        const credential = await startAuthentication({ optionsJSON: options, useBrowserAutofill: true })
+        const credential = await startAuthentication({
+          optionsJSON: options,
+          useBrowserAutofill: true,
+        })
         if (aborted) return
 
         await completePasskeyLogin(credential)
@@ -97,7 +103,9 @@ export default function LoginForm() {
     }
 
     initConditionalUI()
-    return () => { aborted = true }
+    return () => {
+      aborted = true
+    }
   }, [completePasskeyLogin])
 
   const handlePasskeyLogin = async () => {
@@ -206,7 +214,10 @@ export default function LoginForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div ref={announcerRef} aria-live="polite" aria-atomic="true" className="sr-only" />
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert">
+        <div
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+          role="alert"
+        >
           {error}
         </div>
       )}
@@ -232,7 +243,7 @@ export default function LoginForm() {
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck="false"
-            className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
         </div>
       </div>
@@ -248,7 +259,7 @@ export default function LoginForm() {
           </label>
           <Link
             href="/forgot-password"
-            className="text-xs font-bold text-aerojet-sky hover:underline"
+            className="text-aerojet-sky text-xs font-bold hover:underline"
           >
             Forgot?
           </Link>
@@ -263,11 +274,12 @@ export default function LoginForm() {
             placeholder="••••••••"
             required
             autoComplete="current-password"
-            className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-12 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-12 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
             className="absolute top-1/2 right-4 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-400"
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -312,7 +324,7 @@ export default function LoginForm() {
               required
               autoFocus
               autoComplete="one-time-code"
-              className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-center text-lg font-mono tracking-[0.3em] text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-center font-mono text-lg tracking-[0.3em] text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
         </div>
@@ -322,7 +334,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-4 text-xs font-black tracking-widest text-white uppercase shadow-lg transition-all hover:bg-aerojet-sky disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-aerojet-blue hover:bg-aerojet-sky flex w-full items-center justify-center gap-2 rounded-xl py-4 text-xs font-black tracking-widest text-white uppercase shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? (
           <>
@@ -338,7 +350,9 @@ export default function LoginForm() {
           <span className="w-full border-t border-slate-200 dark:border-slate-700" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-slate-400 dark:bg-slate-950">Or continue with</span>
+          <span className="bg-white px-2 text-slate-600 dark:bg-slate-950 dark:text-slate-300">
+            Or continue with
+          </span>
         </div>
       </div>
 
