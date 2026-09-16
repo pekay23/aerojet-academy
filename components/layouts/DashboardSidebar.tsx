@@ -117,12 +117,12 @@ function MobileTopBar({
 
             return (
               <span key={i} className="flex shrink-0 items-center gap-1.5">
-                {i > 0 && <span className="text-xs text-slate-300 dark:text-slate-600">/</span>}
+                {i > 0 && <span className="text-xs text-slate-500 dark:text-slate-500">/</span>}
                 <span
                   className={`max-w-30 truncate text-xs ${
                     isLast
                       ? 'font-bold text-slate-800 dark:text-slate-100'
-                      : 'font-medium text-slate-400 dark:text-slate-500'
+                      : 'font-medium text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   {label}
@@ -134,7 +134,7 @@ function MobileTopBar({
       </nav>
 
       {/* Portal label - pushed to end */}
-      <span className="ml-auto text-[9px] font-black tracking-widest text-slate-300 uppercase dark:text-slate-600">
+      <span className="ml-auto text-[9px] font-black tracking-widest text-slate-500 uppercase dark:text-slate-400">
         {portalLabel.replace(' Portal', '')}
       </span>
     </div>
@@ -654,7 +654,7 @@ function renderSidebarContent({
               </span>
             </div>
             {appVersion && (
-              <span className="bg-sidebar-foreground/5 text-sidebar-foreground/40 rounded-md px-1.5 py-0.5 text-[9px] font-black">
+              <span className="bg-sidebar-foreground/10 text-sidebar-foreground/70 rounded-md px-1.5 py-0.5 text-[9px] font-black">
                 v{appVersion}
               </span>
             )}

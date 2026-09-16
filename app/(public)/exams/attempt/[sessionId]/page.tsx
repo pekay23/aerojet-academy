@@ -13,7 +13,7 @@ function ExamLoading() {
   return (
     <div className="flex h-screen items-center justify-center bg-slate-50 dark:bg-black">
       <div className="text-center">
-        <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-aerojet-blue border-t-transparent" />
+        <div className="border-aerojet-blue mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
         <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
           Loading secure exam environment...
         </p>

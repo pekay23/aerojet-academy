@@ -84,14 +84,14 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const authors = authorIds.length
     ? await prismaUnfiltered.user.findMany({
         where: { id: { in: authorIds } },
-        select: { id: true, name: true, profile: { select: { firstName: true, lastName: true } } },
+        select: { id: true, profile: { select: { firstName: true, lastName: true } } },
       })
     : []
   const authorMap = new Map(authors.map((a) => [a.id, a]))
 
   const questions = rawQuestions.map((q) => ({
     ...q,
-    submittedBy: q.submittedById ? authorMap.get(q.submittedById) ?? null : null,
+    submittedBy: q.submittedById ? (authorMap.get(q.submittedById) ?? null) : null,
   }))
 
   return apiPaginated(questions, total, page, limit)

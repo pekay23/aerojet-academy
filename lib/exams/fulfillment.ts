@@ -36,11 +36,14 @@ export function deriveBookingFulfillmentState(input: {
   status?: string | null
 }): BookingFulfillmentState {
   const { demandStatus, executedAt, rolloverToEventId, result, status } = input
-
-  if (executedAt || demandStatus === 'EXECUTED') return 'EXECUTED'
+  const normalizedResult = result?.trim().toUpperCase()
 
   // EXCUSED: seat still owed, candidate must rebook or be placed in next event
-  if (result?.toUpperCase() === 'EXCUSED') return 'EXCUSED_PENDING_REBOOK'
+  if (normalizedResult === 'EXCUSED') return 'EXCUSED_PENDING_REBOOK'
+
+  const noShowResult =
+    normalizedResult === 'ABSENT' || normalizedResult === 'NO_SHOW' || normalizedResult === 'NOSHOW'
+  if (executedAt || demandStatus === 'EXECUTED' || noShowResult) return 'EXECUTED'
 
   if (demandStatus === 'ROLLED_FORWARD') return 'ROLLED_FORWARD'
   if (demandStatus === 'SCHEDULED') return 'SCHEDULED'
@@ -150,7 +153,7 @@ const isCompletedResult = (result: string | null | undefined) =>
 export function isUpcomingBooking(input: {
   examDate?: string | null | undefined
   result?: string | null
-  demandStatus?: string | null | undefined
+  demandStatus?: RawDemandStatus
   eventStatus?: string | null | undefined
 }): boolean {
   if (!input.examDate) return false
@@ -167,6 +170,13 @@ export function isUpcomingBooking(input: {
     return false
   }
   return true
+}
+
+export function getExamNotificationDedupeKey(
+  userId: string,
+  moduleCode: string | null | undefined
+): string {
+  return `${userId}:${moduleCode?.trim() || 'unknown'}`
 }
 
 export function isMissedBooking(input: {

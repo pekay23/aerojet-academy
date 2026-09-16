@@ -13,7 +13,7 @@ const careerPoints = [
 
 export default function Careers() {
   return (
-    <section className="relative w-full min-h-105 overflow-hidden border-t border-[#1b2430]/15 text-[#f7f3ec] sm:min-h-0">
+    <section className="relative min-h-105 w-full overflow-hidden border-t border-[#1b2430]/15 text-[#f7f3ec] sm:min-h-0">
       {/* Background Image — mobile */}
       <div className="absolute inset-0 z-0 sm:hidden">
         <Image

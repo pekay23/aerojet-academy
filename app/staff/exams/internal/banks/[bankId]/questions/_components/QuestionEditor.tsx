@@ -15,7 +15,10 @@ import {
   Eye,
   EyeOff,
   ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react'
+import TablePagination from '@/components/shared/TablePagination'
 
 interface Question {
   id: string
@@ -31,6 +34,7 @@ interface Question {
   isActive: boolean
   status: string
   createdAt?: string
+  sortOrder: number | null
 }
 
 interface QuestionEditorProps {
@@ -62,6 +66,10 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
   const [showRetired, setShowRetired] = useState(false)
   const [restoring, setRestoring] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<string>('default')
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(25)
+  const [pagination, setPagination] = useState({ total: 0, totalPages: 1 })
+  const [reorderingId, setReorderingId] = useState<string | null>(null)
 
   const [form, setForm] = useState({
     text: '',
@@ -82,17 +90,27 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
         `/api/staff/exams/internal/banks/${bankId}/questions`,
         window.location.origin
       )
+      url.searchParams.set('page', String(page))
+      url.searchParams.set('limit', String(limit))
       if (sortBy && sortBy !== 'default') url.searchParams.set('sort', sortBy)
       const res = await fetch(url.pathname + url.search)
       if (!res.ok) throw new Error(`Failed to load questions (${res.status})`)
       const json = await res.json()
-      if (json.data) setQuestions(json.data)
+      if (json.data) {
+        setQuestions(json.data)
+        if (json.meta) {
+          setPagination({
+            total: json.meta.total ?? 0,
+            totalPages: json.meta.totalPages ?? 1,
+          })
+        }
+      }
     } catch (e) {
       console.error('Failed to fetch questions:', e)
     } finally {
       setLoading(false)
     }
-  }, [bankId, sortBy])
+  }, [bankId, sortBy, page, limit])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -146,9 +164,9 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
         : `/api/staff/exams/internal/banks/${bankId}/questions/${editingId}`
 
       const payload = {
-        text: form.text,
+        text: form.text.trim(),
         options: form.options.map((o) => o.trim()),
-        correctAnswer: form.correctAnswer,
+        correctAnswer: form.correctAnswer.trim(),
         subTopic: form.subTopic || undefined,
         difficulty: form.difficulty,
         points: form.points,
@@ -165,6 +183,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
       })
       if (res.ok) {
         resetForm()
+        setPage(1)
         fetchQuestions()
       }
     } finally {
@@ -190,6 +209,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
         n.delete(deleteTarget)
         return n
       })
+      setPage(1)
       fetchQuestions()
     } finally {
       setDeleting(false)
@@ -215,6 +235,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
         )
       )
       setSelectedIds(new Set())
+      setPage(1)
       fetchQuestions()
     } finally {
       setDeleting(false)
@@ -229,9 +250,29 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
       await fetch(`/api/staff/exams/internal/banks/${bankId}/questions/${id}/restore`, {
         method: 'POST',
       })
+      setPage(1)
       fetchQuestions()
     } finally {
       setRestoring(null)
+    }
+  }
+
+  const handleReorder = async (questionId: string, direction: 'up' | 'down') => {
+    setReorderingId(questionId)
+    try {
+      const res = await fetch(`/api/staff/exams/internal/banks/${bankId}/questions`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId, direction }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to reorder question')
+      if (Array.isArray(json.data?.questionIds)) {
+        const byId = new Map(questions.map((question) => [question.id, question]))
+        setQuestions(json.data.questionIds.map((id: string) => byId.get(id)).filter(Boolean))
+      }
+    } finally {
+      setReorderingId(null)
     }
   }
 
@@ -275,7 +316,7 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
           const optionA = (parts[1] || '').trim()
           const optionB = (parts[2] || '').trim()
           const optionC = (parts[3] || '').trim()
-          const options = [optionA, optionB, optionC].filter(Boolean)
+          const options = [optionA, optionB, optionC]
           const correctAnswer = (parts[4] || '').trim()
           const subTopic = (parts[5] || '').trim() || undefined
           const difficulty = (parts[6] || 'MEDIUM').trim() as 'EASY' | 'MEDIUM' | 'HARD'
@@ -304,8 +345,11 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
         setImportResult({ count: json.data.count, errors: json.data.errors || [] })
         if (json.data.count > 0) {
           setBulkText('')
+          setPage(1)
           fetchQuestions()
         }
+      } else if (json.errors) {
+        setImportResult({ count: 0, errors: json.errors })
       }
     } finally {
       setBulkImporting(false)
@@ -605,7 +649,10 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
             <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" />
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => {
+                setSortBy(e.target.value)
+                setPage(1)
+              }}
               className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:text-slate-300"
             >
               <option value="default">Default Sort</option>
@@ -695,6 +742,23 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
         </div>
       )}
 
+      {questions.length > 0 && (
+        <TablePagination
+          page={page}
+          perPage={limit}
+          total={pagination.total}
+          onPageChange={(nextPage) => {
+            setPage(nextPage)
+            setSelectedIds(new Set())
+          }}
+          onPerPageChange={(nextLimit) => {
+            setLimit(nextLimit)
+            setPage(1)
+            setSelectedIds(new Set())
+          }}
+        />
+      )}
+
       {questions.length === 0 ? (
         <div className="py-12 text-center">
           <AlertCircle className="mx-auto mb-3 h-10 w-10 text-slate-300" />
@@ -718,6 +782,8 @@ export default function QuestionEditor({ bankId }: QuestionEditorProps) {
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
           onRestore={handleRestore}
+          onReorder={handleReorder}
+          reorderingId={reorderingId}
         />
       )}
     </div>
@@ -736,6 +802,8 @@ function QuestionList({
   onEdit,
   onDelete,
   onRestore,
+  onReorder,
+  reorderingId,
 }: {
   questions: Question[]
   selectedIds: Set<string>
@@ -747,6 +815,8 @@ function QuestionList({
   onEdit: (q: Question) => void
   onDelete: (id: string) => void
   onRestore: (id: string) => void
+  onReorder: (id: string, direction: 'up' | 'down') => void
+  reorderingId: string | null
 }) {
   const activeQuestions = questions.filter((q) => q.isActive)
   const retiredQuestions = questions.filter((q) => !q.isActive)
@@ -882,9 +952,33 @@ function QuestionList({
                 )}
               </div>
             </div>
-            <div className="ml-3 flex items-center gap-1">
+            <div className="ml-3 flex flex-col items-center gap-1">
               {q.isActive ? (
                 <>
+                  <button
+                    onClick={() => onReorder(q.id, 'up')}
+                    disabled={reorderingId === q.id}
+                    aria-label={`Move question ${i + 1} up`}
+                    className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+                  >
+                    {reorderingId === q.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <ArrowUp className="h-4 w-4" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => onReorder(q.id, 'down')}
+                    disabled={reorderingId === q.id}
+                    aria-label={`Move question ${i + 1} down`}
+                    className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+                  >
+                    {reorderingId === q.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4" />
+                    )}
+                  </button>
                   <button
                     onClick={() => onEdit(q)}
                     aria-label={`Edit question ${i + 1}`}

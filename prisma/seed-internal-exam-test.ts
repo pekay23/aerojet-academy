@@ -1,3 +1,4 @@
+import { Decimal } from '@prisma/client/runtime/client'
 import { Prisma, ApplicationStage, QuestionDifficulty, TestSessionStatus } from '@prisma/client'
 import { prismaUnfiltered as prisma } from '../lib/prisma/client'
 import bcrypt from 'bcryptjs'
@@ -985,9 +986,9 @@ async function main() {
         enrollmentId: enrollment.id,
         assessmentType: 'INTERNAL_CA',
         assessmentName: `Assessment ${s.id}`,
-        score: new Prisma.Decimal(score),
-        maxScore: new Prisma.Decimal(100),
-        percentage: new Prisma.Decimal(score),
+        score: new Decimal(score),
+        maxScore: new Decimal(100),
+        percentage: new Decimal(score),
         grade: score >= 75 ? 'PASS' : 'FAIL',
         assessmentDate: daysFromNow(-10),
         gradedBy: instructor.id,

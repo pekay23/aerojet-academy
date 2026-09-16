@@ -64,6 +64,7 @@ Operational runbooks — CI/CD, encoding hygiene, branch strategy, deployment.
 
 Historical audit reports. Newest first; older reports preserved for context.
 
+- [2026-09-11 · Exam notification & audit-trail audit](./audits/2026-09-11-exam-notification-logging-audit.md) — audit logging and student notifications for exam-event lifecycle transitions, parallel dispatch, and Windows test-pipeline fixes
 - [2026-09-08 · Encoding mojibake fixes](./audits/2026-09-08-encoding-mojibake-fixes.md) — comprehensive encoding remediation across 20+ files, prevention measures added
 - [2026-09-05 · TypeScript and ESLint verification](./audits/2026-09-05-typecheck-eslint-verification.md) — type-check clean, ESLint runner fixed, warning inventory recorded
 - [2026-09-04 · Full portal audit](./audits/2026-09-04-full-portal-audit.md) — cross-portal role enforcement and data access audit

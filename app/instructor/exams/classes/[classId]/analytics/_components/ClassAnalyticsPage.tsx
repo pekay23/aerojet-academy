@@ -291,7 +291,7 @@ export default function ClassAnalyticsPage({
             </div>
 
             {/* Virtualized Body */}
-            <div ref={parentRef} className="h-[400px] overflow-auto">
+            <div ref={parentRef} className="h-100 overflow-auto">
               <div
                 style={{
                   height: `${rowVirtualizer.getTotalSize()}px`,

@@ -1,19 +1,19 @@
 # Portal Audit & Implementation Tracker
 
-**Last Updated**: 2026-09-07
-**Status**: All 5 portals audited. All 213 portal-specific findings implemented. Cross-portal schema migration complete (2026-09-04). TypeScript: 0 errors (02717b1e). ESLint: 0 errors, 17 warnings in 2 files (8e43423c bulk cleanup).
+**Last Updated**: 2026-09-11
+**Status**: All 5 portals audited. All 213 portal-specific findings implemented. Cross-portal schema migration complete (2026-09-04). Exam lifecycle, reconciliation, notification, and question-bank follow-up audits implemented. TypeScript: 0 errors. ESLint remains unavailable locally because the installed ESLint v10 configuration is incompatible with the legacy project configuration.
 
 ---
 
 ## Summary
 
-| Portal | Total Findings | Fixed | Partial | Pending | Implementation Status | Verification |
-|--------|---------------|-------|---------|---------|----------------------|--------------|
-| Staff | 68 (3C/13H/24M/18L/7S) | 68 | 0 | 0 | ✅ Complete | ⚠️ Verified with findings |
-| Student | 27 (5C/7H/6M/5L/4S) | 27 | 0 | 0 | ✅ Complete | ⚠️ Verified with findings |
-| Instructor | 40 (4C/8H/12M/10L/6S) | 40 | 0 | 0 | ✅ Complete | ⚠️ Verified with findings |
-| Examiner | 29 (3C/7H/6M/5L/8S) | 29 | 0 | 0 | ✅ Complete | ⚠️ Verified with findings |
-| Applicant | 49 (5C/12H/18M/8L/6S) | 49 | 0 | 0 | ✅ Complete | ⚠️ Verified with findings |
+| Portal     | Total Findings         | Fixed | Partial | Pending | Implementation Status | Verification              |
+| ---------- | ---------------------- | ----- | ------- | ------- | --------------------- | ------------------------- |
+| Staff      | 68 (3C/13H/24M/18L/7S) | 68    | 0       | 0       | ✅ Complete           | ⚠️ Verified with findings |
+| Student    | 27 (5C/7H/6M/5L/4S)    | 27    | 0       | 0       | ✅ Complete           | ⚠️ Verified with findings |
+| Instructor | 40 (4C/8H/12M/10L/6S)  | 40    | 0       | 0       | ✅ Complete           | ⚠️ Verified with findings |
+| Examiner   | 29 (3C/7H/6M/5L/8S)    | 29    | 0       | 0       | ✅ Complete           | ⚠️ Verified with findings |
+| Applicant  | 49 (5C/12H/18M/8L/6S)  | 49    | 0       | 0       | ✅ Complete           | ⚠️ Verified with findings |
 
 **Total**: 213 findings across 5 portals — all implemented.
 
@@ -22,10 +22,12 @@
 ## Portal Status Details
 
 ### Staff Portal
+
 **Implementation Status**: ✅ Complete
 **Files Modified**: 84+
 
 #### Completed (68 of 68)
+
 - **Critical (3/3)**: All 3 Critical findings implemented
   - C-1: OJT API routes created (`app/api/staff/ojt/`, `entries/`, `mentors/`)
   - C-2: OJT logbook review workflow built (`app/staff/ojt/`, `ReviewSignoffPanel`, `MentorAssignments`)
@@ -49,17 +51,20 @@
 - **Suggestions (7/7)**: All 7 Suggestions implemented
 
 #### Deferred
-| Item | Rationale |
-|------|-----------|
+
+| Item   | Rationale                |
+| ------ | ------------------------ |
 | (none) | All findings implemented |
 
 ---
 
 ### Student Portal
+
 **Implementation Status**: ✅ Complete
 **Files Modified**: 60+
 
 #### Completed (27 of 27)
+
 - **Critical (5/5)**: All 5 Critical findings implemented
   - C-1: 16 API routes migrated to `prismaUnfiltered`
   - C-2: Documents API route created
@@ -93,17 +98,20 @@
   - S-4: Document thumbnails/previews in `documents/page.tsx`
 
 #### Deferred
-| Item | Rationale |
-|------|-----------|
+
+| Item   | Rationale                |
+| ------ | ------------------------ |
 | (none) | All findings implemented |
 
 ---
 
 ### Instructor Portal
+
 **Implementation Status**: ✅ Complete
 **Files Modified**: 16+
 
 #### Completed (40 of 40)
+
 - **Critical (4/4)**: All 4 Critical findings implemented
   - C-1: `lib/actions/instructor.ts` migrated to `prismaUnfiltered`
   - C-2: `lib/instructor/profile.ts` migrated + `server-only`
@@ -148,17 +156,20 @@
   - S-6: `ACADEMIC_RULES.EASA_PASS_MARK` used throughout
 
 #### Deferred
-| Item | Rationale |
-|------|-----------|
+
+| Item   | Rationale                |
+| ------ | ------------------------ |
 | (none) | All findings implemented |
 
 ---
 
 ### Examiner Portal
+
 **Implementation Status**: ✅ Complete
 **Files Modified**: 6+
 
 #### Completed (29 of 29)
+
 - **Critical (3/3)**: All 3 Critical findings implemented
   - C-1: 4 API routes created (`sittings`, `results`, `availability`, `compliance`)
   - C-2: Dashboard button fixed
@@ -194,17 +205,20 @@
   - S-8: Page transitions (`animate-in` classes)
 
 #### Deferred
-| Item | Rationale |
-|------|-----------|
+
+| Item   | Rationale                |
+| ------ | ------------------------ |
 | (none) | All findings implemented |
 
 ---
 
 ### Applicant Portal
+
 **Implementation Status**: ✅ Complete
 **Files Modified**: 42+
 
 #### Completed (49 of 49)
+
 - **Critical (5/5)**: All 5 Critical findings implemented
   - C-1: `ApplicantError` renamed
   - C-2: `ApplicantLoading` renamed
@@ -260,8 +274,9 @@
   - S-6: `docs/architecture/applicant-portal.md` route map
 
 #### Deferred
-| Item | Rationale |
-|------|-----------|
+
+| Item   | Rationale                |
+| ------ | ------------------------ |
 | (none) | All findings implemented |
 
 ---
@@ -269,18 +284,23 @@
 ## Central Remaining Gaps
 
 ### Pending Critical (0)
+
 All critical findings implemented across all portals.
 
 ### Pending High (0)
+
 All high findings implemented across all portals.
 
 ### Pending Medium (0)
+
 All medium findings implemented across all portals.
 
 ### Pending Low (0)
+
 All low findings implemented across all portals.
 
 ### Pending Suggestions (0)
+
 All suggestions implemented across all portals.
 
 ---
@@ -291,63 +311,66 @@ Four adversarial reviewers verified all 213 findings across 5 portals. **4 criti
 
 ### Critical Bugs Found and Fixed
 
-| # | Portal | File | Bug | Fix Applied |
-|---|--------|------|-----|-------------|
-| 1 | Instructor | `app/instructor/grading/_components/GradingQueueView.tsx` | Missing `Input` and `Badge` imports — build failure | Added missing imports |
-| 2 | Instructor | `app/instructor/metrics/page.tsx` | Duplicate `ACADEMIC_RULES` import — ESLint error | Removed duplicate import |
-| 3 | Examiner | `app/examiner/results/page.tsx` | `History` icon used but not imported — runtime crash | Added `History` to lucide-react imports |
-| 4 | Applicant | `app/applicant/application/aptitude-test/_components/QuestionCard.tsx` | Undefined variable `i` in `String.fromCharCode(65 + i)` — runtime crash | Added index parameter to map callback |
-| 5 | Applicant | `app/applicant/notifications/page.tsx` | Default import of named-only `PageTransition` — runtime crash | Changed to named import |
-| 6 | Applicant | `app/applicant/dashboard/page.tsx` | Default import of named-only `PageTransition` — runtime crash | Changed to named import |
-| 7 | Examiner | `app/examiner/_components/ExaminerSidebar.tsx` | `window.location.origin` still present — false claim of fix | Replaced with `/login` direct path |
+| #   | Portal     | File                                                                   | Bug                                                                     | Fix Applied                             |
+| --- | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------- |
+| 1   | Instructor | `app/instructor/grading/_components/GradingQueueView.tsx`              | Missing `Input` and `Badge` imports — build failure                     | Added missing imports                   |
+| 2   | Instructor | `app/instructor/metrics/page.tsx`                                      | Duplicate `ACADEMIC_RULES` import — ESLint error                        | Removed duplicate import                |
+| 3   | Examiner   | `app/examiner/results/page.tsx`                                        | `History` icon used but not imported — runtime crash                    | Added `History` to lucide-react imports |
+| 4   | Applicant  | `app/applicant/application/aptitude-test/_components/QuestionCard.tsx` | Undefined variable `i` in `String.fromCharCode(65 + i)` — runtime crash | Added index parameter to map callback   |
+| 5   | Applicant  | `app/applicant/notifications/page.tsx`                                 | Default import of named-only `PageTransition` — runtime crash           | Changed to named import                 |
+| 6   | Applicant  | `app/applicant/dashboard/page.tsx`                                     | Default import of named-only `PageTransition` — runtime crash           | Changed to named import                 |
+| 7   | Examiner   | `app/examiner/_components/ExaminerSidebar.tsx`                         | `window.location.origin` still present — false claim of fix             | Replaced with `/login` direct path      |
 
 **Status**: All 10 verification findings from the 2026-08-28 LLM Council pass are now resolved. 7 items were already implemented in the working tree at remediation time (stale tracker entries: #3, #6, #8, plus verified-fixed #1, #2) — the tracker's "Confirmed Pending" posture predated the final remediation pass. 3 were completed by remediation (#4, #5, #10) and 1 was closed as a false positive (#9). The type-check gate (pre-push) is the sole remaining item and is deferred to a separate sprint (see Test Coverage Status).
 
-| # | Portal | Finding | Severity | Resolution |
-| ---|--------|---------|----------|-------------|
-| 1 | Student | H-6 | — | ✅ **Verified fixed**: `logActionError` from `lib/student/error-handler.ts` used in `app/student/actions.ts:26` |
-| 2 | Instructor | M-4 | — | ✅ **Verified fixed**: server-side pagination via `getGradingQueue(page, limit)` with clamped `limit` |
-| 3 | Instructor | M-12 | Medium | ✅ **Already implemented**: `getInstructorProfileByUserId` wrapped in `unstable_cache` (`lib/instructor/profile.ts`). Note: wrapper is inline (not module-scope) — minor idiomatic polish only. |
-| 4 | Instructor | L-4 | Low | ✅ **Fixed**: `app/instructor/grading/error.tsx:7` now renders a generic message in production; `{error.message}` gated behind `NODE_ENV === 'development'` |
-| 5 | Instructor | H-3 | Medium | ✅ **Fixed**: created `app/instructor/attendance/[id]/error.tsx` error boundary |
-| 6 | Staff | H-9 | High | ✅ **Already implemented**: `app/staff/actions.ts` is now an 11-line barrel re-export; 9 domain files in `app/staff/actions/` (users, enrollments, bookings, results, finance, certificates, search, messages, applicants) |
-| 7 | Staff | M-4 | Medium | ✅ **Fixed**: all 8 OJT routes under `app/api/staff/ojt/**` now import `rateLimitByUser`. The two GET handlers in `app/api/staff/ojt/route.ts` and `app/api/staff/ojt/[logbookId]/route.ts` were the gaps; added (100 req/5min reads, 30 req/1min mutations). Removed a redundant duplicate `requireStaff()` call in the create handler. |
-| 8 | Staff | H-3 | Medium | ✅ **Already implemented**: `any` types replaced across all three files — `audit-logs/page.tsx` (forEach callbacks now narrow inferred types), `CourseInfoEditDialog.tsx` (`CourseInfoEditDialogProps` interface), `ExamComponentsSection.tsx` (`catch (err: unknown)` + `instanceof Error` guards) |
-| 9 | Examiner | M-2 | Medium | ⏸️ **Closed — false positive**: `app/examiner/results/actions.ts:126` `for...of` loop is correct — each `ExamResult` row gets unique `score`/`grade`/`percentage`/`passed`; Prisma `updateMany` can only apply *uniform* values and cannot batch per-row-different data. The loop already runs inside `$transaction`. |
-| 10 | Applicant | C-5 | Low | ✅ **Fixed**: created `app/applicant/exam-bookings/[id]/not-found.tsx` |
+| #   | Portal     | Finding | Severity | Resolution                                                                                                                                                                                                                                                                                                                               |
+| --- | ---------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Student    | H-6     | —        | ✅ **Verified fixed**: `logActionError` from `lib/student/error-handler.ts` used in `app/student/actions.ts:26`                                                                                                                                                                                                                          |
+| 2   | Instructor | M-4     | —        | ✅ **Verified fixed**: server-side pagination via `getGradingQueue(page, limit)` with clamped `limit`                                                                                                                                                                                                                                    |
+| 3   | Instructor | M-12    | Medium   | ✅ **Already implemented**: `getInstructorProfileByUserId` wrapped in `unstable_cache` (`lib/instructor/profile.ts`). Note: wrapper is inline (not module-scope) — minor idiomatic polish only.                                                                                                                                          |
+| 4   | Instructor | L-4     | Low      | ✅ **Fixed**: `app/instructor/grading/error.tsx:7` now renders a generic message in production; `{error.message}` gated behind `NODE_ENV === 'development'`                                                                                                                                                                              |
+| 5   | Instructor | H-3     | Medium   | ✅ **Fixed**: created `app/instructor/attendance/[id]/error.tsx` error boundary                                                                                                                                                                                                                                                          |
+| 6   | Staff      | H-9     | High     | ✅ **Already implemented**: `app/staff/actions.ts` is now an 11-line barrel re-export; 9 domain files in `app/staff/actions/` (users, enrollments, bookings, results, finance, certificates, search, messages, applicants)                                                                                                               |
+| 7   | Staff      | M-4     | Medium   | ✅ **Fixed**: all 8 OJT routes under `app/api/staff/ojt/**` now import `rateLimitByUser`. The two GET handlers in `app/api/staff/ojt/route.ts` and `app/api/staff/ojt/[logbookId]/route.ts` were the gaps; added (100 req/5min reads, 30 req/1min mutations). Removed a redundant duplicate `requireStaff()` call in the create handler. |
+| 8   | Staff      | H-3     | Medium   | ✅ **Already implemented**: `any` types replaced across all three files — `audit-logs/page.tsx` (forEach callbacks now narrow inferred types), `CourseInfoEditDialog.tsx` (`CourseInfoEditDialogProps` interface), `ExamComponentsSection.tsx` (`catch (err: unknown)` + `instanceof Error` guards)                                      |
+| 9   | Examiner   | M-2     | Medium   | ⏸️ **Closed — false positive**: `app/examiner/results/actions.ts:126` `for...of` loop is correct — each `ExamResult` row gets unique `score`/`grade`/`percentage`/`passed`; Prisma `updateMany` can only apply _uniform_ values and cannot batch per-row-different data. The loop already runs inside `$transaction`.                    |
+| 10  | Applicant  | C-5     | Low      | ✅ **Fixed**: created `app/applicant/exam-bookings/[id]/not-found.tsx`                                                                                                                                                                                                                                                                   |
 
 ## Cross-Portal Audit Findings (2026-08-29)
 
 A second audit pass was conducted across all 5 portals to identify cross-portal patterns and regressions. **14 additional findings were identified and resolved.**
 
 ### Critical (5)
-| # | Portal | Finding | Fix Applied |
-|---|--------|---------|-------------|
-| 1 | Examiner | Cache keys missing `examinerId` in results/compliance pages | Added `examinerId` to `unstable_cache` keys |
-| 2 | Instructor | Materials page ownership bypass | Added `instructorId` to class lookup |
-| 3 | Student | Internal exam session ownership check | Added server-side `examSession.studentId === session.user.id` check |
-| 4 | Student | Documents raw URL exposure | Routed through `proxyImageUrl(d.fileUrl, 'students')` |
-| 5 | Applicant | Full-table course scan | Replaced `findMany({})` + JS filter with `findUnique({ where: { id } })` |
+
+| #   | Portal     | Finding                                                     | Fix Applied                                                              |
+| --- | ---------- | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 1   | Examiner   | Cache keys missing `examinerId` in results/compliance pages | Added `examinerId` to `unstable_cache` keys                              |
+| 2   | Instructor | Materials page ownership bypass                             | Added `instructorId` to class lookup                                     |
+| 3   | Student    | Internal exam session ownership check                       | Added server-side `examSession.studentId === session.user.id` check      |
+| 4   | Student    | Documents raw URL exposure                                  | Routed through `proxyImageUrl(d.fileUrl, 'students')`                    |
+| 5   | Applicant  | Full-table course scan                                      | Replaced `findMany({})` + JS filter with `findUnique({ where: { id } })` |
 
 ### High (9)
-| # | Portal | Finding | Fix Applied |
-|---|--------|---------|-------------|
-| 6 | Student | Unbounded exam queries | Added `take: 200` to 3 queries |
-| 7 | Student | Dead code in `bookBundleExamsAction` | Removed unreachable block after early return |
-| 8 | Applicant | Unvalidated query param | Added Zod enum validation for `type` |
-| 9 | Applicant | `any` casts in API routes | Replaced with `Record<string, unknown>` + proper types |
-| 10 | Instructor | Class lookup logic | Replaced `findFirst` by name with `findFirst` by `id` + `instructorId` |
-| 11 | Instructor | Grades pagination | Added `take: 200` to grades query |
-| 12 | Examiner | Score validation bypass | Hardened input validation in results actions |
-| 13 | All | Audit logging for sensitive reads | Added `createAuditLog` to 4 pages |
-| 14 | All | `/api/images/proxy` SSRF risk | Added URL allowlist for privileged roles |
+
+| #   | Portal     | Finding                              | Fix Applied                                                            |
+| --- | ---------- | ------------------------------------ | ---------------------------------------------------------------------- |
+| 6   | Student    | Unbounded exam queries               | Added `take: 200` to 3 queries                                         |
+| 7   | Student    | Dead code in `bookBundleExamsAction` | Removed unreachable block after early return                           |
+| 8   | Applicant  | Unvalidated query param              | Added Zod enum validation for `type`                                   |
+| 9   | Applicant  | `any` casts in API routes            | Replaced with `Record<string, unknown>` + proper types                 |
+| 10  | Instructor | Class lookup logic                   | Replaced `findFirst` by name with `findFirst` by `id` + `instructorId` |
+| 11  | Instructor | Grades pagination                    | Added `take: 200` to grades query                                      |
+| 12  | Examiner   | Score validation bypass              | Hardened input validation in results actions                           |
+| 13  | All        | Audit logging for sensitive reads    | Added `createAuditLog` to 4 pages                                      |
+| 14  | All        | `/api/images/proxy` SSRF risk        | Added URL allowlist for privileged roles                               |
 
 ### Medium (3)
-| # | Portal | Finding | Fix Applied |
-|---|--------|---------|-------------|
-| 15 | Staff | Barrel file/directory shadowing | Replaced `actions.ts` with `actions/index.ts` barrel |
-| 16 | Staff | OJT API rate limiting | Added `rateLimitByUser` to 8 OJT mutation endpoints |
-| 17 | All | Type safety hardening | `tx: any` → `Prisma.TransactionClient`, discriminated `resultOverride`, input validation |
+
+| #   | Portal | Finding                         | Fix Applied                                                                              |
+| --- | ------ | ------------------------------- | ---------------------------------------------------------------------------------------- |
+| 15  | Staff  | Barrel file/directory shadowing | Replaced `actions.ts` with `actions/index.ts` barrel                                     |
+| 16  | Staff  | OJT API rate limiting           | Added `rateLimitByUser` to 8 OJT mutation endpoints                                      |
+| 17  | All    | Type safety hardening           | `tx: any` → `Prisma.TransactionClient`, discriminated `resultOverride`, input validation |
 
 ### Deferred Items (in progress)
 
@@ -359,15 +382,15 @@ A second audit pass was conducted across all 5 portals to identify cross-portal 
 
 ### Cross-Portal Schema Migration Complete (2026-09-04)
 
-| # | Migration | Status | Evidence |
-|---|-----------|--------|----------|
-| 1 | `FullTimeEnrollment.academicYearId` FK | ✅ Complete | `prisma/schema.prisma`; Neon + Supabase `db push` succeeded |
-| 2 | `OJTLogbook.licenceCategoryId` FK | ✅ Complete | `prisma/schema.prisma`; legacy `licenceCategory String` retained |
-| 3 | `ExamResult.sittingId` FK | ✅ Complete | `prisma/schema.prisma`; 32 existing results have no sitting assignments |
-| 4 | `Certificate.session` relation | ✅ Complete | `prisma/schema.prisma`; uses existing `sessionId` column |
-| 5 | `InternalExamRegistration.licenceCategoryId` FK | ✅ Complete | Optional FK for future use |
-| 6 | Reverse relations + indexes | ✅ Complete | `AcademicYear.fullTimeEnrollments`, `LicenseCategory.ojtLogbooks`/`registrations`, `ExamSitting.examResults`, `InternalExamSession.certificates` |
-| 7 | Application code updated | ✅ Complete | `app/api/staff/ojt/route.ts` resolves `LicenseCategory` by code; `app/api/staff/students/[id]/route.ts` includes `academicYear`; student/applicant pages updated |
+| #   | Migration                                       | Status      | Evidence                                                                                                                                                         |
+| --- | ----------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `FullTimeEnrollment.academicYearId` FK          | ✅ Complete | `prisma/schema.prisma`; Neon + Supabase `db push` succeeded                                                                                                      |
+| 2   | `OJTLogbook.licenceCategoryId` FK               | ✅ Complete | `prisma/schema.prisma`; legacy `licenceCategory String` retained                                                                                                 |
+| 3   | `ExamResult.sittingId` FK                       | ✅ Complete | `prisma/schema.prisma`; 32 existing results have no sitting assignments                                                                                          |
+| 4   | `Certificate.session` relation                  | ✅ Complete | `prisma/schema.prisma`; uses existing `sessionId` column                                                                                                         |
+| 5   | `InternalExamRegistration.licenceCategoryId` FK | ✅ Complete | Optional FK for future use                                                                                                                                       |
+| 6   | Reverse relations + indexes                     | ✅ Complete | `AcademicYear.fullTimeEnrollments`, `LicenseCategory.ojtLogbooks`/`registrations`, `ExamSitting.examResults`, `InternalExamSession.certificates`                 |
+| 7   | Application code updated                        | ✅ Complete | `app/api/staff/ojt/route.ts` resolves `LicenseCategory` by code; `app/api/staff/students/[id]/route.ts` includes `academicYear`; student/applicant pages updated |
 
 ### Audit Documentation Issues
 
@@ -379,13 +402,13 @@ A second audit pass was conducted across all 5 portals to identify cross-portal 
 
 ## Test Coverage Status
 
-| Portal | Fixed Findings | Test Files | Coverage |
-|--------|---------------|------------|----------|
-| Staff | 68 | 12+ | Partial |
-| Student | 27 | 6+ | Partial |
-| Instructor | 40 | 4+ | Partial |
-| Examiner | 29 | 2+ | Partial |
-| Applicant | 49 | 10+ | Partial |
+| Portal     | Fixed Findings | Test Files | Coverage |
+| ---------- | -------------- | ---------- | -------- |
+| Staff      | 68             | 12+        | Partial  |
+| Student    | 27             | 6+         | Partial  |
+| Instructor | 40             | 4+         | Partial  |
+| Examiner   | 29             | 2+         | Partial  |
+| Applicant  | 49             | 10+        | Partial  |
 
 **Note**: Pre-existing test failures in `tests/unit/lib/utils-date.test.ts` were resolved by adding missing exports to `lib/utils/date.ts`. Remaining test gaps are in legacy integration test scaffolding, not in audit-related implementations.
 
@@ -424,6 +447,7 @@ Two skills encode the standards for this project:
 5. ~~Commit changes with comprehensive commit message~~ — Done (8e43423c, 02717b1e)
 
 ### Outstanding (minor)
+
 - 17 ESLint warnings remain in 2 files: `app/staff/exams/events/create/page.tsx` (11 `any`) and `app/staff/exams/events/[id]/edit/_components/EditExamEventForm.tsx` (8 `any`). Non-blocking.
 - 1 unused import warning: `lib/withdrawal/actions.ts:6` (`Prisma`).
 

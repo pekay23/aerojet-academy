@@ -11,13 +11,34 @@ interface ReturnLinkProps {
   className?: string
 }
 
+const RETURN_NAV_PARAMS = ['returnUrl', 'returnType']
+
+function stripReturnNavParams(url: string): { base: string; searchParams: URLSearchParams } {
+  const separatorIdx = url.indexOf('?')
+  const base = separatorIdx === -1 ? url : url.slice(0, separatorIdx)
+  const searchParams = new URLSearchParams(separatorIdx === -1 ? '' : url.slice(separatorIdx + 1))
+  for (const key of RETURN_NAV_PARAMS) {
+    searchParams.delete(key)
+  }
+  return { base, searchParams }
+}
+
+function buildUrl(base: string, searchParams: URLSearchParams): string {
+  const qs = searchParams.toString()
+  return qs ? `${base}?${qs}` : base
+}
+
 export function appendReturnNavigation(
   href: string,
   returnUrl: string,
   returnType = 'notification'
 ) {
-  const separator = href.includes('?') ? '&' : '?'
-  return `${href}${separator}returnUrl=${encodeURIComponent(returnUrl)}${returnType ? `&returnType=${encodeURIComponent(returnType)}` : ''}`
+  const { base, searchParams } = stripReturnNavParams(href)
+  searchParams.set('returnUrl', returnUrl)
+  if (returnType) {
+    searchParams.set('returnType', returnType)
+  }
+  return buildUrl(base, searchParams)
 }
 
 export function ReturnLink({
@@ -27,10 +48,12 @@ export function ReturnLink({
   className,
 }: ReturnLinkProps) {
   const searchParams = useSearchParams()
-  const returnUrl = searchParams.get('returnUrl') || fallbackHref
-  const href = returnType
-    ? `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}returnType=${encodeURIComponent(returnType)}`
-    : returnUrl
+  const rawReturnUrl = searchParams.get('returnUrl') || fallbackHref
+  const { base, searchParams: cleanedParams } = stripReturnNavParams(rawReturnUrl)
+  if (returnType) {
+    cleanedParams.set('returnType', returnType)
+  }
+  const href = buildUrl(base, cleanedParams)
 
   return (
     <Link

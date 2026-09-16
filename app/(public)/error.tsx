@@ -15,14 +15,14 @@ export default function PublicError({ _error, reset }: { _error: Error; reset: (
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
           <span className="text-2xl">⚠️</span>
         </div>
-        <h2 className="mb-3 text-2xl font-black tracking-tight text-aerojet-blue uppercase">
+        <h2 className="text-aerojet-blue mb-3 text-2xl font-black tracking-tight uppercase">
           Something went wrong
         </h2>
         <p className="mb-8 text-sm text-slate-500">We're sorry, an unexpected error occurred.</p>
         <div className="flex flex-col justify-center gap-3 sm:flex-row">
           <button
             onClick={reset}
-            className="rounded-xl bg-aerojet-sky px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-colors hover:bg-aerojet-blue"
+            className="bg-aerojet-sky hover:bg-aerojet-blue rounded-xl px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-colors"
           >
             Try Again
           </button>

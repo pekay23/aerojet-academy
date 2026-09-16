@@ -147,3 +147,28 @@ describe('exam filter helpers', () => {
     ).toBe(false)
   })
 })
+
+describe('official examCategory filter', () => {
+  const officialFilter = (r: { examCategory: string | null | undefined }) =>
+    r.examCategory === 'OFFICIAL_EASA'
+
+  it('includes OFFICIAL_EASA records in official filter', () => {
+    expect(officialFilter({ examCategory: 'OFFICIAL_EASA' })).toBe(true)
+  })
+
+  it('excludes null examCategory from official filter', () => {
+    expect(officialFilter({ examCategory: null })).toBe(false)
+  })
+
+  it('excludes undefined examCategory from official filter', () => {
+    expect(officialFilter({ examCategory: undefined })).toBe(false)
+  })
+
+  it('excludes INTERNAL records from official filter', () => {
+    expect(officialFilter({ examCategory: 'INTERNAL' })).toBe(false)
+  })
+
+  it('excludes empty string examCategory from official filter', () => {
+    expect(officialFilter({ examCategory: '' })).toBe(false)
+  })
+})
