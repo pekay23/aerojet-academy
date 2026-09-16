@@ -2,7 +2,7 @@
 
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { useEditor, EditorContent, Node, mergeAttributes } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
+import { starterKit } from '@/lib/tiptap/starter-kit'
 import LinkExtension from '@tiptap/extension-link'
 import { Color } from '@tiptap/extension-color'
 import { TextStyle } from '@tiptap/extension-text-style'
@@ -166,9 +166,7 @@ export default function NewsMarkdownEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        link: false,
-      }),
+      starterKit,
       LinkExtension.configure({
         openOnClick: false,
       }),
