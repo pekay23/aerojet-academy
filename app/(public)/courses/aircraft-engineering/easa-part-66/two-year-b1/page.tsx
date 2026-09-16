@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Hero from '../../../../_components/Hero'
 import SectionReveal from '../../../../_components/SectionReveal'
-import { CheckCircle2, Clock, BookOpen, Zap } from 'lucide-react'
+import { BookOpen, Zap } from 'lucide-react'
 import ModuleGrid from '@/app/(public)/_components/ModuleGrid'
 
 export const metadata: Metadata = {

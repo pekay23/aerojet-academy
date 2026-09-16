@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { Check, ShieldCheck, TrendingUp, BookOpen, Clock, Users, GraduationCap } from 'lucide-react'
+import { Check, ShieldCheck, TrendingUp } from 'lucide-react'
 import Hero from '@/app/(public)/_components/Hero'
 import SectionReveal from '@/app/(public)/_components/SectionReveal'
 import ProgramCard from '@/app/(public)/_components/ProgramCard'
