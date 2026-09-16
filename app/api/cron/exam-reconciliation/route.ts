@@ -4,9 +4,11 @@ import { getSystemSetting } from '@/lib/settings'
 import { sendEmail } from '@/lib/email/sender'
 import { env } from '@/lib/env'
 import { markExamAttendance } from '@/lib/exams/attendance'
+import { getExamNotificationDedupeKey } from '@/lib/exams/fulfillment'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { TIME_WINDOWS } from '@/lib/constants/business-rules'
 
-// Default grace period in hours if system setting is missing
-const DEFAULT_GRACE_HOURS = 24
+const DEFAULT_GRACE_HOURS = TIME_WINDOWS.EXAM_CUTOFF_HOURS
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
@@ -16,9 +18,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const graceHours = Number(
+    const configuredGraceHours = Number(
       await getSystemSetting('exam_reconciliation_grace_hours', String(DEFAULT_GRACE_HOURS))
     )
+    const graceHours =
+      Number.isFinite(configuredGraceHours) && configuredGraceHours >= 0
+        ? configuredGraceHours
+        : DEFAULT_GRACE_HOURS
     const graceMs = graceHours * 60 * 60 * 1000
     const cutoff = new Date(Date.now() - graceMs)
 
@@ -42,10 +48,15 @@ export async function GET(req: NextRequest) {
       }
     >()
 
+    // Run-scoped notification deduplication. Processing remains entity-scoped so
+    // a booking is still reconciled when an assignment for the same student and
+    // module was already handled.
+    const notifiedStudentModules = new Set<string>()
+
     // 1. Reconcile ExamSittingAssignment records past their sitting time with no attendance
     const staleAssignments = await prisma.examSittingAssignment.findMany({
       where: {
-        status: { notIn: ['CANCELLED', 'ATTENDED', 'EXCUSED'] },
+        status: { notIn: ['CANCELLED', 'ATTENDED', 'EXCUSED', 'ABSENT', 'ROLLED_FORWARD'] },
         sitting: {
           startTime: { lt: cutoff },
         },
@@ -64,53 +75,101 @@ export async function GET(req: NextRequest) {
       },
     })
 
+    const assignmentBookingIds = staleAssignments.map((assignment) => assignment.bookingId)
+    const assignmentSittingIds = staleAssignments.map((assignment) => assignment.sittingId)
+    const assignmentUserIds = staleAssignments.map((assignment) => assignment.booking.userId)
+    const [assignmentAttendances, assignmentResults] = await Promise.all([
+      assignmentBookingIds.length > 0 || assignmentSittingIds.length > 0
+        ? prisma.examAttendance.findMany({
+            where: {
+              OR: [
+                ...(assignmentBookingIds.length > 0
+                  ? [{ bookingId: { in: assignmentBookingIds } }]
+                  : []),
+                ...(assignmentSittingIds.length > 0 && assignmentUserIds.length > 0
+                  ? [{ sittingId: { in: assignmentSittingIds }, userId: { in: assignmentUserIds } }]
+                  : []),
+              ],
+            },
+            select: { bookingId: true, sittingId: true, userId: true },
+          })
+        : Promise.resolve([]),
+      assignmentUserIds.length > 0
+        ? prisma.examResult.findMany({
+            where: {
+              OR: staleAssignments.map((assignment) => ({
+                userId: assignment.booking.userId,
+                moduleCode: assignment.booking.moduleCode,
+                examCategory: assignment.booking.examCategory,
+                deletedAt: null,
+              })),
+            },
+            select: { userId: true, moduleCode: true, examCategory: true },
+          })
+        : Promise.resolve([]),
+    ])
+    const assignmentAttendanceKeys = new Set(
+      assignmentAttendances.map((attendance) =>
+        attendance.bookingId
+          ? `booking:${attendance.bookingId}`
+          : `sitting:${attendance.sittingId}:${attendance.userId}`
+      )
+    )
+    const assignmentResultKeys = new Set(
+      assignmentResults.map((result) =>
+        JSON.stringify([result.userId, result.moduleCode, result.examCategory])
+      )
+    )
+
     for (const assignment of staleAssignments) {
+      const studentKey = getExamNotificationDedupeKey(
+        assignment.booking.userId,
+        assignment.booking.moduleCode
+      )
+      const alreadyNotified = notifiedStudentModules.has(studentKey)
+
       try {
-        // Skip if attendance already exists
-        const existingAttendance = await prisma.examAttendance.findFirst({
-          where: {
-            OR: [{ membershipId: assignment.id }, { bookingId: assignment.bookingId }],
-          },
-        })
-        if (existingAttendance) continue
+        const attendanceKey = `booking:${assignment.bookingId}`
+        const sittingAttendanceKey = `sitting:${assignment.sittingId}:${assignment.booking.userId}`
+        if (
+          assignmentAttendanceKeys.has(attendanceKey) ||
+          assignmentAttendanceKeys.has(sittingAttendanceKey)
+        ) {
+          continue
+        }
 
-        // Skip if result already exists
-        const existingResult = await prisma.examResult.findFirst({
-          where: {
-            userId: assignment.booking.userId,
-            moduleCode: assignment.booking.moduleCode,
-            deletedAt: null,
-          },
-        })
-        if (existingResult) continue
+        const resultKey = JSON.stringify([
+          assignment.booking.userId,
+          assignment.booking.moduleCode,
+          assignment.booking.examCategory,
+        ])
+        if (assignmentResultKeys.has(resultKey)) continue
 
-        // Mark as ABSENT
+        if (assignment.booking.score != null || assignment.booking.percentage != null) {
+          continue
+        }
+
         await markExamAttendance({
           bookingId: assignment.bookingId,
+          sittingId: assignment.sittingId,
           status: 'ABSENT',
           recordedBy: 'cron-exam-reconciliation',
+          notifyStudent: !alreadyNotified,
         })
 
+        if (!alreadyNotified) {
+          notifiedStudentModules.add(studentKey)
+        }
         results.sittingsProcessed++
-
-        // Notify student
-        if (assignment.booking.user?.email) {
-          await createNotificationForUser(assignment.booking.userId, {
-            type: 'EXAM_REMINDER',
-            title: 'Exam Marked as Absent',
-            message: `Your exam for ${assignment.booking.moduleCode} on ${formatDate(assignment.sitting.startTime)} has been marked as absent due to non-attendance.`,
-            link: `/student/exams`,
-          })
+        if (!alreadyNotified) {
           results.notificationsCreated++
         }
 
-        // Notify staff/admin
         await notifyStaffAboutMissedExam(
           assignment.booking,
           assignment.sitting,
           staffNotificationMap
         )
-        results.notificationsCreated++
       } catch (err: unknown) {
         results.errors.push(
           `Assignment ${assignment.id}: ${err instanceof Error ? err.message : String(err)}`
@@ -126,6 +185,7 @@ export async function GET(req: NextRequest) {
         demandStatus: { notIn: ['EXECUTED', 'ROLLED_FORWARD', 'CANCELLED', 'POSTPONED'] },
         result: null,
         score: null,
+        percentage: null,
       },
       include: {
         user: true,
@@ -143,53 +203,41 @@ export async function GET(req: NextRequest) {
     })
 
     for (const booking of staleBookings) {
+      const studentKey = getExamNotificationDedupeKey(booking.userId, booking.moduleCode)
+      const alreadyNotified = notifiedStudentModules.has(studentKey)
+
       try {
-        // Skip if attendance already exists
         const existingAttendance = await prisma.examAttendance.findFirst({
-          where: {
-            OR: [{ membershipId: booking.id }, { bookingId: booking.id }],
-          },
+          where: { bookingId: booking.id },
         })
         if (existingAttendance) continue
 
-        // Skip if result already exists
         const existingResult = await prisma.examResult.findFirst({
           where: {
             userId: booking.userId,
             moduleCode: booking.moduleCode,
+            examCategory: booking.examCategory,
             deletedAt: null,
           },
         })
         if (existingResult) continue
 
-        // Skip OFFICIAL_EASA bookings that still have no result (pending upload)
-        if (booking.examCategory === 'OFFICIAL_EASA' && !booking.result) {
-          continue
-        }
-
-        // Mark as NO_SHOW via markExamAttendance
         await markExamAttendance({
           bookingId: booking.id,
           status: 'ABSENT',
           recordedBy: 'cron-exam-reconciliation',
+          notifyStudent: !alreadyNotified,
         })
 
+        if (!alreadyNotified) {
+          notifiedStudentModules.add(studentKey)
+        }
         results.bookingsProcessed++
-
-        // Notify student
-        if (booking.user?.email) {
-          await createNotificationForUser(booking.userId, {
-            type: 'EXAM_REMINDER',
-            title: 'Exam Marked as Missed',
-            message: `Your exam for ${booking.moduleCode} on ${formatDate(booking.examDate)} has been marked as missed. Please contact the academy to rebook.`,
-            link: `/student/exams`,
-          })
+        if (!alreadyNotified) {
           results.notificationsCreated++
         }
 
-        // Notify staff/admin
         await notifyStaffAboutMissedExam(booking, null, staffNotificationMap)
-        results.notificationsCreated++
       } catch (err: unknown) {
         results.errors.push(
           `Booking ${booking.id}: ${err instanceof Error ? err.message : String(err)}`
@@ -198,7 +246,18 @@ export async function GET(req: NextRequest) {
     }
 
     // Send batched staff notification once after processing all bookings/sittings
-    await flushStaffNotifications(staffNotificationMap)
+    const flushResult = await flushStaffNotifications(staffNotificationMap)
+    results.notificationsCreated += flushResult.notificationsCreated
+    results.emailsSent += flushResult.emailsSent
+
+    await createAuditLog({
+      userId: 'cron-exam-reconciliation',
+      action: AuditAction.SYSTEM_UPDATE,
+      entity: 'ExamReconciliationRun',
+      entityId: `exam-reconciliation-${Date.now()}`,
+      description: 'Automated exam reconciliation completed',
+      changes: { ...results },
+    })
 
     return NextResponse.json({
       success: true,
@@ -285,7 +344,7 @@ async function notifyStaffAboutMissedExam(
   staffNotificationMap.set(staffId, entry)
 }
 
-async function flushStaffNotifications(
+export async function flushStaffNotifications(
   staffNotificationMap: Map<
     string,
     {
@@ -296,8 +355,8 @@ async function flushStaffNotifications(
       dates: string[]
     }
   >
-) {
-  if (staffNotificationMap.size === 0) return
+): Promise<{ notificationsCreated: number; emailsSent: number }> {
+  if (staffNotificationMap.size === 0) return { notificationsCreated: 0, emailsSent: 0 }
 
   // Fetch staff users once
   const staffUsers = await prisma.user.findMany({
@@ -305,25 +364,26 @@ async function flushStaffNotifications(
       role: { in: ['SUPER_ADMIN', 'ADMIN', 'STAFF'] },
     },
     select: { id: true, email: true },
-    take: 10,
   })
 
   const globalEntry = staffNotificationMap.get('staff-global')
-  if (!globalEntry) return
+  if (!globalEntry) return { notificationsCreated: 0, emailsSent: 0 }
 
   const missedCount = globalEntry.names.length
   const summaryMessage = `${missedCount} exam(s) marked as missed:\n${globalEntry.modules.map((m: string, i: number) => `- ${m} on ${globalEntry.dates[i]}`).join('\n')}`
 
-  for (const staff of staffUsers) {
-    await createNotificationForUser(staff.id, {
-      type: 'WARNING',
-      title: 'Exams Missed — Action Required',
-      message: summaryMessage,
-      link: `/staff/dashboard`,
-    })
+  const staffResults = await Promise.all(
+    staffUsers.map(async (staff) => {
+      await createNotificationForUser(staff.id, {
+        type: 'WARNING',
+        title: 'Exams Missed — Action Required',
+        message: summaryMessage,
+        link: `/staff/dashboard`,
+      })
 
-    if (staff.email) {
-      const html = `
+      let emailSent = false
+      if (staff.email) {
+        const html = `
           <p>Dear Admin,</p>
           <p>The following ${missedCount} exam(s) were marked as missed by the automated reconciliation cron:</p>
           <ul>
@@ -339,15 +399,24 @@ async function flushStaffNotifications(
           </ul>
           <p>Please review and take appropriate action (refund or rebook).</p>
         `
-      await sendEmail({
-        to: staff.email,
-        subject: `${missedCount} Exam(s) Missed — Action Required`,
-        html,
-        template: 'exam-missed-staff',
-        userId: staff.id,
-      })
-    }
-  }
+        const emailResult = await sendEmail({
+          to: staff.email,
+          subject: `${missedCount} Exam(s) Missed — Action Required`,
+          html,
+          template: 'exam-missed-staff',
+          userId: staff.id,
+        })
+        emailSent = emailResult.success
+      }
+
+      return { notificationCreated: true, emailSent }
+    })
+  )
+
+  const notificationsCreated = staffResults.filter((r) => r.notificationCreated).length
+  const emailsSent = staffResults.filter((r) => r.emailSent).length
+
+  return { notificationsCreated, emailsSent }
 }
 
 function formatDate(date: Date | string | null | undefined): string {

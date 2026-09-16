@@ -275,6 +275,7 @@ export interface SerializedStudent {
   paymentApprovedAt: string | null
   programmeChoice: string | null
   lastLoginAt: string | null
+  lastSeenAt: string | null
   createdAt: string
   updatedAt: string
   profile: SerializedProfile | null

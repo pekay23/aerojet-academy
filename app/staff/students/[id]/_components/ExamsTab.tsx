@@ -19,6 +19,7 @@ import { updateExamBooking, deleteExamRecord } from '@/app/staff/actions/index'
 import BookExamForStudentDialog from './BookExamForStudentDialog'
 import AddExamRecordDialog from './AddExamRecordDialog'
 import CertificateReleaseControl from './CertificateReleaseControl'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import {
   deriveBookingDisplayResult,
   isUpcomingBooking as isUpcomingBookingFromLib,
@@ -104,6 +105,8 @@ export default function ExamsTab({
   const [quickAddModule, setQuickAddModule] = useState<SerializedExamComponent | null>(null)
   const [sortBy, setSortBy] = useState<'moduleCode' | 'examDate' | 'score' | 'result'>('examDate')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
   // Merge exam bookings and exam results into unified history
   const allExamRecords = useMemo(() => {
@@ -296,10 +299,8 @@ export default function ExamsTab({
       filtered = filtered.filter((r) => isMissedBooking(r))
     } else if (filter === 'completed') {
       filtered = filtered.filter((r) => r.status === 'COMPLETED')
-    } else if (filter === 'internal') {
-      filtered = filtered.filter((r) => r.examCategory === 'INTERNAL')
     } else if (filter === 'official') {
-      filtered = filtered.filter((r) => r.examCategory === 'OFFICIAL_EASA' || !r.examCategory)
+      filtered = filtered.filter((r) => r.examCategory === 'OFFICIAL_EASA')
     }
 
     if (search) {
@@ -342,8 +343,7 @@ export default function ExamsTab({
       missed: allExamRecords.filter((r) => isMissedBooking(r)).length,
       completed: allExamRecords.filter((r) => r.status === 'COMPLETED').length,
       internal: allExamRecords.filter((r) => r.examCategory === 'INTERNAL').length,
-      official: allExamRecords.filter((r) => r.examCategory === 'OFFICIAL_EASA' || !r.examCategory)
-        .length,
+      official: allExamRecords.filter((r) => r.examCategory === 'OFFICIAL_EASA').length,
     }),
     [allExamRecords, isMissedBooking, isUpcomingBooking]
   )
@@ -375,10 +375,16 @@ export default function ExamsTab({
   }
 
   // Handle delete
-  const handleDelete = async (recordId: string) => {
-    if (!confirm('Are you sure you want to delete this exam record?')) return
+  const handleDelete = (recordId: string) => {
+    setPendingDeleteId(recordId)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return
+    setShowDeleteConfirm(false)
     try {
-      const res = await deleteExamRecord(recordId)
+      const res = await deleteExamRecord(pendingDeleteId)
       if ('error' in res && res.error) {
         toast.error(res.error)
       } else {
@@ -387,6 +393,8 @@ export default function ExamsTab({
       }
     } catch {
       toast.error('Failed to delete record')
+    } finally {
+      setPendingDeleteId(null)
     }
   }
 
@@ -1076,6 +1084,18 @@ export default function ExamsTab({
             ))}
           </div>
         </div>
+      )}
+
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          open={showDeleteConfirm}
+          onOpenChange={setShowDeleteConfirm}
+          title="Delete exam record"
+          description="Are you sure you want to delete this exam record? This action cannot be undone."
+          confirmLabel="Delete"
+          variant="destructive"
+          onConfirm={confirmDelete}
+        />
       )}
     </div>
   )

@@ -1,103 +1,163 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { Loader2, Eye, EyeOff, Lock, CheckCircle2 } from "lucide-react";
+import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { Loader2, Eye, EyeOff, Lock, CheckCircle2 } from 'lucide-react'
 
 export default function ResetPasswordPage() {
-  const _router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const _router = useRouter()
+  const searchParams = useSearchParams()
+  const token = searchParams.get('token')
 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
 
   if (!token) {
     return (
       <div className="text-center">
-        <h2 className="text-2xl font-black text-aerojet-blue uppercase tracking-tight mb-3">Invalid Link</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">This password reset link is invalid or has expired.</p>
-        <Link href="/forgot-password" className="text-aerojet-sky font-bold text-sm hover:underline">Request a new link</Link>
+        <h2 className="text-aerojet-blue mb-3 text-2xl font-black tracking-tight uppercase">
+          Invalid Link
+        </h2>
+        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
+          This password reset link is invalid or has expired.
+        </p>
+        <Link
+          href="/forgot-password"
+          className="text-aerojet-sky text-sm font-bold hover:underline"
+        >
+          Request a new link
+        </Link>
       </div>
-    );
+    )
   }
 
   if (success) {
     return (
       <div className="text-center">
-        <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 className="w-8 h-8 text-green-500" />
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
+          <CheckCircle2 className="h-8 w-8 text-green-500" />
         </div>
-        <h2 className="text-2xl font-black text-aerojet-blue uppercase tracking-tight mb-3">Password Updated</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">You can now sign in with your new password.</p>
-        <Link href="/login" className="inline-block bg-aerojet-blue text-white px-8 py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-aerojet-sky transition-all">
+        <h2 className="text-aerojet-blue mb-3 text-2xl font-black tracking-tight uppercase">
+          Password Updated
+        </h2>
+        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
+          You can now sign in with your new password.
+        </p>
+        <Link
+          href="/login"
+          className="bg-aerojet-blue hover:bg-aerojet-sky inline-block rounded-xl px-8 py-3 text-xs font-black tracking-widest text-white uppercase transition-all"
+        >
           Sign In
         </Link>
       </div>
-    );
+    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password !== confirmPassword) { setError("Passwords do not match"); return; }
-    setError("");
-    setLoading(true);
+    e.preventDefault()
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+    setError('')
+    setLoading(true)
 
     try {
-      const res = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password }),
-      });
+      })
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "Failed to reset password");
+        const data = await res.json()
+        throw new Error(data.message || 'Failed to reset password')
       }
 
-      setSuccess(true);
+      setSuccess(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reset password')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-black text-aerojet-blue uppercase tracking-tight">New Password</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Choose a strong password for your account.</p>
+        <h2 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase">
+          New Password
+        </h2>
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+          Choose a strong password for your account.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">{error}</div>}
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            {error}
+          </div>
+        )}
 
         <div>
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">New Password</label>
+          <label className="mb-2 block text-xs font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400">
+            New Password
+          </label>
           <div className="relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" required minLength={8} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl pl-11 pr-12 py-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-aerojet-sky focus:border-transparent transition-all" />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-400">
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <Lock className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Min. 8 characters"
+              required
+              minLength={8}
+              className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-12 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute top-1/2 right-4 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-400"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Confirm Password</label>
-          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" required className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-aerojet-sky focus:border-transparent transition-all" />
+          <label className="mb-2 block text-xs font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400">
+            Confirm Password
+          </label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Re-enter password"
+            required
+            className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          />
         </div>
 
-        <button type="submit" disabled={loading || password.length < 8} className="w-full bg-aerojet-blue text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-aerojet-sky transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg">
-          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</> : "Update Password"}
+        <button
+          type="submit"
+          disabled={loading || password.length < 8}
+          className="bg-aerojet-blue hover:bg-aerojet-sky flex w-full items-center justify-center gap-2 rounded-xl py-4 text-xs font-black tracking-widest text-white uppercase shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Updating...
+            </>
+          ) : (
+            'Update Password'
+          )}
         </button>
       </form>
     </div>
-  );
+  )
 }

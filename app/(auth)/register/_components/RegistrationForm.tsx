@@ -488,23 +488,25 @@ export default function RegistrationForm({
           control={form.control}
           name="acknowledgeFeeDeletion"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-amber-200 bg-amber-50 p-4 shadow-sm">
+            <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-lg border border-amber-200 bg-amber-50 p-4 shadow-sm">
               <FormControl>
                 <Checkbox
                   checked={field.value as boolean}
                   onCheckedChange={field.onChange}
-                  className="mt-0.5 bg-white data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
+                  className="mt-0.5 bg-white data-[state=checked]:border-amber-600 data-[state=checked]:bg-amber-600"
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel className="text-sm font-semibold text-amber-900">
                   Mandatory Payment Deadline <span className="text-red-500">*</span>
                 </FormLabel>
-                <p className="text-xs text-amber-700 leading-snug">
-                  I understand that I must transfer the {formatCurrency(fee, currency)} registration fee via bank deposit within 7 days of registering, or my account will be permanently deleted without notice.
+                <p className="text-xs leading-snug text-amber-700">
+                  I understand that I must transfer the {formatCurrency(fee, currency)} registration
+                  fee via bank deposit within 7 days of registering, or my account will be
+                  permanently deleted without notice.
                 </p>
               </div>
-              <FormMessage className="text-xs text-red-600 font-medium" />
+              <FormMessage className="text-xs font-medium text-red-600" />
             </FormItem>
           )}
         />
@@ -525,11 +527,14 @@ export default function RegistrationForm({
 
         <p className="mt-4 text-center text-xs text-pretty text-gray-500">
           By clicking Start, you agree to the{' '}
-          <Link href="/online-application-terms" className="font-bold text-aerojet-sky hover:underline">
+          <Link
+            href="/online-application-terms"
+            className="text-aerojet-sky font-bold hover:underline"
+          >
             Application Terms
           </Link>{' '}
           and acknowledge the{' '}
-          <Link href="/privacy-policy" className="font-bold text-aerojet-sky hover:underline">
+          <Link href="/privacy-policy" className="text-aerojet-sky font-bold hover:underline">
             Privacy & Data Protection Notice
           </Link>
           . Your account login details will be emailed after payment verification.
@@ -538,4 +543,3 @@ export default function RegistrationForm({
     </Form>
   )
 }
-

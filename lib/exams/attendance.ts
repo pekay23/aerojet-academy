@@ -1,8 +1,14 @@
-import { ExamAttendanceStatus, Prisma, MembershipStatus } from '@prisma/client'
+import { BookingDemandStatus, ExamAttendanceStatus, Prisma, MembershipStatus } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import { createAuditLog } from '@/lib/audit/logger'
 import { createNotification } from '@/lib/email/service'
+
+const COMPLETED_ABSENCE_RESULTS = new Set(['ABSENT', 'NO_SHOW', 'NOSHOW', 'EXCUSED'])
+
+function isCompletedAbsenceResult(result: string | null | undefined): boolean {
+  return !!result && COMPLETED_ABSENCE_RESULTS.has(result.trim().toUpperCase())
+}
 
 export async function markExamAttendance(params: {
   membershipId?: string
@@ -11,8 +17,17 @@ export async function markExamAttendance(params: {
   status: ExamAttendanceStatus
   notes?: string | null
   recordedBy: string
+  notifyStudent?: boolean
 }) {
-  const { membershipId, bookingId, sittingId, status, notes, recordedBy } = params
+  const {
+    membershipId,
+    bookingId,
+    sittingId,
+    status,
+    notes,
+    recordedBy,
+    notifyStudent = true,
+  } = params
 
   if (!membershipId && !bookingId && !sittingId) {
     throw new Error('Must provide a membership, booking, or sitting reference')
@@ -182,15 +197,15 @@ export async function markExamAttendance(params: {
 
       if (booking?.id) {
         if (status === ExamAttendanceStatus.PRESENT) {
-          const currentResult = booking.result?.toUpperCase()
+          const currentResult = booking.result?.trim().toUpperCase()
           await tx.examBooking.update({
             where: { id: booking.id },
             data: {
               status: booking.status === 'NO_SHOW' ? 'APPROVED' : booking.status,
-              demandStatus: 'EXECUTED',
+              demandStatus: BookingDemandStatus.EXECUTED,
               executedAt: attendanceDate,
-              // Clear any stale absence/excusal fields if re-marking present
-              ...(currentResult === 'ABSENT' || currentResult === 'EXCUSED'
+              // Clear stale absence, no-show, or excusal outcomes when re-marking present.
+              ...(isCompletedAbsenceResult(currentResult)
                 ? {
                     result: null,
                     cancellationReason: null,
@@ -201,11 +216,13 @@ export async function markExamAttendance(params: {
             },
           })
         } else if (status === ExamAttendanceStatus.ABSENT) {
-          // Absent: seat is consumed but not passed — mark as no-show
+          // An absence consumes the seat and closes this delivery attempt.
           await tx.examBooking.update({
             where: { id: booking.id },
             data: {
               status: 'NO_SHOW',
+              demandStatus: BookingDemandStatus.EXECUTED,
+              executedAt: attendanceDate,
               result: 'ABSENT',
               cancellationReason: 'Marked absent for exam attendance',
               cancelledAt: new Date(),
@@ -213,14 +230,14 @@ export async function markExamAttendance(params: {
             },
           })
         } else {
-          // EXCUSED: the candidate did not sit but their paid guarantee is STILL OWED.
-          // Do NOT mark as EXECUTED, do NOT set cancellation fields.
-          // The booking stays SCHEDULED — fulfillment remains pending.
+          // EXCUSED: the candidate did not sit, so the paid guarantee remains owed.
           await tx.examBooking.update({
             where: { id: booking.id },
             data: {
+              demandStatus: BookingDemandStatus.SCHEDULED,
+              executedAt: null,
               result: 'EXCUSED',
-              // Ensure any stale cancellation stamps are cleared
+              // Ensure any stale cancellation stamps are cleared.
               cancellationReason: null,
               cancelledAt: null,
               cancelledBy: null,
@@ -265,28 +282,31 @@ export async function markExamAttendance(params: {
       }
 
       // Audit log for attendance change
-      await createAuditLog({
-        userId: recordedBy,
-        action: 'UPDATE',
-        entity: 'ExamAttendance',
-        entityId: attendance.id,
-        description: `Marked exam attendance ${status} for user ${userId}${booking?.id ? ` on booking ${booking.id}` : ''}${membership?.id ? ` on membership ${membership.id}` : ''}`,
-        changes: {
-          status,
-          bookingId: booking?.id,
-          membershipId: membership?.id,
-          sittingId: sitting?.id,
+      await createAuditLog(
+        {
+          userId: recordedBy,
+          action: 'UPDATE',
+          entity: 'ExamAttendance',
+          entityId: attendance.id,
+          description: `Marked exam attendance ${status} for user ${userId}${booking?.id ? ` on booking ${booking.id}` : ''}${membership?.id ? ` on membership ${membership.id}` : ''}`,
+          changes: {
+            status,
+            bookingId: booking?.id,
+            membershipId: membership?.id,
+            sittingId: sitting?.id,
+          },
         },
-      })
+        tx
+      )
 
       // Notify student of attendance status
-      if (userId && status === ExamAttendanceStatus.ABSENT) {
-        await createNotification(prisma, userId, {
+      if (notifyStudent && userId && status === ExamAttendanceStatus.ABSENT) {
+        await createNotification(tx, userId, {
           type: 'EXAM_REMINDER',
           title: 'Exam Marked as Absent',
           message: `You were marked absent for the exam on ${attendanceDate.toLocaleDateString()}. Please contact the academy if this is incorrect.`,
           link: '/student/exams',
-        }).catch((err) => console.error('[NOTIFICATION ERROR]', err))
+        })
       }
 
       return {

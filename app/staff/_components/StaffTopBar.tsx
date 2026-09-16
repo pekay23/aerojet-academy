@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { usePathname, useSearchParams } from 'next/navigation'
 import {
   Bell,
@@ -114,7 +113,6 @@ export default function StaffTopBar({
   welcomeMessages,
   userName,
 }: StaffTopBarProps) {
-  const _router = useRouter()
   const [welcomeMsg, setWelcomeMsg] = useState<string | null>(null)
   const [dismissingIds, setDismissingIds] = useState<Set<string>>(new Set())
   const pathname = usePathname()
@@ -148,26 +146,41 @@ export default function StaffTopBar({
   })
 
   useEffect(() => {
-    ensureSystemNotifications()
-      .then(() => fetch('/api/staff/topbar-items'))
-      .then((r) =>
-        r.ok
-          ? r.json()
+    // Only run ensureSystemNotifications once per session (5 min TTL) to avoid ~3s delay on every page load
+    const lastRun = sessionStorage.getItem('ensureSystemNotificationsAt')
+    const now = Date.now()
+    const FIVE_MINUTES = 5 * 60 * 1000
+    const shouldRun = !lastRun || now - parseInt(lastRun, 10) > FIVE_MINUTES
+
+    const loadTopbar = async () => {
+      if (shouldRun) {
+        try {
+          await ensureSystemNotifications()
+          sessionStorage.setItem('ensureSystemNotificationsAt', String(now))
+        } catch {
+          // Ignore errors - topbar-items will still load
+        }
+      }
+
+      try {
+        const r = await fetch('/api/staff/topbar-items')
+        const data = r.ok
+          ? await r.json()
           : {
               notifications: [],
               messages: [],
               pendingItems: { applicants: [], payments: [], enrollments: [] },
             }
-      )
-      .then((data) => {
         setNotifications(data.notifications ?? [])
         setMessages(data.messages ?? [])
         setPendingItems(data.pendingItems ?? { applicants: [], payments: [], enrollments: [] })
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('[StaffTopBar] Failed to fetch topbar items:', err)
         toast.error('Failed to load pending items')
-      })
+      }
+    }
+
+    void loadTopbar()
   }, [])
 
   const notifCount =
@@ -220,11 +233,16 @@ export default function StaffTopBar({
   }
 
   const handleMarkMessageAsRead = async (msgId: string) => {
+    setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, isRead: true } : m)))
     try {
-      await markMessageAsRead(msgId)
-      setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, isRead: true } : m)))
+      const result = await markMessageAsRead(msgId)
+      if (result.error) {
+        setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, isRead: false } : m)))
+        toast.error(result.error)
+      }
     } catch {
-      // Silently fail - the thread page will also try to mark as read
+      setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, isRead: false } : m)))
+      toast.error('Failed to mark message as read')
     }
   }
 
@@ -418,7 +436,10 @@ export default function StaffTopBar({
                           } ${isDismissing ? 'opacity-50' : ''}`}
                         >
                           <Link
-                            href={`${n.linkUrl || '/staff/notifications'}?returnUrl=${encodeURIComponent(currentHref)}`}
+                            href={appendReturnNavigation(
+                              n.linkUrl || '/staff/notifications',
+                              currentHref
+                            )}
                             className="flex min-w-0 flex-1 items-start gap-3"
                           >
                             <TypeIcon className={`mt-0.5 h-4 w-4 shrink-0 ${cfg.className}`} />

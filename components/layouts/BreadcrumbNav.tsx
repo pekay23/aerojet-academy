@@ -60,7 +60,7 @@ export default function BreadcrumbNav({ className }: { className?: string }) {
   return (
     <nav
       className={cn(
-        'hidden items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 lg:flex',
+        'hidden items-center gap-1.5 text-xs text-slate-500 lg:flex dark:text-slate-400',
         className
       )}
       aria-label="Breadcrumb"
@@ -78,7 +78,7 @@ export default function BreadcrumbNav({ className }: { className?: string }) {
 
         return (
           <span key={href} className="flex shrink-0 items-center gap-1.5">
-            <span className="text-xs text-slate-300 dark:text-slate-600">/</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">/</span>
             {isLast ? (
               <span className="max-w-30 truncate font-bold text-slate-800 dark:text-slate-100">
                 {label}
