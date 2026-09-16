@@ -134,7 +134,7 @@
     "@prisma/config": "7.10.0",
     "@storybook/nextjs": "^10.5.10",
     "@storybook/react": "^10.5.10",
-    "@types/node": "^25.9.5",
+    "@types/node": "^26.0.0",
     "@types/pg": "^8.23.1",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.18",
