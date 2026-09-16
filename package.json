@@ -1,7 +1,7 @@
 {
   "name": "aerojet-academy",
   "version": "1.0.82",
-  "packageManager": "bun@1.4.0",
+  "packageManager": "bun@1.4.2",
   "private": true,
   "type": "module",
   "description": "Aerojet Aviation Training Academy - Complete Portal System",
