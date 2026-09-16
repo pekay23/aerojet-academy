@@ -1,7 +1,7 @@
 import React from 'react'
 import Navbar from '@/components/layouts/PublicNav'
 import Footer from '@/components/layouts/PublicFooter'
-import MobileStickyBar from '@/components/layouts/MobileNav'
+
 import { getAdvisoryConfig } from '@/lib/settings'
 import AdvisoryBanner from './_components/AdvisoryBanner'
 
