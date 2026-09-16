@@ -68,7 +68,7 @@
     "@supabase/supabase-js": "^2.112.4",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/typography": "^0.5.20",
-    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-table": "^9.0.0",
     "@tiptap/core": "3.30.5",
     "@tiptap/extension-color": "^3.30.5",
     "@tiptap/extension-font-family": "^3.30.5",
