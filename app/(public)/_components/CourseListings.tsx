@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { ArrowRight, Clock, Construction } from 'lucide-react'
+import { ArrowRight, Construction } from 'lucide-react'
 
 const courseData = [
   {

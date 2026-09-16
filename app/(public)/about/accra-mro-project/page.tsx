@@ -22,7 +22,16 @@ export default function MROPage() {
               Vision & Purpose
             </h2>
             <p className="mb-4 text-lg leading-relaxed text-slate-600">
-              The Accra MRO Project is a flagship initiative by Aerojet Aviation to position Ghana
+              The{' '}
+              <a
+                href="https://aerojet-aviation.com/accra-mro"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-aerojet-blue font-semibold hover:underline"
+              >
+                Accra MRO Project
+              </a>{' '}
+              is a flagship initiative by Aerojet Aviation to position Ghana
               as the primary aviation technical hub for the West African sub-region.
             </p>
             <p className="leading-relaxed text-slate-500">

@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { Phone, Mail } from 'lucide-react'
 import SectionReveal from './SectionReveal'
 
 export default function HomeContact({ isOpen = true }: { isOpen?: boolean }) {
