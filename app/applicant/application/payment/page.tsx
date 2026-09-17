@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import PaymentUploadForm from './_components/PaymentUploadForm'
 
 export const metadata: Metadata = { title: 'Upload Payment | Applicant Portal' }
@@ -13,7 +13,7 @@ export default async function PaymentPage() {
 
   const userId = session.user.id
 
-  const applicant = await prisma.user.findUnique({
+  const applicant = await prismaUnfiltered.user.findUnique({
     where: { id: userId },
     select: {
       registrationFee: true,
@@ -26,7 +26,7 @@ export default async function PaymentPage() {
   if (!applicant) redirect('/login')
 
   // Fetch global registration settings and bank details
-  const settings = await prisma.systemSetting.findMany({
+  const settings = await prismaUnfiltered.systemSetting.findMany({
     where: {
       key: {
         in: [

@@ -14,9 +14,9 @@ import {
   Tag,
   Hourglass,
   Shield,
-  XCircle,
-  Eye,
-  Settings,
+  XCircle as _XCircle,
+  Eye as _Eye,
+  Settings as _Settings,
 } from 'lucide-react'
 import CourseActionsMenu from '../../_components/CourseActionsMenu'
 import ExamComponentsSection from './_components/ExamComponentsSection'
@@ -233,7 +233,7 @@ export default async function CourseDetailsPage({ params }: Props) {
               {serializedCourse.classes.length === 0 ? (
                 <p className="text-sm text-slate-400 italic">No classes currently scheduled.</p>
               ) : (
-                serializedCourse.classes.map((cls: any) => (
+                serializedCourse.classes.map((cls) => (
                   <Link
                     key={cls.id}
                     href={`/staff/classes/${slugify(cls.name)}`}

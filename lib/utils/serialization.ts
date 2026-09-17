@@ -2,9 +2,11 @@
  * Recursive type that represents the output of serializePrisma.
  * Converts Decimal properties to number and Date properties to string.
  */
+type DecimalLike = { toNumber(): number; d: readonly number[]; s: number }
+
 export type SerializedPrisma<T> = T extends Date
   ? string
-  : T extends { toNumber(): number; d: any; s: any } // Prisma Decimal check
+  : T extends DecimalLike
     ? number
     : T extends Array<infer U>
       ? Array<SerializedPrisma<U>>
@@ -18,52 +20,64 @@ export type SerializedPrisma<T> = T extends Date
  * Prisma/Decimal.js objects to numbers and Date objects to ISO strings.
  */
 export function serializePrisma<T>(data: T): SerializedPrisma<T> {
-  if (data === null || data === undefined) return data as any
+  if (data === null || data === undefined) return data as SerializedPrisma<T>
 
   // Handle arrays
   if (Array.isArray(data)) {
-    return data.map((item) => serializePrisma(item)) as any
+    return data.map((item) => serializePrisma(item)) as SerializedPrisma<T>
   }
 
   // Handle BigInt (e.g., Passkey.counter)
   if (typeof data === 'bigint') {
-    return Number(data) as any
+    return Number(data) as SerializedPrisma<T>
   }
 
   // Handle Buffer/Bytes (e.g., Passkey.publicKey)
   if (Buffer.isBuffer(data)) {
-    return data.toString('base64') as any
+    return data.toString('base64') as SerializedPrisma<T>
   }
 
   // Handle Uint8Array
   if (data instanceof Uint8Array) {
-    return Buffer.from(data).toString('base64') as any
+    return Buffer.from(data).toString('base64') as SerializedPrisma<T>
   }
 
   // Handle objects
   if (typeof data === 'object') {
+    const candidate = data as unknown as {
+      constructor?: { name: string }
+      toNumber?: () => number
+      d?: unknown
+      s?: unknown
+    }
     // Check if it's a Prisma Decimal object
     if (
-      (data as any).constructor?.name === 'Decimal' ||
-      (typeof (data as any).toNumber === 'function' && (data as any).d && (data as any).s)
+      candidate.constructor?.name === 'Decimal' ||
+      (typeof candidate.toNumber === 'function' && candidate.d && candidate.s)
     ) {
-      return (data as any).toNumber()
+      return candidate.toNumber!() as SerializedPrisma<T>
     }
 
     // Convert Date objects to strings for consistent client consumption
     if (data instanceof Date) {
-      return data.toISOString() as any
+      return data.toISOString() as SerializedPrisma<T>
     }
 
-    // Recursively serialize object properties
-    const result: any = {}
-    for (const key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        result[key] = serializePrisma((data as any)[key])
-      }
+    // Recursively serialize object properties using a null-prototype object
+    // to prevent prototype pollution via __proto__ keys
+    const result = Object.create(null) as Record<string, unknown>
+    const dataRecord = data as Record<string, unknown>
+    for (const key of Object.keys(dataRecord)) {
+      // Use Object.defineProperty to avoid __proto__ setter issues
+      Object.defineProperty(result, key, {
+        value: serializePrisma(dataRecord[key]),
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      })
     }
-    return result
+    return result as SerializedPrisma<T>
   }
 
-  return data as any
+  return data as SerializedPrisma<T>
 }

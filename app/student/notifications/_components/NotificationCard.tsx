@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { Info, AlertTriangle, AlertCircle, CheckCircle2, Clock } from 'lucide-react'
 import { markNotificationAsReadAction } from '@/app/student/actions'
 import { Notification } from '@prisma/client'
 import Link from 'next/link'
+import { appendReturnNavigation } from '@/components/shared/ReturnLink'
 
 interface NotificationCardProps {
   notification: Notification
@@ -30,6 +32,10 @@ export default function NotificationCard({ notification }: NotificationCardProps
       }
     })
   }
+
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const currentHref = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
 
   return (
     <div
@@ -83,7 +89,8 @@ export default function NotificationCard({ notification }: NotificationCardProps
         {notification.linkUrl && (
           <div className="mt-4">
             <Link
-              href={notification.linkUrl}
+              href={appendReturnNavigation(notification.linkUrl, currentHref)}
+              onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-2 text-xs font-black text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
               {notification.linkText || 'View Details'}

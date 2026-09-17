@@ -1,14 +1,14 @@
 'use server'
 
-import prisma from '@/lib/prisma/client'
-import { getAuthSession, requireStaff, requireAuth } from '@/lib/auth/helpers'
+import { prismaUnfiltered } from '@/lib/prisma/client'
+import { requireStaff, requireAuth } from '@/lib/auth/helpers'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { revalidatePath } from 'next/cache'
 
 export async function getAdminResources() {
   await requireStaff()
 
-  const resources = await prisma.generalResource.findMany({
+  const resources = await prismaUnfiltered.generalResource.findMany({
     include: {
       courses: { select: { id: true, code: true, name: true } },
       pathways: { select: { id: true, code: true, name: true } },
@@ -23,12 +23,12 @@ export async function getResourceLinkingOptions() {
   await requireStaff()
 
   const [courses, pathways] = await Promise.all([
-    prisma.course.findMany({
+    prismaUnfiltered.course.findMany({
       where: { isActive: true },
       select: { id: true, code: true, name: true },
       orderBy: { code: 'asc' },
     }),
-    prisma.studyPathwayModel.findMany({
+    prismaUnfiltered.studyPathwayModel.findMany({
       select: { id: true, code: true, name: true },
       orderBy: { name: 'asc' },
     }),
@@ -42,7 +42,7 @@ export async function getStudentResources() {
   const userId = session.id
 
   // 1. Get student status and pathway
-  const profile = await prisma.studentProfile.findUnique({
+  const profile = await prismaUnfiltered.studentProfile.findUnique({
     where: { userId },
     select: { pathwayId: true }
   })
@@ -50,14 +50,14 @@ export async function getStudentResources() {
   // 2. Get all "bought" or enrolled courses for the student
   // This includes full-time enrollments and modular ones
   const [ftEnrollments, modularEnrollments] = await Promise.all([
-    prisma.enrollment.findMany({
+    prismaUnfiltered.enrollment.findMany({
       where: { 
         userId, 
         status: { in: ['ENROLLED', 'APPROVED', 'ACTIVE'] } 
       },
       select: { courseId: true }
     }),
-    prisma.modularEnrollment.findMany({
+    prismaUnfiltered.modularEnrollment.findMany({
       where: { 
         studentId: userId, 
         status: { in: ['ENROLLED', 'APPROVED', 'ACTIVE'] } 
@@ -72,7 +72,7 @@ export async function getStudentResources() {
   // We'll fetch course IDs for those codes
   const allModularCodes = modularEnrollments.flatMap(e => e.package.modulesIncluded)
   if (allModularCodes.length > 0) {
-    const modularCourses = await prisma.course.findMany({
+    const modularCourses = await prismaUnfiltered.course.findMany({
       where: { code: { in: allModularCodes } },
       select: { id: true }
     })
@@ -82,7 +82,7 @@ export async function getStudentResources() {
   const courseIds = Array.from(enrolledCourseIds)
 
   // 3. Fetch resources
-  const resources = await prisma.generalResource.findMany({
+  const resources = await prismaUnfiltered.generalResource.findMany({
     where: {
       showToStudents: true,
       AND: [
@@ -111,6 +111,9 @@ export async function getStudentResources() {
   return serializePrisma(resources)
 }
 
+// Allowed URL protocols — relative paths (/foo) and absolute (https://, http://, mailto:, tel:)
+const SAFE_URL_RE = /^(\/|[a-z][a-z\d+\-.]*:\/\/)/i
+
 export async function upsertResource(data: {
   id?: string
   name: string
@@ -128,10 +131,31 @@ export async function upsertResource(data: {
 
   const { courseIds = [], pathwayIds = [], ...rest } = data
 
-  const resource = await prisma.generalResource.upsert({
+  // Reject dangerous URL schemes (javascript:, data:, vbscript:, …)
+  if (!SAFE_URL_RE.test(rest.url)) {
+    throw new Error('Invalid resource URL. Only http(s), mailto, tel, or relative paths are allowed.')
+  }
+
+  // ── Category-aware visibility guard ──────────────────────────────────────
+  // STUDENT_GUIDE: always global and visible to everyone (enforced, not optional).
+  // ADMINISTRATIVE / INSTITUTIONAL: never visible to students (staff/in instructor only).
+  const visibility =
+    data.category === 'STUDENT_GUIDE'
+      ? { showToInstructors: true, showToStaff: true, showToStudents: true }
+      : data.category === 'ADMINISTRATIVE' || data.category === 'INSTITUTIONAL'
+        ? { showToInstructors: rest.showToInstructors, showToStaff: rest.showToStaff, showToStudents: false }
+        : {
+            showToInstructors: rest.showToInstructors,
+            showToStaff: rest.showToStaff,
+            showToStudents: rest.showToStudents,
+          }
+
+  const finalData = { ...rest, ...visibility }
+
+  const resource = await prismaUnfiltered.generalResource.upsert({
     where: { id: data.id || 'new' },
     update: {
-      ...rest,
+      ...finalData,
       courses: {
         set: courseIds.map(id => ({ id }))
       },
@@ -140,7 +164,7 @@ export async function upsertResource(data: {
       }
     },
     create: {
-      ...rest,
+      ...finalData,
       courses: {
         connect: courseIds.map(id => ({ id }))
       },
@@ -153,13 +177,16 @@ export async function upsertResource(data: {
   revalidatePath('/instructor/resources')
   revalidatePath('/staff/resources')
   revalidatePath('/student/resources')
+  revalidatePath('/student/courses')
+  revalidatePath('/student/courses/[slug]')
+  revalidatePath('/student/courses/[slug]/materials')
   return serializePrisma(resource)
 }
 
 export async function deleteResource(id: string) {
   await requireStaff()
 
-  await prisma.generalResource.delete({
+  await prismaUnfiltered.generalResource.delete({
     where: { id },
   })
 

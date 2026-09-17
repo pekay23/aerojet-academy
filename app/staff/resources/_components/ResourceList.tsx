@@ -23,13 +23,27 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import ResourceForm from './ResourceForm'
 
+interface Resource {
+  id: string
+  name: string
+  description?: string | null
+  url: string
+  type: string
+  category: string
+  showToInstructors: boolean
+  showToStaff: boolean
+  showToStudents: boolean
+  courses?: Array<{ id: string; code: string; name: string }> | null
+  pathways?: Array<{ id: string; code: string; name: string }> | null
+}
+
 interface ResourceListProps {
-  resources: any[]
+  resources: Resource[]
 }
 
 export default function ResourceList({ resources: initialResources }: ResourceListProps) {
   const [resources, setResources] = useState(initialResources)
-  const [editingResource, setEditingResource] = useState<any>(null)
+  const [editingResource, setEditingResource] = useState<Resource | null>(null)
   const [sortField, setSortField] = useState<'name' | 'category' | 'type' | 'visibility'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
@@ -40,7 +54,7 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
       await deleteResource(id)
       setResources(resources.filter((r) => r.id !== id))
       toast.success('Resource deleted')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to delete resource')
     }
   }
@@ -178,7 +192,11 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
                       variant="outline"
                       className="border-slate-200 px-2 py-0 text-[10px] font-bold tracking-widest uppercase dark:border-slate-700"
                     >
-                      {resource.category}
+                      {resource.category
+                        .toLowerCase()
+                        .split('_')
+                        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+                        .join(' ')}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -201,16 +219,16 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
                           STU
                         </Badge>
                       )}
-                      {resource.courses?.length > 0 && (
-                        <Badge variant="outline" className="h-5 px-1.5 text-[9px] tracking-tighter font-mono">
-                          {resource.courses.length} MOD
-                        </Badge>
-                      )}
-                      {resource.pathways?.length > 0 && (
-                        <Badge variant="outline" className="h-5 px-1.5 text-[9px] tracking-tighter">
-                          {resource.pathways.length} PTH
-                        </Badge>
-                      )}
+                       {(resource.courses ?? []).length > 0 && (
+                         <Badge variant="outline" className="h-5 px-1.5 text-[9px] tracking-tighter font-mono">
+                           {(resource.courses ?? []).length} MOD
+                         </Badge>
+                       )}
+                       {(resource.pathways ?? []).length > 0 && (
+                         <Badge variant="outline" className="h-5 px-1.5 text-[9px] tracking-tighter">
+                           {(resource.pathways ?? []).length} PTH
+                         </Badge>
+                       )}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
@@ -255,7 +273,7 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
             </DialogTitle>
           </DialogHeader>
           <ResourceForm
-            initialData={editingResource}
+            initialData={editingResource ?? undefined}
             onSuccess={() => {
               setEditingResource(null)
               window.location.reload()

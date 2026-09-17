@@ -399,6 +399,10 @@ export const attachProofSchema = z.object({
   proofUrl: z.string().url('Valid proof URL required'),
 })
 
+export const payMilestoneSchema = z.object({
+  milestoneId: z.string().min(1, 'Milestone ID is required'),
+})
+
 export const staffBookExamSchema = z.object({
   bookingType: z.enum(['INDIVIDUAL', 'TWIN_PACK', 'FOUR_PACK', 'RESIT']),
   moduleIds: z.array(z.string().cuid()).min(1).max(4),
@@ -420,6 +424,40 @@ export const updateSettingSchema = z.object({
   value: z.any(),
   label: z.string().optional(),
 })
+
+// ===========================================================================
+// INTERNAL EXAM REGISTRATION SCHEMA
+// ===========================================================================
+
+export const internalExamRegistrationSchema = z.object({
+  sessionId: z.string().min(1, 'Session ID is required'),
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+  dateOfBirth: z.string().refine((val) => !isNaN(Date.parse(val)), 'Invalid date of birth'),
+  nationality: z.string().min(2, 'Nationality is required'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(7, 'Phone number is too short').max(20),
+  licenceCategory: z.string().min(1, 'Licence category is required'),
+  modules: z.array(z.string()).default([]),
+  examDate: z.string().optional(),
+  examLocation: z.string().min(1, 'Exam location is required'),
+  candidatePhoto: z.string().nullable().optional(),
+  idDocumentType: z.enum(['passport', 'national_id', 'driving_licence']),
+  idDocumentNumber: z.string().min(1, 'ID document number is required'),
+  consentTruthfulness: z.boolean().refine((val) => val === true, {
+    message: 'You must declare truthfulness',
+  }),
+  consentMonitoring: z.boolean().refine((val) => val === true, {
+    message: 'You must consent to monitoring',
+  }),
+  consentIdentity: z.boolean().refine((val) => val === true, {
+    message: 'You must consent to identity capture',
+  }),
+  consentProcessing: z.boolean().refine((val) => val === true, {
+    message: 'You must consent to result processing',
+  }),
+})
+
+export type InternalExamRegistrationInput = z.infer<typeof internalExamRegistrationSchema>
 
 // ===========================================================================
 // HELPER

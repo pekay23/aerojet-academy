@@ -12,15 +12,15 @@ The user went through this process firsthand as an applicant — the design is b
 
 Not all programmes follow the same pipeline. The state machine must support per-programme stage skipping:
 
-| Stage | FULL_TIME_4YEAR | FULL_TIME_2YEAR | MILITARY_1YEAR | MODULAR | EXAM_ONLY |
-|-------|:-:|:-:|:-:|:-:|:-:|
-| Registration + Payment | Yes | Yes | Yes | Yes | Existing flow |
-| Document Uploads | Yes (admin-configured) | Yes (admin-configured) | Yes (admin-configured) | Yes (admin-configured) | Skip |
-| Aptitude Test | Yes | Yes | Yes | Optional (admin toggle) | Skip |
-| Shortlisting | Yes | Yes | Yes | Auto-accept if aptitude passed | Skip |
-| Interview | Yes | Yes | Yes | Skip | Skip |
-| Medical | Yes | Yes | Yes | Skip | Skip |
-| Enrollment | → Batch + Class + AcademicYear (scholarship, no cert issue, bonded) | → Batch + Class + AcademicYear (self-funded, certs issued, no OJT) | → Batch + Class (accelerated) | → Course catalog + completion deadline | → Exam access only |
+| Stage                  |                           FULL_TIME_4YEAR                           |                          FULL_TIME_2YEAR                           |        MILITARY_1YEAR         |                MODULAR                 |     EXAM_ONLY      |
+| ---------------------- | :-----------------------------------------------------------------: | :----------------------------------------------------------------: | :---------------------------: | :------------------------------------: | :----------------: |
+| Registration + Payment |                                 Yes                                 |                                Yes                                 |              Yes              |                  Yes                   |   Existing flow    |
+| Document Uploads       |                       Yes (admin-configured)                        |                       Yes (admin-configured)                       |    Yes (admin-configured)     |         Yes (admin-configured)         |        Skip        |
+| Aptitude Test          |                                 Yes                                 |                                Yes                                 |              Yes              |        Optional (admin toggle)         |        Skip        |
+| Shortlisting           |                                 Yes                                 |                                Yes                                 |              Yes              |     Auto-accept if aptitude passed     |        Skip        |
+| Interview              |                                 Yes                                 |                                Yes                                 |              Yes              |                  Skip                  |        Skip        |
+| Medical                |                                 Yes                                 |                                Yes                                 |              Yes              |                  Skip                  |        Skip        |
+| Enrollment             | → Batch + Class + AcademicYear (scholarship, no cert issue, bonded) | → Batch + Class + AcademicYear (self-funded, certs issued, no OJT) | → Batch + Class (accelerated) | → Course catalog + completion deadline | → Exam access only |
 
 **Implementation:** `Application` model gets a `programmeChoice ProgrammeChoice` field. The state machine's `allowedTransitions` map checks this field to skip inapplicable stages (e.g., modular applicants transition directly from `SHORTLISTED` → `SELECTED` → `ENROLLED`, skipping interview and medical).
 
@@ -45,18 +45,19 @@ The entire new system is built behind feature flags. The current simplified flow
 
 ### SystemSettings Feature Flags
 
-| Key | Default | What it controls |
-|-----|---------|-----------------|
-| `admissions_pipeline_enabled` | `false` | Master switch. When OFF: registration creates User only (current flow). When ON: also creates Application record, state machine activates, full pipeline kicks in. |
-| `aptitude_test_enabled` | `false` | When OFF: applicants skip aptitude stage entirely (auto-transition PAYMENT_VERIFIED → SHORTLISTED). When ON: applicants must complete aptitude test. |
-| `interview_system_enabled` | `false` | When OFF: shortlisted applicants skip interview (auto-transition SHORTLISTED → SELECTED). When ON: interview scheduling activates. |
-| `medical_review_enabled` | `false` | When OFF: selected applicants skip medical (auto-transition SELECTED → ENROLLED). When ON: medical upload/review flow activates. |
-| `internal_exam_system_enabled` | `false` | When OFF: students use existing exam flow. When ON: internal exam test-taking UI available. |
-| `document_uploads_enabled` | `false` | When OFF: no document upload step in pipeline. When ON: applicants see document upload page after payment verification. |
+| Key                            | Default | What it controls                                                                                                                                                   |
+| ------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `admissions_pipeline_enabled`  | `false` | Master switch. When OFF: registration creates User only (current flow). When ON: also creates Application record, state machine activates, full pipeline kicks in. |
+| `aptitude_test_enabled`        | `false` | When OFF: applicants skip aptitude stage entirely (auto-transition PAYMENT_VERIFIED → SHORTLISTED). When ON: applicants must complete aptitude test.               |
+| `interview_system_enabled`     | `false` | When OFF: shortlisted applicants skip interview (auto-transition SHORTLISTED → SELECTED). When ON: interview scheduling activates.                                 |
+| `medical_review_enabled`       | `false` | When OFF: selected applicants skip medical (auto-transition SELECTED → ENROLLED). When ON: medical upload/review flow activates.                                   |
+| `internal_exam_system_enabled` | `false` | When OFF: students use existing exam flow. When ON: internal exam test-taking UI available.                                                                        |
+| `document_uploads_enabled`     | `false` | When OFF: no document upload step in pipeline. When ON: applicants see document upload page after payment verification.                                            |
 
 ### How the Code Checks Flags
 
 **Registration API** (`app/api/public/register/route.ts`):
+
 ```
 if (admissions_pipeline_enabled && programmeChoice !== 'EXAM_ONLY') {
   // Create Application record, set stage to REGISTERED
@@ -66,6 +67,7 @@ if (admissions_pipeline_enabled && programmeChoice !== 'EXAM_ONLY') {
 ```
 
 **Approval API** (`app/api/staff/applicants/[id]/approve/route.ts`):
+
 ```
 if (admissions_pipeline_enabled && application exists) {
   // Use state machine transitions
@@ -75,6 +77,7 @@ if (admissions_pipeline_enabled && application exists) {
 ```
 
 **Applicant status page** (`app/applicant/application/status/page.tsx`):
+
 ```
 if (admissions_pipeline_enabled && application exists) {
   // Show dynamic pipeline tracker
@@ -84,6 +87,7 @@ if (admissions_pipeline_enabled && application exists) {
 ```
 
 **Applicant sidebar** (`app/applicant/_components/ApplicantSidebar.tsx`):
+
 ```
 if (admissions_pipeline_enabled && application exists) {
   // Show stage-aware menu items
@@ -93,6 +97,7 @@ if (admissions_pipeline_enabled && application exists) {
 ```
 
 **Staff sidebar** (`app/staff/_components/StaffSidebar.tsx`):
+
 ```
 if (admissions_pipeline_enabled) {
   // Show "Admissions" section with sub-pages
@@ -103,6 +108,7 @@ if (internal_exam_system_enabled) {
 ```
 
 **State machine** (`lib/admissions/state-machine.ts`):
+
 ```
 // Before transitioning, check if the target stage's subsystem is enabled
 // If aptitude_test_enabled === false, skip APTITUDE_PENDING → APTITUDE_COMPLETED
@@ -124,6 +130,7 @@ Admin enables subsystems in this order as confidence grows:
 ### Admin UI
 
 **New:** `app/staff/settings/feature-flags/page.tsx`
+
 - Simple toggle switches for each flag
 - Warning banner: "Changing this affects all new applicants immediately"
 - Shows current state of each subsystem with a green/red indicator
@@ -178,6 +185,7 @@ New Enums:
 **New file:** `lib/admissions/state-machine.ts`
 
 Core function: `transitionApplication(applicationId, targetStage, actorId, metadata?)`
+
 - Validates transition against allowed transitions map
 - Updates `Application.stage` and `Application.previousStage`
 - Creates `ApplicationStageLog` entry
@@ -185,6 +193,7 @@ Core function: `transitionApplication(applicationId, targetStage, actorId, metad
 - Returns updated Application
 
 **New file:** `lib/admissions/constants.ts`
+
 - Stage labels, colors, descriptions, icons
 - Allowed transitions map
 - Stage-specific instructions for the applicant status page
@@ -192,22 +201,27 @@ Core function: `transitionApplication(applicationId, targetStage, actorId, metad
 ### 1.3 Integration Points
 
 **Modify:** `app/api/public/register/route.ts`
+
 - After creating User + Profile, also create `Application` record for non-EXAM_ONLY applicants
 - Set initial stage to `REGISTERED`, auto-transition to `PAYMENT_PENDING`
 
 **Modify:** `app/api/staff/applicants/[id]/approve/route.ts`
+
 - After existing approval logic, transition Application to `PAYMENT_VERIFIED` → `APTITUDE_PENDING`
 
 **Modify:** `app/applicant/application/status/page.tsx`
+
 - Replace hardcoded 4-step timeline with dynamic pipeline tracker reading from `Application.stage`
 - Show stage-specific instructions and next actions
 
 **New:** `app/staff/admissions/page.tsx` + `loading.tsx`
+
 - Pipeline overview: counts per stage (funnel visualization)
 - Quick filters: by intake cycle, programme choice
 - Links to sub-sections (aptitude, interviews, medical, shortlisting)
 
 **Modify:** Staff sidebar (`app/staff/_components/StaffSidebar.tsx`)
+
 - Add "Admissions" section with children: Pipeline, Intake Cycles, Aptitude Tests, Interviews, Medical Review, Shortlisting
 
 ---
@@ -217,6 +231,7 @@ Core function: `transitionApplication(applicationId, targetStage, actorId, metad
 ### 2.1 Configurable Document Requirements
 
 The academy requires various documents from applicants — not just CV and cover letter. Known document types include:
+
 - CV / Resume
 - Cover Letter
 - National Identification (Ghana Card, Driving License, Passport, etc.)
@@ -227,6 +242,7 @@ The academy requires various documents from applicants — not just CV and cover
 **Admin must be able to add, remove, and configure required documents** per intake cycle or programme type, without code changes.
 
 **New model:** `ApplicationDocumentType`
+
 ```
 - id, name (display label), slug (unique key), description
 - fileTypes (allowed MIME types — default PDF + image)
@@ -238,6 +254,7 @@ The academy requires various documents from applicants — not just CV and cover
 ```
 
 **New model:** `ApplicationDocument`
+
 ```
 - id, applicationId, documentTypeId, fileUploadId
 - status: PENDING | APPROVED | REJECTED
@@ -246,19 +263,23 @@ The academy requires various documents from applicants — not just CV and cover
 ```
 
 **Modify:** `app/api/uploadthing/core.ts`
+
 - Add single generic route slug: `applicantDocument` (PDF + images, configurable max size)
 
 **New:** `app/applicant/application/documents/page.tsx` + `loading.tsx` + `_components/DocumentUploadForm.tsx`
+
 - Dynamically renders upload fields based on active `ApplicationDocumentType` records matching applicant's programme
 - Shows required vs optional labels, upload status per document, re-upload option
 - Staff can review and approve/reject individual documents
 
 **New:** `app/staff/admissions/document-types/page.tsx`
+
 - Admin CRUD for document type configuration
 - Set which documents are required for which programmes
 - Reorder, activate/deactivate
 
 **New API:** `app/api/staff/admissions/document-types/route.ts` (GET/POST)
+
 - `app/api/staff/admissions/document-types/[id]/route.ts` (PUT/DELETE)
 
 This replaces the original hardcoded CV/cover letter approach — the system is now fully flexible for any document the academy needs in the future.
@@ -266,15 +287,18 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 ### 2.2 Intake Cycles
 
 **New pages:**
+
 - `app/staff/admissions/intake-cycles/page.tsx` — List all cycles
 - `app/staff/admissions/intake-cycles/create/page.tsx` — Create new cycle
 
 **New API:** `app/api/staff/admissions/intake-cycles/route.ts` (GET/POST)
+
 - `app/api/staff/admissions/intake-cycles/[id]/route.ts` (GET/PUT/DELETE)
 
 ### 2.3 Updated Applicant Sidebar
 
 **Modify:** `app/applicant/_components/ApplicantSidebar.tsx`
+
 - Dynamically show menu items based on `Application.stage`:
   - Always: Dashboard, My Application, Notifications
   - After PAYMENT_VERIFIED: Upload Documents
@@ -290,6 +314,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 ### 3.1 Admin — Question Bank Management
 
 **New pages:**
+
 - `app/staff/admissions/aptitude/page.tsx` — Question bank list
 - `app/staff/admissions/aptitude/banks/[id]/page.tsx` — Edit bank + questions
 - `app/staff/admissions/aptitude/banks/[id]/_components/QuestionEditor.tsx` — CRUD for questions
@@ -297,6 +322,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 - `app/staff/admissions/aptitude/results/page.tsx` — All session results
 
 **New APIs:**
+
 - `app/api/staff/admissions/aptitude/banks/route.ts` (GET/POST)
 - `app/api/staff/admissions/aptitude/banks/[id]/route.ts` (GET/PUT/DELETE)
 - `app/api/staff/admissions/aptitude/banks/[id]/questions/route.ts` (GET/POST)
@@ -306,6 +332,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 - `app/api/staff/admissions/aptitude/sessions/[id]/void/route.ts` (POST — void flagged session)
 
 **SystemSettings keys:**
+
 - `aptitude_time_limit_minutes` (default 60)
 - `aptitude_pass_threshold_pct` (default 50)
 - `aptitude_math_count` (default 10)
@@ -323,10 +350,12 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 ### 3.2 Applicant — Test Taking UI
 
 **New pages:**
+
 - `app/applicant/application/aptitude-test/page.tsx` — Pre-test info + start button
 - `app/applicant/application/aptitude-test/results/page.tsx` — View results (if configured)
 
 **New client components** (under `_components/`):
+
 - `TestWarningModal.tsx` — Rules, fullscreen notice, timer info, confirm to start
 - `TestInterface.tsx` — Main test-taking UI (fullscreen, renders questions one-at-a-time or all)
 - `QuestionCard.tsx` — Renders MCQ (radio buttons), NUMERIC_INPUT (number field), TRUE_FALSE
@@ -334,6 +363,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 - `AntiCheatProvider.tsx` — React context wrapping Fullscreen API + visibility listeners
 
 **New APIs:**
+
 - `app/api/applicant/aptitude/start/route.ts` — Create session, select random questions, return question set
 - `app/api/applicant/aptitude/answer/route.ts` — Save answer(s), validate session active
 - `app/api/applicant/aptitude/submit/route.ts` — Finalize, auto-grade, calculate score, transition stage
@@ -341,6 +371,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 - `app/api/applicant/aptitude/session/route.ts` — GET current session state (for resume)
 
 **New library files:**
+
 - `lib/aptitude/grading.ts` — Compare answers to correct answers, calculate score
 - `lib/aptitude/question-selector.ts` — Random selection per category from active bank
 - `lib/aptitude/anti-cheat.ts` — Server-side validation (expiry check, flag threshold)
@@ -348,6 +379,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 ### 3.3 Anti-Cheat Measures
 
 **Client-side (deterrent):**
+
 - `document.documentElement.requestFullscreen()` on test start
 - `document.addEventListener('visibilitychange')` — detect tab switch
 - `window.addEventListener('blur')` — detect window switch
@@ -356,6 +388,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 - Disable browser back/forward navigation during test
 
 **Server-side (authoritative):**
+
 - `expiresAt` set on session start — no submissions accepted after
 - `tabSwitchCount` and `fullscreenExits` tracked via API calls
 - Auto-flag when thresholds exceeded (configurable via SystemSettings)
@@ -378,6 +411,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 ### 4.1 Scoring Engine
 
 **New file:** `lib/admissions/scoring.ts`
+
 - Composite score calculation: `(aptitude_score * weight_a) + (profile_completeness * weight_p) + (referral_bonus * weight_r)`
 - Weights configurable via SystemSettings:
   - `shortlist_aptitude_weight` (default 60)
@@ -390,6 +424,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 ### 4.2 Staff Shortlisting Dashboard
 
 **New:** `app/staff/admissions/shortlisting/page.tsx`
+
 - Table of applicants at `APTITUDE_COMPLETED` stage
 - Columns: Name, Programme, Aptitude Score, Composite Score, CV (link), Actions
 - Filters: by programme, intake cycle, score range
@@ -405,12 +440,14 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 ### 5.1 Admin — Schedule & Slot Management
 
 **New pages:**
+
 - `app/staff/admissions/interviews/page.tsx` — Schedule list + calendar view
 - `app/staff/admissions/interviews/schedules/[id]/page.tsx` — Edit schedule, manage slots
 - `app/staff/admissions/interviews/schedules/[id]/_components/SlotGenerator.tsx` — Bulk generate slots
 - `app/staff/admissions/interviews/schedules/[id]/_components/InterviewNotesForm.tsx` — Record notes/score
 
 **New APIs:**
+
 - `app/api/staff/admissions/interviews/schedules/route.ts` (GET/POST)
 - `app/api/staff/admissions/interviews/schedules/[id]/route.ts` (GET/PUT/DELETE)
 - `app/api/staff/admissions/interviews/schedules/[id]/slots/route.ts` (GET/POST)
@@ -420,6 +457,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 **Bulk slot generator logic:** Admin provides date range, available days of week, time blocks (e.g. 9-10am, 10-11am, 2-3pm), daily capacity limit → system creates all `InterviewSlot` records.
 
 **SystemSettings keys:**
+
 - `interview_max_reschedules` (default 2)
 - `interview_reschedule_cutoff_hours` (default 24)
 - `interview_duration_minutes` (default 60)
@@ -428,15 +466,18 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 ### 5.2 Applicant — Self-Service Booking
 
 **New pages:**
+
 - `app/applicant/interview/schedule/page.tsx` — Calendar showing available slots, book button
 - `app/applicant/interview/status/page.tsx` — View booking details, reschedule option
 
 **New APIs:**
+
 - `app/api/applicant/interview/available-slots/route.ts` (GET — returns slots with `bookedCount < capacity`)
 - `app/api/applicant/interview/book/route.ts` (POST — book slot with race-condition-safe transaction)
 - `app/api/applicant/interview/reschedule/route.ts` (POST — release old slot, book new)
 
 **Race condition prevention:** Use `prismaUnfiltered.$transaction()` with re-check inside:
+
 ```
 1. Find slot, verify bookedCount < capacity
 2. Increment bookedCount
@@ -444,6 +485,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 ```
 
 **Rescheduling rules:**
+
 - Max reschedules tracked on `Application.interviewRescheduleCount`
 - Cannot reschedule within N hours of slot (cutoff from SystemSettings)
 - On reschedule: decrement old slot bookedCount, increment new, update Application
@@ -451,6 +493,7 @@ This replaces the original hardcoded CV/cover letter approach — the system is 
 ### 5.3 Interview Outcome Recording
 
 Staff records outcome via `InterviewNotesForm`:
+
 - Score (0-100)
 - Notes (text)
 - Result: PASS / FAIL / CONDITIONAL / NO_SHOW
@@ -464,11 +507,13 @@ Staff records outcome via `InterviewNotesForm`:
 ### 6.1 Medical Tracking
 
 Medical status is embedded in `Application` model (simple status + documents pattern):
+
 - `medicalStatus` enum field
 - `medicalClearedAt`, `medicalClearedBy`, `medicalNotes`, `medicalFacility`
 - Documents stored via existing `FileUpload` model with `referenceType: 'MEDICAL'`
 
 **SystemSettings keys:**
+
 - `medical_exam_fee` (default 200)
 - `medical_exam_currency` (default EUR)
 - `medical_exam_location` (default address)
@@ -478,6 +523,7 @@ Medical status is embedded in `Application` model (simple status + documents pat
 ### 6.2 Applicant Medical Page
 
 **New:** `app/applicant/application/medical/page.tsx` + `_components/MedicalUploadForm.tsx`
+
 - Display: fee amount, payment instructions, examination location
 - Toggle: "I will use the academy's facility" / "I will use my own facility" (+ facility name input)
 - Upload medical documents (uses `medicalDocument` UploadThing route slug)
@@ -486,6 +532,7 @@ Medical status is embedded in `Application` model (simple status + documents pat
 ### 6.3 Staff Medical Review
 
 **New:** `app/staff/admissions/medical/page.tsx`
+
 - Queue of applications at `MEDICAL_SUBMITTED` stage
 - View uploaded documents
 - Actions: Clear / Request Resubmission / Fail
@@ -495,6 +542,7 @@ Medical status is embedded in `Application` model (simple status + documents pat
 On final stage reached (programme-dependent — `MEDICAL_CLEARED` for full-time/military, `SELECTED` or `SHORTLISTED` for modular):
 
 **All programmes:**
+
 - Create StudentProfile, generate student ID
 - Change role: APPLICANT → STUDENT
 - Send enrollment completion email
@@ -502,17 +550,20 @@ On final stage reached (programme-dependent — `MEDICAL_CLEARED` for full-time/
 - Trigger existing promotion flow (currently in `app/api/applicant/pay-milestone/route.ts`)
 
 **Full-time (4yr/2yr) + Military (1yr) — additional steps:**
+
 - Assign to AcademicYear (current or next active year)
 - Staff later creates IntakeCycle batch → splits into Classes (~25 each) using existing batch enrollment system
 - Student gains access to: class schedule, classmates directory, seating, attendance
 
 **Modular — additional steps:**
+
 - Set `Application.completionDeadline` (admin-configurable, default 2 years from enrollment)
 - No batch/class/academic year assignment
 - Student gains access to: course catalog, self-paced exam booking, study materials
 - Cron job: warn students at 75% and 90% of deadline elapsed
 
 **Modular "class option":**
+
 - Modular students who opt for academy-provided class lessons are enrolled into a Class (like full-time) but without a fixed academic year/semester. Admin creates ad-hoc classes for modular groups when demand exists.
 
 ---
@@ -521,24 +572,25 @@ On final stage reached (programme-dependent — `MEDICAL_CLEARED` for full-time/
 
 **New emails to add in `lib/email/service.ts`** (following existing `renderXxx` / `sendXxx` pattern):
 
-| Template | Trigger | Key Content |
-|----------|---------|-------------|
-| `aptitude-test-invitation` | Payment verified | Link to start test, rules, time limit |
-| `aptitude-test-result` | Test completed | Score, pass/fail (if configured to show) |
-| `shortlisted` | Staff shortlists | Congrats, next step: interview scheduling |
-| `interview-invitation` | Shortlisted | Link to schedule interview, available dates |
-| `interview-confirmed` | Slot booked | Date, time, location, what to bring |
-| `interview-rescheduled` | Slot changed | New date/time/location |
-| `interview-reminder` | Cron (24h before) | Reminder with details |
-| `interview-result-pass` | Interview passed | Congrats, medical next steps |
-| `interview-result-fail` | Interview failed | Rejection with reason |
-| `medical-instructions` | Selected | Fee, location, documents needed, own-facility option |
-| `medical-cleared` | Medical approved | Congrats, enrollment confirmation |
-| `medical-resubmit` | Docs rejected | What needs to be resubmitted |
-| `application-rejected` | Rejected at any stage | Stage-specific rejection with reason |
-| `enrollment-complete` | Medical cleared → enrolled | Welcome as student, portal link |
+| Template                   | Trigger                    | Key Content                                          |
+| -------------------------- | -------------------------- | ---------------------------------------------------- |
+| `aptitude-test-invitation` | Payment verified           | Link to start test, rules, time limit                |
+| `aptitude-test-result`     | Test completed             | Score, pass/fail (if configured to show)             |
+| `shortlisted`              | Staff shortlists           | Congrats, next step: interview scheduling            |
+| `interview-invitation`     | Shortlisted                | Link to schedule interview, available dates          |
+| `interview-confirmed`      | Slot booked                | Date, time, location, what to bring                  |
+| `interview-rescheduled`    | Slot changed               | New date/time/location                               |
+| `interview-reminder`       | Cron (24h before)          | Reminder with details                                |
+| `interview-result-pass`    | Interview passed           | Congrats, medical next steps                         |
+| `interview-result-fail`    | Interview failed           | Rejection with reason                                |
+| `medical-instructions`     | Selected                   | Fee, location, documents needed, own-facility option |
+| `medical-cleared`          | Medical approved           | Congrats, enrollment confirmation                    |
+| `medical-resubmit`         | Docs rejected              | What needs to be resubmitted                         |
+| `application-rejected`     | Rejected at any stage      | Stage-specific rejection with reason                 |
+| `enrollment-complete`      | Medical cleared → enrolled | Welcome as student, portal link                      |
 
 **New cron jobs** (add to existing cron infrastructure):
+
 - Interview reminders (24h before)
 - Aptitude test reminders (if not started within N days)
 - Modular completion deadline warnings (at 75% and 90% of deadline elapsed)
@@ -555,6 +607,7 @@ The aptitude test infrastructure (Phase 3) is designed for pre-enrollment screen
 The internal exam system is implemented behind the `internal_exam_system_enabled` feature flag and is wired through the staff, student, API, and settings surfaces.
 
 Implemented:
+
 - Staff exam-bank management: `app/staff/exams/internal/page.tsx`, `app/staff/exams/internal/_components/ExamBankManager.tsx`, `app/api/staff/exams/internal/banks/route.ts`, and `app/api/staff/exams/internal/banks/[bankId]/questions/route.ts`.
 - Staff share links: expanded bank rows expose a copyable student-facing link in the form `/student/exams/internal?bankId=<bankId>`. Students still pass normal role and enrollment checks before starting.
 - Student exam dashboard: `app/student/exams/internal/page.tsx` and `InternalExamDashboard.tsx` list only exam banks tied to courses the student is enrolled in, show attempt/retake/ban state, and open the matching pre-exam lobby from a shared bank link.
@@ -564,6 +617,7 @@ Implemented:
 - Anti-cheat: when bank rules enable `allowKeyboardAutoSubmit`, a keyboard press during the active exam auto-submits the attempt and increments `InternalExamSession.keyboardEvents`. Timeout submission is also recorded through the same submit path.
 
 Remaining implementation gaps:
+
 - Staff-facing session/result review pages are still thinner than the plan: there is not yet a dedicated `/staff/exams/internal/sessions` detail surface for reviewing every answer and exporting a regulatory audit packet.
 - Essay questions are scaffolded in the model, but the current live student UI is MCQ-focused.
 - The standalone `keyboard-event` endpoint described in the original plan was folded into the submit path instead of implemented as a separate route.
@@ -582,18 +636,18 @@ These are the official rules the academy follows for internal EASA module exams:
 
 ### 8.2 How It Differs from Aptitude Tests
 
-| Aspect | Aptitude Test (Pre-Enrollment) | Internal Exam (Post-Enrollment) |
-|--------|-------------------------------|-------------------------------|
-| Who takes it | Applicants | Enrolled students |
-| Purpose | Admissions screening | Course module assessment |
-| Question source | AptitudeTestBank | InternalExamBank (per course/module) |
-| Question format | MCQ, numeric, true/false | MCQ (3 options), essay |
-| Time calculation | Fixed total (admin-set, e.g. 60 min) | Per-question (75s × question count for EASA) |
-| Pass mark | 50% (configurable) | 75% (EASA) / admin-configurable (non-EASA) |
-| Anti-cheat | Tab switch warning → threshold → auto-submit | **Any keyboard press = instant auto-submit** |
-| Retake rules | Admin toggle (allow/deny) | 90-day wait (EASA) / admin-configurable (non-EASA) |
-| Results | Score + pass/fail (optionally hidden) | Score + pass/fail (always shown to student) |
-| Certificate | N/A | Issued on pass (except 4yr scholarship — scores only) |
+| Aspect           | Aptitude Test (Pre-Enrollment)               | Internal Exam (Post-Enrollment)                       |
+| ---------------- | -------------------------------------------- | ----------------------------------------------------- |
+| Who takes it     | Applicants                                   | Enrolled students                                     |
+| Purpose          | Admissions screening                         | Course module assessment                              |
+| Question source  | AptitudeTestBank                             | InternalExamBank (per course/module)                  |
+| Question format  | MCQ, numeric, true/false                     | MCQ (3 options), essay                                |
+| Time calculation | Fixed total (admin-set, e.g. 60 min)         | Per-question (75s × question count for EASA)          |
+| Pass mark        | 50% (configurable)                           | 75% (EASA) / admin-configurable (non-EASA)            |
+| Anti-cheat       | Tab switch warning → threshold → auto-submit | **Any keyboard press = instant auto-submit**          |
+| Retake rules     | Admin toggle (allow/deny)                    | 90-day wait (EASA) / admin-configurable (non-EASA)    |
+| Results          | Score + pass/fail (optionally hidden)        | Score + pass/fail (always shown to student)           |
+| Certificate      | N/A                                          | Issued on pass (except 4yr scholarship — scores only) |
 
 ### 8.3 New Models
 
@@ -667,6 +721,7 @@ New Models:
 ### 8.4 Instructor — Question Upload & Exam Management
 
 **New pages:**
+
 - `app/staff/exams/internal/page.tsx` — List all internal exam banks grouped by course
 - `app/staff/exams/internal/banks/[id]/page.tsx` — Edit bank + questions
 - `app/staff/exams/internal/banks/[id]/_components/QuestionEditor.tsx` — CRUD for questions (reuse pattern from aptitude QuestionEditor)
@@ -674,6 +729,7 @@ New Models:
 - `app/staff/exams/internal/rules/page.tsx` — Rule overrides for non-EASA banks
 
 **New APIs:**
+
 - `app/api/staff/exams/internal/banks/route.ts` (GET/POST)
 - `app/api/staff/exams/internal/banks/[id]/route.ts` (GET/PUT/DELETE)
 - `app/api/staff/exams/internal/banks/[id]/questions/route.ts` (GET/POST)
@@ -685,11 +741,13 @@ New Models:
 ### 8.5 Student — Test Taking UI
 
 **New pages:**
+
 - `app/student/exams/internal/page.tsx` — List available exams (by enrolled courses)
 - `app/student/exams/internal/[bankId]/page.tsx` — Pre-exam info + rules + start button
 - `app/student/exams/internal/[bankId]/results/page.tsx` — View past results
 
 **New client components** (under `_components/`, shared with aptitude where possible):
+
 - `InternalExamInterface.tsx` — Main test UI. Fullscreen, timed, renders MCQ (3-option) + essay.
   - **Keyboard listener:** `document.addEventListener('keydown')` on the exam container. Any keypress (except mouse clicks on answer options) triggers immediate auto-submit.
   - Timer calculated from question count × time-per-question.
@@ -698,6 +756,7 @@ New Models:
 - `ExamResultsView.tsx` — Score breakdown, pass/fail, retake eligibility date.
 
 **New APIs:**
+
 - `app/api/student/exams/internal/progress/route.ts` (GET — enrolled-course exam banks, progress, retake/ban state, and student details for confirmation)
 - `app/api/student/exams/internal/start/route.ts` (POST — create session, select questions, calculate time)
 - `app/api/student/exams/internal/answer/route.ts` (POST — save answer)
@@ -709,6 +768,7 @@ Note: keyboard-triggered auto-submit is currently handled by `submit/route.ts` w
 ### 8.6 Shared Infrastructure with Aptitude Tests
 
 Reuse from Phase 3:
+
 - `AntiCheatProvider.tsx` — Extended with keyboard listener (configurable per exam type)
 - `TestTimer.tsx` — Same countdown component, different calculation input
 - `QuestionCard.tsx` — Extended to support 3-option MCQ + essay textarea
@@ -716,6 +776,7 @@ Reuse from Phase 3:
 - Fullscreen API, visibility change detection, IP/user agent logging
 
 **New shared file:** `lib/exams/time-calculator.ts`
+
 - EASA: `mcqCount * 75 + essayCount * 20 * 60` (seconds)
 - Custom: `mcqCount * timePerQuestionSecs + essayCount * essayTimeMins * 60`
 
@@ -737,13 +798,16 @@ Reuse from Phase 3:
 ## Phase 9: Legacy Data Import + Flexible Fields
 
 ### 9.1 Problem
+
 The first and second batches have records scattered across CSVs, Word documents, images, and various online storage. Admin needs to:
+
 1. Import this data into the system with validation
 2. Occasionally add new data fields for applicants/students without requiring schema changes
 
 ### 9.2 Admin-Defined Custom Fields
 
 **New model:** `CustomFieldDefinition`
+
 ```
 - id, name (display label), slug (unique key)
 - fieldType: TEXT, NUMBER, DATE, SELECT, MULTI_SELECT, FILE, BOOLEAN
@@ -756,6 +820,7 @@ The first and second batches have records scattered across CSVs, Word documents,
 ```
 
 **New model:** `CustomFieldValue`
+
 ```
 - id, fieldDefinitionId, entityId (the Application/StudentProfile/User id), entityType
 - value String (stored as string, parsed based on fieldType)
@@ -766,10 +831,12 @@ The first and second batches have records scattered across CSVs, Word documents,
 This is the EAV (Entity-Attribute-Value) pattern — admin can add fields like "Blood Type", "Emergency Contact", "Prior Aviation Experience", "Uniform Size", etc. without schema migrations. The trade-off is querying flexibility (no SQL filtering on custom fields), but these are typically display/report fields, not filter criteria.
 
 **New pages:**
+
 - `app/staff/settings/custom-fields/page.tsx` — Admin CRUD for field definitions
 - Custom field rendering component that dynamically generates form inputs based on `fieldType`
 
 **New APIs:**
+
 - `app/api/staff/settings/custom-fields/route.ts` (GET/POST)
 - `app/api/staff/settings/custom-fields/[id]/route.ts` (PUT/DELETE)
 
@@ -778,6 +845,7 @@ This is the EAV (Entity-Attribute-Value) pattern — admin can add fields like "
 **New:** `app/staff/admissions/import/page.tsx`
 
 Step-by-step import wizard:
+
 1. **Upload** — Accept CSV files (and optionally Excel via a parser library)
 2. **Column Mapping** — Admin maps CSV columns to system fields (first name, last name, email, programme, license categories, custom fields, etc.). Auto-detect common column names.
 3. **Validation** — Preview rows with per-row validation:
@@ -790,14 +858,17 @@ Step-by-step import wizard:
 5. **Import** — Create User + Profile + Application records for each valid row. For already-enrolled students (historical), also create StudentProfile and set appropriate stage (`ENROLLED`).
 
 **File attachments for imported records:**
+
 - Separate upload step or per-row file attachment for scanned documents (images, PDFs)
 - Stored via existing `FileUpload` model with `referenceType: 'IMPORT'`
 
 **New APIs:**
+
 - `app/api/staff/admissions/import/validate/route.ts` (POST — accepts CSV, returns validation results)
 - `app/api/staff/admissions/import/execute/route.ts` (POST — creates records from validated data)
 
 ### 9.4 Historical Batch Context
+
 - Second batch was smaller, admitted to replace students who left. Most of the second batch also departed; one remains.
 - Import tool should support setting `Application.stage` to `ENROLLED`, `WITHDRAWN`, or `REJECTED` for historical records so the system accurately reflects who is still active vs. who left.
 - Admin can attach scattered files (images, scanned docs) to imported records via the document upload system.
@@ -837,6 +908,7 @@ Step-by-step import wizard:
 This section captures how the academy actually operates, to ensure the implementation matches reality.
 
 ### Batch → Class Structure
+
 - A batch (cohort) size depends on total classroom capacity. Currently ~50 students (2 classrooms × 25–28 seats each), but will grow as the academy adds more classrooms for cabin crew, non-EASA courses, EASA courses, etc.
 - The batch is split across available classrooms (currently 2 classes of ~25 each).
 - Both classes study the same courses on the same schedule, but at different times of day:
@@ -846,29 +918,32 @@ This section captures how the academy actually operates, to ensure the implement
 - 5–15 minute breaks after every hour of instruction.
 
 ### Academic Calendar (Full-Time Programmes)
+
 - 4-year programme split into years, each with 2 semesters.
 - Each semester covers ~3–4 course modules (e.g., M1, M2, M3).
 - Daily instruction: 3–5 hours per class, every weekday.
 - After completing a semester's modules, students write exams. Results are graded instantly by the examiner and communicated to students.
 
 ### License Categories & Exam Levels
+
 - Students enroll targeting specific license categories: B1.1, B2, etc.
 - B2 is a higher level than B1 — writing the B2 exam for a module automatically covers B1 (the higher exam subsumes the lower).
 - A class may contain students enrolled for B1.1 only and students enrolled for B1.1+B2. They study together but write at different exam levels.
 
 ### Programme Pathways (How They Differ)
-| Aspect | Full-Time 4yr (Scholarship) | Full-Time 2yr | Military (1yr) | Modular | Exam Only |
-|--------|---------------------------|---------------|----------------|---------|-----------|
-| Batch/Class | Yes (~25/class) | Yes (~25/class) | Yes (accelerated) | No (unless class option) | No |
-| Academic Year | Yes | Yes | Yes (compressed) | No | No |
-| Funding | Scholarship | Self-funded | Self-funded | Self-funded | Self-funded |
-| OJT (Part 145) | Academy provides facility | Student finds own facility | Student finds own facility | N/A | N/A |
-| Exam certificates | Not issued individually (scores only) | Issued on pass | Issued on pass | Issued on pass | Issued on pass |
-| Post-completion | Academy bonds student → places in engineering facility | Independent | Independent | Independent | Independent |
-| Study schedule | Fixed daily hours | Fixed daily hours | Fixed (accelerated) | Self-paced | Already studied |
-| Exam booking | Scheduled per semester | Scheduled per semester | Scheduled (compressed) | Self-service, any window | Self-service |
-| Completion deadline | Programme duration | Programme duration | 1 year | Admin-set (default 2yr) | Per-booking |
-| Admission pipeline | Full | Full | Full | Light (no interview/medical) | None |
+
+| Aspect              | Full-Time 4yr (Scholarship)                            | Full-Time 2yr              | Military (1yr)             | Modular                      | Exam Only       |
+| ------------------- | ------------------------------------------------------ | -------------------------- | -------------------------- | ---------------------------- | --------------- |
+| Batch/Class         | Yes (~25/class)                                        | Yes (~25/class)            | Yes (accelerated)          | No (unless class option)     | No              |
+| Academic Year       | Yes                                                    | Yes                        | Yes (compressed)           | No                           | No              |
+| Funding             | Scholarship                                            | Self-funded                | Self-funded                | Self-funded                  | Self-funded     |
+| OJT (Part 145)      | Academy provides facility                              | Student finds own facility | Student finds own facility | N/A                          | N/A             |
+| Exam certificates   | Not issued individually (scores only)                  | Issued on pass             | Issued on pass             | Issued on pass               | Issued on pass  |
+| Post-completion     | Academy bonds student → places in engineering facility | Independent                | Independent                | Independent                  | Independent     |
+| Study schedule      | Fixed daily hours                                      | Fixed daily hours          | Fixed (accelerated)        | Self-paced                   | Already studied |
+| Exam booking        | Scheduled per semester                                 | Scheduled per semester     | Scheduled (compressed)     | Self-service, any window     | Self-service    |
+| Completion deadline | Programme duration                                     | Programme duration         | 1 year                     | Admin-set (default 2yr)      | Per-booking     |
+| Admission pipeline  | Full                                                   | Full                       | Full                       | Light (no interview/medical) | None            |
 
 **Scholarship bonding model:** 4-year scholarship students do not receive individual course exam certificates — they only see their scores. The academy places them in its engineering facility after completion and bonds them (contractual obligation to work for the academy/partners). This ensures ROI on the scholarship investment. 2-year and other self-funded students receive certificates immediately on passing and are independent after graduation.
 
@@ -877,74 +952,82 @@ This section captures how the academy actually operates, to ensure the implement
 These changes directly affect the academy's course content, exam structure, and training delivery:
 
 **Exam Structure Changes:**
+
 - **Modules 9 & 10:** Essay questions permanently REMOVED. Exams are now purely MCQ.
 - **Module 10:** MCQ count increased from 40 to 44 to compensate for essay removal.
 - The internal exam system must support per-module question counts (not a fixed number). Admin configures question count per InternalExamBank.
 
 **New Syllabus Content (affects course materials):**
+
 - **Module 6 (Materials):** Composite materials and additive manufacturing (3D printing)
 - **Module 7 (Maintenance Practices):** Electrical Wiring Interconnection Systems (EWIS) and Critical Design Configuration Control Limitations (CDCCL)
 - **Module 9 & 10:** Safety Management Systems (SMS), occurrence reporting, risk management
 - **Module 13 (Aero Structures & Systems):** Modern avionics, fly-by-wire systems
 
 **Distance Learning (now permanent — was COVID temporary):**
+
 - **VCE (Virtually Controlled Environment):** Synchronous instructor-led remote sessions. The academy could offer this for modular students.
 - **Asynchronous distance learning:** Permitted with mandatory instructor interaction balance.
 - **Synthetic Training Devices:** VR/AR tools allowed in practical training when approved.
 - This validates the modular "class option" — admin can create online/remote classes for modular students, not just physical ones.
 
 **OJT (On-the-Job Training) Changes:**
+
 - Moved from rigid checklist to **competence-based assessment** model.
 - OJT task list is now adaptable to actual maintenance environment.
 - Affects 4-year scholarship students (academy provides Part-145 OJT facility).
 
 **Experience Requirements:**
+
 - B1.1, B1.3, B2: minimum **12 months** in EASA Part-145 approved organisation
 - A, B1.2, B1.4, B3: minimum **6 months** in Part-145
 - 2-year full-time students must find their own Part-145 facility for this.
 
 **Coming 2025+ (plan for future):**
+
 - **Anti-exam-fraud measures (NPA 2023-10):** Question randomization, stricter proctoring. Our internal exam system already handles this with shuffling and anti-cheat.
 - **e-Licence:** Digital Part-66 licence rollout beginning late 2025/2026. May affect certificate generation.
 - **Language proficiency standards** for instructors and students (typically English).
 
 **Full Module List (17 modules):**
 
-| # | Module | B1.1 | B1.2 | B2 |
-|---|--------|:----:|:----:|:--:|
-| 1 | Mathematics | Yes | Yes | Yes |
-| 2 | Physics | Yes | Yes | Yes |
-| 3 | Electrical Fundamentals | Yes | Yes | Yes |
-| 4 | Electronic Fundamentals | Yes | Yes | Yes |
-| 5 | Digital Techniques / Electronic Instrument Systems | Yes | Yes | Yes |
-| 6 | Materials and Hardware | Yes | Yes | Yes |
-| 7 | Maintenance Practices | Yes | Yes | Yes |
-| 8 | Basic Aerodynamics | Yes | Yes | Yes |
-| 9 | Human Factors | Yes | Yes | Yes |
-| 10 | Aviation Legislation | Yes | Yes | Yes |
-| 11 | Turbine Aeroplane Aero, Structures & Systems | Yes | - | - |
-| 12 | Helicopter Aero, Structures & Systems | - | - | - |
-| 13 | Aircraft Aero, Structures & Systems | Yes | Yes | Yes |
-| 14 | Propulsion | Yes | Yes | - |
-| 15 | Gas Turbine Engine | Yes | - | - |
-| 16 | Piston Engine | - | Yes | - |
-| 17 | Propeller | Yes | Yes | - |
+| #   | Module                                             | B1.1 | B1.2 | B2  |
+| --- | -------------------------------------------------- | :--: | :--: | :-: |
+| 1   | Mathematics                                        | Yes  | Yes  | Yes |
+| 2   | Physics                                            | Yes  | Yes  | Yes |
+| 3   | Electrical Fundamentals                            | Yes  | Yes  | Yes |
+| 4   | Electronic Fundamentals                            | Yes  | Yes  | Yes |
+| 5   | Digital Techniques / Electronic Instrument Systems | Yes  | Yes  | Yes |
+| 6   | Materials and Hardware                             | Yes  | Yes  | Yes |
+| 7   | Maintenance Practices                              | Yes  | Yes  | Yes |
+| 8   | Basic Aerodynamics                                 | Yes  | Yes  | Yes |
+| 9   | Human Factors                                      | Yes  | Yes  | Yes |
+| 10  | Aviation Legislation                               | Yes  | Yes  | Yes |
+| 11  | Turbine Aeroplane Aero, Structures & Systems       | Yes  |  -   |  -  |
+| 12  | Helicopter Aero, Structures & Systems              |  -   |  -   |  -  |
+| 13  | Aircraft Aero, Structures & Systems                | Yes  | Yes  | Yes |
+| 14  | Propulsion                                         | Yes  | Yes  |  -  |
+| 15  | Gas Turbine Engine                                 | Yes  |  -   |  -  |
+| 16  | Piston Engine                                      |  -   | Yes  |  -  |
+| 17  | Propeller                                          | Yes  | Yes  |  -  |
 
 **License Categories (full list):** A, B1.1, B1.2, B1.3, B1.4, B2, B2L, B3, L, C
 
 **Training paths:**
+
 - Part 147 basic training course: 2,400 hours (~20 months) + 2 years Part-145 experience
 - Technical trade school: + 3 years experience
 - Part 147 MTO exam path: + 5 years experience (work while studying)
+  **Impact on the plan:**
 
-**Impact on the plan:**
-1. `InternalExamBank` must store per-module question count (not rely on a global default) since M10 now has 44 MCQs, not the standard 40.
-2. Essay question support in internal exams can be deprioritized — EASA is removing them. Keep the model field (`isEssay`) for non-EASA courses only.
-3. The anti-cheat and question randomization we're building aligns with EASA's upcoming anti-fraud requirements.
+1. If future EASA module additions exceed the standard question-bank size, `InternalExamBank` must store per-module question counts rather than relying on a global default.
+2. Essay question support in internal exams is deprioritized — EASA is moving away from essay questions. The model field (`isEssay`) is retained for non-EASA courses only.
+3. The anti-cheat and question randomization already built align with EASA's upcoming anti-fraud requirements.
 4. Distance learning support (VCE) could be added as a class delivery mode for modular students.
 5. OJT tracking could be a future module (competence-based assessment records).
 
 ### Exam Pool System (Already Built — No Changes Needed)
+
 - Pool = one classroom (max 28 seats), up to 4 modules per session (examiner limit).
 - Booking types: single, twin-pack (2 at discount), four-pack (4 at deeper discount), group charter.
 - If a student books multiple exams (e.g., twin-pack), each exam goes into a separate session (student can't write 2 exams simultaneously). Session 1 might be 8–10 AM, Session 2 might be 12–2 PM.
@@ -952,6 +1035,7 @@ These changes directly affect the academy's course content, exam structure, and 
 - All programme types (full-time, modular, exam-only) use the same pool system for exam booking.
 
 ### Revision Sessions
+
 - **Online revision**: ~1 week before exam window, via Zoom/Teams link sent by admin to concerned students.
 - **In-person revision**: On exam day, examiner does a quick review session before each exam module starts. E.g., M1 revision at 7 AM before M1 exam at 8 AM; M2 revision between sessions.
 - Admin manages this through existing notification/communication tools.
@@ -960,32 +1044,32 @@ These changes directly affect the academy's course content, exam structure, and 
 
 ## Critical Files to Modify
 
-| File | Change |
-|------|--------|
-| `prisma/schema.prisma` | Add all new models and enums |
-| `app/api/public/register/route.ts` | Create Application for non-EXAM_ONLY |
-| `app/api/staff/applicants/[id]/approve/route.ts` | Trigger pipeline stage transitions |
-| `app/applicant/application/status/page.tsx` | Full pipeline tracker UI |
-| `app/applicant/_components/ApplicantSidebar.tsx` | Stage-aware navigation |
-| `app/staff/_components/StaffSidebar.tsx` | Add Admissions section |
-| `app/api/uploadthing/core.ts` | New upload route slugs (CV, cover letter, medical, question images) |
-| `lib/email/service.ts` | 14 new email templates |
-| `components/Tour/AppTour.tsx` | Update applicant tour steps |
-| Exam result/certificate display logic | Suppress individual certificate downloads for SCHOLARSHIP-funded students (show scores only) |
+| File                                             | Change                                                                                       |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `prisma/schema.prisma`                           | Add all new models and enums                                                                 |
+| `app/api/public/register/route.ts`               | Create Application for non-EXAM_ONLY                                                         |
+| `app/api/staff/applicants/[id]/approve/route.ts` | Trigger pipeline stage transitions                                                           |
+| `app/applicant/application/status/page.tsx`      | Full pipeline tracker UI                                                                     |
+| `app/applicant/_components/ApplicantSidebar.tsx` | Stage-aware navigation                                                                       |
+| `app/staff/_components/StaffSidebar.tsx`         | Add Admissions section                                                                       |
+| `app/api/uploadthing/core.ts`                    | New upload route slugs (CV, cover letter, medical, question images)                          |
+| `lib/email/service.ts`                           | 14 new email templates                                                                       |
+| `components/Tour/AppTour.tsx`                    | Update applicant tour steps                                                                  |
+| Exam result/certificate display logic            | Suppress individual certificate downloads for SCHOLARSHIP-funded students (show scores only) |
 
 ## Reusable Existing Infrastructure
 
-| What | Where | Reuse How |
-|------|-------|-----------|
-| File uploads | `FileUpload` model + UploadThing | CV, cover letter, medical docs |
-| Email sending | `lib/email/service.ts` + `sender.ts` | All new email templates |
-| Notifications | `Notification` model | Stage transition alerts |
-| Audit logging | `lib/audit/logger.ts` | All admissions actions |
-| System settings | `SystemSetting` + `lib/settings.ts` | All admin-configurable values |
-| API patterns | `lib/api/response.ts` | apiSuccess, apiError, withErrorHandler |
-| Auth helpers | `lib/auth/helpers.ts` | getAuthSession, requireStaff |
-| Zod validation | `lib/validation/schemas.ts` | New admission schemas |
-| Skeleton components | `components/shared/DashboardSkeleton.tsx` | All new loading.tsx files |
+| What                | Where                                     | Reuse How                              |
+| ------------------- | ----------------------------------------- | -------------------------------------- |
+| File uploads        | `FileUpload` model + UploadThing          | CV, cover letter, medical docs         |
+| Email sending       | `lib/email/service.ts` + `sender.ts`      | All new email templates                |
+| Notifications       | `Notification` model                      | Stage transition alerts                |
+| Audit logging       | `lib/audit/logger.ts`                     | All admissions actions                 |
+| System settings     | `SystemSetting` + `lib/settings.ts`       | All admin-configurable values          |
+| API patterns        | `lib/api/response.ts`                     | apiSuccess, apiError, withErrorHandler |
+| Auth helpers        | `lib/auth/helpers.ts`                     | getAuthSession, requireStaff           |
+| Zod validation      | `lib/validation/schemas.ts`               | New admission schemas                  |
+| Skeleton components | `components/shared/DashboardSkeleton.tsx` | All new loading.tsx files              |
 
 ---
 

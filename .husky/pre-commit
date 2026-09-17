@@ -1,2 +1,2 @@
-node scripts/bump-version.js
+bun run scripts/check-encoding.mjs
 npx lint-staged

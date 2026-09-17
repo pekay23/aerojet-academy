@@ -48,11 +48,13 @@ export default function CurrencyToggle({
   }, [baseCurrency])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRates()
   }, [fetchRates])
 
   useEffect(() => {
     if (currentCurrency === baseCurrency) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setConvertedAmount(amount)
     } else {
       const rate = rates[currentCurrency.toLowerCase()]

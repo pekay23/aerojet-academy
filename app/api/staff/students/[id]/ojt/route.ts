@@ -84,7 +84,7 @@ export const POST = withErrorHandler(
 
 // PATCH /api/staff/students/[id]/ojt — Update an OJT period
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, context?: { params: Record<string, string> }) => {
+  async (req: NextRequest, _context?: { params: Record<string, string> }) => {
     const staff = await requireStaff()
     const body = await req.json()
     const { ojtId, status, hoursCompleted, endDate, notes } = body

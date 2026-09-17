@@ -1,5 +1,5 @@
 import 'server-only'
-import { Resend } from 'resend'
+import { Resend, type WebhookEvent } from 'resend'
 
 // Placeholder when the key is absent (Preview/CI builds) so the Resend
 // constructor doesn't throw during `next build` page-data collection.
@@ -16,7 +16,7 @@ export async function createResendWebhook(
 ) {
   return await resend.webhooks.create({
     endpoint,
-    events: events as any,
+      events: events as unknown as WebhookEvent[],
   })
 }
 
@@ -34,7 +34,7 @@ export async function updateResendWebhook(
   webhookId: string,
   options: { endpoint?: string; events?: string[]; status?: 'enabled' | 'disabled' }
 ) {
-  return await resend.webhooks.update(webhookId, options as any)
+  return await resend.webhooks.update(webhookId, options as unknown as Parameters<typeof resend.webhooks.update>[1])
 }
 
 /**

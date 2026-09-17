@@ -8,7 +8,7 @@ import {
 } from './types'
 
 // Type definitions for Prisma objects with includes
-type CourseWithRelations = Prisma.CourseGetPayload<{
+type _CourseWithRelations = Prisma.CourseGetPayload<{
   include: {
     examComponents: { include: { course: true } }
   }
@@ -46,7 +46,9 @@ type UserWithProfile = Prisma.UserGetPayload<{
   }
 }>
 
-export function serializeCourse(course: any): SerializedCourse {
+type CourseInput = Prisma.CourseGetPayload<{}>
+
+export function serializeCourse(course: CourseInput): SerializedCourse {
   return {
     ...course,
     price: course.price ? Number(course.price) : undefined,
@@ -97,23 +99,28 @@ export function serializePaymentMilestone(milestone: PaymentMilestoneWithRelatio
 }
 
 export function serializeUserProfile(user: UserWithProfile): SerializedUserProfile {
+  const { createdAt: _profileCreatedAt, updatedAt: _profileUpdatedAt } = user.profile || {}
+  const { createdAt: _studentCreatedAt, updatedAt: _studentUpdatedAt, pathwayRel } = user.studentProfile || {}
+
   return {
     id: user.id,
     email: user.email,
     role: user.role,
     profile: user.profile ? {
-      ...(user.profile as any),
-      dateOfBirth: (user.profile as any).dateOfBirth?.toISOString() || null,
-      createdAt: undefined,
-      updatedAt: undefined,
+      firstName: user.profile.firstName,
+      lastName: user.profile.lastName,
+      middleName: user.profile.middleName,
+      phone: user.profile.phone,
+      address: user.profile.address,
+      dateOfBirth: user.profile.dateOfBirth ? new Date(user.profile.dateOfBirth).toISOString() : null,
+      profilePhotoUrl: user.profile.profilePhotoUrl,
     } : null,
     studentProfile: user.studentProfile ? {
-      ...(user.studentProfile as any),
-      pathwayName: user.studentProfile.pathwayRel?.name || null,
-      enrollmentDate: (user.studentProfile as any).enrollmentDate?.toISOString() || null,
-      createdAt: undefined,
-      updatedAt: undefined,
+      studentId: user.studentProfile.studentId,
+      enrollmentType: user.studentProfile.enrollmentType,
+      pathwayName: pathwayRel?.name || null,
+      enrollmentDate: user.studentProfile.enrollmentDate ? new Date(user.studentProfile.enrollmentDate).toISOString() : null,
     } : null,
-    settings: user.settings || {},
+    settings: (user.settings as Record<string, unknown>) || {},
   }
 }

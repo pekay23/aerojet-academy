@@ -48,6 +48,8 @@ export default function MedicalPage() {
     }
   }, [])
 
+   
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData() }, [fetchData])
 
   const handleSubmit = async () => {

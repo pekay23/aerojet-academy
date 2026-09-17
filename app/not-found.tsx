@@ -30,7 +30,7 @@ export default function NotFound() {
         </div>
       </div>
 
-      <p className="mt-8 text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase">
+      <p className="mt-8 text-[10px] font-bold tracking-[0.2em] text-slate-600 uppercase dark:text-slate-300">
         &copy; {new Date().getFullYear()} Aerojet Aviation Training Academy
       </p>
     </div>

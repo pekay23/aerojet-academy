@@ -74,8 +74,8 @@ export async function autoEnrollStudent(studentProfileId: string): Promise<numbe
   const academicYearId = profile.academicYearId
   const semesterId = profile.semesterId
 
-  const targetTerm = (profile.pathwayRel as any).academicTerms.find(
-    (term: any) => term.yearNumber === currentYear && term.semesterNumber === currentSem
+  const targetTerm = (profile.pathwayRel as unknown as { academicTerms: Array<{ yearNumber: number; semesterNumber: number; courseAssignments: Array<{ courseId: string }> }> }).academicTerms.find(
+    (term: { yearNumber: number; semesterNumber: number }) => term.yearNumber === currentYear && term.semesterNumber === currentSem
   )
 
   if (!targetTerm) {
@@ -87,7 +87,7 @@ export async function autoEnrollStudent(studentProfileId: string): Promise<numbe
 
   // 4. Filter for modules the student *actually* needs (deduplication)
   const { modules: requiredModules } = await getDeduplicatedModulesForStudent(studentProfileId)
-  const requiredModuleIds = new Set(requiredModules.map((m: any) => m.id))
+  const requiredModuleIds = new Set(requiredModules.map((m: { id: string }) => m.id))
 
   // 5. Create enrollments for modules assigned to this term that the student needs
   let enrollmentCount = 0

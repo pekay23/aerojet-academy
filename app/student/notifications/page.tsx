@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { Mail } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import prismaUnfiltered from '@/lib/prisma/client'
 import NotificationsList from './_components/NotificationsList'
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export default async function NotificationsPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const notifications = await prisma.notification.findMany({
+  const notifications = await prismaUnfiltered.notification.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: 'desc' },
     take: 50,
@@ -24,10 +24,10 @@ export default async function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.isRead).length
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-7xl space-y-8 duration-700">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             Notifications
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -55,4 +55,3 @@ export default async function NotificationsPage() {
     </div>
   )
 }
-

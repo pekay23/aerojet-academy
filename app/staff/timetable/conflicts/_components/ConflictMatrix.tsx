@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { AlertOctagon, User, Building2 } from 'lucide-react'
 
 interface ConflictDto {
-  kind: 'INSTRUCTOR' | 'CLASSROOM'
+  kind: 'INSTRUCTOR' | 'CLASSROOM' | 'INSTRUCTOR_UNAVAILABLE'
   resourceId: string
   resourceLabel: string
   date: string

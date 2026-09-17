@@ -105,7 +105,7 @@ async function test3_dualWrite() {
       email: testEmail,
       role: 'APPLICANT',
       status: 'PENDING',
-    } as any);
+    } as unknown as { id: string });
 
     console.log('✅ User created with backup:', user.id);
 
@@ -114,7 +114,7 @@ async function test3_dualWrite() {
     const fetched = await readWithFallback('user', { id: user.id });
 
     if (fetched) {
-      console.log('✅ Read with fallback successful:', (fetched as any).email);
+      console.log('✅ Read with fallback successful:', (fetched as Record<string, unknown>).email);
     } else {
       console.log('⚠️  Read with fallback returned null');
     }
@@ -159,3 +159,5 @@ async function runAllTests() {
 }
 
 runAllTests().catch(console.error);
+
+

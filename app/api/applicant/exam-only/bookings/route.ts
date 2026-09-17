@@ -1,19 +1,16 @@
-import { NextResponse } from 'next/server'
-import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { NextRequest } from 'next/server'
+import { requireApplicant } from '@/lib/auth/helpers'
+import { prismaUnfiltered } from '@/lib/prisma/client'
+import { withErrorHandler, apiPaginated, parsePagination } from '@/lib/api/response'
 
-export async function GET() {
-  try {
-    const session = await getAuthSession()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+export const GET = withErrorHandler(async (req: NextRequest) => {
+  const user = await requireApplicant()
+  const { page, limit, skip } = parsePagination(new URL(req.url).searchParams)
 
-    const userId = session.user.id
-
-    const bookings = await prisma.examBooking.findMany({
+  const [bookings, total] = await Promise.all([
+    prismaUnfiltered.examBooking.findMany({
       where: {
-        userId,
+        userId: user.id,
         bookingType: 'INDIVIDUAL',
       },
       include: {
@@ -31,27 +28,34 @@ export async function GET() {
       orderBy: {
         createdAt: 'desc',
       },
-      take: 100,
-    })
+      take: limit,
+      skip,
+    }),
+    prismaUnfiltered.examBooking.count({
+      where: {
+        userId: user.id,
+        bookingType: 'INDIVIDUAL',
+      },
+    }),
+  ])
 
-    return NextResponse.json(
-      bookings.map((b) => ({
-        id: b.id,
-        status: b.status,
-        amountPaid: Number(b.amountPaid),
-        examDate: b.examDate?.toISOString() || null,
-        examComponent: b.examComponent
-          ? {
-              course: {
-                code: b.examComponent.course.code,
-                name: b.examComponent.course.name,
-              },
-            }
-          : undefined,
-      }))
-    )
-  } catch (error) {
-    console.error('Error fetching bookings:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
+  return apiPaginated(
+    bookings.map((b) => ({
+      id: b.id,
+      status: b.status,
+      amountPaid: Number(b.amountPaid),
+      examDate: b.examDate?.toISOString() || null,
+      examComponent: b.examComponent
+        ? {
+            course: {
+              code: b.examComponent.course.code,
+              name: b.examComponent.course.name,
+            },
+          }
+        : undefined,
+    })),
+    total,
+    page,
+    limit,
+  )
+})

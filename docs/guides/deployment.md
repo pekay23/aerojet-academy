@@ -22,7 +22,7 @@
 
 ### Database Adapter — IMPORTANT
 
-The project uses `@prisma/adapter-pg` with the standard `pg` PostgreSQL driver. **Do NOT switch to `@prisma/adapter-neon`** — the `ws` WebSocket module required by the Neon serverless adapter does not work in Vercel's Turbopack serverless bundles. See `docs/known-issues.md` for details.
+The project uses `@prisma/adapter-pg` with the standard `pg` PostgreSQL driver. **Do NOT switch to `@prisma/adapter-neon`** — the `ws` WebSocket module required by the Neon serverless adapter does not work in Vercel's Turbopack serverless bundles. See `docs/audits/known-issues.md` for details.
 
 Local exception: `next dev` may dynamically select the Neon adapter for `*.neon.tech` URLs to avoid local TCP connection stalls. Production and Vercel runtime must remain on `@prisma/adapter-pg`.
 
@@ -44,7 +44,7 @@ Optional local overrides:
 
 ## Cron Jobs (Vercel)
 
-All 16 cron endpoints are registered in `vercel.json` and require
+All 17 cron endpoints are registered in `vercel.json` and require
 `Authorization: Bearer <CRON_SECRET>`. Schedules are in `vercel.json`:
 
 | Endpoint                               | Schedule (cron) | Purpose                                            |
@@ -58,6 +58,8 @@ All 16 cron endpoints are registered in `vercel.json` and require
 | `/api/cron/cleanup-abandoned-accounts` | `0 5 * * *`     | Daily 05:00 — GDPR-style cleanup                   |
 | `/api/cron/scheduled-reports`          | `0 8 * * 1`     | Mondays 08:00 — Scheduled analytics                |
 | `/api/cron/milestone-reminders`        | `0 9 * * *`     | Daily 09:00 — Milestone T-7/T-1 reminders          |
+| `/api/cron/renewal-reminders`        | `0 6 * * *`     | Daily 06:00 — Subscription & certificate renewal reminders |
+| `/api/cron/renewal-reminders`        | `0 6 * * *`     | Daily 06:00 — Subscription & certificate renewal reminders |
 | `/api/cron/send-reminders`             | `0 10 * * *`    | Daily 10:00 — Exam T-7/T-1 reminders               |
 | `/api/cron/aptitude-reminders`         | `0 11 * * *`    | Daily 11:00 — Aptitude test reminders              |
 | `/api/cron/interview-reminders`        | `0 12 * * *`    | Daily 12:00 — Interview reminders                  |
@@ -94,9 +96,21 @@ Supabase storage nightly.
 
 ## Reverse proxy / middleware
 
-The Next.js 16 codebase uses `proxy.ts` (the Next 16 replacement for
-`middleware.ts`) at the repo root to enforce `ROUTE_ROLE_MAP` for every
-portal and its `/api/*` siblings.
+`proxy.ts` at the repo root is **images-only** — it gates `/api/images/*`
+(auth + hotlink/header protection) and sets image security headers. It does
+**not** enforce portal auth for `/staff`, `/instructor`, `/student`,
+`/examiner`, `/applicant`, or their `/api/*` siblings.
+
+Portal auth is enforced in three layers:
+
+1. **Portal layouts** — each portal's `layout.tsx` calls
+   `requireStaff`/`requireInstructor`/`requireStudent`/etc. from
+   `lib/auth/helpers.ts` as the primary gate.
+2. **Route handlers / server actions** — call `requireAdmin()`/`requireAuth()`
+   /`requireStaff()`/`requirePermission()` directly; thrown `'Unauthorized'`/
+   `'Forbidden'` strings are caught by `withErrorHandler` and converted to
+   401/403.
+3. **Edge proxy** (`proxy.ts`) — images-only; does not gate portal routes.
 
 ## Webhooks
 

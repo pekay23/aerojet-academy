@@ -11,31 +11,8 @@ type PracticalResult = 'SATISFACTORY' | 'UNSATISFACTORY' | 'NEEDS_REVIEW'
 type PracticalTaskCategory = 'P1' | 'P2'
 type PracticalDeliveryMethod = 'TASK_PERFORMANCE' | 'DEMONSTRATION' | 'TECHNICAL_DISCUSSION' | 'SIMULATION'
 
-interface RecordItem {
-  id: string
-  date: string
-  studentProfileId: string
-  courseId: string
-  taskCategory: PracticalTaskCategory
-  taskReference: string | null
-  ataChapterId: string | null
-  description: string
-  deliveryMethod: PracticalDeliveryMethod
-  durationMinutes: number
-  result: PracticalResult | null
-  signedByInstructor: boolean
-  signedByStudent: boolean
-  assessorNotes: string | null
-  course: { id: string; code: string; name: string }
-  ataChapter: { id: string; code: string; title: string } | null
-  instructorId: string
-  instructor: { id: string; profile: { firstName: string; lastName: string } | null }
-  studentProfile: {
-    id: string
-    studentId: string
-    user: { profile: { firstName: string; lastName: string } | null }
-  }
-}
+import type { SerializedPracticalRecord } from '@/lib/staff/types'
+type RecordItem = SerializedPracticalRecord
 
 const DEFAULT_FORM = {
   studentProfileId: '',
@@ -52,6 +29,15 @@ const DEFAULT_FORM = {
   assessorNotes: '',
 }
 
+type CourseOption = { id: string; code: string; name: string }
+type StudentOption = {
+  id: string
+  studentId: string
+  user: { profile: { firstName: string; lastName: string } | null }
+}
+type InstructorOption = { id: string; profile: { firstName: string; lastName: string } | null }
+type AtaChapterOption = { id: string; code: string; title: string }
+
 export default function PracticalAssessmentsClient({
   initialRecords,
   courses,
@@ -59,16 +45,16 @@ export default function PracticalAssessmentsClient({
   instructors,
   ataChapters,
 }: {
-  initialRecords: any[]
-  courses: any[]
-  students: any[]
-  instructors: any[]
-  ataChapters: any[]
+  initialRecords: RecordItem[]
+  courses: CourseOption[]
+  students: StudentOption[]
+  instructors: InstructorOption[]
+  ataChapters: AtaChapterOption[]
 }) {
-  const router = useRouter()
+  const _router = useRouter()
   const confirmDialog = useConfirmDialog()
   const toast = useToast()
-  const [records, setRecords] = useState<RecordItem[]>(initialRecords)
+  const [records, _setRecords] = useState<RecordItem[]>(initialRecords)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isActionPending, setIsActionPending] = useState(false)
@@ -134,7 +120,7 @@ export default function PracticalAssessmentsClient({
         setIsModalOpen(false)
         window.location.reload()
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('An unexpected error occurred.')
     } finally {
       setIsActionPending(false)
@@ -554,7 +540,7 @@ export default function PracticalAssessmentsClient({
                   <select
                     required
                     value={formData.deliveryMethod}
-                    onChange={(e) => setFormData({ ...formData, deliveryMethod: e.target.value as any })}
+                    onChange={(e) => setFormData({ ...formData, deliveryMethod: e.target.value as PracticalDeliveryMethod })}
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value="TASK_PERFORMANCE">Task Performance</option>
@@ -601,7 +587,7 @@ export default function PracticalAssessmentsClient({
                     </label>
                     <select
                       value={formData.result}
-                      onChange={(e) => setFormData({ ...formData, result: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, result: e.target.value as PracticalResult })}
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     >
                       <option value="">-- Leave Unassessed (Pending) --</option>

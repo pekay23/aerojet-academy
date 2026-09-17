@@ -16,28 +16,20 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { format } from 'date-fns'
-import Link from 'next/link'
-import SearchInput from '@/components/SearchInput'
-import { getCurrencySymbol } from '@/lib/currency'
+import { SortableTh } from '@/components/ui/sortable-th'
 
-import {
-  DollarSign,
-  TrendingUp,
-  Calendar,
-  Clock,
-  CheckCircle,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  ExternalLink,
-} from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+
+import { format } from 'date-fns'
+
+
+import { getCurrencySymbol } from '@/lib/currency'
+import type { SerializedTransactionRow } from '@/lib/types/staff'
+
+import { Clock, CheckCircle2 } from 'lucide-react'
 import {
   getFinanceReportSummary,
   getRevenueByProgrammeType,
@@ -45,7 +37,7 @@ import {
   getMonthlyRevenueData,
   getPaymentStatusBreakdown,
 } from '@/lib/analytics/reports'
-import { formatCurrency } from '@/lib/analytics/metrics'
+
 
 export const metadata: Metadata = { title: 'Finance | Staff Portal' }
 export const dynamic = 'force-dynamic'
@@ -126,17 +118,17 @@ async function getTransactionsData(query?: string) {
   ])
 
   const serialized = serializePrisma(transactions)
-  const transactionIds = serialized.map((tx: any) => tx.id)
-  
+  const transactionIds = serialized.map((tx: SerializedTransactionRow) => tx.id)
+
   const paymentIds = serialized
-    .filter((tx: any) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
-    .map((tx: any) => tx.referenceId!)
+    .filter((tx: SerializedTransactionRow) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
+    .map((tx: SerializedTransactionRow) => tx.referenceId!)
   const examBookingReferenceIds = serialized
-    .filter((tx: any) => tx.referenceType === 'EXAM_BOOKING' && tx.referenceId)
-    .map((tx: any) => tx.referenceId!)
+    .filter((tx: SerializedTransactionRow) => tx.referenceType === 'EXAM_BOOKING' && tx.referenceId)
+    .map((tx: SerializedTransactionRow) => tx.referenceId!)
   const fullTimeEnrollmentIds = serialized
-    .filter((tx: any) => tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId)
-    .map((tx: any) => tx.referenceId!)
+    .filter((tx: SerializedTransactionRow) => tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId)
+    .map((tx: SerializedTransactionRow) => tx.referenceId!)
 
   const [relatedPayments, relatedExamBookings, relatedFullTimeEnrollments, relatedModularEnrollments, relatedMilestones] =
     await Promise.all([
@@ -205,7 +197,7 @@ async function getReportsData() {
 export default async function FinancePage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; query?: string }>
+  searchParams: Promise<{ tab?: string; query?: string; sort?: string; order?: string }>
 }) {
   const session = await getAuthSession()
   if (!session) redirect('/login')
@@ -221,7 +213,7 @@ export default async function FinancePage({
     <FinanceTabs pendingTopupCount={pendingTopupCount}>
       {tab === 'overview' && <OverviewTab />}
       {tab === 'transactions' && <TransactionsTab query={params.query} />}
-      {tab === 'wallet-topups' && <WalletTopupsTab />}
+      {tab === 'wallet-topups' && <WalletTopupsTab sort={params.sort} order={params.order} />}
       {tab === 'reconciliation' && <ReconciliationTab />}
       {tab === 'reports' && <ReportsTab />}
     </FinanceTabs>
@@ -238,8 +230,9 @@ async function OverviewTab() {
 }
 
 /* ─── Wallet Top-ups Tab ─── */
-async function WalletTopupsTab() {
+async function WalletTopupsTab({ sort, order }: { sort?: string; order?: string }) {
   const { pendingRequests, topupHistory } = await getWalletTopupsData()
+  const sortedHistory = sortTopupHistory(topupHistory, sort, order)
 
   return (
     <div className="space-y-8">
@@ -260,21 +253,21 @@ async function WalletTopupsTab() {
           <Table>
             <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
               <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Amount Credited</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Date Approved</TableHead>
+                <SortableTh sortKey="student" label="Student" />
+                <SortableTh sortKey="amount" label="Amount Credited" align="right" />
+                <SortableTh sortKey="type" label="Type" />
+                <SortableTh sortKey="date" label="Date Approved" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {topupHistory.length === 0 ? (
+              {sortedHistory.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="h-24 text-center text-slate-500">
                     No top-ups found.
                   </TableCell>
                 </TableRow>
               ) : (
-                topupHistory.map((tx: any) => {
+                sortedHistory.map((tx: SerializedTransactionRow) => {
                   const user = tx.wallet.user
                   const userName = user.profile
                     ? `${user.profile.firstName} ${user.profile.lastName}`
@@ -333,6 +326,27 @@ function ReconciliationTab() {
 }
 
 /* ─── Reports Tab ─── */
+function sortTopupHistory(history: SerializedTransactionRow[], sort?: string, order?: string) {
+  if (!sort) return history
+  const dir = order === 'asc' ? 1 : -1
+  const getKey = (tx: SerializedTransactionRow) => {
+    if (sort === 'student') {
+      const p = tx.wallet?.user?.profile
+      return p ? `${p.firstName ?? ''} ${p.lastName ?? ''}` : tx.wallet?.user?.email ?? ''
+    }
+    if (sort === 'amount') return Number(tx.amount)
+    if (sort === 'type') return tx.referenceType ?? ''
+    if (sort === 'date') return tx.createdAt ? new Date(tx.createdAt).getTime() : 0
+    return 0
+  }
+  return [...history].sort((a, b) => {
+    const ka = getKey(a)
+    const kb = getKey(b)
+    if (typeof ka === 'number' && typeof kb === 'number') return (ka - kb) * dir
+    return String(ka).localeCompare(String(kb)) * dir
+  })
+}
+
 async function ReportsTab() {
   const { summary, revenueByType, paymentMethods, monthlyData, paymentStatus } =
     await getReportsData()

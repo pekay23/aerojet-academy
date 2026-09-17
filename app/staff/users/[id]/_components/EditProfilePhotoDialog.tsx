@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera } from 'lucide-react'
-import Image from 'next/image'
+import { ProtectedImage } from '@/components/ProtectedImage'
+import { proxyImageUrl } from '@/lib/storage/signed-url'
 import { toast } from 'sonner'
 import { UploadButton } from '@/lib/uploads/uploadthing'
 import {
@@ -27,9 +28,9 @@ export default function EditProfilePhotoDialog({
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
-  const handleUploadComplete = async (res: any) => {
-    if (!res || res.length === 0) return
-    const fileUrl = res[0].url
+  const handleUploadComplete = async (res: unknown) => {
+    if (!res || !Array.isArray(res) || res.length === 0) return
+    const fileUrl = (res as Array<{ url: string }>)[0].url
 
     try {
       const updateRes = await fetch(`/api/staff/users/${userId}`, {
@@ -43,9 +44,8 @@ export default function EditProfilePhotoDialog({
       toast.success('Profile photo updated')
       setOpen(false)
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to save profile photo')
-      console.error(error)
     }
   }
 
@@ -69,7 +69,13 @@ export default function EditProfilePhotoDialog({
         <div className="flex flex-col items-center justify-center space-y-6 py-6">
           <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
             {currentPhotoUrl ? (
-              <Image src={currentPhotoUrl} alt="Current" fill sizes="128px" className="object-cover" />
+              <ProtectedImage
+                src={proxyImageUrl(currentPhotoUrl, 'profile-photos')}
+                alt="Current"
+                fill
+                sizes="128px"
+                className="object-cover"
+              />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-slate-300 dark:text-slate-600">
                 <Camera className="h-10 w-10" />

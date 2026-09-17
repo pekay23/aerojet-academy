@@ -14,6 +14,8 @@ export default function WelcomeBanner({ messages, userName }: WelcomeBannerProps
   useEffect(() => {
     // Pick a random message on every mount (i.e., every new session/page load)
     const idx = Math.floor(Math.random() * messages.length)
+   
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setMessage(messages[idx] ?? messages[0])
   }, [messages])
 

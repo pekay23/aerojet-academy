@@ -1,0 +1,206 @@
+--- Page 1 ---
+AEROJET M1 SAMPLE TEST 1 40 minutes
+1. In the equation x = m/M, solve for the first variable, assuming that the second and third variables are equal to 15
+and 3.0, respectively.
+A. 3
+B. 5
+C. 1/5
+T 5
+2. Solve for F in terms of T, =
+F − 32.0 9
+5
+A. T+32
+9
+9
+B. T−32
+5
+𝟗
+C. 𝐓+𝟑𝟐
+𝟓
+3. Using the equation in question 2 above, find F, when T = 55
+A. 131
+B. 67
+C. 63
+4. Find the area of one box in the diagram.
+A. 4 sq. yd. Diagram for question 4
+B. 9 sq. ft.
+C. 1 yd.
+5. What is the unit of the volume of a cubic box whose edge measures 3.00 ft?
+A. 27 cubic ft.
+B. 3 square ft.
+C. Cubic ft.
+6. Determine the values of a, b, and c in the equation x 2 + 3x = 10, when compared with the standard quadratic
+equation.
+A. 1, 3, and 10
+B. 1, 3, and – 10
+C. x 2, 3 and – 10
+−𝑏± √𝑏2−4𝑐
+7. Use your answer in question 6, above to calculate the values of x, using the formula 𝑥 =
+2
+A. 2
+B. – 5
+C. 2, - 5
+2
+8. Which pair of rational fractions sum to ?
+(𝑥+1)(1−𝑥)
+2 1
+A. ,
+𝑥−1 𝑥+1
+1 2
+B. ,
+1−𝑥 𝑥+1
+𝟏 𝟏
+C. ,
+𝟏−𝒙 𝒙+𝟏
+9. What result will be shown on the calculator for the following sequence of keystrokes below?
+A. 35
+B. 12
+C. 19
+10. Find x, given that x = (a + b) − (c + d), where a = −3, b = 5, c = −6, and d = 10.
+A. x = 2
+B. x = 4
+C. x = - 2
+
+--- Page 2 ---
+2 | P age
+11. Simplify (x + 9) − (2x - 1)
+A. 10 – x
+B. 8 – x
+C. 10 – x
+12.
+𝑃2
+=
+2𝑃2
+is equivalent to
+3𝑇1 𝑇2
+A.
+𝑃2
+=
+3𝑃2
+𝑇1 𝑇2
+B. 𝑃 = 3𝑇
+1 1
+C. 𝑻 = 𝟔𝑻
+𝟐 𝟏
+13. Given that a = 4 and b = 3
+1 1 1
+A. + <
+𝑎 𝑏 𝑎+𝑏
+𝟏 𝟏 𝟏
+B. + >
+𝒂 𝒃 𝒂+𝒃
+1 1 1
+C. + =
+𝑎 𝑏 𝑎+𝑏
+14. What units are obtained when a mass in grams is divided by a volume in milliliters?
+A. g/mL
+B. g/cm3
+C. g/m3
+15. Calculate the reciprocal of 4.00 × 10 −8 m.
+A. 2.5 x 10 7 m
+B. 2.5 x 10 7/m
+C. 2.5 x 10 -9/m
+(1.0 × 106)(8.0 × 103)
+16. Evaluate
+2.0 × 108
+A. 𝟒.𝟎 × 𝟏𝟎𝟏
+B. 4.0 × 100
+C. 4.0 × 10−1
+17. Work out 12.8 − 6.02 to 2 significant figures.
+A. 68
+B. 6.8
+C. 0.68
+18. Evaluate
+2𝑎2
+, when 𝑎 = 3
+A. 256
+B. 1024
+C. 512
+19. Subtract and round the answer to the nearest hundreds: 3835 – 1278
+A. 2600
+B. 2700
+C. 3000
+20. Which is the largest?
+A. 0.00576
+B. 0.02010
+C. 0.04006
+
+--- Page 3 ---
+3 | P age
+3 9
+21. Work out +
+4 16
+A. 16/21
+B. 12/16
+𝟓
+C. 𝟏
+𝟏𝟔
+3 3
+22. Multiply 7 ÷
+4 8
+62
+A.
+5
+𝟐
+B. 𝟐𝟎
+𝟑
+2
+C. 21
+3
+3 5
+23. Subtract 37’ 3 "−8’ 10 "
+16 8
+𝟗
+A. 26’ 𝟔 ”
+𝟏𝟔
+9
+B. 27’ 6 ”
+16
+9
+C. 28’ 6 ”
+16
+24. At the beginning of January the parts department at aerojet had 458 plugs in stock. It is estimated that they will
+need 82 plugs per month. A shipment of 650 new plugs will arrive in April. Calculate the number of plugs the
+department will have at the end of May.
+A. 698
+B. 780
+C. 802
+25. Convert the rectangular co-ordinates (4,2) to polar co-ordinates. Use the tangent table below.
+A. (4.5 , 27.0°) Angle I Tangent
+B. (4.5 , 26.0°)
+C. (4.5 , 28.0°)
+For question 25
+26. Convert the polar co-ordinates (5, 30o ) to rectangular co-ordinates.
+A. (4.33, 2.5)
+B. (2.5 , 4.33)
+C. (4.33 , 4.33)
+27. f x=a and y=2 is a solution of the equation x + ay – 3 = 0, then the value of a is:
+A. 2
+B. 1
+C. – 1
+28. Solve simultaneously x + y = 60 and x – y = 2.
+A. x = 29, y = 31
+B. x = 31, y = 30
+C. x = 31, y = 29
+
+--- Page 4 ---
+4 | P age
+Use the graphs below to answer questions 29, 30 and 31.
+29. The gradient of the red line in graph 2 is
+A. positive
+Graph 1 Graph 2
+B. negative
+C. zero
+30. what is the gradient of the red line in graph 1?
+A. 1.5
+B. Undefined
+C. 1
+31. Find the simultaneous solutions of the lines in graph 2
+A. (2 , 3)
+B. (- 3 , 2)
+C. (2 , - 3) for questions 29, 30 and 31.
+32. Calculate the twice the length of side BC in the diagram below
+A. 17.5 cm
+B. 35 cm
+C. 70 cm
+For question 32

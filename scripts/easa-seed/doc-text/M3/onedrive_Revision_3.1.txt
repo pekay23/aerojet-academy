@@ -1,0 +1,351 @@
+Question 1: What is matter, as defined in the passage?
+A) Anything that has volume but not mass.
+B) Anything that can be touched and has mass and volume.
+C) Anything that has mass but not volume.
+Question 2: How is mass related to the amount of matter in an object?
+A) Mass is independent of the amount of matter.
+B) The more matter in an object, the less mass it has.
+C) The more matter in an object, the more mass it has.
+Question 3:
+What is the difference between mass and weight?
+A) Mass is determined by gravity, while weight is the amount of matter.
+B) Mass is the amount of matter, while weight is determined by how much something is pulled by gravity.
+C) Mass and weight are the same.
+Question 4: How is mass indirectly determined, as described in the passage?
+A) By measuring an object's volume.
+B) By measuring the amount of matter in an object.
+C) By measuring how much something is pulled by gravity.
+Question 5: For the purposes of the aircraft technician, which states of matter are considered?
+A) Solids and gases
+B) Solids, liquids, and gases
+C) Solids and plasma
+Question 6: What is an element?
+A) A substance that can be easily reduced to simpler forms.
+B) A substance that can be transformed into other elements through chemical means.
+C) A substance that cannot be reduced to a simpler form by chemical means.
+Question 7: Which of the following is NOT an example of an element mentioned in the passage?
+A) Iron
+B) Silver
+C) Water
+Question 8: What happens to an element when it reaches the point of reduction?
+A) It becomes a compound.
+B) It ceases to exist.
+C) It remains the same element.
+Question 9: Which of the following is an example of an element?
+A) Water
+B) Salt
+C) Oxygen
+Thank you for providing information about compounds. I'll create questions based on this paragraph.
+Question 10: What is a compound?
+A) A chemical combination of two or more elements.
+B) A single element.
+C) A substance made up of only one type of atom.
+Question 11: What is the chemical composition of water?
+A) Two hydrogen atoms and two oxygen atoms.
+B) Two hydrogen atoms and one oxygen atom.
+C) One hydrogen atom and one oxygen atom.
+Question 12: Which of the following is an example of a compound?
+A) Oxygen
+B) Hydrogen
+C) Water
+Question 13: What is the definition of a molecule?
+A) The smallest particle of matter that can exist but does not retain its identity.
+B) The smallest particle of matter that can exist and still retain its identity.
+C) A combination of two or more elements.
+Question 14: What is the term for substances composed of only one type of atom, according to the passage?
+A) Molecules
+B) Compounds
+C) Elements
+Question 15: What would happen to water if it were compounded of one atom of hydrogen and two atoms of oxygen?
+A) It would remain the same.
+B) It would no longer retain its characteristics as water.
+C) It would become a different compound.
+Question 16: What happens to a drop of water when it is divided repeatedly?
+A) It turns into a different substance.
+B) It becomes smaller but still retains its identity as water.
+C) It cannot be divided any longer.
+Question 17: What is considered the most basic building block of all matter?
+A) Protons
+B) Electrons
+C) Atoms
+Question 18: What are the three subatomic particles that compose an atom?
+A) Electrons, protons, and photons.
+B) Neutrons, electrons, and positrons.
+C) Protons, neutrons, and electrons.
+Question 19: What determines the properties of specific atoms?
+A) The number of electrons.
+B) The number of neutrons.
+C) The number of protons, neutrons, and electrons.
+Question 20:
+What is the main property that defines each element?
+A) The number of protons.
+B) The number of neutrons.
+C) The number of protons, neutrons, and electrons.
+Question 21:
+How do hydrogen and helium differ from each other in terms of their atomic properties?
+A) They have the same number of neutrons, protons, and electrons.
+B) They have different numbers of neutrons, protons, and electrons.
+C) They both lack neutrons.
+Question 22:
+How are elements categorized in the periodic table?
+A) Alphabetically.
+B) According to their atomic number.
+C) According to their chemical reactions.
+Question 23: According to the kinetic theory of matter, what is the behaviour of the particles that make up matter?
+A) They are stationary.
+B) They are always moving.
+C) They only move in a vacuum.
+Question 24: Why does matter contract when it is cool and expand when it is hot?
+A) Because of thermal expansion.
+B) Because of chemical reactions.
+C) Because of the kinetic theory.
+Question 25: Where are protons and neutrons primarily located within the atom?
+A) In the outer electron shells
+B) In the nucleus
+C) In the electron cloud
+Question 26: Which subatomic particle is described as having a neutrally charged particle?
+A) Protons
+B) Electrons
+C) Neutrons
+Question 27: What is the relative mass comparison between a proton and an electron?
+A) The mass of a proton is greater.
+B) The mass of an electron is greater.
+C) The mass of a proton and an electron is approximately the same.
+Question 28: Why is it the electron that undergoes changes during chemical reactions?
+A) Because electrons change their mass.
+B) Because electrons change their charge.
+C) Because electrons change their location in the atom.
+Question 29: What determines the overall weight of an atom?
+A) The number of electrons
+B) The number of protons
+C) The number of protons and neutrons in the nucleus
+Question 30: In the context of determining the weight of an atom, what is not considered?
+A) The weight of electrons 
+B) The weight of protons
+C) The weight of neutrons
+Question 31: What remains uncertain about the nature of electricity?
+A) The charge of electrons
+B) The charge of protons
+C) Whether electrons have mass
+Question 32: Which atom represents the simplest form?
+A) Helium
+B) Oxygen
+C) Hydrogen
+Question 33: When is an atom said to have a neutral charge?
+A) When there are no electrons in the atom.
+B) When the total positive charge of protons equals the total negative charge of electrons.
+C) When the atom has an equal number of protons and neutrons.
+Question 34: What determines the radius of an electron's orbit?
+A) Its kinetic energy
+B) Its potential energy
+C) Its total energy
+Question 35: What do we call the specific quantity of energy required to keep an electron in orbit?
+A) Kinetic energy
+B) Potential energy
+C) Energy level
+Question 36: Why are certain energy levels grouped together into electron shells?
+A) To determine the chemical properties of elements
+B) To catalogue the elements
+C) To create electron configurations
+Question 37: What is the maximum number of electrons that can be contained in the second shell?
+A) 2
+B) 8
+C) 18
+Question 38: How many energy levels are there in the heaviest atoms?
+A) 3
+B) 6 
+C) 7
+Question 39: How does the filling of electron shells typically occur in atoms?
+A) From the outermost shell to the innermost shell
+B) From the innermost shell to the outermost shell
+C) Randomly
+Question 40: When does an energy level start to fill up with electrons?
+A) Only when the previous energy level is completely filled
+B) Immediately upon reaching its capacity
+C) After the outermost shell is filled
+Question 41: Where can you find information about an element's electron configuration?
+A) In a chemistry textbook
+B) In the electron shell diagram
+C) In the Periodic Table of Elements
+Question 42: What does valence represent in terms of an atom's chemistry?
+A) The number of electrons in the nucleus
+B) The number of chemical bonds an atom can form
+C) The atomic number of the element
+Question 43: What are valence electrons?
+A) Electrons in the innermost shell
+B) Electrons that can participate in chemical bonds
+C) Electrons in the nucleus
+Question 44: What is the determining factor in an atom's valence?
+A) The number of electrons in the nucleus
+B) The number of protons
+C) The number of electrons in the outermost shell
+Question 45: What is ionization in the context of atoms?
+A) The process of converting atoms into molecules
+B) The process of an atom losing or gaining electrons
+C) The process of breaking an atom apart
+Question 46: What happens to an atom when it loses an electron?
+A) It becomes negatively charged.
+B) It becomes positively charged.
+C) It remains neutral.
+Question 47: What is the term for a net positively charged atom?
+A) A negative ion
+B) A cation
+C) An anion
+Question 48: How is an atom described when it gains extra electrons?
+A) As positively charged
+B) As negatively charged
+C) As neutrally charged
+Question 49: What is the term for a negatively charged atom that has gained extra electrons?
+A) A positive ion
+B) A cation
+C) An anion
+Question 50: In what state are atoms when they are neutral?
+A) The protons are more than the electrons.
+B) The electrons are more than the protons.
+C) The positively charged protons and the negatively charged electrons are equal in number.
+Question 51: Where are valence electrons typically found in an atom?
+A) In the nucleus
+B) Drifting midway between two nuclei
+C) In the innermost shell
+Question 52: Why are some electrons in an atom described as being more loosely bound?
+A) Because they are positioned closer to the nucleus
+B) Because they are positioned farther from the nucleus
+C) Because they have a higher energy level
+Question 53: What is the term for the outermost electrons that can be easily dislodged from the atom?
+A) Bound electrons
+B) Valence electrons
+C) Inner electrons
+Question 54: What can valence electrons become when they are dislodged from the atom?
+A) Neutrons
+B) Protons
+C) Free electrons
+Question 55: What is the term for the flow of electrons in a practical electrical circuit?
+A) Atomic motion
+B) Electron drift
+C) Current
+Question 56: What determines the chemical and electrical properties of an atom?
+A) The number of protons in the atom
+B) The valence of the atom
+C) The size of the atom
+Question 57: How can the properties of a material be categorized?
+A) As conductor, semiconductor, or insulator
+B) As metallic, non-metallic, or metalloid
+C) As reactive, non-reactive, or inert
+Question 58: What determines a material's ability to conduct a greater current?
+A) The number of protons in the material
+B) The valence of the material
+C) The availability of free electrons in the material
+Question 59: What type of elements make good conductors of electricity?
+A) Noble gases
+B) Non-metals
+C) Gold, copper, and silver
+Question 60: What characterizes the outer orbits of the atoms in good conductors?
+A) They are empty.
+B) They have many free electrons.
+C) They have tightly bound electrons.
+Question 61: What can cause the electrons in the outer orbit of conductor atoms to break loose and move through the material?
+A) Pressure applied to the material
+B) Energy in the form of heat
+C) Magnetic fields
+Question 62: How many electrons are typically in the outer orbit of copper and silver atoms at room temperature?
+A) None
+B) One
+C) Billions
+Question 63: How do insulators generally behave in terms of conducting electrical current?
+A) They conduct electrical current very well.
+B) They conduct electrical current moderately.
+C) They do not conduct electrical current well or not at all.
+Question 64: What is an example of an insulator?
+A) Copper
+B) Glass
+C) Silver
+Question 65: What typically prevents electrical current from being conducted in insulators?
+A) The presence of free electrons
+B) The absence of free electrons
+C) The material's high temperature
+Question 66: In what condition can the outer electrons in insulator atoms be dislodged to allow electrical current to flow?
+A) Under normal conditions
+B) In an extremely strong electrical field
+C) In the presence of other insulators
+Question 67: What is the term for the action of dislodging outer electrons in insulator atoms to allow current flow?
+A) Breakdown
+B) Conductivity
+C) Disruption
+Question 68: How do the characteristics of semiconductors generally compare to conductors and insulators?
+A) Semiconductors are better conductors than conductors.
+B) Semiconductors are not good at conducting or insulating.
+C) Semiconductors are excellent insulators.
+Question 69: What are the two most widely used semiconductor materials?
+A) Gold and silver
+B) Silicon and germanium
+C) Glass and ceramic
+Answers
+1: B) Anything that can be touched and has mass and volume.
+2: C) The more matter in an object, the more mass it has.
+3: B) Mass is the amount of matter, while weight is determined by how much something is pulled by gravity.
+4: C) By measuring how much something is pulled by gravity.
+5: B) Solids, liquids, and gases
+6: C) A substance that cannot be reduced to a simpler form by chemical means.
+7: C) Water
+8: B) It ceases to exist.
+9: C) Oxygen
+10: A) A chemical combination of two or more elements.
+11: B) Two hydrogen atoms and one oxygen atom.
+12: C) Water
+13: B) The smallest particle of matter that can exist and still retain its identity.
+14: C) Elements
+15: B) It would no longer retain its characteristics as water.
+16: B) It becomes smaller but still retains its identity as water.
+17: C) Atoms
+18: C) Protons, neutrons, and electrons.
+19: C) The number of protons, neutrons, and electrons.
+20: A) The number of protons.
+21: B) They have different numbers of neutrons, protons, and electrons.
+22: B) According to their atomic number.
+23: B) They are always moving.
+24: A) Because of thermal expansion.
+25: B) In the nucleus
+26: C) Neutrons
+27: A) The mass of a proton is greater.
+28: C) Because electrons change their location in the atom.
+29: C) The number of protons and neutrons in the nucleus
+30: A) The weight of electrons 
+31: C) Whether electrons have mass
+32: C) Hydrogen
+33: B) When the total positive charge of protons equals the total negative charge of electrons.
+34: C) Its total energy
+35: C) Energy level
+36: A) To determine the chemical properties of elements
+37: B) 8
+38: C) 7
+39: B) From the innermost shell to the outermost shell
+40: A) Only when the previous energy level is completely filled
+41: C) In the Periodic Table of Elements
+42: B) The number of chemical bonds an atom can form
+43: B) Electrons that can participate in chemical bonds
+44: C) The number of electrons in the outermost shell
+45: B) The process of an atom losing or gaining electrons
+46: B) It becomes positively charged.
+47: B) A cation
+48: B) As negatively charged
+49: C) An anion
+50: C) The positively charged protons and the negatively charged electrons are equal in number.
+51: B) Drifting midway between two nuclei
+52: B) Because they are positioned farther from the nucleus
+53: B) Valence electrons
+54: C) Free electrons
+55: C) Current
+56: B) The valence of the atom
+57: A) As conductor, semiconductor, or insulator
+58: C) The availability of free electrons in the material
+59: C) Gold, copper, and silver
+60: B) They have many free electrons.
+61: B) Energy in the form of heat
+62: B) One
+63: C) They do not conduct electrical current well or not at all.
+64: B) Glass
+65: B) The absence of free electrons
+66: B) In an extremely strong electrical field
+67: B) A) Breakdown
+68: B) Semiconductors are not good at conducting or insulating.
+69: B) Silicon and germanium

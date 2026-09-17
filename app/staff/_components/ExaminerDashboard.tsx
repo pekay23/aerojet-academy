@@ -1,19 +1,44 @@
+'use client'
+
+import { useMemo } from 'react'
 import { Calendar, Users, ClipboardCheck, Clock, BookOpen } from 'lucide-react'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface ExaminerDashboardProps {
   examinerName: string
-  nextSitting?: any
-  recentSittings: any[]
+  nextSitting?: {
+    id: string
+    name?: string | null
+    startTime: string
+    maxCandidates?: number | null
+  } | null
+  recentSittings: {
+    id: string
+    name?: string | null
+    startTime: string
+    event?: { name: string } | null
+    currentMemberCount?: number | null
+    status: string
+  }[]
 }
 
 export default function ExaminerDashboard({ examinerName, nextSitting, recentSittings }: ExaminerDashboardProps) {
+  const sortable = useMemo(
+    () =>
+      recentSittings.map((s) => ({
+        ...s,
+        _date: s.startTime ? new Date(s.startTime).getTime() : 0,
+      })),
+    [recentSittings]
+  )
+  const { items: sortedSittings, requestSort, sortConfig } = useSort(sortable)
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase dark:text-white">
+        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
           Examiner Hub
         </h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -46,7 +71,7 @@ export default function ExaminerDashboard({ examinerName, nextSitting, recentSit
                     </span>
                     <span className="flex items-center gap-1">
                       <Users className="h-3.5 w-3.5" />
-                      {nextSitting.maxCandidates} Candidates Allocated
+                      {nextSitting.maxCandidates != null ? `${nextSitting.maxCandidates} Candidates Allocated` : '—'}
                     </span>
                   </div>
                 </div>
@@ -76,7 +101,7 @@ export default function ExaminerDashboard({ examinerName, nextSitting, recentSit
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Sittings</span>
             </div>
             <div className="text-2xl font-black text-slate-900 dark:text-white">{recentSittings.length}</div>
-            <p className="text-[10px] text-slate-500">Completed in the last 90 days</p>
+            <p className="text-[10px] text-slate-500">Recently completed</p>
           </div>
           
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
@@ -100,29 +125,29 @@ export default function ExaminerDashboard({ examinerName, nextSitting, recentSit
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:bg-slate-800/50">
               <tr>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4">Event / Session</th>
-                <th className="px-6 py-4">Students</th>
-                <th className="px-6 py-4">Status</th>
+                <SortHeader label="Date" sortKey="_date" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
+                <SortHeader label="Event / Session" sortKey="event.name" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
+                <SortHeader label="Students" sortKey="currentMemberCount" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" align="right" />
+                <SortHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" align="center" />
                 <th className="px-6 py-4 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {recentSittings.length === 0 ? (
+              {sortedSittings.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-xs text-slate-400">
                     No past sittings found in the record.
                   </td>
                 </tr>
               ) : (
-                recentSittings.map((s) => (
+                sortedSittings.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-medium">{format(new Date(s.startTime), 'MMM d, yyyy')}</td>
                     <td className="px-6 py-4">
-                       <div className="font-bold text-slate-900 dark:text-white">{s.event?.name}</div>
+                     <div className="font-bold text-slate-900 dark:text-white">{s.event?.name}</div>
                        <div className="text-[10px] text-slate-500">{s.name}</div>
                     </td>
-                    <td className="px-6 py-4">{s.currentMemberCount || 0} Members</td>
+                    <td className="px-6 py-4">{s.currentMemberCount != null ? `${s.currentMemberCount} Members` : '—'}</td>
                     <td className="px-6 py-4">
                       <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
                         COMPLETED

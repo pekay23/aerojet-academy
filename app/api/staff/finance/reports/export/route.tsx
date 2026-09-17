@@ -7,9 +7,13 @@ import {
   getPaymentStatusBreakdown,
 } from '@/lib/analytics/reports'
 import { renderToStream } from '@react-pdf/renderer'
-import { FinancialReportTemplate } from '@/components/pdf/templates/FinancialReportTemplate'
+import { FinancialReportTemplate, type FinancialReportTemplateProps } from '@/components/pdf/templates/FinancialReportTemplate'
 import { getPDFSettings } from '@/lib/pdf-settings'
 import React from 'react'
+
+function FinancialReportElement(props: FinancialReportTemplateProps) {
+  return <FinancialReportTemplate {...props} />
+}
 
 /**
  * GET /api/staff/finance/reports/export
@@ -41,25 +45,25 @@ export async function GET(req: NextRequest) {
     const pdfSettings = await getPDFSettings(req.nextUrl.origin)
 
     const stream = await renderToStream(
-      <FinancialReportTemplate
-        year={year}
-        month={month}
-        summary={{
+      FinancialReportElement({
+        year,
+        month,
+        summary: {
           totalRevenue: summary.totalRevenue,
           revenueThisMonth: summary.revenueThisMonth,
           pendingAmount: summary.pendingAmount,
           avgTransactionValue: summary.avgTransactionValue,
-        }}
-        monthlyData={monthlyData}
-        revenueByType={revenueByType}
-        paymentStatus={paymentStatus}
-        logoUrl={pdfSettings.logoUrl}
-        watermarkUrl={pdfSettings.watermarkUrl}
-        watermarkOpacity={pdfSettings.watermarkOpacity}
-      />
+        },
+        monthlyData: monthlyData,
+        revenueByType: revenueByType,
+        paymentStatus: paymentStatus,
+        logoUrl: pdfSettings.logoUrl,
+        watermarkUrl: pdfSettings.watermarkUrl,
+        watermarkOpacity: pdfSettings.watermarkOpacity,
+      })
     )
 
-    return new NextResponse(stream as any, {
+    return new NextResponse(stream as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="financial-report-${year}-${month}.pdf"`,

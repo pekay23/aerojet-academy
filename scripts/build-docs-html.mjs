@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 /**
  * Build static HTML for every markdown file under `docs/`.
  *
@@ -34,8 +34,10 @@ const SECTIONS = [
   { dir: 'architecture', title: 'Architecture', blurb: 'System reference — API, database, security.' },
   { dir: 'guides',       title: 'Guides',       blurb: 'Operational how-tos — setup, deployment, handover.' },
   { dir: 'audits',       title: 'Audits',       blurb: 'Historical audit reports, newest first.' },
+  { dir: 'compliance',   title: 'Compliance',   blurb: 'Regulatory registers — ISO 27001, data protection, DPIA.' },
   { dir: 'plans',        title: 'Plans',        blurb: 'RFCs and implementation roadmaps.' },
   { dir: 'design',       title: 'Design',       blurb: 'Design system — tokens, typography, components.' },
+  { dir: 'operations',   title: 'Operations',   blurb: 'Branch strategy, CI/CD, deployment workflows.' },
 ]
 
 // ── HTML helpers ─────────────────────────────────────────────────────────
@@ -52,6 +54,11 @@ function slugify(text) {
     .replace(/^-|-$/g, '')
 }
 
+function relativeHref(from, to) {
+  const fromDir = path.dirname(from)
+  return path.relative(fromDir, to).replaceAll('\\', '/')
+}
+
 // ── Marked renderer overrides ────────────────────────────────────────────
 // We extend marked to:
 //   - rewrite *.md → *.html in internal links
@@ -64,42 +71,45 @@ function buildMarkdownCallbacks() {
   const escape = (s) =>
     String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
 
+  function processBodyHtml(html) {
+    // 1. Rewrite internal .md links to .html (skip absolute URLs)
+    let out = html.replace(/href="([^"]+\.md)(#([^"]*))?"/g, (match, href, hash) => {
+      if (/^https?:/i.test(href)) return match
+      const newHref = href.replace(/\.md(?=#|$)/i, '.html')
+      return `href="${newHref}${hash || ''}"`
+    })
+
+    // 2. Convert blockquotes starting with <p><strong> to editorial pull-quotes
+    out = out.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, (match, content) => {
+      const trimmed = content.trim()
+      if (/^<p><strong>/.test(trimmed)) {
+        return `<blockquote class="he-pull">${content}</blockquote>`
+      }
+      return match
+    })
+
+    // 3. Wrap h2 headings in numbered editorial sections; add ids to h3+
+    out = out.replace(/<h([1-6])([^>]*)>(.*?)<\/h[1-6]>/g, (match, level, attrs, content) => {
+      const plain = content.replace(/<[^>]+>/g, '').trim()
+      const id = slugify(plain)
+
+      if (level === '2') {
+        h2Counter += 1
+        const num = String(h2Counter).padStart(2, '0')
+        return `<section class="he-section" id="${id}"><div class="he-section__num">${num} · ${escape(plain)}</div><h2 class="he-section__title">${content}</h2></section>`
+      }
+
+      return `<h${level} id="${id}"${attrs}>${content}</h${level}>`
+    })
+
+    return out
+  }
+
   return {
     resetCounter: () => {
       h2Counter = 0
     },
-    render: (md) =>
-      Bun.markdown.render(
-        md,
-        {
-          heading: (children, { level }) => {
-            const plain = children.replace(/<[^>]+>/g, '').trim()
-            const id = slugify(plain)
-            if (level === 2) {
-              h2Counter += 1
-              const num = String(h2Counter).padStart(2, '0')
-              return `<section class="he-section" id="${id}"><div class="he-section__num">${num} · ${escape(plain)}</div><h2 class="he-section__title">${children}</h2>`
-            }
-            return `<h${level} id="${id}">${children}</h${level}>`
-          },
-          link: (children, { href, title }) => {
-            let finalHref = href
-            if (finalHref && /\.md(#|$)/i.test(finalHref) && !/^https?:/i.test(finalHref)) {
-              finalHref = finalHref.replace(/\.md(?=#|$)/i, '.html')
-            }
-            const titleAttr = title ? ` title="${escape(title)}"` : ''
-            return `<a href="${escape(finalHref)}"${titleAttr}>${children}</a>`
-          },
-          codespan: (children) => `<code>${children}</code>`,
-          blockquote: (children) => {
-            const isPull = /^<p><strong>/.test(children.trim())
-            return isPull
-              ? `<blockquote class="he-pull">${children}</blockquote>`
-              : `<blockquote>${children}</blockquote>`
-          },
-        },
-        { gfm: true },
-      ),
+    render: (md) => processBodyHtml(Bun.markdown.html(md)),
     renderInline: (md) => Bun.markdown.html(md),
   }
 }
@@ -120,9 +130,9 @@ function extractToc(md) {
 }
 
 // ── Layout heuristic ─────────────────────────────────────────────────────
-function detectLayout(slug, mdContent) {
+function _detectLayout(slug, mdContent) {
   const s = slug.toLowerCase()
-  const c = mdContent.toLowerCase()
+  const _c = mdContent.toLowerCase()
   if (/incident|post-?mortem/.test(s)) return 'incident'
   if (/-plan|implementation|refactor/.test(s)) return 'plan'
   if (/audit|status|findings|review/.test(s)) return 'audit'
@@ -141,13 +151,15 @@ function parseHeader(md, slug, section) {
   const afterH1 = h1Match ? md.slice((h1Match.index ?? 0) + h1Match[0].length) : md
   const paragraphs = afterH1.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
   const deckCandidate = paragraphs.find(
-    (p) => !p.startsWith('#') && !p.startsWith('```') && !p.startsWith('|') && !p.startsWith('- ') && !p.startsWith('> ')
+    (p) => !p.startsWith('#') && !p.startsWith('```') && !p.startsWith('|') && !p.startsWith('- ') && !p.startsWith('> ') && !/^\d+\.\s/.test(p)
   )
   let deckMarkdown = ''
   if (deckCandidate) {
     const oneLine = deckCandidate.replace(/\s+/g, ' ')
-    // Stop at the first sentence-ending punctuation outside code spans.
-    const sentenceEnd = oneLine.match(/^([^.!?`]+(?:`[^`]*`[^.!?`]*)*[.!?])(?=\s|$)/)
+    // Strip leading list marker before sentence extraction to avoid matching
+    // "1." / "2." as a sentence end.
+    const withoutListMarker = oneLine.replace(/^(\d+\.\s|[-*]\s)/, '')
+    const sentenceEnd = withoutListMarker.match(/^([^.!?`]+(?:`[^`]*`[^.!?`]*)*[.!?])(?=\s|$)/)
     if (sentenceEnd) {
       deckMarkdown = sentenceEnd[1]
     } else {
@@ -173,7 +185,7 @@ function parseHeader(md, slug, section) {
 }
 
 // Strip the leading H1 + the deck paragraph so the body doesn't duplicate them.
-// The deck paragraph is whatever sits between the H1 and the next blank-line
+// The deck paragraph is whatever sits between the H1 and the next blank line
 // boundary, AS LONG AS it isn't itself a heading / code fence / list / quote.
 function stripHeader(md) {
   let out = md.replace(/^#\s+[^\n]+\n+/, '')
@@ -196,17 +208,19 @@ function stripHeader(md) {
 }
 
 // ── Page template ────────────────────────────────────────────────────────
-function pageHtml({ title, eyebrow, deckHtml, body, toc, project, basePathToHtml, isIndex }) {
+function pageHtml({ title, eyebrow, deckHtml, body, toc, project, basePathToHtml, isIndex, currentPath }) {
   const nav = `
 <nav class="he-nav">
   <a class="he-nav__brand" href="${basePathToHtml}index.html">${escapeHtml(project)} <small>docs</small></a>
   <div class="he-nav__links">
     <a href="${basePathToHtml}index.html">Index</a>
-    <a href="${basePathToHtml}architecture/system-overview.html">Architecture</a>
-    <a href="${basePathToHtml}guides/setup.html">Guides</a>
-    <a href="${basePathToHtml}audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="${basePathToHtml}plans/future-plans.html">Plans</a>
-    <a href="${basePathToHtml}design-system.html">Design</a>
+    <a href="${basePathToHtml}architecture/index.html">Architecture</a>
+    <a href="${basePathToHtml}guides/index.html">Guides</a>
+    <a href="${basePathToHtml}audits/index.html">Audits</a>
+    <a href="${basePathToHtml}compliance/index.html">Compliance</a>
+    <a href="${basePathToHtml}plans/index.html">Plans</a>
+    <a href="${basePathToHtml}design/index.html">Design</a>
+    <a href="${basePathToHtml}operations/index.html">Operations</a>
   </div>
 </nav>`
 
@@ -233,8 +247,8 @@ function pageHtml({ title, eyebrow, deckHtml, body, toc, project, basePathToHtml
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>${escapeHtml(title)} · ${escapeHtml(project)}</title>
-<link rel="stylesheet" href="${basePathToHtml}design-tokens.css">
-<link rel="stylesheet" href="${basePathToHtml}docs.css">
+<link rel="stylesheet" href="${relativeHref(currentPath, path.join(OUT, 'design-tokens.css'))}">
+<link rel="stylesheet" href="${relativeHref(currentPath, path.join(OUT, 'docs.css'))}">
 </head>
 <body>
 <div class="he-shell ${useTwoCol ? 'he-shell--wide' : ''}">
@@ -251,7 +265,7 @@ ${mainClose}
 ${tocHtml}
 ${layoutClose}
 <footer class="he-foot">
-  Source · <a href="${basePathToHtml}../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="${relativeHref(currentPath, DOCS)}">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>
@@ -334,6 +348,67 @@ const SITE_CSS = `/* TOC sidebar + index grid extensions to the base tokens. */
 }
 .he-standalone-card a { font-weight: 500; }
 .he-standalone-card p { font-size: var(--t-small-size); color: var(--fg-muted); margin: var(--sp-1) 0 0; }
+
+/* Index page: section link + folder meta */
+.he-index-section__link { color: inherit; text-decoration: none; }
+.he-index-section__link:hover h2 { color: var(--clay); }
+.he-folder-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--sp-2);
+  font-size: var(--t-small-size);
+  color: var(--fg-muted);
+}
+.he-folder-meta__link {
+  font-weight: 500;
+  color: var(--clay);
+  text-decoration: none;
+}
+.he-folder-meta__link:hover { text-decoration: underline; }
+
+/* Folder pages */
+.he-bc { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; margin: var(--sp-4) 0; font-size: var(--t-small-size); }
+.he-bc__item { color: var(--fg-muted); text-decoration: none; }
+.he-bc__item:hover { color: var(--clay); text-decoration: underline; }
+.he-bc__sep { color: var(--border); }
+
+.he-folder-grid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: var(--sp-6); }
+.he-folder-card {
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-4); background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); text-decoration: none; color: inherit;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.he-folder-card:hover { border-color: var(--clay); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.he-folder-card__icon { font-size: 1.5rem; }
+.he-folder-card__name { font-weight: 500; }
+.he-folder-card__count { font-size: var(--t-small-size); color: var(--fg-muted); }
+
+.he-folder-controls {
+  display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-4);
+}
+.he-folder-controls label { font-size: var(--t-small-size); color: var(--fg-muted); font-weight: 500; }
+.he-sort-select {
+  padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); border: 1px solid var(--border);
+  background: var(--surface); color: inherit; font-size: var(--t-small-size);
+}
+
+.he-docs-table { width: 100%; border-collapse: collapse; font-size: var(--t-small-size); }
+.he-docs-table th {
+  text-align: left; padding: var(--sp-3) var(--sp-4); border-bottom: 2px solid var(--border);
+  font-weight: 600; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.05em; font-size: var(--t-caption-size);
+}
+.he-docs-table td { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border); vertical-align: top; }
+.he-docs-table tr:hover td { background: rgba(0,0,0,0.02); }
+.he-docs-table td:first-child { font-weight: 500; }
+.he-docs-table td a { color: var(--clay); text-decoration: none; }
+.he-docs-table td a:hover { text-decoration: underline; }
+.he-docs-table code {
+  font-size: 0.85em; background: rgba(0,0,0,0.04); padding: 0.1em 0.35em; border-radius: 0.25em;
+  color: var(--fg-muted);
+}
+.he-docs-table .he-empty { text-align: center; color: var(--fg-muted); padding: var(--sp-8) var(--sp-4); }
 `
 
 // ── File walking ─────────────────────────────────────────────────────────
@@ -341,8 +416,11 @@ async function walkMd(dir) {
   const out = []
   const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => [])
   for (const ent of entries) {
-    if (ent.isDirectory()) continue
-    if (ent.name.endsWith('.md')) out.push(path.join(dir, ent.name))
+    if (ent.isDirectory()) {
+      out.push(...(await walkMd(path.join(dir, ent.name))))
+    } else if (ent.name.endsWith('.md')) {
+      out.push(path.join(dir, ent.name))
+    }
   }
   return out.sort()
 }
@@ -357,7 +435,12 @@ async function buildPage({ src, outPath, section, project, basePathToHtml }) {
   const { render, renderInline, resetCounter } = buildMarkdownCallbacks()
   resetCounter()
   const body = render(stripped)
-  const deckHtml = deckMarkdown ? renderInline(deckMarkdown) : ''
+  const rawDeckHtml = deckMarkdown ? renderInline(deckMarkdown) : ''
+  // Unwrap single-paragraph decks so the deck <p class="he-deck"> wrapper
+  // in the template doesn't create invalid nested <p><p>…</p></p>.
+  const deckHtml = rawDeckHtml && /^<p[\s>]/.test(rawDeckHtml) && /<\/p>\s*$/.test(rawDeckHtml)
+    ? rawDeckHtml.replace(/^<p[\s>]*/, '').replace(/<\/p>\s*$/, '')
+    : rawDeckHtml
 
   const html = pageHtml({
     title,
@@ -366,17 +449,203 @@ async function buildPage({ src, outPath, section, project, basePathToHtml }) {
     body,
     toc,
     project,
-    basePathToHtml,
+    basePathToHtml: basePathToHtml ?? '../',
+    currentPath: outPath,
     isIndex: false,
   })
 
   await fs.mkdir(path.dirname(outPath), { recursive: true })
   await fs.writeFile(outPath, html, 'utf8')
   return {
-    slug: path.basename(src, '.md'),
+    slug: path.relative(path.dirname(outPath), outPath).replace(/\.html$/, ''),
     title,
     deck: deckMarkdown, // raw text for card grid preview
     srcRelative: path.relative(ROOT, src).replaceAll('\\', '/'),
+  }
+}
+
+// ── Directory metadata helpers ─────────────────────────────────────────────
+async function getDirectChildren(dir) {
+  const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => [])
+  const files = []
+  const subdirs = []
+  for (const ent of entries) {
+    if (ent.isFile() && ent.name.endsWith('.md')) {
+      files.push(ent.name)
+    } else if (ent.isDirectory()) {
+      subdirs.push(ent.name)
+    }
+  }
+  return { files: files.sort(), subdirs: subdirs.sort() }
+}
+
+async function dirHasMd(dir) {
+  const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => [])
+  for (const ent of entries) {
+    if (ent.isFile() && ent.name.endsWith('.md')) return true
+    if (ent.isDirectory() && await dirHasMd(path.join(dir, ent.name))) return true
+  }
+  return false
+}
+
+function extractDate(text) {
+  const m = text.match(/(\d{4}-\d{2}-\d{2})/)
+  return m ? m[1] : null
+}
+
+// ── Build a folder index page ──────────────────────────────────────────────
+async function buildFolderPage({ srcDir, outDir, project, folderTitle }) {
+  const { files: directFiles, subdirs } = await getDirectChildren(srcDir)
+  const subdirEntries = []
+  for (const sd of subdirs) {
+    const fullSubdir = path.join(srcDir, sd)
+    if (await dirHasMd(fullSubdir)) {
+      const mdCount = (await walkMd(fullSubdir)).length
+      subdirEntries.push({ name: sd, count: mdCount })
+    }
+  }
+
+  const fileEntries = []
+  for (const f of directFiles) {
+    const src = path.join(srcDir, f)
+    const md = await fs.readFile(src, 'utf8')
+    const { title, deckMarkdown } = parseHeader(md, f.replace(/\.md$/, ''), null)
+    const stat = await fs.stat(src).catch(() => null)
+    const mtime = stat ? stat.mtime.toISOString().slice(0, 10) : ''
+    const date = extractDate(f) || mtime
+    fileEntries.push({
+      title,
+      deck: deckMarkdown,
+      date,
+      srcRelative: path.relative(ROOT, src).replaceAll('\\', '/'),
+      href: path.relative(outDir, path.join(outDir, path.relative(srcDir, src).replace(/\.md$/, '.html'))).replaceAll('\\', '/'),
+    })
+  }
+
+  // Sort files by date descending by default
+  fileEntries.sort((a, b) => {
+    const cmp = (b.date || '').localeCompare(a.date || '')
+    return cmp !== 0 ? cmp : a.title.localeCompare(b.title)
+  })
+
+  // Compute breadcrumbs from the folder's position in the docs tree
+  const relToRoot = path.relative(DOCS, srcDir).replaceAll('\\', '/')
+  const parts = relToRoot.split('/').filter(Boolean)
+  const folderPagePath = path.join(outDir, 'index.html')
+  // basePathToHtml points from this folder page to docs/html/ root.
+  // One level of ./ for top-level section folders; ../ for nested subdirs.
+  const folderDepth = path.relative(OUT, outDir).split(path.sep).filter(Boolean).length
+  const basePathToHtml = folderDepth <= 0 ? './' : '../'.repeat(folderDepth)
+  const breadcrumbItems = [{ label: 'Docs', href: relativeHref(folderPagePath, path.join(OUT, 'index.html')) }]
+  for (let i = 0; i < parts.length; i++) {
+    const ancestorPath = path.join(OUT, ...parts.slice(0, i + 1), 'index.html')
+    breadcrumbItems.push({ label: parts[i], href: relativeHref(folderPagePath, ancestorPath) })
+  }
+  const breadcrumbHtml = breadcrumbItems
+    .map((bc, i) => {
+      const isLast = i === breadcrumbItems.length - 1
+      if (isLast) return `<span class="he-bc__item">${escapeHtml(bc.label)}</span>`
+      return `<a class="he-bc__item" href="${bc.href}">${escapeHtml(bc.label)}</a>`
+    })
+    .join('<span class="he-bc__sep">/</span>')
+
+  const subdirsHtml = subdirEntries.length > 0
+    ? `
+  <div class="he-folder-grid">
+    ${subdirEntries.map((sd) => `
+    <a class="he-folder-card" href="${sd.name}/index.html">
+      <div class="he-folder-card__icon">📁</div>
+      <div class="he-folder-card__name">${escapeHtml(sd.name)}</div>
+      <div class="he-folder-card__count">${sd.count} document${sd.count === 1 ? '' : 's'}</div>
+    </a>`).join('')}
+  </div>`
+    : ''
+
+  const filesTableRows = fileEntries.length > 0
+    ? fileEntries
+        .map(
+          (f) => `
+    <tr data-date="${f.date || ''}" data-title="${escapeHtml(f.title)}">
+      <td><a href="${f.href}">${escapeHtml(f.title)}</a></td>
+      <td>${escapeHtml(f.date || '—')}</td>
+      <td>${escapeHtml((f.deck || '').slice(0, 120))}</td>
+      <td><code>${escapeHtml(f.srcRelative)}</code></td>
+    </tr>`
+        )
+        .join('')
+    : `<tr><td colspan="4" class="he-empty">No documents in this folder.</td></tr>`
+
+  const body = `
+<nav class="he-bc" aria-label="Breadcrumb">
+  ${breadcrumbHtml}
+</nav>
+${subdirsHtml}
+<div class="he-folder-controls">
+  <label for="sort-select">Sort by</label>
+  <select id="sort-select" onchange="sortDocs(this.value)" class="he-sort-select">
+    <option value="newest">Newest first</option>
+    <option value="oldest">Oldest first</option>
+    <option value="az">A → Z</option>
+    <option value="za">Z → A</option>
+  </select>
+</div>
+<table class="he-docs-table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Date</th>
+      <th>Description</th>
+      <th>Source</th>
+    </tr>
+  </thead>
+  <tbody id="docs-table-body">
+    ${filesTableRows}
+  </tbody>
+</table>
+<script>
+function sortDocs(criteria) {
+  const tbody = document.getElementById('docs-table-body');
+  if (!tbody) return;
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a, b) => {
+    const aDate = a.dataset.date || '';
+    const bDate = b.dataset.date || '';
+    const aTitle = a.dataset.title || '';
+    const bTitle = b.dataset.title || '';
+    switch (criteria) {
+      case 'newest': return bDate.localeCompare(aDate) || aTitle.localeCompare(bTitle);
+      case 'oldest': return aDate.localeCompare(bDate) || aTitle.localeCompare(bTitle);
+      case 'az': return aTitle.localeCompare(bTitle);
+      case 'za': return bTitle.localeCompare(aTitle);
+      default: return 0;
+    }
+  });
+  tbody.innerHTML = '';
+  rows.forEach(row => tbody.appendChild(row));
+}
+</script>
+`
+
+  const html = pageHtml({
+    title: folderTitle,
+    eyebrow: breadcrumbItems[0]?.label || 'Docs',
+    deckHtml: `${fileEntries.length} document${fileEntries.length === 1 ? '' : 's'} in this folder`,
+    body,
+    toc: [],
+    project,
+    basePathToHtml,
+    currentPath: path.join(outDir, 'index.html'),
+    isIndex: true,
+  })
+
+  await fs.mkdir(outDir, { recursive: true })
+  await fs.writeFile(path.join(outDir, 'index.html'), html, 'utf8')
+
+  return {
+    title: folderTitle,
+    fileCount: fileEntries.length,
+    subdirCount: subdirEntries.length,
+    srcRelative: path.relative(ROOT, srcDir).replaceAll('\\', '/'),
   }
 }
 
@@ -400,10 +669,10 @@ async function buildIndex({ project, sectionResults }) {
 
       return `
 <section class="he-index-section" id="${s.dir}">
-  <div class="he-index-section__head">
+  <a class="he-index-section__head he-index-section__link" href="./${s.dir}/index.html">
     <h2>${escapeHtml(s.title)}</h2>
-    <p class="he-index-section__blurb">${escapeHtml(s.blurb)}</p>
-  </div>
+    <p class="he-index-section__blurb">${escapeHtml(s.blurb)} · Browse folder →</p>
+  </a>
   <div class="he-grid">${cards}
   </div>
 </section>`
@@ -454,12 +723,13 @@ ${standalone}
     title: 'Documentation',
     eyebrow: `${project} · docs`,
     deckHtml:
-      'All project documentation, organised by purpose. Markdown sources live in <code>docs/architecture</code>, <code>docs/guides</code>, <code>docs/audits</code>, <code>docs/plans</code>, and <code>docs/design</code>.',
+      'All project documentation, organised by purpose. Markdown sources live in <code>docs/architecture</code>, <code>docs/guides</code>, <code>docs/audits</code>, <code>docs/compliance</code>, <code>docs/plans</code>, <code>docs/design</code>, and <code>docs/operations</code>.',
     body,
     toc: [],
     project,
     basePathToHtml: './',
     isIndex: true,
+    currentPath: path.join(OUT, 'index.html'),
   })
   await fs.writeFile(path.join(OUT, 'index.html'), html, 'utf8')
 }
@@ -487,8 +757,9 @@ async function main() {
     const files = await walkMd(srcDir)
     const built = []
     for (const src of files) {
-      const slug = path.basename(src, '.md')
-      const outPath = path.join(outDir, `${slug}.html`)
+      const rel = path.relative(srcDir, src)
+      const slug = rel.replace(/\.md$/, '')
+      const outPath = path.join(outDir, slug + '.html')
       const result = await buildPage({
         src,
         outPath,
@@ -501,11 +772,46 @@ async function main() {
     sectionResults.push({ ...section, files: built })
   }
 
-  await buildIndex({ project, sectionResults })
+  // Generate folder index pages for every directory containing markdown files
+  const folderPages = []
+  async function generateFolderIndexes(srcDir, outDir) {
+    const hasMd = await dirHasMd(srcDir)
+    if (!hasMd) return
+
+    const folderTitle = path.basename(srcDir)
+    const page = await buildFolderPage({
+      srcDir,
+      outDir,
+      project,
+      folderTitle,
+    })
+    folderPages.push(page)
+
+    // Recurse into subdirectories
+    const { subdirs } = await getDirectChildren(srcDir)
+    for (const sd of subdirs) {
+      const childSrc = path.join(srcDir, sd)
+      const childOut = path.join(outDir, sd)
+      await generateFolderIndexes(childSrc, childOut)
+    }
+  }
+
+  // Start recursion from each top-level docs subdirectory
+  const topLevelEntries = await fs.readdir(DOCS, { withFileTypes: true }).catch(() => [])
+  for (const ent of topLevelEntries) {
+    if (ent.isDirectory()) {
+      const srcDir = path.join(DOCS, ent.name)
+      const outDir = path.join(OUT, ent.name)
+      await generateFolderIndexes(srcDir, outDir)
+    }
+  }
+
+  await buildIndex({ project, sectionResults, folderPages })
 
   const total = sectionResults.reduce((s, sec) => s + sec.files.length, 0)
+  const folderTotal = folderPages.length
   console.log(
-    `[build-docs-html] generated ${total} HTML pages + index across ${SECTIONS.length} sections (design-tokens + docs.css copied into docs/html/)`
+    `[build-docs-html] generated ${total} HTML pages + ${folderTotal} folder indexes + index across ${SECTIONS.length} sections (design-tokens + docs.css copied into docs/html/)`
   )
 }
 
@@ -527,6 +833,7 @@ main().catch((err) => {
   console.error('[build-docs-html] failed:', err)
   process.exit(1)
 })
+
 
 
 

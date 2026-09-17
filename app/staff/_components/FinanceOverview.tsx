@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import {
   TrendingUp,
   Clock,
@@ -11,9 +11,10 @@ import {
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import type { FinanceOverviewData } from '@/lib/finance/overview'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 const RevenueChart = dynamic(() => import('./RevenueChart'), { ssr: false })
 
-const STATUS_CONFIG: Record<string, { label: string; icon: any; style: string }> = {
+const STATUS_CONFIG: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; style: string }> = {
   APPROVED: { label: 'Approved', icon: CheckCircle2, style: 'text-emerald-600 bg-emerald-50' },
   PENDING: { label: 'Pending', icon: Clock, style: 'text-amber-600 bg-amber-50' },
   REJECTED: { label: 'Rejected', icon: XCircle, style: 'text-red-600 bg-red-50' },
@@ -28,6 +29,18 @@ export default function FinanceOverview({
 }) {
   const [data, setData] = useState<FinanceOverviewData | null>(initialData)
   const [loading, setLoading] = useState(false)
+
+  const sortableTransactions = useMemo(
+    () =>
+      (data?.recentTransactions ?? []).map((tx) => ({
+        ...tx,
+        _userSort: tx.user.profile
+          ? `${tx.user.profile.firstName} ${tx.user.profile.lastName}`.toLowerCase()
+          : tx.user.email.toLowerCase(),
+      })),
+    [data]
+  )
+  const { items: sortedTransactions, requestSort, sortConfig } = useSort(sortableTransactions)
 
   const fetchData = async () => {
     setLoading(true)
@@ -181,14 +194,12 @@ export default function FinanceOverview({
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
-                {['User', 'Type', 'Amount', 'Method', 'Status', 'Date'].map((h) => (
-                  <th
-                    key={h}
-                    className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase"
-                  >
-                    {h}
-                  </th>
-                ))}
+                <SortHeader label="User" sortKey="_userSort" currentSort={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <SortHeader label="Type" sortKey="referenceType" currentSort={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <SortHeader label="Amount" sortKey="amount" currentSort={sortConfig} onSort={requestSort} align="right" className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <SortHeader label="Method" sortKey="paymentMethod" currentSort={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <SortHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} align="center" className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <SortHeader label="Date" sortKey="createdAt" currentSort={sortConfig} onSort={requestSort} align="right" className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -202,14 +213,14 @@ export default function FinanceOverview({
                     ))}
                   </tr>
                 ))
-              ) : !data?.recentTransactions?.length ? (
+              ) : !sortedTransactions.length ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center">
                     <p className="text-sm font-bold text-slate-400">No transactions yet</p>
                   </td>
                 </tr>
               ) : (
-                data.recentTransactions.map((tx) => {
+                sortedTransactions.map((tx) => {
                   const fullName = tx.user.profile
                     ? [
                         tx.user.profile.firstName,

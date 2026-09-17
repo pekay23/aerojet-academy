@@ -1,0 +1,900 @@
+--- Page 1 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+1
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+Make P the subject of the formula I =PRT/100. (Decimal) 46
+P = IRT/100 P = 100I/RT P = 100RT/I
+What is 738 in binary coded decimal?
+Make u the subject of the formula v^2 = u^2 + 1011110010
+2as. 111100010
+u = âˆš(v^2 + 2as) u = âˆš(v^2 - 2as) u = v - 2as 11100111000
+Remove the brackets and simplify: (x-y)(x-y). log9 - log3 =
+x^2 - 2xy - y^2 x^2 + y^2 log3 log6 log9
+x^2 - 2xy + y^2
+What is y in the formula shown? a = (X+B) / y.
+Evaluate (3x^2 - 6xy) / (x-2y). y = (X - B) / a y = (a + X) / B y = (X +B) / a
+Cannot be simplified further. 3x-3y
+3x 6^7 divided by 12^7 is equal to
+1/20.
+Evaluate (3a + 2b)(2a-3b). 1/128.
+6a^2 - 5ab - 6b^2 6a - 5ab - 6b 1/2.
+6a^2 + 5ab - 6b^2
+If 2x-8y=14 and 4x+8y=16; then x=
+Solve the following equations for x: 4x + 8y = 64; -1/2. 3.
+2x - 8y = 86. 5.
+x=5 x=25 x=125
+Solve: 2x - 3 = 4
+207) (Binary) 11001 + 11001 = x = 3.50
+50 x = 7
+26 x = -3
+55
+V = (a+b) * r^2 Find a.
+100000 in binary is what number in decimal? a = V / r^2 - b a = (V - b) / r^2 a = V - r^2 - b
+16
+32 Make m the subject of the formula in y=mx+c.
+64 m=(y-c)/x m=y-x/c m=y+c/x
+D in hexidecimal is what number in decimal? Make x the subject of the formula in y = mx+c.
+8 y - c / m (y - c) / m
+13 y - m / c
+17
+Octal is to the base of
+210) (Binary) 10101 + 11001 = 2.
+(Binary) 46 8.
+(Octal) 46
+
+--- Page 2 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+2
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+16. 230) y = 2x + 4, When x = -1, y =
+0.5
+101110 in binary is 2
+46 base 2. 4
+46 base 8.
+46 base 10. 231) What is 011100001 base 2 in Octal?
+324
+What is octal 13 in base 10? 341
+4 452
+5
+BCD format of numbering system has a base of
+11
+2.
+What type of equation is this? ax^2 +bx+c = 0. 8.
+Quadratic equation. Polynomic equation. 10.
+Gradient of the line.
+The characteristic of Log 0.698 is
+224) What is (X^2 * X^3 )^3 ? -2.
+X^10 X^15 X^36 -1.
+1.
+Base of hexadecimal is
+2. 234) Log 59,000 =
+8. 0.77452
+16. 4.7745
+5.77452
+y = mx + c can also be written as
+x = y / (m + c) x = (y - c) / m If 2x^2 + kx-8 = 0 has two equal real roots, then
+x = y / (m - c) k is an imaginary number. k=±8.
+k=-8.
+(x + y)^2 Ã· (x + y)^8 has a base and exponent of
+(x + y)^10. Given the log of A exceeds that of B by 4, find
+(x + y)^-6. (x + y)^1/4 the correct statement about A and B.
+A is 4000 times the value of B. A is 10,000 times
+Rewrite the following with a positive index: z^(- the value of B. A is 1000 times the value of B.
+2) and x^(-3).
+1/z^2 and 1/x^3 (ZX^2 )^2 ; and (X)^3 Z/22; and What is 11110001 base 2 in Octal?
+1/X 72
+361
+229) 10011 base 2 = 684
+29 base 2
+19 base 10 If x^2 -3=6, then x=
+35 base 10 Â±2 Â±3 18
+
+--- Page 3 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+3
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+Given that s=0, solve the equation s=ut + Solve for x: 5x-7=3.
+Â½at^2 for the two possible values of t. x=-2
+t=0, t=-2u/a. t=0, t=a/2u. t=0, t=2u/a. x=-4/5 x=2
+Log 9 - Log 3 + Log 4 =
+Octal is the word given to what base?
+Log 10
+2
+Log 12
+8
+Log 16
+16
+What is log 0.1? Which of the following is a quadratic equation?
+-1 3x^2 + 2x + 1 = 0
+-0.1 3x + 2y + 4 = 0
+0 3x^3 + 3x - 2 = 0
+What is log 1? What is log 1000?
+0 1.0787
+1 2.0787
+10 3.0787
+What is the log of 20000.2? What is log AB?
+43.010 log (A + B) log A + log B log A - log B
+4.3010
+0.4301 What is Log A/B?
+log A + Log B log A - Log B Log (A - B)
+244) A quadratic equation has the real roots x=6
+and x=9. Determine the equation which is 254) log 100+2 =
+satisfied by these roots. 4
+x^2 -54x+15=0 x^2 -15x+54=0 x^2 +15x-15=0 log 102
+log 200
+245) 10111 base 2 - 1001 base 2 =
+1100 base 2
+255) log 100/2 =
+1110 base 2 1
+1010 base 2 log 98
+log 200
+What is the characteristic of 5.74?
+-1 256) log 100 + cos60 =
+0 0.25
+1 2.5
+25
+What is log6^3?
+6log3 log18 3log6
+
+--- Page 4 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+4
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+What is the external angle indicated on the 5 inches
+figure below? 5.5 inches 6 inches
+To work out the circumference of a circle use
+D * 0.3142.
+D * 3.142.
+120Â°
+D - 3.142.
+60Â°
+30Â° An equilateral triangle has
+no equal sides. two equal side. three equal sides.
+If a wheel of radius R revolves 1/2 a turn, how
+many radians does it turn through? A quadrilateral with only two parallel sides is a
+2Ï€ radians 2R^2 radians Ï€ radians Trapezium. Rhombus. Parallelogram.
+If there are two similar angles in a right triangle, A triangle with equal angles is called
+these angles are right angled. equilateral. isosceles.
+supplementary. subordinate. complementary.
+Two gears are in mesh, one is larger than the
+An equilateral triangle has other, the smaller gear rotates
+no equal sides. 2 equal sides. at a faster speed.
+3 equal sides. at a lower speed. at the same speed.
+The three angles of a triangle summed together The name given to this shape.
+equal
+90.
+180.
+Trapezoid Parallelogram Rhombus
+360.
+A triangle with equal sides is The circumference of a circle is found by
+isosceles. equilateral.
+multiplying the diameter by 3.142. multiplying
+acute. the radius by 3.142. dividing the diameter by
+3.142.
+Two gears are in mesh, one has twice the
+number of teeth as the other, so
+Calculate the height of an obtuse triangle whose
+the gear with fewer teeth rotates slower than
+base is X cm and the area is Y square cm.
+the other
+Y + X / 2
+the gear with fewer teeth rotates faster than the
+Y * 2 / X Y * 2 * X
+other.
+A right-angled triangle has sides of 3 inches and the two gears rotate at the same speed.
+4 inches, what will the third side be?
+
+--- Page 5 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+5
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+Locus points plotted equidistant from a central
+points represent Which shape has no parallel sides?
+circumference. diameter. Trapezoid Kite Rhombus
+radius.
+The properties of a scalene triangle are
+A circle contains acute angle.
+2Ï€r radians. 2Ï€ radians. 4Ï€ radians. all sides are equal.
+all sides different lengths.
+An oblique pyramid is one which has its axis
+perpendicular to its base. not perpendicular to its What is the height of an oblique pyramid?
+base. parallel to its base. The height is angled to the base.
+The height is perpendicular to the base.
+An input gear has 20 teeth and the output gear The height is parallel to the sides.
+has 120 teeth. If the input gear rotates 360Â°,
+the output gear will rotate What is the value of X in the diagram shown?
+45Â°.
+60Â°.
+90Â°.
+A line from the centre of a circle is called
+diameter. its segment. radius.
+40Â°
+35Â°
+Give the name of the triangle, which has two
+30Â°
+sides equal in length and two equal angles.
+Equilateral Isosceles
+How many degrees are there in the smaller of
+Obtuse
+the segments, where AB is one sixth of AC?
+In an equilateral triangle, all of the angles are
+equal, to
+Ï€ divided by 2.
+Ï€ divided by 3.
+Ï€ divided by 4.
+What is an obtuse angle?
+10Â°
+One greater than 180Â°. One less than 90Â°. 14.5Â°
+One greater than 90Â°, but less than 180Â°. 15Â°
+A congruent triangle has In a parallelogram, if all the sides are of equal
+same shape and size. same size different shape. length and 1 angle is 90Â°, it is a
+same shape different size. rhomboid. quadrilateral. square.
+
+--- Page 6 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+6
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+In a rhombus A triangle has angles 67Â° and 48Â°. The third
+all sides are different length with no angles 90Â°. angle is
+all sides are equal length with no angles 90Â°. 65Â°.
+adjacent sides are different lengths with no 75Â°.
+angles 90Â° 115Â°.
+An isosceles triangle has the following The sum of the angles of a polygon with 'n' sides
+properties: is
+two sides parallel. 180 * (n-2).
+three sides the same length. two sides the same (n/4) * 180.
+length. 60 * n.
+In an oblique triangle the axis is Suppose the earth to be a real sphere with the
+perpendicular to the base. at a slant to the base. radius R. The arc distance from HK (N23) to the
+parallel to the base. North pole is
+0.9R.
+How far does a wheel of 7m radius travel in one 1.2R.
+revolution? 2.2R.
+14m 22m 44m
+One radian is
+For a scalene triangle which is true? the angle subtended at the centre of a circle
+2 sides are equal. when the arc-length formed between two radial
+No 2 sides are equal. One angle is acute. lines is equal to pi.
+the angle subtended at the centre of a circle
+A line to create a segment from the centre of a
+when the arc-length formed between two radial
+circle is a
+lines is equal in length to the radius.
+radius. diameter. chord.
+66.67Â°.
+A shape with 4 equal sides and one 90Â° angle is
+How many degrees in π radians?
+a
+90
+parallelogram. rhombus. square.
+180
+In a right angled triangle the longest side is 20cm 360
+long, the shortest side is 12cm. What length is
+the last side? The sum of the external angles of any polygon is
+13.6cm 16cm 18cm 180 degrees.
+360 degrees.
+The sum of the internal angles of a triangle is 540 degrees.
+180Â°.
+2Ï€ radians. 360Â°. Which of the 2 angles are called supplementary?
+
+--- Page 7 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+7
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+30 degrees and 60 degrees How many times does the x-axis get crossed
+40 degrees and 40 degrees when y = x^2 - 3.
+60 degrees and 120 degrees 3
+2
+An acute angle is 1
+less than 90 degrees. more than 90 degrees. less
+than 180 degrees. On a graph what is the intercept of y when 4y =
+x + 8.
+A straight line which goes from one point on the 2
+circumference to another is called 4
+an arc. 8
+a tangent. a chord.
+What is the equation of the line shown?
+What is the name given to a quadrilateral with
+two pairs of adjacent sides equal and the
+diagonals intersect at right angles? Note not all
+the sides are equal.
+kite. parallelogram. rhombus.
+Find the size of the other two angles of an
+isoscelese triangle with one angle of 100Â°.
+y = 2x + 2
+40Â°, 40Â° y = -2-x y = x-2
+30Â°, 30Â°
+100Â°, 20Â° The graph points (9, 3) and (3, 1) what is the
+slope?
+A triangle always has 9/5
+exactly one right angle. at least two acute angles. 1/3
+exactly two acute angle. 3/1
+The locus of a point which stays the same A straight line graph has the equation 3y = 12x–
+distance from a given point is 3 What is the gradient?
+a circle. 1/4
+a parallel line. an ellipse. 4/1
+3/4
+In the following equation what is the y-
+intercept? 4y = 2x + 8. For an equation 2y = 5x + 3 what is the
+2 gradient?
+4 3/5x
+8 5/2
+5x+3/2
+
+--- Page 8 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+8
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+Using cosine to find the angle of a triangle, What is the gadient of the straight line whose
+which statement is true? equation is 2y + 3x = 6?
+Opposite/Hyp Opposite/Adjacent Adjacent/Hyp -3/2
+3/2
+What type of equation is y = x^2 + 9x + 14? 3
+Quadratic Circular Exponential
+Two lines with equations y = 3x-6 and y = 3x + 4
+2y = 5x + 3 What is the gradient? meet when y = 3. are at right angles. are parallel.
+2/5
+5/2 + 3 What is the equation of a straight line that
+5/2 passes through the two points (0,0) and (3,2)?
+y = 3x + 2 y = 2x + 3 y = 2x/3
+What is the slope between the points (3,1) and
+(9,3)? The line with equation x = 3 is
+1/3 at 45° to both axes. parallel to the x axis. parallel
+3/1 to the y axis.
+2
+What is the equation of the graph shown?
+What is commonly referred to as the law of a
+straight line?
+y = x^2 plus 180
+The line must pass through the 180 degree
+datum.
+y = -2.
+y = mx + c
+x = -2.
+y = 2x.
+The y intercept of 4y = 4x + 8 is
+2.
+Solve the simultaneous equations y = x + 2 and 4.
+3y + 2x = 6.
+8.
+x = 0, y = 0
+x = 0, y = 2
+A straight line passes through the two points
+x = 2, y = 0
+(1,4) and (6,1). What is the gradient of the line?
+-3/5
+The plot of the equation y = 1/x is a
+2/5
+straight line.
+3/5
+curve with one turning point. curve with two
+turning points.
+What is the equation of a straight line with
+gradient m and intercept on the y axis c?
+y = mx + c x = y + mc y = cx + m
+
+--- Page 9 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+9
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+Which of the graphs shown is given by the Which of the following formulae are correct for
+equation y = x^2 + 3? the triangle shown?
+A^2 = C^2 + B^2 B^2 = C^2 + A^2 C^2 = A^2 +
+B^2
+In a right-angled triangle the other two angles
+a b c
+are both 45Â°. The length of the opposite side
+can be calculated by Which of the graphs shown is given by the
+sin 45Â° x length of the hypotenuse side of the
+equation; 2y = 4x+6?
+triangle. sin 45Â° x length of the adjacent side of
+the triangle. cos 45Â° x length of the adjacent
+side of the triangle.
+Sin Φ =
+a b c
+A/C B/C C/A
+Which of the graphs shown is given by the
+equation; y = 2x^3 + 4x + 3?
+Cos A =
+0.6
+0.8
+1.2
+c b a
+In a right-angle triangle, the sine of an angle is
+What is the tangent of 90°?
+opposite divided by hypotenuse. adjacent
+Negative infinity. Positive infinity. 0.
+divided by hypotenuse. opposite divided by
+adjacent.
+Two angles of a triangle are 68° and 32° .
+Therefore the third angle must be
+In a right-angle triangle, the tangent of an angle
+63°.
+is
+80°.
+opposite divided by adjacent. adjacent divided
+114°.
+by hypotenuse. opposite divided by hypotenuse.
+
+--- Page 10 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+01
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+In a right-angle triangle, the cosine of an angle is The trigonometrical ratio; adjacent divided by
+opposite divided by hypotenuse. adjacent hypotenuse is
+divided by hypotenuse. opposite divided by Sine. Tangent. Cosine.
+adjacent.
+57.3 degrees is equal to
+On a right angle triangle, the longest side is 20
+radian. cm and the shortest is 12 cm. What is the other
+radian. Π radian.
+side?
+13 cm
+A right angled triangle has sides 6cm, 8cm and
+16 cm
+10 cm. What is the sine of the angle between
+18 cm
+the 8cm side and the 10 cm side?
+0.6 In a right triangle, SINE theta = adjacent divided
+by hypotenuse. opposite divided by adjacent. 0.75
+opposite divided by hypotenuse. 0.8
+Complete the following: SINE a = Sin 90 =
+a squared times b squared. Infinity 0
+opposite side divided by the hypotenuse side. 1
+adjacent side divided by the opposite side.
+What size of angle has the same ratio for both
+A sector with angle A is subtended to the centre the sine and the cosine?
+point of a circle. Area of the sector is 0 degrees
+proportional to 45 degrees
+angle A. cos A. sin A. 60 degrees
+Starting from zero amplitude, the cosine curve Sin A is equal to
+repeats itself between
+-180 and 180 degree.
+-90 and 270 degrees.
+0 and 360 degree. 3/5.
+3/4.
+Choose the correct statement
+4/5.
+sec^2 * x + tan^2 * x = 1 cosec^2 * x - cot^2 * x =
+1 cos^2 * x - sin^2 * x = 1
+If cos 60 is 0.5, what is sin 30?
+0.5
+A right angled triangle has the two shortest sides
+0.866
+of 5cm and 12 cm. What is the length of the
+None of the above.
+longest side?
+13cm 15cm 17cm 5/16 + 3/32 expressed as a single fraction is
+
+--- Page 11 ---
+WWW.PART66EASA.COM
+MODULE – 01(PART2) MATHEMATICS
+Attempt Online Test Series to prepare yourself for exam visit www.part66easa.com
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66traP
+llA
+(
+66trapASAE/bf
+@
+koobecaF
+no
+su
+ekiL
+,)moc.asaE66traP.www(
+egaP
+11
+lairetam
+yduts
+dna
+srepap
+noitseuQ
+noitanimaxe
+eludoM
+66
+RAC
+ACGD
+/
+ASAE
+tsetal
+lla
+daolnwod
+ot
+etisbew
+ruo
+tisiV
+13/32.
+8/48.
+15/512.
+Dividing 4 1/2 by 2 1/6 gives the answer of
+25/12.
+54/26.
+21/3.
+10000 expressed as ten raised to a power would
+be
+10^3.
+10^4.
+10^5.
+60 mm expressed as a percentage of 3 meters is
+0.5%.
+1.8%.
+2%.
+The average speed of an aircraft that travels
+7200 miles in 12 hours is
+167 mph.
+600 mph.
+864 mph.

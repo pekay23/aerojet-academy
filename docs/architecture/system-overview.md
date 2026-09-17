@@ -27,7 +27,7 @@ app/api/          → REST API + cron + UploadThing
 
 ## Auth enforcement (three layers)
 
-1. **Edge proxy** at `proxy.ts` — `ROUTE_ROLE_MAP` gates every `/staff`, `/instructor`, `/student`, `/examiner`, `/applicant` page and their `/api/*` siblings. Wrong-role users are redirected to their own portal; unauthenticated users get `/login?callbackUrl=…` (pages) or 401 JSON (API).
+1. **Edge proxy** at `proxy.ts` — images-only gate. Handles `/api/images/*` auth, hotlink protection, and security headers. Does **NOT** enforce portal role authentication.
 2. **Portal layouts** — each portal `layout.tsx` calls `requireStaff` / `requireInstructor` / etc. from `lib/auth/helpers.ts` as a second check and to pass the session into the tree.
 3. **Route handlers / server actions** — call `requireAdmin()` / `requireAuth()` directly; thrown `'Unauthorized'` / `'Forbidden'` is converted to 401 / 403 by `withErrorHandler`.
 
@@ -37,8 +37,8 @@ A missed check in any one layer is caught by the next.
 
 `lib/prisma/client.ts` exports two clients:
 
-- `prisma` (default) — RLS-wrapped + soft-delete extension. Wraps every query in a transaction that sets PostgreSQL session vars (`aerojet.user_id`, `aerojet.user_role`) for row-level security. Used by student/applicant pages.
-- `prismaUnfiltered` (named) — raw, no overhead. Used by staff pages, which are already auth-gated.
+- `prisma` (default) — Extended with soft-delete and RLS extensions. Legacy; not used by active portal code.
+- `prismaUnfiltered` (named) — Raw base client with no RLS overhead. Used by all portals for direct queries.
 
 Adapter auto-selects per environment (Neon WS in dev, `pg` Pool in production).
 

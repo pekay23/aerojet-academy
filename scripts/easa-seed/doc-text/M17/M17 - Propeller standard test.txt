@@ -1,0 +1,328 @@
+Propeller Fundamentals (25% = 15 questions)
+What is the primary function of a propeller on an aircraft?
+A) To produce lift
+B) To produce thrust
+C) To stabilize the aircraft
+Which part of the propeller blade meets the oncoming airflow first?
+A) Trailing edge
+B) Chord line
+C) Leading edge
+What is the blade face of a propeller also known as?
+A) Thrust face
+B) Cambered surface
+C) Blade back
+What angle should the propeller blade be set to for maximum efficiency relative to the oncoming airflow?
+A) 10º to 12º
+B) 4º to 6º
+C) 8º to 10º
+What creates the thrust in a propeller?
+A) High-pressure air moving from front to rear
+B) High-pressure air moving from rear to front
+C) Low-pressure air moving from front to rear
+What term describes the distance between the leading and trailing edges of a propeller blade measured along the chord line?
+A) Root
+B) Chord
+C) Tip
+What happens to the airflow over the propeller blade as the engine rotates it?
+A) It creates a lift force called thrust
+B) It creates a drag force called thrust
+C) It creates a lift force called drag
+What is the term for the imaginary straight line stretching from the center of the leading edge to the center of the trailing edge of a propeller blade?
+A) Axis line
+B) Centerline
+C) Chord line
+What part of the propeller blade is attached to the hub?
+A) Tip
+B) Root
+C) Chord
+Which component secures all the propeller blades together?
+A) Spinner
+B) Hub
+C) Clamp
+How does the speed of the aircraft affect the relative airflow into the propeller?
+A) It decreases the relative airflow
+B) It has no effect on the relative airflow
+C) It increases the relative airflow
+What principle does the operation of a propeller blade primarily rely on?
+A) Newton’s first law of motion
+B) Bernoulli’s principle
+C) Newton’s third law of motion
+What is the main cause of vibration if ice is allowed to build up on propeller blades?
+A) Increased efficiency of the aerofoil
+B) Out of balance condition
+C) Reduced propeller weight
+What does the blade back of a propeller do to the airflow?
+A) Decelerates the air and increases its pressure
+B) Accelerates the air and reduces its pressure
+C) Maintains constant pressure and speed
+What type of flow does the propeller blade produce as it moves through the air?
+A) Circular flow
+B) Linear flow
+C) Helical flow
+Propeller Construction (16% = 10 questions)
+What materials are modern propeller blades often made from?
+A) Aluminum
+B) Carbon or glass fiber composites
+C) Steel
+What is the primary purpose of the spinner on a propeller?
+A) To increase the propeller's weight
+B) To aerodynamically smooth the airflow over the hub
+C) To decrease the propeller's strength
+What term is used for the curved or convex forward surface of a propeller blade?
+A) Blade face
+B) Blade back
+C) Chord
+What is the function of the propeller hub?
+A) To provide aerodynamic shaping
+B) To secure the propeller blades to the drive shaft
+C) To reduce propeller noise
+What part of the propeller blade is the innermost and attaches it to the center of the propeller?
+A) Tip
+B) Root
+C) Leading edge
+Which of the following best describes a scimitar tip propeller?
+A) It is designed for maximum noise
+B) It is a non-swept back design
+C) It has swept back tips for high efficiency
+What causes the separation of layers in composite propeller blades?
+A) Lamination
+B) De-lamination
+C) Aerodynamic stress
+What part of the propeller blade pushes air rearward to generate forward thrust?
+A) Blade face
+B) Blade back
+C) Leading edge
+What is one function of the chord line in a propeller blade?
+A) It defines the distance between the hub and the tip
+B) It helps measure the chord
+C) It defines the straight line from leading edge to trailing edge
+What type of damage can occur to composite propeller blades due to lightning strikes?
+A) De-lamination
+B) Corrosion
+C) Melting at points of entry and exit
+Propeller Pitch Control (19% = 11 questions)
+What is the primary purpose of controlling the pitch of a propeller blade?
+A) To adjust the engine speed
+B) To change the thrust and efficiency
+C) To control the aircraft's altitude
+How is the propeller pitch adjusted in a constant-speed propeller system?
+A) Manually by the pilot
+B) Automatically by a governor
+C) By varying the propeller blade length
+What happens when a propeller blade is set to a higher pitch angle?
+A) It produces less thrust
+B) It produces more thrust
+C) It reduces fuel efficiency
+What is the effect of a feathered propeller blade?
+A) Maximizes drag
+B) Minimizes drag
+C) Increases thrust
+In a variable pitch propeller, what component adjusts the blade angle?
+A) Propeller hub
+B) Governor
+C) Spinner
+What is the result of a fine pitch setting in a propeller blade?
+A) High engine RPM and high thrust
+B) Low engine RPM and low thrust
+C) High engine RPM and low thrust
+Which propeller pitch setting is used during cruise flight for maximum efficiency?
+A) Fine pitch
+B) Coarse pitch
+C) Feathered
+What mechanism is used to change the pitch of a propeller blade in flight?
+A) Hydraulic actuators
+B) Electrical motors
+C) Manual control levers
+What is the term for the lowest blade angle in a controllable pitch propeller?
+A) Fine pitch
+B) Coarse pitch
+C) Feathered pitch
+What is one benefit of a constant-speed propeller?
+A) Increased engine wear
+B) Improved fuel efficiency
+C) Reduced engine power
+What happens to the propeller pitch during descent to reduce drag?
+A) It is set to fine pitch
+B) It is feathered
+C) It is set to coarse pitch
+Propeller Synchronising (6% = 4 questions)
+What is the primary purpose of propeller synchronizing in multi-engine aircraft?
+A) To increase fuel consumption
+B) To reduce noise and vibration
+C) To increase thrust
+How is propeller synchronization typically achieved?
+A) Manually by the pilot
+B) Automatically using a synchronization system
+C) By adjusting engine power settings
+What is the result of unsynchronized propellers on a multi-engine aircraft?
+A) Increased efficiency
+B) Increased noise and vibration
+C) Decreased thrust
+What component is used to synchronize propeller speeds automatically?
+A) Governor
+B) Synchronizer
+C) Feathering mechanism
+Propeller Ice Protection (9% = 6 questions)
+What is the purpose of propeller ice protection systems?
+A) To increase propeller weight
+B) To prevent or remove ice formation on blades
+C) To increase thrust
+What is a common method of preventing ice formation on propeller blades?
+A) Heating the blades electrically
+B) Cooling the blades
+C) Reducing blade RPM
+Which system operates continuously to prevent ice formation?
+A) Electrical de-icing
+B) Hot air anti-icing
+C) Chemical anti-icing
+What is one disadvantage of using electrical de-icing systems on propellers?
+A) Increased drag
+B) Increased electrical load
+C) Reduced efficiency
+What is the role of chemical anti-icing systems in propeller ice protection?
+A) To lower the freezing point of water on the blades
+B) To heat the blades
+C) To remove the ice mechanically
+Which of the following is a typical de-icing fluid used in propeller ice protection systems?
+A) Ethylene glycol
+B) Propylene glycol
+C) Methanol
+What method do pneumatic de-icing boots use to remove ice from propeller blades?
+A) Heating the blades
+B) Inflating and deflating to break off ice
+C) Spraying chemical de-icers
+How does propeller ice affect flight safety?
+A) It increases fuel efficiency
+B) It reduces thrust and increases vibration
+C) It improves lift and control
+Propeller Maintenance (19% = 11 questions)
+What is the primary objective of routine propeller maintenance?
+A) To increase propeller weight
+B) To ensure safe and efficient operation
+C) To decrease aerodynamic efficiency
+Which tool is commonly used to check the track of a propeller blade?
+A) Torque wrench
+B) Dial indicator
+C) Propeller protractor
+What type of inspection is typically performed to detect internal flaws in a propeller blade?
+A) Visual inspection
+B) Magnetic particle inspection
+C) Ultrasonic inspection
+What is the most common cause of propeller blade damage in service?
+A) Bird strikes
+B) Lightning strikes
+C) Foreign object debris (FOD)
+What action should be taken if a propeller blade is found to be out of balance?
+A) Replace the propeller
+B) Adjust the blade pitch
+C) Add or remove weight to balance
+What is the purpose of a propeller governor in maintenance checks?
+A) To control engine power output
+B) To regulate propeller blade angle
+C) To ensure proper synchronization
+Which component should be inspected for corrosion during a propeller maintenance check?
+A) Spinner
+B) Hub
+C) Blade tips
+What is a key indicator of excessive propeller blade wear?
+A) Increased blade length
+B) Decreased blade thickness
+C) Increased blade pitch
+What is the consequence of operating a propeller with an undetected crack?
+A) Reduced fuel efficiency
+B) Potential blade failure
+C) Improved aerodynamic performance
+How often should a propeller be dynamically balanced?
+A) Every flight
+B) After any maintenance or repair
+C) Monthly
+What safety equipment is necessary when performing propeller maintenance?
+A) Fire extinguisher
+B) Safety goggles and gloves
+C) Earplugs
+Which document outlines the specific maintenance procedures for a particular propeller model?
+A) Aircraft maintenance manual
+B) Pilot’s operating handbook
+C) Propeller manufacturer’s maintenance manual
+Propeller Storage and Preservation (6% = 4 questions)
+What is the primary goal of proper propeller storage and preservation?
+A) To increase propeller weight
+B) To prevent damage and corrosion
+C) To reduce thrust
+Which of the following is a recommended practice for storing propellers long-term?
+A) Storing in a vertical position
+B) Covering with a protective coating
+C) Storing in an uncovered area
+What should be done to a propeller before placing it in long-term storage?
+A) Clean and lubricate
+B) Disassemble completely
+C) Apply electrical de-icing
+Which condition can adversely affect a stored propeller if not properly controlled?
+A) High altitude
+B) Humidity
+C) Propeller pitch
+Correct Answers
+B) To produce thrust
+C) Leading edge
+A) Thrust face
+ B) 4º to 6º
+A) High-pressure air moving from front to rear
+B) Chord
+A) It creates a lift force called thrust
+C) Chord line
+B) Root
+B) Hub
+C) It increases the relative airflow
+C) Newton’s third law of motion
+B) Out of balance condition
+B) Accelerates the air and reduces its pressure
+C) Helical flow
+B) Carbon or glass fiber composites
+B) To aerodynamically smooth the airflow over the hub
+B) Blade back
+B) To secure the propeller blades to the drive shaft
+B) Root
+C) It has swept back tips for high efficiency
+B) De-lamination
+A) Blade face
+C) It defines the straight line from leading edge to trailing edge
+C) Melting at points of entry and exit
+B) To change the thrust and efficiency
+B) Automatically by a governor
+B) It produces more thrust
+B) Minimizes drag
+B) Governor
+A) High engine RPM and high thrust
+B) Coarse pitch
+A) Hydraulic actuators
+A) Fine pitch
+B) Improved fuel efficiency
+B) It is feathered
+B) To reduce noise and vibration
+B) Automatically using a synchronization system
+B) Increased noise and vibration
+B) Synchronizer
+B) To prevent or remove ice formation on blades
+A) Heating the blades electrically
+B) Hot air anti-icing
+B) Increased electrical load
+A) To lower the freezing point of water on the blades
+C) Methanol
+B) Inflating and deflating to break off ice
+B) It reduces thrust and increases vibration
+B) To ensure safe and efficient operation
+C) Propeller protractor
+C) Ultrasonic inspection
+C) Foreign object debris (FOD)
+C) Add or remove weight to balance
+B) To regulate propeller blade angle
+B) Hub
+B) Decreased blade thickness
+B) Potential blade failure
+B) After any maintenance or repair
+B) Safety goggles and gloves
+C) Propeller manufacturer’s maintenance manual
+B) To prevent damage and corrosion
+B) Covering with a protective coating
+A) Clean and lubricate
+B) Humidity

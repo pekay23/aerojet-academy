@@ -7,15 +7,10 @@ import {
   CreditCard,
   Clock,
   ArrowUpRight,
-  ArrowDownRight,
-  Building2,
   Info,
-  Search,
-  Filter,
   CheckCircle2,
   AlertTriangle,
   Target,
-  RefreshCw,
   History,
 } from 'lucide-react'
 
@@ -30,6 +25,19 @@ import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import { getCurrencySymbol } from '@/lib/currency'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
+
+interface WalletTransactionDisplay {
+  id: string
+  createdAt: Date
+  type: string
+  amount: number
+  description: string
+  status: string
+  currency: string
+  paymentCurrency?: string
+  originalAmount?: number
+  isPending: boolean
+}
 
 export const metadata: Metadata = {
   title: 'Wallet | Student Portal',
@@ -48,44 +56,47 @@ export default async function WalletPage({
   const user = session.user
   const tab = tabParam || 'overview'
 
-  const [wallet, studentProfile, pendingTopups, ftEnrollment, activeBundles, pendingTuition] = await Promise.all([
-    prisma.wallet.findUnique({ where: { userId: user.id } }),
-    prisma.studentProfile.findUnique({
-      where: { userId: user.id },
-      select: {
-        studentId: true,
-        enrollmentType: true,
-        programmeChoice: true,
-        pathwayRel: true,
-      },
-    }),
-    prisma.payment.findMany({
-      where: { userId: user.id, referenceType: 'WALLET_TOPUP', status: 'PENDING' },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    }),
-    prisma.fullTimeEnrollment.findFirst({
-      where: { studentId: user.id },
-      include: {
-        programme: true,
-        milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
-      },
-    }),
-    prisma.examBundle.findMany({
-      where: { userId: user.id, status: 'ACTIVE' },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    }),
-    prisma.payment.findMany({
-      where: {
-        userId: user.id,
-        referenceType: { in: ['SEAT_CONFIRMATION', 'YEAR_1_FULL', 'FULL_PROGRAMME', 'CUSTOM_PART_PAYMENT'] },
-        status: 'PENDING'
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    }),
-  ])
+  const [wallet, studentProfile, pendingTopups, ftEnrollment, activeBundles, pendingTuition] =
+    await Promise.all([
+      prisma.wallet.findUnique({ where: { userId: user.id } }),
+      prisma.studentProfile.findUnique({
+        where: { userId: user.id },
+        select: {
+          studentId: true,
+          enrollmentType: true,
+          programmeChoice: true,
+          pathwayRel: true,
+        },
+      }),
+      prisma.payment.findMany({
+        where: { userId: user.id, referenceType: 'WALLET_TOPUP', status: 'PENDING' },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+      }),
+      prisma.fullTimeEnrollment.findFirst({
+        where: { studentId: user.id },
+        include: {
+          programme: true,
+          milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
+        },
+      }),
+      prisma.examBundle.findMany({
+        where: { userId: user.id, status: 'ACTIVE' },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+      }),
+      prisma.payment.findMany({
+        where: {
+          userId: user.id,
+          referenceType: {
+            in: ['SEAT_CONFIRMATION', 'YEAR_1_FULL', 'FULL_PROGRAMME', 'CUSTOM_PART_PAYMENT'],
+          },
+          status: 'PENDING',
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+      }),
+    ])
 
   const studentId = studentProfile?.studentId || 'N/A'
   const walletBalance = {
@@ -105,40 +116,45 @@ export default async function WalletPage({
   const isFullTime = effectiveEnrollmentType === 'FULL_TIME'
 
   // Fetch payment methods for top-up tab
-  const activePaymentMethods = (tab === 'top-up' || tab === 'payments') ? await getActivePaymentMethods() : []
+  const activePaymentMethods =
+    tab === 'top-up' || tab === 'payments' ? await getActivePaymentMethods() : []
 
   // Logic for action-based top-up requirements
   let requiredAmount = 0
   let actionLabel = ''
-  
+
   if (actionParam && ftEnrollment) {
     const milestoneTypeMap: Record<string, string> = {
       seat: 'SEAT_CONFIRMATION',
       sem1: 'SEM1_DUE',
       sem2: 'SEM2_DUE',
-      full: 'FULL_YEAR'
+      full: 'FULL_YEAR',
     }
-    
+
     const targetType = milestoneTypeMap[actionParam]
     if (targetType) {
       if (targetType === 'FULL_YEAR') {
         requiredAmount = ftEnrollment.milestones
-          .filter(m => m.status !== 'PAID')
+          .filter((m) => m.status !== 'PAID')
           .reduce((sum, m) => sum + Number(m.amountDue), 0)
         actionLabel = 'Full Year Payment'
       } else {
-        const milestone = ftEnrollment.milestones.find(m => m.milestoneType === targetType)
+        const milestone = ftEnrollment.milestones.find((m) => m.milestoneType === targetType)
         if (milestone) {
           requiredAmount = Number(milestone.amountDue)
-          actionLabel = targetType === 'SEAT_CONFIRMATION' ? 'Seat Confirmation' : 
-                        targetType === 'SEM1_DUE' ? 'Semester 1' : 'Semester 2'
+          actionLabel =
+            targetType === 'SEAT_CONFIRMATION'
+              ? 'Seat Confirmation'
+              : targetType === 'SEM1_DUE'
+                ? 'Semester 1'
+                : 'Semester 2'
         }
       }
     }
   }
 
   // Fetch transactions for transactions tab
-  let allTransactions: any[] = []
+  let allTransactions: WalletTransactionDisplay[] = []
   if (tab === 'transactions') {
     // Audit 4g: the transactions tab shows only approved purchases/deposits and
     // wallet deductions. Pending payments and invoices are intentionally excluded
@@ -180,14 +196,14 @@ export default async function WalletPage({
         description: `${p.referenceType || 'Payment'} (${p.paymentMethod || 'Transfer'})`,
         status: 'COMPLETED',
         currency: p.currency,
-        paymentCurrency: p.paymentCurrency,
+        paymentCurrency: p.paymentCurrency ?? undefined,
         originalAmount: p.originalAmount ? Number(p.originalAmount) : undefined,
         isPending: false,
       })),
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   }
 
-  const isCredit = (type: string) => ['TOP_UP', 'RELEASE', 'REFUND', 'ADJUSTMENT'].includes(type)
+  const _isCredit = (type: string) => ['TOP_UP', 'RELEASE', 'REFUND', 'ADJUSTMENT'].includes(type)
 
   return (
     <WalletTabs studyMode={effectiveEnrollmentType}>
@@ -210,7 +226,7 @@ export default async function WalletPage({
           )}
 
           <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
-            <div className="from-aerojet-blue to-aerojet-blue/90 rounded-2xl bg-linear-to-br p-5 text-white shadow-xl sm:p-8 lg:col-span-2">
+            <div className="rounded-2xl bg-linear-to-br from-blue-800 to-blue-800/90 p-5 text-white shadow-xl sm:p-8 lg:col-span-2">
               <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 sm:h-12 sm:w-12 sm:rounded-2xl">
@@ -255,7 +271,7 @@ export default async function WalletPage({
             <div className="flex flex-col gap-3 sm:gap-4">
               <a
                 href="/student/wallet?tab=top-up"
-                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-aerojet-sky/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-sky-400/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600 transition-colors group-hover:bg-green-100 sm:h-12 sm:w-12">
                   <ArrowUpRight className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -269,7 +285,7 @@ export default async function WalletPage({
               </a>
               <a
                 href="/student/wallet?tab=transactions"
-                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-aerojet-sky/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-sky-400/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-100 sm:h-12 sm:w-12">
                   <CreditCard className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -291,38 +307,76 @@ export default async function WalletPage({
                 Active Exam Packages
               </h3>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {activeBundles.map((bundle) => (
-                  <div
-                    key={bundle.id}
-                    className="flex flex-col justify-between rounded-xl border border-indigo-50 bg-indigo-50/30 p-4 transition-colors hover:border-indigo-100 dark:border-slate-800 dark:bg-slate-800/50"
-                  >
-                    <div>
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className="font-bold tracking-tight text-indigo-900 dark:text-indigo-300">
-                          {bundle.bundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'}
+                {activeBundles.map((bundle) => {
+                  const remaining = bundle.totalSeats - bundle.usedSeats
+                  const hasSeats = remaining > 0
+                  const content = (
+                    <div className="flex flex-col justify-between">
+                      <div>
+                        <div className="mb-2 flex items-center justify-between">
+                          <span className="font-bold tracking-tight text-indigo-900 dark:text-indigo-300">
+                            {bundle.bundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'}
+                          </span>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
+                              hasSeats
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                            }`}
+                          >
+                            {hasSeats ? 'Active' : 'Exhausted'}
+                          </span>
+                        </div>
+                        <div className="mb-1 text-sm text-slate-600 dark:text-slate-400">
+                          Remaining Seats:{' '}
+                          <strong className="text-slate-900 dark:text-slate-100">
+                            {remaining}
+                          </strong>{' '}
+                          / {bundle.totalSeats}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          Purchased:{' '}
+                          {new Date(bundle.createdAt).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </div>
+                        <div className="mt-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                          Valid until{' '}
+                          {new Date(bundle.validUntil).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </div>
+                      </div>
+                      {hasSeats && (
+                        <span className="text-aerojet-sky mt-3 inline-flex items-center text-xs font-bold">
+                          Select Modules
+                          <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                         </span>
-                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700 uppercase">
-                          Active
-                        </span>
-                      </div>
-                      <div className="mb-1 text-sm text-slate-600 dark:text-slate-400">
-                        Remaining Seats:{' '}
-                        <strong className="text-slate-900 dark:text-slate-100">
-                          {bundle.totalSeats - bundle.usedSeats}
-                        </strong>{' '}
-                        / {bundle.totalSeats}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        Purchased:{' '}
-                        {new Date(bundle.createdAt).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  )
+
+                  return hasSeats ? (
+                    <Link
+                      key={bundle.id}
+                      href="/student/exams?tab=book"
+                      className="flex flex-col justify-between rounded-xl border border-indigo-200 bg-indigo-50/30 p-4 transition-all hover:border-indigo-300 hover:shadow-md dark:border-indigo-900/40 dark:bg-slate-800/50 dark:hover:border-indigo-700"
+                    >
+                      {content}
+                    </Link>
+                  ) : (
+                    <div
+                      key={bundle.id}
+                      className="flex flex-col justify-between rounded-xl border border-indigo-50 bg-indigo-50/30 p-4 dark:border-slate-800 dark:bg-slate-800/50"
+                    >
+                      {content}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
@@ -356,7 +410,7 @@ export default async function WalletPage({
                   <h3 className="text-sm font-bold text-slate-900 sm:text-base dark:text-slate-100">
                     Payment Milestones
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     {ftEnrollment.programme.name} — Year {ftEnrollment.currentYearNumber}
                   </p>
                 </div>
@@ -377,7 +431,7 @@ export default async function WalletPage({
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <div className="flex justify-between text-xs text-slate-400">
+                    <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
                       <span>{pct}% paid</span>
                       <span>
                         {currencySymbol} {total.toLocaleString()} total
@@ -467,7 +521,9 @@ export default async function WalletPage({
                 <Target className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Payment Milestones</h2>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Payment Milestones
+                </h2>
                 <p className="text-sm text-slate-500">Track and pay your programme fees.</p>
               </div>
             </div>
@@ -479,15 +535,18 @@ export default async function WalletPage({
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">
                       <Target className="h-8 w-8 text-blue-500" />
                     </div>
-                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Exam-Only Pathway</h3>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                      Exam-Only Pathway
+                    </h3>
                     <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                      You are enrolled in the Exam-Only pathway. You do not have scheduled tuition milestones.
-                      Payments are made per exam booking or bundle. Use the "Top Up" tab to add funds to your wallet.
+                      You are enrolled in the Exam-Only pathway. You do not have scheduled tuition
+                      milestones. Payments are made per exam booking or bundle. Use the "Top Up" tab
+                      to add funds to your wallet.
                     </p>
                     <div className="mt-6 flex flex-wrap justify-center gap-3">
                       <Link
                         href="/student/exams?tab=records"
-                        className="rounded-xl bg-aerojet-blue px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
+                        className="rounded-xl bg-blue-800 px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
                       >
                         Browse Exams
                       </Link>
@@ -498,15 +557,17 @@ export default async function WalletPage({
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">
                       <Clock className="h-8 w-8 text-blue-500" />
                     </div>
-                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Enrollment Under Review</h3>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                      Enrollment Under Review
+                    </h3>
                     <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                      We have received your tuition payment proof. Our admissions team is currently verifying it.
-                      Once approved, your enrollment milestones will appear here.
+                      We have received your tuition payment proof. Our admissions team is currently
+                      verifying it. Once approved, your enrollment milestones will appear here.
                     </p>
                     <div className="mt-6 flex flex-wrap justify-center gap-3">
                       <Link
                         href="/student/messages?subject=Question regarding enrollment approval"
-                        className="rounded-xl bg-aerojet-blue px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
+                        className="rounded-xl bg-blue-800 px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
                       >
                         Message Admin
                       </Link>
@@ -517,7 +578,9 @@ export default async function WalletPage({
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/20">
                       <AlertTriangle className="h-8 w-8 text-amber-500" />
                     </div>
-                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Enrollment Not Found</h3>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                      Enrollment Not Found
+                    </h3>
                     <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                       Your full-time enrollment record has not been created yet. This usually means
                       your programme activation is still being configured by the academy team.
@@ -531,11 +594,15 @@ export default async function WalletPage({
                           <PlusCircle className="h-5 w-5 text-blue-600" />
                         </div>
                         <div className="text-center">
-                          <span className="block text-xs font-black tracking-widest text-slate-900 uppercase dark:text-white">Return to Portal</span>
-                          <span className="text-[10px] text-slate-500">Check your student dashboard</span>
+                          <span className="block text-xs font-black tracking-widest text-slate-900 uppercase dark:text-white">
+                            Return to Portal
+                          </span>
+                          <span className="text-[10px] text-slate-500">
+                            Check your student dashboard
+                          </span>
                         </div>
                       </Link>
-                      
+
                       <Link
                         href="/student/messages?subject=Report Enrollment Issue"
                         className="flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 transition-all hover:border-amber-200 hover:bg-amber-50/50 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-amber-900/30"
@@ -544,7 +611,9 @@ export default async function WalletPage({
                           <Info className="h-5 w-5 text-amber-600" />
                         </div>
                         <div className="text-center">
-                          <span className="block text-xs font-black tracking-widest text-slate-900 uppercase dark:text-white">Report to Admin</span>
+                          <span className="block text-xs font-black tracking-widest text-slate-900 uppercase dark:text-white">
+                            Report to Admin
+                          </span>
                           <span className="text-[10px] text-slate-500">Get technical help</span>
                         </div>
                       </Link>
@@ -563,7 +632,9 @@ export default async function WalletPage({
                   }
                   const isPaid = m.status === 'PAID'
                   const isOverdue = m.status === 'OVERDUE'
-                  const canPay = (m.status === 'DUE' || m.status === 'OVERDUE') && walletBalance.available >= Number(m.amountDue)
+                  const canPay =
+                    (m.status === 'DUE' || m.status === 'OVERDUE') &&
+                    walletBalance.available >= Number(m.amountDue)
 
                   return (
                     <div
@@ -572,19 +643,27 @@ export default async function WalletPage({
                         isPaid
                           ? 'border-emerald-100 bg-emerald-50/30 dark:border-emerald-900/20 dark:bg-emerald-900/10'
                           : isOverdue
-                          ? 'border-red-100 bg-red-50/30 dark:border-red-900/20 dark:bg-red-900/10'
-                          : 'border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900'
+                            ? 'border-red-100 bg-red-50/30 dark:border-red-900/20 dark:bg-red-900/10'
+                            : 'border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900'
                       }`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                          isPaid ? 'bg-emerald-100 text-emerald-600' : 
-                          isOverdue ? 'bg-red-100 text-red-600' : 
-                          'bg-slate-100 text-slate-400'
-                        }`}>
-                          {isPaid ? <CheckCircle2 className="h-5 w-5" /> : 
-                           isOverdue ? <AlertTriangle className="h-5 w-5" /> : 
-                           <Clock className="h-5 w-5" />}
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                            isPaid
+                              ? 'bg-emerald-100 text-emerald-600'
+                              : isOverdue
+                                ? 'bg-red-100 text-red-600'
+                                : 'bg-slate-100 text-slate-400'
+                          }`}
+                        >
+                          {isPaid ? (
+                            <CheckCircle2 className="h-5 w-5" />
+                          ) : isOverdue ? (
+                            <AlertTriangle className="h-5 w-5" />
+                          ) : (
+                            <Clock className="h-5 w-5" />
+                          )}
                         </div>
                         <div>
                           <p className="font-bold text-slate-900 dark:text-slate-100">
@@ -599,11 +678,18 @@ export default async function WalletPage({
                       <div className="flex items-center justify-between gap-6 md:justify-end">
                         <div className="text-right">
                           <p className="text-lg font-black text-slate-900 dark:text-slate-100">
-                            {currencySymbol}{Number(m.amountDue).toLocaleString()}
+                            {currencySymbol}
+                            {Number(m.amountDue).toLocaleString()}
                           </p>
-                          <p className={`text-[10px] font-bold uppercase tracking-wider ${
-                            isPaid ? 'text-emerald-600' : isOverdue ? 'text-red-600' : 'text-amber-600'
-                          }`}>
+                          <p
+                            className={`text-[10px] font-bold tracking-wider uppercase ${
+                              isPaid
+                                ? 'text-emerald-600'
+                                : isOverdue
+                                  ? 'text-red-600'
+                                  : 'text-amber-600'
+                            }`}
+                          >
                             {m.status}
                           </p>
                         </div>
@@ -615,16 +701,21 @@ export default async function WalletPage({
                             currency={walletBalance.currency}
                             label={LABELS[m.milestoneType] || m.milestoneType}
                           />
-                        ) : !isPaid && (
-                          <Link
-                            href={`/student/wallet?tab=top-up&action=${
-                              m.milestoneType === 'SEAT_CONFIRMATION' ? 'seat' : 
-                              m.milestoneType === 'SEM1_DUE' ? 'sem1' : 'sem2'
-                            }`}
-                            className="rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-800"
-                          >
-                            Top Up to Pay
-                          </Link>
+                        ) : (
+                          !isPaid && (
+                            <Link
+                              href={`/student/wallet?tab=top-up&action=${
+                                m.milestoneType === 'SEAT_CONFIRMATION'
+                                  ? 'seat'
+                                  : m.milestoneType === 'SEM1_DUE'
+                                    ? 'sem1'
+                                    : 'sem2'
+                              }`}
+                              className="rounded-xl bg-blue-800 px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-800"
+                            >
+                              Top Up to Pay
+                            </Link>
+                          )
                         )}
                       </div>
                     </div>
@@ -646,14 +737,25 @@ export default async function WalletPage({
                   <Info className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-blue-900 dark:text-blue-200">Payment Requirement</h3>
+                  <h3 className="font-bold text-blue-900 dark:text-blue-200">
+                    Payment Requirement
+                  </h3>
                   <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
                     To complete your <strong>{actionLabel}</strong>, you need a total of{' '}
-                    <strong className="text-lg font-black">{currencySymbol}{requiredAmount.toLocaleString()}</strong> in your available balance.
+                    <strong className="text-lg font-black">
+                      {currencySymbol}
+                      {requiredAmount.toLocaleString()}
+                    </strong>{' '}
+                    in your available balance.
                   </p>
                   <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
-                    You currently have {currencySymbol}{walletBalance.available.toLocaleString()} available. 
-                    Please transfer at least <strong>{currencySymbol}{(requiredAmount - walletBalance.available).toLocaleString()}</strong> more.
+                    You currently have {currencySymbol}
+                    {walletBalance.available.toLocaleString()} available. Please transfer at least{' '}
+                    <strong>
+                      {currencySymbol}
+                      {(requiredAmount - walletBalance.available).toLocaleString()}
+                    </strong>{' '}
+                    more.
                   </p>
                 </div>
               </div>
@@ -661,7 +763,7 @@ export default async function WalletPage({
           )}
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aerojet-blue text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-800 text-white">
                 <span className="font-bold">1</span>
               </div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
@@ -688,7 +790,7 @@ export default async function WalletPage({
 
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aerojet-sky text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-400 text-white">
                 <span className="font-bold">2</span>
               </div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">

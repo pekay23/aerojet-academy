@@ -17,7 +17,7 @@ import {
 
 import { getSystemSetting } from '@/lib/settings'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import RegistrationFeeDisplay from './_components/RegistrationFeeDisplay'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 
@@ -40,7 +40,7 @@ const statusConfig: Record<
     label: string
     color: string
     bg: string
-    icon: any
+    icon: React.ComponentType<{ className?: string }>
     description: string
   }
 > = {
@@ -133,7 +133,7 @@ export default async function ApplicantDashboardPage() {
 
   const userId = session.user.id
 
-  const applicant = await prisma.user.findUnique({
+  const applicant = await prismaUnfiltered.user.findUnique({
     where: { id: userId },
     select: {
       emailVerified: true,

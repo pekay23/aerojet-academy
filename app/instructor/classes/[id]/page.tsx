@@ -10,9 +10,18 @@ import {
   Calendar,
 } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
+import type { Prisma } from '@prisma/client'
+
+type GradeRow = Prisma.GradeGetPayload<{
+  include: { user: { include: { profile: true } } }
+}>
+type AttendanceRow = Prisma.AttendanceRecordGetPayload<{
+  include: { user: { include: { profile: true } } }
+}>
+type ResourceRow = Prisma.GeneralResourceGetPayload<Record<string, never>>
 
 export const metadata: Metadata = { title: 'Class Detail | Instructor Portal' }
 
@@ -35,11 +44,11 @@ export default async function Page({
     return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
   }
 
-  const allClasses = await prisma.class.findMany({ select: { id: true, name: true } });
+  const allClasses = await prismaUnfiltered.class.findMany({ select: { id: true, name: true } });
   const matchedClass = allClasses.find(c => slugify(c.name) === id);
   const targetId = matchedClass ? matchedClass.id : id;
 
-  const classData = await prisma.class.findUnique({
+  const classData = await prismaUnfiltered.class.findUnique({
     where: { id: targetId },
     include: {
       course: {
@@ -61,13 +70,13 @@ export default async function Page({
   const enrollments = course.enrollments || []
 
   // Only fetch tab-specific data for the active tab
-  let grades: any[] = []
-  let attendanceRecords: any[] = []
-  let resources: any[] = []
+  let grades: GradeRow[] = []
+  let attendanceRecords: AttendanceRow[] = []
+  let resources: ResourceRow[] = []
   let attendanceStats = { rate: 0, present: 0, late: 0, absent: 0, total: 0 }
 
   if (activeTab === 'grades') {
-    grades = await prisma.grade.findMany({
+    grades = await prismaUnfiltered.grade.findMany({
       where: { enrollment: { courseId: course.id } },
       include: { user: { include: { profile: true } } },
       orderBy: { assessmentDate: 'desc' },
@@ -75,21 +84,21 @@ export default async function Page({
   }
 
   if (activeTab === 'attendance') {
-    attendanceRecords = await prisma.attendanceRecord.findMany({
+    attendanceRecords = await prismaUnfiltered.attendanceRecord.findMany({
       where: { classId: id },
       include: { user: { include: { profile: true } } },
       orderBy: { date: 'desc' },
       take: 50,
     })
-    const present = attendanceRecords.filter((r: any) => r.status === 'PRESENT').length
-    const late = attendanceRecords.filter((r: any) => r.status === 'LATE').length
-    const absent = attendanceRecords.filter((r: any) => r.status === 'ABSENT').length
+    const present = attendanceRecords.filter((r) => r.status === 'PRESENT').length
+    const late = attendanceRecords.filter((r) => r.status === 'LATE').length
+    const absent = attendanceRecords.filter((r) => r.status === 'ABSENT').length
     const total = attendanceRecords.length
     attendanceStats = { rate: total > 0 ? Math.round((present / total) * 100) : 0, present, late, absent, total }
   }
 
   if (activeTab === 'materials') {
-    resources = await prisma.generalResource.findMany({
+    resources = await prismaUnfiltered.generalResource.findMany({
       where: { showToInstructors: true },
       orderBy: { updatedAt: 'desc' },
       take: 10,
@@ -109,7 +118,7 @@ export default async function Page({
       <div>
         <Link
           href="/instructor/classes"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-500 dark:text-slate-500 uppercase transition-colors hover:text-aerojet-sky"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes
@@ -166,7 +175,7 @@ export default async function Page({
               {t.count !== undefined && (
                 <span
                   className={cn(
-                    'rounded-lg px-1.5 py-0.5 text-[10px] font-black',
+                    'rounded-lg px-1.5 py-0.5 text-xs font-black',
                     isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
                   )}
                 >
@@ -197,7 +206,7 @@ export default async function Page({
             </div>
             <div className="divide-y divide-slate-50 dark:divide-slate-800">
               {enrollments.length > 0 ? (
-                enrollments.map((enrollment: any) => (
+                enrollments.map((enrollment) => (
                   <div
                     key={enrollment.id}
                     className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
@@ -275,7 +284,7 @@ export default async function Page({
             </div>
             <div className="divide-y divide-slate-50 dark:divide-slate-800">
               {attendanceRecords.length > 0 ? (
-                attendanceRecords.map((record: any) => (
+                attendanceRecords.map((record) => (
                   <div key={record.id} className="flex items-center justify-between px-6 py-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 uppercase dark:bg-slate-800">
@@ -349,7 +358,7 @@ export default async function Page({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                    {grades.map((grade: any) => {
+                    {grades.map((grade) => {
                       const pct = Number(grade.percentage) || 0
                       const passing = pct >= 75
                       return (
@@ -452,7 +461,7 @@ export default async function Page({
                   General Resources ({resources.length})
                 </h3>
                 <div className="space-y-2">
-                  {resources.map((resource: any) => (
+                  {resources.map((resource) => (
                     <div key={resource.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-800/50">
                       <div>
                         <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{resource.name}</p>

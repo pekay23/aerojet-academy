@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { chargeWallet } from '@/lib/wallet/operations'
@@ -15,7 +15,7 @@ export const GET = withErrorHandler(async (_req: NextRequest) => {
   const session = await getAuthSession()
   if (!session) throw new Error('Unauthorized')
 
-  const user = await prisma.user.findUnique({
+  const user = await prismaUnfiltered.user.findUnique({
     where: { id: session.user.id },
     select: {
       registrationFee: true,
@@ -26,7 +26,7 @@ export const GET = withErrorHandler(async (_req: NextRequest) => {
 
   if (!user) throw new Error('User not found')
 
-  const wallet = await prisma.wallet.findUnique({
+  const wallet = await prismaUnfiltered.wallet.findUnique({
     where: { userId: session.user.id },
     select: { availableBalance: true, currency: true },
   })
@@ -45,7 +45,7 @@ export const GET = withErrorHandler(async (_req: NextRequest) => {
 // POST — Pay registration fee from wallet
 // ---------------------------------------------------------------------------
 
-export const POST = withErrorHandler(async (req: NextRequest) => {
+export const POST = withErrorHandler(async (_req: NextRequest) => {
   const session = await getAuthSession()
   if (!session) throw new Error('Unauthorized')
 
@@ -53,11 +53,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Fetch user and wallet
   const [user, wallet] = await Promise.all([
-    prisma.user.findUnique({
+    prismaUnfiltered.user.findUnique({
       where: { id: userId },
       select: { registrationFee: true, registrationPaid: true },
     }),
-    prisma.wallet.findUnique({
+    prismaUnfiltered.wallet.findUnique({
       where: { userId },
       select: { availableBalance: true, currency: true },
     }),
@@ -90,7 +90,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Execute in a transaction
-  await prisma.$transaction(async (tx) => {
+  await prismaUnfiltered.$transaction(async (tx) => {
     // Charge wallet (creates transaction + decrements balance)
     await chargeWallet(
       tx,

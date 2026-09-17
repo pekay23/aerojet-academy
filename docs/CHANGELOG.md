@@ -1,13 +1,207 @@
 # Changelog
 
-## [1.0.82] — 2026-08-26
+## [1.2.4] — 2026-09-15
 
 ### Changed
+
 - Maintenance and stability updates.
 
-## [1.0.81] — 2026-08-26
+## [1.2.3] — 2026-09-12
 
 ### Changed
+
+- Maintenance and stability updates.
+
+## [1.2.2] — 2026-09-11
+
+### Added
+
+- Audit logging for Go/No-Go, postponement, and pool-confirmation decisions.
+- Student in-app notifications for exam-event lifecycle transitions and published results.
+- Batched user lookup and parallel notification dispatch for exam-event operations.
+
+### Fixed
+
+- Windows pre-push test failures caused by Vitest worker-pool crashes; the hook now runs tests without file parallelism and without color output.
+
+## [1.2.1] — 2026-09-11
+
+### Added
+
+- Automated overdue/missed exam reconciliation through `/api/cron/exam-reconciliation`, including a configurable grace period, idempotent attendance writes, assignment synchronization, and batched staff alerts.
+- Upcoming and missed/unresolved exam filters backed by shared fulfillment helpers.
+- Natural question ordering, pagination, validation, and seed-data integrity improvements for internal and instructor question banks.
+- Return-navigation metadata for staff and student notification links.
+- Regrade/edit-grade safeguards and internal-exam test-session answer fixtures.
+- Go/No-Go propagation and clearer booking-fulfillment display states.
+
+### Fixed
+
+- Missing module/date display fallbacks, stale upcoming/missed classifications, duplicate notification paths, and incomplete exam-result/attendance state transitions.
+- Question-bank ordering and pagination regressions, including natural ordering such as M2 before M10.
+
+## [1.0.109] — 2026-09-09
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.108] — 2026-09-09
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.107] — 2026-09-08
+
+### Changed
+
+- EASA question-bank CSV audit completed: 4,115 questions across 10 modules (M1–M7, M11A, M13, M17) verified at 0 unanswered; 47 garbage/non-aviation or diagram-dependent questions removed and replaced with EASA-compliant text questions.
+- Documentation updated: `docs/plans/internal-exam-test-seeding-plan.md` (§0A added with CSV state/audit history), `docs/guides/easa-exam-compliance.md` (3-option structure, blind grading, answer visibility rules aligned with code), `docs/process/per-phase-audit-gate.md` (CSV audit gate added).
+- `docs/plans/implementation-gap-report.md` corrected: Phase 5 Accessibility/EASA deliverables marked complete now that `ACCESSIBILITY.md` and `docs/guides/easa-exam-compliance.md` exist.
+
+## [1.0.106] — 2026-09-07
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.105] — 2026-09-04
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.104] — 2026-09-04
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.103] — 2026-09-03
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.102] — 2026-09-03
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.101] — 2026-09-03
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.100] — 2026-09-03
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.99] — 2026-09-03
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.98] — 2026-09-03
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.97] — 2026-09-03
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.96] — 2026-09-03
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.95] — 2026-09-03
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.94] — 2026-09-03
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.93] — 2026-09-02
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.92] — 2026-09-02
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.91] — 2026-09-02
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.90] — 2026-09-01
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.89] — 2026-09-01
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.88] — 2026-09-01
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.87] — 2026-09-01
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.86] — 2026-09-01
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.85] — 2026-09-01
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.84] — 2026-09-01
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.83] — 2026-09-01
+
+### Changed
+
 - Maintenance and stability updates.
 
 ## [1.0.80] — 2026-08-22

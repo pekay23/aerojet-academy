@@ -19,7 +19,7 @@ export interface PDFSettings {
 function readImageAsDataUri(filePath: string): string | null {
   try {
     // Normalize: strip any leading /public or public prefix to avoid double public/public/
-    let normalized = filePath.replace(/^\/?(public)\//i, '/')
+    const normalized = filePath.replace(/^\/?(public)\//i, '/')
     const absolutePath = normalized.startsWith('/')
       ? path.join(/*turbopackIgnore: true*/ process.cwd(), 'public', normalized)
       : normalized
@@ -84,7 +84,7 @@ const DEFAULT_WATERMARK = '/apple-touch-icon.png'
  * Fetches PDF-specific system settings and resolves image URLs
  * to data URIs supported by @react-pdf/renderer (PNG/JPG only).
  */
-export async function getPDFSettings(hostOrigin: string): Promise<PDFSettings> {
+export async function getPDFSettings(_hostOrigin: string): Promise<PDFSettings> {
   const settings = await getSystemSettings([
     'pdf_header_logo_url',
     'pdf_watermark_url',

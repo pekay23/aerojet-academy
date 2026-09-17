@@ -14,11 +14,13 @@
   <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
     <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +28,1006 @@
 <header>
   <p class="he-eyebrow">Plans</p>
   <h1 class="he-title">Exam Pooling Refactor Phase Execution Checklists</h1>
-  <p class="he-deck"><p>This document expands the main refactor plan into detailed execution checklists for each implementation phase.</p>
-</p>
+  <p class="he-deck">This document expands the main refactor plan into detailed execution checklists for each implementation phase.</p>
 </header>
-<section class="he-section" id="purpose"><div class="he-section__num">01 · Purpose</div><h2 class="he-section__title">Purpose</h2>This document expands the main refactor plan into detailed execution checklists for each implementation phase.Use this together with:<code>docs/plans/exam-pooling-refactor.md</code>This file is intended for implementation agents and engineers working directly in the codebase. Each phase includes:objectivescopeprerequisite checksfile/module targetsdatabase tasksbackend tasksUI/API tasksvalidation gatesrisks and rollback concernsdefinition of done<section class="he-section" id="global-execution-rules"><div class="he-section__num">02 · Global Execution Rules</div><h2 class="he-section__title">Global Execution Rules</h2>These rules apply to all phases.<h3 id="1-preserve-financial-correctness">1. Preserve Financial Correctness</h3>Any change that touches:wallet balancesreserved fundsfund capturefund releasebooking guaranteesroll-forward logicmust be treated as high risk.Before merging any such phase:transaction boundaries must be reviewedidempotency must be verifiedaudit log effects must be verifiedno legacy booking path should silently skip wallet updates<h3 id="2-preserve-backward-compatibility-until-explicit-cutover">2. Preserve Backward Compatibility Until Explicit Cutover</h3>Do not remove old pool-based reads/writes until:new schema is in placenew read model is livemigration adapters existlegacy pages still render meaningful data<h3 id="3-prefer-additive-migrations-first">3. Prefer Additive Migrations First</h3>For early phases:add tablesadd columnsadd enumsadd indexesDo not make destructive schema changes until after the new runtime path is proven.<h3 id="4-keep-domain-boundaries-clear">4. Keep Domain Boundaries Clear</h3>Do not let new code recreate the old coupling.Enforce these concepts:<code>Demand</code> is not <code>Sitting</code><code>Pool</code> is not <code>Sitting</code><code>Booking</code> is not <code>PoolMembership</code><code>Fulfillment</code> is not <code>Attendance</code><h3 id="5-validate-with-typecheck-and-schema-validation-after-each-phase">5. Validate With Typecheck and Schema Validation After Each Phase</h3>Minimum validation after each phase:<code>npx tsc --noEmit</code><code>npx prisma validate</code>Where behavior changes, add targeted test coverage or verification scripts.<h1 id="phase-0-pre-refactor-baseline-and-safety-nets">Phase 0: Pre-Refactor Baseline and Safety Nets</h1><section class="he-section" id="objective"><div class="he-section__num">03 · Objective</div><h2 class="he-section__title">Objective</h2>Establish a safe baseline before structural changes begin.<section class="he-section" id="scope"><div class="he-section__num">04 · Scope</div><h2 class="he-section__title">Scope</h2>identify current production-critical flowsfreeze baseline expectationsadd missing observability where needed<section class="he-section" id="prerequisites"><div class="he-section__num">05 · Prerequisites</div><h2 class="he-section__title">Prerequisites</h2>current branch compilesPrisma schema validatesknown outstanding unrelated changes are understood and not reverted<section class="he-section" id="checklist"><div class="he-section__num">06 · Checklist</div><h2 class="he-section__title">Checklist</h2><h3 id="repository-and-architecture-review">Repository and architecture review</h3>Read <code>docs/plans/exam-pooling-refactor.md</code>Read current exam and pooling source docs in <code>aerojet master/</code>Confirm the current high-risk runtime entry points:<code>app/student/actions.ts</code><code>app/api/applicant/exam-only/book-exam/route.ts</code><code>app/api/applicant/exam-only/join-pool/route.ts</code><code>lib/pools/join.ts</code><code>lib/pools/auto-pool.ts</code><code>lib/pools/group-booking.ts</code><code>lib/events/go-no-go.ts</code><code>app/api/cron/check-pools/route.ts</code><h3 id="baseline-flow-inventory">Baseline flow inventory</h3>Document current path for standard pool joinDocument current path for individual bookingDocument current path for bundle bookingDocument current path for group charter bookingDocument current path for pool confirmation and fund captureDocument current path for pool failure and fund releaseDocument current path for attendance and exam record rendering<h3 id="safety-instrumentation">Safety instrumentation</h3>Ensure all booking/cancellation/payment paths write audit logsIdentify any path still mutating pool/bookings without shared helpersAdd TODO inventory in implementation notes if a path must be migrated later<h3 id="baseline-verification">Baseline verification</h3>Run <code>npx tsc --noEmit</code>Run <code>npx prisma validate</code>Capture a short baseline summary:what works todayknown broken assumptionslegacy behaviors to preserve temporarily<section class="he-section" id="definition-of-done"><div class="he-section__num">07 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2>the team has a reliable map of the current booking/event/attendance flowsall high-risk entry points are identified before schema changes begin<h1 id="phase-1-schema-foundation">Phase 1: Schema Foundation</h1><section class="he-section" id="objective"><div class="he-section__num">08 · Objective</div><h2 class="he-section__title">Objective</h2>Introduce the structural models needed for the new demand/sitting/fulfillment architecture without yet changing core runtime behavior.<section class="he-section" id="scope"><div class="he-section__num">09 · Scope</div><h2 class="he-section__title">Scope</h2>additive schema changesno major booking behavior rewrites yet<section class="he-section" id="primary-files"><div class="he-section__num">10 · Primary Files</div><h2 class="he-section__title">Primary Files</h2><code>prisma/schema.prisma</code>new migration SQL file(s)any schema-related documentation updates<section class="he-section" id="target-schema-changes"><div class="he-section__num">11 · Target Schema Changes</div><h2 class="he-section__title">Target Schema Changes</h2><h3 id="add-new-enums">Add new enums</h3>Add <code>EventViabilityMode</code>Add <code>SessionType</code>Add <code>SittingStatus</code>Add <code>SittingAssignmentStatus</code>Add <code>BookingGuaranteeType</code>Add <code>BookingDemandStatus</code><h3 id="extend-examevent">Extend <code>ExamEvent</code></h3>Add <code>minCandidateTarget</code>Add <code>minSeatVolumeTarget</code>Add <code>viabilityMode</code>Add <code>isExaminerConfirmed</code>Add <code>confirmedExaminerCount</code>Add indexes if query patterns require them<h3 id="extend-exampool">Extend <code>ExamPool</code></h3>Add <code>poolNumber</code>Add <code>isPublicVisible</code>Add <code>totalDemandSeats</code>Add <code>guaranteedSeats</code>Review whether <code>allowedModules</code> and <code>preSeedModules</code> remain sufficient during migration — still in use by <code>resolveStandardPoolForJoin()</code>, sufficient for current migration stage<h3 id="add-examiner">Add <code>Examiner</code></h3>Create new <code>Examiner</code> modelLink <code>Examiner.userId</code> to <code>User</code>Add <code>isActive</code>Add <code>maxParallelSittings</code>Add indexes<h3 id="add-examsitting">Add <code>ExamSitting</code></h3>Create <code>ExamSitting</code> modelAdd relations to <code>ExamEvent</code>, <code>Examiner</code>, and <code>ExamComponent</code>Add <code>dayNumber</code>Add <code>sessionType</code>Add <code>startTime</code>Add <code>endTime</code>Add <code>capacity</code>Add <code>reservedSeats</code>Add <code>confirmedSeats</code>Add <code>status</code>Add <code>venue</code>Add indexes for:<code>eventId</code><code>examinerId</code><code>examComponentId</code><code>dayNumber/sessionType</code><code>status</code><h3 id="add-examsittingassignment">Add <code>ExamSittingAssignment</code></h3>Create <code>ExamSittingAssignment</code> modelAdd relations to <code>ExamSitting</code>, <code>ExamBooking</code>, and <code>User</code>Add <code>status</code>Add <code>attendanceStatus</code>Add <code>assignedAt</code>Add <code>assignedBy</code>Add uniqueness on <code>bookingId + sittingId</code>Add indexes<h3 id="extend-exambooking">Extend <code>ExamBooking</code></h3>Add <code>guaranteeType</code> — exists as <code>BookingGuaranteeType @default(INDIVIDUAL_GUARANTEED)</code>Add <code>demandStatus</code> — exists as <code>BookingDemandStatus @default(DEMAND_CAPTURED)</code>Add <code>preferredSessionType</code> — exists as <code>SessionType?</code>Add <code>guaranteedSeat</code> — exists as <code>Boolean @default(false)</code>Add <code>executedAt</code> — exists as <code>DateTime?</code>Add <code>rolloverFromBookingId</code> — exists as <code>String?</code>Add <code>rolloverToEventId</code> — exists as <code>String?</code>Review whether <code>examDate</code> remains meaningful during migration — still used as fallback date in student views<h3 id="extend-examattendance">Extend <code>ExamAttendance</code></h3>Add <code>sittingId</code>Add relation to <code>ExamSitting</code>Add index on <code>sittingId</code><h3 id="evolve-fulfillment-tracking">Evolve fulfillment tracking</h3>Decide whether to extend <code>BookingEntitlement</code> or add a new fulfillment model — combination approach chosenUsing combination:<code>ExamBooking.demandStatus</code> + <code>executedAt</code> for per-module delivery state<code>ExamBooking.result</code> for EXCUSED/ABSENT/PASS/FAIL<code>BookingEntitlement</code> retained for resit accounting and bundle-level purchase tracking<code>lib/exams/fulfillment.ts</code> as canonical derivation layer<section class="he-section" id="migration-tasks"><div class="he-section__num">12 · Migration Tasks</div><h2 class="he-section__title">Migration Tasks</h2>Create Prisma migration — all schema changes applied and validatedCreate deployment-safe SQL artifact if needed — additive-only migrationsValidate no existing enum conflicts with the DBValidate RLS and foreign-key compatibility<section class="he-section" id="validation-gates"><div class="he-section__num">13 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2><code>npx prisma validate</code> ✓<code>npx tsc --noEmit</code> ✓migration file reviewed for additive-only safety<section class="he-section" id="risks"><div class="he-section__num">14 · Risks</div><h2 class="he-section__title">Risks</h2>enum drift between Prisma and databasemigration ordering problems in environments with stale clientsintroducing relations that break existing queries if required fields are made non-null too early<section class="he-section" id="definition-of-done"><div class="he-section__num">15 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2>new schema structures existold runtime behavior still worksno production flow depends on new fields yet<h1 id="phase-2-unified-demand-read-model">Phase 2: Unified Demand Read Model</h1><section class="he-section" id="objective"><div class="he-section__num">16 · Objective</div><h2 class="he-section__title">Objective</h2>Create a canonical read layer for event demand that includes all booking types and becomes the foundation for visibility and viability.<section class="he-section" id="scope"><div class="he-section__num">17 · Scope</div><h2 class="he-section__title">Scope</h2>read-only aggregationno major booking write-path changes yet<section class="he-section" id="primary-files"><div class="he-section__num">18 · Primary Files</div><h2 class="he-section__title">Primary Files</h2><code>lib/exams/demand.ts</code><code>app/student/exams/*</code><code>app/student/exam-bookings/*</code><code>app/staff/exams/*</code>possibly public-facing exam-only informational routes<section class="he-section" id="checklist"><div class="he-section__num">19 · Checklist</div><h2 class="he-section__title">Checklist</h2><h3 id="build-canonical-demand-service">Build canonical demand service</h3>Create <code>lib/exams/demand.ts</code> — 276-line service with full DTOsDefine event demand DTOs for:total seat demand — <code>EventDemandSnapshot.totals.bookingCount</code>guaranteed seat demand — <code>EventDemandSnapshot.totals.guaranteedCount</code>flexible seat demand — <code>EventDemandSnapshot.totals.flexibleCount</code>module breakdown — <code>EventDemandModuleSummary[]</code>pool breakdown — <code>EventDemandPoolSummary[]</code>booking-type breakdown — <code>byBookingType[]</code>institution/company breakdown if available — deferred, not yet needed by downstream consumers<h3 id="aggregate-all-booking-types">Aggregate all booking types</h3>Include <code>POOL</code> bookings — derived via <code>deriveGuaranteeType()</code>Include <code>INDIVIDUAL</code> bookingsInclude <code>GROUP_CHARTER</code> / company demandInclude <code>TWIN_PACK</code> and <code>FOUR_PACK</code> per-module bookingsInclude resit seat demand where it contributes to event demand<h3 id="define-counting-rules">Define counting rules</h3>Decide whether demand is counted by:candidate seats — <code>bookingCount</code>module seats — <code>EventDemandModuleSummary.bookingCount</code>guaranteed seats — <code>guaranteedCount</code>paid seats — <code>paidSeatCount</code>Ensure event viability can consume the same aggregated output later — <code>viability.ts</code> reads the same data<h3 id="update-student-views">Update student views</h3>Refactor <code>AvailablePoolsTab</code> to show demand-aware state — shows pool member counts and demand contextAdd visible distinction between:public demand — pool member count showncandidate's own booking status — shown via membership status badgeguaranteed vs flexible booking — shown in MyBookingsTab via fulfillment stateEnsure counts no longer imply only standard pools matter<h3 id="update-staff-views">Update staff views</h3>Refactor staff events tab to show:total seat demand — rendered from <code>getEventDemandSnapshot()</code>guaranteed demand — shown in demand summary carddistinct module demand — module list renderedpool composition — pool cards with member countsEnsure staff can inspect weak pools in the context of total event demand<h3 id="public-visibility-design">Public visibility design</h3>Decide which parts of demand are visible to registered modular/exam-only users — pool member counts and available capacityExclude sensitive personal/company data — no PII in demand snapshotsInclude enough signal to motivate booking behavior — seat availability shown<section class="he-section" id="validation-gates"><div class="he-section__num">20 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2>Typecheck passesStaff event screens render with unified demandStudent available-pools view reflects total demand correctlyNo booking mutation path has changed yet<section class="he-section" id="risks"><div class="he-section__num">21 · Risks</div><h2 class="he-section__title">Risks</h2>double-counting the same demand via both booking and membership relationsmisclassifying guaranteed vs flexible bookingsconfusing users if pool counts and event counts are shown without distinction<section class="he-section" id="definition-of-done"><div class="he-section__num">22 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2>one canonical demand read model existsUI surfaces can show real demand across booking typesdownstream phases can use demand service without re-querying ad hoc<h1 id="phase-3-rolling-pool-assignment-rewrite">Phase 3: Rolling Pool Assignment Rewrite</h1><section class="he-section" id="objective"><div class="he-section__num">23 · Objective</div><h2 class="he-section__title">Objective</h2>Replace hard-reject pool assignment with rolling, same-module-first pool routing.<section class="he-section" id="scope"><div class="he-section__num">24 · Scope</div><h2 class="he-section__title">Scope</h2>pool assignment logicwrite-path updates for standard, applicant, and bundle booking flows<section class="he-section" id="primary-files"><div class="he-section__num">25 · Primary Files</div><h2 class="he-section__title">Primary Files</h2><code>lib/pools/assignment.ts</code><code>lib/pools/join.ts</code><code>lib/pools/validation.ts</code><code>lib/pools/auto-pool.ts</code><code>app/student/actions.ts</code><code>app/api/applicant/exam-only/book-exam/route.ts</code><code>app/api/applicant/exam-only/join-pool/route.ts</code><section class="he-section" id="checklist"><div class="he-section__num">26 · Checklist</div><h2 class="he-section__title">Checklist</h2><h3 id="create-assignment-service">Create assignment service</h3>Create <code>lib/pools/assignment.ts</code> — 180-line service with <code>resolveStandardPoolForJoin()</code>Implement pool search strategy:same module, open, capacity available — <code>sameModulePool</code> pathelse earliest open pool with <code><4</code> distinct modules and capacity — <code>openModuleSlotPool</code> pathelse create next pool — <code>createOverflowPool()</code> auto-creates with label/day/slotSupport explicit event scoping — scoped by <code>eventId</code> parameterSupport standard pool creation when needed — <code>createOverflowPool()</code><h3 id="remove-hard-rejection-on-5th-module">Remove hard rejection on 5th module</h3>Refactor <code>lib/pools/validation.ts</code> — no longer rejects on module countRefactor <code>lib/pools/join.ts</code> — calls <code>resolveStandardPoolForJoin()</code> for routingEnsure 5th distinct module routes to another pool instead of failing outright — overflow pool created<h3 id="preserve-capacity-rules">Preserve capacity rules</h3>Still enforce max 28 seats per pool — <code>POOL_MAX_CANDIDATES</code> constantStill enforce max 4 distinct modules per pool — <code>MODULE_DIVERSITY_CAP</code> constantStill prevent duplicate same-module-in-event joins for the same user where required<h3 id="update-applicant-booking-path">Update applicant booking path</h3>Refactor <code>app/api/applicant/exam-only/book-exam/route.ts</code> — uses shared assignmentStop selecting the “first available pool” blindly — uses <code>resolveStandardPoolForJoin()</code>Use shared assignment service<h3 id="update-student-booking-path">Update student booking path</h3>Refactor student join actions to use shared assignment service — <code>lib/enrollment/exams.ts</code> calls <code>resolveStandardPoolForJoin()</code>Remove duplicated legacy pool creation rules where possible<h3 id="update-bundle-placement">Update bundle placement</h3>Ensure each bundle module is assigned independently — each module calls <code>resolveStandardPoolForJoin()</code> separatelyAllow modules in the same bundle to land in different pools if requiredKeep all booking and wallet logic atomic — wrapped in <code>$transaction</code><h3 id="legacy-compatibility">Legacy compatibility</h3>Ensure old pool labels and timing metadata are still populated sufficiently for existing screens — <code>createOverflowPool()</code> sets label/day/slotIf pool auto-creation relies on standard A/B/C/D assumptions, keep them functional during this phase — <code>getPoolLabel()</code> generates A-Z labels<section class="he-section" id="validation-gates"><div class="he-section__num">27 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2>Typecheck passesJoining a 5th distinct module routes to another pool instead of failingBundles can split across pools without ledger corruptionNo pool exceeds 28 seatsNo pool exceeds 4 distinct modules<section class="he-section" id="risks"><div class="he-section__num">28 · Risks</div><h2 class="he-section__title">Risks</h2>race conditions during pool creation or assignmentaccidental duplicate pool creation under concurrent demandwallet funds being reserved before assignment failure without cleanup<section class="he-section" id="definition-of-done"><div class="he-section__num">29 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2>pool assignment follows rolling overflow rulessame-module clustering is favoredall main booking entry points share consistent assignment logic<h1 id="phase-4-event-level-viability-and-gono-go-refactor">Phase 4: Event-Level Viability and Go/No-Go Refactor</h1><section class="he-section" id="objective"><div class="he-section__num">30 · Objective</div><h2 class="he-section__title">Objective</h2>Replace pool-centric failure logic with event-centric viability logic that respects total demand, guaranteed bookings, and examiner economics.<section class="he-section" id="scope"><div class="he-section__num">31 · Scope</div><h2 class="he-section__title">Scope</h2>event viability servicecron behaviorstaff decision surfaces<section class="he-section" id="primary-files"><div class="he-section__num">32 · Primary Files</div><h2 class="he-section__title">Primary Files</h2><code>lib/exams/viability.ts</code> new<code>lib/events/go-no-go.ts</code><code>app/api/cron/check-pools/route.ts</code><code>app/api/cron/check-events/route.ts</code><code>app/staff/_components/GoNoGoMeter.tsx</code><section class="he-section" id="checklist"><div class="he-section__num">33 · Checklist</div><h2 class="he-section__title">Checklist</h2><h3 id="create-viability-service">Create viability service</h3>Create <code>lib/exams/viability.ts</code> — 185-line service with <code>evaluateEventViability()</code>Implement viability evaluation using:total paid seats — <code>totalPaidSeats</code>total guaranteed seats — <code>totalGuaranteedSeats</code>total revenue — <code>totalConfirmedRevenue</code>pool distribution — <code>poolsMeetingThreshold</code> / <code>poolsBelowThreshold</code>manual override — <code>FORCE_GO</code> / <code>FORCE_NO_GO</code> from <code>overrideStatus</code>Support threshold combinations described in business docs — <code>CANDIDATE_COUNT</code>, <code>SEAT_VOLUME</code>, <code>REVENUE</code>, <code>HYBRID</code><h3 id="refactor-existing-gono-go-code">Refactor existing Go/No-Go code</h3>Update <code>lib/events/go-no-go.ts</code> — 310-line service calling <code>evaluateEventViability()</code>Remove assumption that every pool below threshold forces failure — weak pools allowed when event is viableDistinguish:event viable — <code>GO</code>pool strong — pools meeting thresholdpool weak but can still run — <code>GO_WITH_UNDERFILLED_SITTINGS</code>event not viable — <code>NO_GO</code><h3 id="refactor-cron-behavior">Refactor cron behavior</h3>Update <code>check-pools</code> cron to stop auto-failing all weak pools in isolation — now calls <code>evaluateGoNoGo()</code> per eventEnsure event-level viability is evaluated before pool failure/release actions — <code>executeGo()</code>/<code>executeNoGo()</code> called based on event decisionPreserve redistribution behavior only where it still makes sense — auto-pool redistribution runs first<h3 id="define-new-outcomes-clearly">Define new outcomes clearly</h3><code>GO</code><code>NO_GO</code><code>POSTPONE</code> — <code>executePostponement()</code> with date shift<code>GO_WITH_UNDERFILLED_SITTINGS</code><code>NEEDS_REVIEW</code><h3 id="staff-ui-updates">Staff UI updates</h3>Update Go/No-Go meter to reflect event-level viability — <code>GoNoGoMeter.tsx</code> existsStop presenting pool-only revenue target as if it is the full truth — event-level metrics shownShow underfilled but still serviceable demand — <code>GO_WITH_UNDERFILLED_SITTINGS</code> surfaced<section class="he-section" id="validation-gates"><div class="he-section__num">34 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2>Typecheck passesEvent-level viability can succeed even if one pool is weakWeak pool is not auto-failed when event is already viableFunds are not prematurely released for guaranteed demand<section class="he-section" id="risks"><div class="he-section__num">35 · Risks</div><h2 class="he-section__title">Risks</h2>legacy assumptions in cron jobs may still trigger incorrect state transitionsstaff UI may show contradictory statuses if pool and event states are not carefully coordinated<section class="he-section" id="definition-of-done"><div class="he-section__num">36 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2>event viability is computed from total demandpool failure is no longer isolated from event economicscron logic respects guaranteed commitments<h1 id="phase-5-sitting-scheduler">Phase 5: Sitting Scheduler</h1><section class="he-section" id="objective"><div class="he-section__num">37 · Objective</div><h2 class="he-section__title">Objective</h2>Introduce real scheduled exam sittings and assign bookings into them according to module clustering, candidate constraints, and examiner availability.<section class="he-section" id="scope"><div class="he-section__num">38 · Scope</div><h2 class="he-section__title">Scope</h2>new scheduling layerno full pool-time deprecation yet, but sitting becomes the emerging source of truth<section class="he-section" id="primary-files"><div class="he-section__num">39 · Primary Files</div><h2 class="he-section__title">Primary Files</h2><code>lib/exams/scheduler.ts</code> newnew sitting-related API/actions as neededstaff exam scheduling UI files<section class="he-section" id="checklist"><div class="he-section__num">40 · Checklist</div><h2 class="he-section__title">Checklist</h2><h3 id="create-scheduler-service">Create scheduler service</h3>Create <code>lib/exams/scheduler.ts</code>Accept unified demand input from <code>lib/exams/demand.ts</code> — <code>scheduleEventSittingsFromDemand()</code> addedCreate sitting generation algorithm<h3 id="sitting-generation-rules">Sitting generation rules</h3>Generate sittings by module demandPrefer same-module clusteringSupport multiple days and sessionsRespect capacity 28 per sitting by defaultAllow spare capacity in sittings when justified<h3 id="candidate-assignment-rules">Candidate assignment rules</h3>No overlapping sittings for same userRespect max daily exam countRespect module duration and session timing — <code>ExamComponent.duration</code> now drives window lengthPlace guaranteed bookings before flexible pool demand<h3 id="examiner-assignment-rules">Examiner assignment rules</h3>One examiner for nowPrevent same-examiner overlapDesign for future parallel examiner assignments — <code>getExaminerForSlot()</code> respects <code>maxParallelSittings</code><h3 id="staff-scheduling-interface">Staff scheduling interface</h3>Add sitting planner to staff exams areaAllow viewing generated sittingsAllow manual adjustments — <code>PATCH /api/staff/exam-sittings/[id]</code> supports day/session/capacity/venue/status/examinerShow warnings for:candidate conflictsexaminer conflictsspare seatsunscheduled guaranteed demandImplemented via <code>detectSchedulingConflicts()</code> + <code>SchedulingWarningsPanel</code> component<h3 id="transitional-compatibility">Transitional compatibility</h3>Ensure existing pool pages can still point to pools while sittings begin to existAdd links from pool/member views to assigned sittings where available<section class="he-section" id="validation-gates"><div class="he-section__num">41 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2>Typecheck passesScheduler can build valid sittings for one event — algorithm verified structurallyNo examiner overlap — <code>getExaminerForSlot()</code> + <code>detectSchedulingConflicts()</code> enforces thisNo candidate overlap — <code>canUseSlot()</code> + conflict detection enforces thisGuaranteed demand is placed first — <code>sortCandidates()</code> sorts guaranteed-first<section class="he-section" id="risks"><div class="he-section__num">42 · Risks</div><h2 class="he-section__title">Risks</h2>scheduling complexity can explode if built directly inside UI routescandidate/day-limit logic may be underspecified if module duration data is incompletegenerated sittings can confuse legacy UI if not surfaced carefully<section class="he-section" id="definition-of-done"><div class="he-section__num">43 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2>real sitting records existbookings can be assigned to actual scheduled delivery slotssitting-level planning is operational for staff<h1 id="phase-6-guaranteed-fulfillment-and-roll-forward">Phase 6: Guaranteed Fulfillment and Roll-Forward</h1><section class="he-section" id="objective"><div class="he-section__num">44 · Objective</div><h2 class="he-section__title">Objective</h2>Ensure paid demand, especially bundles and individuals, is fulfilled correctly across event failure, postponement, and partial execution.<section class="he-section" id="scope"><div class="he-section__num">45 · Scope</div><h2 class="he-section__title">Scope</h2>fulfillment trackingroll-forward logicguarantee preservation<section class="he-section" id="primary-files"><div class="he-section__num">46 · Primary Files</div><h2 class="he-section__title">Primary Files</h2><code>lib/exams/rollforward.ts</code> new<code>lib/pools/bundles.ts</code><code>app/student/actions.ts</code><code>app/api/applicant/exam-only/book-exam/route.ts</code>any entitlement-related models/services<section class="he-section" id="checklist"><div class="he-section__num">47 · Checklist</div><h2 class="he-section__title">Checklist</h2><h3 id="model-guarantee-fulfillment">Model guarantee fulfillment</h3>Finalize whether fulfillment is tracked on:extended <code>BookingEntitlement</code>new fulfillment modelor a combination<h3 id="implement-roll-forward-service">Implement roll-forward service</h3>Create <code>lib/exams/rollforward.ts</code>Identify all paid module attempts not executed in the current windowRoll them into next event/windowPreserve price/payment linkagePreserve booking group linkage where appropriate<h3 id="bundle-specific-rules">Bundle-specific rules</h3>One module executed, another not:mark one as executedmark the other as rolled forwardDo not require repurchase of already-paid bundle module<h3 id="individual-and-company-rules">Individual and company rules</h3>Individual guaranteed seats roll forward if event is postponed or module not delivered — <code>rollForwardPostponedBookingsForEvent()</code> addedCompany/group-backed demand is preserved under contract-backed rules — <code>preserveCompanyGuaranteedDemand()</code> added<h3 id="ui-status-propagation">UI status propagation</h3>Student portal should show:executedscheduledpostponedrolled forwardpending fulfillmentexcused (pending rebook)<section class="he-section" id="validation-gates"><div class="he-section__num">48 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2>Typecheck passesPaid bundle modules are never lost on partial execution — <code>hasMixedBookingGroupFulfillment()</code> enforces visibilityRolled-forward demand remains visible and owed — <code>deriveBookingFulfillmentState()</code> derives from <code>demandStatus</code>/<code>rolloverToEventId</code>No double-consumption of a bundle seat — <code>checkDoubleConsumptionGuard()</code> prevents duplicate clones<section class="he-section" id="risks"><div class="he-section__num">49 · Risks</div><h2 class="he-section__title">Risks</h2>accidental duplicate booking creation in next windowconfusing legacy status fields if demand and payment state divergemismatch between wallet ledger and fulfillment status<section class="he-section" id="definition-of-done"><div class="he-section__num">50 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2>guaranteed paid demand survives weak pools and postponements correctlybundle modules are fulfilled independently<h1 id="phase-7-attendance-and-exam-records-migration">Phase 7: Attendance and Exam Records Migration</h1><section class="he-section" id="objective"><div class="he-section__num">51 · Objective</div><h2 class="he-section__title">Objective</h2>Make attendance and exam history reflect real scheduled sittings rather than only pool membership/booking state.<section class="he-section" id="scope"><div class="he-section__num">52 · Scope</div><h2 class="he-section__title">Scope</h2>sitting-aware attendancesitting-aware record rendering<section class="he-section" id="primary-files"><div class="he-section__num">53 · Primary Files</div><h2 class="he-section__title">Primary Files</h2><code>lib/exams/attendance.ts</code><code>app/api/staff/exam-attendance/route.ts</code><code>app/api/admin/exams/mark-no-show/route.ts</code>student/staff exam history pages<section class="he-section" id="checklist"><div class="he-section__num">54 · Checklist</div><h2 class="he-section__title">Checklist</h2><h3 id="attendance-writes">Attendance writes</h3>Update attendance write helper to use <code>sittingId</code> where availableContinue supporting fallback booking/membership paths during migration<h3 id="attendance-ui">Attendance UI</h3>Staff can mark attendance per sitting assignmentStudent portal shows per-module sitting attendanceFull-time class-linked candidates retain optional <code>classId</code> linkage<h3 id="exam-records-rendering">Exam records rendering</h3>Student history merges:resultsbookingsattendancerolled-forward attemptsStaff records view does the same without inventing misleading statuses<h3 id="no-showexcused-handling">No-show/excused handling</h3>No-show updates sitting assignment and booking correctlyExcused status does not silently consume fulfillment incorrectly — EXCUSED now keeps <code>demandStatus</code> as-is, no cancellation stamp, no <code>EXECUTED</code> flag<section class="he-section" id="validation-gates"><div class="he-section__num">55 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2>Typecheck passesAttendance works for:pool candidates — membership-based path still supportedindividual candidates — booking-based path with optional sittingbundle-derived candidates — booking path with <code>bookingGroupRef</code> propagationfull-time class-linked candidates — <code>classId</code> auto-resolved from enrollment type<section class="he-section" id="implementation-status-snapshot"><div class="he-section__num">56 · Implementation Status Snapshot</div><h2 class="he-section__title">Implementation Status Snapshot</h2><code>lib/exams/attendance.ts</code> now accepts optional <code>sittingId</code>, updates <code>ExamAttendance.sittingId</code>, and synchronizes <code>ExamSittingAssignment</code> attendance state when a sitting-backed assignment exists.EXCUSED attendance no longer stamps <code>demandStatus=EXECUTED</code> or sets cancellation fields — the seat remains owed and the candidate can be rebooked.ABSENT attendance correctly sets <code>status=NO_SHOW</code> with cancellation fields.PRESENT attendance sets <code>demandStatus=EXECUTED</code> and <code>executedAt</code>.<code>lib/exams/fulfillment.ts</code> now exposes <code>EXCUSED_PENDING_REBOOK</code> as a distinct fulfillment state, and <code>fulfillmentStateLabel()</code> provides UI-friendly labels.<code>lib/exams/scheduler.ts</code> now uses <code>ExamComponent.duration</code> for accurate session windows, picks the least-loaded examiner via <code>getExaminerForSlot()</code> (respecting <code>maxParallelSittings</code>), and exposes <code>detectSchedulingConflicts()</code> for the staff warning panel.<code>scheduleEventSittingsFromDemand()</code> accepts a pre-fetched <code>EventDemandSnapshot</code> and surfaces unscheduled guaranteed modules.<code>app/api/staff/exam-sittings/[id]/route.ts</code> provides <code>GET</code> + <code>PATCH</code> for manual sitting adjustments.<code>app/api/staff/exam-sittings/conflicts/route.ts</code> exposes conflict detection for the <code>SchedulingWarningsPanel</code>.<code>lib/exams/rollforward.ts</code> now includes <code>rollForwardPostponedBookingsForEvent()</code> for individual postponement and <code>preserveCompanyGuaranteedDemand()</code> for GROUP_CHARTER contract-backed demand.<code>checkDoubleConsumptionGuard()</code> prevents duplicate roll-forward clones in the same target event.Student portal now surfaces EXCUSED as a distinct visual status.Phases 5, 6, 7, and 8 are structurally complete.<code>lib/exams/resits.ts</code> provides spare capacity detection, resit candidate discovery, and proposal-based backfill execution with candidate-overlap prevention.Remaining work is Phase 9 (legacy cleanup).<section class="he-section" id="risks"><div class="he-section__num">57 · Risks</div><h2 class="he-section__title">Risks</h2>duplicate attendance rows during mixed-mode migrationstale record aggregation showing attendance without correct sitting context<section class="he-section" id="definition-of-done"><div class="he-section__num">58 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2>attendance and exam records reflect actual module sittings accurately<h1 id="phase-8-resit-backfill-and-spare-capacity-utilization">Phase 8: Resit Backfill and Spare Capacity Utilization</h1><section class="he-section" id="objective"><div class="he-section__num">59 · Objective</div><h2 class="he-section__title">Objective</h2>Use spare sitting capacity intelligently for resits and late demand once the event is already viable.<section class="he-section" id="scope"><div class="he-section__num">60 · Scope</div><h2 class="he-section__title">Scope</h2>resit allocationspare seat utilization<section class="he-section" id="primary-files"><div class="he-section__num">61 · Primary Files</div><h2 class="he-section__title">Primary Files</h2><code>lib/exams/resits.ts</code>sitting schedulerstaff scheduling viewsresit booking flows<section class="he-section" id="checklist"><div class="he-section__num">62 · Checklist</div><h2 class="he-section__title">Checklist</h2><h3 id="identify-spare-capacity">Identify spare capacity</h3>Detect viable sittings with unused seats — <code>detectSpareCapacity()</code> in <code>lib/exams/resits.ts</code>Classify which spare seats are eligible for backfill — only non-cancelled sittings with <code>spareSeats > 0</code><h3 id="resit-matching">Resit matching</h3>Match failed modules to spare same-module capacity first — <code>generateResitBackfillProposals()</code> prefers same-modulePrevent candidate overlap — <code>userSlotSet</code> and <code>proposedUserSlots</code> track day/session conflictsRespect guarantee and timing rules — guaranteed demand placed first by scheduler, resits fill remaining capacity<h3 id="staff-control">Staff control</h3>Allow staff to approve or assign resit backfill — <code>GET /api/staff/resit-backfill</code> returns dry-run proposals, <code>POST</code> executes approved onesShow warnings when resit assignment could affect schedule quality — warnings array in proposal result<code>ResitBackfillPanel</code> UI component wired into staff event page<h3 id="record-correctness">Record correctness</h3>Ensure resit attendance and result updates flow into exam records correctly — <code>executeResitBackfill()</code> creates <code>ExamSittingAssignment</code> and sets <code>demandStatus = SCHEDULED</code><section class="he-section" id="validation-gates"><div class="he-section__num">63 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2>Typecheck passesSpare seats can be backfilled without corrupting scheduling — idempotency guard prevents duplicatesResits update exam history correctly — sitting assignments link to bookings<section class="he-section" id="risks"><div class="he-section__num">64 · Risks</div><h2 class="he-section__title">Risks</h2>overscheduling same candidatebackfilling incompatible modules into unsuitable sittings<section class="he-section" id="definition-of-done"><div class="he-section__num">65 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2>spare viable capacity can be monetized and tracked cleanly<h1 id="phase-9-legacy-pool-time-deprecation-and-cleanup">Phase 9: Legacy Pool-Time Deprecation and Cleanup</h1><section class="he-section" id="objective"><div class="he-section__num">66 · Objective</div><h2 class="he-section__title">Objective</h2>Finalize the transition away from pool time as a source of truth and remove or isolate obsolete behaviors.<section class="he-section" id="scope"><div class="he-section__num">67 · Scope</div><h2 class="he-section__title">Scope</h2>final cleanuplegacy path retirement<section class="he-section" id="primary-files"><div class="he-section__num">68 · Primary Files</div><h2 class="he-section__title">Primary Files</h2>all pool-time-dependent surfacesall old event/pool cron assumptionsall legacy adapters<section class="he-section" id="checklist"><div class="he-section__num">69 · Checklist</div><h2 class="he-section__title">Checklist</h2><h3 id="audit-legacy-timing-usage">Audit legacy timing usage</h3>Find all reads of:<code>ExamPool.examDate</code> — 42 references across 18 files (display, email, pricing, attendance fallback)<code>ExamPool.examStartTime</code> — 6 references (join overlap check, applicant display, email)<code>ExamPool.examEndTime</code> — 6 references (join overlap check, applicant display, email)<code>ExamPool.dayNumber</code> — 5 references (display labels, pool sort)<code>ExamPool.timeSlot</code> — 8 references (display labels, student/staff views)Determine which are still needed for compatibility vs which must switch to <code>ExamSitting</code> — all are display-only or advisory; critical scheduling logic now uses <code>ExamSitting</code><h3 id="switch-truth-source">Switch truth source</h3>Move student scheduling displays to <code>ExamSitting</code> — <code>MyBookingsTab</code> uses sitting assignments where available, pool timing as fallbackMove staff operational scheduling displays to <code>ExamSitting</code> — event page shows sittings table, scheduling warnings, and resit backfillKeep pool timing only as advisory or remove from critical paths — pool timing is display-only; <code>ExamSitting</code> is the scheduling truth source<h3 id="retire-obsolete-logic">Retire obsolete logic</h3>Remove old pool-centric assumptions from cron — fully done: auto-pool redistribution removed.Remove duplicate assignment logic — obsolete auto-pool code deleted.Remove dead compatibility code once all routes have migrated — obsolete API routes and UI buttons deleted.<section class="he-section" id="validation-gates"><div class="he-section__num">70 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2>Typecheck passesNo critical user-facing schedule still depends on pool time alone — all scheduling uses <code>ExamSitting</code>Legacy compatibility code is documented or removed — documented in this audit<section class="he-section" id="risks"><div class="he-section__num">71 · Risks</div><h2 class="he-section__title">Risks</h2>hidden legacy pages may still rely on pool timing fieldsscheduled/attendance pages may regress if one old path survives unnoticed<section class="he-section" id="definition-of-done"><div class="he-section__num">72 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2>the system’s operational timing truth is sitting-basedpool-time-as-final-schedule is no longer a runtime assumption<h1 id="cross-phase-test-and-verification-checklist">Cross-Phase Test and Verification Checklist</h1>Use this after each major milestone.<section class="he-section" id="wallet-and-ledger"><div class="he-section__num">73 · Wallet and Ledger</div><h2 class="he-section__title">Wallet and Ledger</h2>wallet top-up approved by admin can fund course purchasewallet top-up approved by admin can fund pool bookingreserve/capture/release flows remain balancedcancellations do not corrupt balances<section class="he-section" id="booking-types"><div class="he-section__num">74 · Booking Types</div><h2 class="he-section__title">Booking Types</h2>pool booking worksindividual booking worksgroup/company booking worksbundle booking worksresit booking works<section class="he-section" id="demand"><div class="he-section__num">75 · Demand</div><h2 class="he-section__title">Demand</h2>demand reflects all booking typesstaff demand views match student-facing counts<section class="he-section" id="viability"><div class="he-section__num">76 · Viability</div><h2 class="he-section__title">Viability</h2>event can remain viable with one weak poolweak pool is not auto-failed when examiner trip is justified<section class="he-section" id="scheduling"><div class="he-section__num">77 · Scheduling</div><h2 class="he-section__title">Scheduling</h2>same candidate cannot be double-bookedone examiner cannot be double-bookedmodule clustering is preferredoverflow pools/sittings are created correctly<section class="he-section" id="attendance-and-results"><div class="he-section__num">78 · Attendance and Results</div><h2 class="he-section__title">Attendance and Results</h2>present/absent/excused writes update the correct recordsno-show handling is correctexam records display accurately in student and staff portals<h1 id="suggested-agent-work-breakdown">Suggested Agent Work Breakdown</h1>If multiple agents are used, split work by write scope.<h3 id="agent-a-schema-and-migrations">Agent A: Schema and migrations</h3><code>prisma/schema.prisma</code>migration SQL<h3 id="agent-b-demand-and-viability-read-model">Agent B: Demand and viability read model</h3><code>lib/exams/demand.ts</code><code>lib/exams/viability.ts</code>read-only UI wiring<h3 id="agent-c-pool-assignment-and-booking-writes">Agent C: Pool assignment and booking writes</h3><code>lib/pools/assignment.ts</code><code>lib/pools/join.ts</code>applicant/student booking entry points<h3 id="agent-d-scheduler-and-sitting-models">Agent D: Scheduler and sitting models</h3><code>lib/exams/scheduler.ts</code>staff scheduling UI<h3 id="agent-e-attendance-and-fulfillment">Agent E: Attendance and fulfillment</h3><code>lib/exams/attendance.ts</code>roll-forward servicesexam record renderingDo not assign overlapping write scopes unless a merge plan is explicit.<h1 id="final-stop-condition">Final Stop Condition</h1>The refactor is complete only when the system can correctly model:public demand across all booking typesrolling pool creation and overflowevent-level viabilityguaranteed individual and bundle fulfillmentreal scheduled sittingsmulti-module candidates across multi-day windowssitting-aware attendance and recordsfuture support for multiple examinersUntil those are true, the refactor should be treated as in progress even if the current pool UI appears functional.
+<section class="he-section" id="purpose"><div class="he-section__num">01 · Purpose</div><h2 class="he-section__title">Purpose</h2></section>
+<p>This document expands the main refactor plan into detailed execution checklists for each implementation phase.</p>
+<p>Use this together with:</p>
+<ul>
+<li><code>docs/plans/exam-pooling-refactor.md</code></li>
+</ul>
+<p>This file is intended for implementation agents and engineers working directly in the codebase. Each phase includes:</p>
+<ul>
+<li>objective</li>
+<li>scope</li>
+<li>prerequisite checks</li>
+<li>file/module targets</li>
+<li>database tasks</li>
+<li>backend tasks</li>
+<li>UI/API tasks</li>
+<li>validation gates</li>
+<li>risks and rollback concerns</li>
+<li>definition of done</li>
+</ul>
+<section class="he-section" id="global-execution-rules"><div class="he-section__num">02 · Global Execution Rules</div><h2 class="he-section__title">Global Execution Rules</h2></section>
+<p>These rules apply to all phases.</p>
+<h3 id="1-preserve-financial-correctness">1. Preserve Financial Correctness</h3>
+<p>Any change that touches:</p>
+<ul>
+<li>wallet balances</li>
+<li>reserved funds</li>
+<li>fund capture</li>
+<li>fund release</li>
+<li>booking guarantees</li>
+<li>roll-forward logic</li>
+</ul>
+<p>must be treated as high risk.</p>
+<p>Before merging any such phase:</p>
+<ul>
+<li>transaction boundaries must be reviewed</li>
+<li>idempotency must be verified</li>
+<li>audit log effects must be verified</li>
+<li>no legacy booking path should silently skip wallet updates</li>
+</ul>
+<h3 id="2-preserve-backward-compatibility-until-explicit-cutover">2. Preserve Backward Compatibility Until Explicit Cutover</h3>
+<p>Do not remove old pool-based reads/writes until:</p>
+<ul>
+<li>new schema is in place</li>
+<li>new read model is live</li>
+<li>migration adapters exist</li>
+<li>legacy pages still render meaningful data</li>
+</ul>
+<h3 id="3-prefer-additive-migrations-first">3. Prefer Additive Migrations First</h3>
+<p>For early phases:</p>
+<ul>
+<li>add tables</li>
+<li>add columns</li>
+<li>add enums</li>
+<li>add indexes</li>
+</ul>
+<p>Do not make destructive schema changes until after the new runtime path is proven.</p>
+<h3 id="4-keep-domain-boundaries-clear">4. Keep Domain Boundaries Clear</h3>
+<p>Do not let new code recreate the old coupling.</p>
+<p>Enforce these concepts:</p>
+<ul>
+<li><code>Demand</code> is not <code>Sitting</code></li>
+<li><code>Pool</code> is not <code>Sitting</code></li>
+<li><code>Booking</code> is not <code>PoolMembership</code></li>
+<li><code>Fulfillment</code> is not <code>Attendance</code></li>
+</ul>
+<h3 id="5-validate-with-typecheck-and-schema-validation-after-each-phase">5. Validate With Typecheck and Schema Validation After Each Phase</h3>
+<p>Minimum validation after each phase:</p>
+<ul>
+<li><code>npx tsc --noEmit</code></li>
+<li><code>npx prisma validate</code></li>
+</ul>
+<p>Where behavior changes, add targeted test coverage or verification scripts.</p>
+<hr />
+<h1 id="phase-0-pre-refactor-baseline-and-safety-nets">Phase 0: Pre-Refactor Baseline and Safety Nets</h1>
+<section class="he-section" id="objective"><div class="he-section__num">03 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Establish a safe baseline before structural changes begin.</p>
+<section class="he-section" id="scope"><div class="he-section__num">04 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<ul>
+<li>identify current production-critical flows</li>
+<li>freeze baseline expectations</li>
+<li>add missing observability where needed</li>
+</ul>
+<section class="he-section" id="prerequisites"><div class="he-section__num">05 · Prerequisites</div><h2 class="he-section__title">Prerequisites</h2></section>
+<ul>
+<li>current branch compiles</li>
+<li>Prisma schema validates</li>
+<li>known outstanding unrelated changes are understood and not reverted</li>
+</ul>
+<section class="he-section" id="checklist"><div class="he-section__num">06 · Checklist</div><h2 class="he-section__title">Checklist</h2></section>
+<h3 id="repository-and-architecture-review">Repository and architecture review</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Read <code>docs/plans/exam-pooling-refactor.md</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Read current exam and pooling source docs in <code>aerojet master/</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Confirm the current high-risk runtime entry points:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>app/student/actions.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>app/api/applicant/exam-only/book-exam/route.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>app/api/applicant/exam-only/join-pool/route.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>lib/pools/join.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>lib/pools/auto-pool.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>lib/pools/group-booking.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>lib/events/go-no-go.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>app/api/cron/check-pools/route.ts</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="baseline-flow-inventory">Baseline flow inventory</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Document current path for standard pool join</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Document current path for individual booking</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Document current path for bundle booking</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Document current path for group charter booking</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Document current path for pool confirmation and fund capture</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Document current path for pool failure and fund release</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Document current path for attendance and exam record rendering</li>
+</ul>
+<h3 id="safety-instrumentation">Safety instrumentation</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Ensure all booking/cancellation/payment paths write audit logs</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Identify any path still mutating pool/bookings without shared helpers</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Add TODO inventory in implementation notes if a path must be migrated later</li>
+</ul>
+<h3 id="baseline-verification">Baseline verification</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Run <code>npx tsc --noEmit</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Run <code>npx prisma validate</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Capture a short baseline summary:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>what works today</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>known broken assumptions</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>legacy behaviors to preserve temporarily</li>
+</ul>
+</li>
+</ul>
+<section class="he-section" id="definition-of-done"><div class="he-section__num">07 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2></section>
+<ul>
+<li>the team has a reliable map of the current booking/event/attendance flows</li>
+<li>all high-risk entry points are identified before schema changes begin</li>
+</ul>
+<hr />
+<h1 id="phase-1-schema-foundation">Phase 1: Schema Foundation</h1>
+<section class="he-section" id="objective"><div class="he-section__num">08 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Introduce the structural models needed for the new demand/sitting/fulfillment architecture without yet changing core runtime behavior.</p>
+<section class="he-section" id="scope"><div class="he-section__num">09 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<ul>
+<li>additive schema changes</li>
+<li>no major booking behavior rewrites yet</li>
+</ul>
+<section class="he-section" id="primary-files"><div class="he-section__num">10 · Primary Files</div><h2 class="he-section__title">Primary Files</h2></section>
+<ul>
+<li><code>prisma/schema.prisma</code></li>
+<li>new migration SQL file(s)</li>
+<li>any schema-related documentation updates</li>
+</ul>
+<section class="he-section" id="target-schema-changes"><div class="he-section__num">11 · Target Schema Changes</div><h2 class="he-section__title">Target Schema Changes</h2></section>
+<h3 id="add-new-enums">Add new enums</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>EventViabilityMode</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>SessionType</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>SittingStatus</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>SittingAssignmentStatus</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>BookingGuaranteeType</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>BookingDemandStatus</code></li>
+</ul>
+<h3 id="extend-examevent">Extend <code>ExamEvent</code></h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>minCandidateTarget</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>minSeatVolumeTarget</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>viabilityMode</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>isExaminerConfirmed</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>confirmedExaminerCount</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add indexes if query patterns require them</li>
+</ul>
+<h3 id="extend-exampool">Extend <code>ExamPool</code></h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>poolNumber</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>isPublicVisible</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>totalDemandSeats</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>guaranteedSeats</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Review whether <code>allowedModules</code> and <code>preSeedModules</code> remain sufficient during migration — still in use by <code>resolveStandardPoolForJoin()</code>, sufficient for current migration stage</li>
+</ul>
+<h3 id="add-examiner">Add <code>Examiner</code></h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create new <code>Examiner</code> model</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Link <code>Examiner.userId</code> to <code>User</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>isActive</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>maxParallelSittings</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add indexes</li>
+</ul>
+<h3 id="add-examsitting">Add <code>ExamSitting</code></h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create <code>ExamSitting</code> model</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add relations to <code>ExamEvent</code>, <code>Examiner</code>, and <code>ExamComponent</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>dayNumber</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>sessionType</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>startTime</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>endTime</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>capacity</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>reservedSeats</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>confirmedSeats</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>status</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>venue</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add indexes for:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>eventId</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>examinerId</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>examComponentId</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>dayNumber/sessionType</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>status</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="add-examsittingassignment">Add <code>ExamSittingAssignment</code></h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create <code>ExamSittingAssignment</code> model</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add relations to <code>ExamSitting</code>, <code>ExamBooking</code>, and <code>User</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>status</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>attendanceStatus</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>assignedAt</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>assignedBy</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add uniqueness on <code>bookingId + sittingId</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add indexes</li>
+</ul>
+<h3 id="extend-exambooking">Extend <code>ExamBooking</code></h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>guaranteeType</code> — exists as <code>BookingGuaranteeType @default(INDIVIDUAL_GUARANTEED)</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>demandStatus</code> — exists as <code>BookingDemandStatus @default(DEMAND_CAPTURED)</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>preferredSessionType</code> — exists as <code>SessionType?</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>guaranteedSeat</code> — exists as <code>Boolean @default(false)</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>executedAt</code> — exists as <code>DateTime?</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>rolloverFromBookingId</code> — exists as <code>String?</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>rolloverToEventId</code> — exists as <code>String?</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review whether <code>examDate</code> remains meaningful during migration — still used as fallback date in student views</li>
+</ul>
+<h3 id="extend-examattendance">Extend <code>ExamAttendance</code></h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add <code>sittingId</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add relation to <code>ExamSitting</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add index on <code>sittingId</code></li>
+</ul>
+<h3 id="evolve-fulfillment-tracking">Evolve fulfillment tracking</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Decide whether to extend <code>BookingEntitlement</code> or add a new fulfillment model — <strong>combination approach chosen</strong></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Using combination:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>ExamBooking.demandStatus</code> + <code>executedAt</code> for per-module delivery state</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>ExamBooking.result</code> for EXCUSED/ABSENT/PASS/FAIL</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>BookingEntitlement</code> retained for resit accounting and bundle-level purchase tracking</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>lib/exams/fulfillment.ts</code> as canonical derivation layer</li>
+</ul>
+</li>
+</ul>
+<section class="he-section" id="migration-tasks"><div class="he-section__num">12 · Migration Tasks</div><h2 class="he-section__title">Migration Tasks</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create Prisma migration — all schema changes applied and validated</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create deployment-safe SQL artifact if needed — additive-only migrations</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Validate no existing enum conflicts with the DB</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Validate RLS and foreign-key compatibility</li>
+</ul>
+<section class="he-section" id="validation-gates"><div class="he-section__num">13 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>npx prisma validate</code> ✓</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>npx tsc --noEmit</code> ✓</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>migration file reviewed for additive-only safety</li>
+</ul>
+<section class="he-section" id="risks"><div class="he-section__num">14 · Risks</div><h2 class="he-section__title">Risks</h2></section>
+<ul>
+<li>enum drift between Prisma and database</li>
+<li>migration ordering problems in environments with stale clients</li>
+<li>introducing relations that break existing queries if required fields are made non-null too early</li>
+</ul>
+<section class="he-section" id="definition-of-done"><div class="he-section__num">15 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2></section>
+<ul>
+<li>new schema structures exist</li>
+<li>old runtime behavior still works</li>
+<li>no production flow depends on new fields yet</li>
+</ul>
+<hr />
+<h1 id="phase-2-unified-demand-read-model">Phase 2: Unified Demand Read Model</h1>
+<section class="he-section" id="objective"><div class="he-section__num">16 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Create a canonical read layer for event demand that includes all booking types and becomes the foundation for visibility and viability.</p>
+<section class="he-section" id="scope"><div class="he-section__num">17 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<ul>
+<li>read-only aggregation</li>
+<li>no major booking write-path changes yet</li>
+</ul>
+<section class="he-section" id="primary-files"><div class="he-section__num">18 · Primary Files</div><h2 class="he-section__title">Primary Files</h2></section>
+<ul>
+<li><code>lib/exams/demand.ts</code></li>
+<li><code>app/student/exams/*</code></li>
+<li><code>app/student/exam-bookings/*</code></li>
+<li><code>app/staff/exams/*</code></li>
+<li>possibly public-facing exam-only informational routes</li>
+</ul>
+<section class="he-section" id="checklist"><div class="he-section__num">19 · Checklist</div><h2 class="he-section__title">Checklist</h2></section>
+<h3 id="build-canonical-demand-service">Build canonical demand service</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create <code>lib/exams/demand.ts</code> — 276-line service with full DTOs</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Define event demand DTOs for:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>total seat demand — <code>EventDemandSnapshot.totals.bookingCount</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>guaranteed seat demand — <code>EventDemandSnapshot.totals.guaranteedCount</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>flexible seat demand — <code>EventDemandSnapshot.totals.flexibleCount</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>module breakdown — <code>EventDemandModuleSummary[]</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>pool breakdown — <code>EventDemandPoolSummary[]</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>booking-type breakdown — <code>byBookingType[]</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>institution/company breakdown if available — deferred, not yet needed by downstream consumers</li>
+</ul>
+</li>
+</ul>
+<h3 id="aggregate-all-booking-types">Aggregate all booking types</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Include <code>POOL</code> bookings — derived via <code>deriveGuaranteeType()</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Include <code>INDIVIDUAL</code> bookings</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Include <code>GROUP_CHARTER</code> / company demand</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Include <code>TWIN_PACK</code> and <code>FOUR_PACK</code> per-module bookings</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Include resit seat demand where it contributes to event demand</li>
+</ul>
+<h3 id="define-counting-rules">Define counting rules</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Decide whether demand is counted by:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>candidate seats — <code>bookingCount</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>module seats — <code>EventDemandModuleSummary.bookingCount</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>guaranteed seats — <code>guaranteedCount</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>paid seats — <code>paidSeatCount</code></li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Ensure event viability can consume the same aggregated output later — <code>viability.ts</code> reads the same data</li>
+</ul>
+<h3 id="update-student-views">Update student views</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Refactor <code>AvailablePoolsTab</code> to show demand-aware state — shows pool member counts and demand context</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add visible distinction between:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>public demand — pool member count shown</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>candidate's own booking status — shown via membership status badge</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>guaranteed vs flexible booking — shown in MyBookingsTab via fulfillment state</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Ensure counts no longer imply only standard pools matter</li>
+</ul>
+<h3 id="update-staff-views">Update staff views</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Refactor staff events tab to show:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>total seat demand — rendered from <code>getEventDemandSnapshot()</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>guaranteed demand — shown in demand summary card</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>distinct module demand — module list rendered</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>pool composition — pool cards with member counts</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Ensure staff can inspect weak pools in the context of total event demand</li>
+</ul>
+<h3 id="public-visibility-design">Public visibility design</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Decide which parts of demand are visible to registered modular/exam-only users — pool member counts and available capacity</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Exclude sensitive personal/company data — no PII in demand snapshots</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Include enough signal to motivate booking behavior — seat availability shown</li>
+</ul>
+<section class="he-section" id="validation-gates"><div class="he-section__num">20 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Typecheck passes</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Staff event screens render with unified demand</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Student available-pools view reflects total demand correctly</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>No booking mutation path has changed yet</li>
+</ul>
+<section class="he-section" id="risks"><div class="he-section__num">21 · Risks</div><h2 class="he-section__title">Risks</h2></section>
+<ul>
+<li>double-counting the same demand via both booking and membership relations</li>
+<li>misclassifying guaranteed vs flexible bookings</li>
+<li>confusing users if pool counts and event counts are shown without distinction</li>
+</ul>
+<section class="he-section" id="definition-of-done"><div class="he-section__num">22 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2></section>
+<ul>
+<li>one canonical demand read model exists</li>
+<li>UI surfaces can show real demand across booking types</li>
+<li>downstream phases can use demand service without re-querying ad hoc</li>
+</ul>
+<hr />
+<h1 id="phase-3-rolling-pool-assignment-rewrite">Phase 3: Rolling Pool Assignment Rewrite</h1>
+<section class="he-section" id="objective"><div class="he-section__num">23 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Replace hard-reject pool assignment with rolling, same-module-first pool routing.</p>
+<section class="he-section" id="scope"><div class="he-section__num">24 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<ul>
+<li>pool assignment logic</li>
+<li>write-path updates for standard, applicant, and bundle booking flows</li>
+</ul>
+<section class="he-section" id="primary-files"><div class="he-section__num">25 · Primary Files</div><h2 class="he-section__title">Primary Files</h2></section>
+<ul>
+<li><code>lib/pools/assignment.ts</code></li>
+<li><code>lib/pools/join.ts</code></li>
+<li><code>lib/pools/validation.ts</code></li>
+<li><code>lib/pools/auto-pool.ts</code></li>
+<li><code>app/student/actions.ts</code></li>
+<li><code>app/api/applicant/exam-only/book-exam/route.ts</code></li>
+<li><code>app/api/applicant/exam-only/join-pool/route.ts</code></li>
+</ul>
+<section class="he-section" id="checklist"><div class="he-section__num">26 · Checklist</div><h2 class="he-section__title">Checklist</h2></section>
+<h3 id="create-assignment-service">Create assignment service</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create <code>lib/pools/assignment.ts</code> — 180-line service with <code>resolveStandardPoolForJoin()</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Implement pool search strategy:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>same module, open, capacity available — <code>sameModulePool</code> path</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>else earliest open pool with <code>&lt;4</code> distinct modules and capacity — <code>openModuleSlotPool</code> path</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>else create next pool — <code>createOverflowPool()</code> auto-creates with label/day/slot</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Support explicit event scoping — scoped by <code>eventId</code> parameter</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Support standard pool creation when needed — <code>createOverflowPool()</code></li>
+</ul>
+<h3 id="remove-hard-rejection-on-5th-module">Remove hard rejection on 5th module</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Refactor <code>lib/pools/validation.ts</code> — no longer rejects on module count</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Refactor <code>lib/pools/join.ts</code> — calls <code>resolveStandardPoolForJoin()</code> for routing</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Ensure 5th distinct module routes to another pool instead of failing outright — overflow pool created</li>
+</ul>
+<h3 id="preserve-capacity-rules">Preserve capacity rules</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Still enforce max 28 seats per pool — <code>POOL_MAX_CANDIDATES</code> constant</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Still enforce max 4 distinct modules per pool — <code>MODULE_DIVERSITY_CAP</code> constant</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Still prevent duplicate same-module-in-event joins for the same user where required</li>
+</ul>
+<h3 id="update-applicant-booking-path">Update applicant booking path</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Refactor <code>app/api/applicant/exam-only/book-exam/route.ts</code> — uses shared assignment</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Stop selecting the “first available pool” blindly — uses <code>resolveStandardPoolForJoin()</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Use shared assignment service</li>
+</ul>
+<h3 id="update-student-booking-path">Update student booking path</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Refactor student join actions to use shared assignment service — <code>lib/enrollment/exams.ts</code> calls <code>resolveStandardPoolForJoin()</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Remove duplicated legacy pool creation rules where possible</li>
+</ul>
+<h3 id="update-bundle-placement">Update bundle placement</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Ensure each bundle module is assigned independently — each module calls <code>resolveStandardPoolForJoin()</code> separately</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Allow modules in the same bundle to land in different pools if required</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Keep all booking and wallet logic atomic — wrapped in <code>$transaction</code></li>
+</ul>
+<h3 id="legacy-compatibility">Legacy compatibility</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Ensure old pool labels and timing metadata are still populated sufficiently for existing screens — <code>createOverflowPool()</code> sets label/day/slot</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>If pool auto-creation relies on standard A/B/C/D assumptions, keep them functional during this phase — <code>getPoolLabel()</code> generates A-Z labels</li>
+</ul>
+<section class="he-section" id="validation-gates"><div class="he-section__num">27 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Typecheck passes</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Joining a 5th distinct module routes to another pool instead of failing</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Bundles can split across pools without ledger corruption</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>No pool exceeds 28 seats</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>No pool exceeds 4 distinct modules</li>
+</ul>
+<section class="he-section" id="risks"><div class="he-section__num">28 · Risks</div><h2 class="he-section__title">Risks</h2></section>
+<ul>
+<li>race conditions during pool creation or assignment</li>
+<li>accidental duplicate pool creation under concurrent demand</li>
+<li>wallet funds being reserved before assignment failure without cleanup</li>
+</ul>
+<section class="he-section" id="definition-of-done"><div class="he-section__num">29 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2></section>
+<ul>
+<li>pool assignment follows rolling overflow rules</li>
+<li>same-module clustering is favored</li>
+<li>all main booking entry points share consistent assignment logic</li>
+</ul>
+<hr />
+<h1 id="phase-4-event-level-viability-and-gono-go-refactor">Phase 4: Event-Level Viability and Go/No-Go Refactor</h1>
+<section class="he-section" id="objective"><div class="he-section__num">30 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Replace pool-centric failure logic with event-centric viability logic that respects total demand, guaranteed bookings, and examiner economics.</p>
+<section class="he-section" id="scope"><div class="he-section__num">31 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<ul>
+<li>event viability service</li>
+<li>cron behavior</li>
+<li>staff decision surfaces</li>
+</ul>
+<section class="he-section" id="primary-files"><div class="he-section__num">32 · Primary Files</div><h2 class="he-section__title">Primary Files</h2></section>
+<ul>
+<li><code>lib/exams/viability.ts</code> new</li>
+<li><code>lib/events/go-no-go.ts</code></li>
+<li><code>app/api/cron/check-pools/route.ts</code></li>
+<li><code>app/api/cron/check-events/route.ts</code></li>
+<li><code>app/staff/_components/GoNoGoMeter.tsx</code></li>
+</ul>
+<section class="he-section" id="checklist"><div class="he-section__num">33 · Checklist</div><h2 class="he-section__title">Checklist</h2></section>
+<h3 id="create-viability-service">Create viability service</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create <code>lib/exams/viability.ts</code> — 185-line service with <code>evaluateEventViability()</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Implement viability evaluation using:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>total paid seats — <code>totalPaidSeats</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>total guaranteed seats — <code>totalGuaranteedSeats</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>total revenue — <code>totalConfirmedRevenue</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>pool distribution — <code>poolsMeetingThreshold</code> / <code>poolsBelowThreshold</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>manual override — <code>FORCE_GO</code> / <code>FORCE_NO_GO</code> from <code>overrideStatus</code></li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Support threshold combinations described in business docs — <code>CANDIDATE_COUNT</code>, <code>SEAT_VOLUME</code>, <code>REVENUE</code>, <code>HYBRID</code></li>
+</ul>
+<h3 id="refactor-existing-gono-go-code">Refactor existing Go/No-Go code</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Update <code>lib/events/go-no-go.ts</code> — 310-line service calling <code>evaluateEventViability()</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Remove assumption that every pool below threshold forces failure — weak pools allowed when event is viable</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Distinguish:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>event viable — <code>GO</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>pool strong — pools meeting threshold</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>pool weak but can still run — <code>GO_WITH_UNDERFILLED_SITTINGS</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>event not viable — <code>NO_GO</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="refactor-cron-behavior">Refactor cron behavior</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Update <code>check-pools</code> cron to stop auto-failing all weak pools in isolation — now calls <code>evaluateGoNoGo()</code> per event</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Ensure event-level viability is evaluated before pool failure/release actions — <code>executeGo()</code>/<code>executeNoGo()</code> called based on event decision</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Preserve redistribution behavior only where it still makes sense — auto-pool redistribution runs first</li>
+</ul>
+<h3 id="define-new-outcomes-clearly">Define new outcomes clearly</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>GO</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>NO_GO</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>POSTPONE</code> — <code>executePostponement()</code> with date shift</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>GO_WITH_UNDERFILLED_SITTINGS</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>NEEDS_REVIEW</code></li>
+</ul>
+<h3 id="staff-ui-updates">Staff UI updates</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Update Go/No-Go meter to reflect event-level viability — <code>GoNoGoMeter.tsx</code> exists</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Stop presenting pool-only revenue target as if it is the full truth — event-level metrics shown</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Show underfilled but still serviceable demand — <code>GO_WITH_UNDERFILLED_SITTINGS</code> surfaced</li>
+</ul>
+<section class="he-section" id="validation-gates"><div class="he-section__num">34 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Typecheck passes</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Event-level viability can succeed even if one pool is weak</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Weak pool is not auto-failed when event is already viable</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Funds are not prematurely released for guaranteed demand</li>
+</ul>
+<section class="he-section" id="risks"><div class="he-section__num">35 · Risks</div><h2 class="he-section__title">Risks</h2></section>
+<ul>
+<li>legacy assumptions in cron jobs may still trigger incorrect state transitions</li>
+<li>staff UI may show contradictory statuses if pool and event states are not carefully coordinated</li>
+</ul>
+<section class="he-section" id="definition-of-done"><div class="he-section__num">36 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2></section>
+<ul>
+<li>event viability is computed from total demand</li>
+<li>pool failure is no longer isolated from event economics</li>
+<li>cron logic respects guaranteed commitments</li>
+</ul>
+<hr />
+<h1 id="phase-5-sitting-scheduler">Phase 5: Sitting Scheduler</h1>
+<section class="he-section" id="objective"><div class="he-section__num">37 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Introduce real scheduled exam sittings and assign bookings into them according to module clustering, candidate constraints, and examiner availability.</p>
+<section class="he-section" id="scope"><div class="he-section__num">38 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<ul>
+<li>new scheduling layer</li>
+<li>no full pool-time deprecation yet, but sitting becomes the emerging source of truth</li>
+</ul>
+<section class="he-section" id="primary-files"><div class="he-section__num">39 · Primary Files</div><h2 class="he-section__title">Primary Files</h2></section>
+<ul>
+<li><code>lib/exams/scheduler.ts</code> new</li>
+<li>new sitting-related API/actions as needed</li>
+<li>staff exam scheduling UI files</li>
+</ul>
+<section class="he-section" id="checklist"><div class="he-section__num">40 · Checklist</div><h2 class="he-section__title">Checklist</h2></section>
+<h3 id="create-scheduler-service">Create scheduler service</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create <code>lib/exams/scheduler.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Accept unified demand input from <code>lib/exams/demand.ts</code> — <code>scheduleEventSittingsFromDemand()</code> added</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create sitting generation algorithm</li>
+</ul>
+<h3 id="sitting-generation-rules">Sitting generation rules</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Generate sittings by module demand</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Prefer same-module clustering</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Support multiple days and sessions</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Respect capacity 28 per sitting by default</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Allow spare capacity in sittings when justified</li>
+</ul>
+<h3 id="candidate-assignment-rules">Candidate assignment rules</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>No overlapping sittings for same user</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Respect max daily exam count</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Respect module duration and session timing — <code>ExamComponent.duration</code> now drives window length</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Place guaranteed bookings before flexible pool demand</li>
+</ul>
+<h3 id="examiner-assignment-rules">Examiner assignment rules</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>One examiner for now</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Prevent same-examiner overlap</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Design for future parallel examiner assignments — <code>getExaminerForSlot()</code> respects <code>maxParallelSittings</code></li>
+</ul>
+<h3 id="staff-scheduling-interface">Staff scheduling interface</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add sitting planner to staff exams area</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Allow viewing generated sittings</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Allow manual adjustments — <code>PATCH /api/staff/exam-sittings/[id]</code> supports day/session/capacity/venue/status/examiner</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Show warnings for:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>candidate conflicts</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>examiner conflicts</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>spare seats</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>unscheduled guaranteed demand</li>
+<li>Implemented via <code>detectSchedulingConflicts()</code> + <code>SchedulingWarningsPanel</code> component</li>
+</ul>
+</li>
+</ul>
+<h3 id="transitional-compatibility">Transitional compatibility</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Ensure existing pool pages can still point to pools while sittings begin to exist</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Add links from pool/member views to assigned sittings where available</li>
+</ul>
+<section class="he-section" id="validation-gates"><div class="he-section__num">41 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Typecheck passes</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Scheduler can build valid sittings for one event — algorithm verified structurally</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>No examiner overlap — <code>getExaminerForSlot()</code> + <code>detectSchedulingConflicts()</code> enforces this</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>No candidate overlap — <code>canUseSlot()</code> + conflict detection enforces this</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Guaranteed demand is placed first — <code>sortCandidates()</code> sorts guaranteed-first</li>
+</ul>
+<section class="he-section" id="risks"><div class="he-section__num">42 · Risks</div><h2 class="he-section__title">Risks</h2></section>
+<ul>
+<li>scheduling complexity can explode if built directly inside UI routes</li>
+<li>candidate/day-limit logic may be underspecified if module duration data is incomplete</li>
+<li>generated sittings can confuse legacy UI if not surfaced carefully</li>
+</ul>
+<section class="he-section" id="definition-of-done"><div class="he-section__num">43 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2></section>
+<ul>
+<li>real sitting records exist</li>
+<li>bookings can be assigned to actual scheduled delivery slots</li>
+<li>sitting-level planning is operational for staff</li>
+</ul>
+<hr />
+<h1 id="phase-6-guaranteed-fulfillment-and-roll-forward">Phase 6: Guaranteed Fulfillment and Roll-Forward</h1>
+<section class="he-section" id="objective"><div class="he-section__num">44 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Ensure paid demand, especially bundles and individuals, is fulfilled correctly across event failure, postponement, and partial execution.</p>
+<section class="he-section" id="scope"><div class="he-section__num">45 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<ul>
+<li>fulfillment tracking</li>
+<li>roll-forward logic</li>
+<li>guarantee preservation</li>
+</ul>
+<section class="he-section" id="primary-files"><div class="he-section__num">46 · Primary Files</div><h2 class="he-section__title">Primary Files</h2></section>
+<ul>
+<li><code>lib/exams/rollforward.ts</code> new</li>
+<li><code>lib/pools/bundles.ts</code></li>
+<li><code>app/student/actions.ts</code></li>
+<li><code>app/api/applicant/exam-only/book-exam/route.ts</code></li>
+<li>any entitlement-related models/services</li>
+</ul>
+<section class="he-section" id="checklist"><div class="he-section__num">47 · Checklist</div><h2 class="he-section__title">Checklist</h2></section>
+<h3 id="model-guarantee-fulfillment">Model guarantee fulfillment</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Finalize whether fulfillment is tracked on:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>extended <code>BookingEntitlement</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>new fulfillment model</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>or a combination</li>
+</ul>
+</li>
+</ul>
+<h3 id="implement-roll-forward-service">Implement roll-forward service</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Create <code>lib/exams/rollforward.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Identify all paid module attempts not executed in the current window</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Roll them into next event/window</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Preserve price/payment linkage</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Preserve booking group linkage where appropriate</li>
+</ul>
+<h3 id="bundle-specific-rules">Bundle-specific rules</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>One module executed, another not:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>mark one as executed</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>mark the other as rolled forward</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Do not require repurchase of already-paid bundle module</li>
+</ul>
+<h3 id="individual-and-company-rules">Individual and company rules</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Individual guaranteed seats roll forward if event is postponed or module not delivered — <code>rollForwardPostponedBookingsForEvent()</code> added</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Company/group-backed demand is preserved under contract-backed rules — <code>preserveCompanyGuaranteedDemand()</code> added</li>
+</ul>
+<h3 id="ui-status-propagation">UI status propagation</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Student portal should show:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>executed</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>scheduled</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>postponed</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>rolled forward</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>pending fulfillment</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>excused (pending rebook)</li>
+</ul>
+</li>
+</ul>
+<section class="he-section" id="validation-gates"><div class="he-section__num">48 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Typecheck passes</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Paid bundle modules are never lost on partial execution — <code>hasMixedBookingGroupFulfillment()</code> enforces visibility</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Rolled-forward demand remains visible and owed — <code>deriveBookingFulfillmentState()</code> derives from <code>demandStatus</code>/<code>rolloverToEventId</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>No double-consumption of a bundle seat — <code>checkDoubleConsumptionGuard()</code> prevents duplicate clones</li>
+</ul>
+<section class="he-section" id="risks"><div class="he-section__num">49 · Risks</div><h2 class="he-section__title">Risks</h2></section>
+<ul>
+<li>accidental duplicate booking creation in next window</li>
+<li>confusing legacy status fields if demand and payment state diverge</li>
+<li>mismatch between wallet ledger and fulfillment status</li>
+</ul>
+<section class="he-section" id="definition-of-done"><div class="he-section__num">50 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2></section>
+<ul>
+<li>guaranteed paid demand survives weak pools and postponements correctly</li>
+<li>bundle modules are fulfilled independently</li>
+</ul>
+<hr />
+<h1 id="phase-7-attendance-and-exam-records-migration">Phase 7: Attendance and Exam Records Migration</h1>
+<section class="he-section" id="objective"><div class="he-section__num">51 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Make attendance and exam history reflect real scheduled sittings rather than only pool membership/booking state.</p>
+<section class="he-section" id="scope"><div class="he-section__num">52 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<ul>
+<li>sitting-aware attendance</li>
+<li>sitting-aware record rendering</li>
+</ul>
+<section class="he-section" id="primary-files"><div class="he-section__num">53 · Primary Files</div><h2 class="he-section__title">Primary Files</h2></section>
+<ul>
+<li><code>lib/exams/attendance.ts</code></li>
+<li><code>app/api/staff/exam-attendance/route.ts</code></li>
+<li><code>app/api/admin/exams/mark-no-show/route.ts</code></li>
+<li>student/staff exam history pages</li>
+</ul>
+<section class="he-section" id="checklist"><div class="he-section__num">54 · Checklist</div><h2 class="he-section__title">Checklist</h2></section>
+<h3 id="attendance-writes">Attendance writes</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Update attendance write helper to use <code>sittingId</code> where available</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Continue supporting fallback booking/membership paths during migration</li>
+</ul>
+<h3 id="attendance-ui">Attendance UI</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Staff can mark attendance per sitting assignment</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Student portal shows per-module sitting attendance</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Full-time class-linked candidates retain optional <code>classId</code> linkage</li>
+</ul>
+<h3 id="exam-records-rendering">Exam records rendering</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Student history merges:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>results</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>bookings</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>attendance</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>rolled-forward attempts</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Staff records view does the same without inventing misleading statuses</li>
+</ul>
+<h3 id="no-showexcused-handling">No-show/excused handling</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>No-show updates sitting assignment and booking correctly</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Excused status does not silently consume fulfillment incorrectly — EXCUSED now keeps <code>demandStatus</code> as-is, no cancellation stamp, no <code>EXECUTED</code> flag</li>
+</ul>
+<section class="he-section" id="validation-gates"><div class="he-section__num">55 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Typecheck passes</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Attendance works for:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>pool candidates — membership-based path still supported</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>individual candidates — booking-based path with optional sitting</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>bundle-derived candidates — booking path with <code>bookingGroupRef</code> propagation</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>full-time class-linked candidates — <code>classId</code> auto-resolved from enrollment type</li>
+</ul>
+</li>
+</ul>
+<section class="he-section" id="implementation-status-snapshot"><div class="he-section__num">56 · Implementation Status Snapshot</div><h2 class="he-section__title">Implementation Status Snapshot</h2></section>
+<ul>
+<li><code>lib/exams/attendance.ts</code> now accepts optional <code>sittingId</code>, updates <code>ExamAttendance.sittingId</code>, and synchronizes <code>ExamSittingAssignment</code> attendance state when a sitting-backed assignment exists.</li>
+<li>EXCUSED attendance no longer stamps <code>demandStatus=EXECUTED</code> or sets cancellation fields — the seat remains owed and the candidate can be rebooked.</li>
+<li>ABSENT attendance correctly sets <code>status=NO_SHOW</code> with cancellation fields.</li>
+<li>PRESENT attendance sets <code>demandStatus=EXECUTED</code> and <code>executedAt</code>.</li>
+<li><code>lib/exams/fulfillment.ts</code> now exposes <code>EXCUSED_PENDING_REBOOK</code> as a distinct fulfillment state, and <code>fulfillmentStateLabel()</code> provides UI-friendly labels.</li>
+<li><code>lib/exams/scheduler.ts</code> now uses <code>ExamComponent.duration</code> for accurate session windows, picks the least-loaded examiner via <code>getExaminerForSlot()</code> (respecting <code>maxParallelSittings</code>), and exposes <code>detectSchedulingConflicts()</code> for the staff warning panel.</li>
+<li><code>scheduleEventSittingsFromDemand()</code> accepts a pre-fetched <code>EventDemandSnapshot</code> and surfaces unscheduled guaranteed modules.</li>
+<li><code>app/api/staff/exam-sittings/[id]/route.ts</code> provides <code>GET</code> + <code>PATCH</code> for manual sitting adjustments.</li>
+<li><code>app/api/staff/exam-sittings/conflicts/route.ts</code> exposes conflict detection for the <code>SchedulingWarningsPanel</code>.</li>
+<li><code>lib/exams/rollforward.ts</code> now includes <code>rollForwardPostponedBookingsForEvent()</code> for individual postponement and <code>preserveCompanyGuaranteedDemand()</code> for GROUP_CHARTER contract-backed demand.</li>
+<li><code>checkDoubleConsumptionGuard()</code> prevents duplicate roll-forward clones in the same target event.</li>
+<li>Student portal now surfaces EXCUSED as a distinct visual status.</li>
+<li>Phases 5, 6, 7, and 8 are structurally complete.</li>
+<li><code>lib/exams/resits.ts</code> provides spare capacity detection, resit candidate discovery, and proposal-based backfill execution with candidate-overlap prevention.</li>
+<li>Remaining work is Phase 9 (legacy cleanup).</li>
+</ul>
+<section class="he-section" id="risks"><div class="he-section__num">57 · Risks</div><h2 class="he-section__title">Risks</h2></section>
+<ul>
+<li>duplicate attendance rows during mixed-mode migration</li>
+<li>stale record aggregation showing attendance without correct sitting context</li>
+</ul>
+<section class="he-section" id="definition-of-done"><div class="he-section__num">58 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2></section>
+<ul>
+<li>attendance and exam records reflect actual module sittings accurately</li>
+</ul>
+<hr />
+<h1 id="phase-8-resit-backfill-and-spare-capacity-utilization">Phase 8: Resit Backfill and Spare Capacity Utilization</h1>
+<section class="he-section" id="objective"><div class="he-section__num">59 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Use spare sitting capacity intelligently for resits and late demand once the event is already viable.</p>
+<section class="he-section" id="scope"><div class="he-section__num">60 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<ul>
+<li>resit allocation</li>
+<li>spare seat utilization</li>
+</ul>
+<section class="he-section" id="primary-files"><div class="he-section__num">61 · Primary Files</div><h2 class="he-section__title">Primary Files</h2></section>
+<ul>
+<li><code>lib/exams/resits.ts</code></li>
+<li>sitting scheduler</li>
+<li>staff scheduling views</li>
+<li>resit booking flows</li>
+</ul>
+<section class="he-section" id="checklist"><div class="he-section__num">62 · Checklist</div><h2 class="he-section__title">Checklist</h2></section>
+<h3 id="identify-spare-capacity">Identify spare capacity</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Detect viable sittings with unused seats — <code>detectSpareCapacity()</code> in <code>lib/exams/resits.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Classify which spare seats are eligible for backfill — only non-cancelled sittings with <code>spareSeats &gt; 0</code></li>
+</ul>
+<h3 id="resit-matching">Resit matching</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Match failed modules to spare same-module capacity first — <code>generateResitBackfillProposals()</code> prefers same-module</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Prevent candidate overlap — <code>userSlotSet</code> and <code>proposedUserSlots</code> track day/session conflicts</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Respect guarantee and timing rules — guaranteed demand placed first by scheduler, resits fill remaining capacity</li>
+</ul>
+<h3 id="staff-control">Staff control</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Allow staff to approve or assign resit backfill — <code>GET /api/staff/resit-backfill</code> returns dry-run proposals, <code>POST</code> executes approved ones</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Show warnings when resit assignment could affect schedule quality — warnings array in proposal result</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>ResitBackfillPanel</code> UI component wired into staff event page</li>
+</ul>
+<h3 id="record-correctness">Record correctness</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Ensure resit attendance and result updates flow into exam records correctly — <code>executeResitBackfill()</code> creates <code>ExamSittingAssignment</code> and sets <code>demandStatus = SCHEDULED</code></li>
+</ul>
+<section class="he-section" id="validation-gates"><div class="he-section__num">63 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Typecheck passes</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Spare seats can be backfilled without corrupting scheduling — idempotency guard prevents duplicates</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Resits update exam history correctly — sitting assignments link to bookings</li>
+</ul>
+<section class="he-section" id="risks"><div class="he-section__num">64 · Risks</div><h2 class="he-section__title">Risks</h2></section>
+<ul>
+<li>overscheduling same candidate</li>
+<li>backfilling incompatible modules into unsuitable sittings</li>
+</ul>
+<section class="he-section" id="definition-of-done"><div class="he-section__num">65 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2></section>
+<ul>
+<li>spare viable capacity can be monetized and tracked cleanly</li>
+</ul>
+<hr />
+<h1 id="phase-9-legacy-pool-time-deprecation-and-cleanup">Phase 9: Legacy Pool-Time Deprecation and Cleanup</h1>
+<section class="he-section" id="objective"><div class="he-section__num">66 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Finalize the transition away from pool time as a source of truth and remove or isolate obsolete behaviors.</p>
+<section class="he-section" id="scope"><div class="he-section__num">67 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<ul>
+<li>final cleanup</li>
+<li>legacy path retirement</li>
+</ul>
+<section class="he-section" id="primary-files"><div class="he-section__num">68 · Primary Files</div><h2 class="he-section__title">Primary Files</h2></section>
+<ul>
+<li>all pool-time-dependent surfaces</li>
+<li>all old event/pool cron assumptions</li>
+<li>all legacy adapters</li>
+</ul>
+<section class="he-section" id="checklist"><div class="he-section__num">69 · Checklist</div><h2 class="he-section__title">Checklist</h2></section>
+<h3 id="audit-legacy-timing-usage">Audit legacy timing usage</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Find all reads of:
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>ExamPool.examDate</code> — 42 references across 18 files (display, email, pricing, attendance fallback)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>ExamPool.examStartTime</code> — 6 references (join overlap check, applicant display, email)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>ExamPool.examEndTime</code> — 6 references (join overlap check, applicant display, email)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>ExamPool.dayNumber</code> — 5 references (display labels, pool sort)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><code>ExamPool.timeSlot</code> — 8 references (display labels, student/staff views)</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Determine which are still needed for compatibility vs which must switch to <code>ExamSitting</code> — all are display-only or advisory; critical scheduling logic now uses <code>ExamSitting</code></li>
+</ul>
+<h3 id="switch-truth-source">Switch truth source</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Move student scheduling displays to <code>ExamSitting</code> — <code>MyBookingsTab</code> uses sitting assignments where available, pool timing as fallback</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Move staff operational scheduling displays to <code>ExamSitting</code> — event page shows sittings table, scheduling warnings, and resit backfill</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Keep pool timing only as advisory or remove from critical paths — pool timing is display-only; <code>ExamSitting</code> is the scheduling truth source</li>
+</ul>
+<h3 id="retire-obsolete-logic">Retire obsolete logic</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Remove old pool-centric assumptions from cron — fully done: auto-pool redistribution removed.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Remove duplicate assignment logic — obsolete auto-pool code deleted.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Remove dead compatibility code once all routes have migrated — obsolete API routes and UI buttons deleted.</li>
+</ul>
+<section class="he-section" id="validation-gates"><div class="he-section__num">70 · Validation Gates</div><h2 class="he-section__title">Validation Gates</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Typecheck passes</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>No critical user-facing schedule still depends on pool time alone — all scheduling uses <code>ExamSitting</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Legacy compatibility code is documented or removed — documented in this audit</li>
+</ul>
+<section class="he-section" id="risks"><div class="he-section__num">71 · Risks</div><h2 class="he-section__title">Risks</h2></section>
+<ul>
+<li>hidden legacy pages may still rely on pool timing fields</li>
+<li>scheduled/attendance pages may regress if one old path survives unnoticed</li>
+</ul>
+<section class="he-section" id="definition-of-done"><div class="he-section__num">72 · Definition of Done</div><h2 class="he-section__title">Definition of Done</h2></section>
+<ul>
+<li>the system’s operational timing truth is sitting-based</li>
+<li>pool-time-as-final-schedule is no longer a runtime assumption</li>
+</ul>
+<hr />
+<h1 id="cross-phase-test-and-verification-checklist">Cross-Phase Test and Verification Checklist</h1>
+<p>Use this after each major milestone.</p>
+<section class="he-section" id="wallet-and-ledger"><div class="he-section__num">73 · Wallet and Ledger</div><h2 class="he-section__title">Wallet and Ledger</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>wallet top-up approved by admin can fund course purchase</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>wallet top-up approved by admin can fund pool booking</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>reserve/capture/release flows remain balanced</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>cancellations do not corrupt balances</li>
+</ul>
+<section class="he-section" id="booking-types"><div class="he-section__num">74 · Booking Types</div><h2 class="he-section__title">Booking Types</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>pool booking works</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>individual booking works</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>group/company booking works</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>bundle booking works</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>resit booking works</li>
+</ul>
+<section class="he-section" id="demand"><div class="he-section__num">75 · Demand</div><h2 class="he-section__title">Demand</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>demand reflects all booking types</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>staff demand views match student-facing counts</li>
+</ul>
+<section class="he-section" id="viability"><div class="he-section__num">76 · Viability</div><h2 class="he-section__title">Viability</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>event can remain viable with one weak pool</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>weak pool is not auto-failed when examiner trip is justified</li>
+</ul>
+<section class="he-section" id="scheduling"><div class="he-section__num">77 · Scheduling</div><h2 class="he-section__title">Scheduling</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>same candidate cannot be double-booked</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>one examiner cannot be double-booked</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>module clustering is preferred</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>overflow pools/sittings are created correctly</li>
+</ul>
+<section class="he-section" id="attendance-and-results"><div class="he-section__num">78 · Attendance and Results</div><h2 class="he-section__title">Attendance and Results</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>present/absent/excused writes update the correct records</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>no-show handling is correct</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>exam records display accurately in student and staff portals</li>
+</ul>
+<hr />
+<h1 id="suggested-agent-work-breakdown">Suggested Agent Work Breakdown</h1>
+<p>If multiple agents are used, split work by write scope.</p>
+<h3 id="agent-a-schema-and-migrations">Agent A: Schema and migrations</h3>
+<ul>
+<li><code>prisma/schema.prisma</code></li>
+<li>migration SQL</li>
+</ul>
+<h3 id="agent-b-demand-and-viability-read-model">Agent B: Demand and viability read model</h3>
+<ul>
+<li><code>lib/exams/demand.ts</code></li>
+<li><code>lib/exams/viability.ts</code></li>
+<li>read-only UI wiring</li>
+</ul>
+<h3 id="agent-c-pool-assignment-and-booking-writes">Agent C: Pool assignment and booking writes</h3>
+<ul>
+<li><code>lib/pools/assignment.ts</code></li>
+<li><code>lib/pools/join.ts</code></li>
+<li>applicant/student booking entry points</li>
+</ul>
+<h3 id="agent-d-scheduler-and-sitting-models">Agent D: Scheduler and sitting models</h3>
+<ul>
+<li><code>lib/exams/scheduler.ts</code></li>
+<li>staff scheduling UI</li>
+</ul>
+<h3 id="agent-e-attendance-and-fulfillment">Agent E: Attendance and fulfillment</h3>
+<ul>
+<li><code>lib/exams/attendance.ts</code></li>
+<li>roll-forward services</li>
+<li>exam record rendering</li>
+</ul>
+<p>Do not assign overlapping write scopes unless a merge plan is explicit.</p>
+<hr />
+<h1 id="final-stop-condition">Final Stop Condition</h1>
+<p>The refactor is complete only when the system can correctly model:</p>
+<ul>
+<li>public demand across all booking types</li>
+<li>rolling pool creation and overflow</li>
+<li>event-level viability</li>
+<li>guaranteed individual and bundle fulfillment</li>
+<li>real scheduled sittings</li>
+<li>multi-module candidates across multi-day windows</li>
+<li>sitting-aware attendance and records</li>
+<li>future support for multiple examiners</li>
+</ul>
+<p>Until those are true, the refactor should be treated as in progress even if the current pool UI appears functional.</p>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -180,7 +1178,7 @@
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>guides · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell ">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+
+<main>
+<header>
+  <p class="he-eyebrow">Docs</p>
+  <h1 class="he-title">guides</h1>
+  <p class="he-deck">14 documents in this folder</p>
+</header>
+
+<nav class="he-bc" aria-label="Breadcrumb">
+  <a class="he-bc__item" href="../index.html">Docs</a><span class="he-bc__sep">/</span><span class="he-bc__item">guides</span>
+</nav>
+
+<div class="he-folder-controls">
+  <label for="sort-select">Sort by</label>
+  <select id="sort-select" onchange="sortDocs(this.value)" class="he-sort-select">
+    <option value="newest">Newest first</option>
+    <option value="oldest">Oldest first</option>
+    <option value="az">A → Z</option>
+    <option value="za">Z → A</option>
+  </select>
+</div>
+<table class="he-docs-table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Date</th>
+      <th>Description</th>
+      <th>Source</th>
+    </tr>
+  </thead>
+  <tbody id="docs-table-body">
+    
+    <tr data-date="2026-09-08" data-title="EASA Exam Compliance Guide">
+      <td><a href="easa-exam-compliance.html">EASA Exam Compliance Guide</a></td>
+      <td>2026-09-08</td>
+      <td>**Last updated:** 2026-08-30 **Scope:** Internal exam system and anti-cheat certification exam system **Regulatory basis</td>
+      <td><code>docs/guides/easa-exam-compliance.md</code></td>
+    </tr>
+    <tr data-date="2026-09-07" data-title="Deployment Guide">
+      <td><a href="deployment.html">Deployment Guide</a></td>
+      <td>2026-09-07</td>
+      <td>The project uses `@prisma/adapter-pg` with the standard `pg` PostgreSQL driver.</td>
+      <td><code>docs/guides/deployment.md</code></td>
+    </tr>
+    <tr data-date="2026-09-07" data-title="Developer Handover Documentation">
+      <td><a href="handover.html">Developer Handover Documentation</a></td>
+      <td>2026-09-07</td>
+      <td>This document provides a comprehensive guide for developers taking over the Aerojet Academy portal.</td>
+      <td><code>docs/guides/handover.md</code></td>
+    </tr>
+    <tr data-date="2026-09-06" data-title="Tailwind CSS v4 Migration Plan">
+      <td><a href="tailwind-v4-migration.html">Tailwind CSS v4 Migration Plan</a></td>
+      <td>2026-09-06</td>
+      <td>The project currently runs **Tailwind CSS v4.3.3** but the configuration file (`tailwind.config.ts`) is written in **Tai</td>
+      <td><code>docs/guides/tailwind-v4-migration.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Analytics Features Guide">
+      <td><a href="analytics-features.html">Analytics Features Guide</a></td>
+      <td>2026-09-04</td>
+      <td>This document maps every analytics, reporting, and monitoring feature in Aerojet Academy and explains how to access and </td>
+      <td><code>docs/guides/analytics-features.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Contributing to Aerojet Academy">
+      <td><a href="contributing.html">Contributing to Aerojet Academy</a></td>
+      <td>2026-09-04</td>
+      <td></td>
+      <td><code>docs/guides/contributing.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Kilo Code Session Inventory &amp; Recovery Reference">
+      <td><a href="session-inventory-and-recovery-reference.html">Kilo Code Session Inventory &amp; Recovery Reference</a></td>
+      <td>2026-09-04</td>
+      <td>---…</td>
+      <td><code>docs/guides/session-inventory-and-recovery-reference.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Lost Files Recovery Manifest — 2026-09-01 Catastrophic Revert">
+      <td><a href="lost-files-recovery-manifest.html">Lost Files Recovery Manifest — 2026-09-01 Catastrophic Revert</a></td>
+      <td>2026-09-04</td>
+      <td>**Date:** 2026-09-01 **Incident:** A subagent session ran destructive `git checkout` + `git clean -fd` that reverted the</td>
+      <td><code>docs/guides/lost-files-recovery-manifest.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Neon → Supabase Logical Replication Runbook">
+      <td><a href="neon-supabase-logical-replication.html">Neon → Supabase Logical Replication Runbook</a></td>
+      <td>2026-09-04</td>
+      <td>**Status**: Manual one-time DB setup required on both Neon and Supabase.</td>
+      <td><code>docs/guides/neon-supabase-logical-replication.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Newsroom — Operational Guide">
+      <td><a href="newsroom.html">Newsroom — Operational Guide</a></td>
+      <td>2026-09-04</td>
+      <td>The newsroom is the public-facing blog / press release system.</td>
+      <td><code>docs/guides/newsroom.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Role transitions">
+      <td><a href="role-transitions.html">Role transitions</a></td>
+      <td>2026-09-04</td>
+      <td>Aerojet has six user roles in order of authority…</td>
+      <td><code>docs/guides/role-transitions.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Sortable table pattern (server-paginated lists)">
+      <td><a href="sortable-tables.html">Sortable table pattern (server-paginated lists)</a></td>
+      <td>2026-09-04</td>
+      <td>All list endpoints in the Aerojet codebase follow the same shape: an authenticated page reads `searchParams`, runs a Pri</td>
+      <td><code>docs/guides/sortable-tables.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Tools">
+      <td><a href="tools.html">Tools</a></td>
+      <td>2026-09-04</td>
+      <td>Then convert to PDF: ``…</td>
+      <td><code>docs/guides/tools.md</code></td>
+    </tr>
+    <tr data-date="2026-09-01" data-title="Setup Guide">
+      <td><a href="setup.html">Setup Guide</a></td>
+      <td>2026-09-01</td>
+      <td></td>
+      <td><code>docs/guides/setup.md</code></td>
+    </tr>
+  </tbody>
+</table>
+<script>
+function sortDocs(criteria) {
+  const tbody = document.getElementById('docs-table-body');
+  if (!tbody) return;
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a, b) => {
+    const aDate = a.dataset.date || '';
+    const bDate = b.dataset.date || '';
+    const aTitle = a.dataset.title || '';
+    const bTitle = b.dataset.title || '';
+    switch (criteria) {
+      case 'newest': return bDate.localeCompare(aDate) || aTitle.localeCompare(bTitle);
+      case 'oldest': return aDate.localeCompare(bDate) || aTitle.localeCompare(bTitle);
+      case 'az': return aTitle.localeCompare(bTitle);
+      case 'za': return bTitle.localeCompare(aTitle);
+      default: return 0;
+    }
+  });
+  tbody.innerHTML = '';
+  rows.forEach(row => tbody.appendChild(row));
+}
+</script>
+
+</main>
+
+
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

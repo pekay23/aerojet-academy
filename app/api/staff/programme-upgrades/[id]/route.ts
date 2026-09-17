@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
 // PUT — approve/reject upgrade request
-export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const PUT = withErrorHandler(async (req: NextRequest, ctx: RouteContext) => {
   const staff = await requireStaff()
   const { id } = await ctx.params
   const { action, notes, newDeadline } = await req.json()

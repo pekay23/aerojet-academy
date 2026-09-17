@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Users, Loader2, CheckCircle, X, Building2 } from 'lucide-react'
 import {
   Dialog,

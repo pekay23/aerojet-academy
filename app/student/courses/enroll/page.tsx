@@ -172,7 +172,7 @@ export default async function EnrollPage({
           <div className="space-y-4">
             <Link
               href="/student/courses"
-              className="inline-flex items-center gap-2 text-xs font-black tracking-[0.24em] text-aerojet-blue uppercase transition-colors hover:text-aerojet-sky dark:text-blue-300"
+              className="inline-flex items-center gap-2 text-xs font-black tracking-[0.24em] text-blue-800 uppercase transition-colors hover:text-sky-400 dark:text-blue-300"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to Campus
@@ -180,7 +180,7 @@ export default async function EnrollPage({
 
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-[10px] font-black tracking-[0.24em] text-slate-500 uppercase dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
-                <Layers3 className="h-3.5 w-3.5 text-aerojet-sky" />
+                <Layers3 className="h-3.5 w-3.5 text-sky-400" />
                 Course Enrollment Desk
               </div>
               <div>
@@ -232,7 +232,7 @@ export default async function EnrollPage({
               <section key={categoryKey} className="space-y-5">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-3 py-1 text-[10px] font-black tracking-[0.28em] text-white uppercase dark:bg-white dark:text-slate-950">
-                    <span className="h-2 w-2 rounded-full bg-aerojet-sky" />
+                    <span className="h-2 w-2 rounded-full bg-sky-400" />
                     {categoryLabel[categoryKey] || categoryKey.replace(/_/g, ' ')}
                   </div>
                   <div className="h-px flex-1 bg-linear-to-r from-slate-300 to-transparent dark:from-slate-700" />
@@ -271,7 +271,7 @@ export default async function EnrollPage({
                         <div className="relative flex flex-1 flex-col p-5 pt-6">
                           <div className="mb-5 flex items-start justify-between gap-3">
                             <div className="space-y-2">
-                              <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 font-mono text-[11px] font-black tracking-[0.18em] text-aerojet-blue uppercase dark:border-slate-700 dark:bg-slate-900 dark:text-blue-300">
+                              <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 font-mono text-[11px] font-black tracking-[0.18em] text-blue-800 uppercase dark:border-slate-700 dark:bg-slate-900 dark:text-blue-300">
                                 {course.code}
                               </span>
                               <p className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
@@ -281,7 +281,7 @@ export default async function EnrollPage({
                           </div>
 
                           <div className="space-y-3">
-                            <h2 className="text-xl font-black leading-tight text-slate-950 transition-colors group-hover:text-aerojet-blue dark:text-white dark:group-hover:text-blue-300">
+                            <h2 className="text-xl font-black leading-tight text-slate-950 transition-colors group-hover:text-blue-800 dark:text-white dark:group-hover:text-blue-300">
                               {course.name}
                             </h2>
                             <p className="line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
@@ -299,7 +299,7 @@ export default async function EnrollPage({
                           <div className="mt-5 grid grid-cols-2 gap-3">
                             <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-900/70">
                               <div className="flex items-center gap-2">
-                                <Clock3 className="h-4 w-4 text-aerojet-sky" />
+                                <Clock3 className="h-4 w-4 text-sky-400" />
                                 <span className="text-[10px] font-black tracking-[0.18em] text-slate-400 uppercase">
                                   Duration
                                 </span>

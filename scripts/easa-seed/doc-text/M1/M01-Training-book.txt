@@ -1,0 +1,3861 @@
+--- Page 1 ---
+01
+SUNTECH
+Module 1 for B1 & B2
+Compliant with
+AVIATION TRAINING CENTER APPROVAL CAA SI.147.006
+MATHEMATICS
+
+--- Page 2 ---
+01
+This publication is issued to trainees of SUNTECH
+Training organization and is classified as ‘FOR TRAIN-
+ING USE ONLY’ The information contained in this pub-
+lication is not intended to substitute or replace any
+relevant technical publication issued by the aircraft
+competent design authority. The trainees shall always
+refer to the official documents issued to the aircraft
+user while performing activities on the aircraft. The in-
+formation herein is updated at the date of issue of this
+training publication and SUNTECH does not take any
+commitment to update this material unless requested
+by the Part-66/147 regulation or Competent Authority.
+Copyrights disclaimer
+© Copyright © 2024 SUNTECH Ltd.
+All rights reserved. No part of this publication may be
+reproduced, distributed, or transmitted in any form or
+by any means, including photocopying, recording, or
+other electronic or mechanical methods, without the
+prior written permission of the publisher, For permis-
+sion requests, write to the publisher – SUNTECH Ltd..
+MATHEMATICS
+
+--- Page 3 ---
+PUBLICATION DATE OF
+REVISION DESCRIPTION PAGES REVISED NOTES
+ISSUE NO REVISION
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+
+--- Page 4 ---
+BASIC KNOWLEDGE REQUIRE- (c) The applicant should be able to use mathematical formula in
+conjunction with physical laws describing the subject.
+MENTS
+(d) The applicant should be able to read and understand sketches,
+drawings and schematics describing the subject.
+(e) The applicant should be able to apply his knowledge in a practi-
+KNOWLEDGE LEVELS – CATEGORY A, B1, B2, B3
+cal manner using detailed procedures.
+AND C AIRCRAFT MAINTENANCE LICENCE
+LEVEL 3
+Basic knowledge for categories A, B1, and B2 and B3 are indicated by A detailed knowledge of the theoretical and practical aspects of the
+the allocation of knowledge levels indicators (1, 2 or 3) against each subject and a capacity to combine and apply the separate elements
+applicable subject. Category C applicants must meet either the cate- of knowledge in a logical and comprehensive manner.
+gory B1 or the category B2 basic knowledge levels.
+Objectives:
+The knowledge level indicators are defined as follows:
+(a) The applicant should know the theory of the subject and interre-
+lationships with other subjects.
+LEVEL 1
+(b) The applicant should be able to give a detailed description of the
+A familiarization with the principal elements of the subject.
+subject using theoretical fundamentals and specific examples.
+Objectives:
+(c) The applicant should understand and be able to use mathemati-
+(a) The applicant should be familiar with the basic elements of the
+cal formula related to the subject.
+subject.
+(d) The applicant should be able to read, understand and prepare
+(b) The applicant should be able to give a simple description of the
+sketches, simple drawings and schematics describing the subject.
+whole subject, using common words and examples.
+(e) The applicant should be able to apply his knowledge in a practi-
+(c) The applicant should be able to use typical terms.
+cal manner using manufacturer's instructions.
+LEVEL 2 (f) The applicant should be able to interpret results from various
+A general knowledge of the theoretical and practical aspects of the sources and measurements and apply corrective action where ap-
+subject and an ability to apply that knowledge. propriate.
+Objectives:
+(a) The applicant should be able to understand the theoretical fun-
+damentals of the subject.
+(b) The applicant should be able to give a general description of the
+subject using, as appropriate, typical examples.
+
+--- Page 5 ---
+TABLE OF CONTENTS 1.1 Arithmetic – Level 2
+Arithmetical terms and signs, methods of multiplication and di-
+Part 66 Ref vision, fractions and decimals, factors and multiples, weights,
+measures and conversion factors, ratio and proportion, av-
+erages and percentages, areas and volumes, squares, cubes,
+square and cube roots.
+01 1.2 Algebra
+1.2(a) Evaluating … - Level 2
+(a) Evaluating simple algebraic expressions, addition, subtrac-
+tion, multiplication and division, use of brackets, simple alge-
+braic fractions;
+1.2(b) Linear … - Level 1
+Linear equations and their solutions; Indices and powers, neg-
+ative and fractional indices; Binary and other applicable num-
+bering systems; Simultaneous equations and second-degree
+equations with one unknown; Logarithms.
+1.3 Geometry
+1.3(a) Simple … - Level 1
+Simple geometrical constructions;
+1.3(b) Graphical … - Level 2
+Graphical representation: nature and uses of graphs, graphs
+of equations/functions;
+1.3(c) Simple … - Level 2
+Simple trigonometry: trigonometrical relationships, use of ta-
+MATHEMATIblCes and reSctangular and polar coordinates.
+
+--- Page 6 ---
+MODULE 1 // MATHEMATICS
+TABLE OF CONTENTS
+RATIO AND PROPORTION
+Averages 29
+1.01 Arithmetic
+AVERAGES AND PERCENTAGES
+ARITHMETIC PERCENTAGE
+Arithmetic Terms 12 POWERS AND ROOTS
+Directed or Signed Numbers 13
+Indices and Powers 32
+FACTORS 14
+Roots 34
+PRIME NUMBERS 14
+Square Roots 34
+GREATEST COMMON FACTOR (GCF) 14
+Cube Roots 35
+LOWEST COMMON MULTIPLE (LCM) 15
+FRACTIONAL INDICIES 35
+ARITHMETICAL PRECEDENCE 15
+STANDARD FORM 36
+BODMAS Example 16
+Area 36
+FRACTIONS 16
+AREA AND VOLUME
+Addition of Fractions 17
+Area of Triangles 37
+Subtraction of Fractions 18
+Area of Circular Shapes 38
+Multiplication of Fractions 19
+Area of Other Shapes 39
+Division of Fractions 20
+Calculation of Areas of Shapes 40
+Decimal Fractions 20
+VOLUMES
+Addition & Subtraction 21
+Multiplication & Division 21 1.02 Algebra 45
+WEIGHTS AND MEASURES
+ALGEBRA
+Common conversions table 24
+1.2(a) Evaluating simple …
+Metric System of Prefixes 26
+
+--- Page 7 ---
+MODULE 1 // MATHEMATICS
+Operation 47 To Convert Binary to Hexadecimal or Vice Versa 65
+Basic Laws 48 LOGARITHMS
+Solving Linear Equations 49
+1.03 Geometry
+EQUATIONS
+GEOMETRY
+Equations Requiring Multiplication or Division 50
+Solve the equation 50 1.3(a) Simple geometrical constructions 69
+Equations Requiring Addition or Subtraction 50
+Angular Measurement 69
+Equations Containing Unknowns on both Sides 51
+GEOMETRIC CONSTRUCTIONS
+Equations Containing Brackets 52
+Triangle 72
+Equations Containing Fractions 52
+Triangle Types 72
+TRANSPOSITION IN EQUATIONS
+Similar & Congruent Triangles 74
+1.2(b) Linear equations
+POLYGON
+Construction of Equations 56
+Quadrilaterals 76
+SIMULTANEOUS EQUATIONS Parallelogram 76
+Rectangle 77
+QUADRATIC EQUATIONS
+Rhombus 77
+NUMBERING SYSTEMS
+Square 78
+Decimal System of Numeration 61
+Trapezium 78
+Binary System of Numeration 62
+Circles 79
+Octal System of Numeration 63
+Tangent 80
+Conversion to Other Bases 64
+Radian Measure 81
+To convert Binary Numbers to Decimal 64
+1.3(b) Graphical representation
+To Convert Binary to Octal or Vice Versa 65
+GRAPHS 82
+
+--- Page 8 ---
+MODULE 1 // MATHEMATICS
+Construction 83 Metric System of Prefixes 111
+Axis and Scales 83 Area Formulas 112
+Cartesian coordinate system 83 Volume Formulas 112
+GRAPHS AND MATHEMATICAL FORMULA Functions of numbers 113
+Functions of numbers (continuation) 114
+Function and Shape 89
+Table of values for sine, cosine and tangent of right angles
+Graph of a linear equation 90
+0-90° 115
+Graph of the quadratic equation 91
+Function 92
+Function 93
+Area under a Graph 94
+MONOGRAMS
+1.3(c) Simple trigonometry 97
+TRIGONOMETRY 97
+Introduction 98
+TRIGONOMETRICAL CALCULATIONS & FORMULA
+Trigonometry table for sin, cos and tan of the angles 102
+CONSTRUCTION OF TRIGONOMETRICAL CURVES
+Values in 4 Quadrants 104
+CO-ORDINATE GEOMETRY
+Introduction 106
+POLAR / RECTANGULAR CO-ORDINATES
+Common conversions table 110
+
+--- Page 9 ---
+01.01
+ARITHMETIC
+2
+
+--- Page 10 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+ARITHMETIC
+ARITHMETIC
+Mathematics is the basic language of science and technology.
+It is an exact language that has a vocabulary and meaning for
+every term. Since mathematics follows definite rules and be-
+haves in the same way every time, scientists and engineers use
+it as their basic tool.
+Long before any metal is cut for a new aircraft design, there
+are literally millions of mathematical computations made. Avi-
+ation maintenance technicians perform their duties with the
+aid of many different tools. Like the wrench or screwdriver,
+mathematics is an essential tool in the maintenance, repair
+and fabrication of replacement parts.
+Arithmetic is the basic language of all mathematics and uses
+real, non-negative numbers. These are sometimes known as
+counting numbers. Only four operations are used, addition,
+subtraction, multiplication and division.
+Whilst these operations are well known to you, a review of the
+terms and operations used will make learning the more diffi-
+cult mathematical concepts easier.
+10
+
+--- Page 11 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+ARITHMETIC TERMS It is useful if a student is proficient at simple mental arithme-
+The most common system of numbers in use is the decimal sys- tic, and this is only possible if one has a “feel” for numbers, and
+tem, which uses the ten digits 0, 1, 2, 3, 4, 5, 6, 7, 8, 9. the size of numbers. A knowledge of simple “times tables” is
+also useful.
+These ten whole numbers from zero to 9 are called ‘Integers’.
+Above the number nine, the digits are re-used in various com-
+binations to represent larger numbers. This is accomplished by
+arranging the numbers in columns based on a multiple of ten.
+With the addition of a minus (-) sign, numbers smaller than
+zero are indicated.
+To describe quantities that fall between whole numbers, frac-
+tions are used. Common fractions are used when the space
+between two integers is divided into equal segments, such as
+quarters. When the space between integers is divided into ten
+segments, decimal fractions are typically used.
+Students will be familiar with this system and the basic opera-
+tions, which may involve Addition, Subtraction, Multiplica-
+tion and Division.
+• When numbers are added, they form a sum.
+• When numbers are subtracted, they create a difference.
+• When numbers are multiplied, they form a product.
+• When one number (the dividend) is divided by another
+(the divisor), the result is a quotient.
+Fig 01. 1 - Times Table
+11
+
+--- Page 12 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+Or
+DIRECTED OR SIGNED NUMBERS
+-15+(-8)+(-19) =-42
+Directed numbers are numbers which have a + or – sign at-
+tached to them. Directed numbers can be added, subtracted,
+and +13+6 =+19
+etc., but care should be taken to ensure a correct solution. The
+following rules should assist.
+-42+19 =-23
+• To add several numbers of the same sign, add them to-
+gether and ensure sign of the sum is the same as the
+To subtract directed numbers, change the sign of the number
+sign of the numbers.
+to be subtracted and add the resulting numbers.
+• To add 2 numbers with different signs, subtract the
+Example:
+smaller from the larger. The sign of the resultant (the
+difference) is the same as the sign of the large number.
+-10-(-6) =-10+6 =-4
+Example: 7-(+18) = 7-18 =-11
+-12+6,(12-6) = 6,-12+6 =-6 A minus in front of brackets should be taken to mean –1. Using
+the above example – (6) should be read as –1(-6) i.e. minus 1
+times minus six. Similarly, a positive sign in front of brackets
+If there are more than 2 numbers, carry out the operation 2
+should be read as +1, so +(-6) should be read as +1(-6) i.e. plus
+numbers at a time, or produce two numbers by adding up all
+1 times minus 6.
+the numbers with like signs. And then apply the rules above.
+• The product of two numbers with like signs is positive
+Example:
+(+ve)
+-15-8+13-19+6,(-15-8) = • The product of numbers with unlike signs is negative
+(-ve).
+-23,-23+13 =-10,-10-19 =-29,-29+6 =-23
+• When dividing numbers with like signs, the quotient of
+the result is +ve.
+12
+
+--- Page 13 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+PRIME NUMBERS
+• When dividing numbers with unlike signs, the quotient
+is –ve. A prime number is a number whose only factors are 1 and it-
+self. The prime numbers between 1 and 30 are: 1, 2, 3, 5, 7, 11,
+This can be summarised as follows:
+13, 17, 19, 23 and 29.
+(+)x(+) = (+) (-)x(-) = (-) It is sometimes useful to express the factors of a given number
+in terms of prime numbers.
+(+)x(-) = (-) (-)x(-) = (+)
+For example, let us look at the factors of 60 again, taking 4 and
+15 as 2 factors.
+FACTORS (4 x 15 = 60), but 4 has factors of 2 and 2, and 15 has factors of
+We know that 2 x 6 = 12. 2 and 6 are factors of 12. 5 and 3.
+We could also state that, as 3 x 4 = 12, 3 and 4 are also factors of Hence the number 60 can be expressed as 2 x 2 x 3 x 5, which
+12, similarly 12 and 1. are all factors of 60. We have now factorised the number 60 in
+terms of prime numbers.
+This may seem obvious, but it is sometimes useful to “facto-
+rise” a number, i.e. determine the factors that make up the
+number. More commonly it is necessary to find the factors of GREATEST COMMON FACTOR (GCF)
+an algebraic expression.
+The greatest common factor is the biggest factor (number) that
+Example divides the numbers being examined. Suppose that we take 3
+numbers, 1764, 2100 and 2940.The greatest common factor of
+Find the possible factors of 60. In other words, find the integers
+these numbers is 84.
+that divide 60. The factors will be: 2, 3, 4, 5, 6, 10, 12, 15, 20, 30
+and 60 In some instances, you will be able to identify this value simply
+by looking at the numbers, in others you will need to calculate
+it. To calculate the GCF, we must identify the factors of each
+number in terms of prime numbers:
+13
+
+--- Page 14 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+The Lowest Common Multiple of these three numbers will be:
+2 x 2 x 3 x 3 x7 x7 =1764
+2 x 2(inall)x 3 x 3(in1764)5 x 5(in2100)
+2 x 2 x 3 x 5 x 5 x7 =2100
+x7 x7(in1764and 2940)
+2 x 2 x 3 x 5 x7 x7 =2940
+2 x 2 x 3 x 3 x 5 x 5 x7 x7 = 44,100
+We then select the common prime factors and multiply them
+so2 x 2 x 3 x 3 x 5 x 5 x7 x7 = 44,100isthe LCM
+together to produce the Greatest Common Factor, in this case:
+1764 x 24 = 44,100
+2 x 2 x 3 x7 = 84
+2100 x 21 = 44,100
+LOWEST COMMON MULTIPLE (LCM)
+2940 x15 = 44,100
+The lowest common multiple of a set of numbers is the small-
+est number that is divided exactly by each of the given num-
+ARITHMETICAL PRECEDENCE
+bers. The LCM can be found by multiplying together all of the
+The term Arithmetic Precedence means the order in which we
+factors the maximum number of that appear to each of the in- carry out arithmetic functions. Sometimes it doesn’t matter
+dividual numbers. what order we carry them out.
+Consider the previous three numbers, 1764, 2100 and 2940 and Consider the expression 2 + 3 = 5. It makes no difference if we
+write 3 + 2 = 5. Again, consider 3 x 4 = 12, there is no difference
+their factors.
+if we write 4 x 3 = 12.
+2 x 2 x 3 x 3 x7 x7 =1764
+However, if I write 2 + 3 x 4, what is the answer?
+• If we first add 2 + 3, we will get 5 and then 5 x 4 = 20.
+2 x 2 x 3 x 5 x 5 x7 =2100
+• Alternatively, multiplying 3 x 4 = 12, adding 2 we get 14.
+If we are going to agree on the answer, we must first agree on
+2 x 2 x 3 x 5 x7 x7 =2940
+the rules we use. This introduces the topic known as arithmetical
+precedence, and is most easily remember by the term BODMAS.
+14
+
+--- Page 15 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+BODMAS indicates the precedence, or the order in which we FRACTIONS
+perform our calculations:
+11
+• B stands for Brackets
+16
+• O stands for “Of”
+• D stands for Division is an example of a Proper Fraction, generally abbreviated to
+fraction.
+• M stands for Multiplication
+It has the same meaning as 11 ÷ 16, that is, 11 divided by 16.
+• A stands for Addition
+• The number above the line is the Numerator
+• S stands for Subtraction
+• The number below the line is the Denominator.
+BODMAS EXAMPLE
+23
+Find the value of:
+4
+64'(-16)+(-7-12)-(-29+36)(-2+9) Is also a Fraction, but because 23 is greater than 4, it is called
+an Improper Fraction. It will normally be written as
+This expression becomes:
+which is the same as:
+64'(-16)+(-19)-(7)(7) B
+3
+5
+(-4)+(-19)-(7)(7) D
+4
+(-4)+(-19)-49 M
+Similarly;
+-23-49 A
+23 20+3 20 3 3
+= = + = 5
+4 4 4 4 4
+=-72 S 15
+
+--- Page 16 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+3 25 21 In this example, the LCD of 16, 12 and 8 is 48.
+3 could beconvertedto because 3 x7 =
+4 7 7
+Having found the LCD, each fraction now needs to be expressed
+21 4 25 in terms of the LCD. This is achieved by dividing the LCD by
+so + =
+7 7 7 the denominator and multiplying the result by the numerator.
+7
+ADDITION OF FRACTIONS 16
+The important thing to remember here is that only fractions
+Dividethe LCDbythedenominator 48'16 = 3
+with the same (a common) denominator can be added or sub-
+tracted.
+Multiplytheresult bythenumerator 3 x7 = 21
+Example 1
+7 21
+and so canbewrittenas
+7 3 1 11 3 16 48
++ + = = 1
+8 8 8 8 8
+If the denominators are not the same, then it is necessary to
+can be written as
+find the lowest Common Denominator (LCD) also called
+Alternatively:
+Least Common Denominator (LCD) and to put each fraction
+in terms of this value. Finding the Lowest Common Denomi- Dividethe LCDby thedenominator
+nator is essentially the same as finding the Lowest Common
+Multiple, which was covered in a previous topic. 48'16 = 3
+Example 2:
+And multiplythetopand bottom
+7 5 1
++ +
+16 12 8 of the fractionbytheresult
+7 3 21 21 7
+x = so isthe same
+16 3 48 48 16
+16
+
+--- Page 17 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+Similarly: First add the whole numbers together, so the calculation be-
+comes.
+5
+2 5 7
+12 6+ + +
+3 6 12
+DividetheLCDbythedenominator 48'12 = 4
+The LCD of 3, 6 and 12 is 12. Using this, the sum becomes.
+5 4 20
+Multiplytopand bottomof fractionby 4 + =
+12 4 48
+2(4) 5(2) 7(1)
+6+ + +
+Finally 3(4) 6(2) 12(1)
+1 1 6 6
+convertsto x =
+8 8 6 48 8 10 7
+= 6+ ++
+12 12 12
+7 5 1
+sothethree fractions + + become
+16 12 8 25
+= 6+
+12
+21 20 6
++ +
+46 48 48
+This simplifies to become:
+withthecommondenominator inplace,
+1 1
+6+2+ = 8
+2 2
+47
+theadditionbecomes
+48
+SUBTRACTION OF FRACTIONS
+Example 3 The basic procedure is very similar to that used for addition;
+In this case we have 3 improper fractions find the LCM, convert the individual fractions, but subtract the
+numerators instead of adding. There may be one difference
+which is important.
+2 5 7
+1 + 2 + 3
+3 6 12
+17
+
+--- Page 18 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+Example 1 MULTIPLICATION OF FRACTIONS
+1 7
+These calculations are generally easier to perform than addi-
+3 -1
+3 12
+tion and subtraction.
+Subtract the whole numbers, 3 - 1 = 2, so the calculation be-
+Example 1
+comes:
+5 7
+1 7 x
+2+ - 6 8
+3 12
+Simply multiply the numerators together and multiply the de-
+The LCM is 12, so the sum becomes:
+nominators together. So:
+7 4 12
+Now is greater than and so (= 1)
+12 12 12
+5 7 35
+x =
+6 8 48
+is"borrowed" from2so
+And then convert to a mixed number or simplify as necessary.
+1 7 12 4 7
+2+ - becomes1+ + - =
+3 12 12 12 12
+Example 2
+9 9
+1+ writtenas1
+12 12
+2 1
+1 x 4
+3 4
+To avoid confusion, you may find it easier to convert the mixed
+numbers 3 1/ to improper fractions 10/ , find the LCM, perform
+3 3
+the subtraction and then simplify the answer. Convert into improper fractions, so:
+2 5 1 17
+1 becomes and 4 becomes
+3 3 4 4
+18
+
+--- Page 19 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+Then multiply as before: For Example:
+5 17 85 49 7 7 x7 8 x 2
+x = ' = x
+3 4 12 8 16 8 7
+And convert to a mixed number: Which becomes:
+1
+7 7 x 2 = 14
+12
+DIVISION OF FRACTIONS DECIMAL FRACTIONS
+To divide two fractions, we invert the divisor (the number we Decimal fractions are fractions where the Denominator is
+are dividing by) and multiply. equal to some power of 10, i.e. 100, 1,000, 10,000 etc.
+Example 1 The example below is a decimal fraction:
+1 7 125
+6 '
+8 16 1000
+Firstly, convert into improper fractions, then invert the second Decimal fractions are usually re-written as decimals. This is
+fraction and multiply: very easily done by using a Decimal Point. Take the example
+above:
+49 ' 7 = 49 x 16 = 784 = 14 Place a decimal point to the right of the numerator (top num-
+8 16 8 7 56
+ber). Then move the decimal point to the left, by a number of
+places equal to the number of “noughts” in the denominator
+NOTE: Every opportunity should be taken to simplify by ‘Can- (bottom number). Remove one nought from the denominator
+celling’ numbers above and below the line wherever possible. for each move.
+19
+
+--- Page 20 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+125 125. 12.5
+So startsas becomes
+Example 1
+1000 1000 100
+2.683+34.41
+1.25 0.125
+then and finally 2.683
+10 1
+34.410
+57.093
+Any value over 1 is equal to that value so the answer becomes
+0.125
+theanswer is 37.093
+125
+would become12.5etc.
+10 MULTIPLICATION & DIVISION
+Multiplication of Decimals is the same as ordinary “long” mul-
+Any fraction can be formed into a decimal, by dividing the nu- tiplication, but the number of decimal places in the answer
+merator by the denominator. For example: must equal the sum of decimal places in the numbers being
+multiplied.
+7 Example 1
+becomes0.875 6.24 x 3.121
+8
+6.24
+x 3.121
+ADDITION & SUBTRACTION
+The main thing to remember when adding or subtracting deci- 624
+mal numbers is to ensure they are correctly lined up using the
+decimal point as a reference.
+12480
+62400
+1872000
+1947504 20
+
+--- Page 21 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+There are two digits after the decimal place in the first number WEIGHTS AND
+and 3 in the second. Therefore, there must be 5 digits after the
+decimal place in the answer, so the answer becomes: MEASURES
+Answer is19.47504
+A wide number of different weights and measures are used
+during the maintenance of aircraft. The ones that come to mind
+(Common sense helps here. A number slightly greater than 6 is
+first are probably fuel capacities, tyre pressures, temperatures
+multiplied by another number slightly greater than 3. Logical-
+and speeds. There are however very many others, which you
+ly the answer should be approximately 18).
+will meet as you progress through your course.
+Division is also the same as ordinary long division, but again a
+Firstly, the most commonly used system in aviation today is the
+simple rule helps to simplify the process.
+‘Systeme Internationale’ (SI). This system is based on multi-
+Multiply both the divisor and dividend by a power of ten (move
+ples of 10 and has been accepted widely, with one or two ex-
+the decimal place to the right) so that the divisor becomes a
+ceptions.
+whole number.
+It consists of a standard set of units for:
+Examples:
+• Length (metre - m)
+• Mass (kilogram - kg)
+3650'45.56
+• Time (second - s)
+Multiplybothnumbersby100(103)to give365000'4556
+• Temperature (Kelvin - K)
+769'0.364 • Current (ampere - A)
+• Light (candela - cd)
+Multiplybothnumbersby1000(103)to give76900'364
+• Amount of substance (mole – mol)
+21
+
+--- Page 22 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+• Capacity (gallons)
+• Temperature (Fahrenheit)
+You will occasionally meet a mixture of systems, which will re-
+quire conversion from one to another. A good example is the
+amount of fuel put into an aircraft’s tanks. You will find this be-
+ing measured in imperial gallons, American gallons, imperial
+pounds, SI kilograms or metric litres.
+Changing a quantity in one unit to a quantity in another unit
+requires a conversion factor. When the quantity in the first
+unit is multiplied by the conversion factor, the result is the
+quantity in the second units. For example, to convert imperial
+gallons to litres, they must be multiplied by 4.546
+Example 1
+Convert 25 Imperial Gallons into Litres.
+Fig 01. 2 - Elementary units 25 x 4.546 = 113.65 Litres
+There are several other units which, whilst not being part of
+the basic S.I. ones above, are in common use and still use the Example 2
+metric system for calculations.
+Convert 1500 miles into kilometres using the conversion factor
+An older system that is still used in some countries today, is the
+1.6094
+Imperial System, which uses a mixture of old units such as
+• Length (feet and inches)
+1500 x1.6094 = 2413.9Kilometres
+• Weight (pounds)
+22
+
+--- Page 23 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+COMMON CONVERSIONS TABLE
+IMPERIAL SYSTEM SI (METRIC) IMPERIAL SYSTEM SI (METRIC)
+Distance
+1 Inch = 2.54 Centimeters 1 Centimeter = 0.394 Inches
+1 Foot = 0.3048 Meters 1 Meter = 3.28 Feet
+1 (Statute) Mile = 1.6093 Kilometers 1 Kilometer = 0.621 Miles
+Weight
+1 Pound = 0.45359 Kilograms 1 Kilogram = 2.204 Pounds
+Volume
+1 Quart = 0.94635 Liters 1 Liter = 1.057 Quarts
+1 Gallon = 3.7854 Liters 1 Liter = 0.264 Gallons
+Temperature
+0 Fahrenheit = (-)17.778 Celsius 0 Celsius = 33.8 Fahrenheit
+0 Fahrenheit = 255.37 Kelvin 0 Kelvin = (-)437.87 Fahrenheit
+Area
+1 Square Inch = 6.4516 Square Centimeters 1 Square Centimeter = 0.155 Square Inches
+1 Square Foot = 0.092903 Square Meters 1 Square Meter = 10.76391 Square Feet
+1 Square Mile = 2.59 Square Kilometers 1 Square Kilometer = 0.386 Square Miles
+Speed
+1 Foot Per Second = 0.3048 Meters Per Second 1 Meter Per Second = 3.281 Feet Per Second
+1 Mile Per Hour = 1.6093 Kilometers per Hour 1 Kilometer per Hour = 0.621 Miles Per Hour
+1 Knot = 1.852 Kilometers per Hour 1 Kilometer per Hour = 0.540 Knots
+Fig 01. 3 - Common conversions metric/imperial
+23
+
+--- Page 24 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+At this point we can also mention that values and units can be
+expresed in a way using Metric system of Prefixes. Use of them
+is very convenient, especially when we want to express very
+high or very low values.
+For example the resistance of 240 000 000 Ω can easily be ex-
+presed as 240 MΩ or the capacitance of 0,0000054 F can easier
+be expresed as 5,4 µF. For the conversions you shall know the
+conversion factors or the values of prefixes.
+The same way we can convert distance of 10 km into 10 000 m,
+or the volume of 1000 L into 10 hL, or the frequency of 200 000
+Hz into 200 kHz or 0,2 MHz or the power of 0,03 kW into 30 W.
+24
+
+--- Page 25 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+METRIC SYSTEM OF PREFIXES
+PREFIX SYMBOL DECIMAL VALUE SCIENTIFIC COLLOQUIAL
+Quecto q 0.000 000 000 000 000 000 000 000 000 001 10-30 nonillionth
+ronto r 0.000 000 000 000 000 000 000 000 001 10-27 octillionth
+yocto y 0.000 000 000 000 000 000 000 001 10-24 septillionth
+zepto z 0.000 000 000 000 000 000 001 10-21 sextillionth
+atto a 0.000 000 000 000 000 001 10-18 quintillionth
+femto f 0.000 000 000 000 001 10-15 quadrillionth
+pico P 0.000 000 000 001 10-12 trillionth
+nano N 0.000 000 001 10-9 billionth
+micro n 0.000 001 10-6 millionth
+milli m 0.001 10-3 thousandth
+centi c 0.01 10-2 hundredth
+deci d 0.1 10-1 tenth
+- - 1 10° one
+deka da 10 101 ten
+hecto h 100 102 hundred
+kilo k 1 000 103 thousand
+mega M 1 000 000 106 million
+giga G 1 000 000 000 109 billion
+tera T 1 000 000 000 000 1012 trillion
+peta P 1 000 000 000 000 000 1015 quadrillion
+exa E 1 000 000 000 000 000 000 1018 quintillion
+zetta Z 1 000 000 000 000 000 000 000 1021 sextillion
+yotta Y 1 000 000 000 000 000 000 000 000 1024 septillion
+ronna R 1 000 000 000 000 000 000 000 000 000 1027 octillion
+quetta Q 1 000 000 000 000 000 000 000 000 000 000 1030 nonillion
+25
+Fig 01. 4 - Metric System of Prefixes
+
+--- Page 26 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+RATIO AND PRO- stroke is 240 cm2 and at the top becomes 30 cm2 the ratio is
+240:30 or, reduced to its lowest terms, 8:1.
+PORTION
+Another typical ratio is that of different gear sizes. For exam-
+ple, the ratio of a drive gear with 10 teeth to a driven gear
+with 20 teeth is 10:20 or 1:2 when reduced. This means that
+for every one tooth of the drive gear there are two teeth on the
+This topic is an extension of several previous topics. ‘Ratio’
+driven gear.
+and ‘Proportion’ are essentially statements that link two or
+more “Quantities” together. For example, a ‘3 to1 mix of sand
+and cement’, which may be written as a 3:1 mix of sand and
+cement, means ‘mix 3 parts of sand to 1 part of cement”.
+This is a commonly used statement which you will notice has
+no formal units, although volume is inferred. Parts could be
+represented by shovels full, buckets full, wheelbarrows full etc.
+The mixture simply has a total of 4 parts, of which 3 parts, or
+3/4, is sand, and 1 part ¼ is cement. A ratio therefore simply
+provides a means of comparing one value with another.
+For example, if an engine turns at 4000rpm and the propeller
+turns at 2400rpm, the ratio of the two speeds is 4000 to 2400,
+or ‘5 to 3’ when reduced to its lowest terms. This relationship
+can also be expressed as 5/3 or 5:3.
+The use of ‘Ratios’ is common in aviation, such as when con-
+sidering the compression ratio in an engine. This is the ratio of
+cylinder displacement, when the piston is at the bottom of its
+stroke compared with the displacement when it is at the top.
+Fig 01. 5 - Drive ration of the gears
+For example, if the volume of the cylinder at the bottom of its
+26
+
+--- Page 27 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+However, when working with gears, the ratio of teeth is op- Example 1
+posite the ratio of revolutions. In other words, since the drive
+Proportions are also used when we calculate the two compo-
+gear has one third as many teeth as the driven gear, the drive
+nent sealants. If you must mix base component and the accel-
+gear must complete three revolutions to turn the driven gear
+erator in proportion of 5:3 and you need to mix 200ml, how
+once. This results in a revolution ratio of 2:1, which is the op-
+much base component and how much accelerator you need?
+posite of the ratio of teeth.
+All together you need 8 portions of both (5 + 3). You divide
+A ‘Proportion’ is a statement of equality between two or more
+200ml by 8 portions and you get that each portion is 25ml.
+ratios and represents a convenient way to solve problems in-
+Then you multiply this by number of portions of base (25ml
+volving ratios. For example, if an engine has a reduction gear
+x 5 = 125 ml) and by number of portions of the accelerator
+ratio between the crankshaft and the propeller of 3:2, and the
+(25ml x 3 = 75ml). Therefore, you must mix both components
+engine is turning at 2700rpm, what is the rotational speed of
+with the ratio of 125:75.
+the propeller?
+Example 2
+In this problem let V represent the unknown value, which in
+p
+Divide £240 between 4 men in the ratio of 9:11:13:15.
+this case is the speed of the propeller. Next, set up a propor-
+tional statement using the fractional form, 3/2 = 2700/V . The normal procedure for this type of problem is to:
+p
+To solve this equation, cross multiply to arrive at the equation • Add all of the individual proportions to find the total
+3V = 2 x 2700, or 5400rpm. To solve for V divide 5400 by 3. number of parts.
+p p
+Thus, the propeller speed is 1800rpm.
+• Divide the total amount by the number of parts to find
+the value of each part.
+• Multiply each ratio by the value of each part.
+27
+
+--- Page 28 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+So AVERAGES AND
+2+11+13+15 = 48
+PERCENTAGES
+Y240divided by 48Y5
+Thereforeeachpart isworthY5
+AVERAGES
+When working with numerical information, it is sometimes use-
+9 x 5 = 45
+ful to find the average value. When estimating the time of a par-
+ticular journey there would be no point in basing the time on the
+11x 5 = 55 slowest speed or the highest speed, always use an average speed.
+We would also use average fuel consumption to estimate how
+13 x 5 = 65
+much fuel an aircraft would use for a particular flight.
+In both of these types of calculation, we can only work out the
+15 x 5 = 75
+average by dividing the total distance or fuel used by the time.
+Example 1
+The proportions are therefore £45, £55, £65 and £75
+An aircraft travels a total distance of 750 km in a time of 3
+A useful check is to add the individual parts together, to ensure
+hours 45 minutes. What is the average speed in km/h?
+the total is the amount you started with.
+Avarage Speed = Total Distance/Time
+750
+= = 200km/h
+3.75
+Example 2
+An aircraft uses 300 gallons of fuel for a flight of duration 4
+hours. What is the average fuel consumption?
+28
+
+--- Page 29 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+300
+Avarage FuelConsumption = = 75 gallons/hour
+4
+PERCENTAGE
+We often need to calculate averages based on many data items.
+Example 3
+Percentages are special fractions whose denominator is 100.
+The weight of six items are as follows:
+The decimal fraction 0.33 is the same as 33/100 and is equiva-
+lent to 33 percent or 33%. You can convert common fractions
+to percentages by first converting them to decimal fractions
+9.5,10.3,8.9,9.4,11.2,10.1
+and then multiplying by 100.
+For example:
+What is the average weight?
+To calculate this, we simply add the total weights and divide by
+5/8expressed asdecimal is0.625
+the number of items.
+9.5
+This is converted to a percentage by moving the decimal point
+two places to the right, the same as multiplying by 100. This
+10.3
+becomes 62.5%.
+8.9 To find the percentage of a number, multiply the number by
+the decimal equivalent of the percentage.
+9.4
+Example1
+To find 10% of 200, begin by converting 10% to its decimal
+11.2
+equivalent, which is 0.1. This is achieved by dividing the per-
+centage figure by 100. Now multiply 200 by 0.1 to arrive at the
+10.1
+value of 20.
+Total = 59.4kg'6
+Average = 9.9kg 29
+
+--- Page 30 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+If you want to find the percentage one number is of another, To determine this, you must divide the known quantity,
+you must divide the first number by the second and multiply 4180rpm, by the decimal equivalent of the percentage.
+the quotient by 100. For instance:
+An engine produces 85hp from a possible 125hp. What per- 4180'0.38 = 11,000rpmmaximum
+centage of the total horsepower available is being developed?
+To solve this, divide the 85 by 125 and multiply the quotient by
+100. A common mistake made on this type of problem is multiply-
+ing by the percentage instead of dividing. One way of avoiding
+85'125 = 0.68 making this error is to look at the problem and determine what
+exactly is being asked.
+0.68 x100 = 68%power
+In the problem above, if 4180rpm is 38% of the maximum then
+the maximum must be greater than 4180. The only way to get
+an answer that meets this criterion is to divide by 0.38.
+Example 2
+Another way that percentages are used is to determine a num-
+ber when only a portion of the number is known. For example:
+If 4180rpm is 38% of the maximum speed, what is the maxi-
+mum speed?
+30
+
+--- Page 31 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+POWERS AND 9 is the square of 3 or 3 squared equals 9
+ROOTS
+4 x 4 x 4= 43 = 64
+64 is the “cube” of 4 or 4 cubed equals 64
+INDICES AND POWERS
+It is often necessary to multiply a number by itself once, twice
+or several times. To indicate this, a method of notation has
+But put another way:
+evolved, which is both convenient and capable of being ex-
+• 3 is said to be the square root of 9
+tended to introduce other concepts.
+• 4 is the cube root of 64
+3 x 3iswrittenas 32 • 2 is the fifth root of 32.
+The method of notation used is that:
+2 x 2 x 2 x 2 x 2iswrittenas 25
+3 = 91 or 9
+2
+4 x 4 x 4iswrittenas 43etc.
+2 = 321 or 4 32
+5
+In the above examples, the number being multiplied by itself
+is known as the ‘Base’ and the number of times it is multiplied
+by itself is known as the ‘Power’ or ‘Index’. Alternatively, the 4 = 641 or 3 64
+3
+number 2 has been raised to power 5.
+Power 2 is generally referred to as the ‘Square’
+Power 3 is generally referred to as the ‘Cube’.
+3 x 3 = 32 = 9
+31
+
+--- Page 32 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+It is possible to re-write the above, so that Rule 3:
+3 = 90.5
+(N2)3 = N2 x N22x N
+2 = 320.2
+using rule 1 this equals N6
+4 = 640.333
+Where the power is expressed as a decimal, instead of a frac- (Na)b = N(axb)or Nab
+tion.
+To allow the use of numbers involving powers and indices,
+Rule 4
+some rules have evolved, which are reproduced, using the
+symbol N to represent any base number.
+N2'N2 = N(2-2) = N0
+Rule 1:
+N2 x N3 = N5
+Any number divided by itself equals 1 so N0 = 1
+Na x Nb = N(a+b) Therefore:
+Rule 2:
+1
+= N0'N2
+N2
+N x N x N x N x N
+N5'N2 = N3 = = N2
+N x N x N
+using rule 2 this equals N-2
+Na'Nb = N(a-b)
+1 1
+` = N0 also = Na
+Na N-a
+32
+
+--- Page 33 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+Because
+So
+Na/b = b Na
+1'N2isthe sameas N0-N2 = N(0-2) = N-2
+A root is a number that when multiplied by itself a specified
+Rule 5
+number of times will produce a given number.
+If
+ROOTS
+N1/3 x N1/3 x N1/3 = N1 = N
+Roots are just the opposite mathematical function from pow-
+ers. The two most common roots are the ‘Square Root’ and the
+‘Cube Root’.
+then N1/3 must be the third root of N, because the only number
+that can be multiplied by itself 3 times to make N is the third
+root of N. SQUARE ROOTS
+The square root of 25, written as √25, equals 5. That is, when
+` N1/3 = 3 N the number 5 is squared (multiplied by itself), it produces the
+number 25. The symbol √ is called a radical sign. Finding the
+square root of a number is the most common application of
+Similarly, if roots.
+Numbers whose square roots are whole numbers are called
+perfect squares. The first ten perfect squares are: 1, 4, 9, 16, 25,
+N2/3 x N2/3 x N2/3 = N2
+36, 49, 64, 81, and 100. The square root of each of these num-
+bers is 1, 2, 3, 4, 5, 6, 7, 8, 9, and 10, respectively.
+then N2/3 must be the third root of N2
+Examples:
+` N2/3 = 3 N2
+36 = 6and 81 = 9
+33
+
+--- Page 34 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+To find the square root of a number that is not a perfect square, That is, when the number 5 is cubed (5 × 5 × 5), it produces the
+use either a calculator or the estimation method. A long hand number 125.
+method does exist for finding square roots, but with the ad-
+It is common to confuse the “cube” of a number with the “cube
+vent of calculators and because of its lengthy explanation, it is
+root” of a number. For clarification,
+not included in this module. The estimation method uses the
+knowledge of perfect squares to approximate the square root
+of a number. TheCubeof 27 = 273 = 27 x 27 x 27 = 19,683
+Example:
+TheCubeof 27 = 3 27 = 3
+Find the square root of 31. Since 31 falls between the two per-
+fect roots 25 and 36, we know that 31 must be between 25 and
+36. Therefore, 31 must be greater than 5 and less than 6 be-
+FRACTIONAL INDICIES
+cause 25 = 5 and 36 = 6.
+Another way to write a root is to use a fraction as the index
+If you estimate the square root of 31 at 5.5, you are close to the
+(or exponent) instead of the radical sign. The square root of a
+correct answer. The square root of 31 is actually 5.568.
+number is written with a 1⁄2 as the exponent instead of a radi-
+cal sign.
+CUBE ROOTS
+The cube root of a number is written with an exponent of 1⁄3
+The cube root of 125 equals 5. written as and the fourth root with an exponent of 1⁄4 and so on.
+Examples:
+3 125
+31 = 311/2 3 125 = 1251/3 4 16 = 161/4
+34
+
+--- Page 35 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+STANDARD FORM AREA AND VOLUME
+If the number 8.347 is multiplied by 10,000 then the product is
+83470. This calculation can be written as 8.347 x 104 = 83470.
+When 83470 is written as 8.347 x 104, it is known as Standard AREA
+Form.
+We are already familiar with the concept of length, e.g. the
+A number in standard form has two parts. The first part is a distance between 2 points, we express length in some chosen
+number between 1 and 10 (but does not equal 10), and the sec- unit, e.g. in meters. If we want to fit a picture-rail along a wall,
+ond part is 10 raised to some whole number power. all we need to know is the length of the wall, so that we can
+order sufficient rail. But if we wish to fit a carpet to the room
+• The first part is called the ‘Mantissa’.
+floor, the length of the room is insufficient. Obviously, we also
+• The second part the ‘Exponent’. need to know the width. This two- dimensional concept of size
+To express a number in standard form, move the decimal point is termed Area.
+left or right to create a number between 1 and 10 (the mantis-
+Square and Rectangular Area
+sa), and then create the exponent. The value of which equals
+Starting with basic shapes as a Square. Square has all sides
+the number of places by which the decimal point has been
+equal in length.
+moved.
+• If the point was moved Left, the power is positive
+• If the point was moved Right, the power is negative.
+Examples:
+526 = 5.26 x102
+0.3717 = 3.716 x10-1
+0.002 = 2.0 x10-3
+35
+
+--- Page 36 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+Consider an area for the airport 7km by 4km as shown.
+Clearly it can be divided up into 28 equal squares,
+each measuring 1km by 1km. Each square has an
+area of 1 square kilometer. Hence, the total area is
+28 square kilometers (usually written as 28km2 for
+convenience).
+So, to calculate the area of a rectangle, multiply length
+of one side by the length of the other side.
+AREA OF TRIANGLES
+This concept can be extended to include non-rectan-
+gular shapes. Consider the triangles ABC and ADC
+which together form a rectangle ABCD.
+Fig 01. 6 - Area of a Square
+Fig 01. 8 - Area of a Triangle
+Fig 01. 7 - Area of a Rectangular
+36
+
+--- Page 37 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+Inspection reveals the 2 triangles are congruent. Hence their AREA OF CIRCULAR SHAPES
+areas are equal and the area of ABC = ½ area of ABCD. The area of a circle is given by the formula:
+If we consider this diagram, the area of the triangle can be seen
+to equal: A = rr2(wherer = radius)
+1/2 x base x perpendicular height
+or
+This is true for any triangle but remember, it is the ‘Perpen- A = r( d )2 = rd2 (if thediameter is givenr = d )
+2 4 2
+dicular Height’. Note that base (in meters) x height (in meters)
+gives m2.
+Remember that any area is so many square units. So, the area
+A theorem exists stating that triangles with the same base and
+of a circle must include a ‘squared’ term
+drawn between the same parallels will have the same area.
+Fig 01. 9 - Same Areas
+Fig 01. 10 - Area and perimeter (circumference) of a Circle
+37
+
+--- Page 38 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+Example: What is the area of a semi-circle (that is half of the Area of the Parallelogram:
+circle) where the diameter is 30cm?
+30
+Areaof acircle = r( )2
+2
+1 30
+Semi-circle = ( )(r)( )2
+2 2
+1
+= ( )(r)(15)2 = 353.43cm
+2
+AREA OF OTHER SHAPES
+The table below indicates the areas of many common shapes.
+Area of the Trapezium:
+Fig 01. 12 - Area of a Parallelogram
+Fig 01. 11 - Area of a Trapezium 38
+
+--- Page 39 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+CALCULATION OF AREAS OF SHAPES
+Sometimes an area calculation must be made where the object
+or shape is not one of the common shapes listed. Sometimes it
+is made up from a combination of shapes.
+Example:
+An office 8.5m by 6.3m is to be fitted with a carpet, so as to
+leave a surround 600mm wide around the carpet. What is the
+area of the surround?
+With a problem like this, it is often helpful to sketch a diagram.
+Fig 01. 13 - Area of an Ellipse
+Fig 01. 14 - Combined shapes 1
+39
+
+--- Page 40 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+= (8.5 x6.3)-(8.5-2 x0.6)(6.3-2 x0.6) In this case the shape comprises a rectangle and a semi-circle.
+• The rectangle has dimensions 150mm x 100mm.
+= 53.55-(7.3)(5.1)
+• The semi-circle has a diameter of 100mm.
+= 53.55-37.23 = 16.32m2 Total area is the sum of the two individual areas.
+Note that 600mm had to be converted to 0.6m. Don’t forget to
+Area = (100x150)+(r502)/2
+include units in the answer e.g. m2.
+Area = 15000+3,9425 = 18925mm2
+We may need to find the area of an object that is a combination
+of shapes:
+Fig 01. 15 - Combined Shapes 2
+40
+
+--- Page 41 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+VOLUMES Volumes are calculated in cubic units such as cubic centime-
+tres, cubic metres, cubic inches etc. However, volumes are
+easily converted to other terms, such as litres.
+For example: A cubic metre contains 1000 litres of liquid.
+Solids are objects that have three dimensions: length, width and
+height. Having the ability to calculate volume enables you to Instead of squares, we now consider cubes. This is a 3-dimen-
+determine the capacity of a fuel tank or reservoir, calculate the sional concept and the typical units of volume are cubic me-
+capacity of a cargo area or work out the volume of a cylinder. tres (m3).
+Note that all these formulas contain 3 dimensions so that when If we have a box
+multiplied, a volume will result. If you have not got 3 dimen-
+• Length 4m
+sions, you have not got a volume!
+• Width 3m
+V = a3 • Height 2m
+where:a = lengthof acube's side
+Fig 01. 17 - Volume of a Rectangular Solid (presented by cubes)
+Fig 01. 16 - Volume of the Cube 41
+
+--- Page 42 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+77
+Basically, therefore, when calculating volume, it is necessary to Volumeof 1cylinder = r( )2
+2
+look for three dimensions, at 90º to each other, and then multi-
+ply them together. For a box - type shape, multiplying length x
+Volumeof 1cylinder = 414440mm2
+width x height = volume.
+Volumeof 2cylinder = 828880mm3
+Fig 01. 18 - Volume of the rectangular solids
+For irregular or particular shapes, different techniques or ap-
+proximations can be used, or sometimes a specific formula
+may exist.
+Example:
+What is the cubic capacity of a 2-cylinder engine, with a bore of
+77mm and a stroke of 89mm?
+Fig 01. 19 - Volume of a Cylinder
+42
+
+--- Page 43 ---
+MODULE 1 // MATHEMATICS // ALGEBRA
+SUNTECH
+Note In this example, the dimensions have been given in mm.
+The volume would normally be given in cm3. To convert mm3
+to cm3, divide by (10)3
+` 828880mm3 becomes828.88cm3
+Volumeof aCone
+1
+=
+rr2h
+3 Fig 01. 21 - Volume of a sphere
+Fig 01. 20 - Volume of a Cone
+When calculating areas or volumes, remember the basic for-
+mulas, but be ready to spot when an area or solid body is a
+combination of basic shapes that can be added or subtracted.
+For the cone it is good to know that we can fit exactly three
+cones in the volume of one cylinder with the same radius of a
+base area. That can also be seen comparing the formula of a
+cylinder and a cone.
+43
+
+--- Page 44 ---
+01.02
+ALGEBRA
+2
+
+--- Page 45 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+ALGEBRA 1.2(a) Evaluating simple …
+Very often students will claim that they never have and never
+will understand Algebra. They say they can understand and
+work with numbers, but not with letters, and yet Algebra is
+designed to make matters simple and clear.
+For example, suppose a room is 5 metres long by 3 metres
+wide and we need to know how much carpet is needed to cover
+the floor. No one would have any hesitation in calculating the
+answer, 15 square metres (m2). But that answer only applies
+to that room. The general answer is that the area is found by
+multiplying length by width (or breadth).
+i.e. Area = lengthx breadth
+But it is easier to write A = L x b, where the letters A, L, b rep-
+resent in this case Area, Length and breadth, and that is what
+Algebra is all about; letters represent some variable and only
+when particular values, for example numbers are known, do
+we resort to them instead.
+So, when using Algebra, it is important to state what the letters
+represent. Some letters are often used, particularly x and y,
+but g often represents acceleration due to gravity, ℑ represents
+density, and so on. This is what Algebraic notation is about.
+45
+
+--- Page 46 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+In other simple words we can say that algebra always present a x b x c x d = abcd = bdac = cadbetc.
+the relationship between parameters included in a formula,
+rather than the result itself. In the above formula for the cal-
+(3 x 4 is obviously the same as 4 x 3 etc.)
+culation of the size of the carpet, the relationship between the
+Length and breadth is defined and never changes for this same When symbols such as x and y are multiplied together, we do
+calculation. not need to include the multiplication sign. This is the same if a
+number and a symbol are multiplied together.
+OPERATION
+3 x y, 4 x z, s x p, a x b, y x z x m
+Algebraic operations are in essence the same as when using
+numbers. So
+• Adding a and b is written a + b can all be written without the multiplication sign as
+• Subtracting a and b is written a - b
+• Multiplying a and b is written ab 3y, 4z, sp, ab, and yzm
+• Dividing a by b is written a/b
+• Squaring a a2 The same is not true of numbers on their own:
+We are not restricted to 2 letters only.
+a Multiplied by b and divided by c becomes, logically: 7 x6,4 x 5and6 x7 cannot bewrittenas78,45and67.
+ab
+c ‘Like Terms’ are terms comprised of the same algebraic quan-
+tity - this is important. 7x, 5x and -3x are all terms containing x
+Note also that the order in which letters appear is basically un- 7a, 4b, 3a and -6b can be split into two groups of like terms, 7a
+important. and 3a, and 4b and -6b.
+46
+
+--- Page 47 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+If like terms contain numerical coefficients, they can be sim- a(3x+7y)-(4x+3y) = 3x+7y-4x-3y =-x+4y
+plified.
+7x+5x-3x = (7+5-3)x = 9x Note especially that when removing brackets, all the terms in-
+side the brackets are multiplied by what is immediately out-
+7a+3a+4b-6b = 10a-2b. side the brackets. The basic procedure is as follows.
+a(x+y) = ax+ay
+Terms like ab + cb - db may be simplified as (a + c - d) b. (b is a
+common factor of the 3 terms) a+b(x+y) = a+bx+by
+When dealing with algebraic terms and expressions the ability
+(both x and y aremultiplied by b)
+to factorise is a great asset. Similarly, the ability to divide nu-
+merator and denominator by the same terms (i.e. cancelling
+top and bottom) allows simplification. (a+b)(x+y) = ax+ay+bx+by
+3a2b 3aab a (x and y aremultiplied by(a+b))
+= =
+6ab2 6abb 2b
+(a+b)2(a+b)(a+b) =
+BASIC LAWS
+Algebra obeys the same laws of procedure as Arithmetic, i.e.
+(a x a)+(a xb) +(b x a)+(b x b)
+BODMAS.
+Note that Brackets appear rather more often in Algebra, and = a2+ab+ab+b2 = a22ab+b2
+are only removed when there is a good reason to do so, for
+example, when further operations ultimately lead to greater
+simplification. When factorising, examine each term is order to look for com-
+mon factors. the common factors of a2b and -2ab2 are a and b
+(they appear in both),
+47
+
+--- Page 48 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+hencea2b-2ab2canbewritten(ab)(a-2b) EQUATIONS
+(ab) and (a - 2b) are both factors of the complete expression
+a2b and -2ab2. The statement a – 4 = 5 is an equation. What we are saying is
+that an unknown quantity minus 4 equals 5. It does not take a
+ax+bx+ay+by
+genius to work out that the unknown quantity in this case is 9,
+there is only one value that will be correct.
+= x(a+b)+y(a+b) = (x+y)(a+b)
+The value of ‘a’ can be calculated using guesswork or elimina-
+tion. The process of establishing that a = 9 is called solving the
+or = a(x+y)+b(x+y) = (x+y)(a+b)
+equation.
+SOLVING LINEAR EQUATIONS
+Algebra can be extended to include fractions.
+A linear equation is one containing only the first power of the
+unknown quantity.
+a c ad+cb
+e.g. + =
+b d bd
+5y-5 = 3y+9or 5(m-2) = 15
+These are both linear equations.
+When we solve linear equations, the appearance of the equa-
+tion may change. For example, the first equation could be
+re-written as 5y – 3y = 9 + 5 and the second as 5m – 10 = 15. Both
+of these look different from the original form, but equality has
+been maintained and they are therefore the same.
+48
+
+--- Page 49 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+The general rule for all equations is: Whatever you do to one Dividing both sides by 4 we get:
+side of the equation, you must do the same to the other side.
+By convention we name each side of the equation Left Hand 4b 20
+=
+4 4
+Side (LHS) or Right Hand Side (RHS)
+So, the solution is b = 5
+EQUATIONS REQUIRING MULTIPLICATION OR DIVISION
+Example
+EQUATIONS REQUIRING ADDITION OR SUBTRACTION
+Solve the equation
+The simplest type of linear equation is of this type:
+x
+= 4
+5 x-6 = 9
+If we multiply both sides by 5, we get:
+To solve all equations, we must manipulate the equation to get
+the unknown on one side and the known values on the other
+x
+-5 = 4-5 side. In this case we must eliminate the value of –6 from the
+5
+LHS.
+This can be done by adding 6 to the LHS, but we must also add
+So, the solution is x = 20
+6 to the RHS. So the equation becomes:
+Example
+x-6+6 = 9+6
+SOLVE THE EQUATION
+4b = 20
+49
+
+--- Page 50 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+We then simplify the equation to obtain: the first stage is the same, i.e.
+5x = 3+12
+x = 9+6 = 15
+So5x = 15
+So the solution is x = 15
+A simpler way of solving this type of equation is to switch val- It seems obvious that x = 3, but how mathematically is this
+ues from one side to another. When we do this, we must, how- achieved? If we divide both sides by 5, we will get the solution
+ever change the sign. x = 3.
+Example
+EQUATIONS CONTAINING UNKNOWNS ON BOTH SIDES
+Solve y+4 = 14 In equations of this type, we should group the unknown quan-
+tities on one side and the other terms on the other side.
+For example, solve:
+If we switch the + 4 to the RHS and change the sign it becomes
+8y+4 = 5y+22
+Y = 14-4
+If we subtract 4 from both sides, and also subtract 5y from
+So, the solution is y = 10
+both sides we will get:
+If the equation has multiples of the unknown quantity, such as
+solve:
+3y = 18
+Solve5x-12 = 3
+The solution can then be obtained by dividing each side by 3.
+50
+
+--- Page 51 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+3y 18 then divide both sides by 6 the solution is
+= = y = 6
+3 3
+y = 2
+As in all cases of solving equations, we can and should check if
+our solution is correct by substituting the solution in the origi-
+nal equation.
+To check the solution is correct, we substitute y = 2 in the orig-
+inal equation.
+LHS(8 x6)+4 = 48+4 = 52
+LHS 3(2 x 2+3) = 3(4+3) = 3 x7 = 21
+RHS(5 x6)+22 = 30+22 = 52
+RHS = 21
+EQUATIONS CONTAINING BRACKETS
+The first step is to remove the brackets and then solve as nor- EQUATIONS CONTAINING FRACTIONS
+mal:
+In this case we must multiply each term by the LCM of the de-
+nominators.
+3(2y+3) = 21 Example 1
+y 3 3y
++ = -2
+first expand the brackets to obtain
+4 5 2
+6y+9 = 21
+then subtract 9 from both sides
+6y = 12
+51
+
+--- Page 52 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+The LCM of the denominators 4, 5 and 2 is 20, so we must mul- Example 2
+tiply each term in the equation by 20
+Solve the equation:
+y 3 3y
+x-4
+-
+2x-1
+= 4
+x 20+ x 20 = x 20-2 x 20 3 2
+4 5 2
+5y+12 = 30y-40 The LCM of 3 and 2 is 6, so we multiply all of the terms by 6
+x-4 2x-1
+5y-30y =-40-12 x6- x6 = 4 x6
+3 2
+so-25y =-52
+2(x-4)-3(2x-1) = 24
+2x-8-6x+3 = 24
+Note in this case we have negative values on both sides. If we
+swap them around and change the signs i.e. swap the LHS for -4x-5 = 24
+the RHS
+Note this is exactly the same as 25y = 52. This can be proved by so-4x = 29
+taking the equation - 25y = - 52 and adding 25y to both sides,
+and then adding 52 to both sides
+And the solution is:
+29
+x = =-7.25
+4
+52
+
+--- Page 53 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+TRANSPOSITION IN 6a+11+a = 25-a+atherefore7a+11 = 25
+7a+11-11 = 25-11
+EQUATIONS so7a = 14
+To remove + 11, 6wae +mu1s1t s+ubatr=ac2t 511- fraom+ abotthh esrideefsore7a+11 = 25
+and if 7a = 14thena = 2
+N-n
+Find N,if C7=a+11-11 = 25-11
+2p
+Consider a formula (equation) given in a certain form. N-n
+C =
+2p so7a = 14
+N-n
+C x 2p = x 2p
+6a+11 = 25-a 2p
+and if 7a = 14thena = 2
+2Cp+n = (N-n)+n = N
+N = 2Cp+n N-n
+This contains one algebraic quantity, “a”, within an equation. We have found tFhiant da =N 2,.i f C =
+rr2h 2p
+Think of an equation as a statement of ‘balance’. In this one, 6a ThiVs i=s the unique value which satisfies 6a + 11 = 25 - a.
+3
++ 11 on the LHS equals, or balances, 25 - a on the RHS. N-n
+Study it agairn rto2C hs=ee how we worked to isolate the required
+V x 3 = x 32p
+As we have one equation and one unknown ‘a’, there is only term ‘a’ on one3 side, and remember, what you do to one side of
+N-n
+one numerical value which can produce a balance. What is it? an e
+3
+q
+V
+ua
+=
+tio
+r
+n,r y2ohuC m
+=
+xu
+r
+2s
+2
+tp d=o to
+2
+th
+p
+e oxth2erp side if the balance is to
+By manipulating (transposing is the word) the equation, it is
+be mrahintainendh.
+6a+11+a = 25-a+atherefore7a+11 = 25
+possible to isolate the ‘a’ on the LHS and balance it with an ac- Exam3plVe 1
+=
+r22
+=
+Cp
+7 r a
++
++
+n
+1
+=
+1
+(
+-
+N
+1
+-
+1
+n
+=
+)+
+25
+n
+-
+=
+1
+N
+1
+rh
+tual number on the RHS. This will then be the unique value of
+Here is another formsoul7aa in=vo1lv4ing several algebraic symbols.
+3V
+‘a’. Look again at the equation. r = N = 2Cp+n
+rh and if 7a = 14thena = 2
+N-n
+Frin
+r
+d2h N,if C =
+6a+11 = 25-a V = 2p
+3
+N-n
+C =
+2p
+Remember, we want N on
+r
+o
+r
+n2e
+h
+side by itself. It is important to
+To remove the ‘a’ on the RHS, we must add ‘a’ to both sides. V x 3 = Nx-3n
+get a ‘feel’ for the fCorxm2 opf 3t=he equatixon2.p To help, we will put
+2p
+brackets around (N - n).
+2Cp+n = (N-n)+n = N
+3VN = = r 2 r C 2 p h + = n r2 53
+rh nh
+rr2h
+V =
+3
+3V
+= r2 r=r2r h
+rVhx 3 = x 3
+3
+r =
+3V3V
+=
+rr2h
+=
+r2
+rhrh nh
+3V
+= r2 = r
+rh
+3V
+r =
+rh
+
+--- Page 54 ---
+6a+11+a = 25-a+atherefore7a+11 = 25
+7a+11-11 = 25-11
+so7a = 14
+a6nad+i1f17a+=a =142t5h-enaa+=a2therefore7a+11 = 25
+7a+11-11 =N2-5n-11
+Find N,if C =
+2p
+6a+11+a = 25-a+atherefore7a+11 = 25 so7a = 14
+N-n
+7a+11-11 = 25-11
+Ca6na=d+i1f17a+=a =142t5h-enaa+=a2therefore7a+11 = 25
+MODULE 1 // MATHEMATICS // ARITHMETIC
+2p SUNTECH
+so7a = 14
+7
+F
+a
+in
++
+d
+1
+N
+1
+,i
+-
+fN
+1
+C-
+1
+=n
+=N2-5n-11
+and if 7a = 14thena = 2
+C
+so
+x
+7
+2
+a
+p
+=
+=
+14 2p
+x2p2p
+N-n
+6a+11+a = 25-a
+N
++
+-
+a
+n
+therefore7a+11 = 25 C2aCn=pd+ifn7=a =(N1-4nth)e+nna==N2
+So: Find N,if C = Find r (the radius), step by2 sptep.
+7a+11-11 = 25-121p N = 2Cp+n N-n
+Find N,ifNC-=n
+so7a C = = 1N4-n First multiply both sidCesx b2 r yp 3 r2 = h 2p x2p2p
+2p V = N-n
+and if 7a = 14thena = 2 C2C=p+ 3n = (N-n)+n = N
+2p
+N-n
+6a+11C+xa2=p2=5N--a+n axt2hperefore7a+11 = 25 N = 2Cp r +rn 2h
+Find N,if C = 2p V x 3 = N-nx 3
+7a+11-11 = 252-p11 C x 2p = 3 x 2p
+2Cp+n = (N-n)+n = N
+rr2h 2p
+To remove the 2p s o w 7C e a m == u N s 1 t - m 4 n ultiply both sides by 2p. V 23CV = p+3rnr = 2h(N-n)+n = N
+N 2p= 2Cp+n = = r2
+and if 7a = 14thena = 2 Then divide both sider N s bh = y π 2 h Cp nr+ h rn2h
+Fin C d x N 26 , V i pa f = += C 1 r = N 1 2 r 3 - N p + 2nh - ax n =22p5-a+atherefore7a+11 = 25 V 3 x V 3 r = r= 2hr 32 = x r 3
+C =N
+2
+N
+C
+=
+p
+-
+7
+s 2
++
+Vo
+a
+n C 7
+n +
+p xa
+=
++
+1
+3=
+1 (
+n =
+N
+1
+-2 r
+4
+- 1p r
+3
+1 n2) = h +
+x
+2 n 5
+3
+= - N 11
+r
+V
+r
+3
+=
+V r=
+h
+h
+=3
+3r
+V n
+r
+r
+2
+hr
+h
+2h =
+r2
+To remove the -n, we m 2 ua p snt addidf n7 ato =bo1th4 stihdeesna = 2 V x 3r=h x 3
+r 3rNV 2h-nrr2h 3V = r 3 2 = r
+C xV2=p F = 6 irn3 ah d2 + p = N 1 , 1 if x n+ C h 2 a p = = =N 22 r- 5p 2n -a+atherefore7 R a e + m 1 em 1 b = er 2 , t 5 o find r, t 3 ak V re th = he r sqru2ahre = ro r o 2 t of r2 and do the same
+2C V p+ x n C 37 = = = a3(r N+ VNr -1 -2 = 1n hn -x ) r 1 + 231 = n = = r 2 N 5-11 to both sides. r r = h r 3V h nh
+N = 2Cp+ rnh2 3 p
+so7a = 14
+That is, V = r 3rV h r 3 C = 2 arh xn r =2 n d r p 2 h if h r 3 =7 V h = N a 2 r= - p 2 n 14xt2hpena = 2 3 r V h = r2 = r
+N-n
+V x 3 3 = V
+2F
+r
+C
+=
+ip
+r
+n 2+d
+h r
+nN
+2 x
+,
+=
+=
+3
+if
+r
+(CN=-n
+2
+)
+p
++n = N
+3V
+rhN =32Cp+n r =
+N-n rh
+C =
+r 3V h r = =r V n r r = 32 h V h hrr = 3 22p r h 2 N-n
+C x 2p = x 2p
+This is what transposition is all about. We are re-arranging for-
+Example 2 3V rr22 h p
+rh = V 2 x C r32 p = + =r n =3(N x - 3 n)+n = N mulas expressed as equations, which then allows us to find a
+The volume of a cone:
+particular numerical value for one (unknown) quantity if the
+33V
+N
+V
+= 2
+r
+Crp2+hn
+r = = = r2 other numerical values are given.
+rrhh rrn2hh
+V =
+3V 3
+= r2 = r
+rh rr2h
+V x 3 = x 3
+3V 3
+r =
+3V
+rh rr2h 54
+= =
+r2
+rh nh
+3V
+= r2 = r
+rh
+3V
+r =
+rh
+
+--- Page 55 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+One important point, it is only possible to find an unknown Example 1
+quantity if all the other values are known. This is known as
+Think of a number, double it, add 6 and divide the result by 3.
+‘solving an equation’.
+What is the answer?
+The rule is, one unknown quantity can be deduced from one
+Let the number you think of be A. Doubling this number gives 2A.
+equation. Two unknowns require two different equations.
+If 6 is then added, we have 2A + 6, which must then be divided
+Three unknowns required three different equations, and so on.
+by 3, making the answer:
+2A+6
+1.2(b) Linear equations
+3
+This formula can be used Ator ecaalc=ul2atLe xthLe =an2swL2erw nhoe mreatLteer quals100m
+CONSTRUCTION OF EQUATIONS
+what number you think of.
+Area = 2(100)2 = 20000m2
+As already stated, maths serves as a “tool” for Engineers at the
+Example 2 2(7M)+3M = Y8500
+design stage. Design is the creation of a component or mecha-
+If one side of a rectangula1r 4fieMld+ is3 tw=ic1e7 aMs lo=nYg a8s5 t0he0 other,
+nism on paper, i.e. before it takes shape in metal or plastic. The
+design engineer hopefully makes it strong enough - his knowl-
+and the short side is 100m.
+M
+Ca
+=
+lcuYla8te5 t0h0e a
+=
+re
+Y
+a
+8
+of
+5
+t
+0
+he
+0
+field.
+17
+edge of materials and their strengths allow him to do this by Let the short side of the field be L. The long side is therefore
+calculation. He uses formulas and equations. 2 x L or 2L. To calculate th 3 e R ar + ea 5 , C we = m Y u 7 lt 4 ip 0 ly one side by the
+other, so: C = R+20
+To do this, he must allocate letters to represent some variable 2A+6
+` 3R+5(R+20) = 3R+5R+100 = 740
+or known quantity. He can then construct a formula or equa- 3
+` 8R = 740-100 = 640
+tion by using the letters within some ‘reasonable’ statement
+about the situation. He studies the situation and then makes Area = 2L x L = 2L2w
+R
+h
+=
+er6e4L0e
+=
+quYa
+8
+ls
+0
+1
+(
+0
+th
+0
+e
+m
+cost of aradiator)
+8
+the statement.
+Area = 2(100)2 = 20 a 0 n 0 d 0m C =2 80+20 = Y100(thecost of aconvertor)
+How do we construct equations from the facts contained with-
+in a scenario?
+2(7M)+3M = Y8500
+14M+3 = 17M = Y8500
+Y8500
+M = = Y8500 55
+17
+3R+5C = Y740
+C = R+20
+` 3R+5(R+20) = 3R+5R+100 = 740
+` 8R = 740-100 = 640
+640
+R = = Y80(thecost of aradiator)
+8
+andC = 80+20 = Y100(thecost of aconvertor)
+
+--- Page 56 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+2A+6
+Example 3 Example 4
+3
+A certain type of motor car cost seven times as much as a cer- T
+A
+h
+r
+r
+e
+e
+a
+e e
+=
+le
+2
+ct
+L
+ri
+x
+c
+L
+ra
+=
+dia
+2
+t
+L
+or2s
+w
+a
+h
+nd
+e r
+fi
+e
+v
+L
+e
+e
+co
+q
+n
+u
+v
+a
+ec
+ls
+to
+1
+r
+0
+h
+0
+ea
+m
+ters together
+tain make of motor cycle. If two cars and three motor cycles cost £740. A convector cost £20 more than a radiator. Find the
+Area = 2(100)2 = 20000m2
+cost £8500, find the cost of each vehicle. cost of each.”
+2(7M)+3M = Y8500
+Let the cost of a car be C (at present C is an unknown). Let R represent the cost of a radiator, and C represent the cost
+14M+3 = 17M = Y8500
+of a convector. Then
+Let the cost of a motor cycle be M (another unknown). Y8500
+M = = Y500
+17
+We know that 2C + 3M = £8500 (this has two unknowns within
+3R+5C = Y740
+one equation). 2A+6
+3
+But we also know that C = 7 x M, therefore, we can substitute
+Area = 2L x L = 2L2where Lequals100mC = R+20
+for C in the first equation.
+Area = 2(100)2 = 20000m2
+2(7M)+3M = Y8500 ` 3R+5(R+20) = 3R+5R+100 = 740
+14M+3 = 17M = Y8500 ` 8R = 740-100 = 640
+640
+Y8500 R = = Y80(thecost of aradiator)
+M = = Y500 8
+17
+3R+5C = Y740
+andC = 80+20 = Y100(thecost of aconvertor)
+C = R+20
+The cost of a motor cycle is therefore £500, and the cost of a car
+must be 7 X £500 ` = £ 3 3 R 50+0.5(R+20) = 3R+5R+100 = 740
+` 8R = 740-100 = 640
+Here 2 equations were constructed from the facts, and then
+640
+combined to allowR a= solutio=n t Y o 8be0 f(otuhned.cost of aradiator)
+8
+In the next examapnled, Cwe= f8or0m+ e2q0ua=tioYns1 0fr0om(t hthee cfoacstts,o afnad convertor)
+then transpose to produce a solution.
+56
+
+--- Page 57 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+SIMULTANEOUS The method of solution of all simultaneous equations is to:
+• First manipulate one or both of the equations so that
+EQUATIONS
+the coefficient of one of the unknowns is the same in
+both equations.
+• Then add or subtract one of the equations from the oth-
+Consider the equation 4x - 3y = 1. There are 2 unknowns (x er to produce a third equation with only one unknown.
+and y) in one equation, and so the equation cannot be solved The other having become zero.
+to give a single value for x and y. There are an infinite number
+• Solve the new equation to find the unknown.
+of values of x for which there are corresponding values of y.
+• Put the solution into one of the original equations to
+For example, if:
+find the other unknown.
+If x = 4,then y = 5
+• Put both solutions into the equation not used in the
+stage above to check your answers.
+If x = 7,then y = 9
+Example If x = 4,then y = 5
+If x = 7,then y = 9
+If x = 1,then y = 1 Using these two equations as an example:
+If x = 1,then y = 1
+4x-3y = 1(1)
+4x-3y = 1(1)
+However, if a second equation exists, for example x + 3y = 19,
+then these two equxat+io3nsy c=an1 b9e( e2v)aluated simultaneously to
+x+3y = 19(2)
+give single values fo5rx x= an2d0 y. So x = 4
+5x = 20 So x = 4
+4+3y = 19 so3y = 19 = 15 so y = 5
+The process is simple Iafndx =inv4o,ltvhese nmoyd=ify5ing the equations, If x = 4,then y = 5
+4+3y = 19 so3y = 19 = 15 so y = 5
+whilst still preservi 2 ng x t + Ihfe 3 xe y q= = ua7 8 l,ittihe ( se 1 .n ) y = 9 We do not need to m I a f n 2 i x p x u =+ la 7 3 te , y t e h = it e h 8 n er y o (= f 1 th ) 9 e equations because
+3x+5y = 11(1) the co-efficient of y is the same in both equations. Therefore,
+If x = 1,then y = 1
+If3xx=+ 15,yth
+=
+e1n1y(=1)1
+(2x+3y = 8)x 3 = 6x+9y = 24 we can eliminate the “y” value simply by adding the two equa-
+4x-3y = 1(1)
+4x(2-x3+y3=y1=(18))x 3 = 6x+9y = 24
+(2x+5y = 8)x 2 = 6x+10y = 22 tions. The result is:
+x+(23xy+=51y9=(28))x 2 = 6x+10y = 22
+So6x+9y = 24 (3)
+x+3y = 19(2)
+5xS=o62x0+9Syo=x =244(3)
+6x+10y = 22 (4)
+5x = 20 So x = 4
+46+x3+y1=01y9=s2o23(y4=) 19 = 15 so y = 5
+0x-1y = 2 57
+4+3y = 19 so3y = 19 = 15 so y = 5
+2x0+x-3y1=y =82(1)
+so-y = 2 and y =-2
+2x+3y = 8 (1)
+3xs+o-5yy==121a(1n)d y =-2
+)2x+3(-2) = 8 therefore 2x = 14 and x = 7
+3x+5y = 11(1)
+(2)x2+x3+y3=(-8)2x)3==86thxe+r9eyfo=re242x = 14 and x = 7
+(2x+3y = 8)x 3 = 6x+9y = 24
+(2x+5y = 8)x 2 = 6x+10y = 22
+(2x+5y = 8)x 2 = 6x+10y = 22
+So6x+9y = 24 (3)
+So6x+9y = 24 (3)
+6x+10y = 22 (4)
+6x+10y = 22 (4)
+0x-1y = 2
+0x-1y = 2
+so-y = 2 and y =-2
+so-y = 2 and y =-2
+)2x+3(-2) = 8 therefore 2x = 14 and x = 7
+)2x+3(-2) = 8 therefore 2x = 14 and x = 7
+
+--- Page 58 ---
+If x = 4,then y = 5
+If x = 7,then y = 9
+If x = 1,then y = 1
+4x-3y = 1(1)
+x+3y = 19(2)
+5x = 20 So x = 4
+If x = 4,the4n+y3=y5= 19 so3y = 19 = 15 so y = 5
+If x = 7,then2xy+=39y = 8 (1)
+If x = 1,the3nxy+=51y = 11(1)
+If x = 4,then y = 5 4x-3y = 1((12)x+3y = 8)x 3 = 6x+9y = 24
+MODULE 1I /f/ x M=ATH7E,MthATeICnS y// = AR9ITHMETIC x+3y = 19((22)x+5y = 8)x 2 = 6x+10y = 2SU2NTECH
+5x = 20 SoSxo=6x4+9y = 24 (3)
+If x = 1,then y = 1
+4x-3y = 1 I ( f 1 x ) = 4,then y = 5 Subt 4 ra + ct 3 e y qu = at 1 io 9 n 6 ( sx 4 o ) + f 3 r 1 o y m 0=y (3 1= ) 92=21(54) so y = 5
+If we then substitute x If = x 4 = in 7 th , e t h se e c n on y d = eq 9 uation we get: 2x+3y = 8 (1)
+x+3y = 19(2)
+If x = 1,then y = 1 3x+5y = 110(x1-) 1y = 2
+5x = 20 So x = 4
+4x-3y = 1(1) (2x+3y = 8)x 3 = 6x+9y = 24
+4+3y = 19 so3y = 19 = 15 so y = 5
+x+3y = 19(2) (2x+5y = 8s)ox-2y==62x+an1d0yy==2-22
+2x+3y = 8 (1)
+3x+ If 5 x y= = 4 1 ,5 1 txh (1 e= ) n2y0 = S5o x = 4 So6x+9y = 24 (3)
+Our solu ( ti 2 o x n I s + f a 3 r x e y= x = 7 = 8 , 4 4 t ) h a + x n e 3 d 3 n y y = y = = =6 5 1 x 9 9 +9 so y 3 = y 2 = 4 19 = 15 so y = 5 subs 6 ti x tu + te 1 y 0 = y - = 2. 2 i )2 n 2 e x( i 4 t + h ) e 3 r ( e - qu 2 a ) ti = on 8 (1 t ) h o e r r ( e 2 f ) o to r e so 2 lv x e = for 1 x 4 . I a nd x = 7
+Example 1 If x = 4,then y = 5 0x-1y = 2
+(2x I + f 5 x y= = 1 8 ,t ) h x e 2 n = y =6x 1 +10y = 22 have selected (1).
+If x = 7,t 2 h x e + n 3 y y = = 9 8 (1) so-y = 2 and y =-2
+4x-3y = 1(1)
+So6x+9y = 24 (3)
+If x = 1,then y = 1 2x+3(-2) = 8 therefore 2x = 14 and x = 7
+x+3y = 19(2)
+6x+10y = 22 (4)
+4x-3y =3x1 + (15)y = 11(1)
+0x- 5 1 x y= = 20 2 So x = 4
+x+3y = 19(2)
+Check your answer by substituting both values in equation (2).
+so- 4 y+ = 3 2 y =an 1 d 9 y so = 3 - y 2= 19 = 15 so y = 5
+Multiply eq5uaxti=on2 ( 0 1)( b2Syxo th+xe3 =cyo4e=ffi8ci)enxt 3of= x 6inx e+qu9aytio=n2 (24). Do not use equation (1) because it will not highlight an error. If
+)2x 2 + x 3+( 3 - y 2=) 8 = 8 (1 th ) erefore 2x = 14 and x = 7
+4+3y =(129x+so5y3y==8)1x92==156xs+o1y0=y =5 22 you had used equation (2) to find x, then the check should be
+3x+5y = 11(1)
+2x+3y =So86x(1+)9y = 24 (3) carried using equation (1).
+(2x+3y = 8)x 3 = 6x+9y = 24
+3x+5y =6x11+(110)y = 22 (4)
+(2x+5y = 8)x 2 = 6x+10y = 22
+0x-1y = 2 3x+5y=11
+So6x+9y = 24 (3)
+Multiply eq(u2atxio+n 3(2y) s=boy8 -th)yex c=3oe2=ffi6acixnend+t 9oyfy x== i-n2 2e4quation (1).
+6x+10y = 22 (4) 3(7)+5(-2)=11 therefore 21+(-10)=11 -correct
+)2x+3(-2) = 8 therefore 2x = 14 and x = 7
+0x-1y = 2
+(2x+5y = 8)x 2 = 6x+10y = 22 3x+5y = 11
+so-y = 2 and y =-2 (2x+3y=8)x5 3x+5y = 11
+The sam 3 e x r+es 5 u y lt =wo 1 u 1 ld be 3 f x ou + n 5 d y i 3 f = y ( 71 w )1 a + s e 5 li ( m - in 2 a ) te = d 1 as 1 sh th ow er n e fore 21+(-10) = 11 -correct
+10x+153yx=+450y(=3)11 3(7)+5(-2) = 11 therefore 21+(-10) = 11 -correct
+S)o26xx++ 39(y-= 22)4= 8(3t)herefore 2x = 14 and x = 7
+below.3(7)+5(-2) =31(17)th+e(5r2e(x-fo+2r3)ey=2=1181+)t(xh-5e1re0f)o=re1121-+co(-rr1e0c)t = 11 -correct
+(3x+5y3=(171))+x53(-2) = 11 t(h2exr+ef3oyre=281)x+5(-10) = 11 -correct
+(2x+3y = 8)x5(2x+31y0=x8+)1x55y = 40 (3)
+9x+15y=33 (4)
+(2x+3y = 8)x5 10x+15y = 40 (3)
+6x+10y = 22 (4) x=7 1et0cx. +15y = 401(03x)+1(53yx=+450y =(31)1)x 3
+10x+15y = 40 (3) (3x+5y = 11)x 3
+0x-1y = 2
+-b! (b32x-+45ayc= 11)x(33x+59yx=+1115)yx=333 (4)
+(3x+5y = 11)x 3 9x+15y = 33 (4)
+so-y = 2 and y =-2 92xa+15y = 33 (94x)+15xy==733et(c4.)
+)2x+3(-2) = 8 therefore 2x = 14 and x = 7 y=6x x 2 9 - = x 5 7 + x- e 1 t 5 6 c y ( . a = = 3 6 3 , xb (4 == ) -75e, x - tc = c b =. 7 ! -8 e ) t b c 2 . -4ac
+x= -( - - x - b 5) = b ! ! ! 7 2 b ( e a - 2 b t 2 - c 5 2 ( . ) 6- 4 2 ) a 4 - c a 4 - c (6 b ) ! (- 2 - 6 b y ) a b 2 = - ! 6 4 x 2 a b 2 2 a c 2 a - - 5 4 x a - c 6(a = 6, 58 b =-5, c =-8)
+5! 25+1424a 5!13 y = 6x2 -5x-6(a = 6, b =-5, c =-8)
+x= y = y 1 = 6 2 x 6 2 x - 2 - 5x= 5 - x- 6 1 y 2 ( 6 a= (a =6 = x6 2 , x 6 -b , = b 5= - - x = - ( ( - - - - 56 5 , 5 5 ) (c , ) a ! = c != = - ( 6 - ( 8 - - ,) 8 5 b 5 ) ) ) = 2 2- - - 5 4 4 , ( ( 6 c 6 ) = ) ( ( - - - 8 6 6 ) ) )
+x= 1 1 8 2x o = r - 1 - 2 8 - ( = - (- 1 5)1 25 ! ) o ! r ( - - x(3 2 - 5 = ) 5 -2 ) -( 2 x- - 4=5( 4 )6 ( !) 6 ( ) - ( ( - 6-) 6 5 ) )2 - 2 42 ( (( 6 66 ) ))(-6)
+x = 2(6) 5! 225(6+)144 5!13
+2(6)x =5! 25+144 =5!13
+5! 25+144 55 !x !=2153+14142 5!1=3 12
+x x = = x = 18 1 5 8o ! r 1 - 2 2 1 - 8 5 2 8= + 1 1x x 4 1 = = 4= 1 1 o = 8 r x -o 5 x 1 = r 2 ! = 1 2 1 - 2 1 1 2 11 1 2 8 8 2 38 2o = o r r 1 1 - 1 - 1 1 2 2 8 2 8 = o = = r 1 1 - 1 1 2 12 2 2 o o r r - 1 - 2 3 2 3 2
+x =12 o1r2 = 12 12or -312 2 3
+12 12 2 3
+
+--- Page 59 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+3x+5y = 11 SUNTECH
+3(7)+5(-2) = 11 therefore 21+(-10) = 11 -correct
+(2x+3y = 8)x5
+QUADRATIC EQUA- natively, P and S are th1e0 vxa+lue1s5 oyf x= w4h0ich( 3sa)tisfy the condition
+y = ax2 + bx + c = o. (3x+5y = 11)x 3
+TIONS
+It can be3 sxh+ow5ny t=ha1t t19hex R+o1ot5s yar=e f3o3un(d4 t)o be equal to:
+3(7)+5(-2x)==711ettch.erefore 21+(-10) = 11 -correct
+(2x+3y = 8-)xb5! b2 -4ac
+10x+15y = 40 (3)2a
+Any equation of the form y = ax2 + bx + c, where a, b and c
+are numbers, is known as a quadratic equation. An equation of (3x+5y = 11y)=x63x2 -5x-6(a = 6, b =-5, c =-8)
+this type will produce a curve called a ‘Parabola’. This equ9axti+on1 g5ivye=s tw33o v(a4 - lu) ( e - s, 5 on ) e ! for ( P - t 5 he ) 2 ot - he 4 r ( f 6 or ) ( S - . 6)
+x =
+The actual value for coefficients a, b and c will determine the
+Examplex = 7 etc.
+2(6)
+exact shape and position of the curve. Find the - ro b o ! ts of b 2-4ac5! 25+144 5!13
+x = =
+2a 12 12
+y = 6x2-5x-61(8a = 6-,8b =- 15, c =- 28)
+x = or = 1 or -
+12 12 2 3
+-(-5)! (-5)2-4(6)(-6)
+x =
+2(6)
+5! 25+144 5!13
+x = =
+12 12
+18 -8 1 2
+x = or = 1 or -
+12 12 2 3
+It has been considered impossible to find the square root of a
+negative value. The equation concerned is then said to have no
+real roots. When b2 - 4ac is negative, the equation is said to have
+Fig 01. 22 - Parabola
+complex roots, where the roots comprise both a real and imag-
+It will be noted that one of the curves cuts the x-axis at points inary component. This concept is not considered in these notes.
+P and S. P and S are known as the roots of the equation. Alter-
+59
+
+--- Page 60 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+NUMBERING SYS- Example 1
+Decimal 368 is really:
+TEMS
+(3-102)+(6-101)+(8-10)
+(4-102)+(5-101)+(2-100)+(6-10-1)+(4-10-2)
+The most widely used system of numbers is the decimal sys-
+or in columnl feoarmst:significant weight = 100 = 1
+tem, based on the Hindu Arabic symbols 0, 1, 2, 3 etc but ro-
+man symbols such as V, X, L and C are also well known and next most significant weight = 101 = 10
+102 101 100
+understood. To-day, the practice of engineering requires a 368,53.24
+measure of competence in handling several different systems 1(H0u1n1dr0e1dsis) real(lTye:ns) (Units)
+of numerals. (1-23 5)+(0-24 6)+(1-23 8)+(1-22)+(0-21)+(1-20)
+In general, a system of numeration consists of a set of symbols 110.11isreally:
+Example 2
+together with a rule by which the symbols can be combined (1-22)+(0-21)+(1-20)+(1-2-1)+(0-2-2)
+Decimal 452.64 is really:
+together. 3762isreally
+Number is the property associated with a set or collection of
+(3-102)+((63--18012))++((87--18 01))+(6-80)
+things. It is independent of the nature of the individual items (4-102)+((53-x160) 1)++((72x-81)0+ 0)(+6(x61-)1=0-1 1 9)2++(45-61+06-2 =) 254
+in the set. The number fourteen may be written as 14 or XIV. In least signific3a7n.1t3w8eiigshrte=al1ly00 = 1
+this case the number is the same but the system or numeration
+next most si(g3n-ifi8ca1)n+tw(7ei-gh8t0=)+10( 1 1=-180-1)+(3-8-2)
+or in column form:
+is different.
+368,53.24
+101101isreally:102 101 100 10-1 10-2
+DECIMAL SYSTEM OF NUMERATION
+(1-25)+(0-24)4+(15-23)2+(1-6 22)+4(0-21)+(1-20)
+110.11isreally:
+In the decimal system, the symbols are combined by arrang-
+(1-22)+(0-21)+(1-20)+(1-2-1)+(0-2-2)
+ing them in a horizontal line, the contribution that each digit
+3762isreally
+makes being governed by its position. A decimal point enables
+(3-82)+(7-81)+(6-80)
+numbers less than one to be represented.
+(3 x6)+(7 x 8)+(6 x1) = 192+56+6 = 254
+37.138isreally 60
+(3-81)+(7-80)+(1-8-1)+(3-8-2)
+
+--- Page 61 ---
+(3-102)+(6-101)+(8-10)
+MODULE 1 // MATHEMATICS // ARITHMETIC (4-102)+(5-101)+(2-100)+(6-10-1)+(4- SU 1 N 0 T - E 2 C ) H
+least significantweight=100 =1
+next most significantweight=101 =10
+Ten is known as the ‘Base’ or ‘Radix’ of the decimal system. Example 1
+368,53.24
+The ‘Index’ indicates the power to which the base is raised.
+101101isreally:
+The ba ( s 3 e, - an 1 d 0 th 2 e ) p + a ( rt 6 ic - ul 1 ar 0 i 1 n ) d + ex ( t 8 o w - h 1 ic 0 h ) it is raised is called (1-25)+(0-24)+(1-23)+(1-22)+(0-21)+(1-20)
+the ‘We(4igh-t’1. 0e.2g.) +(5-101)+(2-100)+(6-10-1)+(4-11100-.1 2 1)isreally:
+(1-22)+(0-21)+(1-20)+(1-2-1)+(0-2-2)
+least significant weight = 100 = 1 3o(r7 3 i6n-2 cio1 sl0urem 2 a )nl + l fyo(r6m-: 101)+(8-10)
+(3(4--821)0+ 2 ()7+-(851-)+1(06 1 -)+80()2-100)+(6-10-1)+(4-10-2)
+next most significant weight = 101 = 10 (3lexa6s)t+si(g7nxif8i)c+an(6t wx1e)ig=h1t9 = 2+10506 =+61=254
+25 24 23 22 21 20
+3 n 7 e .1 x 3 t 8 m is o r s e t a s ll i y gnificant weight = 101 = 10
+The nu 3 m 6 b 8 er ,5 s 3 by .2 w 4 hich w(e3ig-ht1 i0s 2 m)u+lti(p6lie-d1 a0re 1 )ca+lle(d8 ‘-Di1gi 0 t)s’. (3 3 - 68 8 , 1 5 ) 3 + . ( 2 7 4 -801)+(10-8-11)+1(3-80-2)1
+In prac 1 ti 0 ce 1 o 1 n 0 ly 1 t i h s e r d e i a gi l t l s( y 4o : f - th1e0 sy2s)t + em( 5ar - e w10ri1tt)en + , (th2e - w1ei0gh0)t +(6 (1 - = 04 1 510 1in -0 1d1) e + icsim (r4 aela - ) l1ly0:-2)
+being i(m1p-lie2d 5 e).g+. (0-2 le 4 a ) s + t ( s 1 ig - n 2 if 3 i ) c + an ( t 1 w - e 2 ig 2) h + t = (0 1 - 00 21 = ) 1 +( E 1 (x1a - m- 2 p2 0 le )5 )2 +(0-24)+(1-23)+(1-22)+(0-21)+(1-20)
+110.11isreally:
+110.11isreally:
+next most significant weight = 101 = 10
+(1-22)+(0-21)+(1-20)+(1-2-1)+(0-2-2)
+(1-22)+(0-21)+(1-20)+(1-2-1)+(0-2-2)
+368,53.24
+3762isreally
+3762isreally
+101101isreally:
+(3-82)+(7-8 (1 1) - + 2 ( 5 6 ) - + 8 (0 0) -24)+(1-23)+(1-22( ) 3 + - ( 8 0 2 - ) 2 +1( ) 7 + - (1 81 - ) 2 +0( ) 6-80)
+0 is cou(n3texd6 a)s + a d(i7gitx, s8o) th + a(t 6thxer1e )ar = e t1e9n 2di + git5s 6in + th6e = de2ci5m4al or in column form:
+110.11isreally: (3 x6)+(7 x 8)+(6 x1) = 192+56+6 = 254
+system, 0 to 9 inclusive.
+37.138 isreally (1-22)+(0-21)+(1-20)+(1-2-317)+.13(0 8 -is2r-e2a)lly22 21 20 2-1 2-2
+(3-81)+(7-8 3 0 7 ) 6 + 2 ( i 1 s - re 8 a - ll 1 y )+(3-8-2) (3-81)+(7-8 1 0)+1 (1-0 8-1) 1+(3 1-8-2)
+BINARY SYSTEM OF NUMERATION
+(3-82)+(7-81)+(6-80)
+(= 6.75 in decimal)
+Only the symbols 0 and 1 are used and the base is two, other-
+(3 x6)+(7 x 8)+(6 x1) = 192+56+6 = 254
+wise the system of numeration is the same as before. The two Note: All digits to the right of the binary point refer to negative
+37.138 isreally
+digits 0 and 1 are referred to as bits, an abbreviation of binary powers.
+(3-81)+(7-80)+(1-8-1)+(3-8-2)
+digits.
+61
+
+--- Page 62 ---
+(3-102)+(6-101)+(8-10)
+(4-102)+(5-101)+(2-100)+(6-10-1)+(4-10-2)
+least significant weight = 100 = 1
+next most significant weight = 101 = 10
+368,53.24
+101101isreally:
+(1-25)+(0-24)+(1-23)+(1-22)+(0-21)+(1-20)
+110.11isreally:
+(1-22)+(0-21)+(1-20)+(1-2-1)+(0-2-2)
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+3762isreally
+(3-82)+(7-81)+(6-80)
+The binary system is very suitable for use with electrical Examp(le3 2x6)+(7 x 8)+(6 x1) = 192+56+6 = 254
+switching circu(i3ts-. A1 s0w2i)tc+h (is6 e-ith1e0r1 o)ff+ o(r8 o-n c1o0r)responding, 37.138 isreally
+for example, to ( 4 0 a - n 1 d 0 1 2r ) es + pe ( c 5 ti - ve 1 ly 0 . T1h ) e + re ( i 2 s - no 1 a 0 m0b ) i + gu ( it 6 y. -10-1)+(4-(31 - 0- 8 21))+(7-80)+(1-8-1)+(3-8-2)
+least significant weight = 100 = 1
+OCTAL SYSTEnMex OtFm NoUsMt sEiRgAnTifIOicNant weight = 101 = 10
+or in column form:
+In the octal sys3te6m8 ,o5f 3nu.2m4eration, the symbols 0 to 7 are used
+and the base is1 80. 1A1ga0in1, itsher esyasltleym: of numeration is the same 82 81 80 8-1 8-2
+as that used for( 1de-ci2m5a)l a+n(d0 b-ina2r4y), w+it(h1 e-ac2h3 c)o+lum(1n- in2cr2e)a+s-(0-21)+(1-20)
+0 3 7 1 3
+ing by a power of one as you move from right to left.
+110.11isreally:
+(3-102)+(6-101)+(8-10) in decimal
+Example 1 (1-22)+(0-21)+(1-20)+(1-2-1)+(0-2-2)
+(4-102)+(5-101)+(2-100)+(6-10-1)+(4-10-2)
+3762isreally
+(3x8)+(7x1)+(1x0.125)+(3x0.015625)
+least significant weight = 100 = 1
+(3-82)+(7-81)+(6-80)
+next most significant weight = 101 = 10
+(3 x6)+(7 x 8)+(6 x1) = 192+56+6 = 254 = 31.140625
+368,53.24
+37.138 isreally (1x25)+(0+24)+(1x23)+(1x22)+
+or in1 0co1lu1m0n1 ifosrrme:ally:
+(3-81)+(7-80)+(1-8-1)+(3-8-2)
+All dig+it(s 1tox t2h1e) r+igh(t1 o+f th2e0 o)c=ta4l p5oint refer to negative powers.
+(1-25)+(0-24)+(1-23)+(1-22)+(0-21)+(1-20) 10
+83 82 81 80
+Answer A7 isequalto10100111
+110.11isreally: 16 2
+0 3 7 6 log (16) = 2
+(1-22)+(0-21)+(1-20)+(1-2-1)+(0-2-2) 4
+log(100) = 2isactually log (100) = 2
+in d 3 ec 7 im 62 al isreally 10
+Rule1:log (M$N) = log M+log N
+b b b
+(3-82)+(7-81)+(6-80)
+M
+Rule 2:log ( ) = log M-log N
+(3 x6)+(7 x 8)+(6 x1) = 192+56+6 = 254 b N b b
+37.138 isreally Rule 3:log (Mk) = k$log M
+b b
+(3-81)+(7-80)+(1-8-1)+(3-8-2) Rule4:log (1) = 0
+b
+Rule5:log (b) = 1
+b
+Rule6:log (bk) = k
+b
+Rule7:blog b (k) = k 62
+
+--- Page 63 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+CONVERSION TO OTHER BASES Example 3
+Conversion from decimal to any other base can be achieved by
+Convert 6310 to hexadecimal:
+dividing the decimal number repeatedly by the new base and
+recording the remainder. The remainder gives the number in 16 63
+the new base and should be read from bottom to top. 16 3 Rem 15(F)
+Example 0 Rem 3
+Convert 2910 to binary:
+Result 3F
+2 29
+16
+2 14 Rem 1
+2 7 Rem 0 TO CONVERT BINARY NUMBERS TO DECIMAL
+2 3 Rem 1 The easiest way to convert from binary to decimal is to remem-
+ber the weightings, or if necessary, write the weightings above
+2 1 Rem 1
+each binary digit, and add them up.
+0 Rem 1
+Example 1
+Convert 1 0 1 1 0 1 to decimal.
+Result 11101
+2
+Example 2
+25 24 23 22 21 20
+Convert 5710 to octal:
+(32) (16) (8) (4) (2) (1)
+8 57
+(3x8)+(7x1)+(1x0.125)+(3x0.015625)
+1 0 1 1 0 1
+8 7 Rem 1
+= 31.140625
+7 Rem 7
+(1x25)+(0+24)+(1x23)+(1x22)+
++(1x21)+(1+20) = 45
+10
+Answer A7 isequalto10100111
+16 2
+log (16) = 2 63
+4
+log(100) = 2isactually log (100) = 2
+10
+Rule1:log (M$N) = log M+log N
+b b b
+M
+Rule 2:log ( ) = log M-log N
+b N b b
+Rule 3:log (Mk) = k$log M
+b b
+Rule4:log (1) = 0
+b
+Rule5:log (b) = 1
+b
+Rule6:log (bk) = k
+b
+Rule7:blog b (k) = k
+
+--- Page 64 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+An alternative method for long binary numbers is to take the The reverse process should be used to convert octal to binary.
+left-hand digit, double it and add the result to the next digit to Convert each digit into a 3-digit binary number keeping the
+the right as shown below (double and add to next digit to the order of digits the same. Work from the bottom to the top of the
+right). table shown above to convert 2718 to binary.
+1 0 1 1 1 0
+1 2 5 11 23 46 TO CONVERT BINARY TO HEXADECIMAL OR VICE VER-
+SA
+The process for converting a binary number to a hexadecimal
+TO CONVERT BINARY TO OCTAL OR VICE VERSA
+one is the same as that used to convert binary numbers to octal.
+Each octal digit can be represented by 3 binary digits. There- Each hexadecimal digit can be represented by 4 binary digits;
+fore, to convert from binary to octal: therefore, the binary number is split into groups of 4 digits start-
+1. Split the binary number into groups of 3 digits starting from ing from the right. The weightings this time are 8 – 4 – 2 – 1.
+the right. Again, the reverse process is used to convert from hexadecimal
+2. Weight the numbers in each group 4 – 2 – 1 to binary. Convert each hexadecimal digit into its binary equiv-
+alent keeping the order the same.
+3. Find the total of each group of 3 digits, the result is the octal
+value. Example 1
+Example 1 Convert A7 to binary.
+16
+Convert 1 0 1 1 1 0 0 1 to Octal
+Hexadecimal No A 7
+Binary No 1 0 1 1 1 0 0 1
+Weightings 8 4 2 1 8 4 2 1
+Weighting 4 2 1 4 2 1 4 2 1
+Binary No 1 0 1 0 0 1 1 1
+Octal No (sum) 2 7 1
+Answer is A7 is equal to 10100111
+Result 10111001 is equal to 271 16 2
+2 8
+64
+
+--- Page 65 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+LOGARITHMS The use of logarithms is no longer so widespread as the elec-
+tronic calculator has become so readily available.
+An index or exponent tells the user how many times to mul-
+tiply a number (the base) by itself. A logarithm answers the
+Logarithms are a mathematical concept that was developed to
+question: how many of one number are multiplied to arrive at
+simplify multiplication and division of large numbers. Loga-
+another number?
+rithms enable multiplication and division to be performed us-
+ing addition and subtraction.
+Fig 02. 1 - Logarithm
+65
+
+--- Page 66 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+(3x8)+(7x1)+(1x0.125)+(3x0.015625)
+Example: can be simplified, especially problems involving multiplica-
+= 31.140625
+tion and division of extremely large or small numbers. For ex-
+how many 4’s are mult ( i 1 pl x ie 2 d5 ) to + g ( e 0 t 1 + 6? 2 T4) he + a ( n 1 s x w 2 e3r, ) 2 + , i ( s 1 t x h 2 e 2)+
+ample, instead of multiplying or dividing large numbers, the
+logarithm. This is written as follows: (3x8)+(7x1)+(1x0.125)+(3x0.015625)
++(1x21)+(1+20) = 45 10 logari = thm 31 s . o 1 f 4 th 0 e 6 n 2 u 5 mbers can be added when multiplying or
+Answer A7 isequalto10100111 subtracted when dividing. This results in much simpler calcu-
+16 2 (1x25)+(0+24)+(1x23)+(1x22)+
+log (16) = 2 lations. The rules of logs allow us to use logs in the way de-
+4
++(1x21)+(1+20) = 45
+log(100) = 2isactually log (100) = scr2ibed above. 10
+10
+(3x8)+(7x1)+(1x0.125)+(3x0.015625) Answer A7 isequalto10100111
+Rule1:log (M$N) = log M+log NThe rules are as foll 1 o 6 ws: 2
+We read this as “log to the base 4 ofb 16 equals 2”. Lobgarithms b
+= 31.140625 log (16) = 2
+M 4
+(commonly known as LRogus)l ean2d: eloxpgon(ents) a=rel oreglatMed.- log N
+(1x25)+(0+24)+(1x23b )+N(1x22)+ b b log(100) = 2isactually log
+10
+(100) = 2
+When a + l ( o 1 ga x r 2 it 1 h ) m + is ( 1 w + r R it u2 te 0l n e) w 3 = : it 4l h o5 o g 1 u b0 t ( a M baks ) e = , it k is $ l i o m g p b lie M d that Rule1:log b (M$N) = log b M+log b N
+the base is 10.
+Answer A7
+16
+Risuelequ4a:llotgob1(011)0=00111
+2 M
+log 4 (16) = 2 Rule5:log b (b) = 1 Rule 2:log b ( N ) = log b M-log b N
+log(100) = 2iRsualcet6u:allolgy lo(bgk)(=1k00) = 2
+b 10
+Rule1:log b (M Ru $N le ) 7=:b lologg bb (Mk)+ = l k og b N Rule 3:log b (Mk) = k$log b M
+M
+This meRaunsl eth2a:t ltoheg nu(mb)er= olfo tigmeMs 1-0 nloeegds tNo be multiplied
+b N b b Rule4:log (1) = 0
+by itself to equal 100 is 2 times. b
+Rule 3:log (Mk) = k$log M
+b b
+There are a special group of logs called Natural Logarithms.
+Rule4:log (1) = 0 Rule5:log (b) = 1
+b b
+Their base is a number that is called ‘e’. ‘e’ is a constant and it
+Rule5:log (b) = 1
+b
+has the value 2.718 28 to five decimal places. You do not need
+Rule6:log (bk) = k Rule6:log b (bk) = k
+to remember the valbue of ‘e’. Natural logs then, have ‘e’ as their
+base, soR thuelye c7o:ubld lo b g eb ( w k) r=ittekn loge, however they are so widely
+Rule7:blog b (k) = k
+used and so important that they are given the symbol ln. (That
+is a lower-case L followed by an n).
+A benefit of using logarithms is that complicated calculations
+66
+
+--- Page 67 ---
+MODULE 1 // MATHEMATICS // ARITHMETIC
+SUNTECH
+Where:
+b > 0but ! 1, and M,N,and k arereal
+numbers but M and Nmust bepositive
+Fig 02. 2 - Logarithm rules
+67
+
+--- Page 68 ---
+01.03
+GEOMETRY
+2
+
+--- Page 69 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+GEOMETRY 1.3(a) Simple geometrical con-
+structions
+ANGULAR MEASUREMENT
+If two straight lines are drawn, we can see that they make an
+“angle”.
+Fig 03. 1 - An Angle
+But how are ‘angles’ expressed or measured. Consider a single
+line, and rotate it through a complete revolution.
+69
+
+--- Page 70 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+Fig 03. 3 - Angles
+Note that 1 degree can be sub-divided into 60 minutes and 1
+minute can be sub- divided into 60 seconds (very small).
+A few definitions are included here:
+• An Acute angle - less than 90º
+• An Obtuse angle - between 90º and 180º
+Fig 03. 2 - A Circle
+• A Reflex angle - greater than 180º
+Then an angle that this line has turned is 360o and we created
+• Complementary angles - their sum is 90º
+a circle.
+• Supplementary angles their sum is 180º
+A degree is of a revolution. Note that half a revolution is there-
+fore 180º and a right angle (¼ of a revolution) is 90º.
+70
+
+--- Page 71 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+Fig 03. 4 - Different angles
+71
+
+--- Page 72 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+GEOMETRIC CON- The construction of a dotted line parallel to AB and an exten-
+sion of BC proves this.
+STRUCTIONS
+There are many different shapes associated with geometry.
+The more common ones are described in the following text.
+TRIANGLE
+A Triangle obviously has 3 sides and 3 (internal) angles. The Fig 03. 6 - Extended Triangle
+sides are often represented by the 3 (small) letters a, b and c;
+the angles by the (large) letters A, B and C.
+TRIANGLE TYPES
+The 3 angles add up to 180º.
+There are many different types of triangles. The main types
+and features are summarised as follows:
+• Acute-Angled Triangle - All of its angles are less than 90º.
+• Obtuse-Angled Triangle - Has one angle greater than 90º.
+• Scalene Triangle - Has three sides of different lengths.
+• Right-Angled Triangle - One of its angles equal is to 90º.
+The longest side is opposite the 90º angle (right-angle)
+and is called the hypotenuse.
+• Isosceles Triangle - Two sides and two angles are equal.
+The equal angles lie opposite to the equal sides.
+Fig 03. 5 - A Triangle
+• Equilateral Triangle - All its sides and angles are equal.
+72
+
+--- Page 73 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+Fig 03. 7 - Different triangle types
+73
+
+--- Page 74 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+SIMILAR & CONGRUENT TRIANGLES
+You may study two triangular shapes and estimate whether
+they are the same or not. We need to be more precise.
+If they have the same shape, we are really saying that their an-
+gles are the same, they are then described as similar triangles.
+Similar triangles do not have to be the same size. One triangle
+may have sides twice or ten times as large as another triangle
+Fig 03. 9 - Congruent Triangles
+and still be classified as similar.
+t is sometimes necessary to determine whether triangles are
+Congruent. A simple criteria exists to assist us.
+Fig 03. 8 - Similar Triangles
+If they are exactly the same shape and size, their sides are the
+same length, then they are described as Congruent triangles.
+74
+
+--- Page 75 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+POLYGON
+A Polygon is a geometric closed figure bounded by straight
+lines. The term poly means multi. A triangle has the least num-
+ber of sides. Other multi-sided figures have names indicating
+the number of sides. Hence:
+• Pentagon – 5 Sided
+• Hexagon – 6 Sided
+• Octagon – 8 Sided
+Fig 03. 10 - Polygons
+75
+
+--- Page 76 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+QUADRILATERALS PARALLELOGRAM
+A Quadrilateral is any four-sided shape. There are various A Parallelogram has both pairs of opposite sides parallel. The
+types, some are common and you are probably familiar with following properties apply to parallelograms:
+their names. Some are not so common.
+• Each pair of opposite sides is equal in length.
+Since a quadrilateral has four sides, it can be divided into two
+• Each pair of opposite angles are equal.
+triangles. The sum of its angles must therefore be 360º.
+• The diagonals bisect each other.
+• The diagonals bisect the parallelogram and form two
+congruent triangles.
+Fig 03. 12 - A Parallelogram
+Fig 03. 11 - Quadrilaterals
+76
+
+--- Page 77 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+RECTANGLE RHOMBUS
+A Rectangle is a parallelogram with its angle equal to 90º. It has A Rhombus is a parallelogram with all of its sides equal in
+the same properties as a parallelogram with the addition that length. It also has all of the properties of a parallelogram and
+the diagonals are equal in length. the following additional properties:
+• The diagonals bisect at right angles
+Fig 03. 14 - A Rhombus
+Fig 03. 13 - A Rectangle
+77
+
+--- Page 78 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+SQUARE TRAPEZIUM
+A Square is a rectangle with all the sides equal in length. It has A Trapezium is a quadrilateral with one pair of sides parallel.
+all the properties of a parallelogram, rectangle and rhombus.
+Fig 03. 16 - A Trapezium
+Fig 03. 15 - A Square
+78
+
+--- Page 79 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+CIRCLES OB and that the length of the line AB is clearly equal to twice
+Circles are not just particular mathematical shapes but are in- the radius. AB = 2OP. AB is the Diameter of the circle (D = 2R).
+volved in our everyday life, for example, wheels are circles,
+We already know that if OP is rotated through 1 complete revo-
+gears are basically circular and shafts revolve in a circular
+lution, it will have rotated through 360 degrees, but what is the
+fashion. Hence, we must be aware of some important defini-
+distance travelled by P in tracing this circular path?
+tions and properties.
+Put another way, how far will a wheel whose radius is R, roll
+If the line OP is fixed at O and rotated around O, the point P
+along a surface, during one revolution?
+traces a path which is circular - it forms a circle.
+Fig 03. 18 - Circumference (Periphery)
+Fig 03. 17 - Circle and Diameter The distance, known as the Circumference is obviously de-
+pendent on the length of the length of the diameter, but can be
+The length OP is the Radius of the circle. Note that OP = OA =
+calculated precisely from the equation:
+3C = rD(= 2rR)
+22
+79
+7
+` Distancein1Rev = r x Diameter
+= (r)(715)mm
+` Distancein30 Rev = (30)(r)(715)
+= 67410mm
+= 67.4meters
+1c = r/180radians,or 180c/r = 1radian(approx.57.3c)
+N
+(N = r.~)
+r
+
+--- Page 80 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+The value π is actually the ratio between the circumference of Example:
+a circle and its diameter. π (Greek letter, pronounced “pi”) can
+A wheel, diameter 715 mm, makes 30 revolutions. How far
+be approximated to 3.142.
+does it move from its start point?
+It will certainly be found on a scientific calculator, but the frac- 3C = rD(= 2rR)
+The distance moved in 1 rev. = the length of the circumference.
+tion 22
+3C = rD(= 2rR) 7
+` Distancein1Rev = r x Diameter
+22
+7
+` Distancein1Rev = r x Diameter = (r)(715)mm
+= (r)(715)mm
+is a very good approximation.
+` Distancein30 Rev = (30)(r)(715) ` Distancein30 Rev = (30)(r)(715)
+= 67410mm
+TANGENT = 67.4meters = 67410mm
+The line AP drawn so that it 1 tco = ucrhe / s 1 t 8 he 0 c r i a rc d le i a a n t sp,ooinrt1 P8 0 isc /r = 1radian(approx.57.3c)
+known as the ‘Tangent’ to the N circle. = 67.4meters
+(N = r.~)
+It should be noted that AP is a r lways at right-angles to the radi- 1c = r/180radians,or 180c/r = 1radian(approx.57.3c)
+us OP. N
+(N = r.~)
+r
+Fig 03. 19 - A Tangent
+80
+
+--- Page 81 ---
+3C=rD(=2rR)
+22
+7
+`Distancein1Rev=r x Diameter
+MODULE 1 // MATHEMATICS // GEOMETRY =(r)(715)mm
+SUNTECH
+`Distancein30Rev= (30)(r)(715)
+= 67410mm
+RADIAN MEASURE
+= 67.4meters
+We already know that an angle of 360º represents 1 complete
+1c=r/180radians,or180c/r= 1radian(approx.57.3c)
+revolution. But there is another important unit of angular mea-
+N
+(N=r.~)
+surement, known as the Radian. r
+One final and useful point concerning radian measure.
+3C = rD(= 2rR)
+22
+7
+Fig 03. 21 - Arc Length ` Distancein1Rev = r x Diameter
+= (r)(715)mm
+If an arc of a circle, radius r, subtends an angle, equal to θ Ra-
+` Distancein30 Rev = (30)(r)(715)
+dians, the length of the arc is r.θ.
+= 67410mm
+Note also that if a point P is moving with speed N, then the ro-
+= 67.4meters
+Fig 03. 20 - A Radian tational speed ω is equal to:
+1c = r/180radians,or 180c/r = 1radian(approx.57.3c)
+Consider a circle of radius R and consider an arc, where length is
+N
+(N = r.~)
+also equal to R. The portion of the circle is then equal to 1 Radian. r
+It can be deduced that 1 revolution is equivalent to 2π Radians,
+ω is expressed in Radians per second.
+i.e. 1 rev = 6.2832 rads. Therefore 360º = 2π rads, and we can
+derive conversion factors, as that;
+81
+
+--- Page 82 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+1.3(b) Graphical
+representation
+GRAPHS
+Graphs are a pictorial method of dis-
+playing numerical data that enables
+you to quickly visualise certain rela-
+tionships, complete complex calcu-
+lations and predict trends. The data
+can be presented in many different
+ways as shown below, and most
+data can be presented in any for-
+mat. However, care should be tak-
+en when selecting a format to use,
+some formats are better suited to
+particular types of data or data sets.
+For example, if have a whole amount
+divided into known proportions,
+then this is better presented as a pie
+chart; if we have a list of scores in a
+test, then a bar graph is better. If we
+Fig 03. 22 - Types of Charts
+are plotting temperature with re-
+spect to time then a continuous line
+graph is better.
+82
+
+--- Page 83 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+CONSTRUCTION
+In order to construct graphs effectively, some simple rules
+should be followed. First of all, present the data in a clear, tab-
+ular form. The data will generally comprise 2 variables, one
+that is being varied, the independent variable, and the one that
+changes as a result of the variation, the dependent variable (its
+value depends on the value of the other).
+For example, an experiment was conducted, where a volume of
+gas was heated. As the temperature of the gas increased, it was
+noted that the gas expanded: its volume increased. The first
+quantity, the temperature, is the independent variable and the
+second quantity, the volume, is the dependent variable.
+AXIS AND SCALES
+Before “plotting” the points, the two axes must be drawn, and Fig 03. 23 - Axis and Scales
+the scales chosen.
+The horizontal (x-axis) will represent the independent vari-
+CARTESIAN COORDINATE SYSTEM
+able and the vertical (y- axis) the dependent variable. The
+scales cross at the origin O. On any graph by extending the horizontal axis to the left and
+the vertical axis below the horizontal axis, the graph can en-
+compass negative values. A rectangular coordinate system,
+known as the Cartesian Coordinate System, is used to define
+the plane, that is, to create the space for a graph. It consists of
+two intersecting axes at right angles to each other.
+83
+
+--- Page 84 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+The x axis is horizontal and the y axis is vertical. The point cated horizontally along the x axis. The second value is located
+where the axes intersect is called the Origin. Each axis is cal- vertically along the y axis.
+ibrated in even increments, but the axes do not have to be
+To define the position of the plotted points the numbering of the
+marked in the same increments as each other. To locate a point
+4 quadrants of the Cartesian system is important. As an exam-
+on the coordinate system, an ordered pair is required. This
+ple, you can find (2,3) in Quadrant I and ((-3,1) in Quadrant II.
+consists of two values presented as (x, y). The first value is lo-
+Fig 03. 24 - Plane (2D) Cartesian system
+84
+
+--- Page 85 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+Three-dimensional Cartesian system instead of Quadrants has • Subtract the LH value from the RH value to give a range
+Octants, because there are 8 octants in the 3D Cartesian sys- of values (= some number of units).
+tem. With this system you can define the position of the object
+• Study the graph paper to find how many large squares
+in the 3D space.
+there are from left to right.
+• Now divide the value found by the subtraction, by the
+number of large squares.
+This should give an idea of a suitable scale.
+That is, so many units should be represented by 1 large square
+along the x-axis. The most useful scales are 1, 2, 5, 10, 20, 50
+units etc. to 1 large square.
+Fig 03. 26 - Plotting Graphs
+The same procedure is used for the y-axis. Subtract the smallest
+Fig 03. 25 - Three- dimensional Cartesian system
+(lower) value from the largest (upper value) to give the Range’,
+There is no merit in drawing small graphs. Choose scales so divide by the number of large squares between top and bottom
+that completed graph fits the sheet of graph paper. of the paper.
+• Look at the largest right-hand, and the smallest left-
+hand values that will be plotted along the x-axis.
+85
+
+--- Page 86 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+the x-axis so as to intersect with a similar line drawn from the
+y-axis for its corresponding dependent value.
+Fig 03. 28 - Setting Values
+The intersection represents one plotted point of the graph.
+The procedure is repeated for each pair of values in turn. When
+Fig 03. 27 - x and y Axis
+all the points have been plotted, a continuous line is drawn
+Having done this, draw the 2 axes, and mark off the units, us- through the points.
+ing your chosen scales.
+The way in which the line is drawn depends on the nature of
+The graph paper has now been prepared for the object of the the data. It is probably true to say that most mathematical or
+exercise, i.e. to transfer the data from the table to the graph. scientific data change gradually or progressively - they may
+form a definite relationship. In this case, do not join the points
+The transfer is very simple, take one value of the independent
+with a series of straight lines.
+variable and draw a (faint) line to coincide with its value along
+86
+
+--- Page 87 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+Fig 03. 29 - Straight Lines
+But try to draw a continuous smooth line.
+This probably means that the line only goes through some (not
+all) of the points - don’t worry; experimental or plotting errors
+can occur.
+There should be roughly the same number of points on both
+sides of the smooth curve. Sometimes, it is fairly obvious that a
+straight line is the (most) reasonable ‘fit’ to the point, and this
+is often the case for simple scientific experiments.
+Fig 03. 31 - Graphical of the thrust versus speed and drag of the
+airplane
+Fig 03. 30 - Curved Lines
+87
+
+--- Page 88 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+D = kV2
+GRAPHS AND y = mx, y = x2, y = x3, y = sin x,
+MATHEMATICAL y = ex, y = cos x, etc.etc
+y = mx+c
+FORMULA This topic ylo=okas xat 2 twheh sehraepea ainsds cohmareacctoernisstticasn otf. these func-
+tions wheny e=xpkrxe3sseedtc g.raphically, so that a simple link can be
+made with physical phenomena, which demonstrates similar
+y = sin x and y = cos x
+characteristics.
+r
+This course is designed for engineers, not mathematicians and ( radians),
+2
+so maths is viewed as a servant, not a master. Later, it will be When a mathematical function is plotted, certain shapes
+y = ex
+seen that one physical quantity will vary as another quantity evolve characteristic of that function. If, following an experi-
+varies, with the two linked by some mathematical law or equa- ment durin y g= w e h - ic x h data is gathered, that data creates similar
+tion. shapes, thyen= a1 p-reesu x mption linking formula and experiment
+may made.
+An example is that the drag force (D) varies according to the
+square of the airspeed (V). Expressed as a formula:
+D = kV2
+y = mx, y = x2, y = x3, y = sin x,
+y = ex, y = cos x, etc.etc
+This relationship can be plotted in graphical form, and it is rea-
+sonable to presume that ity w=oumldx b+e cof the same form as the
+maths relationship of y = xy2,= wahxer2ew y hise croenasidiserseodm ase ac founnsct-ant.
+tion of x y = f(x) y = kx3etc.
+There are many mathematyica=l fsuinncxtioanns,d exyam=pcloess mxight be:
+r
+( radians),
+2
+y = ex
+y = e-x
+88
+y = 1-ex
+
+--- Page 89 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+FUNCTION AND SHAPE Linear function y = mx where m is some constant coefficient
+The variable y is often described as a function of x. Here sever- has a straight line as the graph of the function. y = mx gives a
+al different functions are considered graphically. straight line, passing through the origin O. m is the slope of the
+graph (and = tan Q the greater the value of m, the steeper the
+slope. Obviously for a straight line, the slope is constant for a
+constant value of m. If m is -ve, the line slopes as shown. (if m
+= 0, the ‘line’ Y = 0 coincides with the x-axis).
+Fig 03. 32 - Functions
+89
+
+--- Page 90 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+D = kV2
+GRAPH OF A LINEAR E y Q = UA m T x IO , N y = x2, y = x3, y = sin x,
+y = ex, y = cos x, etc.etc
+y = mx+c
+y = ax2whereais someconstant.
+y = kx3etc.
+Linear function has always straight line as a graph. It may be
+y = sin x and y = cos x
+differently positioned and inclined in all possible directions,
+r
+but is always straight line(. radians),
+2
+y = ex
+y = e-x
+y = 1-ex
+Fig 03. 33 - Graphs of a linear function
+90
+
+--- Page 91 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+As an example, you can calculate the graph of y = -x + 5. Minus Graph of the quadratic function is a curve, known as a parab-
+in front of x gives us backwards inclination of the line. Calcu- ola. As ‘a’ increases the value of ax2 also increases. Note that
+lation shows that for x=0 y equals to 5 (0,5). For chosen x=2 y the slope is no longer constant. This is a function which is com-
+becomes 3 D (2,=3) k a V nd 2 so on. monly found in physical situations.
+y = mx, y = x2, y = x3, y = sin x,
+Note when value x2 is positive (ax2) parabola is turned up and
+GRAPH OF y T = H e E x , QU y A = DR c A o T s IC x, EQ et U c A .e T t IO c N when x2 value is negative (-ax)2 parabola is turned down.
+y = mx+c
+Positive parabola has a minimum point and negative parabola
+y = ax2whereais someconstant.
+has a minimum point defined. Parabola may or may not cross
+y = kx3etc. the x axis but always at some point crosses the y axis.
+y = sin x and y = cos x
+r
+( radians),
+2
+y = ex
+y = e-x
+y = 1-ex
+Fig 03. 34 - Parabola
+91
+
+--- Page 92 ---
+D = kV2
+D = kV2 y = mx, y = x2, y = x3, y = sin x,
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+y = mx, y = x2, y = x3, y = sin x, y = ex, y = cos x, etc.etc
+y = ex, y = cos x, etc.etc y = mx+c
+FUNCTION y = mx+c FUNCTION y = ax2whereais someconstant.
+y = ax2whereais someconstant. y = kx3etc.
+y = kx3etc. y = s
+D
+in
+=
+x
+k
+a
+V
+n2d y = cos x
+y = sin x and y = cos x r
+( rayd=iamnsx),, y = x2, y = x3, y = sin x,
+r 2
+This is the characteristic ( s2ha r p a e d . N ia o n te s t ) h , at the graph has Turn- Both of these func y tio = n e s yxar=e ree x p,etityiv=e bcuots thxe, weotrcd. uestecd to de-
+ing points, where the sloype= cehxanges from +ve to –ve and vice scribe such behav y io = ur e - yisx =pemrioxd+icc (in this case, the period is
+versa. y = e-x 360º or 2π radian y s) = . 1 y - = e ax x2whereais someconstant.
+y = 1-ex Note that the cosine grayph= ‘lkeaxd3s’e tthce. sine graph by 90º
+y = sin x and y = cos x
+r
+( radians),
+2
+y = ex
+when such behaviour oycc=ures - , x it is often referred to a ‘phase
+difference’. These graphys= ar1e -oftee x n found, particularly in elec-
+trical work.
+Fig 03. 35 - Turning Points
+Functions within this family are less likely to be encountered
+during this course.
+92
+
+--- Page 93 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+D = kV2
+y = mx, y = x2, y = x3, y = sin x,
+y = ex, y = cos x, etc.etc
+y = mx+c
+Fig 03. 37 - Function y = ex
+y = ax2whereais someconstant.
+Reference has already been made to the slope of a graph.
+y = kx3etc.
+Straight lines have a constant slope. Curves have variable
+Fig 03. 36 - Function y = syin = x sainnd xy =a cnods xy. = cos x
+slopes, and often include turning points (often termed maxi-
+r
+FUNCTION ( radians), ma and minima).
+2
+y = ex Mathematicians determine slopes by using a branch of math-
+ematics called ‘Calculus’ – a later topic. Engineers are often
+y = e-x interested in slope, because depending on the variables, the
+slope itself represents a physical quantity – more about this in
+y = 1-ex the Physics module.
+y = ex is known as the Exponential function. It is also often
+found in engineering applications. Some variations on the ba-
+sic function are also shown.
+93
+
+--- Page 94 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+AREA UNDER A GRAPH MONOGRAMS
+The area under a graph is also often useful and may represent
+a physical quantity.
+The need to show how two or more variables affect a value
+is common in the maintenance of aircraft. Nomographs are a
+special type of graph that enable you to solve complex prob-
+lems involving more than one variable.
+Most nomographs contain a great deal of information and re-
+quire the use of scales on three sides of the chart, as well as
+diagonal lines.
+In fact, some charts contain so much information, that it can
+be very important for you to carefully read the instructions
+before using the chart and to show care when reading infor-
+mation from the chart itself.
+Fig 03. 38 - Area Under a Graph
+Illustrated is a fairly typical graph of three variables: Distance,
+The area can be calculated by:
+Speed and Time.
+• Considering simple shapes and approximating
+If any two of the three variables are known, the approximate
+• Counting squares value of the third can be quickly determined. In this example,
+the dotted line indicates a known speed and time. The resulting
+• Using calculus
+distance travelled can be extracted from the graph at the point
+where these two dashed lines meet.
+94
+
+--- Page 95 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+Fig 03. 39 - Nomograph
+Whilst this nomograph is much too small for accurate compu-
+tation, it can be seen that when travelling at around 250 knots
+for three and a half hours, you would travel just under 1000
+nautical miles.
+Practical use of nomograph in aviation is the servicing of the
+shock strut of MLG or NLG, where the variables are the pres-
+sure in a shock strut, temperature of the air and the extent of
+the visible chrome of the shock strut.
+95
+
+--- Page 96 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+Fig 03. 40 - Shock strut pressure chart
+96
+
+--- Page 97 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+1.3(c) Simple trigonometry These ratio’s must be remembered!
+(Some students find the mnemonic “SohCahToa” to be helpful
+TRIGONOMETRY
+in this respect).
+Basic trigonometry involves expressing the angles of a right-an-
+These ratios are used very extensively in Maths and Science
+gled triangle in relation to lengths of the sides of the triangle.
+and very many modifications to the basic ratio have been
+evolved. How can these ratios be used in practice?
+Fig 03. 41 - Right-Angled Triangle
+The ratio of the opposite side length to the hypotenuse length
+in the diagram is termed the “sine” of the angle φ. Opposite q
+Sinz =
+Hypotenuse h
+Fig 03. 42 - Triangle Adjacent a
+Opposite q Cosz =
+Sinz = Hypotenuse h
+Hypotenuse h
+Consider a triangle with side lengths 3, 4, 5 OR 6,8,10 as shown.
+Opposite q
+Tanz =
+From our definition of sine, Adjacent h
+Adjacent a
+Cosz =
+Hypotenuse h
+3
+= 0.6sinez
+5
+Opposite q
+Tanz =
+Adjacent h
+4
+= 0.8cosinez
+5
+3 97
+= 0.6sinez 60 O
+5 = = tan15c
+D A
+4
+= 0.8cosinez 60
+5 TransposingD =
+tan15c
+60 O
+= = tan15c 1
+D A Theareaof thetriangle = a x AD(c)
+2
+60
+TransposingD = AD
+tan15c but sinC (2)
+b
+1
+Theareaof thetriangle = a x AD(c) Substituting(2)in(1)
+2
+1
+AD Theareaof thetriangle = a.bsinC
+but sinC (2) 2
+b
+Substituting(2)in(1)
+1
+Theareaof thetriangle = a.bsinC
+2
+
+--- Page 98 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+Now while it is obvious that ɸ is proportional to the side lengths, TRIGONOMETRICAL
+what is its actual value in degrees?
+CALCULATIONS &
+e.g. if 0.6 is input into a calculator and the sin-1 button is oper-
+ated, the screen display will be 36.86989765º.
+FORMULA
+The actual calculation of sine, cosine and tangent is beyond the
+scope of this course, but the values of each ratio and the cor-
+responding angle have been compiled in tabular form, but can
+INTRODUCTION
+be found using a scientific calculator.
+Earlier we considered the basic trigonometry functions. They
+If 0.8 is input and the cosin-1 button operated or if ¾ = 0.75 and
+can now be applied to practical situations.
+the tan-1 button operated the same 36·86989765 will be dis-
+played. Conversely, if 36·86989765 is input, and the sin button
+is operated, 0·6 will be displayed.
+Fig 03. 43 - Church Spine
+98
+
+--- Page 99 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+Example Example
+Opposite q
+Sinz =
+A church spine is knownH toy pbeo t6e0n muesteres hhigh. When the top
+is viewed through a theodoAlitdej, athcee nantgle baetween the line-of-
+Cosz =
+sight and the horizontal iHs 1y5pº.o Hteonwu fsaer is hthe theodolite from
+Opposite q
+the base of the s T pi a n n e? z = Opposite q Sinz = Hypotenuse h
+Adjacent h
+The distance D is the unknown quantity. Angle 15º and side Adjacent a
+3 Cosz =
+(height) 60m are k=no0w.n6.sinez Hypotenuse h
+5
+Opposite q
+Therefore, an eq4uation can be formed: Tanz =
+= 0.8cosinez Adjacent h
+5
+3
+60 O = 0.6sinez
+= = tan15c 5
+D A Fig 03. 1 - Example 1
+4
+= 0.8cosinez
+ABC is a5ny triangle.
+60
+TransposingD =
+tan15c Suppose 6 a 0 li=ne O AD= itsa dnra1w5nc so that angle BDA = angle CDA =
+D A
+90º. AD is now the height of the triangle.
+1 60
+Theareaof thetriangle = a x AD(c) TransposingD =
+Using the calculator, 60 ÷ tan 15 = 223.9 metres.2 tan15c
+AD 1
+This illustrates tbheu btasic psriinnCciple w(2h)en solving trigonometry Theareaof thetriangle = a x AD(c)
+b 2
+problems.
+Substituting(2)in(1)
+Sketch a diagram, if necessary, identify the kn1own and un- AD opposite
+Theareaof thetriangle = a.bsinC but sinC( )
+known values, and then express them in terms o2f the sides of b hypotenuse
+the triangle and the corresponding angle.
+Therefore AD = bsinC (2)
+The basic trigonometry ratios were explained with reference
+to a right-angled triangle. But their use can be extended for use
+Substituting(2)in(1)
+with any triangle.
+1
+Theareaof thetriangle = a.bsinC
+2
+99
+
+--- Page 100 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+Using a similar method, it can be shown that the area of a tri-
+angle is also:
+1 1
+b.sinA = a.c.sinB
+2 2
+1 1
+b.sinA = a.c.sinB
+1 1
+.b.c.sinA = a.c.sinB 2 2
+2 2
+Using these last two equations we can derive the sine formula. 1 1
+.b.c.sinA = a.c.sinB
+b.c.sinA = a.c.sinB 2 2
+b.sinA = a.sinB (dividingthroughby c) b.c.sinA = a.c.sinB
+1 1
+b.sinA = a.bc.sinB a b.sinA = a.sinB (dividingthroughby c)
+2 ` 2 =
+sinB sinA
+Fig 03. 44 - Example 2 b a
+` =
+b2 +ca2 - 2 sinB sinA
+1 Cos1A =
+.b.c.sinA = a.c.sinB
+2 2 2bc b2+ca2- 2
+Cos A =
+a2+c2-b2 2bc
+Cos B =
+2ac
+b.c.sinA = a.c.sinB
+a
+2+b2-c2 a2+c2-b2
+CosC = Cos B =
+2ab 2ac
+b.sinA = a.sinB (dividingthroughby c)
+a2+b2-c2
+b a CosC =
+` = 2ab
+sinB sinA
+b2+ca2- 2
+This formula can easily be proved by drawing AD perpendicu-
+Cos A =
+2bc
+lar to BC, and using Pythagoras).
+Another useful formula is the Cosine formula. Again, it applies
+to any triangle ABC and has three forms.
+a2+c2-b2
+Cos B =
+2ac
+a
+2+b2-c2
+CosC =
+2ab
+100
+
+--- Page 101 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+0° 30° 45° 60° 90°
+sissniinn iiicoccososi s iitattanann iii
+sini c0osi ta 11 n 1i 111 333 111 3331
+1 1 sin3i 1co 2 ss 22 iin 2 i t 22 anc 2 oi 2 s 2 sin ii 33 t 3 acno i si tani
+3
+2 2 1 2 1 3 31 11 1 3 11 3 1
+sini cosi ta1ni 3 30 3
+sini2 sicnoi2sic 2 ot 2 asnii32 tan 22i 23 2 3
+1 1 3 1
+3
+sini 2 cosi2 ta 21 ni 1 3 1 0 31 13 31 1 3 Not defined
+2 22 22 32 3
+1 1 3 1
+3
+2 2 2 3
+Fig 03. 45 - Trigonometry of the angles
+101
+
+--- Page 102 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+TRIGONOMETRY TABLE FOR SIN, COS AND TAN OF THE ANGLES
+A SIN(A) COS(A) Tan(A) A SIN(A) COS (A) Tan(A) A SIN(A) COS(A) Tan(A) A SIN(A) COS(A) Tan(A)
+0 0.0000 1.0000 0.0000 23 0.3907 0.9205 0.4245 46 0.7193 0.6947 1.0355 69 0.9336 0.3584 2.6051
+1 0.0175 0.9998 0.0175 24 0.4067 0.9135 0.4452 47 0.7314 0.6820 1.0724 70 0.9397 0.3420 2.7475
+2 0.0349 0.9994 0.0349 25 0.4226 0.9063 0.4663 48 0.7431 0.6691 1.1106 71 0.9455 0.3256 2.9042
+3 0.0523 0.9986 0.0524 26 0.4384 0.8988 0.4877 49 0.7547 0.6561 1.1504 72 0.9511 0.3090 3.0777
+4 0.0698 0.9976 0.0699 27 0.4540 0.8910 0.5095 50 0.7660 0.6428 1.1918 73 0.9563 0.2924 3.2709
+5 0.0872 0.9962 0.0875 28 0.4695 0.8829 0.5317 51 0.7771 0.6293 1.2349 74 0.9613 0.2756 3.4874
+6 0.1045 0.9945 0.1051 29 0.4848 0.8746 0.5543 52 0.7880 0.6157 1.2799 75 0.9659 0.2588 3.7321
+7 0.1219 0.9925 0.1228 30 0.5000 0.8660 0.5774 53 0.7986 0.6018 1.3270 76 0.9703 0.2419 4.0108
+8 0.1392 0.9903 0.1405 31 0.5150 0.8572 0.6009 54 0.8090 0.5878 1.3764 77 0.9744 0.2250 4.3315
+9 0.1564 0.9877 0.1584 32 0.5299 0.8480 0.6249 55 0.8192 0.5736 1.4281 78 0.9781 0.2079 4.7046
+10 0.1736 0.9848 0.1763 33 0.5446 0.8387 0.6494 56 0.8290 0.5592 1.4826 79 0.9816 0.1908 5.1446
+11 0.1908 0.9816 0.1944 34 0.5592 0.8290 0.6745 57 0.8387 0.5446 1.5399 80 0.9848 0.1736 5.6713
+12 0.2079 0.9781 0.2126 35 0.5736 0.8192 0.7002 58 0.8480 0.5299 1.6003 81 0.9877 0.1564 6.3138
+13 0.2250 0.9744 0.2309 36 0.5878 0.8090 0.7265 59 0.8572 0.5150 1.6643 82 0.9903 0.1392 7.1154
+14 0.2419 0.9703 0.2493 37 0.6018 0.7986 0.7536 60 0.8660 0.5000 1.7321 83 0.9925 0.1219 8.1443
+15 0.2588 0.9659 0.2679 38 0.6157 0.7880 0.7813 61 0.8746 0.4848 1.8040 84 0.9945 0.1045 9.5144
+16 0.2756 0.9613 0.2867 39 0.6293 0.7771 0.8098 62 0.8829 0.4695 1.8807 85 0.9962 0.0872 11.4301
+17 0.2924 0.9563 0.3057 40 0.6428 0.7660 0.8391 63 0.8910 0.4540 1.9626 86 0.9976 0.0698 14.3007
+18 0.3090 0.9511 0.3249 41 0.6561 0.7547 0.8693 64 0.8988 0.4384 2.0503 87 0.9986 0.0523 19.0811
+19 0.3256 0.9455 0.3443 42 0.6691 0.7431 0.9004 65 0.9063 0.4226 2.1445 88 0.9994 0.0349 28.6363
+20 0.3420 0.9397 0.3640 43 0.6820 0.7314 0.9325 66 0.9135 0.4067 2.2460 89 0.9998 0.0175 57.2900
+21 0.3584 0.9336 0.3839 44 0.6947 0.7193 0.9657 67 0.9205 0.3907 2.3559 90 1.0000 0.0000 ∞
+22 0.3746 0.9272 0.4040 45 0.7071 0.7071 1.0000 68 0.9272 0.3746 2.4751
+Fig 03. 46 - Trigonometry table for sin, cos and tan of the angles
+102
+
+--- Page 103 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+CONSTRUCTION OF If the radius OP has a length of 1 unit,
+TRIGONOMETRICAL AP
+sini = = AP(thelength AP)
+1
+CURVES tani =
+sini
+cosi
+If a graph of sine ÷ (length AP) is plotted against angle θ, the
+x = rcosi
+typical curve results.
+y = rsini
+If radius OP is rotated anticlockwise, the angle θ (POA) in-
+x2 +y2
+=
+r2
+creases and the value of sine ÷ als o increases (because AP in-
+y
+creases in relation to OP). tani =
+x
+a2 +b2
+=
+c2
+Fig 03. 48 - Graph of Sin θ
+Note the repetition every revolution (360º) and that the values
+of sine ÷ range between +1 and -1.
+Fig 03. 47 - Construction of Curves
+103
+
+--- Page 104 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+The graph for cosine θ is similar but displaced by 90º.
+Fig 03. 49 - Graph for Cosine θ
+The graph for tangent θ is deduced from the other two curves
+AP
+sini = = AP(thelength AP)
+1
+sini
+tani =
+cosi Fig 03. 2 - Graph for Tangent θ
+x = rcosi
+At 90º and 270º, the valuye =ofr tsainn θi becomes infinity. VALUES IN 4 QUADRANTS
+x2 +y2
+=
+r2
+Inspection of the sine and cosine curves show that the values
+y change from +ve to -ve to +ve etc., as angle θ increases. It is
+tani =
+x
+important to have an idea how these changes are linked to the
+a2 +b2
+=
+c2
+approximate value of θ.
+This diagram shows how the values of sine, cosine and tan-
+gent take +ve or -ve values, depending with the value of θ,
+within one of the four quadrants.
+104
+
+--- Page 105 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+CO-ORDINATE GE- Example
+Suppose we had a right-angled triangle, sides and lengths 3, 4
+OMETRY
+and 5 units. We know that the angles are approximately 37º,
+53º and 90º.
+We might choose to place the triangle in our x, y plane, where
+point A is 2 units along the x axis, and 1 unit along the y axis.
+Geometry has previously considered certain well-known reg-
+The co-ordinates of point A then become (2.1).
+ular shapes, e.g. circles, rectangles and triangles, and studied
+their properties. These studies have considered the shape in
+isolation, i.e. without reference to any particular datum.
+Co-ordinate geometry extends these studies by introducing
+‘Datums’, and then expressing the position of the significant
+features of shapes with reference to their datum. The datums
+we chose are usually the x, y, z axes we use in graphs.
+Fig 03. 51 - Example 1
+As long as AC is drawn parallel to the x-axis, point C becomes
+(6.1) and point B becomes (6.4). If we introduce point D as the
+mid-point along AB, it is clear that the co-ordinates of D are (4,
+2.5). If we were to fix point A, but rotate the triangle, the co-or-
+dinates of B and C would change, even though the length of the
+side remains unchanged.
+Fig 03. 50 - Datums 1
+105
+
+--- Page 106 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+POLAR / RECTAN-
+GULAR CO-ORDI-
+NATES
+INTRODUCTION
+In the previous chapter, the concept expressing geometrical
+shapes by using (x, y) co-ordinates was considered.
+Fig 03. 52 - Example 2
+Point C moves from (6.1) to become (5.46, 3) and point B
+moves from (6.4) to become (3.96, 5.56).
+Fig 03. 53 - Rectangular Co-ordinates
+Because their position is established with reference to the two
+axes x and y, where the intersection of the two reference val-
+106
+
+--- Page 107 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+ues completes a rectangle, such co-ordinate is known as Rect- This method of expressing position(s) in terms of r and φ is
+angular Co-ordinates (we showed them as Cartesian Co-or- known as the Polar co-ordinate system. (r, theta)
+dinates).
+Fig 03. 55 - Polar Co-ordinate System
+Fig 03. 54 - Cartesian Co-ordinates
+Another co-ordinate system exists, which uses a different sys-
+tem of datums. In this system, the datums are the origin, point
+O and the x axis, and the position A, which was expressed as
+(2, 1) using (x y) co-ordinate will now be expressed in terms
+of the distance from O (the ‘r’ co-ordinate) and the angular
+displacement of the line OA with reference to the x axis (the
+co-ordinate). Angular displacement can pre presented in radi-
+ans (rad) or in angles (°).
+107
+
+--- Page 108 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+AP
+sini = = AP(thelength AP)
+1
+When converting between coordinate systems the following
+sini
+relatationnish=ips are helpful to remember:
+cosi
+x = rcosi
+y = rsini
+x2+y2 = r2
+y
+tani = Fig 03. 57 - Polar coordinates presentation in radians
+x
+a2+b2 = c2
+Fig 03. 56 - Conversion between Cartesian and Polar systems
+As an example, the point in polar system has coordinates (4,π)
+or (4,180°) but in Cartesian system it is (-4,0).
+The point (5,π/3) or (5,60°) in Polar system is in Cartesian sys-
+tem presented as (3,4).
+Fig 03. 58 - Polar coordinates presentation in in degrees of a circle
+108
+
+--- Page 109 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+For the conversion of polar coordinates into the Cartesian co-
+ordinates the Pythagora
+s
+s’
+i n
+Thieo
+=
+reAmP ca
+=
+n
+A
+b
+P
+e o
+(
+f
+t h
+a
+e
+gr
+l
+e
+e
+a
+n
+t
+g
+h
+t
+e
+h
+lp
+A
+. I
+P
+t i
+)
+s
+1
+one of the basic rules for calculation of different right angle
+sini
+triangle constructions int aevneiry
+=
+day life.
+cosi
+Pythagoras’ Theorem is named after the ancient Greek math-
+x = rcosi
+ematician, Pythagoras (~500 B.C.). This theorem is used to find
+y = rsini
+the third side of any right triangle when two sides are known.
+The Pythagoras’ Theoremx2 s+tatye 2 s t=hart: 2
+y
+tani =
+x
+a2 +b2
+=
+c2
+Where c = the hypotenuse of a right triangle,
+a is one side of the triangle and
+b is the other side of the triangle.
+c is the hypotenuse
+- It is the longest side
+- It is always opposite the right angle
+a and b are the two shorter sides
+- They are always adjacent to the right
+angle
+Fig 03. 59 - Pythagoras‘ Theorem
+109
+
+--- Page 110 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+COMMON CONVERSIONS TABLE
+IMPERIAL SYSTEM SI (METRIC) IMPERIAL SYSTEM SI (METRIC)
+Distance
+1 Inch = 2.54 Centimeters 1 Centimeter = 0.394 Inches
+1 Foot = 0.3048 Meters 1 Meter = 3.28 Feet
+1 (Statute) Mile = 1.6093 Kilometers 1 Kilometer = 0.621 Miles
+Weight
+1 Pound = 0.45359 Kilograms 1 Kilogram = 2.204 Pounds
+Volume
+1 Quart = 0.94635 Liters 1 Liter = 1.057 Quarts
+1 Gallon = 3.7854 Liters 1 Liter = 0.264 Gallons
+Temperature
+0 Fahrenheit = (-)17.778 Celsius 0 Celsius = 33.8 Fahrenheit
+0 Fahrenheit = 255.37 Kelvin 0 Kelvin = (-)437.87 Fahrenheit
+Area
+1 Square Inch = 6.4516 Square Centimeters 1 Square Centimeter = 0.155 Square Inches
+1 Square Foot = 0.092903 Square Meters 1 Square Meter = 10.76391 Square Feet
+1 Square Mile = 2.59 Square Kilometers 1 Square Kilometer = 0.386 Square Miles
+Speed
+1 Foot Per Second = 0.3048 Meters Per Second 1 Meter Per Second = 3.281 Feet Per Second
+1 Mile Per Hour = 1.6093 Kilometers per Hour 1 Kilometer per Hour = 0.621 Miles Per Hour
+1 Knot = 1.852 Kilometers per Hour 1 Kilometer per Hour = 0.540 Knots
+110
+
+--- Page 111 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+METRIC SYSTEM OF PREFIXES
+PREFIX SYMBOL DECIMAL VALUE SCIENTIFIC COLLOQUIAL
+Quecto q 0.000 000 000 000 000 000 000 000 000 001 10-30 nonillionth
+ronto r 0.000 000 000 000 000 000 000 000 001 10-27 octillionth
+yocto y 0.000 000 000 000 000 000 000 001 10-24 septillionth
+zepto z 0.000 000 000 000 000 000 001 10-21 sextillionth
+atto a 0.000 000 000 000 000 001 10-18 quintillionth
+femto f 0.000 000 000 000 001 10-15 quadrillionth
+pico P 0.000 000 000 001 10-12 trillionth
+nano N 0.000 000 001 10-9 billionth
+micro n 0.000 001 10-6 millionth
+milli m 0.001 10-3 thousandth
+centi c 0.01 10-2 hundredth
+deci d 0.1 10-1 tenth
+- - 1 10° one
+deka da 10 101 ten
+hecto h 100 102 hundred
+kilo k 1 000 103 thousand
+mega M 1 000 000 106 million
+giga G 1 000 000 000 109 billion
+tera T 1 000 000 000 000 1012 trillion
+peta P 1 000 000 000 000 000 1015 quadrillion
+exa E 1 000 000 000 000 000 000 1018 quintillion
+zetta Z 1 000 000 000 000 000 000 000 1021 sextillion
+yotta Y 1 000 000 000 000 000 000 000 000 1024 septillion
+ronna R 1 000 000 000 000 000 000 000 000 000 1027 octillion
+quetta Q 1 000 000 000 000 000 000 000 000 000 000 1030 nonillion
+111
+
+--- Page 112 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+AREA FORMULAS VOLUME FORMULAS
+OBJECT VOLUME
+OBJECT AREA FORMULA
+Rectangular Solid LWH
+A = LW
+Rectangle Length x Width
+AA ==LLWW
+AA==LLWW s2
+Squ - are Le S n i g d t e h x x S W id i e dth A A = = A A L L A A A A A A A A A W W = = = = = = = = = = = L S L S L S 1 L L W L S 2W W 2 2 W W W 2 BH Cy C l u in b d e er r s s 2 2 r r 42 r rH 2 r H 3
+Pa T r T r a r a l i l p a e e n lo z g g o l r e id am ½ ½ L x x e ( n ( b B g a a H t s h s e e e i x 1 g + x h H b H t e a e i s g i e g h 2 h t ) t x ) A A A A A = = = = = A A A A A S L r A A A A A A 1 1 2 2 A A A A A A A A A AA A A A A A A A A A A A A A H 2 = = = = = r ( B = = = = = = = = = = = = = = = = = = = = = = = = = b 2 = = = = = HL r r 1 1 L L S L 2 2 1 1 1 2 L S L 1 1 2 2 L L r r r r 1 1 1 2 2 2 2 S L r 1 1 2 2 H L r r 1 1 W W H 2 2 2 + W H 2 r a B ( H H B ( H 2 B ( H r a r a ( B ( r b B ( b 2 r a B ( b b H H b b b2 2 b H b b 2 1 b H 2 H b 1 H 1 1 2 1 1 + + ) + + + + + H b b b b b b b 2 2 2 2 2 ) ) 2 ) ) ) ) H ) H H H H H H S C p o h n e e re r s 1 4 3 3 r 1 1 4 4 3 3 3 3 2 r r r r r r r r 1 3 3 2 r r 2 H r r r r r 3 2 H 3 3 2 2 H r H H 2H
+Circle π x radius2 A
+A
+=
+=2r r
+r
+a2b1 2
+A = rab
+A
+A
+=
+=
+r rr
+a
+2
+b
+π x semi-axis a x
+Ellipse A = rab
+semi-axis b
+112
+
+--- Page 113 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+FUNCTIONS OF NUMBERS
+SQUARE CUBE SQUARE CUBE
+NUMBER SQUARE CUBE CIRCUM- FERENCE AREA NUMBER SQUARE CUBE CIRCUM-FERENCE AREA
+ROOT ROOT ROOT ROOT
+Number N N Square Cube Circumference of a Area of a Number Squared Cubed Square Cube Circumference of a Area of a
+(N) Squared Cubed Root of RNo(otN o)f Circle with Diame- Circle with Root of RNo(otN o)f Circle with Diame- Circle with
+(N2) (N3) N( N) N(3 N) ter = N Diameter =N N( N) N(3 N) ter = N Diameter =N
+N(3 N) N(3 N)
+1 1 1 1.000 1.000 3.142 0.785 26 676 17576 5.099 2.963 81.681 530.93
+2 4 8 1.414 1.260 6.283 3.142 27 729 19683 5.196 3.000 84.823 572.55
+3 9 27 1.732 1.442 9.425 7.069 28 784 21952 5.292 3.037 87.965 615.75
+4 16 64 2.000 1.587 12.566 12.566 29 841 24389 5.385 3.072 91.106 660.52
+5 25 125 2.236 1.710 15.708 19.635 30 900 27000 5.477 3.107 94.248 706.86
+6 36 216 2.449 1.817 18.850 28.274 31 961 29791 5.568 3.141 97.389 754.77
+7 49 343 2.646 1.913 21.991 38.484 32 1024 32768 5.657 3.175 100.531 804.25
+8 64 512 2.828 2.000 25.133 50.265 33 1089 35937 5.745 3.208 103.672 855.30
+9 81 729 3.000 2.080 28.274 63.617 34 1156 39304 5.831 3.240 106.814 907.92
+10 100 1000 3.162 2.154 31.416 78.540 35 1225 42875 5.916 3.271 109.956 962.11
+11 121 1331 3.317 2.224 34.558 95.033 36 1296 46656 6.000 3.302 113.097 1017.88
+12 144 1728 3.464 2.289 37.699 113.01 37 1369 50653 6.083 3.332 116.239 1075.21
+13 169 2197 3.606 2.351 40.841 132.73 38 1444 54872 6.164 3.362 119.380 1134.11
+14 196 2744 3.742 2.410 43.982 153.94 39 1521 59319 6.245 3.391 122.522 1194.59
+15 225 3375 3.873 2.466 47.124 176.71 40 1600 64000 6.325 3.420 125.664 1256.64
+16 256 4096 4.000 2.520 50.265 201.06 41 1681 68921 6.403 3.448 128.805 1320.25
+17 289 4913 4.123 2.571 53.407 226.98 42 1764 74088 6.481 3.476 131.947 1385.44
+18 324 5832 4.243 2.621 56.549 254.47 43 1849 79507 6.557 3.503 135.088 1452.20
+19 361 6859 4.359 2.668 59.690 283.53 44 1936 85184 6.633 3.530 138.230 1520.53
+20 400 8000 4.472 2.714 62.832 314.16 45 2025 91125 6.708 3.557 141.372 1590.43
+21 441 9261 4.583 2.759 65.973 346.36 46 2116 97336 6.782 3.583 144.513 1661.90
+22 484 10648 4.690 2.802 69.115 380.13 47 2209 103823 6.856 3.609 147.655 1734.94
+23 529 12167 4.796 2.844 72.257 415.48 48 2304 110592 6.928 3.634 150.796 1809.56
+24 576 13824 4.899 2.885 75.398 452.39 49 2401 117649 7.000 3.659 153.938 1885.74
+25 625 15625 5.000 2.924 78.540 490.87 50 2500 125000 7.071 3.684 157.080 1963.49
+113
+
+--- Page 114 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+FUNCTIONS OF NUMBERS (CONTINUATION)
+SQUARE CUBE SQUARE CUBE
+NUMBER SQUARE CUBE CIRCUM-FERENCE AREA NUMBER SQUARE CUBE CIRCUM-FERENCE AREA
+ROOT ROOT ROOT ROOT
+Number N N Square Cube Circumference of a Area of a Number Squared Cubed Square Cube Circumference of a Area of a
+(N) Squared Cubed Root of RNo(otN o)f Circle with Diame- Circle with Root of RNo(otN o)f Circle with Diame- Circle with
+(N2) (N3) N( N) N(3 N) ter = N Diameter =N N( N) N(3 N) ter = N Diameter =N
+N(3 N) N(3 N)
+51 2601 132651 7.141 3.708 160.221 2042.82 76 5776 438976 8.718 4.236 238.761 4536.46
+52 2704 140608 7.211 3.733 163.363 2123.71 77 5929 456533 8.775 4.254 241.902 4656.62
+53 2809 148877 7.280 3.756 166.504 2206.18 78 6084 474552 8.832 4.273 245.044 4778.36
+54 2916 157464 7.348 3.780 169.646 2290.22 79 6241 493039 8.888 4.291 248.186 4901.67
+55 3025 166375 7.416 3.803 172.787 2375.83 80 6400 512000 8.944 4.309 251.327 5026.54
+56 3136 175616 7.483 3.826 175.929 2463.01 81 6561 531441 9.000 4.327 254.469 5152.99
+57 3249 185193 7.550 3.849 179.071 2551.76 82 6724 551368 9.055 4.344 257.610 5281.01
+58 3364 195112 7.616 3.871 182.212 2642.08 83 6889 571787 9.110 4.362 260.752 5410.60
+59 3481 205379 7.681 3.893 185.354 2733.97 84 7056 592704 9.165 4.380 263.894 5541.76
+60 3600 216000 7.746 3.915 188.495 2827.43 85 7225 614125 9.220 4.397 267.035 5674.50
+61 3721 226981 7.810 3.937 191.637 2922.46 86 7396 636056 9.274 4.414 270.177 5808.80
+62 3844 238328 7.874 3.958 194.779 3019.07 87 7569 658503 9.327 4.431 273.318 5944.67
+63 3969 250047 7.937 3.979 201.062 3117.24 88 7744 681472 9.381 4.448 276.460 6082.12
+64 4096 262144 8.000 4.000 3216.99 3216.99 89 7921 704969 9.434 4.465 279.602 6221.13
+65 4225 274625 8.062 4.021 204.203 3318.30 90 8100 729000 9.487 4.481 282.743 6361.72
+66 4356 287496 8.124 4.041 210.487 3421.19 91 8281 753571 9.539 4.498 285.885 6503.88
+67 4489 300763 8.185 4.062 3525.65 3525.65 92 8464 778688 9.592 4.514 289.026 6647.60
+68 4624 314432 8.246 4.082 213.628 3631.68 93 8649 804357 9.644 4.531 292.168 6792.90
+69 4761 328509 8.307 4.102 216.770 3739.28 94 8836 830584 9.695 4.547 295.309 6939.77
+70 4900 343000 8.367 4.121 219.911 3848.45 95 9025 857375 9.747 4.563 298.451 7088.21
+71 5041 357911 8.426 4.141 223.053 3959.19 96 9216 884736 9.798 4.579 301.593 7238.22
+72 5184 373248 8.485 4.160 226.194 4071.50 97 9409 912673 9.849 4.595 304.734 7389.81
+73 5329 389017 8.544 4.179 229.336 4185.38 98 9604 941192 9.900 4.610 307.876 7542.96
+74 5476 405224 8.602 4.198 232.478 4300.84 99 9801 970299 9.950 4.626 311.017 7697.68
+75 5625 421875 8.660 4.217 235.619 4417.86 100 10000 1000000 10.000 4.642 314.159 7853.98
+114
+
+--- Page 115 ---
+MODULE 1 // MATHEMATICS // GEOMETRY
+SUNTECH
+TABLE OF VALUES FOR SINE, COSINE AND TANGENT OF RIGHT ANGLES 0-90°
+A SIN(A) COS(A) TAN(A) A SIN(A) COS (A) TAN(A) A SIN(A) COS(A) TAN(A) A SIN(A) COS(A) TAN(A)
+0 0.0000 1.0000 0.0000 23 0.3907 0.9205 0.4245 46 0.7193 0.6947 1.0355 69 0.9336 0.3584 2.6051
+1 0.0175 0.9998 0.0175 24 0.4067 0.9135 0.4452 47 0.7314 0.6820 1.0724 70 0.9397 0.3420 2.7475
+2 0.0349 0.9994 0.0349 25 0.4226 0.9063 0.4663 48 0.7431 0.6691 1.1106 71 0.9455 0.3256 2.9042
+3 0.0523 0.9986 0.0524 26 0.4384 0.8988 0.4877 49 0.7547 0.6561 1.1504 72 0.9511 0.3090 3.0777
+4 0.0698 0.9976 0.0699 27 0.4540 0.8910 0.5095 50 0.7660 0.6428 1.1918 73 0.9563 0.2924 3.2709
+5 0.0872 0.9962 0.0875 28 0.4695 0.8829 0.5317 51 0.7771 0.6293 1.2349 74 0.9613 0.2756 3.4874
+6 0.1045 0.9945 0.1051 29 0.4848 0.8746 0.5543 52 0.7880 0.6157 1.2799 75 0.9659 0.2588 3.7321
+7 0.1219 0.9925 0.1228 30 0.5000 0.8660 0.5774 53 0.7986 0.6018 1.3270 76 0.9703 0.2419 4.0108
+8 0.1392 0.9903 0.1405 31 0.5150 0.8572 0.6009 54 0.8090 0.5878 1.3764 77 0.9744 0.2250 4.3315
+9 0.1564 0.9877 0.1584 32 0.5299 0.8480 0.6249 55 0.8192 0.5736 1.4281 78 0.9781 0.2079 4.7046
+10 0.1736 0.9848 0.1763 33 0.5446 0.8387 0.6494 56 0.8290 0.5592 1.4826 79 0.9816 0.1908 5.1446
+11 0.1908 0.9816 0.1944 34 0.5592 0.8290 0.6745 57 0.8387 0.5446 1.5399 80 0.9848 0.1736 5.6713
+12 0.2079 0.9781 0.2126 35 0.5736 0.8192 0.7002 58 0.8480 0.5299 1.6003 81 0.9877 0.1564 6.3138
+13 0.2250 0.9744 0.2309 36 0.5878 0.8090 0.7265 59 0.8572 0.5150 1.6643 82 0.9903 0.1392 7.1154
+14 0.2419 0.9703 0.2493 37 0.6018 0.7986 0.7536 60 0.8660 0.5000 1.7321 83 0.9925 0.1219 8.1443
+15 0.2588 0.9659 0.2679 38 0.6157 0.7880 0.7813 61 0.8746 0.4848 1.8040 84 0.9945 0.1045 9.5144
+16 0.2756 0.9613 0.2867 39 0.6293 0.7771 0.8098 62 0.8829 0.4695 1.8807 85 0.9962 0.0872 11.4301
+17 0.2924 0.9563 0.3057 40 0.6428 0.7660 0.8391 63 0.8910 0.4540 1.9626 86 0.9976 0.0698 14.3007
+18 0.3090 0.9511 0.3249 41 0.6561 0.7547 0.8693 64 0.8988 0.4384 2.0503 87 0.9986 0.0523 19.0811
+19 0.3256 0.9455 0.3443 42 0.6691 0.7431 0.9004 65 0.9063 0.4226 2.1445 88 0.9994 0.0349 28.6363
+20 0.3420 0.9397 0.3640 43 0.6820 0.7314 0.9325 66 0.9135 0.4067 2.2460 89 0.9998 0.0175 57.2900
+21 0.3584 0.9336 0.3839 44 0.6947 0.7193 0.9657 67 0.9205 0.3907 2.3559 90 1.0000 0.0000
+22 0.3746 0.9272 0.4040 45 0.7071 0.7071 1.0000 68 0.9272 0.3746 2.4751
+115

@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { recordAttendance } from '@/lib/actions/instructor'
-import { Check, X, Clock, AlertCircle, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { Check, X, Clock, AlertCircle, Loader2, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED'
@@ -37,8 +38,9 @@ export default function AttendanceRow({
           status: newStatus,
         })
         setStatus(newStatus)
-      } catch (error) {
-        console.error('Failed to update attendance:', error)
+      } catch (err) {
+        console.error('Failed to update attendance:', err)
+        toast.error('Failed to update attendance')
       }
     })
   }
@@ -46,7 +48,7 @@ export default function AttendanceRow({
   const statuses: {
     value: AttendanceStatus
     label: string
-    icon: any
+    icon: LucideIcon
     color: string
     activeColor: string
   }[] = [
@@ -54,7 +56,8 @@ export default function AttendanceRow({
       value: 'PRESENT',
       label: 'Present',
       icon: Check,
-      color: 'hover:bg-green-50 text-slate-400 hover:text-green-600',
+      color:
+        'hover:bg-green-50 text-slate-400 dark:text-slate-300 dark:text-slate-300 hover:text-green-600',
       activeColor: 'bg-green-500 text-white',
     },
     {

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, type Resolver } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2, DollarSign, Users, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,9 +22,10 @@ import { createExamPoolSchema } from '@/lib/validation/schemas'
 import { ExamEvent } from '@prisma/client'
 import { Checkbox } from '@/components/ui/checkbox'
 import { EASA_MODULE_CODES } from '@/lib/constants/easa-modules'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface CreateExamPoolFormProps {
-  event: Omit<ExamEvent, 'minRevenueTarget'> & { minRevenueTarget: number | any }
+  event: Omit<ExamEvent, 'minRevenueTarget'> & { minRevenueTarget: number | null }
 }
 
 type ExamPoolFormValues = z.infer<typeof createExamPoolSchema>
@@ -49,6 +50,14 @@ export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
       seatPrice: 300,
       allowedModules: [],
     },
+  })
+
+  const { markDirty, markClean } = useFormDirty()
+
+  // Track form changes for unsaved changes warning
+  useEffect(() => {
+    const subscription = form.watch(() => markDirty())
+    return () => subscription.unsubscribe()
   })
 
   async function onSubmit(values: ExamPoolFormValues) {
@@ -76,10 +85,11 @@ export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
       }
 
       toast.success('Exam booking created successfully')
+      markClean()
       router.push(`/staff/exams/events/${event.id}`)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create exam booking')
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create exam booking')
     } finally {
       setIsLoading(false)
     }
@@ -95,7 +105,12 @@ export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
             <FormItem>
               <FormLabel htmlFor="pool-name">Booking Name</FormLabel>
               <FormControl>
-                <Input id="pool-name" placeholder="e.g., Morning Session A" autoComplete="off" {...field} />
+                <Input
+                  id="pool-name"
+                  placeholder="e.g., Morning Session A"
+                  autoComplete="off"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -279,7 +294,7 @@ export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
                               }}
                             />
                           </FormControl>
-                          <FormLabel htmlFor={checkboxId} className="font-normal cursor-pointer">
+                          <FormLabel htmlFor={checkboxId} className="cursor-pointer font-normal">
                             {moduleCode}
                           </FormLabel>
                         </FormItem>
@@ -304,7 +319,7 @@ export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
           </Button>
           <Button
             type="submit"
-            className="bg-aerojet-blue px-8 hover:bg-aerojet-blue/90"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 px-8"
             disabled={isLoading}
           >
             {isLoading ? (

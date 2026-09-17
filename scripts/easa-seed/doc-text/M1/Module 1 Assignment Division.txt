@@ -1,0 +1,6 @@
+Assignment 04/04/2023
+Samuel Kwesi Hughes
+Question 1
+Dividing seven point eight two by ten involves shifting the digits from left to right. Seven is shifted from the tens position to the tenths position, eight is shifted from the tenths position to the hundredths position and last but not least, two is shifted from the hundredths position to the thousandths. Seven has been shifted from the tens to the tenths, leaving nothing at the tens but zero. So the answer is zero point seven eight two.
+Question 2
+Dividing zero point zero seven eight two by hundred requires shifting all the digits two places from their positions to the right. So seven which is in the hundredths position would be shifted to the ten thousandths position, eight which is in the thousandths position would be shifted to the hundred thousandths position, and two which is in the ten thousandths position would be shifted to the millionth position. So the answer is zero point zero zero zero seven eight two.

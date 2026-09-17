@@ -1,0 +1,163 @@
+--- Page 1 ---
+How are composite materials protected from lightening strikes?
+Composite materials are protected using:
+• Woven aluminium mesh
+• Aluminium foil sheets
+• Aluminised paint
+• Flame-sprayed aluminium
+• Bonding metal parts to composite surfaces
+Are HF air to air and air to ground ?
+Yes, HF (High Frequency) communication is used for both air-to-air and air-to-ground
+due to its long-range capability via ionospheric reflection
+Under water locator beacon is attached to what ?
+The ULB is attached to the front panel of the flight data recorder (FDR)
+What triggers the autoslat system?
+The autoslat system is triggered by stall warning conditions, when the aircraft
+approaches critical angle of attack
+What does cyclic and collective control ?
+Cyclic control: Changes the tilt of the rotor disc, controlling movement forward,
+backward, and sideways.
+Collective control: Changes pitch of all rotor blades simultaneously, controlling
+vertical movement (lift)
+What frequency uses 30khz - 300khz
+This range is categorized as Low Frequency (LF)
+How does autopilot control the center of gravity of the aircraft?
+
+--- Page 2 ---
+Autopilot adjusts the center of gravity by transferring fuel between main tanks and
+tail/stabiliser tanks to maintain proper CG during flight
+What does audio integration system consist of ?
+Audio Selection Panels (ACP)
+Audio Management Unit (AMU)
+Headsets, microphones, speakers
+Flight and cabin interphone systems
+Auto circuit breakers ...are they AC or DC or both?
+Auto circuit breakers are used in both AC and DC systems for circuit protection
+Difference between fuse and current limiter ?
+Fuse = fast-acting, low power, sensitive to quick surges.
+Current limiter = slow-acting, heavy-duty, tolerates short surges.
+What happens to engines at high altitude? What happens to density?
+Engines: Suffer performance loss due to lower oxygen levels.
+Density: Decreases with altitude, reducing lift and engine efficiency
+What structure runs along the length of the wing ?
+The main spar runs along the length of the wing, serving as its primary load-bearing
+structure
+What battery does emergency transmitter(ELT) use ?
+The ELT uses an internal battery pack designed to last at least 48 hours after
+activation. It is sealed and must be replaced according to the manufacturer’s interval
+label
+
+--- Page 3 ---
+What does yaw damper control?
+The yaw damper controls Dutch roll damping, turn coordination, and engine failure
+compensation by automatically adjusting the rudder based on inputs from a Yaw Rate
+Gyro and other sensors
+Purpose of yaw gyro?
+The yaw gyro senses yaw rate (rotations about the vertical axis) and provides signals to
+the rudder servo for damping Dutch roll and stabilizing the aircraft
+Why does gyro have tendencies to be unstable/ drift?
+Gyros drift due to the rotation of the Earth, mechanical imperfections, and friction in
+the gyro bearings. This apparent movement causes the gyro to slowly lose directional
+reference over time
+What is profile navigation and Lateral navigation ?
+ Lateral navigation controls the aircraft’s heading or track across the ground.
+ Profile navigation manages vertical flight, including climb, descent, altitude hold,
+and thrust management
+What length of antenna is most effective in relation to the frequency ?
+The most effective antenna length is one half the wavelength of the operating
+frequency
+Avionics world vs open world?
+In avionics, systems operate in a closed (controlled) world with certified and reliable
+hardware/software. The open world refers to generic computing systems where such
+strict certification is not required
+What kind of lights are no collision lights?
+Anti-collision lights include red/white rotating beacons and strobe lights used to
+make the aircraft more visible to others
+
+--- Page 4 ---
+What's the minimum number of satellites required for communication?
+For position determination using GPS, at least 4 satellites are required
+How are toilets flushed? Manually? Electrically? Pneumatically?
+Aircraft toilets are flushed electrically, pneumatically, or manually, depending on
+system design. Most modern systems use electric vacuum systems
+How is water supplied to galleys and toilets? Gravity? Pneumatic pump? Electric motor?
+Water is supplied by pumps—typically electric or pneumatic. Gravity systems are
+uncommon in pressurized aircraft
+When do you use rain repellant? On dry windscreen? On wet windscreen? On wet or dry
+windscreen?
+Rain repellent is used on a wet windscreen, not dry. It helps disperse rainwater more
+effectively
+Where is water separator located in the air cycle machine?
+The water separator is located after the air cycle machine’s turbine outlet, where it
+removes moisture from cooled air
+How many fire extinguishers are required for 150 passengers?
+A minimum of 3 portable fire extinguishers is required for 150 passengers, based on
+standard aviation safety requirements
+How does the pilot engage Go around?
+The pilot engages Go-Around (GA) mode by pressing the TO/GA switch (Take-Off/Go-
+Around), usually on the throttle lever. This commands the autopilot or autothrust to
+climb. On other aircraft types the throttles must be manually moved to fully forward
+position.
+
+--- Page 5 ---
+How is defueling done? Through suction and booster pump
+Defueling can be done by suction or using the aircraft's booster pumps in reverse
+mode
+What could cause the aircraft to fly outside the flight envelope ? Fault with egpws? Fault
+with Autopilot? Input of wrong CG?
+Possible causes:
+• Incorrect CG input
+• Autopilot malfunction
+• Aircraft Weight Computation
+• Aft Centre of Gravity out of tolerated limit
+• Alpha Floor Acquisition Wind Shear conditions
+• Operational Speed Computation
+• Lateral Asymmetry due of engine failure
+• Not typically EGPWS fault, since it’s warning-only
+Difference between GPWS and EGPWS?
+ GPWS uses barometric and radio altimeter data to detect terrain.
+ EGPWS enhances GPWS with GPS and terrain databases to predict terrain threats
+Role of thermal relief valve in hydraulics ?
+It protects the system from overpressure due to fluid expansion, especially from
+temperature increase
+What is class A cargo? (Page 824)
+Class A cargo compartments are only accessible during flight and designed to contain
+a fire without detection or extinguishing—limited to small, low-risk items
+Role of safety relief valves in cabin pressurization system?
+
+--- Page 6 ---
+They prevent overpressure in the cabin by venting excess air if the cabin pressure
+exceeds safe limits
+What makes up the IDG? CDU + AC generator
+The Integrated Drive Generator (IDG) consists of a Constant Speed Drive Unit (CDU)
+and an AC Generator
+What is power up test?
+A Power-Up Test checks the functionality of avionics systems and sensors during
+aircraft start-up
+How is VSI measured?
+The Vertical Speed Indicator (VSI) uses static pressure changes over time to
+calculate climb or descent rate
+What does RVDT do?
+A Rotary Variable Differential Transformer (RVDT) converts angular displacement into
+an electrical signal for systems like control surface position sensors
+What are the types of aircraft instruments?
+Pressure instruments (Altimeter, ASI, VSI)
+Gyroscopic instruments (Attitude, Heading, Turn Coordinator)
+Magnetic instruments (Compass)
+Advantage of fly by optics over fly by wire ?
+Fly-by-Optics uses fiber optic cables, which are immune to EMI and faster.
+Fly-by-Wire uses electrical signals, which are susceptible to interference but well
+established
+What is the colour of outer marker?
+
+--- Page 7 ---
+The outer marker is indicated by a blue light and 400 Hz tone
+Difference between static and rotary inverter ?
+Static inverter: No moving parts, more reliable, lighter.
+Rotary inverter: Uses a motor-generator, heavier, older technology
+What is done to fire extingushers periodically? Weighed? Pressure checked?
+They are periodically weighed to check for loss of contents and pressure-checked to
+ensure readiness
+How is windshear detected?
+Detected using systems like Radar, Inertial Navigation, and Angle of Attack Sensors,
+often integrated into the Flight Control Computers

@@ -1,4 +1,4 @@
-import { BookingDemandStatus, PaymentStatus } from '@prisma/client'
+import { BookingDemandStatus, EnrollmentStatus, PaymentStatus } from '@prisma/client'
 import { prismaUnfiltered as prisma } from '../lib/prisma/client'
 import bcrypt from 'bcryptjs'
 
@@ -66,7 +66,7 @@ async function main() {
         studentProfile: {
           create: {
             studentId,
-            enrollmentStatus: data.status as any,
+            enrollmentStatus: data.status as unknown as EnrollmentStatus,
             pathwayId: pathwaysMap[data.pathway],
           },
         },

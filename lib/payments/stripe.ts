@@ -8,7 +8,7 @@ export async function createPaymentIntent(amount: number, currency: string = 'eu
   return { id: `pi_placeholder_${Date.now()}`, client_secret: 'placeholder' }
 }
 
-export async function verifyWebhookSignature(payload: string, signature: string) {
+export async function verifyWebhookSignature(payload: string, _signature: string) {
   // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
   // return stripe.webhooks.constructEvent(payload, signature, process.env.STRIPE_WEBHOOK_SECRET!)
   console.log('[STRIPE] Webhook verification placeholder')

@@ -1,0 +1,263 @@
+--- Page 1 ---
+9
+AEROJET M2 SAMPLE SET
+1. Sound waves
+a. are transverse waves that are able to travel through a vacuum
+b. form part of the electromagnetic spectrum, with low or high frequencies
+c. are longitudinal waves that need a medium through which to travel
+2. An aircrafts microwave landing system is likely to operate at an approximate frequency of:
+a. 500 kHz
+b. 5000 kHz
+c. 5000 MHz
+3. Convert 14 stokes into m2/s, given that 1.0 x 10 4 stokes = 1 m2/s
+A. 1.4 x 10 4
+B. 1.4 x 10 –4
+C. 1.4 x 10 – 3
+4. The weight of a body as it is moved away from the center of the earth :
+a. decreases
+b. increases
+c. remains the same
+5. The 𝑝𝑜𝑢𝑛𝑑𝑎𝑙 is :
+1
+a. of a pound-force (lbf)
+32.15th
+b. 32.15 lbf
+c. 32.15 kg
+6. A missile having a mass of 30,000 kg is launched from sea level on a course for the moon. If the
+gravitational acceleration of the moon is one sixth that on earth, determine the weight of the
+missile on reaching the moon. Take g on earth =10 m/s 2
+a. 49,000 kg
+b. 49,000 N
+c. 4,000 N
+7. Complete the following statement: “A strut is a member in __________ and a tie is a member in
+___________”.
+a. torsion,compression
+b. tension,compression
+c. Compression,tension
+8. Momentum of a body is its :
+a. mass x acceleration
+b. force x velocity
+c. force x time
+9. A rocket launched into the earth’s atmosphere is subject to an acceleration due to gravity of
+5.2 m/s2. If the rocket has a mass of 120,000 kg. Determine the weight of the rocket in orbit.
+a. 642,000 N
+b. 23,077 N
+c. 624,000N
+10. An aircraft has four fuel tanks, two in each wing. The outer tanks each have a volume of 20 m3
+and the inner tanks each have a volume of 30 m3. The fuel used has a specific gravity (RD) of
+0.85. Determine the weight of fuel (at sea level) carried when the tanks are full.
+a. 850 kg
+b. 8500 kg
+c. 85000 kg
+11. A Boeing 757 is given an acceleration of 5 m/s2 by a thrust force of 800 kN. The mass of the
+Boeing 757 is :
+a. 10 000 kg
+b. 100 000 kg
+c. 1 Mkg
+
+--- Page 2 ---
+2 | P age
+12. What is the horizontal component of the 10 kN force in Figure 9.10?
+a. 0 kN
+b. 10 kN
+c. 100 kN
+Figure 9.10
+Figure 9.11
+13. A body of mass 80 kg is held in equilibrium by a force P acting parallel to the plane as indicated
+on Figure 9.11. Determine, the normal reaction R, ignoring the effects of friction.
+a. 784.8 N
+b. 679.7 N
+c. 392.4 N
+14. If the line of action of a force passes through the turning point, then
+a. it has turning effect
+b. the effect distance of the moment is zero
+c. the moment if infinite
+15. Resulting moment:
+a. is sum of ACWM and CWM
+b. is the difference in magnitude between the total CWM and the total ACWM.
+c. is the state of static equilibrium
+16. The moment of a couple = :
+a. turning moment
+b. force × distance between forces
+c. force divided by distance between the forces
+17. If the position of CG from the datum of an aircraft is 13.98 m and the sum of moments of the
+masses is 652,900 kgm then the total mass of the aircraft = :
+a. 46,700 kg
+b. 64,700 kg
+c. 56,700 kg
+
+--- Page 3 ---
+3 | P age
+18. Tending to make one part of the material slide over the other.
+a. Tensile stress
+b. Compressive stress.
+c. Shear stress
+19. A rectangular steel bar 10 mm × 16 mm × 200 mm long extends by 0.12 mm under a tensile
+force of 20 kN. Find the elastic modulus of the bar material.
+a. 208 GPa
+b. 208 Pa
+c. 208 MPa
+20. Tendency to break easily or suddenly with little or no prior extension
+a. ductility
+b. malleability
+c. brittleness
+21. Latent heat is heat added to a body :
+a. with change in temperature
+b. without change in temperature.
+c. without change in volume.
+22. sound travels fastest in :
+a. solids
+b. liquids
+c. gases
+23. intensity of sound may be measured in :
+a. square metre per watt
+b. watts square metre
+c. watts per square metre
+24. static interference is eliminated by
+a. lower frequencies
+b. VHF and above
+c. LW frequencies
+25. The energy of EM waves is in :
+a. inverse proportion to their frequency
+b. inverse proportion to their wavelength
+c. direct proportion to their wavelength
+26. When two wave sets are out of phase peaks and troughs meet and cancel one another, causing
+a. Interference
+b. constructive interference
+c. destructive interference
+27. In communication dead space is :
+a. the area that cannot receive either ground waves or the first sky wave
+b. is the first point from the transmitter at which the first sky wave can be reached
+c. where destructive interference occurs
+
+--- Page 4 ---
+4 | P age
+28. How does the magnitude of the refractive index affect the angle of rays as they enter materials
+having different refractive indices?
+a. The angle of the refracted ray increases as the light ray enters the material having the lower
+refractive index
+b. The angle of the refracted ray decreases as the light ray enters the material having the lower
+refractive index
+c. The angle of the refracted ray remains same as the light ray enters the material having the
+lower refractive index
+29. Define the principle focus, with respect to concave lenses.
+a. is the point at which all paraxial rays converge.
+b. is the point at which all paraxial rays after refraction, appear to diverge converge.
+c. is the neutral point.
+30. A convex lens is a :
+a. converging mirror
+b. diverging lens
+c. converging lens
+31. A light ray through the center of the lens (the optical center) P :,
+a. pass through the lens in a straight line deviated.
+b. pass through the lens in a straight line undeviated
+c. are blocked from passing through the lens.
+32. Convex lenses form :
+a. real, upright, small images of distant objects.
+b. real, inverted, small images of distant objects.
+c. upright, smaller, virtual images of objects placed in front of it.
+33. In using this lens equation :,
+a. when v is positive the image is real, when v is negative the image is real.
+b. when v is positive the image is real, when v is negative the image is virtual.
+c. when v is positive the image is virtual, when v is negative the image is real.
+34. An object x mm high stands on the principal axis of a concave mirror at a distance of 150 mm. If
+the focal length of the mirror is 50 mm, what is the nature of the image?
+a. Inverted and virtual
+b. Inverted and real
+c. Upright and real
+35. Snell’s law is :
+a. n sin θ = n sin θ
+1 i 2 r
+b. n sin θ = n sin θ
+2 i 1 r
+c. n sin θ = n sin θ
+1 i 2 i
+36. It applies the principle of the conservation of energy to open and closed thermodynamic
+systems.
+a. The first law of thermodynamics
+b. The second law of thermodynamics
+c. The third law of thermodynamics
+
+--- Page 5 ---
+5 | P age
+37. For a constant pressure process for a perfect gas :
+a. the boundary must move against an external resistance as heat is supplied and work is done
+by the fluid on its surroundings.
+b. the pressure must change against an external resistance as heat is supplied and work is
+done by the fluid on its surroundings.
+c. he boundary must be unchanged against an external resistance as heat is supplied and work
+is done by the fluid on its surroundings.
+38. A system where particular amounts of compressible fluids, such as vapours and gases, are
+surrounded by an identifiable boundary is a/an :
+a. closed system.
+b. Open system.
+c. thermodynamic system
+39. Under what circumstances enthalpy useful:
+a. In a closed system
+b. In an open system
+c. In a heat system.
+40. In reversible adiabatic
+a. no heat energy is transferred to or from the working fluid
+b. entropy is not zero
+c. heat energy is transferred to or from the working fluid
+41. Detail the forms of energy input and output for a generator.
+a. mechanical energy into electrical energy
+b. electrical energy into mechanical energy
+c. mechanical energy into electrical energy
+42. You are required to measure the jet pipe temperature of an aircraft that, under normal
+operating conditions, will not exceed 1200 0C. A most suitable temperature-measuring device
+will be :
+a. A resistance thermometer
+b. A thermocouple
+c. An alcohol thermometer
+43. A refrigerant is a __________ fluid which has a very _________ boiling temperature
+a. cryogenic, high
+b. cryogenic, low
+c. cryogenic, medium
+44. A body starts from rest and accelerates with constant acceleration of 2.0 m/s2 up to a speed of 9
+m/s. It then travels at 9 m/s for 15 s after which, it is retarded to a speed of 1 m/s. If the
+complete motion takes 24.5 s, find the total distance travelled.
+a. 177.75 m
+b. 180.25 m
+c. 200.50 m
+45. A light aircraft of mass 1965 kg accelerates from 160 to 240 kph in 3.5 s. Find the inertia force on
+the aircraft
+a. 12.46 N
+b. 12.46 MN
+c. 12.46 Kn
+
+--- Page 6 ---
+6 | P age
+46. The v-t graph in Figure 9.12 below represents ________ _________ _________.
+Figure 9.12
+a. Uniformly accelerated motion
+b. Constant velocity motion
+c. Uniformly decelerated motion
+47. Average velocity may be determined by dividing the ______________ by ______________.
+a. sum of velocities, 2
+b. area under graph, time interval
+c. sum of velocities, total number of velocities
+48. 1 rpm = :
+a. 2π/60 rad/s.
+b. 2πr/60 rad/s.
+c. πr2/60 rad/s.
+49. A pinion is required to move with an initial angular velocity of 31.4 rad/s and final angular
+velocity of 62.8 rad/s. If the increase takes place over 15 s, determine the linear acceleration of
+the rack. Assume a pinion radius of 180 mm.
+a. 0.377 ms -2
+b. 2.09 ms -2
+c. 3.77 ms -2
+50. Where resonance can be harmful
+a. All of b and c
+b. Bridges
+c. Pylons
+51. A body moves with SHM with amplitude 50 mm and frequency 2.5 Hz. Convert the frequency to
+rad/s.
+a. 5π rad/s
+b. 15 rad/s
+c. 20 rad/s
+52. Convert the angular velocity 12,500 rev/h into standard SI units:
+a. 21. 8 rad/s
+b. 1309 rad/s
+c. 218 rad /s
+END

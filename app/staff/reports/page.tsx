@@ -1,5 +1,7 @@
+
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
+import React from 'react'
 import {
   TrendingUp,
   Users,
@@ -14,7 +16,6 @@ import {
 } from 'lucide-react'
 import { Metadata } from 'next'
 import { format } from 'date-fns'
-import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -39,7 +40,7 @@ import {
   YoYRevenueChart,
   YoYEnrollmentChart,
   YoYPassRateChart,
-  YoYStudentChart
+  YoYStudentChart,
 } from './_components/YoYCharts'
 import {
   EnrollmentChart,
@@ -48,7 +49,7 @@ import {
   AttendanceChart,
   ExamTrendChart,
   ScoreDistributionChart,
-  Sparkline
+  Sparkline,
 } from './_components/ReportCharts'
 export const metadata: Metadata = { title: 'Reports | Staff Portal' }
 
@@ -58,7 +59,7 @@ interface MetricCardProps {
   title: string
   value: string | number
   growth?: number
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   color: string
   label: string
 }
@@ -129,7 +130,7 @@ async function OverviewTab({ period, from, to }: { period: string; from?: string
   if (period === 'custom') periodLabel = 'vs previous interval'
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1920px] duration-700">
+    <div className="mx-auto max-w-[1920px]">
       {/* Metric Cards Grid */}
       <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
@@ -802,7 +803,7 @@ async function AttendanceTab() {
                     </td>
                   </tr>
                 ) : (
-                  records.map((record: any) => (
+                  records.map((record) => (
                     <tr
                       key={record.id}
                       className="group transition-all duration-150 ease-out hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
@@ -1234,7 +1235,7 @@ async function YoYTab({ year }: { year?: number }) {
     change: string
     positive: boolean
     color: string
-    icon: any
+    icon: React.ComponentType<{ className?: string }>
   }> = [
     {
       label: 'Revenue',

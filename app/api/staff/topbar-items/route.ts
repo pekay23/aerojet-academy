@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 const STAFF_ROLES = ['SUPER_ADMIN', 'ADMIN', 'STAFF']
 

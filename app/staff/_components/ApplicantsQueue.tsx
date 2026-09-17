@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   Search,
-  Download,
   RefreshCw,
   UserCheck,
   Clock,
@@ -19,6 +19,9 @@ import { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers } from '../acti
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import ApplicantDetailDrawer from './ApplicantDetailDrawer'
+import Image from 'next/image'
+import { SortableTh } from '@/components/ui/sortable-th'
+import type { ApplicantCounts } from '@/lib/types/staff'
 
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
@@ -40,7 +43,15 @@ interface Applicant {
     idDocumentUrl?: string | null
     profilePhotoUrl?: string | null
   } | null
-  payments?: any[]
+  payments?: {
+    id: string
+    amount: number
+    currency: string
+    paymentMethod: string
+    status: string
+    proofUrl?: string | null
+    createdAt: string
+  }[]
 }
 
 const TABS = [
@@ -57,6 +68,7 @@ interface Counts {
 }
 
 export default function ApplicantsQueue({ initialCounts }: { initialCounts: Counts }) {
+  const searchParams = useSearchParams()
   const [applicants, setApplicants] = useState<Applicant[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -70,8 +82,9 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
 
   // Sync counts when parent provides updated values
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialCounts.all > 0) setCounts(initialCounts)
-  }, [initialCounts.all, initialCounts.pending_payment, initialCounts.pending_approval])
+  }, [initialCounts])
 
   // paged is now the raw applicants array since the server handles slicing
   const paged = applicants
@@ -85,9 +98,13 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
         page: page.toString(),
         limit: perPage.toString(),
       })
+      const sort = searchParams.get('sort')
+      const order = searchParams.get('order')
+      if (sort) params.set('sort', sort)
+      if (order) params.set('order', order)
       const res = await fetch(`/api/staff/applicants?${params}`)
       const data = await res.json()
-      
+
       if (data.success) {
         setApplicants(data.data ?? [])
         setTotal(data.meta?.total ?? 0)
@@ -101,9 +118,10 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
     } finally {
       setLoading(false)
     }
-  }, [tab, search, page, perPage])
+  }, [tab, search, page, perPage, searchParams])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [tab, search])
 
@@ -299,9 +317,9 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                   )}
                   <span className="relative z-10">
                     {t.label}
-                    {counts[t.key as keyof Counts] !== undefined && (
+                    {counts[t.key as keyof ApplicantCounts] !== undefined && (
                       <span className="ml-1 opacity-70">
-                        ({counts[t.key as keyof Counts] ?? 0})
+                        ({counts[t.key as keyof ApplicantCounts] ?? 0})
                       </span>
                     )}
                   </span>
@@ -349,16 +367,13 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                       )}
                     </button>
                   </th>
-                  {['Applicant', 'Registration Code', 'Date Applied', 'Fee Status', 'Action'].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="px-6 py-3 text-[10px] font-black tracking-wider text-slate-500 uppercase"
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
+                  <SortableTh sortKey="name" label="Applicant" />
+                  <SortableTh sortKey="code" label="Registration Code" />
+                  <SortableTh sortKey="date" label="Date Applied" />
+                  <SortableTh sortKey="fee" label="Fee Status" align="center" />
+                  <th className="px-6 py-3 text-[10px] font-black tracking-wider text-slate-500 uppercase">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -431,10 +446,12 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                           <div className="flex items-center gap-3">
                             <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
                               {applicant.profile?.profilePhotoUrl ? (
-                                <img
+                                <Image
                                   src={applicant.profile.profilePhotoUrl}
                                   alt={fullName}
-                                  className="h-full w-full object-cover"
+                                  fill
+                                  sizes="36px"
+                                  className="object-cover"
                                 />
                               ) : (
                                 initials
@@ -444,7 +461,9 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                               <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                                 {fullName}
                               </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">{applicant.email}</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {applicant.email}
+                              </p>
                             </div>
                           </div>
                         </td>

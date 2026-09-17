@@ -2,10 +2,11 @@ import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { format } from 'date-fns'
 import { sendPoolConfirmedEmail, sendPoolFailedEmail } from '@/lib/email/service'
+import { createNotification } from '@/lib/email/service'
 import { logAuditEvent } from '../audit/logger'
 import { captureFunds, releaseFunds } from '@/lib/wallet/operations'
 
-export async function confirmPoolInternal(poolId: string, tx: any) {
+export async function confirmPoolInternal(poolId: string, tx: Prisma.TransactionClient) {
   const memberships = await tx.poolMembership.findMany({
     where: { poolId, status: 'RESERVED' },
     include: {
@@ -72,6 +73,17 @@ export async function confirmPoolInternal(poolId: string, tx: any) {
     tx
   )
 
+  // In-app notifications for confirmed memberships
+  const notifPromises = memberships.map((m) =>
+    createNotification(tx, m.userId, {
+      type: 'POOL_UPDATE',
+      title: 'Exam Pool Confirmed',
+      message: `Your exam pool "${pool?.name}" has been confirmed. Your seat is now locked.`,
+      link: '/student/exams',
+    }).catch((err) => console.error('[NOTIFICATION ERROR]', err))
+  )
+  await Promise.allSettled(notifPromises)
+
   // Send emails (non-blocking, outside tx)
   for (const m of memberships) {
     const name = m.user.profile?.firstName || 'Student'
@@ -112,12 +124,16 @@ export async function failPool(poolId: string, txClient?: Prisma.TransactionClie
     if (!pool) return null
 
     const memberships = await tx.poolMembership.findMany({
-      where: { poolId, status: 'RESERVED' },
+      where: {
+        poolId,
+        status: { in: ['RESERVED', 'CONFIRMED'] },
+      },
       include: { user: { include: { profile: true } } },
     })
 
     for (const m of memberships) {
-      const releaseAmount = Number(m.amountReserved) || Number(pool.seatPrice) || 300
+      const releaseAmount =
+        Number(m.amountReserved) || Number(m.amountPaid) || Number(pool.seatPrice) || 300
 
       await releaseFunds(
         tx,
@@ -135,6 +151,7 @@ export async function failPool(poolId: string, txClient?: Prisma.TransactionClie
           where: { id: m.bookingId },
           data: {
             status: 'FAILED',
+            demandStatus: 'CANCELLED',
             refundAmount: releaseAmount,
             cancellationReason: 'Pool failed Go/No-Go criteria',
             cancelledAt: new Date(),

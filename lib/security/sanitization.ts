@@ -19,11 +19,11 @@ export function sanitizePhone(phone: string): string {
   return phone.replace(/[^\d+]/g, '')
 }
 
-export function sanitizeObject<T extends Record<string, any>>(obj: T): T {
+export function sanitizeObject<T extends Record<string, unknown>>(obj: T): T {
   const sanitized = { ...obj }
   for (const [key, value] of Object.entries(sanitized)) {
     if (typeof value === 'string') {
-      (sanitized as any)[key] = sanitizeInput(value)
+      ;(sanitized as Record<string, unknown>)[key] = sanitizeInput(value)
     }
   }
   return sanitized

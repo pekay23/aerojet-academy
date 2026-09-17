@@ -83,8 +83,8 @@ export default function PathwaySelector({ currency = 'EUR' }: { currency?: strin
       }
       router.refresh()
       router.push('/applicant/dashboard')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to lock pathway')
       setIsSubmitting(false)
       setIsConfirming(false)
     }

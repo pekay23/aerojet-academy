@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select'
 import { Wallet, Loader2, AlertCircle, FileCheck, X } from 'lucide-react'
 import { UploadButton } from '@/lib/uploads/uploadthing'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface ManualWalletAdjustmentDialogProps {
   userId: string
@@ -44,6 +45,8 @@ export default function ManualWalletAdjustmentDialog({
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  const { markDirty, markClean } = useFormDirty()
 
   const [action, setAction] = useState<'credit' | 'debit' | 'set_balance' | 'adjustment'>('credit')
   const [amount, setAmount] = useState<string>('')
@@ -85,12 +88,14 @@ export default function ManualWalletAdjustmentDialog({
       if (!res.ok) throw new Error(data.error || 'Failed to update wallet')
 
       toast.success(data.message || 'Wallet updated successfully')
+      markClean()
       setOpen(false)
       resetForm()
       onSuccess?.()
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update wallet'
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -120,16 +125,16 @@ export default function ManualWalletAdjustmentDialog({
         <Button
           variant="outline"
           size="sm"
-          className="flex h-8 items-center gap-1.5 rounded-lg border-slate-200 bg-white px-3 text-[10px] font-black tracking-widest text-aerojet-blue uppercase shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-600"
+          className="text-aerojet-blue flex h-8 items-center gap-1.5 rounded-lg border-slate-200 bg-white px-3 text-[10px] font-black tracking-widest uppercase shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-600"
         >
           <Wallet className="h-3.5 w-3.5" />
           Adjust Balance
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Wallet className="h-5 w-5 text-aerojet-blue" />
+            <Wallet className="text-aerojet-blue h-5 w-5" />
             Adjust Wallet: {userName}
           </DialogTitle>
           <DialogDescription className="sr-only">
@@ -154,10 +159,16 @@ export default function ManualWalletAdjustmentDialog({
             >
               Operation Type
             </Label>
-            <Select value={action} onValueChange={(val: any) => setAction(val)}>
+            <Select
+              value={action}
+              onValueChange={(val) => {
+                setAction(val as 'credit' | 'debit' | 'set_balance' | 'adjustment')
+                markDirty()
+              }}
+            >
               <SelectTrigger
                 id="action"
-                className="w-full rounded-xl border-slate-200 bg-white focus:ring-aerojet-blue dark:border-slate-800 dark:bg-slate-950"
+                className="focus:ring-aerojet-blue w-full rounded-xl border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
               >
                 <SelectValue placeholder="Select action" />
               </SelectTrigger>
@@ -184,8 +195,11 @@ export default function ManualWalletAdjustmentDialog({
               step="0.01"
               placeholder={isSetBalance ? 'Enter new balance' : '0.00'}
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="rounded-xl border-slate-200 focus:ring-aerojet-blue dark:border-slate-800"
+              onChange={(e) => {
+                setAmount(e.target.value)
+                markDirty()
+              }}
+              className="focus:ring-aerojet-blue rounded-xl border-slate-200 dark:border-slate-800"
               required
             />
           </div>
@@ -203,8 +217,11 @@ export default function ManualWalletAdjustmentDialog({
               name="description"
               placeholder="e.g. Cash payment received, Refund for course cancellation, Correction of previous error."
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="min-h-[80px] rounded-xl border-slate-200 focus:ring-aerojet-blue dark:border-slate-800"
+              onChange={(e) => {
+                setDescription(e.target.value)
+                markDirty()
+              }}
+              className="focus:ring-aerojet-blue min-h-20 rounded-xl border-slate-200 dark:border-slate-800"
               required={isDebit || action === 'adjustment'}
             />
           </div>
@@ -221,8 +238,11 @@ export default function ManualWalletAdjustmentDialog({
               name="reference"
               placeholder="e.g. Receipt #, Bank Tx ID"
               value={reference}
-              onChange={(e) => setReference(e.target.value)}
-              className="rounded-xl border-slate-200 focus:ring-aerojet-blue dark:border-slate-800"
+              onChange={(e) => {
+                setReference(e.target.value)
+                markDirty()
+              }}
+              className="focus:ring-aerojet-blue rounded-xl border-slate-200 dark:border-slate-800"
             />
           </div>
 
@@ -255,7 +275,8 @@ export default function ManualWalletAdjustmentDialog({
                   setUploading(false)
                 }}
                 appearance={{
-                  button: 'ut-ready:bg-slate-100 ut-ready:text-slate-600 ut-ready:border ut-ready:border-slate-200 ut-ready:rounded-xl ut-ready:text-xs ut-ready:font-bold ut-uploading:bg-slate-50 ut-uploading:text-slate-400',
+                  button:
+                    'ut-ready:bg-slate-100 ut-ready:text-slate-600 ut-ready:border ut-ready:border-slate-200 ut-ready:rounded-xl ut-ready:text-xs ut-ready:font-bold ut-uploading:bg-slate-50 ut-uploading:text-slate-400',
                   allowedContent: 'text-xs text-slate-400',
                 }}
               />
@@ -284,7 +305,7 @@ export default function ManualWalletAdjustmentDialog({
             </Button>
             <Button
               type="submit"
-              className="rounded-xl bg-aerojet-blue hover:bg-[#003d85] dark:bg-blue-600 dark:hover:bg-blue-700"
+              className="bg-aerojet-blue rounded-xl hover:bg-[#003d85] dark:bg-blue-600 dark:hover:bg-blue-700"
               disabled={loading || uploading}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

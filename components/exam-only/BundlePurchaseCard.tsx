@@ -14,10 +14,6 @@ export function BundlePurchaseCard() {
   const [isLoading, setIsLoading] = useState(true)
   const [purchasing, setPurchasing] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchPricing()
-  }, [])
-
   const fetchPricing = async () => {
     try {
       const res = await fetch('/api/applicant/exam-only/pricing')
@@ -29,6 +25,11 @@ export function BundlePurchaseCard() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchPricing()
+  }, [])
 
   const handlePurchase = async (bundleType: 'TWO_SEAT' | 'FOUR_SEAT') => {
     if (!confirm(`Purchase ${bundleType === 'TWO_SEAT' ? '2-Seat' : '4-Seat'} bundle?`)) return

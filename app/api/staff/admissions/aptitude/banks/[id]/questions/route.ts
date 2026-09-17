@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiCreated, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 
 const questionSchema = z.object({
   category: z.enum(['MATH', 'ENGLISH', 'ENGINEERING', 'LOGICAL_REASONING', 'PHYSICS']),
@@ -17,9 +18,9 @@ const questionSchema = z.object({
 })
 
 // GET /api/staff/admissions/aptitude/banks/[id]/questions
-export const GET = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await params
+  const { id } = (await ctx!.params) as { id: string }
 
   const questions = await prismaUnfiltered.aptitudeQuestion.findMany({
     where: { bankId: id },
@@ -31,9 +32,9 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: { param
 })
 
 // POST /api/staff/admissions/aptitude/banks/[id]/questions
-export const POST = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await params
+  const { id } = (await ctx!.params) as { id: string }
   const body = await req.json()
   const parsed = questionSchema.safeParse(body)
   if (!parsed.success) return apiError(parsed.error.issues[0].message)
@@ -46,7 +47,7 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: { para
     data: {
       ...parsed.data,
       bankId: id,
-    } as any,
+     } as Prisma.AptitudeQuestionUncheckedCreateInput,
   })
 
   return apiCreated(question)

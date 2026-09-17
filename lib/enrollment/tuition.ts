@@ -33,7 +33,7 @@ export async function bookTuitionSession(sessionId: string, userId: string) {
 
   return prisma.$transaction(async (tx) => {
     // 1. Direct charge to wallet
-    const chargeResult = await chargeWallet(
+    const _chargeResult = await chargeWallet(
       tx,
       userId,
       amountToCharge,

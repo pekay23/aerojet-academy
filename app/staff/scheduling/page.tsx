@@ -54,6 +54,14 @@ export default async function SchedulingPage() {
     }))
   }))
 
+  const pathwaysForClient = pathways.map((pathway) => ({
+    ...pathway,
+    academicTerms: pathway.academicTerms.map((term) => ({
+      ...term,
+      name: `Year ${term.yearNumber} Semester ${term.semesterNumber}`,
+    })),
+  }))
+
   const courses = coursesRaw.map((course) => ({
     ...course,
     price: Number(course.price),
@@ -63,7 +71,7 @@ export default async function SchedulingPage() {
   return (
     <div className="px-4 py-8 md:px-8">
       <SchedulingClient
-        pathways={pathways}
+        pathways={pathwaysForClient}
         programmes={programmes}
         licenseCategories={licenseCategories}
         courses={courses}

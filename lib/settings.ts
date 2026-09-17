@@ -14,6 +14,11 @@ export async function getSystemSetting(key: string, defaultValue: string = ''): 
   )()
 }
 
+export async function isPdfTemplateSystemEnabled(): Promise<boolean> {
+  const value = await getSystemSetting('pdf_template_system_enabled', 'false')
+  return value === 'true'
+}
+
 export async function updateSystemSetting(
   key: string,
   value: string,

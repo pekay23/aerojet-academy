@@ -1,0 +1,197 @@
+Introduction
+Corrosion is the gradual deterioration of a material due to chemical or electrochemical reaction with its environment. In aircraft maintenance, corrosion control is vital because structural integrity, system reliability, and safety can be compromised if left unchecked. Both ferrous and non-ferrous materials are used extensively in aircraft construction, and each type exhibits characteristic corrosion behaviour. Understanding these differences is essential for correct inspection, prevention, and repair.
+Corrosion in Ferrous Materials
+Ferrous materials, such as carbon steels and high-strength alloy steels, contain iron as their primary constituent.
+Common Types:
+Uniform Surface Rust: oxidation forming a general layer of iron oxide.
+Pitting: localised cavities penetrating the metal surface.
+Stress Corrosion Cracking (SCC): cracking due to combined tensile stress and corrosive environment.
+Galvanic Corrosion: when steel is in contact with a more noble metal in presence of an electrolyte.
+Causes: Moisture, salt (chlorides), acidic contaminants, and dissimilar metal contact accelerate attack. High-strength steels are more vulnerable to SCC, especially in marine or humid conditions.
+Corrosion in Non-Ferrous Materials
+Non-ferrous materials, such as aluminium alloys, magnesium alloys, and titanium, generally form protective oxide films but are not immune to attack.
+Aluminium Alloys:
+Pitting Corrosion is most common, often starting under paint or sealant.
+Exfoliation Corrosion occurs in rolled or extruded products, lifting layers of metal.
+Galvanic Corrosion when coupled to steel or copper.
+Magnesium Alloys:
+Highly anodic and corrode rapidly if unprotected, often showing as a white powdery deposit.
+Titanium:
+Excellent general corrosion resistance but may suffer from galvanic effects when coupled to less noble metals.
+Detection Methods
+Regular inspections are essential, especially in areas prone to moisture entrapment, exhaust deposits, or salt spray.
+Visual Inspection: The primary method, looking for discolouration, blistering, pitting, or flaking.
+Non-Destructive Testing (NDT): Eddy current or ultrasonic inspection to detect subsurface damage.
+Cleaning and Paint Removal: Sometimes required to expose hidden corrosion.
+Prevention and Control
+Design Measures: Drain holes, sealants, and choice of compatible metals reduce susceptibility.
+Protective Coatings: Primers, paints, anodising (for aluminium), plating (cadmium, zinc) for steels.
+Environmental Control: Hangar storage, regular washing, especially after saltwater exposure.
+Maintenance Practices: Prompt repair of paint damage, re-application of protective coatings, and removal of contaminants such as hydraulic fluid or exhaust residue.
+Cathodic Protection: For magnesium parts, sacrificial anodes may be used.
+Repair and Treatment
+Ferrous Materials: Remove corrosion by mechanical methods (wire brushing, abrasive pads) or chemical rust removers. Apply protective finish immediately after cleaning.
+Non-Ferrous Materials: Use non-metallic abrasive pads for aluminium and magnesium. For pitting, blend out damage within allowable limits from the Structural Repair Manual (SRM). Treat surfaces with conversion coatings (e.g., Alodine) before repainting.
+Conclusion
+Corrosion of ferrous and non-ferrous aircraft materials is an inevitable process but can be effectively managed through correct detection, prevention, and repair practices. Awareness of the differences in corrosion behaviour allows maintenance personnel to apply the most effective protective measures. Adherence to Aircraft Maintenance Manual (AMM) and SRM procedures ensures the continued airworthiness and safety of the aircraft.
+Introduction
+Aircraft component release to service is a critical process ensuring that only approved and airworthy parts are installed on an aircraft. This process covers new, repaired, overhauled, or inspected components, and includes verification of documentation, compliance with design standards, and proper certification. Special considerations apply to different categories such as approved components, standard parts, and PMA parts.
+Components and Approval Requirements
+An aircraft component is any part, assembly, or system intended for installation on an aircraft, excluding consumables like lubricants or cleaning fluids.
+Approved Sources: Components must be obtained from an approved production organisation (POA) or an approved maintenance organisation (Part-145).
+Authorised Release Certificate: New or maintained components must be accompanied by an EASA Form 1 (or equivalent FAA 8130-3, TCCA Form One), certifying conformity to approved design data and confirming they are in a condition for safe operation.
+Traceability: All components must be traceable back to their source, with complete historical and maintenance records where applicable.
+Standard Parts
+Standard parts are parts manufactured in complete compliance with a published standard, such as AN, MS, NAS, ISO, or national equivalents.
+Examples: Fasteners, nuts, bolts, washers, seals.
+Approval: They do not require an authorised release certificate but must meet the specifications stated in the applicable design data.
+Quality Assurance: Even though certification is not mandatory, standard parts must come from reputable suppliers with appropriate quality control to ensure conformity and airworthiness.
+Installation: Maintenance personnel must verify that standard parts meet the dimensional, material, and strength requirements of the aircraft type design.
+PMA (Parts Manufacturer Approval) Parts
+PMA parts are replacement or modification parts approved by the FAA (or equivalent authority) for installation on type-certificated aircraft.
+Approval Basis: PMA approval is granted when the part meets or exceeds the performance and quality of the original part under applicable airworthiness standards.
+Identification: PMA parts must be permanently and legibly marked with “FAA-PMA” and the manufacturer’s name or logo.
+Acceptance in EASA Environment: Under bilateral agreements, FAA-PMA parts may be accepted in EASA-registered aircraft if compliance with EASA requirements is demonstrated, often via supporting documentation and mutual acceptance provisions.
+Control in Maintenance: Engineering review may be required before installation to ensure compatibility and compliance with the aircraft’s type certificate.
+Release to Service Procedure
+Verify Documentation: Check that the part is accompanied by the correct authorised release certificate or equivalent documentation.
+Inspect Part: Ensure it is free from damage, corrosion, or defects, and matches the part number in the approved maintenance data.
+Check Applicability: Confirm that the part is correct for the specific aircraft model and configuration.
+Record Installation: Update technical logs, component control cards, and aircraft records as required.
+Certification: The installation and return to service must be signed off by appropriately licensed Part-66 certifying staff.
+Conclusion
+The release to service of aircraft components, whether they are approved components, standard parts, or PMA parts, is a controlled process aimed at ensuring airworthiness and regulatory compliance. Proper documentation, traceability, inspection, and adherence to approved data are essential. By following these procedures, maintenance organisations can ensure that only conforming, safe parts are installed, preserving the safety and reliability of the aircraft.
+Introduction
+Weight and balance is the relationship between the mass of an aircraft and the location of its centre of gravity (CG). Proper weight and balance control is essential for safe and efficient flight operations. Incorrect loading can result in reduced performance, control difficulties, or structural overload. The principles apply to all aircraft types, from light training aircraft to large commercial airliners.
+Basic Definitions
+Datum: A reference point, chosen by the manufacturer, from which all horizontal distances (arms) are measured.
+Arm: The horizontal distance from the datum to the CG of an item.
+Moment: The product of weight multiplied by arm, representing a turning effect around the datum.
+Centre of Gravity (CG): The point at which the aircraft’s total weight is considered to act.
+CG Limits: The forward and aft boundaries within which the CG must lie for safe operation.
+Weight Classifications
+Basic Empty Mass: The weight of the aircraft with fixed equipment, unusable fuel, and necessary operating fluids.
+Dry Operating Mass: Basic empty mass plus crew and equipment but excluding usable fuel and payload.
+Zero Fuel Mass (ZFM): The total mass of the aircraft excluding usable fuel.
+Maximum Take-Off Mass (MTOM): The maximum weight at which take-off is permitted.
+Maximum Landing Mass (MLM): The maximum weight allowed for landing without structural damage.
+Importance of Correct Weight
+Exceeding weight limits can cause:
+Increased take-off and landing distances.
+Reduced climb performance and cruise efficiency.
+Higher stall speeds and decreased manoeuvrability.
+Excessive structural loads on airframe and landing gear.
+Importance of Correct Balance
+CG location affects stability and control:
+Forward CG: Increases longitudinal stability but may require excessive nose-up trim, reducing climb performance and increasing stall speed.
+Aft CG: Reduces stability, can make recovery from stalls/spins more difficult, and may cause control over-sensitivity.
+Out-of-Limit CG: May render the aircraft uncontrollable or unsafe in certain phases of flight.
+Calculation of Weight and Balance
+List all items loaded – passengers, cargo, fuel, and equipment.
+Determine arms from the aircraft’s weight and balance data.
+Calculate moments by multiplying each weight by its arm.
+Sum total weight and total moments.
+Divide total moments by total weight to find CG position.
+Compare CG position with the aircraft’s CG envelope to confirm it is within limits.
+Maintaining Correct Weight and Balance in Service
+Load Sheets: Prepared before each flight to ensure compliance with limits.
+Modifications and Repairs: May change basic weight or CG; updated weighing is required.
+Periodic Weighing: Performed as per regulations or manufacturer’s instructions.
+Record Keeping: Aircraft weight schedule must be updated with every change affecting weight or balance.
+Conclusion
+Aircraft weight and balance characteristics are fundamental to safe flight. By maintaining weight within certified limits and ensuring the CG remains inside the specified envelope, pilots and engineers safeguard performance, controllability, and structural integrity. Accurate calculations, proper record keeping, and adherence to approved procedures are essential responsibilities in both aircraft operation and maintenance.
+Introduction
+Lightning strikes are a recognised hazard in aviation, with commercial aircraft typically experiencing at least one strike during their service life. Although modern aircraft are designed to safely conduct lightning energy around the structure and away from critical systems, a strike can still cause visible and hidden damage. Post-event inspections are essential to verify the aircraft’s continued airworthiness before returning it to service.
+Initial Actions
+Crew Report: The flight crew must report the suspected or confirmed strike, noting the time, location, flight phase, weather conditions, and any abnormal system indications.
+Maintenance Coordination: On arrival, maintenance personnel should review pilot reports and aircraft log entries, then refer to the Aircraft Maintenance Manual (AMM) or manufacturer’s lightning strike inspection procedure.
+Safety Precautions: Ensure the aircraft is electrically grounded and parked in a safe location before beginning the inspection.
+Typical Strike Areas and Damage
+Lightning usually enters at a forward extremity (e.g., radome, nose probe, wing tip) and exits at an aft extremity (e.g., tail cone, trailing edge). Potential damage includes:
+Burn marks, pitting, or small holes at entry/exit points.
+Delamination or scorching of composite panels.
+Damage to static dischargers, bonding straps, and aerials.
+Localised melting or erosion of metal edges.
+External Inspection
+Fuselage and Nose: Examine radome, nose cone, and fuselage skin for evidence of entry points.
+Wings and Tail: Check leading and trailing edges, winglets, and control surface tips for burn marks or surface degradation.
+Undercarriage and Protrusions: Inspect landing gear doors, antennae, and probes for pitting or scorching.
+Fasteners and Joints: Look for arcing marks or discolouration, especially near seams or bonding points.
+Internal Inspection
+If damage is found externally or suspected internally:
+Remove interior panels to inspect structure, wiring looms, and system components in the strike path.
+Check fuel tanks and associated plumbing for arc marks or heat damage.
+Inspect composite structures for hidden delamination using tap testing or NDT methods.
+Systems and Functional Checks
+Electrical and Avionics: Test communication, navigation, and flight control systems for anomalies.
+Bonding and Continuity: Measure electrical bonding resistance between structural components and systems to ensure compliance with limits.
+Lightning Protection Devices: Check static dischargers and surge suppression equipment for serviceability.
+Documentation and Certification
+Record all inspection findings, including photographs where appropriate.
+If no damage is found, release to service must be certified by Part-66 licensed staff.
+If damage is found, assess in accordance with the Structural Repair Manual (SRM) and carry out repairs under approved data before return to service.
+Update technical logs and any regulatory reports required.
+Conclusion
+Although aircraft are designed to withstand lightning strikes, thorough inspections are essential to detect and rectify any damage that could compromise safety. By following manufacturer’s AMM or SRM instructions, checking both visible and hidden areas, and verifying system integrity, maintenance personnel ensure the aircraft remains airworthy and ready for safe operation.
+Introduction
+Pipes and hoses are essential components in aircraft systems for transporting fluids such as fuel, oil, hydraulic fluid, oxygen, and air. Their correct selection, installation, and maintenance are critical for safety and performance. Pipes are rigid conduits, while hoses are flexible lines used where movement or vibration is present. Understanding their materials, construction, and upkeep ensures reliability in demanding aviation environments.
+Aircraft Pipes
+Construction and Materials: Aircraft pipes are typically made from aluminium alloy, stainless steel, or titanium. Aluminium alloy is lightweight and corrosion-resistant, ideal for low- to medium-pressure systems. Stainless steel and titanium are used for high-pressure or high-temperature applications.
+Forming: Pipes are bent to precise radii to avoid flow restrictions and stress concentrations. Bends are made using approved tube-bending tools to prevent flattening.
+Connections: Common fittings include flared ends, flareless compression fittings, and beaded ends with hose clamps.
+Aircraft Hoses
+Construction: Aircraft hoses consist of an inner liner compatible with the fluid carried, one or more reinforcement layers for strength, and an outer cover for environmental protection.
+Types:
+Flexible Metal Hoses for high temperature or pressure.
+Synthetic Rubber or Teflon Hoses for hydraulic, fuel, and pneumatic systems.
+Self-Sealing Hoses in fuel systems to reduce leakage risk.
+Applications: Hoses are used where flexibility is required, such as between moving components or in areas subject to vibration.
+Installation Practices
+Routing: Pipes and hoses must be routed to avoid chafing, excessive bends, and proximity to heat sources.
+Support: Clamps and grommets are used to prevent movement and vibration wear.
+Separation: Maintain clearance from electrical wiring and other systems to prevent cross-system damage.
+Identification: Hoses are often colour-coded or marked to indicate the fluid carried and direction of flow.
+Inspection and Maintenance
+Pipes: Check for dents, cracks, corrosion, and secure fittings. Even small dents in high-pressure lines may require replacement.
+Hoses: Inspect for hardening, cracking, leaks, bulges, or loose fittings. Flex hoses gently to reveal hidden cracks.
+Leak Checks: After maintenance, pressurise systems and inspect joints for leakage.
+Testing: Pressure testing to manufacturer’s limits ensures integrity before service.
+Replacement and Repair
+Pipes with damage beyond limits specified in the Aircraft Maintenance Manual (AMM) must be replaced. Minor scratches or corrosion may be removed within allowable limits, followed by surface treatment.
+Hoses must be replaced if defects are found; repair is not normally permitted due to safety concerns. Always use manufacturer-approved replacements with correct pressure and temperature ratings.
+Conclusion
+Pipes and hoses in aircraft systems play a vital role in transporting fluids safely and efficiently. Proper material selection, correct installation, and thorough inspection are essential for reliability and compliance with airworthiness requirements. Adhering to AMM instructions and industry standards ensures these components operate safely throughout their service life.
+Introduction
+Nondestructive inspection (NDI), also referred to as nondestructive testing (NDT), is the examination of aircraft structures and components without causing damage. NDI is essential for detecting cracks, corrosion, and other defects that may not be visible to the naked eye. These methods help maintain airworthiness by ensuring defects are identified and rectified before they compromise safety.
+Visual Inspection (VI)
+Description: The simplest and most common NDI method, involving direct observation under adequate lighting.
+Applications: Used for general condition checks, corrosion detection, fluid leaks, and surface cracks.
+Enhancements: Magnifying lenses, mirrors, and borescopes for internal or hard-to-reach areas.
+Advantages: Quick, low cost, and requires minimal equipment.
+Dye Penetrant Inspection (DPI)
+Principle: Uses a low-viscosity dye applied to the surface; the dye seeps into surface cracks and is drawn out by a developer for visual detection.
+Applications: Detecting fine surface cracks in non-porous metals and non-metallic materials.
+Advantages: Simple and sensitive for surface flaws.
+Limitations: Only detects surface defects; surfaces must be clean and dry.
+Magnetic Particle Inspection (MPI)
+Principle: Magnetises ferromagnetic materials; fine magnetic particles are applied, which gather at discontinuities due to leakage fields.
+Applications: Detecting surface and near-surface cracks in steel components such as landing gear and engine shafts.
+Advantages: Effective for locating small cracks.
+Limitations: Only works on ferrous materials; component must be demagnetised afterwards if required.
+Eddy Current Testing (ECT)
+Principle: Alternating current in a probe coil induces eddy currents in conductive material; interruptions caused by flaws are detected as signal changes.
+Applications: Detection of cracks, corrosion, and thickness variations in aluminium skins and conductive materials.
+Advantages: No need to remove paint or protective coatings in some cases; portable.
+Limitations: Requires skilled interpretation; limited penetration depth.
+Ultrasonic Testing (UT)
+Principle: High-frequency sound waves are transmitted into the material; reflections from flaws or boundaries are displayed on a screen.
+Applications: Internal crack detection, thickness measurement, and bond integrity in composites.
+Advantages: Detects internal defects not visible externally; high accuracy.
+Limitations: Requires coupling medium and trained operators.
+Radiographic Testing (RT)
+Principle: Uses X-rays or gamma rays to create an image of the component’s internal structure on film or digital sensors.
+Applications: Detecting cracks, voids, corrosion, and internal damage in metals and composites.
+Advantages: Permanent record of inspection; excellent for complex structures.
+Limitations: Requires strict safety controls for radiation; higher cost and equipment requirements.
+Conclusion
+NDI methods are essential tools in aircraft maintenance, enabling detection of hidden defects without compromising structural integrity. By selecting the appropriate method—visual, penetrant, magnetic particle, eddy current, ultrasonic, or radiographic—maintenance personnel can ensure compliance with safety and regulatory standards. Proper training, equipment calibration, and adherence to the Aircraft Maintenance Manual (AMM) and regulatory guidelines are critical for accurate and reliable results.

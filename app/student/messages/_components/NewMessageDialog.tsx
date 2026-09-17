@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 import { useRouter } from 'next/navigation'
-import { Send, Loader2, Plus } from 'lucide-react' // Changed MailPlus to Plus as MailPlus might not be in older lucide versions
+import { Send, Loader2 } from 'lucide-react' // Changed MailPlus to Plus as MailPlus might not be in older lucide versions
 import { toast } from 'sonner'
 import { sendMessage } from '../../actions'
 
@@ -54,6 +55,8 @@ export default function NewMessageDialog({
   })
   const router = useRouter()
 
+  const { markDirty, markClean } = useFormDirty()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -67,6 +70,7 @@ export default function NewMessageDialog({
       }
 
       toast.success('Message sent successfully')
+      markClean()
       setOpen(false)
       setFormData({ recipientId: '', subject: '', body: '' })
       router.refresh()
@@ -99,14 +103,17 @@ export default function NewMessageDialog({
             <Label htmlFor="recipient">To</Label>
             <Select
               value={formData.recipientId}
-              onValueChange={(value) => setFormData({ ...formData, recipientId: value })}
+              onValueChange={(value) => {
+                setFormData({ ...formData, recipientId: value })
+                markDirty()
+              }}
             >
               <SelectTrigger id="recipient">
                 <SelectValue placeholder="Select recipient..." />
               </SelectTrigger>
               <SelectContent>
                 {recipients.length === 0 ? (
-                  <div className="p-2 text-center text-sm text-muted-foreground">
+                  <div className="text-muted-foreground p-2 text-center text-sm">
                     No recipients available
                   </div>
                 ) : (
@@ -129,7 +136,10 @@ export default function NewMessageDialog({
               id="subject"
               placeholder="e.g. Question about Exam Schedule"
               value={formData.subject}
-              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, subject: e.target.value })
+                markDirty()
+              }}
               required
             />
           </div>
@@ -141,7 +151,10 @@ export default function NewMessageDialog({
               placeholder="Type your message here..."
               className="min-h-[150px]"
               value={formData.body}
-              onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, body: e.target.value })
+                markDirty()
+              }}
               required
             />
           </div>

@@ -11,9 +11,22 @@
  * - Automatic data transformation
  */
 
-import { prisma } from '@/lib/prisma/client'
-import { getSupabaseAdmin, isBackupEnabled } from './client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
+import { isBackupEnabled } from './client'
 import { Prisma } from '@prisma/client'
+
+// Typed Prisma model for dynamic access (consistent with writeToSupabase)
+interface TypedPrismaModel {
+  create: (args: { data: unknown }) => Promise<unknown>
+  update: (args: { where: Record<string, unknown>; data: unknown }) => Promise<unknown>
+  delete: (args: { where: Record<string, unknown> }) => Promise<unknown>
+  findUnique: (args: { where: Record<string, unknown> }) => Promise<unknown | null>
+}
+
+function asTypedModel(client: unknown): Record<string, TypedPrismaModel> {
+  return client as unknown as Record<string, TypedPrismaModel>
+}
+
 
 // All Prisma model names
 const MODELS = [
@@ -78,7 +91,7 @@ type ModelKey = (typeof MODELS)[number]
  * Get Supabase Prisma client for backup operations
  * This creates a secondary Prisma client connected to Supabase
  */
-let cachedSupabasePrisma: any = null
+let cachedSupabasePrisma: unknown | null = null
 
 export async function getSupabasePrismaClient() {
   if (cachedSupabasePrisma) return cachedSupabasePrisma
@@ -113,7 +126,6 @@ export async function getSupabasePrismaClient() {
   return cachedSupabasePrisma
 }
 
-
 /**
  * Transform data for Supabase (handle BigInt, Date, etc.)
  */
@@ -145,9 +157,9 @@ export function transformForSupabase<T>(data: T): T {
       value !== null &&
       typeof value === 'object' &&
       'toNumber' in value &&
-      typeof (value as any).toNumber === 'function'
+      typeof (value as { toNumber?: unknown }).toNumber === 'function'
     ) {
-      transformed[key] = (value as any).toNumber()
+      transformed[key] = (value as { toNumber: () => number }).toNumber()
       continue
     }
 
@@ -187,10 +199,9 @@ async function writeToSupabase<T>(
 
   try {
     const transformedData = data ? transformForSupabase(data) : undefined
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const model = (supabase as any)[modelKey] as {
-      create: (args: { data: any }) => Promise<unknown>
-      update: (args: { where: Record<string, unknown>; data: any }) => Promise<unknown>
+    const model = (supabase as unknown as Record<string, unknown>)[modelKey] as {
+      create: (args: { data: unknown }) => Promise<unknown>
+      update: (args: { where: Record<string, unknown>; data: unknown }) => Promise<unknown>
       delete: (args: { where: Record<string, unknown> }) => Promise<unknown>
     }
 
@@ -218,7 +229,11 @@ async function writeToSupabase<T>(
       await new Promise((r) => setTimeout(r, 1000))
       const retryClient = await getSupabasePrismaClient()
       if (!retryClient) return
-      const retryModel = (retryClient as any)[modelKey]
+      const retryModel = (retryClient as unknown as Record<string, unknown>)[modelKey] as {
+        create: (args: { data: unknown }) => Promise<unknown>
+        update: (args: { where: Record<string, unknown>; data: unknown }) => Promise<unknown>
+        delete: (args: { where: Record<string, unknown> }) => Promise<unknown>
+      }
       if (operation === 'create' && data) await retryModel.create({ data: transformForSupabase(data) })
       else if (operation === 'update' && data && where) await retryModel.update({ where, data: transformForSupabase(data) })
       else if (operation === 'delete' && where) await retryModel.delete({ where })
@@ -236,9 +251,7 @@ export async function createWithBackup<T extends Prisma.UserCreateInput>(
   modelKey: ModelKey,
   data: T
 ): Promise<T> {
-  // Write to primary (Neon) - use type assertion for dynamic access
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result = (await (prisma as any)[modelKey].create({ data })) as T
+  const result = (await asTypedModel(prismaUnfiltered)[modelKey].create({ data })) as T
 
   // Backup to Supabase (non-blocking)
   if (isBackupEnabled()) {
@@ -256,9 +269,7 @@ export async function updateWithBackup<T extends Prisma.UserUpdateInput>(
   where: Record<string, unknown>,
   data: T
 ): Promise<T> {
-  // Write to primary (Neon) - use type assertion for dynamic access
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result = (await (prisma as any)[modelKey].update({ where, data })) as T
+  const result = (await asTypedModel(prismaUnfiltered)[modelKey].update({ where, data })) as T
 
   // Backup to Supabase (non-blocking)
   if (isBackupEnabled()) {
@@ -275,9 +286,7 @@ export async function deleteWithBackup(
   modelKey: ModelKey,
   where: Record<string, unknown>
 ): Promise<void> {
-  // Delete from primary (Neon) - use type assertion for dynamic access
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (prisma as any)[modelKey].delete({ where })
+  await asTypedModel(prismaUnfiltered)[modelKey].delete({ where })
 
   // Delete from Supabase (non-blocking)
   if (isBackupEnabled()) {
@@ -292,10 +301,8 @@ export async function readWithFallback<T>(
   modelKey: ModelKey,
   where: Record<string, unknown>
 ): Promise<T | null> {
-  // Try primary first
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await (prisma as any)[modelKey].findUnique({ where })
+    const result = await asTypedModel(prismaUnfiltered)[modelKey].findUnique({ where })
     if (result) return result as T
   } catch (error) {
     console.warn(`[Supabase] Primary DB read failed, trying backup:`, error)
@@ -305,8 +312,7 @@ export async function readWithFallback<T>(
   const supabasePrisma = await getSupabasePrismaClient()
   if (supabasePrisma && isBackupEnabled()) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await (supabasePrisma as any)[modelKey].findUnique({ where })
+      const result = await asTypedModel(supabasePrisma)[modelKey].findUnique({ where })
       if (result) {
         console.log(`[Supabase] Retrieved ${modelKey} from Supabase fallback`)
         return result as T

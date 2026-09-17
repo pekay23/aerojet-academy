@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Plus,
   BookOpen,
@@ -16,7 +17,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-react'
-import { DbCourse, DbCourseCategory } from '@/types/database'
+import { DbCourseCategory } from '@/types/database'
 import { compareNatural } from '@/lib/utils/natural-sort'
 import CourseActionsMenu from '../../_components/CourseActionsMenu'
 
@@ -39,7 +40,9 @@ function readSet(key: string): Set<string> | null {
   try {
     const val = sessionStorage.getItem(key)
     return val ? new Set(JSON.parse(val)) : null
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 function writeSet(key: string, set: Set<string>) {
@@ -48,6 +51,10 @@ function writeSet(key: string, set: Set<string>) {
 }
 
 export default function CoursesClient({ categories }: Props) {
+  const searchParams = useSearchParams()
+  const urlCategory = searchParams.get('category') ?? 'all'
+  const router = useRouter()
+
   // Which category IDs are manually pinned on top
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => {
     const stored = readSet(STORAGE_KEY_PINNED)
@@ -64,7 +71,7 @@ export default function CoursesClient({ categories }: Props) {
   // Filters
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all')
-  const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [categoryFilter, setCategoryFilter] = useState<string>(urlCategory)
 
   // Sorting
   const [sortKey, setSortKey] = useState<'code' | 'name' | 'price' | 'isActive'>('code')
@@ -157,7 +164,7 @@ export default function CoursesClient({ categories }: Props) {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             Courses
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -167,14 +174,14 @@ export default function CoursesClient({ categories }: Props) {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/staff/courses/categories"
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-aerojet-blue transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:border-slate-600"
+            className="text-aerojet-blue flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:border-slate-600"
           >
             <Layers className="h-4 w-4" />
             Manage Categories
           </Link>
           <Link
             href="/staff/courses/create"
-            className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-colors"
           >
             <Plus className="h-4 w-4" />
             Create Course
@@ -194,7 +201,7 @@ export default function CoursesClient({ categories }: Props) {
             placeholder="Search by code or name…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm font-medium text-slate-700 placeholder-slate-400 outline-none focus:border-aerojet-sky focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            className="focus:border-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm font-medium text-slate-700 placeholder-slate-400 outline-none focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
           />
         </div>
 
@@ -205,8 +212,16 @@ export default function CoursesClient({ categories }: Props) {
             id="category-filter"
             name="category"
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none focus:border-aerojet-sky dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            onChange={(e) => {
+              setCategoryFilter(e.target.value)
+              router.replace(
+                e.target.value === 'all'
+                  ? '/staff/courses'
+                  : `/staff/courses?category=${e.target.value}`,
+                { scroll: false }
+              )
+            }}
+            className="focus:border-aerojet-sky rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
           >
             <option value="all">All Categories</option>
             {orderedCategories.map((cat) => (
@@ -238,7 +253,7 @@ export default function CoursesClient({ categories }: Props) {
       {/* ── Pinned chips summary ────────────────────────────────────────────── */}
       {pinnedCategories.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <Pin className="h-3.5 w-3.5 text-aerojet-sky" />
+          <Pin className="text-aerojet-sky h-3.5 w-3.5" />
           <span className="text-xs font-bold tracking-widest text-slate-400 uppercase">
             Pinned:
           </span>
@@ -246,7 +261,7 @@ export default function CoursesClient({ categories }: Props) {
             <button
               key={cat.id}
               onClick={() => togglePin(cat.id)}
-              className="group flex items-center gap-1.5 rounded-full bg-aerojet-blue/8 px-3 py-1 text-xs font-bold text-aerojet-blue transition-all hover:bg-red-50 hover:text-red-600 dark:bg-blue-900/20 dark:text-blue-300"
+              className="group bg-aerojet-blue/8 text-aerojet-blue flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition-all hover:bg-red-50 hover:text-red-600 dark:bg-blue-900/20 dark:text-blue-300"
             >
               {cat.name.replace(/_/g, ' ')}
               <PinOff className="h-3 w-3 opacity-0 group-hover:opacity-100" />
@@ -275,7 +290,7 @@ export default function CoursesClient({ categories }: Props) {
               <div
                 className={`flex items-center gap-3 px-5 py-4 ${
                   isPinned
-                    ? 'bg-linear-to-r from-aerojet-blue/5 to-aerojet-sky/5 dark:from-blue-900/20 dark:to-blue-800/10'
+                    ? 'from-aerojet-blue/5 to-aerojet-sky/5 bg-linear-to-r dark:from-blue-900/20 dark:to-blue-800/10'
                     : 'bg-slate-50 dark:bg-slate-800/50'
                 } border-b border-slate-100 dark:border-slate-800`}
               >
@@ -297,13 +312,13 @@ export default function CoursesClient({ categories }: Props) {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => toggleCollapse(cat.id)}
-                      className="text-left text-base font-black text-aerojet-blue hover:text-aerojet-sky dark:text-white"
+                      className="text-aerojet-blue hover:text-aerojet-sky text-left text-base font-black dark:text-white"
                     >
                       {cat.name.replace(/_/g, ' ')}
                     </button>
 
                     {isEasa && (
-                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black tracking-widest text-aerojet-blue uppercase dark:bg-blue-900/30 dark:text-blue-300">
+                      <span className="text-aerojet-blue rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black tracking-widest uppercase dark:bg-blue-900/30 dark:text-blue-300">
                         EASA
                       </span>
                     )}
@@ -334,7 +349,7 @@ export default function CoursesClient({ categories }: Props) {
                   className={`shrink-0 rounded-lg p-1.5 transition-colors ${
                     isPinned
                       ? 'text-aerojet-sky hover:text-slate-400'
-                      : 'text-slate-300 hover:text-aerojet-sky dark:text-slate-600'
+                      : 'hover:text-aerojet-sky text-slate-300 dark:text-slate-600'
                   }`}
                 >
                   {isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
@@ -451,7 +466,7 @@ export default function CoursesClient({ categories }: Props) {
                                 <div>
                                   <Link
                                     href={`/staff/courses/${course.code}`}
-                                    className="font-bold text-slate-900 hover:text-aerojet-sky dark:text-slate-100"
+                                    className="hover:text-aerojet-sky font-bold text-slate-900 dark:text-slate-100"
                                   >
                                     {course.name}
                                   </Link>
@@ -503,7 +518,11 @@ export default function CoursesClient({ categories }: Props) {
 
                             {/* Actions */}
                             <td className="px-6 py-4 text-right">
-                              <CourseActionsMenu courseId={course.id} courseCode={course.code} courseName={course.name} />
+                              <CourseActionsMenu
+                                courseId={course.id}
+                                courseCode={course.code}
+                                courseName={course.name}
+                              />
                             </td>
                           </tr>
                         ))

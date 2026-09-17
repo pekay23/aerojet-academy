@@ -14,14 +14,18 @@ interface AdminNote {
   authorName: string
 }
 
+interface StudentRef {
+  id: string
+}
+
 interface Props {
-  student: any
+  student: StudentRef
   onRefresh: () => void
   staffId: string
   staffRole: string
 }
 
-export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }: Props) {
+export default function AdminNotesTab({ student, onRefresh: _onRefresh, staffId, staffRole }: Props) {
   const [notes, setNotes] = useState<AdminNote[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [newNote, setNewNote] = useState('')
@@ -47,6 +51,7 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
   }, [student.id])
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotes()
   }, [fetchNotes])
 
@@ -64,8 +69,12 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
       toast.success('Note added')
       setNewNote('')
       fetchNotes()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message)
+      } else {
+        toast.error('An unexpected error occurred')
+      }
     } finally {
       setIsAdding(false)
     }
@@ -84,8 +93,12 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
       toast.success('Note updated')
       setEditingId(null)
       fetchNotes()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message)
+      } else {
+        toast.error('An unexpected error occurred')
+      }
     }
   }
 
@@ -99,8 +112,12 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
       if (!res.ok) throw new Error(data.error || 'Failed to delete note')
       toast.success('Note deleted')
       fetchNotes()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message)
+      } else {
+        toast.error('An unexpected error occurred')
+      }
     } finally {
       setDeletingId(null)
     }
@@ -112,7 +129,7 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <StickyNote className="h-5 w-5 text-aerojet-blue" />
+        <StickyNote className="text-aerojet-blue h-5 w-5" />
         <h3 className="text-lg font-semibold">Admin Notes</h3>
         {notes.length > 0 && (
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-500 dark:bg-slate-800">
@@ -130,15 +147,19 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
           placeholder="Write a private note about this student..."
-          className="min-h-[100px] w-full rounded-lg border border-slate-200 p-3 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-1 focus:ring-aerojet-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          className="focus:border-aerojet-blue focus:ring-aerojet-blue min-h-[100px] w-full rounded-lg border border-slate-200 p-3 text-sm focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
         />
         <div className="mt-3 flex justify-end">
           <button
             onClick={handleAddNote}
             disabled={isAdding || !newNote.trim()}
-            className="flex items-center gap-2 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#001d42] disabled:opacity-50"
+            className="bg-aerojet-blue flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#001d42] disabled:opacity-50"
           >
-            {isAdding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+            {isAdding ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Plus className="h-3.5 w-3.5" />
+            )}
             Add Note
           </button>
         </div>
@@ -167,7 +188,7 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
               {/* Note Header */}
               <div className="mb-2 flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-aerojet-blue/10 text-[10px] font-black text-aerojet-blue uppercase dark:bg-blue-500/10 dark:text-blue-400">
+                  <div className="bg-aerojet-blue/10 text-aerojet-blue flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-black uppercase dark:bg-blue-500/10 dark:text-blue-400">
                     {note.authorName
                       .split(' ')
                       .map((n) => n[0])
@@ -223,7 +244,7 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
                   <textarea
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
-                    className="min-h-[80px] w-full rounded-lg border border-slate-200 p-3 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-1 focus:ring-aerojet-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="focus:border-aerojet-blue focus:ring-aerojet-blue min-h-[80px] w-full rounded-lg border border-slate-200 p-3 text-sm focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                   <div className="mt-2 flex justify-end gap-2">
                     <button
@@ -235,14 +256,14 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
                     <button
                       onClick={() => handleUpdateNote(note.id)}
                       disabled={!editContent.trim()}
-                      className="flex items-center gap-1 rounded-lg bg-aerojet-blue px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#001d42] disabled:opacity-50"
+                      className="bg-aerojet-blue flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#001d42] disabled:opacity-50"
                     >
                       <Check className="h-3 w-3" /> Save
                     </button>
                   </div>
                 </div>
               ) : (
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                <p className="text-sm leading-relaxed whitespace-pre-wrap text-slate-600 dark:text-slate-300">
                   {note.content}
                 </p>
               )}

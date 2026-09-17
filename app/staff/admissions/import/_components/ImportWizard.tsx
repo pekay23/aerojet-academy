@@ -2,8 +2,8 @@
 
 import { useState, useRef } from 'react'
 import Papa from 'papaparse'
-import { CustomFieldDefinition, ProgrammeChoice, ApplicationStage } from '@prisma/client'
-import { Upload, ArrowRight, CheckCircle2, AlertTriangle, FileSpreadsheet } from 'lucide-react'
+import { CustomFieldDefinition } from '@prisma/client'
+import { ArrowRight, CheckCircle2, AlertTriangle, FileSpreadsheet } from 'lucide-react'
 
 type Step = 'UPLOAD' | 'MAP' | 'VALIDATE' | 'IMPORT'
 
@@ -18,11 +18,11 @@ const STANDARD_FIELDS = [
 
 export default function ImportWizard({ customFields }: { customFields: CustomFieldDefinition[] }) {
   const [step, setStep] = useState<Step>('UPLOAD')
-  const [csvData, setCsvData] = useState<any[]>([])
+  const [csvData, setCsvData] = useState<Record<string, unknown>[]>([])
   const [csvHeaders, setCsvHeaders] = useState<string[]>([])
   const [mapping, setMapping] = useState<Record<string, string>>({}) // targetField -> csvHeader
   
-  const [validationResults, setValidationResults] = useState<any[]>([])
+  const [validationResults, setValidationResults] = useState<{ row: number; valid: boolean; data?: Record<string, unknown>; errors?: string[] }[]>([])
   const [isImporting, setIsImporting] = useState(false)
   const [importStats, setImportStats] = useState<{ imported: number, errors: string[] } | null>(null)
 
@@ -37,7 +37,7 @@ export default function ImportWizard({ customFields }: { customFields: CustomFie
     const file = e.target.files?.[0]
     if (!file) return
 
-    Papa.parse(file, {
+    Papa.parse<Record<string, unknown>>(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
@@ -68,7 +68,9 @@ export default function ImportWizard({ customFields }: { customFields: CustomFie
 
     // Build rows according to mapping
     const rowsToValidate = csvData.map(row => {
-      const parsed: any = { customFields: {} }
+      const parsed: Record<string, unknown> & { customFields: Record<string, unknown> } = {
+        customFields: {},
+      }
       
       allTargetFields.forEach(tf => {
         const csvCol = mapping[tf.key]
@@ -102,7 +104,7 @@ export default function ImportWizard({ customFields }: { customFields: CustomFie
       } else {
         alert(data.error || 'Validation failed')
       }
-    } catch (e) {
+    } catch (_e) {
       alert('Error validating data')
     } finally {
       setIsImporting(false)
@@ -126,7 +128,7 @@ export default function ImportWizard({ customFields }: { customFields: CustomFie
       } else {
         alert(data.error || 'Import failed')
       }
-    } catch (e) {
+    } catch (_e) {
       alert('Error executing import')
     } finally {
       setIsImporting(false)

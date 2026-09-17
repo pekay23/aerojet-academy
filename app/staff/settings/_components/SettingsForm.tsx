@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSettingsDirty } from './SettingsTabs'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface SettingField {
   key: string
@@ -25,22 +26,95 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
   const [saving, setSaving] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const router = useRouter()
-  const { markDirty, markClean } = useSettingsDirty()
+  const { markDirty, markClean, isDirty } = useSettingsDirty()
+  const { markDirty: markFormDirty, markClean: markFormClean } = useFormDirty()
 
-  // Track boolean toggle states keyed by field key
+  // Pristine baseline = the values that were last loaded or saved.
+  // Dirty comparison is against this baseline, not against each individual default.
+  const baseline = useMemo(() => {
+    const b: Record<string, string> = {}
+    for (const field of fields) {
+      b[field.key] = values[field.key] ?? field.default
+    }
+    return b
+  }, [fields, values])
+
+  // Track boolean toggle states keyed by field key, initialized from baseline
   const [toggles, setToggles] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {}
     for (const field of fields) {
       if (field.type === 'BOOLEAN') {
-        initial[field.key] = (values[field.key] ?? field.default) === 'true'
+        initial[field.key] = baseline[field.key] === 'true'
       }
     }
     return initial
   })
 
-  const handleToggle = useCallback((key: string) => {
-    setToggles((prev) => ({ ...prev, [key]: !prev[key] }))
-  }, [])
+  // Sync parent dirty state whenever toggles diverge from / return to baseline.
+  // We use an effect (not a setState updater) so markDirty/markClean never run
+  // during render — React would warn about updating another component while rendering.
+  useEffect(() => {
+    for (const field of fields) {
+      if (field.type !== 'BOOLEAN') continue
+      const baselineVal = baseline[field.key] === 'true'
+      const currentVal = toggles[field.key] ?? baselineVal
+      if (currentVal !== baselineVal) {
+        markDirty()
+        return
+      }
+    }
+    // Booleans all match baseline. Text/select fields are handled in handleFieldChange.
+    markClean()
+  }, [toggles, baseline, fields, markDirty, markClean])
+
+  // Compute the current effective form state for a given field.
+  const currentValueOf = useCallback(
+    (key: string): string => {
+      const field = fields.find((f) => f.key === key)
+      if (!field) return ''
+      if (field.type === 'BOOLEAN') {
+        return (toggles[key] ?? baseline[key] === 'true') ? 'true' : 'false'
+      }
+      // For uncontrolled inputs, we read the current DOM value
+      if (typeof document !== 'undefined' && formRef.current) {
+        const el = formRef.current.elements.namedItem(key)
+        if (el && 'value' in el)
+          return (el as unknown as HTMLInputElement | HTMLSelectElement).value
+      }
+      return baseline[key]
+    },
+    [fields, toggles, baseline]
+  )
+
+  const isBaselineDirty = useCallback((): boolean => {
+    if (typeof document === 'undefined' || !formRef.current) {
+      // SSR or pre-mount: trust the hook's isDirty
+      return isDirty
+    }
+    for (const field of fields) {
+      if (currentValueOf(field.key) !== baseline[field.key]) return true
+    }
+    return false
+  }, [fields, currentValueOf, baseline, isDirty])
+
+  const handleToggle = useCallback(
+    (key: string) => {
+      setToggles((prev) => ({ ...prev, [key]: !prev[key] }))
+      markFormDirty()
+    },
+    [markFormDirty]
+  )
+
+  const handleFieldChange = useCallback(() => {
+    // After a DOM change on select/text, recompute dirty against baseline
+    if (isBaselineDirty()) {
+      markDirty()
+      markFormDirty()
+    } else {
+      markClean()
+      markFormClean()
+    }
+  }, [isBaselineDirty, markDirty, markClean, markFormDirty, markFormClean])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,6 +139,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
       if (res.ok) {
         toast.success(`${groupLabel || 'Settings'} saved successfully`)
         markClean()
+        markFormClean()
         router.refresh()
       } else {
         toast.error('Failed to save settings')
@@ -77,7 +152,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} onChange={markDirty} className="relative space-y-6">
+    <form ref={formRef} onSubmit={handleSubmit} className="relative space-y-6">
       {groupLabel && (
         <h3 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
           {groupLabel}
@@ -85,9 +160,9 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
       )}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {fields.map((field) => {
-          const currentValue = values[field.key] ?? field.default
+          const baselineValue = baseline[field.key]
           const checked =
-            field.type === 'BOOLEAN' ? (toggles[field.key] ?? currentValue === 'true') : false
+            field.type === 'BOOLEAN' ? (toggles[field.key] ?? baselineValue === 'true') : false
           return (
             <div
               key={field.key}
@@ -121,6 +196,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                         type="button"
                         role="switch"
                         aria-checked={checked}
+                        aria-label={field.label}
                         onClick={() => handleToggle(field.key)}
                         className={`h-7 w-12 cursor-pointer rounded-full shadow-inner transition-colors after:absolute after:top-0.5 after:left-0.5 after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all after:content-[''] ${
                           checked
@@ -143,7 +219,8 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                     <select
                       id={field.key}
                       name={field.key}
-                      defaultValue={currentValue}
+                      defaultValue={baselineValue}
+                      onChange={handleFieldChange}
                       className="focus:border-aerojet-blue focus:ring-aerojet-blue/5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-900 shadow-sm transition-all focus:ring-4 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
                     >
                       {field.options.map((opt) => (
@@ -160,7 +237,8 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                       id={field.key}
                       name={field.key}
                       type={field.type === 'NUMBER' ? 'number' : 'text'}
-                      defaultValue={currentValue}
+                      defaultValue={baselineValue}
+                      onChange={handleFieldChange}
                       className="focus:border-aerojet-blue focus:ring-aerojet-blue/5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:ring-4 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
                     />
                   </div>
@@ -174,8 +252,8 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
       <div className="flex justify-end pt-2">
         <button
           type="submit"
-          disabled={saving}
-          className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#003875] disabled:opacity-50"
+          disabled={saving || !isDirty}
+          className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#003875] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {saving ? 'Saving…' : 'Save Settings'}

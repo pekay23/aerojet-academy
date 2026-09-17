@@ -1,13 +1,14 @@
 'use client'
 
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 
 interface GoNoGoMeterProps {
   currentRevenue: number
   targetRevenue: number
   confirmedSeats: number
   totalSeats: number
-  paymentDeadline: string
+  paymentDeadline: string | Date | null
+  isNearDeadline?: boolean
   poolName?: string
 }
 
@@ -17,17 +18,19 @@ export default function GoNoGoMeter({
   confirmedSeats,
   totalSeats,
   paymentDeadline,
+  isNearDeadline = false,
   poolName,
 }: GoNoGoMeterProps) {
   const progress = Math.min((currentRevenue / targetRevenue) * 100, 100)
   const isGo = currentRevenue >= targetRevenue
-  const isNearDeadline = new Date(paymentDeadline).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000
 
-  const deadlineStr = new Date(paymentDeadline).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
+  const deadlineStr = paymentDeadline
+    ? new Date(paymentDeadline).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : 'Not set'
 
   const progressColor = isGo ? 'bg-emerald-500' : progress >= 75 ? 'bg-amber-500' : 'bg-red-500'
 

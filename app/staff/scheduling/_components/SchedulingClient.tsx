@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, useTransition } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -27,11 +26,74 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+interface LicenseCategoryRequirement {
+  course: {
+    id: string
+  }
+}
+
+interface LicenseCategory {
+  id: string
+  code: string
+  name: string
+  requirements?: LicenseCategoryRequirement[]
+}
+
+interface AcademicTerm {
+  id: string
+  name: string
+  licenseCategoryId: string | null
+  yearNumber: number
+  semesterNumber: number
+  licenseCategory?: LicenseCategory | null
+  courseAssignments: { courseId: string }[]
+}
+
+interface Pathway {
+  id: string
+  code: string
+  name: string
+  academicTerms: AcademicTerm[]
+}
+
+interface Programme {
+  id: string
+  code: string
+  name: string
+  durationYears: number
+}
+
+interface Course {
+  id: string
+  code: string
+  name: string
+  duration: number
+  category?: { name: string } | null
+}
+
 interface SchedulingClientProps {
-  pathways: any[]
-  programmes: any[]
-  licenseCategories: any[]
-  courses: any[]
+  pathways: Pathway[]
+  programmes: Programme[]
+  licenseCategories: LicenseCategory[]
+  courses: Course[]
+}
+
+interface Tab {
+  pathway: Pathway
+  programme: Programme
+  licenseCategories: LicenseCategory[]
+  totalYears: number
+}
+
+interface ProgrammeSchedulePanelProps {
+  tab: Tab
+  groupedCourses: Record<string, Course[]>
+  licenseCourseMap: Record<string, Set<string>>
+  loading: string | null
+  isPending: boolean
+  onToggle: (termId: string, courseId: string, assigned: boolean) => void
+  onEnsureTerms: (pathwayId: string, licenseCategoryId: string, totalYears: number) => void
+  search: string
 }
 
 /** Maps a pathway code to the matching programme(s) */
@@ -54,18 +116,16 @@ export default function SchedulingClient({
   // Build programme tabs that link to pathways
   const programmeTabs = useMemo(() => {
     const tabs: {
-      programme: any
-      pathway: any
-      licenseCategories: any[]
+      programme: Programme
+      pathway: Pathway
+      licenseCategories: LicenseCategory[]
       totalYears: number
     }[] = []
 
     for (const pathway of pathways) {
       // Find matching programmes for this pathway
       const matchingCodes = PATHWAY_PROGRAMME_MAP[pathway.code] || []
-      const matchingProgrammes = programmes.filter((p: any) =>
-        matchingCodes.includes(p.code)
-      )
+      const matchingProgrammes = programmes.filter((p) => matchingCodes.includes(p.code))
 
       if (matchingProgrammes.length === 0) {
         // Fallback: show the pathway itself (for pathways without a FullTimeProgramme)
@@ -93,16 +153,16 @@ export default function SchedulingClient({
   // Group courses by category for cleaner organization
   const groupedCourses = useMemo(() => {
     const filtered = courses.filter(
-      (c: any) =>
+      (c) =>
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.code.toLowerCase().includes(search.toLowerCase())
     )
 
     const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
-    const sorted = [...filtered].sort((a: any, b: any) => collator.compare(a.code, b.code))
+    const sorted = [...filtered].sort((a, b) => collator.compare(a.code, b.code))
 
-    const groups: Record<string, any[]> = {}
-    sorted.forEach((course: any) => {
+    const groups: Record<string, Course[]> = {}
+    sorted.forEach((course) => {
       const cat = course.category?.name || 'General'
       if (!groups[cat]) groups[cat] = []
       groups[cat].push(course)
@@ -114,7 +174,7 @@ export default function SchedulingClient({
   const licenseCourseMap = useMemo(() => {
     const map: Record<string, Set<string>> = {}
     for (const lc of licenseCategories) {
-      map[lc.id] = new Set(lc.requirements.map((r: any) => r.course.id))
+      map[lc.id] = new Set(lc.requirements?.map((r) => r.course.id) ?? [])
     }
     return map
   }, [licenseCategories])
@@ -141,11 +201,7 @@ export default function SchedulingClient({
     totalYears: number
   ) => {
     startTransition(async () => {
-      const result = await ensureTermsForPathwayLicense(
-        pathwayId,
-        licenseCategoryId,
-        totalYears
-      )
+      const result = await ensureTermsForPathwayLicense(pathwayId, licenseCategoryId, totalYears)
       if (result.error) {
         toast.error(result.error)
       } else {
@@ -157,9 +213,9 @@ export default function SchedulingClient({
   const [activeProgrammeId, setActiveProgrammeId] = useState<string>(
     programmeTabs[0]?.programme.id || ''
   )
-  
+
   const activeTab = useMemo(
-    () => programmeTabs.find(t => t.programme.id === activeProgrammeId) || programmeTabs[0],
+    () => programmeTabs.find((t) => t.programme.id === activeProgrammeId) || programmeTabs[0],
     [programmeTabs, activeProgrammeId]
   )
 
@@ -171,11 +227,11 @@ export default function SchedulingClient({
         className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             Academic Scheduling
           </h1>
           <p className="mt-1 flex items-center gap-2 text-base font-medium text-slate-500 dark:text-slate-400">
-            <Sparkles className="h-4 w-4 text-aerojet-sky" />
+            <Sparkles className="text-aerojet-sky h-4 w-4" />
             Map modules to semesters per programme &amp; license category.
           </p>
         </div>
@@ -185,24 +241,28 @@ export default function SchedulingClient({
             placeholder="Search by code or name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-11 rounded-xl border-slate-200 bg-white pl-11 shadow-sm transition-all focus:border-aerojet-sky focus:ring-2 focus:ring-aerojet-sky/10 dark:border-slate-800 dark:bg-slate-950"
+            className="focus:border-aerojet-sky focus:ring-aerojet-sky/10 h-11 rounded-xl border-slate-200 bg-white pl-11 shadow-sm transition-all focus:ring-2 dark:border-slate-800 dark:bg-slate-900/50"
           />
         </div>
       </motion.div>
 
       {/* Programme Selector for all devices */}
-      <div className="w-full sm:max-w-md mb-2">
-        <label className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-2 block flex items-center gap-2">
+      <div className="mb-2 w-full sm:max-w-md">
+        <label className="mb-2 block flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400">
           <Layers className="h-4 w-4" />
           Select Programme
         </label>
         <Select value={activeProgrammeId} onValueChange={setActiveProgrammeId}>
-          <SelectTrigger className="w-full h-12 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-aerojet-blue dark:text-slate-200 font-semibold rounded-xl focus:ring-2 focus:ring-aerojet-sky/20 transition-all">
+          <SelectTrigger className="text-aerojet-blue focus:ring-aerojet-sky/20 h-12 w-full rounded-xl border-slate-200 bg-white font-semibold transition-all focus:ring-2 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
             <SelectValue placeholder="Select a programme" />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800">
             {programmeTabs.map((tab) => (
-              <SelectItem key={tab.programme.id} value={tab.programme.id} className="cursor-pointer font-medium">
+              <SelectItem
+                key={tab.programme.id}
+                value={tab.programme.id}
+                className="cursor-pointer font-medium"
+              >
                 {tab.programme.name}
               </SelectItem>
             ))}
@@ -227,9 +287,6 @@ export default function SchedulingClient({
   )
 }
 
-/**
- * Sub-panel: shows license category sub-tabs and the scheduling matrix for a single programme.
- */
 function ProgrammeSchedulePanel({
   tab,
   groupedCourses,
@@ -239,16 +296,7 @@ function ProgrammeSchedulePanel({
   onToggle,
   onEnsureTerms,
   search,
-}: {
-  tab: any
-  groupedCourses: Record<string, any[]>
-  licenseCourseMap: Record<string, Set<string>>
-  loading: string | null
-  isPending: boolean
-  onToggle: (termId: string, courseId: string, assigned: boolean) => void
-  onEnsureTerms: (pathwayId: string, licenseCategoryId: string, totalYears: number) => void
-  search: string
-}) {
+}: ProgrammeSchedulePanelProps) {
   const { pathway, licenseCategories, totalYears } = tab
 
   // "All (General)" = terms without a licenseCategoryId
@@ -257,7 +305,7 @@ function ProgrammeSchedulePanel({
     const options: { id: string | null; code: string; name: string }[] = [
       { id: null, code: 'ALL', name: 'All Modules (General)' },
     ]
-    
+
     const progCode = (tab.programme.code || '').toUpperCase()
     const progName = (tab.programme.name || '').toUpperCase()
 
@@ -266,10 +314,10 @@ function ProgrammeSchedulePanel({
     for (const lc of licenseCategories) {
       const lcCodeStripped = lc.code.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() // 'B1.1' -> 'B11'
       const looseMatch = lcCodeStripped.replace('11', '1') // 'B11' -> 'B1'
-      
+
       if (
-        progCode.includes(lcCodeStripped) || 
-        progCode.includes(looseMatch) || 
+        progCode.includes(lcCodeStripped) ||
+        progCode.includes(looseMatch) ||
         progName.includes(lc.code.toUpperCase())
       ) {
         hasAnyExplicitMatch = true
@@ -280,10 +328,10 @@ function ProgrammeSchedulePanel({
     for (const lc of licenseCategories) {
       const lcCodeStripped = lc.code.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
       const looseMatch = lcCodeStripped.replace('11', '1')
-      
-      const isMatch = 
-        progCode.includes(lcCodeStripped) || 
-        progCode.includes(looseMatch) || 
+
+      const isMatch =
+        progCode.includes(lcCodeStripped) ||
+        progCode.includes(looseMatch) ||
         progName.includes(lc.code.toUpperCase())
 
       // If the programme specifies specific licenses, only show those.
@@ -299,7 +347,7 @@ function ProgrammeSchedulePanel({
 
   // Filter academic terms for the current license category selection
   const filteredTerms = useMemo(() => {
-    return pathway.academicTerms.filter((term: any) => {
+    return pathway.academicTerms.filter((term) => {
       if (activeLicenseId === null) {
         return term.licenseCategoryId === null
       }
@@ -313,9 +361,9 @@ function ProgrammeSchedulePanel({
     const requiredCourseIds = licenseCourseMap[activeLicenseId]
     if (!requiredCourseIds) return groupedCourses
 
-    const filtered: Record<string, any[]> = {}
+    const filtered: Record<string, Course[]> = {}
     for (const [cat, catCourses] of Object.entries(groupedCourses)) {
-      const matching = catCourses.filter((c: any) => requiredCourseIds.has(c.id))
+      const matching = catCourses.filter((c) => requiredCourseIds.has(c.id))
       if (matching.length > 0) {
         filtered[cat] = matching
       }
@@ -334,7 +382,7 @@ function ProgrammeSchedulePanel({
       className="space-y-6"
     >
       {/* License Category Sub-Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto pb-2">
         <ShieldCheck className="h-4 w-4 shrink-0 text-slate-400" />
         <span className="mr-1 shrink-0 text-xs font-bold tracking-widest text-slate-400 uppercase">
           License:
@@ -362,18 +410,15 @@ function ProgrammeSchedulePanel({
             No schedule configured for this license category
           </h3>
           <p className="mx-auto mt-1 max-w-md text-sm text-blue-600 dark:text-blue-400">
-            Create {totalYears * 2} semester terms for this programme + license combo to start assigning modules.
+            Create {totalYears * 2} semester terms for this programme + license combo to start
+            assigning modules.
           </p>
           <Button
             className="mt-4 gap-2"
             disabled={isPending}
             onClick={() => onEnsureTerms(pathway.id, activeLicenseId, totalYears)}
           >
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              'Create Terms'
-            )}
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create Terms'}
           </Button>
         </div>
       )}
@@ -386,16 +431,16 @@ function ProgrammeSchedulePanel({
               <Table>
                 <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="sticky left-0 z-30 w-[160px] sm:w-[300px] min-w-[160px] sm:min-w-[300px] border-r bg-slate-50 py-6 text-sm font-bold text-aerojet-blue dark:bg-slate-900 dark:text-slate-300">
+                    <TableHead className="text-aerojet-blue sticky left-0 z-30 w-[160px] min-w-[160px] border-r bg-slate-50 py-6 text-sm font-bold sm:w-[300px] sm:min-w-[300px] dark:bg-slate-900 dark:text-slate-300">
                       Module Name
                     </TableHead>
-                    {filteredTerms.map((term: any) => (
+                    {filteredTerms.map((term) => (
                       <TableHead
                         key={term.id}
                         className="min-w-[160px] border-r text-center align-middle"
                       >
                         <div className="flex flex-col items-center gap-1.5">
-                          <span className="text-sm font-bold text-aerojet-blue dark:text-slate-100">
+                          <span className="text-aerojet-blue text-sm font-bold dark:text-slate-100">
                             Year {term.yearNumber} • Sem {term.semesterNumber}
                           </span>
                           {term.licenseCategory && (
@@ -416,10 +461,7 @@ function ProgrammeSchedulePanel({
                     <React.Fragment key={category}>
                       {/* Category Header */}
                       <TableRow className="bg-slate-50/50 hover:bg-slate-50/50 dark:bg-slate-800/10 dark:hover:bg-slate-800/10">
-                        <TableCell
-                          colSpan={filteredTerms.length + 1}
-                          className="px-6 py-2.5"
-                        >
+                        <TableCell colSpan={filteredTerms.length + 1} className="px-6 py-2.5">
                           <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
                             <Layers className="h-3 w-3" />
                             {category}
@@ -428,14 +470,14 @@ function ProgrammeSchedulePanel({
                       </TableRow>
 
                       {/* Course Rows */}
-                      {catCourses.map((course: any) => (
+                      {catCourses.map((course) => (
                         <TableRow
                           key={course.id}
                           className="group border-b border-slate-50 transition-all duration-150 ease-out hover:bg-white/80 dark:border-slate-800/50 dark:hover:bg-slate-800/40"
                         >
-                          <TableCell className="sticky left-0 z-20 border-r bg-white py-5 w-[160px] sm:w-[300px] min-w-[160px] sm:min-w-[300px] transition-all duration-150 ease-out group-hover:bg-white group-hover:shadow-sm dark:bg-slate-950 dark:group-hover:bg-slate-900">
+                          <TableCell className="sticky left-0 z-20 w-[160px] min-w-[160px] border-r bg-white py-5 transition-all duration-150 ease-out group-hover:bg-white group-hover:shadow-sm sm:w-[300px] sm:min-w-[300px] dark:bg-slate-950 dark:group-hover:bg-slate-900">
                             <div className="space-y-1.5 px-2">
-                              <div className="text-sm sm:text-lg leading-tight font-bold text-aerojet-blue dark:text-slate-100 whitespace-normal break-words">
+                              <div className="text-aerojet-blue text-sm leading-tight font-bold break-words whitespace-normal sm:text-lg dark:text-slate-100">
                                 {course.name}
                               </div>
                               <div className="flex flex-wrap items-center gap-2">
@@ -443,7 +485,7 @@ function ProgrammeSchedulePanel({
                                   {course.code}
                                 </span>
                                 {course.duration > 0 && (
-                                  <span className="text-[10px] sm:text-xs font-medium text-slate-400">
+                                  <span className="text-[10px] font-medium text-slate-400 sm:text-xs">
                                     {course.duration} hrs
                                   </span>
                                 )}
@@ -451,9 +493,9 @@ function ProgrammeSchedulePanel({
                             </div>
                           </TableCell>
 
-                          {filteredTerms.map((term: any) => {
+                          {filteredTerms.map((term) => {
                             const isAssigned = term.courseAssignments.some(
-                              (a: any) => a.courseId === course.id
+                              (a) => a.courseId === course.id
                             )
                             const isLoading = loading === `${term.id}-${course.id}`
 
@@ -461,9 +503,7 @@ function ProgrammeSchedulePanel({
                               <TableCell
                                 key={`${term.id}-${course.id}`}
                                 className={`relative border-r p-0 text-center transition-all ${
-                                  isAssigned
-                                    ? 'bg-blue-50/20 dark:bg-blue-900/5'
-                                    : 'bg-transparent'
+                                  isAssigned ? 'bg-blue-50/20 dark:bg-blue-900/5' : 'bg-transparent'
                                 }`}
                               >
                                 <label
@@ -471,7 +511,7 @@ function ProgrammeSchedulePanel({
                                   className="flex h-full min-h-[80px] w-full cursor-pointer items-center justify-center transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10"
                                 >
                                   {isLoading ? (
-                                    <Loader2 className="h-5 w-5 animate-spin text-aerojet-sky" />
+                                    <Loader2 className="text-aerojet-sky h-5 w-5 animate-spin" />
                                   ) : (
                                     <Checkbox
                                       id={`check-${term.id}-${course.id}`}
@@ -479,7 +519,7 @@ function ProgrammeSchedulePanel({
                                       onCheckedChange={(checked) =>
                                         onToggle(term.id, course.id, !!checked)
                                       }
-                                      className="h-6 w-6 rounded-lg border-2 border-slate-200 transition-all data-[state=checked]:border-aerojet-blue data-[state=checked]:bg-aerojet-blue dark:border-slate-800"
+                                      className="data-[state=checked]:border-aerojet-blue data-[state=checked]:bg-aerojet-blue h-6 w-6 rounded-lg border-2 border-slate-200 transition-all dark:border-slate-800"
                                     />
                                   )}
                                 </label>
@@ -493,10 +533,7 @@ function ProgrammeSchedulePanel({
 
                   {Object.keys(filteredGroupedCourses).length === 0 && (
                     <TableRow>
-                      <TableCell
-                        colSpan={filteredTerms.length + 1}
-                        className="py-24 text-center"
-                      >
+                      <TableCell colSpan={filteredTerms.length + 1} className="py-24 text-center">
                         <p className="text-xl font-bold text-slate-400">
                           No modules found matching &quot;{search}&quot;
                         </p>
@@ -514,7 +551,8 @@ function ProgrammeSchedulePanel({
       {hasTerms && activeLicenseId === null && (
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/50">
           <strong>General</strong> schedule applies to all students regardless of license category.
-          Select a specific license category above to create a tailored semester schedule (e.g. B1.1 students see different modules than B2).
+          Select a specific license category above to create a tailored semester schedule (e.g. B1.1
+          students see different modules than B2).
         </div>
       )}
     </motion.div>

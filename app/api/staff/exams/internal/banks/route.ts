@@ -1,13 +1,22 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import {
+  apiSuccess,
+  apiError,
+  apiCreated,
+  withErrorHandler,
+} from '@/lib/api/response'
+import type { Prisma } from '@prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { getInternalBankCategoryCode, normalizeCategoryCode } from '@/lib/easa/category-selection'
+import {
+  calculateMinimumPoolSize,
+} from '@/lib/easa/module-requirements'
 import { z } from 'zod'
 
 // GET — list all exam banks with pool health
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireStaff()
   if (!(await isInternalExamSystemEnabled())) {
     return apiError('Internal exams are not currently available', 403)
@@ -15,7 +24,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
   const url = new URL(req.url)
   const courseId = url.searchParams.get('courseId')
 
-  const where: any = {}
+  const where: Prisma.InternalExamBankWhereInput = {}
   if (courseId) where.courseId = courseId
 
   const banks = await prismaUnfiltered.internalExamBank.findMany({
@@ -23,31 +32,43 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
     include: {
       course: { select: { id: true, name: true, code: true } },
       ruleOverride: true,
-      _count: { 
-        select: { 
-          questions: { where: { status: 'APPROVED', isActive: true } }, 
-          sessions: true 
-        } 
+      _count: {
+        select: {
+          questions: { where: { status: 'APPROVED', isActive: true } },
+          sessions: true,
+        },
       },
     },
-    orderBy: { name: 'asc' },
   })
+
+  // Natural sort by moduleCode so M2 comes before M10, M11A, etc.
+  banks.sort((a, b) =>
+    (a.moduleCode || '').localeCompare(b.moduleCode || '', undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    })
+  )
 
   const pendingCounts = await prismaUnfiltered.internalExamQuestion.groupBy({
     by: ['bankId'],
-    where: { 
-      bankId: { in: banks.map(b => b.id) }, 
-      status: 'PENDING_APPROVAL', 
-      isActive: true 
+    where: {
+      bankId: { in: banks.map((b) => b.id) },
+      status: 'PENDING_APPROVAL',
+      isActive: true,
     },
-    _count: true
+    _count: true,
   })
-  const pendingMap = Object.fromEntries(pendingCounts.map(pc => [pc.bankId, pc._count]))
+  const pendingMap = Object.fromEntries(pendingCounts.map((pc) => [pc.bankId, pc._count]))
 
   // Compute pool health inline from _count to avoid N+1 queries
   const enriched = banks.map((bank) => {
     const questionCount = bank._count.questions
-    const requiredMinimum = bank.minimumPoolSize ?? bank.mcqCount * 5
+    // Use EASA-aware minimum pool size if module code is present
+    const easaMinimum = bank.moduleCode
+      ? calculateMinimumPoolSize(bank.moduleCode, bank.categoryCode)
+      : null
+    const fallbackMinimum = bank.minimumPoolSize ?? bank.mcqCount * 5
+    const requiredMinimum = easaMinimum ?? fallbackMinimum
     const ratio = requiredMinimum > 0 ? questionCount / requiredMinimum : 0
     const health = ratio >= 1.0 ? 'GREEN' : ratio >= 0.6 ? 'AMBER' : 'RED'
     return {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -37,7 +38,7 @@ const FIXED_AMOUNTS = [300, 500, 1000, 2000]
 
 export default function WalletTopUpForm({
   minAmount,
-  currency = 'EUR',
+  currency: _currency = 'EUR',
   paymentMethods = [],
 }: WalletTopUpFormProps) {
   const router = useRouter()
@@ -47,6 +48,8 @@ export default function WalletTopUpForm({
   const [selectedMethodId, setSelectedMethodId] = useState<string>('')
   const [uploading, setUploading] = useState(false)
   const [proofUrl, setProofUrl] = useState<string>('')
+
+  const { markDirty, markClean } = useFormDirty()
 
   const getAmount = (): number => {
     if (selectedAmount !== null) return selectedAmount
@@ -74,6 +77,7 @@ export default function WalletTopUpForm({
     if (!selectedMethodId && paymentMethods.length > 0) {
       setSelectedMethodId(paymentMethods[0].id)
     }
+    markDirty()
     setStep('payment')
   }
 
@@ -81,6 +85,7 @@ export default function WalletTopUpForm({
     if (res && res[0]?.url) {
       setProofUrl(res[0].url)
       setUploading(true)
+      markDirty()
 
       try {
         const apiRes = await fetch('/api/applicant/exam-only/top-up', {
@@ -106,6 +111,7 @@ export default function WalletTopUpForm({
         }
 
         toast.success('Payment submitted successfully!')
+        markClean()
         setStep('success')
       } catch (error) {
         console.error('Payment error:', error)
@@ -141,7 +147,7 @@ export default function WalletTopUpForm({
       <div className="space-y-6">
         {/* Amount Selection Card */}
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <div className="bg-linear-to-r from-aerojet-blue to-aerojet-sky px-6 py-4">
+          <div className="from-aerojet-blue to-aerojet-sky bg-linear-to-r px-6 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
                 <PiggyBank className="h-5 w-5 text-white" />
@@ -167,6 +173,7 @@ export default function WalletTopUpForm({
                   onClick={() => {
                     setSelectedAmount(amount)
                     setCustomAmount('')
+                    markDirty()
                   }}
                   className={`group relative overflow-hidden rounded-xl border-2 p-4 text-center transition-all hover:shadow-md ${
                     selectedAmount === amount
@@ -176,7 +183,7 @@ export default function WalletTopUpForm({
                 >
                   {selectedAmount === amount && (
                     <div className="absolute top-0 right-0">
-                      <div className="h-0 w-0 border-b-20 border-l-20 border-b-transparent border-l-aerojet-blue" />
+                      <div className="border-l-aerojet-blue h-0 w-0 border-b-20 border-l-20 border-b-transparent" />
                     </div>
                   )}
                   <span
@@ -202,11 +209,14 @@ export default function WalletTopUpForm({
               <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                 <button
                   type="button"
-                  onClick={() => setSelectedAmount(null)}
+                  onClick={() => {
+                    setSelectedAmount(null)
+                    markDirty()
+                  }}
                   className="flex items-center"
                 >
                   {selectedAmount === null && !customAmount ? (
-                    <CircleDot className="mr-2 h-5 w-5 text-aerojet-blue dark:text-blue-400" />
+                    <CircleDot className="text-aerojet-blue mr-2 h-5 w-5 dark:text-blue-400" />
                   ) : (
                     <Circle className="mr-2 h-5 w-5 text-slate-300" />
                   )}
@@ -221,11 +231,14 @@ export default function WalletTopUpForm({
                   <input
                     type="number"
                     value={customAmount}
-                    onChange={(e) => setCustomAmount(e.target.value)}
+                    onChange={(e) => {
+                      setCustomAmount(e.target.value)
+                      markDirty()
+                    }}
                     min={minAmount}
                     step="0.01"
                     placeholder={`Min. ${minAmount}`}
-                    className="w-full rounded-xl border-2 border-slate-200 bg-slate-50 py-3 pr-4 pl-10 text-lg font-bold transition-all outline-none focus:border-aerojet-blue focus:bg-white dark:border-slate-700 dark:bg-slate-800"
+                    className="focus:border-aerojet-blue w-full rounded-xl border-2 border-slate-200 bg-slate-50 py-3 pr-4 pl-10 text-lg font-bold transition-all outline-none focus:bg-white dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
               )}
@@ -244,13 +257,13 @@ export default function WalletTopUpForm({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-slate-500 dark:text-slate-400">Amount to pay</p>
-                  <p className="text-2xl font-black text-aerojet-blue dark:text-blue-400">
+                  <p className="text-aerojet-blue text-2xl font-black dark:text-blue-400">
                     €{getAmount().toLocaleString()}
                   </p>
                 </div>
                 <button
                   onClick={handleAmountContinue}
-                  className="flex items-center gap-2 rounded-xl bg-linear-to-r from-aerojet-blue to-aerojet-sky px-6 py-3 font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30"
+                  className="from-aerojet-blue to-aerojet-sky flex items-center gap-2 rounded-xl bg-linear-to-r px-6 py-3 font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30"
                 >
                   Continue
                   <ArrowRight className="h-4 w-4" />
@@ -281,13 +294,15 @@ export default function WalletTopUpForm({
                 </h3>
                 <p className="text-sm text-slate-500">
                   Amount:{' '}
-                  <span className="font-bold text-aerojet-blue">€{getAmount().toLocaleString()}</span>
+                  <span className="text-aerojet-blue font-bold">
+                    €{getAmount().toLocaleString()}
+                  </span>
                 </p>
               </div>
             </div>
             <button
               onClick={handleBack}
-              className="text-sm font-medium text-slate-500 hover:text-aerojet-blue"
+              className="hover:text-aerojet-blue text-sm font-medium text-slate-500"
             >
               Change
             </button>

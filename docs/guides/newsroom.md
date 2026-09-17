@@ -119,7 +119,7 @@ model NewsArticle {
 | ------------------------------------------------------- | -------------------------------------------- |
 | `app/(public)/newsroom/page.tsx`                        | Server-rendered listing page with pagination |
 | `app/(public)/newsroom/[slug]/page.tsx`                 | Article detail with SEO                      |
-| `app/(public)/newsroom/_components/NewsCard.tsx`        | Article card with image, date, tags          |
+| `app/(public)/_components/NewsCard.tsx`                  | Article card with image, date, tags          |
 | `app/(public)/newsroom/_components/NewsSortControl.tsx` | Sort toggle (newest/oldest)                  |
 | `app/(public)/newsroom/_components/NewsPagination.tsx`  | Page navigation                              |
 | `app/(public)/newsroom/_components/ShareButtons.tsx`    | Social sharing                               |

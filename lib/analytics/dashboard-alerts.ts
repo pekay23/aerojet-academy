@@ -9,6 +9,7 @@
 import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import type { ExamBundleStatus } from '@prisma/client'
 
 export interface DashboardAlert {
   id: string
@@ -37,52 +38,66 @@ async function compute(): Promise<DashboardAlert[]> {
     pendingExamReports,
   ] = await Promise.all([
     // 1) Payments awaiting review for >7 days
-    prismaUnfiltered.payment.count({
-      where: { status: 'PENDING', createdAt: { lt: todayMinus7 } },
-    }).catch(() => 0),
+    prismaUnfiltered.payment
+      .count({
+        where: { status: 'PENDING', createdAt: { lt: todayMinus7 } },
+      })
+      .catch(() => 0),
 
     // 2) DSR with dueBy in the past and still open
-    prismaUnfiltered.dataSubjectRequest.count({
-      where: {
-        dueBy: { lt: now },
-        status: { in: ['RECEIVED', 'IN_PROGRESS', 'AWAITING_USER'] },
-      },
-    }).catch(() => 0),
+    prismaUnfiltered.dataSubjectRequest
+      .count({
+        where: {
+          dueBy: { lt: now },
+          status: { in: ['RECEIVED', 'IN_PROGRESS', 'AWAITING_USER'] },
+        },
+      })
+      .catch(() => 0),
 
     // 3) Referrals with fraudScore >= 50 awaiting review
-    prismaUnfiltered.referral.count({
-      where: { fraudScore: { gte: 50 }, reviewedAt: null },
-    }).catch(() => 0),
+    prismaUnfiltered.referral
+      .count({
+        where: { fraudScore: { gte: 50 }, reviewedAt: null },
+      })
+      .catch(() => 0),
 
     // 4) ExamBundles expiring in next 7 days with unused resits
-    prismaUnfiltered.examBundle.count({
-      where: {
-        expiresAt: { gte: tomorrow, lte: sevenDaysOut },
-        status: { in: ['ACTIVE'] as any },
-      },
-    }).catch(() => 0),
+    prismaUnfiltered.examBundle
+      .count({
+        where: {
+          validUntil: { gte: tomorrow, lte: sevenDaysOut },
+          status: { in: ['ACTIVE'] as unknown as ExamBundleStatus[] },
+        },
+      })
+      .catch(() => 0),
 
     // 5) FileUpload rows older than 24h still unmirrored
-    prismaUnfiltered.fileUpload.count({
-      where: {
-        mirroredAt: null,
-        supabasePath: { not: null },
-        createdAt: { lt: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
-      },
-    }).catch(() => 0),
+    prismaUnfiltered.fileUpload
+      .count({
+        where: {
+          mirroredAt: null,
+          supabasePath: { not: null },
+          createdAt: { lt: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
+        },
+      })
+      .catch(() => 0),
 
     // 6) Email deliveries that failed in the last 24h
-    prismaUnfiltered.emailDelivery.count({
-      where: {
-        status: 'FAILED',
-        createdAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
-      },
-    }).catch(() => 0),
+    prismaUnfiltered.emailDelivery
+      .count({
+        where: {
+          status: 'FAILED',
+          createdAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
+        },
+      })
+      .catch(() => 0),
 
     // 7) Internal exam reports awaiting staff review
-    prismaUnfiltered.internalExamReport.count({
-      where: { status: 'PENDING' },
-    }).catch(() => 0),
+    prismaUnfiltered.internalExamReport
+      .count({
+        where: { status: 'PENDING' },
+      })
+      .catch(() => 0),
   ])
 
   const alerts: DashboardAlert[] = []
@@ -161,7 +176,7 @@ async function compute(): Promise<DashboardAlert[]> {
       title: `${pendingExamReports} internal exam report${pendingExamReports === 1 ? '' : 's'} awaiting review`,
       description:
         'Students have flagged issues with submitted exams (typo, ambiguous answer, etc.). Review in the exam Operations dashboard before publishing results.',
-      href: '/staff/exams/internal?view=operations',
+      href: '/staff/exams/internal?tab=operations',
       count: pendingExamReports,
     })
   }

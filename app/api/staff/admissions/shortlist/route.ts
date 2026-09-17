@@ -26,7 +26,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const targetStage = action === 'SHORTLIST' ? 'SHORTLISTED' : 'REJECTED'
 
   let successCount = 0
-  let failures: { id: string; error: string }[] = []
+  const failures: { id: string; error: string }[] = []
 
   for (const id of applicationIds) {
     try {
@@ -38,8 +38,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       } else {
         failures.push({ id, error: transition.error || 'Transition not allowed' })
       }
-    } catch (err: any) {
-      failures.push({ id, error: err.message || 'Unknown error' })
+    } catch (err: unknown) {
+      failures.push({ id, error: err instanceof Error ? err.message : 'Unknown error' })
     }
   }
 

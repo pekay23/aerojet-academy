@@ -65,8 +65,9 @@ async function main() {
         }
       }, { timeout: 20000 })
       console.log(`  ✅ Successfully processed ${item.name}`)
-    } catch (error: any) {
-      console.error(`  ❌ Failed to process ${item.email}: ${error.message}`)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
+      console.error(`  ❌ Failed to process ${item.email}: ${message}`)
     }
   }
   console.log('✨ All funded bookings processed.')

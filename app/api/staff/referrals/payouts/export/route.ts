@@ -8,8 +8,10 @@ export async function GET(req: NextRequest) {
   let actor
   try {
     actor = await requirePermission(ADDITIONAL_PERMISSION_KEYS.MANAGE_REFERRALS)
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: err.message === 'Unauthorized' ? 401 : 403 })
+   } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err)
+    const status = message === 'Unauthorized' ? 401 : 403
+    return NextResponse.json({ error: message }, { status })
   }
 
   const url = new URL(req.url)

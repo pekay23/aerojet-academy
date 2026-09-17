@@ -1,0 +1,267 @@
+--- Page 1 ---
+8
+AEROJET M2 SAMPLE SET
+1. Convex lenses:
+a. form real, inverted, small images of distant objects
+b. create virtual, inverted, small images of near objects
+c. produce images where the focal length is always negative
+2. Radio waves travel as:
+a. sound waves, carrier waves, longitudinal waves
+b. ground waves, sky waves, space waves
+c. aerial waves, longitudinal waves, Doppler waves
+3. What units are employed in the Absolute Metric (CGS) system?
+a. Centimeter-gram-second
+b. Celcius-gram-second
+c. Centigrade-pounds-hours
+4. Assuming that as an approximation there are 10.75 ft2 in a m2. Then estimate, the number of m2
+there are in 215 ft2.
+a. 15 m2
+b. 18 m2
+c. 20 m2
+5. The mass of a light aircraft which weighs 42,000 N on take-off is :
+a. 4281 kg
+b. 4386 kg
+c. 4279 kg
+6. A missile having a mass of 51,000 kg is launched from sea level on a course for the moon. If the
+gravitational acceleration of the moon is one sixth that on earth, determine the mass of the missile
+on reaching the moon. Take g=10 m/s 2
+a. 510,000 kg
+b. 85,000 kg
+c. 51,000 kg
+7. Magnitude, direction, point of application are characteristics of
+a. vectors
+b. forces
+c. scalars
+8. 30 in.Hg in SI units of pressure is :
+a. 101 592 Pa
+b. 101 000 Pa
+c. 100 529 Pa
+9. A solid rectangular body measures 1.5 m × 20 cm × 3 cm and has a mass of 54 kg. Calculate its
+density in Pa
+a. 6000 Pa
+b. 60 Pa
+c. 0.6 Pa
+10. A solid rectangular body measures 1.5 m × 20 cm × 3 cm and has a mass of 54 kg. Calculate its
+relative density
+a. 6
+b. 0.06
+c. 0.0006
+11. Bleriot XI is given an acceleration of 5 m/s2. To achieve this the thrust force produced by the Bleriot
+XI’s engines is 15 kN. Find the mass of the aircraft.
+a. 30 000 kg
+b. 3 000 kg
+c. 3 000 g
+12. Two vectors may be added using the :
+a. parallelogram rule
+b. triangle rule
+c. parallelogram rule or triangle rule
+
+--- Page 2 ---
+2 | P age
+13. A crate of mass 80 kg is held in equilibrium by a force P acting parallel to the plane as indicated on
+Figure 8.10. Determine, using the magnitude of the force P and the normal reaction R, ignoring the
+effects of friction
+a. 784.8 N
+b. 679.7 N
+c. 392.4 N Figure 8.10
+d.
+14. A body of mass 80 kg is held in equilibrium by a force P acting parallel to the plane as indicated on
+Figure 8.12. Determine, the value of W
+a. 84.8 N
+b. 679.7 N
+c. 392.4 N
+15. The perpendicular distance from the line of action of a force to a fulcrum is known as the :
+a. moment
+b. arm
+c. moment arm
+Figure 8.11
+16. Figure 8.11 shows an aircraft control system crank lever ABC pivoted at B. AB is 20 cm and BC is 30
+cm. The magnitude of the vertical rod force at C, required to balance the horizontal control rod
+force of magnitude 10 kN applied at A is:
+a. 5440 N
+b. 11414 N
+c. 300 kN
+17. Which is set-up by forces tending to pull the material apart Tensile stress:
+a. Tensile stress
+b. Compressive stress.
+c. Shear stress
+18. 1 MN/m2 = :
+a. 1 N/mm2
+b. 1 kN/mm2
+c. 1 N/cm2
+19. Ability to be drawn out into threads or wire.
+a. ductility
+b. malleability
+c. brittleness
+
+--- Page 3 ---
+3 | P age
+20. Wrought iron, aluminum, copper and low carbon steels are examples of
+a. ductile materials.
+b. covalent materials
+c. bulk modulus materials
+21. Elasticity is :
+a. when internal atomic binding forces are stretched but not broken and act like minute springs to
+return the material to normal
+b. to be drawn out into threads or wire.
+c. ability of a material to return to its original shape once internal forces have been removed.
+22. Complete the statement :
+‘Sound source vibrations set up a series of alternating zones of high pressure (__________) and low
+pressure (________) which travel outwards from the source in a ________ manner.’
+a. rarefaction, compression, longitudinal
+b. compression, longitudinal, rarefaction
+c. compression, rarefaction, longitudinal
+23. In reference to sound, amplitude is to _________ as frequency is to __________.
+a. pitch, loudness
+b. loudness, pitch
+c. reflection, Doppler effect
+24. Reception of unwanted crackles and hiss in radio communications are examples of
+a. static interference
+b. dynamic interference
+c. space interference
+25. The energy of EM waves is in :
+a. direct proportion to their frequency
+b. inverse proportion to their frequency
+c. direct proportion to their wavelength
+26. When two wave sets are in-phase, they reinforce one another as they meet, creating
+a. Interference
+b. constructive interference
+c. destructive interference
+27. VHF and UHF radio bands are frequently used for aircraft communications because :
+a. they reduce the impossibility of static interference
+b. they reduce the possibility of dynamic interference
+c. they reduce the possibility of static interference
+28. If the focal length of a curved mirror is 30 cm, what is the radius of curvature of the mirror?
+a. 15 cm
+b. 60 mm
+c. 600 mm
+29. Fiber optic cable manufactured with a clad layer of glass over the inner glass core to :
+a. reduce energy losses due to dirt at the boundary
+b. reduce energy losses due to the Fresnel effect and impurities in the glass
+c. reduce energy losses due to dirt at the boundary and due to the Fresnel effect and impurities in
+the glass
+
+--- Page 4 ---
+4 | P age
+30. How does the magnitude of the refractive index affect the angle of rays as they enter materials
+having different refractive indices?
+a. The angle of the refracted ray increases as the light ray enters the material having the lower
+refractive index.
+b. The angle of the refracted ray decreases as the light ray enters the material having the lower
+refractive index.
+c. The angle of the refracted ray remains same as the light ray enters the material having the lower
+refractive index.
+31. Figure 8.12 represents a
+a. Convex lens
+b. Concave lens
+c. Concavex lens Figure 8.12
+32. A small object x cm high stands on and perpendicular to the principal axis of a convex lens, at a
+distance of 20 mm from the lens. If the focal length of the lens is 10 mm, what is the nature of the
+image?
+a. Real and upright
+b. Virtual and inverted
+c. Real and inverted
+33. In using this lens equation if the lens is concave :
+a. f is taken as positive,
+b. f is take as negative
+c. f can be positive or negative
+34. An object 12 mm high stands on the principal axis of a concave mirror at a distance of 150 mm. If
+the focal length of the mirror is 50 mm, what is the height of the image?
+a. 24 mm
+b. 6 cm
+c. 0.6 cm
+35. Light passing from a vacuum through glass with refractive index (n) = 1.6, will have an approximate
+velocity = :
+a. 18.75 × 108 m/s
+b. 0.1875 × 109 m/s
+c. 187.5 × 107 m/s
+36. It is an open system
+a. Gas turbine
+b. Cylinder and piston assembly
+c. Boiling water in a covered container
+37. For a constant volume process for a perfect gas :
+a. Q − W = U – U
+2 1
+b. Q + W = U – U
+2 1
+c. Q = U – U
+2 1
+
+--- Page 5 ---
+5 | P age
+38. Thermal efficiency, η
+Qin − Qout
+a. =
+Qin
+Qin – Qout
+b. =
+Qout
+Qin+ Qout
+c. =
+Qin
+39. An isothermal process,:
+a. Pressure remains constant
+b. Volume remains constant
+c. Temperature remains constant
+40. Detail the forms of energy input and output for a radio.
+a. mechanical energy into electrical energy
+b. chemical and sound energy
+c. electrical energy into sound energy
+41. The thermodynamic cycle of a practical gas turbine engine differ from the ideal Brayton cycle by :
+a. The operation is not frictionless
+b. There is pressure loss, increase in volume and decrease in the density of the working fluid
+c. Both a. and b. above
+42. Convert −20 0C into K.
+a. 293 K
+b. 253 K
+c. – 293 K
+43. What is the purpose of the condensor within a typical refrigeration system?
+a. The condenser allows refrigerants to absorb heat from the medium being cooled
+b. The condenser allows heat to be dissipated to an external medium, so reducing the temperature
+of the refrigerant
+c. The condenser prevents the refrigerator from vibrating
+44. A light aircraft of mass 1965 kg accelerates from 160 to 240 kph in 3.5 s. find the average
+acceleration.
+a. 6.43 m/s2
+b. 6.34 m/s2
+c. 3.64 m/s2
+45. A light aircraft of mass 1965 kg accelerates from 160 to 240 kph in 3.5 s. Find the force required to
+produce the acceleration.
+a. 12.46 N
+b. 12.46 MN
+c. 12.46 kN
+46. Figure 8.13 is a constant velocity graph, the acceleration = ____ and the distance travelled = _____.
+Figure 8.13
+a. 0 , 0
+b. 0 , vt
+c. 0 , ½vt
+
+--- Page 6 ---
+6 | P age
+47. The area under a velocity–time graph determines _______.
+a. distance
+b. velocity
+c. acceleration
+48. 1 rpm = :
+a. 2π rad/min
+b. 2πr rad/min
+c. πr2 rad/min
+49. A 540 mm diameter wheel is rotating at 1500/π rpm. determine the linear velocity of a point on the
+rim of the wheel.
+a. 13,000 m/s
+b. 1,350 m/s
+c. 13.5 m/s
+50. Where resonance can be useful.
+a. Radio tuner
+b. Bridges
+c. Pylons
+51. The force per unit change in length measured in N/m is the :
+a. Tensile stress
+b. Spring stiffness
+c. Spring strain
+52. Machine A delivers 45,000 J of energy in 30 s, machine B produces 48 kNm of work in 31 s, which
+machine is more powerful?
+a. Machine A
+b. Machine B
+c. Both are equally powerful
+END

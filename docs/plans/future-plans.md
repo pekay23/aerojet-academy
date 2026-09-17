@@ -3,7 +3,7 @@
 This document tracks planned features and improvements for the Aerojet Academy platform.
 Items are grouped by original category then ordered by implementation effort in the **Priority Queue** at the bottom.
 
-**Last audited:** 2026-05-06 (bulk update)
+**Last audited:** 2026-09-07
 
 ---
 
@@ -119,13 +119,33 @@ Items are grouped by original category then ordered by implementation effort in 
 
 ---
 
+---
+
+## ✅ Implemented (completed after last audit)
+
+The following features were planned or implied in earlier versions and are now fully built:
+
+| Feature | Implementation | Date |
+|---------|---------------|------|
+| PDF certificate generation | `lib/certificates/generator.ts` | 2026-05 |
+| QR code document verification | `app/(public)/verify/[certificateId]/page.tsx`, `app/api/certificates/verify/[certificateId]/route.ts` | 2026-05 |
+| SEB (Safe Exam Browser) integration | `lib/exams/useAntiCheat.ts`, BEK rotation cron, student SEB download | 2026-07 |
+| Internal exam bank & sessions | `lib/exams/`, `app/staff/exams/`, exam question banks, sessions, operations | 2026-06 |
+| Newsroom (public + staff) | `app/(public)/newsroom/`, `app/staff/newsroom/`, SEO, cover images, author attribution | 2026-05 |
+| Audit hash chain | Immutable audit log with chaining | 2026-05 |
+| LLM Council framework | `agents/skills/llm-council/`, multi-persona evaluation system | 2026-07 |
+
+---
+
 ## 📄 7. PDF Template System & Document Verification
 
 > **Detailed plan:** [`docs/plans/pdf-template-system.md`](./pdf-template-system.md)
 
+> **Status:** Decisions resolved (2026-09-07) — awaiting implementation. Access control: ADMIN/SUPER_ADMIN only. No signature approval workflow required.
+
 ### Template Configuration
 
-- [ ] Data-driven PDF templates — staff can edit text content, labels, and descriptions via UI
+- [ ] Data-driven PDF templates — ADMIN/SUPER_ADMIN can edit all text content, labels, and descriptions via UI
 - [ ] Template lifecycle management (Draft → Active → Archived) with cloning
 - [ ] Per-template branding overrides (logo, watermark, footer)
 - [ ] Configurable certificate numbering format (`CERT-{YYYY}-{SEQ:4}`)
@@ -133,16 +153,17 @@ Items are grouped by original category then ordered by implementation effort in 
 ### Signature Management
 
 - [ ] Upload and manage digital signature images (PNG/JPG, Supabase Storage)
-- [ ] Assign signatures to template positions (left/right slots)
+- [ ] Assign signatures to template positions (left/right slots) — different templates can have different signers
 - [ ] Signature expiry tracking for role changes
 - [ ] Signer name and role label management
+- [ ] Audit log entries for signature uploads
 
 ### Document Verification (QR Codes)
 
-- [ ] Unique verification code per generated document
-- [ ] QR code embedded in PDF footer/accreditation area
-- [ ] Public `/verify/[code]` page — no auth required, shows document authenticity
-- [ ] Verification record with recipient, document type, issue date, certificate number
+- [x] ~~Unique verification code per generated document~~ _(done 2026-05 — certificateId-based verification)_
+- [x] ~~QR code embedded in PDF footer/accreditation area~~ _(done 2026-05 — QR rendered in certificate PDF)_
+- [x] ~~Public `/verify/[code]` page — no auth required, shows document authenticity~~ _(done 2026-05 — `app/(public)/verify/[certificateId]/page.tsx`)_
+- [x] ~~Verification record with recipient, document type, issue date, certificate number~~ _(done 2026-05 — `CertificateVerification` model + API route)_
 
 ### Enhanced Preview
 
@@ -195,7 +216,8 @@ Use this queue to pick the next item to implement.
 | 17  | Batch enrollment interface (bulk class assignment)          | ~1-2 days | 1       | **Done** |
 | 18  | Visual weekly schedule UI (calendar-based class scheduling) | ~1-2 days | 1       | **Done** |
 | 19  | Classroom/room mapping + capacity enforcement               | ~1 day    | 1       | **Done** |
-| 20  | Stripe/Paystack checkout flow for students                  | ~2-3 days | 5       |          |
+| 20  | Stripe/Paystack checkout flow for students                  | ~2-3 days | 5       | **Deferred** |
+| 25  | PDF Template System (Schema + Backend + UI + Integration)  | ~3-4 days | 7       |          |
 
 ### Tier 5 — Major Projects (3+ days each)
 

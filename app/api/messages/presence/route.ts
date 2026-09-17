@@ -14,7 +14,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const ids = url.searchParams.getAll('id').filter(Boolean).slice(0, 100)
   if (ids.length === 0) return apiSuccess([])
 
-  const role = (viewer as any).role ?? 'STUDENT'
+  const role = viewer.role ?? 'STUDENT'
   const entries = await resolvePresenceForViewer({
     viewerId: viewer.id,
     viewerRole: role,

@@ -1,20 +1,21 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { STAGE_ORDER, STAGE_INFO } from '@/lib/admissions/constants'
+import { Prisma } from '@prisma/client'
 
 /**
  * GET /api/staff/admissions/pipeline
  * Returns real-time pipeline analytics: stage distribution, conversion rates,
  * and time-in-stage averages for the admissions funnel.
  */
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext) => {
   await requireStaff()
   const url = new URL(req.url)
   const intakeCycleId = url.searchParams.get('intakeCycleId')
 
-  const where: any = {}
+  const where: Prisma.ApplicationWhereInput = {}
   if (intakeCycleId) where.intakeCycleId = intakeCycleId
 
   // Stage distribution

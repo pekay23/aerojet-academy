@@ -12,7 +12,7 @@ export default meta
 type Story = StoryObj<typeof ConfirmDialog>
 
 export const Default: Story = {
-  render: () => {
+  render: function Default() {
     const [open, setOpen] = useState(false)
     return (
       <>
@@ -30,7 +30,7 @@ export const Default: Story = {
 }
 
 export const Destructive: Story = {
-  render: () => {
+  render: function Destructive() {
     const [open, setOpen] = useState(false)
     return (
       <>

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getInterviewConfig } from '@/lib/settings'
 import { z } from 'zod'
@@ -17,9 +17,9 @@ const schema = z.object({
   })).min(1),
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await params
+  const { id } = (await ctx!.params) as { id: string }
   
   const body = await req.json()
   const result = schema.safeParse(body)
@@ -30,7 +30,7 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: { para
   const schedule = await prismaUnfiltered.interviewSchedule.findUnique({ where: { id } })
   if (!schedule) return apiError('Schedule not found', 404)
 
-  const config = await getInterviewConfig()
+  const _config = await getInterviewConfig()
 
   const start = new Date(dateStart)
   const end = new Date(dateEnd)
@@ -39,7 +39,7 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: { para
 
   const slotsToCreate = []
 
-  let currentDate = new Date(start)
+  const currentDate = new Date(start)
   while (currentDate <= end) {
     if (daysOfWeek.includes(currentDate.getDay())) {
       for (const block of timeBlocks) {

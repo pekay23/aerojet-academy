@@ -171,6 +171,6 @@ export function ArrowR({ className = '' }: { className?: string }) {
 }
 
 export function Img(props: React.ImgHTMLAttributes<HTMLImageElement>) {
-  // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+  // eslint-disable-next-line @next/next/no-img-element
   return <img loading="lazy" alt="" {...props} />
 }

@@ -1,0 +1,232 @@
+--- Page 1 ---
+4
+AEROJET M2 SAMPLE TEST 65 minutes
+Question Number. 1. In which medium does sound travel the fastest?
+Option A. Iron.
+Option B. Air.
+Option C. Water.
+Question Number. 2. Which has the most effect on the speed of sound in air?
+Option A. Temperature.
+Option B. Wavelength.
+Option C. Frequency.
+Question Number. 3. The fundamental frequency of a control cable is 20 Hz, the frequency of the 2nd Harmonic is
+Option A. 40 Hz.
+Option B. 40 KHz.
+Option C. 20 Hz.
+Question Number. 4. Which of the following is an example of a Longitudinal Wave?
+Option A. Sound Wave.
+Option B. Radio Wave.
+Option C. Light Wave.
+Question Number. 5. What is the wavelength of a note of frequency 1kHz when its velocity is 440m/s?
+Option A. 4.4 m.
+Option C. 0.44 km.
+Option B. 0.44 m.
+Question Number. 6 For a concave lens, the image is
+Option A. real.
+Option B. virtual.
+Option C. a chromatic object.
+Question Number. 7. Lasers use which source of light?
+Option A. Scattered.
+Option B. Refraction.
+Option C. Coherent.
+Question Number. 8. Illumination of one lumen per metre squared is one
+Option A. luxor.
+Option B. lux.
+Option C. candle.
+Question Number. 9. The amount of light emitted by a lamp can be measured in
+Option A. candle's.
+Option B. luxors.
+Option C. lumens.
+Question Number. 10. The light gathering power of a lens is indicated by its
+Option A. material.
+Option B. thickness of the lens.
+Option C. focal ratio.
+Question Number. 11. In order for a converging lens to form a real image, the object distance must be more than the
+Option A. focal length.
+Option B. 5 times the thickness of the lens.
+Option C. 1 inch.
+Question Number. 12. A ______ lens is thicker in the middle than at the edges. It is
+Option A. converging.
+Option B. concave.
+Option C. thick.
+
+--- Page 2 ---
+2 | P age
+Question Number. 13. When is the only time a concave mirror forms a virtual image?
+Option A. When the object is at the focal point.
+Option B. When the object is inside the focal point and the pole.
+Option C. When the object is placed at the centre of curvature.
+Question Number. 14. A convex mirror forms a virtual image
+Option A. when the object is at the centre of curvature.
+Option B. when the object is inside the focus.
+Option C. always.
+Question Number. 15. A Concave mirror is used in
+Option A. a rear view mirror.
+Option B. a periscope.
+Option C. headlights.
+Question Number. 16. A block of metal is melted. It will
+Option A. remain the same volume.
+Option B. decrease in volume.
+Option C. increase in volume.
+Question Number. 17. The energy that ice at 0 °C must gain so that it turns to water at 0 °C is called
+Option A. the latent heat of vaporisation.
+Option B. sensible energy.
+Option C. the latent heat of fusion.
+Question Number. 18. An ideal gas goes through an isothermal process. It will act in accordance with which law?
+Option A. Gay Lussac's.
+Option B. Boyle's.
+Option C. Charles's.
+Question Number. 19. The Steam Point of water is
+Option A. 0 Kelvin.
+Option B. 373 Kelvin.
+Option C. 273 Kelvin.
+Question Number. 20. A 200 cm titanium bar increases in length by 2 cm when its temperature rises by 100 °C. Its
+linear expansivity is
+Option A. 0.0101 per °C.
+Option B. 0.01 per °C.
+Option C. 0.0001 per °C.
+Question Number. 21. Heat transmission by convection is confined to
+Option A. liquids and gases.
+Option B. gases and solids.
+Option C. solids and liquids.
+Question Number. 22. Which contains the least amount of heat energy?
+Option A. Both 1 kg of ice at 0 °C and 1 kg of water at 0 °C have the same amount of heat energy.
+Option B. 1 kg of water at 0 °C.
+Option C. 1 kg of ice at 0 °C.
+Question Number. 23. Which weighs the most?
+Option A. 1 kg of ice at 0 °C.
+Option B. Both 1 kg of ice at 0 °C and 1 kg of water at 0 °C have the same weight.
+Option C. 1 kg of water at 0 °C.
+Question Number. 24. Which has the greatest density?
+Option A. 1 kg of ice at 0 °C.
+Option B. 1 kg of water at 0 °C.
+Option C. Both 1 kg of ice at 0 °C and 1 kg of ice at 0 °C have the same density.
+
+--- Page 3 ---
+3 | P age
+Question Number. 25. Which has the greatest volume?
+Option A. 1 kg of water at 0 °C.
+Option B. 1 kg of ice at 0 °C.
+Option C. Both 1 kg of ice at 0 °C and 1 kg of ice at 0 °C have the same volume.
+Question Number. 26. The temperature at which water will exist as a solid, liquid and gas, all at the same time, is
+called.
+Option A. the triple point and is approximately 0 °C.
+Option B. the tri-state point and is approximately at 0 °C.
+Option C. the tri-state point and is approximately 98 °C.
+Question Number. 27. Material X and material Y are both removed from the same oven at the same time, after being in
+the same amount of time. Material X is of a higher temperature than material Y, because
+Option A. material Y has a higher specific heat capacity.
+Option B. material X must have had a higher temperature before it was put in the oven.
+Option C. material X has a higher specific heat capacity.
+Question Number. 28. Atmospheric pressure at ISA conditions is
+Option A. 1013 pa.
+Option B. 1013 bar.
+Option C. 1013 mBar.
+Question Number. 29. Convert 220 gallons to litres.
+Option A. 1000 litres.
+Option B. 48.4 litres.
+Option C. 500 litres..
+Question Number. 30. The SI unit of pressure is the
+Option A. Newton per metre squared (N/m2).
+Option B. Cubic metre (m3).
+Option C. kilogram per metre cubed (kg/m3).
+Question Number. 31. A gauge indicates 15 PSIG. What is the absolute pressure?
+Option A. 30 PSI.
+Option B. 0.3 PSI.
+Option C. Zero PSI.
+Question Number. 32. Water is most dense at
+Option A. -4 °C.
+Option B. 0 °C.
+Option C. +4 °C.
+Question Number. 33. Viscosity can be described as
+Option A. Newton's 1st law of motion.
+Option B. fluids flowing in a straight line.
+Option C. the internal resistance for a fluid to flow.
+Question Number. 34. How much lift is produced on a wing can be derived from
+Option A. Bernoulli's Theorem.
+Option B. Faraday's law.
+Option C. Charles law.
+Question Number. 35. Pressure in a pipe is
+Option A. force per unit area.
+Option B. mass divided by cross-sectional area.
+Option C. weight per unit area.
+Question Number. 36. A good refrigerant has a
+Option A. low condensation temperature and high condensation pressure.
+Option B. low condensation temperature and low condensation pressure.
+Option C. high condensation temperature and low condensation pressure.
+
+--- Page 4 ---
+4 | P age
+Question Number. 37. What is the momentum of a ball of mass 2 grams and has a velocity of 10cm/s?
+Option A. 5 kg.m/s.
+Option B. 0.002 kg.m/s.
+Option C. 0.0002 kg.m/s.
+Question Number. 38. A gyroscope suffers from apparent wander. This is due to
+Option A. friction on the gimbals and bearings.
+Option B. the earth's rotation.
+Option C. the aircraft flying along a north/south track.
+Question Number. 38. The SI unit of momentum is the
+Option A. metre squared (m2).
+Option B. kilogram metre per second.
+Option C. kilogram / metre (kg/m).
+Question Number. 39. Precession in a gyro is
+Option A. proportional to the square of the magnitude of the torque applied
+Option B. proportional to the magnitude of the torque applied.
+Option C. inversely proportional to the magnitude of the torque applied.
+Question Number. 40. A gyro with a fixed point free to rotate in three axis is
+Option A. a tied gyro.
+Option B. a space gyro.
+Option C. an earth gyro.
+Question Number. 41. What type of friction requires the greatest force to overcome it?
+Option A. Dynamic friction.
+Option B. Static friction.
+Option C. Rolling friction.
+Question Number. 42. As an object slides down a slope, its
+Option A. kinetic energy increases and its potential energy increases.
+Option B. kinetic energy increases and its potential energy decreases.
+Option C. kinetic energy decreases and its potential energy increases.
+Question Number. 43. A single fixed pulley (discounting friction etc) has a mechanical advantage of
+Option A. 2.
+Option B. 1/2.
+Option C. 1.
+Question Number. 44. What is the ratio of load to effort called?
+Option A. Mechanical advantage.
+Option B. Velocity ratio.
+Option C. Mechanical ratio.
+Question Number. 45. 1 kW is
+Option A. 3413 BTU per hour.
+Option B. 1.56 HP.
+Option C. 360 Joules.
+Question Number. 46. The tension in the cable of a crane is 2500 N and it lifts a load through 50m, what is the work
+done on the load?
+Option A. 1.25 x 105.
+Option B. 12500 J.
+Option C. 12.5 kJ.
+Question Number. 47. What is the kinetic energy of an aircraft of mass of 2 metric tonnes and has a velocity of 2m/s?
+Option A. 8 kJ.
+Option B. 4 kJ.
+Option C. 2 kJ.
+
+--- Page 5 ---
+5 | P age
+Question Number. 48. The work done in lifting a mass of 2000 kg vertically to a height of 40 metres is
+Option A. 80 kJ.
+Option B. 784 kJ.
+Option C. 500 kJ.
+Question Number. 49. For a car weighing 1000 N, what force would be required to accelerate the car to 3 ms-2?
+Option A. 3270 N.
+Option B. 306.1 N.
+Option C. 333 N.
+Question Number. 50. A time period of 10 microseconds is equal to a frequency of.
+Option A. 100 kHz.
+Option B. 100 Hz.
+Option C. 1 Mhz.
+Question Number. 51. The SI unit of acceleration is the.
+Option A. metre per second squared.
+Option B. metre per second.
+Option C. square metre.
+Question Number. 52. If a body starts at rest and reaches 84 m/s in 3 seconds, its acceleration is
+Option A. 28 m/s2.
+Option B. 14 m/s2.
+Option C. 252 m/s2.
+END

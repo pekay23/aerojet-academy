@@ -43,7 +43,7 @@ export default async function InterviewPage() {
         </p>
       </div>
 
-      <SlotBooking currentSlot={currentSlot as any} />
+      <SlotBooking currentSlot={currentSlot} />
     </div>
   )
 }

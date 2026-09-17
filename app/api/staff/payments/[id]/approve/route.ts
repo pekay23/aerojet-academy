@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { requireStaff } from '@/lib/auth/helpers'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -17,7 +16,7 @@ import {
   generateTempPassword,
   generateAcademyEmail,
 } from '@/lib/auth/helpers'
-import { PaymentStatus, ProgrammeChoice } from '@prisma/client'
+import { PaymentStatus } from '@prisma/client'
 import { topUpWallet } from '@/lib/wallet/operations'
 import { shouldPromoteOnPayment, promoteApplicantToStudent } from '@/lib/enrollment/pathway'
 import { generateMilestonesForYear } from '@/lib/enrollment/full-time'
@@ -38,15 +37,20 @@ export const POST = withErrorHandler(
 
     if (!id) return apiError('Payment ID required')
 
-    let body: any
+     let body: {
+      action?: string
+      notes?: string
+      reason?: string
+      ignorePathwayRestrictions?: boolean
+    }
     try {
       body = await req.json()
-    } catch (e) {
+    } catch (_e) {
       return apiError('Invalid request body', 400)
     }
 
     const { action, notes, reason } = body
-    if (!['approve', 'reject'].includes(action)) {
+    if (!action || !['approve', 'reject'].includes(action)) {
       return apiError('Action must be "approve" or "reject"')
     }
 
@@ -136,10 +140,10 @@ export const POST = withErrorHandler(
 
         if (programme && programme.programmeYears.length > 0) {
           const programmeCode = programme.code
-          
+
           // Validate pathway restriction
-          const { allowed, error, severity } = await import('@/lib/enrollment/validation').then(v => 
-            v.validateFullTimeProgrammeEnrollment(payment.userId, programmeCode)
+          const { allowed, error, severity } = await import('@/lib/enrollment/validation').then(
+            (v) => v.validateFullTimeProgrammeEnrollment(payment.userId, programmeCode)
           )
 
           const force = body.ignorePathwayRestrictions === true
@@ -148,11 +152,17 @@ export const POST = withErrorHandler(
             console.error(`Enrollment blocked: ${error}`)
             return apiError(error || 'Student is not eligible for this programme.', 400, {
               needsOverride: severity === 'WARNING',
-              warning: error
+              warning: error,
             })
           }
 
           const year1 = programme.programmeYears[0]
+          const academicYear = await prismaUnfiltered.academicYear.findUnique({
+            where: { name: '2026/2027' },
+          })
+          if (!academicYear) {
+            return apiError('Academic year 2026/2027 is not configured.', 400)
+          }
 
           // Create FullTimeEnrollment if it doesn't exist yet
           let enrollment = await prismaUnfiltered.fullTimeEnrollment.findFirst({
@@ -167,7 +177,7 @@ export const POST = withErrorHandler(
                 programmeYearId: year1.id,
                 status: 'PENDING_CONFIRMATION',
                 currentYearNumber: 1,
-                academicYear: '2026/2027',
+                academicYearId: academicYear.id,
               },
             })
 
@@ -359,7 +369,12 @@ export const POST = withErrorHandler(
       })
 
       // Analytics tracking (non-blocking)
-      trackPayment(Number(payment.amount), payment.currency || 'EUR', payment.id, payment.userId).catch(console.error)
+      trackPayment(
+        Number(payment.amount),
+        payment.currency || 'EUR',
+        payment.id,
+        payment.userId
+      ).catch(console.error)
 
       return apiSuccess({ message: 'Payment approved' })
     } else {

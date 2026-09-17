@@ -3,9 +3,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Loader2, FileText } from 'lucide-react'
 import DocumentUploadForm from './_components/DocumentUploadForm'
+import type { DocumentType, UploadedDocument } from './_components/DocumentUploadForm'
+
+interface DocumentsPageData {
+  documentTypes: DocumentType[]
+  uploadedDocuments: UploadedDocument[]
+  applicationId: string
+}
 
 export default function DocumentsPage() {
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<DocumentsPageData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,6 +32,8 @@ export default function DocumentsPage() {
     }
   }, [])
 
+   
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchDocuments() }, [fetchDocuments])
 
   if (loading) {

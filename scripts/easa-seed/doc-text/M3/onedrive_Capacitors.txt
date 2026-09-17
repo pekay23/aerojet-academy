@@ -1,0 +1,18 @@
+As we will see in this capacitor tutorial, Capacitors are energy storage devices which have the ability to store an electrical charge across its plates. Thus capacitors store energy as a result of their ability to store charge and an ideal capacitor would not loose its stored energy.
+The simplest construction 4of a capacitor is by using two parallel conducting metal plates separated through a distance by an insulating material. This insulating material is called the “dielectric”. the dielectric plays an important role in the electrical operation of a capacitor and for this capacitor tutorial we can summarise the main points below.
+A capacitor consists of two metal plates separated by a dielectric.
+The dielectric can be made of many insulating materials such as air, glass, paper, plastic etc.
+A capacitor is capable of storing electrical charge and energy.
+The higher the value of capacitance, the more charge the capacitor can store.
+The larger the area of the plates or the smaller their separation the more charge the capacitor can store.
+A capacitor is said to be “Fully Charged” when the voltage across its plates equals the supply voltage.
+The symbol for electrical charge is Q and its unit is the Coulomb.
+Electrolytic capacitors are polarized. They have a +ve and a -ve terminal.
+Capacitance is measured in Farads, which is a very large unit so micro-Farad ( μF ), nano-Farad ( nF ) and pico-Farad ( pF ) are generally used.
+Capacitors that are daisy chained together in a line are said to be connected in Series.
+Capacitors that have both of their respective terminals connected to each terminal of another capacitor are said to be connected in Parallel.
+Parallel connected capacitors have a common supply voltage across them.
+Series connected capacitors have a common current flowing through them.
+Capacitive reactance, XC is the opposition to current flow in AC circuits.
+In AC capacitive circuits the voltage “lags” the current by 90o.
+The basic construction and symbol for a parallel plate capacitor is given as:

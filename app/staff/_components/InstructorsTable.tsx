@@ -19,6 +19,8 @@ import {
 
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
+import { SortableTh } from '@/components/ui/sortable-th'
+import { useSearchParams } from 'next/navigation'
 import {
   bulkUpdateUserStatus,
   bulkDeleteUsers,
@@ -42,6 +44,7 @@ function slugify(text: string) {
 }
 
 export default function InstructorsTable() {
+  const searchParams = useSearchParams()
   const [instructors, setInstructors] = useState<Instructor[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -60,9 +63,13 @@ export default function InstructorsTable() {
         page: page.toString(),
         limit: perPage.toString(),
       })
+      const sort = searchParams.get('sort')
+      const order = searchParams.get('order')
+      if (sort) params.set('sort', sort)
+      if (order) params.set('order', order)
       const res = await fetch(`/api/staff/users?${params}`)
       const data = await res.json()
-      
+
       if (data.success) {
         setInstructors(data.data ?? [])
         setTotal(data.meta?.total ?? 0)
@@ -73,9 +80,12 @@ export default function InstructorsTable() {
     } finally {
       setLoading(false)
     }
-  }, [search, page, perPage])
+  }, [search, page, perPage, searchParams])
 
   useEffect(() => {
+   
+   
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [search])
 
@@ -231,10 +241,10 @@ export default function InstructorsTable() {
                     )}
                   </button>
                 </th>
-                <th className="px-6 py-4">Instructor</th>
+                <SortableTh sortKey="name" label="Instructor" />
                 <th className="px-6 py-4">Employee ID</th>
                 <th className="px-6 py-4">Specialization</th>
-                <th className="px-6 py-4">Email</th>
+                <SortableTh sortKey="name" label="Email" />
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>

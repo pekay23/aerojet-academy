@@ -216,7 +216,7 @@ export const authOptions: NextAuthOptions = {
             status: user.status,
             mustChangePassword: user.mustChangePassword && !user.passwordChanged,
           }
-        } catch (error: any) {
+          } catch (error: unknown) {
           throw error
         }
       },

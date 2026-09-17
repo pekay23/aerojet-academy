@@ -1,0 +1,41 @@
+Team November
+What is the symbol for Voltage? 
+a. Vo
+b. Ω 
+c. V
+Conventional flow is a flow from 
+a. Positive to negative 
+b. Negative to positive
+c. Positive to Neutral
+Electron flow is a flow from 
+a. Positive to negative 
+b. Negative to positive
+c. Positive to Neutral
+Resistance is measured in
+a. Mho 
+b. Ohm
+c. Hom
+The two fundamental properties of current and voltage are related by a third party known as
+a. Resistance  
+b. Potential difference 
+b. Electromotive Force
+Conductance is measured in
+a. Ohms
+b. Siemens
+c. Mho
+Voltage is measured in
+a. Volts
+b. Watts
+b. Ohms
+Conductance is the ability of a material to 
+a. Allow flow of current
+b. Resist flow of current
+c. Discharge current 
+Charge is measured in
+a. Candela 
+b. Coulomb
+c. Current
+ Energy required to move a charge from one point to another point is
+a. Ohm’s energy 
+b. Kinetic energy 
+c. Potential difference

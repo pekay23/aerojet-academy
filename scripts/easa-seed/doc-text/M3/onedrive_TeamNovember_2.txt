@@ -1,0 +1,41 @@
+Team November
+1. What is the unit for Volts
+A. Vo
+B. Ω
+C. V
+2. Conventional flow is a flow from
+A. Positive to negative
+B. Negative to positive
+C. Positive to Neutral
+3. Electron flow is a flow from
+A. Positive to negative
+B. Negative to positive
+C. Positive to Neutral
+4. Resistance is measured in
+A. Mho
+B. Ohm
+C. Hom
+5. The two fundamental properties of current and voltage are related by a third party known as
+A. Resistance
+B. Potential difference
+C. Electromotive Force
+6. Conductance is measured in
+A. Ohms
+B. Siemen
+C. Mho
+7. Voltage is measured in
+A. Volts
+B. Watts
+C. Ohms
+8. Conductance is the ability of a material to
+A. Allow flow of current
+B. Resist flow of current
+C. Discharge current
+9. Charge is measured in
+A. Candela
+B. Coulomb
+C. Current
+10. Energy required to move a charge from one point to another point is
+A. Ohms energy
+B. Kinetic energy
+C. Potential difference

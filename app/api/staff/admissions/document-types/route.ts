@@ -3,6 +3,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
@@ -42,7 +43,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (existing) return apiError('A document type with this slug already exists', 409)
 
   const docType = await prismaUnfiltered.applicationDocumentType.create({
-    data: parsed.data as any,
+    data: parsed.data as Prisma.ApplicationDocumentTypeUncheckedCreateInput,
   })
 
   return apiCreated(docType)

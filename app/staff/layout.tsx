@@ -6,9 +6,11 @@ import StaffTopBar from './_components/StaffTopBar'
 import Heartbeat from '@/components/shared/Heartbeat'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import AppTour from '@/components/Tour/AppTour'
+import { getDashboardAlerts } from '@/lib/analytics/dashboard-alerts'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import packageJson from '../../package.json'
 import { getRegistrationConfig } from '@/lib/settings'
+import { getSystemSetting } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,8 +26,8 @@ export default async function StaffLayout({ children }: { children: React.ReactN
 
   const user = session.user
 
-  // Run both queries in parallel; use prismaUnfiltered to bypass RLS transaction overhead
-  const [dbUser, welcomeMessages, internalExamEnabled, registrationConfig] = await Promise.all([
+  // Run all queries in parallel; use prismaUnfiltered to bypass RLS transaction overhead
+  const [dbUser, welcomeMessages, internalExamEnabled, dashboardAlerts, registrationConfigData, pdfTemplateEnabled] = await Promise.all([
     prismaUnfiltered.user.findUnique({
       where: { id: user.id },
       select: {
@@ -35,9 +37,11 @@ export default async function StaffLayout({ children }: { children: React.ReactN
         profile: { select: { firstName: true, middleName: true, lastName: true } },
       },
     }),
-    getWelcomeMessages(prismaUnfiltered, user.role),
+    getWelcomeMessages(prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient, user.role),
     isInternalExamSystemEnabled(),
+    getDashboardAlerts(),
     getRegistrationConfig(),
+    getSystemSetting('pdf_template_system_enabled', 'false').then(v => v === 'true'),
   ])
 
   if (
@@ -58,8 +62,15 @@ export default async function StaffLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white">
+        Skip to main content
+      </a>
       <Heartbeat />
-      <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
+      <AppTour
+        hasCompletedTour={dbUser.hasCompletedTour}
+        userRole={userRole}
+        data={{ staffAlerts: dashboardAlerts, unreadNotifications: 0 }}
+      />
       <StaffSidebar
         userName={fullName}
         userRole={userRole}
@@ -71,6 +82,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           messages: 0,
         }}
         internalExamEnabled={internalExamEnabled}
+        pdfTemplateEnabled={pdfTemplateEnabled}
         appVersion={packageJson.version}
       />
 
@@ -89,7 +101,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           welcomeMessages={welcomeMessages}
           userName={firstName}
         />
-        {!registrationConfig.isOpen && (
+        {!registrationConfigData?.isOpen && (
           <div className="flex flex-col justify-between gap-2 border-b border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:px-6 lg:px-8">
             <div className="flex items-start gap-3 sm:items-center">
               <div className="mt-0.5 shrink-0 sm:mt-0">

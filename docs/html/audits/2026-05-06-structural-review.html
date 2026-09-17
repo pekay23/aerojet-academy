@@ -14,11 +14,13 @@
   <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
     <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +28,141 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Structural Review — 2026-05-06</h1>
-  <p class="he-deck"><p>---…</p>
-</p>
+  <p class="he-deck">---…</p>
 </header>
-<section class="he-section" id="status-p0-p1-complete-p2p3-backlog"><div class="he-section__num">01 · Status: P0 + P1 COMPLETE — P2/P3 backlog</div><h2 class="he-section__title">Status: P0 + P1 COMPLETE — P2/P3 backlog</h2><section class="he-section" id="prioritized-action-plan"><div class="he-section__num">02 · Prioritized Action Plan</div><h2 class="he-section__title">Prioritized Action Plan</h2><h3 id="p0-security-done">P0 — Security (DONE)</h3>Unprotected cron POST — ✅ Added CRON_SECRET auth to milestone-reminders POST handlerRace condition — ✅ Wrapped top-up in Serializable transaction with duplicate detection<h3 id="p1-maintainability-done">P1 — Maintainability (DONE)</h3>Extract duplicate logic — ✅ Created <code>promoteIfFirstExamActivity()</code> + <code>upgradeRoleInTransaction()</code>, replaced 5 copiesHardcoded business rules — ✅ Payment splits moved to SystemSettings via <code>getPaymentSplitConfig()</code>Add Zod validation — ✅ Added schemas for charter, merge, wallet-proof, book-exam routesDynamic import NewsMarkdownEditor — ✅ Switched to <code>next/dynamic</code> with <code>ssr: false</code> in 2 pages<h3 id="p2-structure-mostly-resolved-2026-05-20">P2 — Structure (mostly resolved 2026-05-20)</h3>Break up long functions — getDashboardData (183 lines), book-exam POST (239 lines), UsersTable (380 lines) — STILL OPEN (low priority, cosmetic)Add error.tsx — ✅ <code>(auth)/error.tsx</code> already exists; <code>app/examiner/error.tsx</code> added 2026-05-20Add not-found.tsx — ✅ All five portals (staff/student/instructor/applicant/examiner) and <code>(auth)</code> + <code>(public)</code> now have branded <code>not-found.tsx</code>Remove dead config — ✅ Tailwind font families already pruned (only <code>sans</code>, <code>outfit</code>, <code>heading</code> remain). <code>trackEvent</code> still in <code>lib/analytics/events.ts</code> but is a minimal stub; leave for now<h3 id="p3-polish-resolved-2026-05-20">P3 — Polish (resolved 2026-05-20)</h3>Centralize hardcoded values — partial; non-blockingReplace <code><img></code> with next/image — ✅ newsroom <code>[id]/edit/page.tsx</code> (the actual location, not <code>create</code>) now uses <code>next/image</code> with <code>fill</code> + <code>sizes</code>. Remaining <code><img></code> tags in admin tables / TwoFactor QR / export HTML are intentional (small avatars / data URIs / server-rendered HTML)Rate limiting — ✅ both <code>resend-verification</code> (<a href="../../app/api/auth/resend-verification/route.ts#L12">app/api/auth/resend-verification/route.ts:12</a>) and <code>submit-payment-proof</code> (<a href="../../app/api/public/submit-payment-proof/route.ts#L9-L12">app/api/public/submit-payment-proof/route.ts:9-12</a>) rate-limited<section class="he-section" id="infrastructure-issue-resolved"><div class="he-section__num">03 · Infrastructure Issue Resolved</div><h2 class="he-section__title">Infrastructure Issue Resolved</h2><h3 id="vercel-database-connection-failure-commit-b0b5e73-6ed1cd9">Vercel Database Connection Failure (commit b0b5e73 → 6ed1cd9)</h3>Root cause: Commit b0b5e73 switched <code>lib/prisma/db-base.ts</code> from <code>@prisma/adapter-pg</code> (standard PostgreSQL TCP driver) to <code>@prisma/adapter-neon</code> (Neon serverless WebSocket driver). The <code>ws</code> Node.js WebSocket module cannot be properly bundled by Turbopack for Vercel's serverless environment, causing "No database host or connection string was set" errors at runtime.Fix: Restored <code>@prisma/adapter-pg</code> with <code>pg</code> Pool — the proven working configuration.Lesson: Always test database adapter changes against a Vercel deployment before merging. The Neon serverless adapter is designed for edge/Cloudflare Workers, not Node.js serverless functions that have native TCP access.<section class="he-section" id="1-long-functions-hardcoded-values-complete"><div class="he-section__num">04 · 1. Long Functions &amp; Hardcoded Values (COMPLETE)</div><h2 class="he-section__title">1. Long Functions & Hardcoded Values (COMPLETE)</h2><h3 id="long-functions-50-lines-high">Long Functions (50+ lines) — HIGH</h3>FileFunctionLinesIssuestaff/dashboard/page.tsxgetDashboardData()~183Monolithic data fetching + aggregationapi/applicant/exam-only/book-exam/route.tsPOST()~239Two booking flows (simplified with shared promotion helper)staff/_components/UsersTable.tsxUsersTable()~380State + filtering + pagination + renderingstaff/exams/events/create/page.tsxCreateExamEventPage()~270Form + validation + UI mixedstaff/reports/page.tsxOverviewTab()~115Complex conditional rendering<h3 id="hardcoded-values-resolved">Hardcoded Values — RESOLVED</h3>lib/enrollment/full-time.ts: 40%/30%/30% payment split — ✅ Moved to SystemSettings (<code>ft_y1_seat_pct</code>, <code>ft_y1_sem1_pct</code>, etc.)api/applicant/exam-only/book-exam/route.ts: 21-day deadline, 28 max candidates — loaded from <code>getExamPricingConfig()</code> (already configurable)api/public/contact/route.ts: noreply@aerojet-academy.com — low prioritystaff/dashboard/page.tsx: 6-month period — low priority<h3 id="duplicate-logic-resolved">Duplicate Logic — RESOLVED</h3>Applicant-to-student promotion: 5+ copies — ✅ Consolidated to <code>promoteIfFirstExamActivity()</code> and <code>upgradeRoleInTransaction()</code> in lib/enrollment/pathway.tsExam event creation: duplicated within book-exam route — P2 backlogAuth checks: manual session + role check — ✅ Charter and merge routes now use <code>withErrorHandler</code> + <code>requireStaff()</code>Pool status arrays: repeated in 3+ files — P3 backlogWallet balance validation: identical pattern in 3+ files — P3 backlog<section class="he-section" id="2-dead-code-unused-exports-complete"><div class="he-section__num">05 · 2. Dead Code &amp; Unused Exports (COMPLETE)</div><h2 class="he-section__title">2. Dead Code & Unused Exports (COMPLETE)</h2><h3 id="minimal-dead-code-found-077-of-exports">Minimal dead code found (~0.77% of exports)</h3>Only genuine dead export:lib/analytics/events.ts — <code>trackEvent()</code> function + <code>AnalyticsEvent</code> type (27 lines) never imported anywhere. Planned analytics infrastructure that was never wired up.Dead Tailwind config (from bundle audit):tailwind.config.ts — 4 font families (Lexend, Montserrat, Playfair, Cal Sans/heading) defined but never loaded via next/font and never used in any component.Potentially obsolete:lib/students/promotion.ts — <code>promoteToStudent()</code> is no longer imported by any route after join-pool was migrated to <code>promoteIfFirstExamActivity()</code>. Only referenced by its own barrel export (lib/students/index.ts). Can be removed.Everything else confirmed in use — lib/utils (21 functions, 71+ files), lib/pools (13 re-exports), all components, all API routes.<section class="he-section" id="3-bundle-size-loading-patterns-complete"><div class="he-section__num">06 · 3. Bundle Size &amp; Loading Patterns (COMPLETE)</div><h2 class="he-section__title">3. Bundle Size & Loading Patterns (COMPLETE)</h2><h3 id="overall-mostly-green">Overall: Mostly Green</h3>Resolved:NewsMarkdownEditor (681 lines, @tiptap deps) imported statically in 2 pages — ✅ Now uses <code>next/dynamic</code> with <code>ssr: false</code>Dead Tailwind font config:tailwind.config.ts defines 4 font families (Lexend, Montserrat, Playfair, Cal Sans / heading) that are never loaded via next/font and never used in any component. Dead config that should be removed.Minor:2x <code><img></code> tags in newsroom/create/page.tsx instead of next/image (preview images)Good practices confirmed:All date-fns imports are specific (not monolithic)All lucide-react imports are specific iconsnext/font with display:swap for Inter + OutfitAVIF + WebP image formats enabledNo synchronous third-party scriptsNo <code>import *</code> patterns for heavy librariesAll 'use client' files under 200 lines<section class="he-section" id="4-low-coverage-security-risks-complete"><div class="he-section__num">07 · 4. Low-Coverage &amp; Security Risks (COMPLETE)</div><h2 class="he-section__title">4. Low-Coverage & Security Risks (COMPLETE)</h2><h3 id="critical-resolved">CRITICAL — RESOLVED</h3>api/cron/milestone-reminders/route.ts:170 — ✅ POST handler now has CRON_SECRET auth checkapi/applicant/exam-only/top-up/route.ts:42-57 — ✅ Wrapped in Serializable transaction<h3 id="high-partially-resolved">HIGH — PARTIALLY RESOLVED</h3>Missing error.tsx in (auth) segment — auth flows have no error boundary (P2 backlog)api/staff/exam-pools/charter/route.ts — ✅ Now uses Zod <code>charterBookingSchema</code> + <code>withErrorHandler</code>Missing not-found.tsx in (auth) and (portal) segments (P2 backlog)<h3 id="medium-partially-resolved">MEDIUM — PARTIALLY RESOLVED</h3>api/staff/exam-pools/merge/route.ts — ✅ Now uses Zod <code>mergePoolsSchema</code> with CUID validationapi/auth/resend-verification/route.ts — No rate limiting (P3 backlog)api/public/submit-payment-proof/route.ts — No rate limiting (P3 backlog)api/staff/students/[id]/wallet/[txnId]/proof/route.ts — ✅ Now uses Zod <code>attachProofSchema</code> instead of unsafe type assertionapi/staff/students/[id]/book-exam/route.ts — ✅ Now uses Zod <code>staffBookExamSchema</code><h3 id="good-practices-confirmed">Good practices confirmed</h3>No dangerouslySetInnerHTML, eval(), or Function()Stripe webhook signature properly verifiedNo exposed API keys in codeNextAuth handles CSRFProper transaction usage in enrollment/pool operations
+<section class="he-section" id="status-p0-p1-complete-p2p3-backlog"><div class="he-section__num">01 · Status: P0 + P1 COMPLETE — P2/P3 backlog</div><h2 class="he-section__title">Status: P0 + P1 COMPLETE — P2/P3 backlog</h2></section>
+<section class="he-section" id="prioritized-action-plan"><div class="he-section__num">02 · Prioritized Action Plan</div><h2 class="he-section__title">Prioritized Action Plan</h2></section>
+<h3 id="p0-security-done">P0 — Security (DONE)</h3>
+<ol>
+<li><del><strong>Unprotected cron POST</strong></del> — ✅ Added CRON_SECRET auth to milestone-reminders POST handler</li>
+<li><del><strong>Race condition</strong></del> — ✅ Wrapped top-up in Serializable transaction with duplicate detection</li>
+</ol>
+<h3 id="p1-maintainability-done">P1 — Maintainability (DONE)</h3>
+<ol start="3">
+<li><del><strong>Extract duplicate logic</strong></del> — ✅ Created <code>promoteIfFirstExamActivity()</code> + <code>upgradeRoleInTransaction()</code>, replaced 5 copies</li>
+<li><del><strong>Hardcoded business rules</strong></del> — ✅ Payment splits moved to SystemSettings via <code>getPaymentSplitConfig()</code></li>
+<li><del><strong>Add Zod validation</strong></del> — ✅ Added schemas for charter, merge, wallet-proof, book-exam routes</li>
+<li><del><strong>Dynamic import NewsMarkdownEditor</strong></del> — ✅ Switched to <code>next/dynamic</code> with <code>ssr: false</code> in 2 pages</li>
+</ol>
+<h3 id="p2-structure-mostly-resolved-2026-05-20">P2 — Structure (mostly resolved 2026-05-20)</h3>
+<ol start="7">
+<li><strong>Break up long functions</strong> — getDashboardData (183 lines), book-exam POST (239 lines), UsersTable (380 lines) — STILL OPEN (low priority, cosmetic)</li>
+<li><del><strong>Add error.tsx</strong></del> — ✅ <code>(auth)/error.tsx</code> already exists; <code>app/examiner/error.tsx</code> added 2026-05-20</li>
+<li><del><strong>Add not-found.tsx</strong></del> — ✅ All five portals (staff/student/instructor/applicant/examiner) and <code>(auth)</code> + <code>(public)</code> now have branded <code>not-found.tsx</code></li>
+<li><del><strong>Remove dead config</strong></del> — ✅ Tailwind font families already pruned (only <code>sans</code>, <code>outfit</code>, <code>heading</code> remain). <code>trackEvent</code> still in <code>lib/analytics/events.ts</code> but is a minimal stub; leave for now</li>
+</ol>
+<h3 id="p3-polish-resolved-2026-05-20">P3 — Polish (resolved 2026-05-20)</h3>
+<ol start="11">
+<li><strong>Centralize hardcoded values</strong> — partial; non-blocking</li>
+<li><del><strong>Replace <code>&lt;img&gt;</code> with next/image</strong></del> — ✅ newsroom <code>[id]/edit/page.tsx</code> (the actual location, not <code>create</code>) now uses <code>next/image</code> with <code>fill</code> + <code>sizes</code>. Remaining <code>&lt;img&gt;</code> tags in admin tables / TwoFactor QR / export HTML are intentional (small avatars / data URIs / server-rendered HTML)</li>
+<li><del><strong>Rate limiting</strong></del> — ✅ both <code>resend-verification</code> (<a href="../../app/api/auth/resend-verification/route.ts#L12">app/api/auth/resend-verification/route.ts:12</a>) and <code>submit-payment-proof</code> (<a href="../../app/api/public/submit-payment-proof/route.ts#L9-L12">app/api/public/submit-payment-proof/route.ts:9-12</a>) rate-limited</li>
+</ol>
+<hr />
+<section class="he-section" id="infrastructure-issue-resolved"><div class="he-section__num">03 · Infrastructure Issue Resolved</div><h2 class="he-section__title">Infrastructure Issue Resolved</h2></section>
+<h3 id="vercel-database-connection-failure-commit-b0b5e73-6ed1cd9">Vercel Database Connection Failure (commit b0b5e73 → 6ed1cd9)</h3>
+<ul>
+<li><strong>Root cause:</strong> Commit b0b5e73 switched <code>lib/prisma/db-base.ts</code> from <code>@prisma/adapter-pg</code> (standard PostgreSQL TCP driver) to <code>@prisma/adapter-neon</code> (Neon serverless WebSocket driver). The <code>ws</code> Node.js WebSocket module cannot be properly bundled by Turbopack for Vercel's serverless environment, causing &quot;No database host or connection string was set&quot; errors at runtime.</li>
+<li><strong>Fix:</strong> Restored <code>@prisma/adapter-pg</code> with <code>pg</code> Pool — the proven working configuration.</li>
+<li><strong>Lesson:</strong> Always test database adapter changes against a Vercel deployment before merging. The Neon serverless adapter is designed for edge/Cloudflare Workers, not Node.js serverless functions that have native TCP access.</li>
+</ul>
+<hr />
+<section class="he-section" id="1-long-functions-amp-hardcoded-values-complete"><div class="he-section__num">04 · 1. Long Functions &amp;amp; Hardcoded Values (COMPLETE)</div><h2 class="he-section__title">1. Long Functions &amp; Hardcoded Values (COMPLETE)</h2></section>
+<h3 id="long-functions-50-lines-high">Long Functions (50+ lines) — HIGH</h3>
+<table>
+<thead>
+<tr><th>File</th><th>Function</th><th>Lines</th><th>Issue</th></tr>
+</thead>
+<tbody>
+<tr><td>staff/dashboard/page.tsx</td><td>getDashboardData()</td><td>~183</td><td>Monolithic data fetching + aggregation</td></tr>
+<tr><td>api/applicant/exam-only/book-exam/route.ts</td><td>POST()</td><td>~239</td><td>Two booking flows (simplified with shared promotion helper)</td></tr>
+<tr><td>staff/_components/UsersTable.tsx</td><td>UsersTable()</td><td>~380</td><td>State + filtering + pagination + rendering</td></tr>
+<tr><td>staff/exams/events/create/page.tsx</td><td>CreateExamEventPage()</td><td>~270</td><td>Form + validation + UI mixed</td></tr>
+<tr><td>staff/reports/page.tsx</td><td>OverviewTab()</td><td>~115</td><td>Complex conditional rendering</td></tr>
+</tbody>
+</table>
+<h3 id="hardcoded-values-resolved">Hardcoded Values — RESOLVED</h3>
+<ul>
+<li><del>lib/enrollment/full-time.ts: 40%/30%/30% payment split</del> — ✅ Moved to SystemSettings (<code>ft_y1_seat_pct</code>, <code>ft_y1_sem1_pct</code>, etc.)</li>
+<li>api/applicant/exam-only/book-exam/route.ts: 21-day deadline, 28 max candidates — loaded from <code>getExamPricingConfig()</code> (already configurable)</li>
+<li>api/public/contact/route.ts: noreply@aerojet-academy.com — low priority</li>
+<li>staff/dashboard/page.tsx: 6-month period — low priority</li>
+</ul>
+<h3 id="duplicate-logic-resolved">Duplicate Logic — RESOLVED</h3>
+<ul>
+<li><del>Applicant-to-student promotion: 5+ copies</del> — ✅ Consolidated to <code>promoteIfFirstExamActivity()</code> and <code>upgradeRoleInTransaction()</code> in lib/enrollment/pathway.ts</li>
+<li>Exam event creation: duplicated within book-exam route — P2 backlog</li>
+<li><del>Auth checks: manual session + role check</del> — ✅ Charter and merge routes now use <code>withErrorHandler</code> + <code>requireStaff()</code></li>
+<li>Pool status arrays: repeated in 3+ files — P3 backlog</li>
+<li>Wallet balance validation: identical pattern in 3+ files — P3 backlog</li>
+</ul>
+<section class="he-section" id="2-dead-code-amp-unused-exports-complete"><div class="he-section__num">05 · 2. Dead Code &amp;amp; Unused Exports (COMPLETE)</div><h2 class="he-section__title">2. Dead Code &amp; Unused Exports (COMPLETE)</h2></section>
+<h3 id="minimal-dead-code-found-077-of-exports">Minimal dead code found (~0.77% of exports)</h3>
+<p><strong>Only genuine dead export:</strong></p>
+<ul>
+<li>lib/analytics/events.ts — <code>trackEvent()</code> function + <code>AnalyticsEvent</code> type (27 lines) never imported anywhere. Planned analytics infrastructure that was never wired up.</li>
+</ul>
+<p><strong>Dead Tailwind config (from bundle audit):</strong></p>
+<ul>
+<li>tailwind.config.ts — 4 font families (Lexend, Montserrat, Playfair, Cal Sans/heading) defined but never loaded via next/font and never used in any component.</li>
+</ul>
+<p><strong>Potentially obsolete:</strong></p>
+<ul>
+<li>lib/students/promotion.ts — <code>promoteToStudent()</code> is no longer imported by any route after join-pool was migrated to <code>promoteIfFirstExamActivity()</code>. Only referenced by its own barrel export (lib/students/index.ts). Can be removed.</li>
+</ul>
+<p><strong>Everything else confirmed in use</strong> — lib/utils (21 functions, 71+ files), lib/pools (13 re-exports), all components, all API routes.</p>
+<section class="he-section" id="3-bundle-size-amp-loading-patterns-complete"><div class="he-section__num">06 · 3. Bundle Size &amp;amp; Loading Patterns (COMPLETE)</div><h2 class="he-section__title">3. Bundle Size &amp; Loading Patterns (COMPLETE)</h2></section>
+<h3 id="overall-mostly-green">Overall: Mostly Green</h3>
+<p><strong>Resolved:</strong></p>
+<ul>
+<li><del>NewsMarkdownEditor (681 lines, @tiptap deps) imported statically in 2 pages</del> — ✅ Now uses <code>next/dynamic</code> with <code>ssr: false</code></li>
+</ul>
+<p><strong>Dead Tailwind font config:</strong></p>
+<ul>
+<li>tailwind.config.ts defines 4 font families (Lexend, Montserrat, Playfair, Cal Sans / heading) that are never loaded via next/font and never used in any component. Dead config that should be removed.</li>
+</ul>
+<p><strong>Minor:</strong></p>
+<ul>
+<li>2x <code>&lt;img&gt;</code> tags in newsroom/create/page.tsx instead of next/image (preview images)</li>
+</ul>
+<p><strong>Good practices confirmed:</strong></p>
+<ul>
+<li>All date-fns imports are specific (not monolithic)</li>
+<li>All lucide-react imports are specific icons</li>
+<li>next/font with display:swap for Inter + Outfit</li>
+<li>AVIF + WebP image formats enabled</li>
+<li>No synchronous third-party scripts</li>
+<li>No <code>import *</code> patterns for heavy libraries</li>
+<li>All 'use client' files under 200 lines</li>
+</ul>
+<section class="he-section" id="4-low-coverage-amp-security-risks-complete"><div class="he-section__num">07 · 4. Low-Coverage &amp;amp; Security Risks (COMPLETE)</div><h2 class="he-section__title">4. Low-Coverage &amp; Security Risks (COMPLETE)</h2></section>
+<h3 id="critical-resolved">CRITICAL — RESOLVED</h3>
+<ol>
+<li><del><strong>api/cron/milestone-reminders/route.ts:170</strong></del> — ✅ POST handler now has CRON_SECRET auth check</li>
+<li><del><strong>api/applicant/exam-only/top-up/route.ts:42-57</strong></del> — ✅ Wrapped in Serializable transaction</li>
+</ol>
+<h3 id="high-resolved">HIGH — RESOLVED</h3>
+<ol start="3">
+<li><del><strong>Missing error.tsx</strong> in (auth) segment</del> — ✅ resolved (see P2.8 above); <code>(auth)/error.tsx</code> exists</li>
+<li><del><strong>api/staff/exam-pools/charter/route.ts</strong></del> — ✅ Now uses Zod <code>charterBookingSchema</code> + <code>withErrorHandler</code></li>
+<li><del><strong>Missing not-found.tsx</strong> in (auth) and (portal) segments</del> — ✅ resolved (see P2.9 above); all 5 portals + <code>(auth)</code> + <code>(public)</code> covered</li>
+</ol>
+<h3 id="medium-resolved">MEDIUM — RESOLVED</h3>
+<ol start="6">
+<li><del><strong>api/staff/exam-pools/merge/route.ts</strong></del> — ✅ Now uses Zod <code>mergePoolsSchema</code> with CUID validation</li>
+<li><del><strong>api/auth/resend-verification/route.ts</strong> — No rate limiting</del> — ✅ rate-limited to 3/hour per IP, uniform response prevents enumeration (see <a href="../architecture/security.html">architecture/security.md</a>)</li>
+<li><del><strong>api/public/submit-payment-proof/route.ts</strong> — No rate limiting</del> — ✅ rate-limited to 5/hour per IP (see <a href="../architecture/security.html">architecture/security.md</a>)</li>
+<li><del><strong>api/staff/students/[id]/wallet/[txnId]/proof/route.ts</strong></del> — ✅ Now uses Zod <code>attachProofSchema</code> instead of unsafe type assertion</li>
+<li><del><strong>api/staff/students/[id]/book-exam/route.ts</strong></del> — ✅ Now uses Zod <code>staffBookExamSchema</code></li>
+</ol>
+<h3 id="good-practices-confirmed">Good practices confirmed</h3>
+<ul>
+<li>No dangerouslySetInnerHTML, eval(), or Function()</li>
+<li>Stripe webhook signature properly verified</li>
+<li>No exposed API keys in code</li>
+<li>NextAuth handles CSRF</li>
+<li>Proper transaction usage in enrollment/pool operations</li>
+</ul>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -53,14 +186,14 @@
     <li class="he-toc__l3"><a href="#overall-mostly-green">Overall: Mostly Green</a></li>
     <li class="he-toc__l2"><a href="#4-low-coverage-security-risks-complete">4. Low-Coverage &amp; Security Risks (COMPLETE)</a></li>
     <li class="he-toc__l3"><a href="#critical-resolved">CRITICAL — RESOLVED</a></li>
-    <li class="he-toc__l3"><a href="#high-partially-resolved">HIGH — PARTIALLY RESOLVED</a></li>
-    <li class="he-toc__l3"><a href="#medium-partially-resolved">MEDIUM — PARTIALLY RESOLVED</a></li>
+    <li class="he-toc__l3"><a href="#high-resolved">HIGH — RESOLVED</a></li>
+    <li class="he-toc__l3"><a href="#medium-resolved">MEDIUM — RESOLVED</a></li>
     <li class="he-toc__l3"><a href="#good-practices-confirmed">Good practices confirmed</a></li>
   </ul>
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

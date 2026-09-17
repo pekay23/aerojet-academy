@@ -36,9 +36,9 @@ export async function createAdminCalendarEvent(data: AdminEventInput) {
           OR: [
             { id: data.targetUserId },
             { email: data.targetUserId },
-            { academyEmail: data.targetUserId }
-          ]
-        }
+            { academyEmail: data.targetUserId },
+          ],
+        },
       })
       if (!u) return { error: 'Target user not found' }
       resolvedTargetId = u.id
@@ -103,9 +103,9 @@ export async function updateAdminCalendarEvent(id: string, data: AdminEventInput
           OR: [
             { id: data.targetUserId },
             { email: data.targetUserId },
-            { academyEmail: data.targetUserId }
-          ]
-        }
+            { academyEmail: data.targetUserId },
+          ],
+        },
       })
       if (!u) return { error: 'Target user not found' }
       resolvedTargetId = u.id

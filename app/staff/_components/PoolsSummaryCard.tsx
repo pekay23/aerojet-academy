@@ -1,6 +1,6 @@
 'use client'
 
-import { Users, Calendar, ArrowRight } from 'lucide-react'
+import { Users, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { CheckSquare, Square, CheckCircle2, XCircle, ExternalLink, Clock } from 'lucide-react'
+import { CheckSquare, Square, CheckCircle2, XCircle, ExternalLink } from 'lucide-react'
 import { bulkUpdatePaymentStatus } from '../actions'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -19,13 +19,14 @@ import {
 } from '@/components/ui/table'
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface PendingTopup {
   id: string
-  amount: any
+  amount: number | string
   currency: string
   paymentCurrency: string | null
-  originalAmount: any | null
+  originalAmount: number | string | null
   createdAt: string | Date
   proofUrl: string | null
   user: {
@@ -44,8 +45,21 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
 
-  const total = requests.length
-  const paged = requests.slice((page - 1) * perPage, page * perPage)
+  const sortableRequests = useMemo(
+    () =>
+      requests.map((r) => ({
+        ...r,
+        _studentSort:
+          r.user.profile
+            ? `${r.user.profile.lastName ?? ''} ${r.user.profile.firstName ?? ''}`.toLowerCase()
+            : r.user.email.toLowerCase(),
+      })),
+    [requests]
+  )
+  const { items: sortedRequests, requestSort, sortConfig } = useSort(sortableRequests)
+
+  const total = sortedRequests.length
+  const paged = sortedRequests.slice((page - 1) * perPage, page * perPage)
 
   const toggleAll = () => {
     if (selectedIds.length === paged.length && paged.length > 0) {
@@ -113,10 +127,29 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
                   )}
                 </button>
               </TableHead>
-              <TableHead>Student</TableHead>
-              <TableHead>Amount</TableHead>
+              <TableHead>Select</TableHead>
+              <SortHeader
+                label="Student"
+                sortKey="_studentSort"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-6"
+              />
+              <SortHeader
+                label="Amount"
+                sortKey="amount"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-6"
+              />
               <TableHead>Proof</TableHead>
-              <TableHead>Requested</TableHead>
+              <SortHeader
+                label="Requested"
+                sortKey="createdAt"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-6"
+              />
             </TableRow>
           </TableHeader>
           <TableBody>

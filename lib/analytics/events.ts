@@ -1,4 +1,5 @@
 import 'server-only'
+import { Prisma } from '@prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
 // ============================================================================
@@ -118,7 +119,7 @@ export type AnalyticsPayload =
   | WalletPayload
   | ReferralPayload
   | TourPayload
-  | Record<string, any>
+  | Record<string, unknown>
 
 // ============================================================================
 // Event validation
@@ -143,7 +144,7 @@ export const REQUIRED_PAYLOAD_FIELDS: Record<AnalyticsEventName, string[]> = {
   TOUR_COMPLETED: ['tourName'],
 }
 
-export function validatePayload(event: AnalyticsEventName, data: Record<string, any>): Record<string, any> {
+export function validatePayload(event: AnalyticsEventName, data: Record<string, unknown>): Record<string, unknown> {
   const required = REQUIRED_PAYLOAD_FIELDS[event] || []
   const missing = required.filter((field) => !(field in data))
   if (missing.length > 0) {
@@ -161,7 +162,26 @@ export async function trackEvent(
   data: AnalyticsPayload = {},
   userId?: string,
 ): Promise<void> {
-  const payload = validatePayload(event, data as Record<string, any>)
+  const payload = validatePayload(event, data as Record<string, unknown>)
+
+  const resolvedUserId = userId ?? payload.userId as string | undefined
+
+  // Validate that the user exists before tracking (if userId is provided)
+  if (resolvedUserId) {
+    try {
+      const userExists = await prismaUnfiltered.user.findUnique({
+        where: { id: resolvedUserId },
+        select: { id: true },
+      })
+      if (!userExists) {
+        console.warn(`[ANALYTICS] Skipping event ${event}: user ${resolvedUserId} does not exist`)
+        return
+      }
+    } catch (err) {
+      // If validation fails, log but don't block the event
+      console.warn(`[ANALYTICS] Could not validate user ${resolvedUserId}:`, err)
+    }
+  }
 
   try {
     await prismaUnfiltered.auditLog.create({
@@ -169,8 +189,8 @@ export async function trackEvent(
         action: event,
         entity: 'ANALYTICS',
         entityId: 'system',
-        userId: userId ?? payload.userId,
-        changes: payload,
+        userId: resolvedUserId,
+        changes: payload as unknown as Prisma.InputJsonValue,
       },
     })
   } catch (err) {
@@ -213,4 +233,20 @@ export async function trackExamCompletion(poolId: string, moduleCode: string, sc
 
 export async function trackWalletTopUp(amount: number, currency: string, method: string, userId?: string) {
   return trackEvent('WALLET_TOP_UP', { amount, currency, method }, userId)
+}
+
+export async function trackCourseAccess(courseId: string, userId?: string) {
+  return trackEvent('COURSE_ACCESSED', { courseId }, userId)
+}
+
+export async function trackDocumentUpload(documentType: string, fileName?: string, userId?: string) {
+  return trackEvent('DOCUMENT_UPLOADED', { documentType, fileName }, userId)
+}
+
+export async function trackReferralClick(referralCode?: string, landingPage?: string, userId?: string) {
+  return trackEvent('REFERRAL_CLICKED', { referralCode, landingPage }, userId)
+}
+
+export async function trackPaymentSubmitted(amount: number, currency: string, paymentId?: string, userId?: string, method?: string) {
+  return trackEvent('PAYMENT_SUBMITTED', { amount, currency, paymentId, method }, userId)
 }

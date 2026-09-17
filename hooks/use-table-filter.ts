@@ -1,9 +1,9 @@
 'use client'
 import { useState, useCallback, useMemo } from 'react'
 
-export function useTableFilter<T extends Record<string, any>>(data: T[], searchKeys: (keyof T)[]) {
+export function useTableFilter<T extends Record<string, unknown>>(data: T[], searchKeys: (keyof T)[]) {
   const [search, setSearch] = useState('')
-  const [filters, setFilters] = useState<Record<string, any>>({})
+  const [filters, setFilters] = useState<Record<string, unknown>>({})
 
   const filtered = useMemo(() => {
     let result = data
@@ -22,7 +22,7 @@ export function useTableFilter<T extends Record<string, any>>(data: T[], searchK
     return result
   }, [data, search, filters, searchKeys])
 
-  const setFilter = useCallback((key: string, value: any) => {
+  const setFilter = useCallback((key: string, value: unknown) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
   }, [])
 

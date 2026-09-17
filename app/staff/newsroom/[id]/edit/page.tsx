@@ -14,7 +14,7 @@ import {
   Trash2,
   X,
   Calendar,
-  Clock,
+  Clock as _Clock,
   User as UserIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -69,8 +69,9 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             : '',
           tags: data.tags || [],
         })
-      } catch (error: any) {
-        toast.error(error.message)
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Failed to load article'
+        toast.error(message)
       } finally {
         setInitialLoading(false)
       }
@@ -116,8 +117,9 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       )
       router.push('/staff/newsroom')
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Something went wrong')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Something went wrong'
+      toast.error(message || 'Something went wrong')
     } finally {
       setLoading(false)
     }
@@ -132,8 +134,9 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       toast.success('Article deleted')
       router.push('/staff/newsroom')
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to delete'
+      toast.error(message)
       setIsDeleting(false)
     }
   }

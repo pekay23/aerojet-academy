@@ -29,7 +29,7 @@ bun run test:e2e:all                   # Playwright (all browsers, CI mode)
 # Database
 bun run db:generate       # prisma generate
 bun run db:push           # prisma db push (Neon — this project has no migration history; db:push is the workflow)
-bun run db:push:supabase  # mirror schema to Supabase replica (runs scripts/sync-supabase-schema.sh)
+bun run db:push:supabase  # mirror schema to Supabase replica (runs scripts/sync-supabase-schema.mjs)
 bun run db:migrate        # prisma migrate dev (rarely used here — kept for emergencies)
 bun run db:studio         # prisma studio (GUI)
 bun run db:seed           # seed from prisma/seed.ts
@@ -59,9 +59,9 @@ app/
 
 Auth is enforced in **three layers**:
 
-1. **Edge proxy** at `proxy.ts:37` (active — renamed from `middleware.ts` per Next.js 16) — `ROUTE_ROLE_MAP` gates `/staff`, `/instructor`, `/student`, `/examiner`, `/applicant` and their `/api/*` siblings. Unauthenticated users get redirected to `/login?callbackUrl=…` (pages) or `401 JSON` (API). Wrong-role users get redirected to their own portal (e.g. STUDENT hitting `/staff` → `/student`). Build output shows it as `ƒ Proxy (Middleware)`.
-2. **Portal layouts** — each portal's `layout.tsx` calls `requireStaff`/`requireInstructor`/`requireStudent`/etc. from `lib/auth/helpers.ts` as a second check and to pass `session.user` into the tree.
-3. **Route handlers / server actions** — call `requireAdmin()`/`requireAuth()`/etc. directly; thrown `'Unauthorized'`/`'Forbidden'` strings are caught by `withErrorHandler` and converted to 401/403.
+1. **Edge proxy** at `proxy.ts` (active — renamed from `middleware.ts` per Next.js 16). **IMPORTANT: this proxy is images-only** — it gates `/api/images/*` (auth + hotlink/header protection) and sets image security headers, but it does **NOT** gate `/staff`, `/instructor`, `/student`, `/examiner`, `/applicant` or their `/api/*` siblings. Do not assume portal or `/api/staff/*` routes are protected by the proxy — verify the route handler (layer 3).
+2. **Portal layouts** — each portal's `layout.tsx` calls `requireStaff`/`requireInstructor`/`requireStudent`/etc. from `lib/auth/helpers.ts` as the primary gate and to pass `session.user` into the tree.
+3. **Route handlers / server actions** — call `requireAdmin()`/`requireAuth()`/`requireStaff()`/`requirePermission()` directly; thrown `'Unauthorized'`/`'Forbidden'` strings are caught by `withErrorHandler` and converted to 401/403.
 
 > Helper utilities at `lib/auth/middleware-helpers.ts` and `utils/supabase/middleware.ts` are NOT wired into the active proxy — they're available for ad-hoc use.
 
@@ -107,6 +107,7 @@ export const GET = withErrorHandler(async (req, ctx) => {
 
 - **Client forms**: react-hook-form + zod via `@hookform/resolvers`. Schemas live in `lib/validation/`
 - **Server Actions**: `'use server'` in `actions.ts` files colocated with route segments (e.g., `app/staff/actions.ts`, `app/applicant/actions.ts`)
+- **Barrel re-exports**: When an `actions/` directory exists alongside `actions.ts`, prefer `actions/index.ts` as the barrel rather than a file with the same name. Next.js resolves the file first, which creates directory/file shadowing and can confuse tooling. The staff portal uses `app/staff/actions/index.ts` to re-export from domain-specific submodules.
 - Server actions body size limit: 4MB (configured in `next.config.ts`)
 
 ### Key Shared Utilities
@@ -206,7 +207,7 @@ Field names trip people up: it's `description:` (string) and `changes:` (object 
 
 ### Cron Jobs
 
-Registered in `vercel.json` and live under `app/api/cron/*/route.ts`. Pattern: check `CRON_SECRET` header → run job → return JSON. **16 jobs currently scheduled (UTC):**
+Registered in `vercel.json` and live under `app/api/cron/*/route.ts`. Pattern: check `CRON_SECRET` header → run job → return JSON. **17 jobs currently scheduled (UTC):**
 
 | Path                         | Schedule                                                  |
 | ---------------------------- | --------------------------------------------------------- |
@@ -222,6 +223,8 @@ Registered in `vercel.json` and live under `app/api/cron/*/route.ts`. Pattern: c
 | `cleanup-abandoned-accounts` | `0 5 * * *`                                               |
 | `scheduled-reports`          | `0 8 * * 1` (Mondays 08:00)                               |
 | `milestone-reminders`        | `0 9 * * *`                                               |
+| `renewal-reminders`         | `0 6 * * *`                                               |
+| `renewal-reminders`         | `0 6 * * *`                                               |
 | `send-reminders`             | `0 10 * * *`                                              |
 | `aptitude-reminders`         | `0 11 * * *`                                              |
 | `interview-reminders`        | `0 12 * * *`                                              |
@@ -237,9 +240,9 @@ To add a cron: create the route, gate with `CRON_SECRET`, then append to `vercel
 
 ## Performance Conventions (MUST FOLLOW)
 
-### 1. Always use `prismaUnfiltered` in staff pages
+### 1. Always use `prismaUnfiltered` in auth-gated pages
 
-Staff pages are already auth-gated. The RLS client (`prisma`) wraps every query in a transaction with `set_config()` — unnecessary overhead for staff/admin roles.
+Staff, instructor, and student/applicant pages are already auth-gated at the route/layout level. The RLS client (`prisma`) wraps every query in a transaction with `set_config()` — unnecessary overhead when the portal already enforces ownership.
 
 ```ts
 // CORRECT
@@ -248,7 +251,11 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import prisma from '@/lib/prisma/client'
 ```
 
-Exception: Student/applicant-facing pages that need RLS enforcement should still use `prisma`.
+Current state:
+- **Staff/instructor portals**: use `prismaUnfiltered` directly.
+- **Student/applicant portals**: use `prismaUnfiltered` with explicit `userId` filters rather than relying on RLS.
+
+The RLS extension (`lib/prisma/rls-hardened.ts`) remains in place for defense-in-depth and future use, but active portal code does not depend on it.
 
 ### 2. Parallelize independent queries with Promise.all
 
@@ -414,7 +421,7 @@ UI: `/staff/gdpr` (DSR queue with 30-day SLA pills), `/staff/settings/retention`
 
 ## Dashboard alerts
 
-`lib/analytics/dashboard-alerts.ts` returns 6 cached alerts (5-min `unstable_cache` TTL): pending payments >7 days, overdue DSRs, fraud-flagged referrals, expiring bundles, mirror backlog, email failures in last 24h. Rendered by `<AlertsCenter>` at the top of `/staff/dashboard` with a 60s `router.refresh()` poll. Add new checks here rather than scattering one-off banners across the dashboard.
+`lib/analytics/dashboard-alerts.ts` returns 7 cached alerts (5-min `unstable_cache` TTL): pending payments >7 days, overdue DSRs, fraud-flagged referrals, expiring bundles, mirror backlog, email failures in last 24h, and internal exam reports pending review. Rendered by `<AlertsCenter>` at the top of `/staff/dashboard` with a 60s `router.refresh()` poll. Add new checks here rather than scattering one-off banners across the dashboard.
 
 ## Shared components inventory
 
@@ -490,8 +497,8 @@ The following problems were discovered and fixed. **Do not reintroduce them.**
 
 ## Verification
 
-- `bun run type-check` — no errors expected.
-- `bun run test --run` — Vitest suite (**102 tests** baseline).
-- `bun run lint` — ESLint; not in pre-commit or pre-push, run manually before PR.
+- `bun run type-check` — `npx tsc --noEmit`. All `RouteHandler`/`RouteContext` type mismatches in `app/api/**/route.ts` have been resolved (0 remaining). Generated API route test files (254 files: 145 from `scripts/gen-tests.mjs`, 109 from `scripts/generate-api-tests.mjs`) have 0 type errors. `vi` global type errors resolved via `tests/vitest-globals.d.ts` (`/// <reference types="vitest/globals" />`). Zero type errors across all checked files: `tsc --noEmit` passes clean. Full test suite (285 tests across unit, component, and integration) passes. Filter to changed files: `tsc --noEmit 2>&1 | Select-String -Pattern <path>`. On Windows, use `bun x tsc --noEmit` — the PowerShell `bun run type-check` wrapper times out due to ChildProcess.kill.
+- `bun run test --run` — Vitest suite. **Windows note:** the foreground `bun run test` (and `bunx`/foreground vitest) aborts with a `ChildProcess.kill` error in this PowerShell env. Verified workaround: run Vitest without worker parallelism — `bun run test --run --no-file-parallelism --no-color` — via the background process runner, which is stable.
+- `bun run lint` — ESLint; not in pre-commit or pre-push, run manually before PR. **Currently non-functional in this Windows env:** `next lint` errors `Invalid project directory`, and `npx eslint` fails because the resolved ESLint is v10 (flat-config) while the project still ships a legacy `.eslintrc.json`. Migrate to `eslint.config.js` before relying on local lint.
 - `bun run build` — full production build; required to catch the `formatCurrency` client-import trap (see _Code Conventions › Imports_).
 - `bun run docs:html` — regenerates the HTML mirror of `docs/`. Run after any markdown change you want reflected on the styled doc site.

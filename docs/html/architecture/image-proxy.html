@@ -14,11 +14,13 @@
   <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
     <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,13 +28,15 @@
 <header>
   <p class="he-eyebrow">Architecture</p>
   <h1 class="he-title">Image Proxy &amp; Storage Adapter</h1>
-  <p class="he-deck"><p>The image proxy system provides auth-gated, role-scoped access to protected images (UploadThing uploads, student documents, resource files, profile photos) through authenticated API routes.</p>
-</p>
+  <p class="he-deck">The image proxy system provides auth-gated, role-scoped access to protected images (UploadThing uploads, student documents, resource files, profile photos) through authenticated API routes.</p>
 </header>
-<section class="he-section" id="overview"><div class="he-section__num">01 · Overview</div><h2 class="he-section__title">Overview</h2>The image proxy system provides auth-gated, role-scoped access to protected images
+<section class="he-section" id="overview"><div class="he-section__num">01 · Overview</div><h2 class="he-section__title">Overview</h2></section>
+<p>The image proxy system provides auth-gated, role-scoped access to protected images
 (UploadThing uploads, student documents, resource files, profile photos) through
 authenticated API routes. It prevents direct URL sharing by requiring a valid session
-for every image request.<section class="he-section" id="architecture"><div class="he-section__num">02 · Architecture</div><h2 class="he-section__title">Architecture</h2>Client (browser)
+for every image request.</p>
+<section class="he-section" id="architecture"><div class="he-section__num">02 · Architecture</div><h2 class="he-section__title">Architecture</h2></section>
+<pre><code>Client (browser)
    │
    ├─ public images (hero backgrounds, logos, partner logos)
    │  → served directly from `/public/` via next/image
@@ -47,41 +51,124 @@ for every image request.<section class="he-section" id="architecture"><div class
          └─ GET /api/images/transform   (staff only)
             └─ same fetch + sharp processing
                └─ watermark, resize, EXIF strip, format convert
-<section class="he-section" id="files"><div class="he-section__num">03 · Files</div><h2 class="he-section__title">Files</h2>FilePurpose<code>lib/storage/proxy.ts</code><code>StorageAdapter</code> interface + <code>httpAdapter</code> + <code>getStorageAdapter()</code> selector<code>lib/storage/signed-url.ts</code><code>proxyImageUrl()</code> and <code>transformImageUrl()</code> helper functions<code>components/ProtectedImage.tsx</code><code>next/image</code> wrapper with right-click/drag protection<code>app/api/images/proxy/route.ts</code>Auth-gated proxy endpoint<code>app/api/images/transform/route.ts</code>Staff-only transform endpoint<section class="he-section" id="storage-adapter-interface"><div class="he-section__num">04 · Storage Adapter Interface</div><h2 class="he-section__title">Storage Adapter Interface</h2>export interface StorageAdapter {
+</code></pre>
+<section class="he-section" id="files"><div class="he-section__num">03 · Files</div><h2 class="he-section__title">Files</h2></section>
+<table>
+<thead>
+<tr><th>File</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>lib/storage/proxy.ts</code></td><td><code>StorageAdapter</code> interface + <code>httpAdapter</code> + <code>getStorageAdapter()</code> selector</td></tr>
+<tr><td><code>lib/storage/signed-url.ts</code></td><td><code>proxyImageUrl()</code> and <code>transformImageUrl()</code> helper functions</td></tr>
+<tr><td><code>components/ProtectedImage.tsx</code></td><td><code>next/image</code> wrapper with right-click/drag protection</td></tr>
+<tr><td><code>app/api/images/proxy/route.ts</code></td><td>Auth-gated proxy endpoint</td></tr>
+<tr><td><code>app/api/images/transform/route.ts</code></td><td>Staff-only transform endpoint</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="storage-adapter-interface"><div class="he-section__num">04 · Storage Adapter Interface</div><h2 class="he-section__title">Storage Adapter Interface</h2></section>
+<pre><code class="language-ts">export interface StorageAdapter {
   name: string
-  fetch(url: string): Promise<{ data: ArrayBuffer; contentType: string }>
+  fetch(url: string): Promise&lt;{ data: ArrayBuffer; contentType: string }&gt;
 }
-Active adapter selected via <code>STORAGE_ADAPTER</code> env var:<code>'http'</code> (default) — Plain HTTP fetch with 10s timeout (<code>AbortSignal.timeout(10_000)</code>)<code>'s3'</code> (commented out) — Placeholder for Cloudflare R2 / S3 signed URLsTo add a new adapter: implement the <code>StorageAdapter</code> interface, register it in
-<code>getStorageAdapter()</code>'s switch statement.<h3 id="adding-s3r2-support">Adding S3/R2 Support</h3>The commented-out <code>s3Adapter</code> in <code>lib/storage/proxy.ts</code> shows the pattern:Install <code>@aws-sdk/client-s3</code>Configure <code>AWS_*</code> env vars (region, bucket, credentials)Uncomment and wire the adapter<section class="he-section" id="url-helpers"><div class="he-section__num">05 · URL Helpers</div><h2 class="he-section__title">URL Helpers</h2><h3 id="proxyimageurlimageurl-scope-options"><code>proxyImageUrl(imageUrl, scope?, options?)</code></h3>Builds a URL for <code>/api/images/proxy</code>:proxyImageUrl('https://utfs.io/f/abc123.jpg')
+</code></pre>
+<p>Active adapter selected via <code>STORAGE_ADAPTER</code> env var:</p>
+<ul>
+<li><code>'http'</code> (default) — Plain HTTP fetch with 10s timeout (<code>AbortSignal.timeout(10_000)</code>)</li>
+<li><code>'s3'</code> (commented out) — Placeholder for Cloudflare R2 / S3 signed URLs</li>
+</ul>
+<p>To add a new adapter: implement the <code>StorageAdapter</code> interface, register it in
+<code>getStorageAdapter()</code>'s switch statement.</p>
+<h3 id="adding-s3r2-support">Adding S3/R2 Support</h3>
+<p>The commented-out <code>s3Adapter</code> in <code>lib/storage/proxy.ts</code> shows the pattern:</p>
+<ol>
+<li>Install <code>@aws-sdk/client-s3</code></li>
+<li>Configure <code>AWS_*</code> env vars (region, bucket, credentials)</li>
+<li>Uncomment and wire the adapter</li>
+</ol>
+<section class="he-section" id="url-helpers"><div class="he-section__num">05 · URL Helpers</div><h2 class="he-section__title">URL Helpers</h2></section>
+<h3 id="proxyimageurlimageurl-scope-options"><code>proxyImageUrl(imageUrl, scope?, options?)</code></h3>
+<p>Builds a URL for <code>/api/images/proxy</code>:</p>
+<pre><code class="language-ts">proxyImageUrl('https://utfs.io/f/abc123.jpg')
 // → /api/images/proxy?url=https%3A%2F%2Futfs.io%2Ff%2Fabc123.jpg
 
 proxyImageUrl('https://utfs.io/f/abc123.jpg', 'students', { width: 400, quality: 85 })
-// → /api/images/proxy?url=...&scope=students&w=400&q=85
-<h3 id="transformimageurlimageurl-options"><code>transformImageUrl(imageUrl, options?)</code></h3>Builds a URL for <code>/api/images/transform</code> (staff only):transformImageUrl('https://utfs.io/f/abc123.jpg', {
+// → /api/images/proxy?url=...&amp;scope=students&amp;w=400&amp;q=85
+</code></pre>
+<h3 id="transformimageurlimageurl-options"><code>transformImageUrl(imageUrl, options?)</code></h3>
+<p>Builds a URL for <code>/api/images/transform</code> (staff only):</p>
+<pre><code class="language-ts">transformImageUrl('https://utfs.io/f/abc123.jpg', {
   width: 800,
   watermark: true,
   strip: true,
   quality: 90,
   format: 'webp',
 })
-// → /api/images/transform?url=...&w=800&watermark=true&strip=false&q=90&format=webp
-<section class="he-section" id="scope-based-access-control"><div class="he-section__num">06 · Scope-Based Access Control</div><h2 class="he-section__title">Scope-Based Access Control</h2>ScopeAllowed RolesNotes<code>students</code>SUPER_ADMIN, ADMIN, STAFF, INSTRUCTOR, EXAMINER + own documentsStudents can only access their own images<code>resources</code>SUPER_ADMIN, ADMIN, STAFF, INSTRUCTOR, EXAMINERTeaching materials<code>staff</code>SUPER_ADMIN, ADMIN, STAFF, EXAMINERStaff-only documents<code>profile-photos</code>Any authenticated userPublic within the portal(no scope)Any authenticated userNo additional filtering<section class="he-section" id="image-transformation-sharp"><div class="he-section__num">07 · Image Transformation (sharp)</div><h2 class="he-section__title">Image Transformation (sharp)</h2>The transform endpoint supports:Resize: <code>?w=N</code> — Max width, maintains aspect ratio, no upscalingFormat conversion: <code>?format=webp|jpeg|png|avif</code> (default: webp)Quality: <code>?q=1-100</code> (default: 85)Watermark: <code>?watermark=true</code> — Overlays "© Aerojet Academy" + date in top-leftEXIF stripping: <code>?strip=false</code> to preserve metadata (stripped by default)<section class="he-section" id="protectedimage-component"><div class="he-section__num">08 · ProtectedImage Component</div><h2 class="he-section__title">ProtectedImage Component</h2><code>components/ProtectedImage.tsx</code> wraps <code>next/image</code> with client-side protections:Right-click context menu disabledDrag-and-drop preventedInvisible overlay to block DevTools element inspection (optional, default: on)<code>user-select: none</code> and <code>pointer-events: none</code> on the <code><img></code> element// Above the fold — preload with priority
-<ProtectedImage
-  src={proxyImageUrl("https://utfs.io/f/abc.jpg", "students")}
-  alt="Certificate"
+// → /api/images/transform?url=...&amp;w=800&amp;watermark=true&amp;strip=false&amp;q=90&amp;format=webp
+</code></pre>
+<section class="he-section" id="scope-based-access-control"><div class="he-section__num">06 · Scope-Based Access Control</div><h2 class="he-section__title">Scope-Based Access Control</h2></section>
+<table>
+<thead>
+<tr><th>Scope</th><th>Allowed Roles</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><code>students</code></td><td>SUPER_ADMIN, ADMIN, STAFF, INSTRUCTOR, EXAMINER + own documents</td><td>Students can only access their own images</td></tr>
+<tr><td><code>resources</code></td><td>SUPER_ADMIN, ADMIN, STAFF, INSTRUCTOR, EXAMINER</td><td>Teaching materials</td></tr>
+<tr><td><code>staff</code></td><td>SUPER_ADMIN, ADMIN, STAFF, EXAMINER</td><td>Staff-only documents</td></tr>
+<tr><td><code>profile-photos</code></td><td>Any authenticated user</td><td>Public within the portal</td></tr>
+<tr><td>(no scope)</td><td>Any authenticated user</td><td>No additional filtering</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="image-transformation-sharp"><div class="he-section__num">07 · Image Transformation (sharp)</div><h2 class="he-section__title">Image Transformation (sharp)</h2></section>
+<p>The transform endpoint supports:</p>
+<ul>
+<li><strong>Resize</strong>: <code>?w=N</code> — Max width, maintains aspect ratio, no upscaling</li>
+<li><strong>Format conversion</strong>: <code>?format=webp|jpeg|png|avif</code> (default: webp)</li>
+<li><strong>Quality</strong>: <code>?q=1-100</code> (default: 85)</li>
+<li><strong>Watermark</strong>: <code>?watermark=true</code> — Overlays &quot;© Aerojet Academy&quot; + date in top-left</li>
+<li><strong>EXIF stripping</strong>: <code>?strip=false</code> to preserve metadata (stripped by default)</li>
+</ul>
+<section class="he-section" id="protectedimage-component"><div class="he-section__num">08 · ProtectedImage Component</div><h2 class="he-section__title">ProtectedImage Component</h2></section>
+<p><code>components/ProtectedImage.tsx</code> wraps <code>next/image</code> with client-side protections:</p>
+<ul>
+<li>Right-click context menu disabled</li>
+<li>Drag-and-drop prevented</li>
+<li>Invisible overlay to block DevTools element inspection (optional, default: on)</li>
+<li><code>user-select: none</code> and <code>pointer-events: none</code> on the <code>&lt;img&gt;</code> element</li>
+</ul>
+<pre><code class="language-tsx">// Above the fold — preload with priority
+&lt;ProtectedImage
+  src={proxyImageUrl(&quot;https://utfs.io/f/abc.jpg&quot;, &quot;students&quot;)}
+  alt=&quot;Certificate&quot;
   width={400}
   height={300}
   priority
-/>
+/&gt;
 
 // Below the fold — lazy (default)
-<ProtectedImage
-  src={proxyImageUrl("https://utfs.io/f/def.jpg")}
-  alt="Document"
+&lt;ProtectedImage
+  src={proxyImageUrl(&quot;https://utfs.io/f/def.jpg&quot;)}
+  alt=&quot;Document&quot;
   width={400}
   height={300}
-/>
-<section class="he-section" id="security"><div class="he-section__num">09 · Security</div><h2 class="he-section__title">Security</h2>Both endpoints require a valid NextAuth sessionThe proxy endpoint validates optional scope-based permissionsThe transform endpoint additionally requires a staff roleResponse headers: <code>X-Content-Type-Options: nosniff</code>, <code>Cache-Control: private, max-age=3600</code>No direct access to UploadThing URLs from the client — all traffic flows through the proxy<section class="he-section" id="performance"><div class="he-section__num">10 · Performance</div><h2 class="he-section__title">Performance</h2>10s timeout on storage adapter fetches1-hour browser cache (<code>private, max-age=3600</code>)Sharp processing only when transformation params are providedUse <code>priority</code> prop for above-the-fold images to enable <code><link rel="preload"></code>Use default lazy loading for below-the-fold images
+/&gt;
+</code></pre>
+<section class="he-section" id="security"><div class="he-section__num">09 · Security</div><h2 class="he-section__title">Security</h2></section>
+<ul>
+<li>Both endpoints require a valid NextAuth session</li>
+<li>The proxy endpoint validates optional scope-based permissions</li>
+<li>The transform endpoint additionally requires a staff role</li>
+<li>Response headers: <code>X-Content-Type-Options: nosniff</code>, <code>Cache-Control: private, max-age=3600</code></li>
+<li>No direct access to UploadThing URLs from the client — all traffic flows through the proxy</li>
+</ul>
+<section class="he-section" id="performance"><div class="he-section__num">10 · Performance</div><h2 class="he-section__title">Performance</h2></section>
+<ul>
+<li>10s timeout on storage adapter fetches</li>
+<li>1-hour browser cache (<code>private, max-age=3600</code>)</li>
+<li>Sharp processing only when transformation params are provided</li>
+<li>Use <code>priority</code> prop for above-the-fold images to enable <code>&lt;link rel=&quot;preload&quot;&gt;</code></li>
+<li>Use default lazy loading for below-the-fold images</li>
+</ul>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -104,7 +191,7 @@ proxyImageUrl('https://utfs.io/f/abc123.jpg', 'students', { width: 400, quality:
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

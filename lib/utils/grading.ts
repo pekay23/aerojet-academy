@@ -1,8 +1,10 @@
-export const EASA_PASSING_GRADE = 75
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
+
+const EASA_PASSING_GRADE = ACADEMIC_RULES.EASA_PASS_MARK
 
 /**
  * Calculates an EASA-compliant result grade.
- * ≥75% = 'P' (Pass), <75% = 'F' (Fail).
+ * ≥EASA_PASS_MARK% = 'P' (Pass), <EASA_PASS_MARK% = 'F'.
  * Note: Legacy records may still carry A/B/C — the UI maps all of those to "Pass".
  */
 export function calculateLetterGrade(percentage: number): string {
@@ -18,7 +20,7 @@ export function isPassing(percentage: number): boolean {
 
 /**
  * Evaluate a combined MCQ + Essay exam result.
- * Both components must meet the EASA passing grade (75%) to pass overall.
+ * Both components must meet the EASA passing grade to pass overall.
  * If either fails, the entire combined exam requires a resit.
  */
 export function evaluateCombinedExamResult(mcqPercentage: number, essayPercentage: number) {

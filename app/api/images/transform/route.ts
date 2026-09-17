@@ -60,8 +60,8 @@ export async function GET(request: NextRequest) {
   try {
     const result = await adapter.fetch(imageUrl)
     data = result.data
-  } catch (err: any) {
-    console.error('[image-transform] fetch error:', err.message)
+  } catch (err: unknown) {
+    console.error('[image-transform] fetch error:', err instanceof Error ? err.message : String(err))
     return new NextResponse(JSON.stringify({ error: 'Image not found' }), {
       status: 404,
       headers: { 'Content-Type': 'application/json' },
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
       avif: { quality },
     }
 
-    const output = await (pipeline as any)[format](formatOptions[format]).toBuffer()
+    const output = await pipeline[format](formatOptions[format]).toBuffer()
 
     const mimeTypes: Record<string, string> = {
       webp: 'image/webp',
@@ -126,8 +126,8 @@ export async function GET(request: NextRequest) {
         'X-Image-Transformed': 'true',
       },
     })
-  } catch (err: any) {
-    console.error('[image-transform] sharp processing error:', err.message)
+  } catch (err: unknown) {
+    console.error('[image-transform] sharp processing error:', err instanceof Error ? err.message : String(err))
     return new NextResponse(JSON.stringify({ error: 'Image processing failed' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

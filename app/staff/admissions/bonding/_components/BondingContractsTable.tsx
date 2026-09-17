@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -39,7 +39,7 @@ interface Contract {
   studentProfile: { studentId: string } | null
 }
 
-const STATUS_CONFIG: Record<BondingStatus, { label: string; color: string; icon: any }> = {
+const STATUS_CONFIG: Record<BondingStatus, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   ISSUED: { label: 'Issued', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', icon: Clock },
   SIGNED: { label: 'Signed', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300', icon: PenLine },
   IN_PROGRESS: { label: 'In Progress', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300', icon: Briefcase },
@@ -63,7 +63,7 @@ const STAT_CARDS: { key: BondingStatus; label: string; borderColor: string; bgCo
   { key: 'BREACHED', label: 'Breached', borderColor: 'border-red-200 dark:border-red-800/50', bgColor: 'bg-red-50 dark:bg-red-900/10', iconBg: 'bg-red-200 dark:bg-red-800/50', iconColor: 'text-red-700 dark:text-red-300', textColor: 'text-red-800 dark:text-red-200', subColor: 'text-red-600 dark:text-red-400' },
 ]
 
-const STAT_ICONS: Record<BondingStatus, any> = {
+const STAT_ICONS: Record<BondingStatus, React.ComponentType<{ className?: string }>> = {
   ISSUED: Clock,
   SIGNED: PenLine,
   IN_PROGRESS: Briefcase,
@@ -149,7 +149,7 @@ export default function BondingContractsTable({
   const handleStatusChange = async (contractId: string, newStatus: BondingStatus) => {
     setSaving(true)
     try {
-      const payload: Record<string, any> = {
+      const payload: Record<string, unknown> = {
         status: newStatus,
         facilityName: editForm.facilityName || null,
         notes: editForm.notes || null,
@@ -182,7 +182,7 @@ export default function BondingContractsTable({
   const handleSaveFields = async (contractId: string) => {
     setSaving(true)
     try {
-      const payload: Record<string, any> = {
+      const payload: Record<string, unknown> = {
         facilityName: editForm.facilityName || null,
         notes: editForm.notes || null,
       }

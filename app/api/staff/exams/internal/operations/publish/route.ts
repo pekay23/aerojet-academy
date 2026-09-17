@@ -4,6 +4,9 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
+import { createNotification } from '@/lib/email/service'
+import { getCertificatesEnabled, createCertificate } from '@/lib/certificates/generator'
+import { getBankRules } from '@/lib/internal-exam/engine'
 
 const publishSchema = z.object({
   sessionIds: z.array(z.string()).min(1).max(500),
@@ -32,7 +35,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       status: { in: ['COMPLETED', 'TIMED_OUT'] },
       isPublished: false,
     },
-    select: { id: true, studentId: true, bankId: true, percentage: true, passed: true },
+    select: {
+      id: true,
+      studentId: true,
+      bankId: true,
+      percentage: true,
+      passed: true,
+      bank: { select: { certificateEnabled: true } },
+    },
   })
 
   if (candidates.length === 0) {
@@ -57,5 +67,46 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     },
   })
 
-  return apiSuccess({ published: result.count })
+  // Notify students that their results are published
+  const notifPromises = candidates.map((c) =>
+    createNotification(prismaUnfiltered, c.studentId, {
+      type: 'SUCCESS',
+      title: 'Exam Results Published',
+      message: `Your internal exam result has been published. You can now view your score.`,
+      link: '/student/exams/internal',
+    }).catch((err) => console.error('[NOTIFICATION ERROR]', err))
+  )
+  await Promise.allSettled(notifPromises)
+
+  // Auto-generate certificates for students who passed (feature-gated).
+  // Requires both the global toggle AND the per-bank certificateEnabled flag.
+  const certificatesEnabled = await getCertificatesEnabled()
+  let certificatesGenerated = 0
+  if (certificatesEnabled) {
+    const passingSessions = candidates.filter((c) => c.passed && c.bank.certificateEnabled)
+    const certPromises: Promise<unknown>[] = []
+
+    for (const c of passingSessions) {
+      const rules = await getBankRules(c.bankId)
+      const certPromise = createCertificate({
+        sessionId: c.id,
+        studentId: c.studentId,
+        score: 0,
+        percentage: c.percentage ?? 0,
+        passMarkPct: rules.passMarkPct,
+        issuedBy: staff.id,
+      }).catch((err) => {
+        console.error(`[certificates] Failed to generate certificate for session ${c.id}:`, err)
+        return null
+      })
+      certPromises.push(certPromise)
+    }
+
+    const certResults = await Promise.allSettled(certPromises)
+    certificatesGenerated = certResults.filter(
+      (r) => r.status === 'fulfilled' && r.value != null
+    ).length
+  }
+
+  return apiSuccess({ published: result.count, certificatesGenerated })
 })

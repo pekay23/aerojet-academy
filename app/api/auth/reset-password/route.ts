@@ -5,10 +5,10 @@ import { hashPassword } from '@/lib/auth/helpers'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  let body: any
+  let body: { token?: string; password?: string }
   try {
     body = await req.json()
-  } catch (e) {
+  } catch (_e) {
     return apiError('Invalid request body', 400)
   }
 

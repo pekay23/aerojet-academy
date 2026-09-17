@@ -64,7 +64,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     revalidateTag('semesters', 'max')
     return NextResponse.json(updatedSemester)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to update semester:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
@@ -105,7 +105,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     revalidateTag('semesters', 'max')
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to delete semester:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }

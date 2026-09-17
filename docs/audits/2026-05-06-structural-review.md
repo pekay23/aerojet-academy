@@ -103,15 +103,15 @@
 1. ~~**api/cron/milestone-reminders/route.ts:170**~~ — ✅ POST handler now has CRON_SECRET auth check
 2. ~~**api/applicant/exam-only/top-up/route.ts:42-57**~~ — ✅ Wrapped in Serializable transaction
 
-### HIGH — PARTIALLY RESOLVED
-3. **Missing error.tsx** in (auth) segment — auth flows have no error boundary (P2 backlog)
+### HIGH — RESOLVED
+3. ~~**Missing error.tsx** in (auth) segment~~ — ✅ resolved (see P2.8 above); `(auth)/error.tsx` exists
 4. ~~**api/staff/exam-pools/charter/route.ts**~~ — ✅ Now uses Zod `charterBookingSchema` + `withErrorHandler`
-5. **Missing not-found.tsx** in (auth) and (portal) segments (P2 backlog)
+5. ~~**Missing not-found.tsx** in (auth) and (portal) segments~~ — ✅ resolved (see P2.9 above); all 5 portals + `(auth)` + `(public)` covered
 
-### MEDIUM — PARTIALLY RESOLVED
+### MEDIUM — RESOLVED
 6. ~~**api/staff/exam-pools/merge/route.ts**~~ — ✅ Now uses Zod `mergePoolsSchema` with CUID validation
-7. **api/auth/resend-verification/route.ts** — No rate limiting (P3 backlog)
-8. **api/public/submit-payment-proof/route.ts** — No rate limiting (P3 backlog)
+7. ~~**api/auth/resend-verification/route.ts** — No rate limiting~~ — ✅ rate-limited to 3/hour per IP, uniform response prevents enumeration (see [architecture/security.md](../architecture/security.md))
+8. ~~**api/public/submit-payment-proof/route.ts** — No rate limiting~~ — ✅ rate-limited to 5/hour per IP (see [architecture/security.md](../architecture/security.md))
 9. ~~**api/staff/students/[id]/wallet/[txnId]/proof/route.ts**~~ — ✅ Now uses Zod `attachProofSchema` instead of unsafe type assertion
 10. ~~**api/staff/students/[id]/book-exam/route.ts**~~ — ✅ Now uses Zod `staffBookExamSchema`
 

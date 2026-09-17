@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
-import { withErrorHandler, apiSuccess } from '@/lib/api/response'
+import { withErrorHandler, apiSuccess , RouteContext } from '@/lib/api/response'
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
@@ -15,11 +15,9 @@ const schema = z.object({
 })
 
 export const PATCH = withErrorHandler(async (
-  req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
-) => {
+  req: NextRequest, ctx?: RouteContext) => {
   const actor = await requireStaff()
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
   const body = schema.parse(await req.json())
 
   const before = await prismaUnfiltered.user.findUnique({

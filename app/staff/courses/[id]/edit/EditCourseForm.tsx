@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, type Resolver } from 'react-hook-form'
+import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
 import {
@@ -27,6 +27,7 @@ import { Input } from '@/components/ui/input'
 import { toast } from '@/hooks/use-toast'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 const courseFormSchema = z.object({
   code: z.string().min(2, {
@@ -51,7 +52,23 @@ const courseFormSchema = z.object({
 type CourseFormValues = z.infer<typeof courseFormSchema>
 
 interface EditCourseFormProps {
-  initialData: any
+  initialData: {
+    id: string
+    code?: string | null
+    name?: string | null
+    description?: string | null
+    categoryId?: string | null
+    applicableCategories?: string[] | null
+    moduleType?: CourseFormValues['moduleType']
+    duration?: number | null
+    price?: number | string | null
+    isActive?: boolean | null
+    requiresPrerequisite?: boolean | null
+    prerequisites?: string[] | null
+    syllabusUrl?: string | null
+    materialsUrl?: string | null
+    currency?: string | null
+  }
 }
 
 export default function EditCourseForm({ initialData }: EditCourseFormProps) {
@@ -60,14 +77,16 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [licenseCategories, setLicenseCategories] = useState<Option[]>([])
 
+  const { markDirty, markClean } = useFormDirty()
+
   useEffect(() => {
     async function fetchData() {
       try {
         const [catsRes, licensesRes] = await Promise.all([
           fetch('/api/staff/course-categories'),
-          fetch('/api/staff/license-categories')
+          fetch('/api/staff/license-categories'),
         ])
-        
+
         const catsData = await catsRes.json()
         const licensesData = await licensesRes.json()
 
@@ -75,13 +94,17 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
           setCategories(catsData.data)
         }
         if (licensesData.success) {
-          setLicenseCategories(licensesData.data.map((l: any) => ({
-            label: `${l.code} - ${l.name}`,
-            value: l.code
-          })))
+          setLicenseCategories(
+            licensesData.data.map((l: { code: string; name: string }) => ({
+              label: `${l.code} - ${l.name}`,
+              value: l.code,
+            }))
+          )
         }
       } catch (error) {
         console.error('Failed to fetch data:', error)
+        toast.error('Failed to load course data')
+        toast.error('Failed to load course data')
       }
     }
     fetchData()
@@ -105,6 +128,13 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
       materialsUrl: initialData.materialsUrl || '',
     },
     mode: 'onChange',
+  })
+  const requiresPrerequisite = useWatch({ control: form.control, name: 'requiresPrerequisite' })
+
+  // Track form changes for unsaved changes warning
+  useEffect(() => {
+    const subscription = form.watch(() => markDirty())
+    return () => subscription.unsubscribe()
   })
 
   async function onSubmit(values: CourseFormValues) {
@@ -134,10 +164,12 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
       }
 
       toast.success('Course updated successfully')
+      markClean()
       router.push(`/staff/courses`)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update course')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update course'
+      toast.error(message || 'Failed to update course')
     } finally {
       setIsLoading(false)
     }
@@ -154,12 +186,7 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
               <FormItem>
                 <FormLabel htmlFor="course-code">Course Code</FormLabel>
                 <FormControl>
-                  <Input
-                    id="course-code"
-                    placeholder="e.g., M1"
-                    autoComplete="off"
-                    {...field}
-                  />
+                  <Input id="course-code" placeholder="e.g., M1" autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -242,7 +269,7 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
           />
         </div>
 
-        {form.watch('requiresPrerequisite') && (
+        {requiresPrerequisite && (
           <FormField
             control={form.control}
             name="prerequisites"
@@ -334,7 +361,9 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="course-price">Price ({initialData.currency || 'EUR'})</FormLabel>
+                <FormLabel htmlFor="course-price">
+                  Price ({initialData.currency || 'EUR'})
+                </FormLabel>
                 <FormControl>
                   <Input
                     id="course-price"
@@ -400,7 +429,11 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
           >
             Cancel
           </Button>
-          <Button type="submit" className="bg-aerojet-blue hover:bg-aerojet-blue/90" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90"
+            disabled={isLoading}
+          >
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Changes'}
           </Button>
         </div>

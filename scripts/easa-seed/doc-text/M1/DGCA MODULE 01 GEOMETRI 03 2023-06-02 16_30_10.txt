@@ -1,0 +1,1062 @@
+--- Page 1 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+1
+1.3a Geometry. 90 degree angles so the other 2 must add up to 90.
+Question Number. 1. What is the
+external angle indicated on the figure below?.
+Question Number. 4. An equilateral
+triangle has.
+Option A. no equal sides.
+Option B. 2 equal sides.
+Option C. 3 equal sides.
+Option A. 60. Correct Answer is. 3 equal sides.
+Option B. 120. Explanation. Triangle definitions.
+Option C. 30.
+Correct Answer is. 120.
+Explanation. NIL. Question Number. 5. The three angles
+of a triangle summed together equal.
+Option A. 90o .
+Option B. 180o .
+Option C. 360o .
+Correct Answer is. 180o .
+Explanation. The sum of the angles of a triangle
+ar 180 degrees.
+Question Number. 2. If a wheel of radius
+R revolves 1/2 a turn, how many radians does it Question Number. 6. The circumference
+turn through?. of a circle is found by.
+Option A. 2π radians. Option A. multiplying the diameter by 3.142.
+Option B. 2R2 radians.
+Option C. π radians. Option B. multiplying the radius by 3.142.
+Correct Answer is. π radians. Option C. dividing the diameter by 3.142.
+Explanation. There are 2π radians in one Correct Answer is. multiplying the diameter
+complete turn (i.e. 360 degrees). by 3.142.
+Explanation. Circumference = π x diameter.
+Question Number. 3. If there are two
+similar angles in a right triangle, these angles are.
+Question Number. 7. Calculate the
+Option A. supplementary. height of an obtuse triangle whose base is X cm
+Option B. subordinate. and the area is Y square cm.
+Option C. complementary. Option A. Y x 2/X.
+Correct Answer is. complementary. Option B. Y + X/2.
+Explanation. Complementary angles add up to Option C. Y * 2 * X.
+90 degrees. Supplementary angles add up to 180 Correct Answer is. Y * 2/X.
+degrees. A right (angled) triangle already has one Explanation. Y = 1/(Y+2) 2X * h, h = Y * 2/X.
+
+--- Page 2 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+2
+Option C. isosceles.
+Correct Answer is. equilateral.
+Question Number. 8. A right-angled Explanation. Triangle definitions.
+triangle has sides of 3 inches and 4 inches, what
+will the third side be?.
+Option A. 5 inches. Question Number. 13. Two gears are in
+Option B. 5.5 inches. mesh, one is larger than the other, the smaller
+Option C. 6 inches. gear rotates.
+Correct Answer is. 5 inches. Option A. at a faster speed.
+Explanation. 3,4,5 triangle. Option B. at a lower speed.
+Option C. at the same speed.
+Correct Answer is. at a faster speed.
+Question Number. 9. To work out the Explanation. The smallest gear rotates the
+circumference of a circle use. fastest.
+Option A. D * 0.3142.
+Option B. D * 3.142.
+Option C. D-3.142. Question Number. 14. The name given to
+Correct Answer is. D * 3.142. this shape.
+Explanation. Circumference = 3.14 * diameter.
+Option A. Trapezoid.
+Question Number. 10. An equilateral
+Option B. Parallelogram.
+triangle has.
+Option C. Rhombus.
+Option A. two equal side.
+Correct Answer is. Parallelogram.
+Option B. no equal sides.
+Explanation. Shape definition.
+Option C. three equal sides.
+Correct Answer is. three equal sides.
+Explanation. Triangle definition.
+Question Number. 11. A quadrilateral
+with only two parallel sides is a.
+Option A. Trapezium.
+Option B. Trapezoid.
+Question Number. 15. A triangle with
+Option C. Rhombus.
+equal sides is.
+Correct Answer is. Trapezoid.
+Option A. isosceles.
+Explanation. Shape definitions.
+Option B. equilateral.
+Option C. acute.
+Correct Answer is. equilateral.
+Question Number. 12. A triangle with
+Explanation. NIL.
+equal angles is called.
+Option A. right angled.
+Option B. equilateral.
+
+--- Page 3 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+3
+Question Number. 16. Two gears are in
+mesh, one has twice the number of teeth as the
+other. Question Number. 20. An input gear has
+Option A. the two gears rotate at the same 20 teeth and the output gear has 120 teeth. If the
+speed. input gear rotates 360°, the output gear will
+Option B. the gear with fewer teeth rotates rotate.
+faster than the other. Option A. 60°.
+Option C. the gear with fewer teeth rotates Option B. 45°.
+slower than the other. Option C. 90°.
+Correct Answer is. the gear with fewer teeth Correct Answer is. 60°.
+rotates faster than the other. Explanation. Ratio 1:6. The big gear will rotate
+Explanation. The smaller gear rotates at twice 1/6 of the small gear. 360/6 = 60°.
+the speed of the larger gear.
+Question Number. 21. A line from the
+Question Number. 17. Locus points centre of a circle is called.
+plotted equidistant from a central points Option A. diameter.
+represent. Option B. its segment.
+Option A. circumference. Option C. radius.
+Option B. diameter. Correct Answer is. radius.
+Option C. radius. Explanation. NIL.
+Correct Answer is. circumference.
+Explanation. Locus is the line scribed by points
+moving equidistant from a point - in this case it will Question Number. 22. Give the name of
+scribe the circumference of a circle. the triangle, which has two sides equal in length
+and two equal angles.
+Option A. Equilateral.
+Question Number. 18. A circle contains. Option B. Isosceles.
+Option C. Obtuse.
+Option A. 2πr radians. Correct Answer is. Isosceles.
+Option B. 2π radians. Explanation. NIL.
+Option C. 4π radians.
+Correct Answer is. 2π radians.
+Explanation. There are 2π radians in 360°. Question Number. 23. In an equilateral
+triangle, all of the angles are equal, to.
+Option A. π divided by 3.
+Question Number. 19. An oblique Option B. π divided by 4.
+pyramid is one which has its axis. Option C. π divided by 2.
+Option A. perpendicular to its base. Correct Answer is. π divided by 3.
+Option B. not perpendicular to its base. Explanation. Since 360° = 2π radians, 180° = π
+Option C. parallel to its base. radians. The angles of an equilatrial triangle are
+Correct Answer is. not perpendicular to its each 180/3 (60°) or π/3.
+base.
+Explanation. Nil.
+
+--- Page 4 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+4
+Question Number. 24. What is an obtuse Option A. The height is angled to the base.
+angle?.
+Option A. One greater than 180o . Option B. The height is perpendicular to the
+Option B. One less than 90o . base.
+Option C. One greater than 90°, but less than Option C. The height is parallel to the sides.
+180o .
+Correct Answer is. One greater than 90°, but Correct Answer is. The height is
+less than 180. perpendicular to the base.
+Explanation. NIL. Explanation. Height is always measured
+perpendicular (90 degrees) to the base.
+Question Number. 25. A congruent
+triangle has. Question Number. 29. What is the value
+Option A. same shape and size. of in the diagram shown?.
+Option B. same size different shape.
+Option C. same shape different size.
+Correct Answer is. same shape and size.
+Explanation. Congruent triangles have the same
+sides AND the same angles.
+Option A. 30°.
+Option B. 35°.
+Option C. 40°.
+Question Number. 26. Which shape has
+Correct Answer is. 35°.
+no parallel sides?.
+Explanation. x + 3x + 4x + 80 = 360, 8x +80 =
+Option A. Trapezoid.
+360, 8x = 360-80, x = 280/8 = 35.
+Option B. Kite.
+Option C. Rhombus.
+Question Number. 30. How many
+Correct Answer is. Kite.
+degrees are there in the smaller of the segments,
+Explanation. NIL.
+where AB is one sixth of AC?.
+Question Number. 27. The properties of a
+scalene triangle are.
+Option A. acute angle.
+Option B. all sides different lengths.
+Option A. 15°.
+Option C. all sides are equal.
+Option B. 14.5°.
+Correct Answer is. all sides different lengths.
+Option C. 10°.
+Correct Answer is. 15°.
+Explanation. A Scalene triangle has all different
+Explanation. 90/6 = 15 degrees.
+sides.
+Question Number. 31. In a parallelogram,
+Question Number. 28. What is the height
+if all the sides are of equal length and 1 angle is
+of an oblique pyramid?. 90°, it is a.
+Option A. rhomboid.
+
+--- Page 5 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+5
+Option B. quadrilateral. Option A. 14.
+Option C. square. Option B. 22m.
+Correct Answer is. square. Option C. 44m.
+Explanation. A square. Correct Answer is. 44m.
+Explanation. C = 2πR = 2 * 3.14 * 7 = 44
+(approx.).
+Question Number. 32. In a rhombus.
+Option A. all sides are different length with Question Number. 36. For a scalene
+no angles 90°. triangle which is true?.
+Option B. all sides are equal length with no Option A. 2 sides are equal.
+angles 90°. Option B. No 2 sides are equal.
+Option C. adjacent sides are different Option C. One angle is acute.
+lengths with no angles 90°. Correct Answer is. No 2 sides are equal.
+Correct Answer is. all sides are equal length Explanation. A scalene triangle has no sides
+with no angles 90°. equal.
+Explanation. A rhombus is a square on the tilt.
+Question Number. 37. A line to create a
+segment from the centre of a circle is a.
+Question Number. 33. An isosceles Option A. radius.
+triangle has the following properties:. Option B. diameter.
+Option A. Two sides parallel. Option C. chord.
+Option B. Three sides the same length. Correct Answer is. diameter.
+Option C. Two sides the same length. Explanation. A chord does not go through the
+Correct Answer is. Two sides the same centre of the circle. A radius does not produce a
+length. segment.
+Explanation. An isoscelese triangle has 2 sides
+and 2 angles the same.
+Question Number. 38. A shape with 4
+equal sides and one 90° angle is a.
+Question Number. 34. In an oblique Option A. parallelogram.
+triangle the axis is. Option B. rhombus.
+Option A. perpendicular to the base. Option C. square.
+Option B. at a slant to the base. Correct Answer is. square.
+Option C. parallel to the base. Explanation. Neither a parallelogram (a pushed-
+Correct Answer is. at a slant to the base. over rectangle) nor a rhombus (a pushed-over
+Explanation. An oblique triangle is on the slant. square) has any 90° angles. A square has (at least)
+one 90° angle.
+Question Number. 35. How far does a Question Number. 39. In a right angled
+wheel of 7m radius travel in one revolution?. triangle the longest side is 20cm long, the shortest
+
+--- Page 6 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+6
+side is 12cm. What length is the last side?. Option B. 2.2R.
+Option C. 1.2R.
+Option A. 13.6cm. Correct Answer is. 1.2R.
+Option B. 18cm. Explanation. Circumference = 2πR (take π = 3).
+Option C. 16cm. Proportion of quoted arc of circumference is
+Correct Answer is. 16cm. 67/360. 67/360 x (2 x 3 x R) = 1.1R (approx, slightly
+Explanation. 12-16-20 triangle is a 3-4-5 more if you take π = 3.14)).
+triangle.
+Question Number. 44. One radian is.
+Question Number. 40. The sum of the
+internal angles of a triangle is. Option A. the angle subtended at the centre
+Option A. 180°. of a circle when the arc-length formed between
+Option B. 2π radians. two radial lines is equal to pi.
+Option C. 360°. Option B. the angle subtended at the centre
+Correct Answer is. 180°. of a circle when the arc-length formed between
+Explanation. Internal angles of a triangle add up two radial lines is equal in length to the radius.
+to 180 degrees (note: 360 degrees and 2π radians Option C. 66.67°.
+are the same thing). Correct Answer is. the angle subtended at the
+centre of a circle when the arc-length formed
+between two radial lines is equal in length to the
+Question Number. 41. A triangle has radius.
+angles 67° and 48°. The third angle is. Explanation. NIL.
+Option A. 115°.
+Option B. 75°.
+Option C. 65°. Question Number. 45. How many
+Correct Answer is. 65°. degrees in π radians ?.
+Explanation. 67+ 48 = 115. 180-115 = 65°. Option A. 180.
+Option B. 360.
+Option C. 90.
+Question Number. 42. The sum of the Correct Answer is. 180.
+angles of a polygon with 'n' sides is. Explanation. 2π radians = 360 degrees.
+Option A. 180 x (n-2).
+Option B. (n/4) x 180.
+Option C. 60 x n. Question Number. 46. The sum of the
+Correct Answer is. 180 x (n-2). external angles of any polygon is.
+Explanation. 180(n-2). Option A. 180 degrees.
+Option B. 540 degrees.
+Option C. 360 degrees.
+Question Number. 43. Suppose the earth Correct Answer is. 360 degrees.
+to be a real sphere with the radius R. The arc Explanation. External website.
+distance from HK (N23) to the North pole is:.
+Option A. 0.9R.
+
+--- Page 7 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+7
+Question Number. 47. Which of the 2
+angles are called supplementary?. Question Number. 51. Find the size of the
+Option A. 60 degrees and 120 degrees. other two angles of an isoscelese triangle with one
+Option B. 40 degrees and 40 degrees. angle of 100°.
+Option C. 30 degrees and 60 degrees. Option A. 40°, 40°.
+Correct Answer is. 60 degrees and 120 Option B. 30°, 30°.
+degrees. Option C. 100°, 20°.
+Explanation. Add up to 180 degrees. Correct Answer is. 40°, 40°.
+Explanation. Isoscelese triangle has 2 angles
+equal. If one angle is 100° the other two add up to
+Question Number. 48. An acute angle is. 80°. These must be the equal angles so each will be
+40°.
+Option A. less than 90 degrees.
+Option B. less than 180 degrees.
+Option C. more than 90 degrees. Question Number. 52. A triangle always
+Correct Answer is. less than 90 degrees. has.
+Explanation. NIL. Option A. exactly one right angle.
+http://math.about.com/library/bldefacute Option B. at least two acute angles.
+angle.htm. Option C. exactly two acute angle.
+Correct Answer is. at least two acute angles.
+Question Number. 49. A straight line Explanation. NIL.
+which goes from one point on the circumference http://mathforum.org/library/drmath/vie
+to another is called. w/55061.html.
+Option A. an arc.
+Option B. a tangent.
+Option C. a chord. Question Number. 53. The locus of a
+Correct Answer is. a chord. point which stays the same distance from a given
+Explanation. NIL. point is.
+http://en.wikipedia.org/wiki/Chord_%28g Option A. a circle.
+eometry%29. Option B. a parallel line.
+Option C. an ellipse.
+Correct Answer is. a circle.
+Question Number. 50. What is the name Explanation. A locus is the path a point travels
+given to a quadrilateral with two pairs of adjacent following a given rule. In this case imagine the path
+sides equal and the diagonals intersect at right of the end of a piece of string fixed at the other
+angles? Note not all the sides are equal?. end and kept taught.
+Option A. kite.
+Option B. parallelogram. 1.3b Geometry.
+Option C. rhombus.
+Correct Answer is. kite.
+Explanation. Draw the figure to check.
+
+--- Page 8 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+8
+Question Number. 1. In the following Option A. y = 2x + 2.
+equation what is the y-intercept? 4y = 2x + 8. Option B. y = -2-x.
+Option C. y = x-2.
+Option A. 2. Correct Answer is. y = -2-x.
+Option B. 4. Explanation. Slope (gradient) is 2/2 and is
+Option C. 8. negative (i.e. -1). y-intercept is -2. Equation of the
+Correct Answer is. 2. line (y = mx + c) is y = -1x -2 or y = -2-x.
+Explanation. First get rid of the 4 from RHS
+(divide all by 4) y = 0.5x + 2. Intercept with y-axis is
+when x = 0. So put x = 0 and what is left?
+(remember that 0.5 x 0 = 0).
+Question Number. 2. How many times
+does the x-axis get crossed when y = x2 -3.
+Question Number. 5. The graph points
+Option A. 3. (9, 3) and (3, 1) what is the slope?.
+Option B. 1. Option A. 9/5.
+Option C. 2. Option B. 1/3.
+Correct Answer is. 1. Option C. 3/1.
+Explanation. y = x2 (a quadratic) is a shape like a Correct Answer is. 1/3.
+'U-curve' where the bottom of the 'U' sits on the Explanation. Slope = change in Y / change in =
+(0,0) point. The -3 means the 'U' is shifted down (3-1)/(9-3) = 2/6 = 1/3.
+the y-axis 3 places.
+Question Number. 6. A straight line
+Question Number. 3. On a graph what is graph has the equation 3y = 12x–3 What is the
+the intercept of y when 4y = x + 8. gradient?.
+Option A. 4. Option A. 1/4.
+Option B. 8. Option B. 4/1.
+Option C. 2. Option C. 3/4.
+Correct Answer is. 2. Correct Answer is. 4/1.
+Explanation. Use y = mx + c The 'c' is the y- Explanation. The coefficient of x is the gradient,
+intercept. 4y = x + 8 must be converted to y = 1/4x but only when the equation is in the form y = mx +
++ 8/4". c. So y = 12/3x -3/3 12/3 = 4/1.
+Question Number. 4. What is the Question Number. 7. For an equation 2y
+equation of the line shown?. = 5x + 3 what is the gradient?.
+Option A. 3/5x.
+Option B. 5/2.
+Option C. 5x+3/2.
+Correct Answer is. 5/2.
+
+--- Page 9 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+9
+Explanation. y = mx + c Gradient is the 'm' (but
+the coefficient of y must be 1. If it is not, divide all Question Number. 12. What is commonly
+terms by the coefficient of y). referred to as the law of a straight line?.
+Option A. y = x2 plus 180.
+Option B. The line must pass through the
+Question Number. 8. Using cosine to 180 degree datum.
+find the angle of a triangle, which statement is Option C. y = mx + c.
+true?. Correct Answer is. y = mx + c.
+Option A. Opposite/Hyp. Explanation. NIL.
+Option B. Opposite/Adjacent.
+Option C. Adjacent/Hyp.
+Correct Answer is. Adjacent/Hyp. Question Number. 13. The y intercept of
+Explanation. S.O.H.C.A.H.T.O.A. 4y = 4x + 8 is.
+Option A. 4.
+Option B. 8.
+Question Number. 9. What type of Option C. 2.
+equation is y = x2 + 9x + 14?. Correct Answer is. 2.
+Option A. Quadratic. Explanation. Must be in form y = Mx + C, C is y-
+Option B. Circular. intercept. y = x + 2 in this case.
+Option C. Exponential.
+Correct Answer is. Quadratic.
+Explanation. Quadratic has x2 as its highest Question Number. 14. A straight line
+order. passes through the two points (1,4) and (6,1).
+What is the gradient of the line?.
+Option A. 3/5.
+Question Number. 10. 2y = 5x + 3 What Option B. -3/5.
+is the gradient?. Option C. 2/5.
+Option A. 2/5. Correct Answer is. -3/5.
+Option B. 5/2 + 3. Explanation. The gradient is found by dividing
+Option C. 5/2. the difference between the y coordinates by the
+Correct Answer is. 5/2. difference between the x coordinates. In this case
+Explanation. Gradient is the m when the it will be 4-1/1-6 = 3/-5 =-3/5.
+formula is in the form y = mx + c.
+Question Number. 15. What is the
+Question Number. 11. What is the slope equation of a straight line with gradient m and
+between the points (3,1) and (9,3)?. intercept on the y axis c?.
+Option A. 1/3. Option A. y = mx + c.
+Option B. 3/1. Option B. x = y + mc.
+Option C. 2. Option C. y = cx + m.
+Correct Answer is. 1/3. Correct Answer is. y = mx + c.
+Explanation. (Y2-Y1)/(-), 3-1 = 2, 9-3 = 6. 2/6 = Explanation. NIL.
+1/3.
+
+--- Page 10 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+01
+Question Number. 16. What is the Explanation. If x = 3 then the line will pass
+gadient of the straight line whose equation is 2y + through all points where x=3 i.e. (3,0); (3,1);(3,2)
+3x = 6?. that is a line parallel to the y axis.
+Option A. 3.
+Option B. 3/2.
+Option C. -3/2. Question Number. 20. What is the
+Correct Answer is. -3/2. equation of the graph shown?.
+Explanation. First put into the form y = mx + c,
+i.e. y = -3x/2 +3 m = gradient hence gradient is -
+3/2.
+Option A. y = -2.
+Question Number. 17. Two lines with
+Option B. x = -2.
+equations y = 3x-6 and y = 3x + 4 ?.
+Option C. y = 2x.
+Option A. meet when y = 3.
+Correct Answer is. y = -2.
+Option B. are at right angles.
+Explanation. All the points on he line have a y
+Option C. are parallel.
+value of -2, hence the equation is y = -2.
+Correct Answer is. are parallel.
+Explanation. They both have the same gradient
+i.e. 3 and hence are parallel.
+Question Number. 18. What is the
+equation of a straight line that passes through the
+two points (0,0) and (3,2).
+Option A. y = 3x + 2.
+Option B. y = 2x + 3.
+Option C. y =2x/3.
+Correct Answer is. y =2x/3.
+Question Number. 21. Use the graphs to
+Explanation. Gradient of the line is (2-0)/(3-0) =
+solve the simultaneous equations y = x + 2 and 3y +
+2/3 this is the difference in the y values divided by
+2x = 6.
+the difference in the x values; m =2/3, The
+Option A. x = 2, y = 0.
+intercept on the y axis is 0, that is when x = 0 ; c =
+Option B. x = 0, y = 2.
+0, The gradient of a straight line is of the form y =
+Option C. x = 0, y = 0.
+mx + c so we get y = 2x/3 +0 = 2x/3.
+Correct Answer is. x = 0, y = 2.
+Explanation. This is easy. The solution is the
+point when the lines cross, i.e. (0,2): x=0, y=2.
+Question Number. 19. The line with
+equation x = 3 is.
+Option A. at 45° to both axes.
+Option B. parallel to the x axis.
+Option C. parallel to the y axis.
+Correct Answer is. parallel to the y axis.
+
+--- Page 11 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+11
+Question Number. 22. The plot of the
+equation y = 1/x is a.
+Option A. straight line.
+Option B. curve with one turning point.
+Option C. curve with two turning points.
+Correct Answer is. curve with two turning
+points.
+Explanation. y = 1/x is a curve with two turning
+point. Try plotting it with values of x of -2, -1, 0, 1,
+2 and you will see that it appears in the no.1 and
+no.3 quadrants and goes off to infinity.
+Question Number. 23. Which of the
+graphs shown is given by the equation y = x2 + 3?.
+Question Number. 24. Which of the
+graphs shown is given by the equation; 2y = 4x +6
+?.
+Correct Answer is. C is correct.
+Explanation. y = ax + b is a straight line, y = ax2
++ b is a quadratic which has one turning point, y =
+ax3 + bx + c has two turning points.
+
+--- Page 12 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+21
+Question Number. 25. Which of the
+graphs shown is given by the equation; y = 2x3 +
+4x + 3 ?.
+Correct Answer is. B is correct because y = ax
++ b, is equation of straight line.
+Explanation. y = ax + b is a straight line, y = ax2
++ b is a quadratic which has one turning point y =
+ax3 + bx + c has two turning points.
+Correct Answer is. Graph in C is correct,
+because it has two turning points.
+Explanation. y = ax + b is a straight line, y = ax2
++ b is a quadratic which has one turning point, y =
+ax3 + bx + c has two turning points.
+1.3c Geometry.
+Question Number. 1. What is the
+tangent of 90o ?.
+Option A. Negative infinity.
+Option B. 0.
+Option C. Positive infinity.
+Correct Answer is. Positive infinity.
+Explanation. Technically, the tan curve goes off
+the graph to + infinity at 90 degrees, but then
+comes back on at - infinity at the same point.
+
+--- Page 13 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+31
+Choose + infinity for the answer here (since it goes Correct Answer is. sin 45° x length of the
+to +infinity first). hypotenuse side of the triangle.
+Explanation. sin 45o = opp/hyp opp = sin 45o /
+hyp.
+Question Number. 2. Two angles of a
+triangle are 68o and 32o . Therefore the third angle
+must be. Question Number. 5. Sin ø =.
+Option A. 114o .
+Option B. 80o .
+Option C. 63o .
+Correct Answer is. 80o .
+Option A. A/C.
+Explanation. The sum of all the angles in a
+Option B. B/C.
+triangle is 180 degrees.
+Option C. C/A.
+Correct Answer is. A /C.
+Explanation. S.O.H.C.A.H.T.O.A.
+Question Number. 3. Which of the
+following formulae are correct for the triangle
+shown?.
+Option A. A2 = C2 + B2 .
+Option B. B2 = C2 + A2 .
+Option C. C2 = A2 + B2 . Question Number. 6. Cos A =.
+Correct Answer is. C2 = A2 + B2 .
+Explanation. Pythagoras theorem.
+Option A. 1.2.
+Option B. 0.6.
+Option C. 0.8.
+Correct Answer is. 0.8.
+Explanation. S.O.H.C.A.H.T.O.A.
+Question Number. 4. In a right-angled
+triangle the other two angles are both 45°. The
+length of the opposite side can be calculated by.
+Option A. cos 45° x length of the adjacent
+side of the triangle.
+Option B. cos 45° x length of the adjacent
+Question Number. 7. In a right-angle
+side of the triangle.
+triangle, the sine of an angle is.
+Option C. sin 45° x length of the hypotenuse
+side of the triangle.
+
+--- Page 14 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+41
+Option A. opposite divided by hypotenuse.
+Question Number. 11. In a right triangle,
+Option B. adjacent divided by hypotenuse. SINE theta =.
+Option A. adjacent divided by hypotenuse.
+Option C. opposite divided by adjacent.
+Correct Answer is. opposite divided by Option B. opposite divided by adjacent.
+hypotenuse. Option C. opposite divided by hypotenuse.
+Explanation. S.O.H.C.A.H.T.O.A.
+Correct Answer is. opposite divided by
+hypotenuse.
+Question Number. 8. In a right-angle Explanation. SOHCAHTOA.
+triangle, the tangent of an angle is.
+Option A. opposite divided by adjacent.
+Option B. adjacent divided by hypotenuse. Question Number. 12. Complete the
+following: SINE a =.
+Option C. opposite divided by hypotenuse. Option A. a squared times b squared.
+Option B. opposite side divided by the
+Correct Answer is. opposite divided by hypotenuse side.
+adjacent. Option C. adjacent side divided by the
+Explanation. S.O.H.C.A.H.T.O.A. opposite side.
+Correct Answer is. opposite side divided by
+the hypotenuse side.
+Question Number. 9. In a right-angle Explanation. S.O.H.C.A.H.T.O.A.
+triangle, the cosine of an angle is.
+Option A. opposite divided by hypotenuse.
+Question Number. 13. A sector with
+Option B. adjacent divided by hypotenuse. angle A is subtended to the centre point of a circle.
+Area of the sector is proportional to:.
+Option C. opposite divided by adjacent. Option A. Angle A.
+Correct Answer is. adjacent divided by Option B. Cos A.
+hypotenuse. Option C. Sin A.
+Explanation. S.O.H.C.A.H.T.O.A. Correct Answer is. Angle A.
+Explanation. Area of a sector is proportional to
+the subtended angle of the sector.
+Question Number. 10. On a right angle
+triangle, the longest side is 20 cm and the shortest
+is 12 cm. What is the other side?. Question Number. 14. Starting from zero
+Option A. 13 cm. amplitude, the cosine curve repeats itself
+Option B. 18 cm. between.
+Option C. 16 cm. Option A. -180 and 180 degree.
+Correct Answer is. 16 cm. Option B. -90 and 270 degrees.
+Explanation. 3,4,5 triangle. Also applies to Option C. 0 and 360 degree.
+multiples of 3,4,5 such as 6,8,10 and 12,16,20. Correct Answer is. -90 and 270 degrees.
+
+--- Page 15 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+51
+Explanation. Sketch the cosine curve and see. Correct Answer is. 1 radian.
+Neither 0 or -180 degrees are zero amplitude. Explanation. This is worth learning.
+Question Number. 15. Choose the correct Question Number. 19. A right angled
+statement:. triangle has sides 6cm, 8cm and 10 cm. What is the
+Option A. Cosec2 x-Cot2 x = 1. sine of the angle between the 8cm side and the 10
+Option B. Sec2 x+tan2 x = 1. cm side?.
+Option C. Cos2 x-Sin2 x = 1. Option A. 0.75.
+Correct Answer is. Cosec2 x-Cot2 x = 1. Option B. 0.6.
+Explanation. See Option C. 0.8.
+http://www.ilovemaths.com/2trigid.htm. Correct Answer is. 0.6.
+Explanation. A 6,8,10 triangle is 2 x the 3, 4, 5
+triangle which is a right angled triangled triangle
+Question Number. 16. A right angled with hypotenuse 5. For our triangle the
+triangle has the two shortest sides of 5cm and 12 hypotenuse will be 10. The angle we are
+cm. What is the length of the longest side?. considering has an opposite side of 6 and sine of
+an angle is the opposite/hypotenuse. Hence the
+Option A. 17cm. answer is 6/10 = 0.6.
+Option B. 15cm.
+Option C. 13cm.
+Correct Answer is. 13cm. Question Number. 20. Sin 90 =.
+Explanation. Use Pythagoras theorem The
+square on the hypotenuse is equal to the sum of Option A. Infinity.
+the squares on the other two sides. 52 + 122 = h2 Option B. 1.
+25 + 144 = h2 , h = √169 =13. Option C. 0.
+Correct Answer is. 1.
+Explanation. Sin 90 = 1, Cos 90 = 0, tan 90 =
+Question Number. 17. The infinity.
+trigonometrical ratio; adjacent divided by
+hypotenuse is.
+Option A. Sine. Question Number. 21. What size of angle
+Option B. Tangent. has the same ratio for both the sine and the
+Option C. Cosine. cosine?.
+Correct Answer is. Cosine. Option A. 60 degrees.
+Explanation. Sin = Opp/Hyp, Cos = Adj/Hyp, Tan Option B. 0 degrees.
+= Opp/Adj. Option C. 45 degrees.
+Correct Answer is. 45 degrees.
+Explanation. An isosceles right angled triangle
+Question Number. 18. 57.3 degrees is has two 45 degree angles. The size of the two
+equal to. sides that are not the hypotenuse are the same.
+Option A. 2 radians. This means that both the sine which is
+Option B. 1 radian. opposite/hypotenuse and the cosine which is
+Option C. π radians.
+
+--- Page 16 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+61
+adjacent/hypotenuseis the same as the adjacent =
+opposite in this case. Question Number. 2. Dividing 41/2 by 2
+1/6 gives the answer of.
+Option A. 21/3.
+Question Number. 22. Sin A is equal to. Option B. 25/12.
+Option C. 54/26.
+Correct Answer is. 54/26.
+Explanation. 41/2 = 9/2, 21/6 = 13/6 Turn one
+fraction up-side-down then multiply 9/2 x 6/13 =
+54/26.
+Option A. 3/4.
+Option B. 3/5.
+Option C. 4/5.
+Question Number. 3. 10000 expressed
+Correct Answer is. 3/5.
+as ten raised to a power would be.
+Explanation. B&C is opposite to A, A&B is
+Option A. 105.
+adjacent to A, A&C is hypotenuse, sin = o/h, cos =
+Option B. 103.
+a/h , tan= o/a.
+Option C. 104.
+Correct Answer is. 104.
+Explanation. 10 * 10 *10 = 1000, 10 * 10 * 10 *
+10 = 10000.
+Question Number. 4. 60 mm expressed
+as a percentage of 3 metres is.
+Option A. 2 %.
+Question Number. 23. If cos 60 is 0.5,
+Option B. 1.8 %.
+what is sin 30?.
+Option C. 0.5 %.
+Option A. 0.5.
+Correct Answer is. 2 %.
+Option B. None of the above.
+Explanation. (60 * 100) / 3000.
+Option C. 0.866.
+Correct Answer is. 0.5.
+Explanation. Cos θ = sin (90-θ).
+Question Number. 5. The average speed
+of an aircraft that travels 7200 miles in 12 hours is.
+1.4
+Option A. 864 MPH.
+Option B. 167 MPH.
+Question Number. 1. 5/16 + 3/32
+Option C. 600 MPH.
+expressed as a single fraction is.
+Correct Answer is. 600 MPH.
+Option A. 13/32.
+Explanation. 7200 /12.
+Option B. 8/48.
+Option C. 15/512.
+Correct Answer is. 13/32.
+Question Number. 6. The sum of
+Explanation. 5/16 = 10/32 , 10/32 + 3/32 =
+complex numbers a+bi and a'+b'i are.
+13/32.
+Option A. (a+b)+(a'+b')i.
+
+--- Page 17 ---
+WWW.EASAQUESTIONPAPERS.BLOGSPOT.COM - PART66 MODULE 1 PART -3
+Visit to download all latest EASA / EASA CAR 66 Module examination Question papers and study material
+DOWNLOAD OUR MOBILE APP FROM PLAY STORE @EASA QUESTION PAPERS
+IF YOU HAVE PREVIOUS SESSION QUESTION PAPERS, SHARE WITH US AT AVIATORSLINKS@GMAIL.COM
+elbaliavA
+PQ
+maxE
+eludoM
+66
+RAC
+llA
+(
+srepaPnoitseuQACGD/bf
+@
+koobecaF
+no
+su
+ekiL
+,)ni.srepapnoitseuqacgd.www(
+egaP
+71
+Option B. (a+a')i+(b+b').
+Option C. (a+a')+(b+b')i.
+Correct Answer is. (a+b)+(a'+b')i.
+Explanation. Add the real numbers to each
+other, then add the imaginary numbers to each
+other, and keep them separate.

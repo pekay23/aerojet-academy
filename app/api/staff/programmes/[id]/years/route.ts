@@ -51,7 +51,7 @@ export const POST = withErrorHandler(
 
 // PATCH /api/staff/programmes/[id]/years — Update a programme year
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, context?: { params: Record<string, string> }) => {
+  async (req: NextRequest, _context?: { params: Record<string, string> }) => {
     const staff = await requireStaff()
     const body = await req.json()
     const { yearId, yearFeeAmount, seatConfirmationFee, firstPaymentAmount, semesters, isActive } =

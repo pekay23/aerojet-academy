@@ -5,7 +5,7 @@ async function main() {
 
   // 1. Reference Data
   const programmes = await prisma.fullTimeProgramme.findMany()
-  const progMap = Object.fromEntries(programmes.map(p => [p.code, p.id]))
+  const _progMap = Object.fromEntries(programmes.map(p => [p.code, p.id]))
   
   const courses = await prisma.course.findMany()
   const courseMap = Object.fromEntries(courses.map(c => [c.code, c.id]))

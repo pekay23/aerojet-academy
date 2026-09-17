@@ -1,0 +1,151 @@
+Question 1: What is the term for the electrical generation resulting from the application of mechanical pressure on a dielectric or nonconducting crystal?
+A) Piezoelectric
+B) Photovoltaic
+C) Thermoelectric
+Question 2: Which materials are commonly used for piezoelectric generation?
+A) Crystalline quartz and copper
+B) Copper and Rochelle salt
+C) Crystalline quartz and Rochelle salt
+Question 3: What happens when a mechanical stress is applied to a piezoelectric crystal?
+A) It produces heat.
+B) It generates an electric polarization.
+C) It creates light.
+Question 4: What can be observed when a circuit is connected across a piezoelectric crystal that is loaded (pressure is applied)?
+A) No change in the crystal
+B) A flow of current
+C) The crystal emits a sound
+Question 5: What is the opposite effect of the piezoelectric effect, where a mechanical output is derived from an electrical signal input?
+A) Photoelectric effect
+B) Electrostatic effect
+C) Piezoelectric effect
+Question 6: In what type of devices are piezoelectric materials used for converting a mechanical strain into an electrical signal?
+A) Thermometers
+B) Microphones and phonograph pickups
+C) Light bulbs
+Question 7: Where is the opposite effect of the piezoelectric effect, producing a mechanical output from an electrical signal input, commonly used?
+A) In refrigerators
+B) In headphones and loudspeakers
+C) In electric cars
+Question 8: What is the most common form of converting chemical energy into electricity?
+A) Solar panels
+B) Batteries
+C) Wind turbines
+Question 9: How does a primary battery produce electricity?
+A) By converting light energy
+B) By heating a chemical solution
+C) By a chemical reaction between two different metals
+Question 10: What is the role of the alkaline electrolyte in a primary battery?
+A) It generates heat.
+B) It stores electrical charge.
+C) It facilitates the chemical reaction between metals.
+Question 11: What happens at one terminal of a battery when electrons are freed during a chemical reaction?
+A) It develops a positive charge.
+B) It develops a negative charge.
+C) It remains neutral.
+Question 12: How do electrons flow in a battery circuit?
+A) From the negative end to the positive end
+B) From the positive end to the negative end
+C) They don't flow in a closed circuit.
+Question 13: What is the most common source of thermal electricity in the aviation industry?
+A) Solar panels
+B) Thermocouples
+C) Fuel cells
+Question 14: What is one significant advantage of using thermocouples as temperature sensors in aviation?
+A) They are expensive.
+B) They are not interchangeable.
+C) They are cheap and interchangeable.
+Question 15: What is the phenomenon that generates a voltage between two dissimilar metal wires in a thermocouple and is proportional to the temperature at the junction?
+A) The Faraday effect
+B) The Seebeck effect
+C) The Edison effect
+Question 16: Who is credited with first noticing the Seebeck effect in 1821?
+A) Thomas Edison
+B) Thomas Seebeck
+C) Albert Einstein
+Question 17: How are thermocouples utilized in aviation?
+A) To generate electricity
+B) To measure cylinder head temperatures, inter-turbine temperature, and exhaust gas temperature
+C) To power aircraft engines
+Question 18: What is the primary function of a solar cell or photovoltaic cell?
+A) To convert heat energy into electricity
+B) To convert light energy into electricity
+C) To store electrical energy
+Question 19: What happens when certain chemical elements in a solar cell are exposed to light energy?
+A) They produce heat.
+B) They release electrons.
+C) They emit photons.
+Question 20: What are photons in sunlight absorbed by in a solar cell?
+A) Conductive materials
+B) Semiconductor materials
+C) Insulating materials
+Question 21: What happens to electrons in a solar cell when they are exposed to light energy?
+A) They are absorbed by atoms.
+B) They are broken loose from their atoms, allowing them to flow and produce electricity.
+C) They become photons.
+Question 22: What are the complementary positive charges created in a solar cell when electrons are released?
+A) Electrons
+B) Holes
+C) Photons
+Question 23: In which direction do the holes in a silicon solar panel flow relative to the electrons?
+A) In the same direction
+B) In the opposite direction
+C) In a random direction
+Question 24: Where have solar cells historically been used as a power source?
+A) In automobiles
+B) In wristwatches
+C) In cooking appliances
+Question 25: What is the production of electricity by friction primarily related to?
+A) The generation of heat
+B) The buildup of static electricity
+C) The creation of light
+Question 26: When non-conductive materials are rubbed together, what phenomenon occurs?
+A) The production of heat
+B) A transfer of electrons
+C) The generation of light
+Question 27: What happens to the charges between materials when a transfer of electrons occurs during friction?
+A) They remain balanced.
+B) They become neutral.
+C) They become imbalanced.
+Question 28: What is created when a conductor is moved through the magnetic lines of flux created by a magnet or electromagnet?
+A) Heat
+B) Electromotive force
+C) Light
+Question 29: What is the result of the creation of electromotive force when a conductor is moved through magnetic lines of flux?
+A) Production of heat
+B) Production of sound
+C) Production of current flow
+Question 30: For what purpose is the current flow produced by the movement of a conductor through magnetic lines of flux typically used?
+A) To generate radio waves
+B) To create mechanical motion
+C) To power electrically operated devices and components
+Answers
+1: A) Piezoelectric
+2: C) Crystalline quartz and Rochelle salt
+3: B) It generates an electric polarization.
+4: B) A flow of current
+5: C) Piezoelectric effect
+6: B) Microphones and phonograph pickups
+7: B) In headphones and loudspeakers
+8: B) Batteries
+9: C) By a chemical reaction between two different metals
+10: C) It facilitates the chemical reaction between metals.
+11: A) It develops a positive charge.
+12: B) From the positive end to the negative end
+13: B) Thermocouples
+14: C) They are cheap and interchangeable.
+15: B) The Seebeck effect
+16: B) Thomas Seebeck
+17: B) To measure cylinder head temperatures, inter-turbine temperature, and exhaust gas temperature
+18: B) To convert light energy into electricity
+19: B) They release electrons.
+20: B) Semiconductor materials
+21: B) They are broken loose from their atoms, allowing them to flow and produce electricity.
+22: B) Holes
+23: B) In the opposite direction
+24: B) In wristwatches
+25: B) The buildup of static electricity
+26: B) A transfer of electrons
+27: C) They become imbalanced.
+28: B) Electromotive force
+29: C) Production of current flow
+30: C) To power electrically operated devices and components

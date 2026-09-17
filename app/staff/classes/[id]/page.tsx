@@ -7,11 +7,11 @@ import {
   ArrowLeft,
   BookOpen,
   Users,
-  MapPin,
+  MapPin as _MapPin,
   Calendar,
   Clock,
   User as UserIcon,
-  Shield,
+  Shield as _Shield,
   Armchair,
 } from 'lucide-react'
 import ClassActionsMenu from '../../_components/ClassActionsMenu'

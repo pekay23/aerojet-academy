@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, Pencil, Trash2, Check, X, Calendar, Users, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface IntakeCycle {
   id: string
@@ -36,6 +37,8 @@ export default function IntakeCycleManager() {
     isActive: true,
   })
 
+  const { markDirty, markClean } = useFormDirty()
+
   const fetchCycles = useCallback(async () => {
     try {
       const res = await fetch('/api/staff/admissions/intake-cycles?limit=50')
@@ -51,20 +54,30 @@ export default function IntakeCycleManager() {
       const res = await fetch('/api/staff/academic-years')
       const json = await res.json()
       if (json.data) setAcademicYears(json.data)
-    } catch {
-      // Non-critical
+    } catch (err) {
+      console.error('[IntakeCycleManager] Failed to fetch academic years:', err)
     }
   }, [])
 
   useEffect(() => {
     fetchCycles()
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAcademicYears()
   }, [fetchCycles, fetchAcademicYears])
 
   const resetForm = () => {
-    setForm({ name: '', description: '', academicYearId: null, startDate: '', endDate: '', isActive: true })
+    setForm({
+      name: '',
+      description: '',
+      academicYearId: null,
+      startDate: '',
+      endDate: '',
+      isActive: true,
+    })
     setEditingId(null)
     setShowForm(false)
+    markClean()
   }
 
   const handleSave = async () => {
@@ -85,6 +98,7 @@ export default function IntakeCycleManager() {
         body: JSON.stringify(payload),
       })
       if (res.ok) {
+        markClean()
         resetForm()
         fetchCycles()
       }
@@ -124,7 +138,7 @@ export default function IntakeCycleManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-aerojet-blue" />
+        <Loader2 className="text-aerojet-blue h-8 w-8 animate-spin" />
       </div>
     )
   }
@@ -134,7 +148,7 @@ export default function IntakeCycleManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white sm:text-3xl">
+          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
             Intake Cycles
           </h1>
           <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -142,8 +156,11 @@ export default function IntakeCycleManager() {
           </p>
         </div>
         <button
-          onClick={() => { resetForm(); setShowForm(true) }}
-          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-aerojet-blue/20 transition-all hover:shadow-xl hover:shadow-aerojet-blue/30"
+          onClick={() => {
+            resetForm()
+            setShowForm(true)
+          }}
+          className="bg-aerojet-blue shadow-aerojet-blue/20 hover:shadow-aerojet-blue/30 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
         >
           <Plus className="h-4 w-4" /> New Cycle
         </button>
@@ -152,56 +169,83 @@ export default function IntakeCycleManager() {
       {/* Form */}
       {showForm && (
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-700 dark:bg-slate-900">
-          <h3 className="mb-4 text-lg font-black text-aerojet-blue dark:text-white">
+          <h3 className="text-aerojet-blue mb-4 text-lg font-black dark:text-white">
             {editingId ? 'Edit Intake Cycle' : 'New Intake Cycle'}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-500">Name *</label>
+              <label className="mb-1 block text-xs font-bold tracking-widest text-slate-500 uppercase">
+                Name *
+              </label>
               <input
                 value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, name: e.target.value }))
+                  markDirty()
+                }}
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 placeholder="e.g. September 2026 Intake"
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-500">Description</label>
+              <label className="mb-1 block text-xs font-bold tracking-widest text-slate-500 uppercase">
+                Description
+              </label>
               <input
                 value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, description: e.target.value }))
+                  markDirty()
+                }}
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 placeholder="Optional description"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-500">Start Date *</label>
+              <label className="mb-1 block text-xs font-bold tracking-widest text-slate-500 uppercase">
+                Start Date *
+              </label>
               <input
                 type="date"
                 value={form.startDate}
-                onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, startDate: e.target.value }))
+                  markDirty()
+                }}
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-500">End Date *</label>
+              <label className="mb-1 block text-xs font-bold tracking-widest text-slate-500 uppercase">
+                End Date *
+              </label>
               <input
                 type="date"
                 value={form.endDate}
-                onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, endDate: e.target.value }))
+                  markDirty()
+                }}
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-500">Academic Year</label>
+              <label className="mb-1 block text-xs font-bold tracking-widest text-slate-500 uppercase">
+                Academic Year
+              </label>
               <select
                 value={form.academicYearId ?? ''}
-                onChange={e => setForm(f => ({ ...f, academicYearId: e.target.value || null }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, academicYearId: e.target.value || null }))
+                  markDirty()
+                }}
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 <option value="">None</option>
-                {academicYears.map(ay => (
-                  <option key={ay.id} value={ay.id}>{ay.name}</option>
+                {academicYears.map((ay) => (
+                  <option key={ay.id} value={ay.id}>
+                    {ay.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -210,8 +254,11 @@ export default function IntakeCycleManager() {
                 <input
                   type="checkbox"
                   checked={form.isActive}
-                  onChange={e => setForm(f => ({ ...f, isActive: e.target.checked }))}
-                  className="h-4 w-4 rounded border-slate-300 text-aerojet-blue"
+                  onChange={(e) => {
+                    setForm((f) => ({ ...f, isActive: e.target.checked }))
+                    markDirty()
+                  }}
+                  className="text-aerojet-blue h-4 w-4 rounded border-slate-300"
                 />
                 Active
               </label>
@@ -221,9 +268,13 @@ export default function IntakeCycleManager() {
             <button
               onClick={handleSave}
               disabled={saving || !form.name || !form.startDate || !form.endDate}
-              className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2.5 text-sm font-bold text-white transition-all hover:shadow-lg disabled:opacity-50"
+              className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-all hover:shadow-lg disabled:opacity-50"
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              {saving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
               {editingId ? 'Update' : 'Create'}
             </button>
             <button
@@ -241,11 +292,13 @@ export default function IntakeCycleManager() {
         <div className="rounded-2xl border border-slate-100 bg-white px-6 py-16 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <Calendar className="mx-auto mb-3 h-12 w-12 text-slate-300" />
           <p className="text-sm font-bold text-slate-400">No intake cycles yet.</p>
-          <p className="mt-1 text-xs text-slate-400">Create your first intake cycle to start grouping applicants.</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Create your first intake cycle to start grouping applicants.
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {cycles.map(cycle => (
+          {cycles.map((cycle) => (
             <div
               key={cycle.id}
               className={`group relative overflow-hidden rounded-2xl border bg-white p-6 shadow-sm transition-all hover:shadow-xl dark:bg-slate-900 ${
@@ -255,9 +308,13 @@ export default function IntakeCycleManager() {
               }`}
             >
               {/* Status dot */}
-              <div className={`absolute right-4 top-4 h-2.5 w-2.5 rounded-full ${cycle.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+              <div
+                className={`absolute top-4 right-4 h-2.5 w-2.5 rounded-full ${cycle.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`}
+              />
 
-              <h3 className="pr-8 text-base font-black text-aerojet-blue dark:text-white">{cycle.name}</h3>
+              <h3 className="text-aerojet-blue pr-8 text-base font-black dark:text-white">
+                {cycle.name}
+              </h3>
               {cycle.description && (
                 <p className="mt-1 text-xs text-slate-400">{cycle.description}</p>
               )}
@@ -265,11 +322,13 @@ export default function IntakeCycleManager() {
               <div className="mt-4 space-y-2">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Calendar className="h-3.5 w-3.5" />
-                  {format(new Date(cycle.startDate), 'MMM d, yyyy')} — {format(new Date(cycle.endDate), 'MMM d, yyyy')}
+                  {format(new Date(cycle.startDate), 'MMM d, yyyy')} —{' '}
+                  {format(new Date(cycle.endDate), 'MMM d, yyyy')}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Users className="h-3.5 w-3.5" />
-                  {cycle._count.applications} application{cycle._count.applications !== 1 ? 's' : ''}
+                  {cycle._count.applications} application
+                  {cycle._count.applications !== 1 ? 's' : ''}
                 </div>
                 {cycle.academicYear && (
                   <div className="mt-1">

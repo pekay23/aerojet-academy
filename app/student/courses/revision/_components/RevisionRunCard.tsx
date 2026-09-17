@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, Users, CheckCircle2, Loader2, Info } from 'lucide-react'
+import { Calendar, Users, CheckCircle2, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -9,15 +9,26 @@ import { bookRevisionRun } from '../actions'
 import { useRouter } from 'next/navigation'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 
-export default function RevisionRunCard({ 
-  run, 
-  isBooked, 
-  walletBalance 
-}: { 
-  run: any, 
-  isBooked: boolean, 
-  walletBalance: number 
-}) {
+interface RevisionRunCardProps {
+  run: {
+    id: string
+    moduleTag: string | null
+    price: number
+    title: string
+    description: string | null
+    startDatetime: Date
+    currentEnrollments: number
+    capacity: number
+  }
+  isBooked: boolean
+  walletBalance: number
+}
+
+export default function RevisionRunCard({
+  run,
+  isBooked,
+  walletBalance
+}: RevisionRunCardProps) {
   const [loading, setLoading] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const router = useRouter()
@@ -41,7 +52,7 @@ export default function RevisionRunCard({
       } else {
         toast.error(res.error)
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to book')
     } finally {
       setLoading(false)
@@ -84,7 +95,7 @@ export default function RevisionRunCard({
         <Button
           onClick={handleBookClick}
           disabled={loading || run.currentEnrollments >= run.capacity}
-          className="w-full rounded-xl bg-aerojet-blue font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full rounded-xl bg-blue-800 font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           {loading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

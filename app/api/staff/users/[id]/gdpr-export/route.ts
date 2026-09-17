@@ -11,8 +11,8 @@ export async function GET(
   let actor
   try {
     actor = await requirePermission(ADDITIONAL_PERMISSION_KEYS.MANAGE_GDPR)
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: err.message === 'Unauthorized' ? 401 : 403 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: err instanceof Error && err.message === 'Unauthorized' ? 401 : 403 })
   }
   const { id } = await ctx.params
 
@@ -31,7 +31,7 @@ export async function GET(
         'Content-Disposition': `attachment; filename="gdpr-export-${id}.json"`,
       },
     })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
   }
 }

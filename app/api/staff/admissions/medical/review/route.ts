@@ -14,7 +14,7 @@ const reviewSchema = z.object({
   facility: z.string().optional(),
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, _ctx: unknown) => {
   const staff = await requireStaff()
 
   const body = await req.json()

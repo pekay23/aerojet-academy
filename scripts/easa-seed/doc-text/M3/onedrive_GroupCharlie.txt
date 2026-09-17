@@ -1,0 +1,40 @@
+1)The S.I unit of potential difference is.....
+a)voltage
+b)volts
+c)current
+2)A stronger magnetic strength of a core in a coil of wire will......the Electromotive force.
+a)decrease
+b)reduced
+c)increase
+3)The force that makes current flow is.....
+a)a charge
+b)voltage
+c)electric
+4)ohms is an S.I unit of resistance which is symbolized by a
+a)French word
+b)Greek word
+c)Hebrew word
+5)The reciprocal of resistance is a...
+a)Potential Difference 
+b)Conductor 
+c)Conductance
+6)The S.I unit of Conductance is...
+a)volts
+b)current
+c)siemens
+7)coulomb as unit was named after a French Physicist called
+a)Charles Augustin
+b)Henry Augustin de Coulomb
+c)Charles-Augustin de Coulomb
+8)The increase in the length of a conductor........ the electrical resistance of the material.
+a)remains the same as
+b)decreases 
+c)increases
+9)Electron flow is the flow of....
+a)energy 
+b)potential difference 
+c)electric current 
+10)Alessandro Volta discovered....
+a)current 
+b)volta
+c)volts 

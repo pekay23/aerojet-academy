@@ -291,7 +291,7 @@
 
 <!-- =========================================================== -->
 <section class="ad-section" id="type">
-  <span class="ad-section__num">03 Â· TYPOGRAPHY</span>
+  <span class="ad-section__num">03 · TYPOGRAPHY</span>
   <h2 class="ad-section__title">Typography</h2>
   <p class="ad-section__deck">Three families loaded via <code>next/font/google</code> with <code>display: 'swap'</code>. Body uses Inter, editorial headings use Playfair Display, marketing display uses Outfit.</p>
 
@@ -299,9 +299,9 @@
   <table class="ad-table">
     <thead><tr><th>Family</th><th>CSS var</th><th>Weights</th><th>Used for</th></tr></thead>
     <tbody>
-      <tr><td><strong>Inter</strong></td><td><code>--font-inter</code></td><td>400â€“700</td><td><code>font-sans</code> default â€” body, portal UI</td></tr>
-      <tr><td><strong>Outfit</strong></td><td><code>--font-outfit</code></td><td>400â€“900</td><td>Design-lab variants, marketing headlines</td></tr>
-      <tr><td><strong>Playfair Display</strong></td><td><code>--font-playfair</code></td><td>400â€“700</td><td>Live public-site editorial headings (<code>font-serif</code>)</td></tr>
+      <tr><td><strong>Inter</strong></td><td><code>--font-inter</code></td><td>400–700</td><td><code>font-sans</code> default — body, portal UI</td></tr>
+      <tr><td><strong>Outfit</strong></td><td><code>--font-outfit</code></td><td>400–900</td><td>Design-lab variants, marketing headlines</td></tr>
+      <tr><td><strong>Playfair Display</strong></td><td><code>--font-playfair</code></td><td>400–700</td><td>Live public-site editorial headings (<code>font-serif</code>)</td></tr>
     </tbody>
   </table>
 
@@ -321,7 +321,7 @@
     </div>
     <div class="ad-type__row">
       <div class="ad-type__meta">eyebrow 11 / 700<br>tracking 0.3em uppercase</div>
-      <div class="ad-type__specimen" style="font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;">â€” Who We Are</div>
+      <div class="ad-type__specimen" style="font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;">— Who We Are</div>
     </div>
     <div class="ad-type__row">
       <div class="ad-type__meta">body lead 18 / 400<br>leading-relaxed</div>
@@ -341,7 +341,7 @@
     </div>
     <div class="ad-type__row">
       <div class="ad-type__meta">mono 12 / 500<br>captions</div>
-      <div class="ad-type__specimen" style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">SYS // EASA PART-66 Â· ACCRA, GHANA</div>
+      <div class="ad-type__specimen" style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">SYS // EASA PART-66 · ACCRA, GHANA</div>
     </div>
   </div>
 
@@ -350,9 +350,9 @@
 
 <!-- =========================================================== -->
 <section class="ad-section" id="sizing">
-  <span class="ad-section__num">04 Â· SIZING & SPACING</span>
+  <span class="ad-section__num">04 · SIZING & SPACING</span>
   <h2 class="ad-section__title">Sizing, spacing & layout</h2>
-  <p class="ad-section__deck">Border radius, component sizes, and the 4-pt spacing scale. Touch targets are enforced at 44Ã—44 px (WCAG 2.5.5) on every interactive component.</p>
+  <p class="ad-section__deck">Border radius, component sizes, and the 4-pt spacing scale. Touch targets are enforced at 44×44 px (WCAG 2.5.5) on every interactive component.</p>
 
   <h3 style="font-size: 18px; font-weight: 500; margin: 24px 0 12px;">Border radius</h3>
   <div class="ad-swatch-row">
@@ -363,7 +363,7 @@
     <div class="ad-square ad-radius-24"></div>
     <div class="ad-square ad-radius-4" style="border-radius: 9999px;"></div>
   </div>
-  <p class="ad-meta" style="margin-top: 8px;">4 px Â· 8 px (<code>--radius</code>) Â· 12 px Â· 16 px Â· 24 px Â· pill (9999 px)</p>
+  <p class="ad-meta" style="margin-top: 8px;">4 px · 8 px (<code>--radius</code>) · 12 px · 16 px · 24 px · pill (9999 px)</p>
 
   <h3 style="font-size: 18px; font-weight: 500; margin: 24px 0 12px;">Spacing rhythm</h3>
   <table class="ad-table">
@@ -386,10 +386,10 @@
   <table class="ad-table">
     <thead><tr><th>Component</th><th>Size</th><th>Class</th><th>Touch target</th></tr></thead>
     <tbody>
-      <tr><td>Button</td><td>default</td><td><code>h-11 px-4 py-2</code></td><td><strong>44Ã—44 px</strong> âœ… WCAG</td></tr>
-      <tr><td>Button</td><td>sm</td><td><code>h-9 px-3</code></td><td>36Ã—32 px</td></tr>
-      <tr><td>Button</td><td>lg</td><td><code>h-12 px-10</code></td><td>48Ã—â‰¥40 px</td></tr>
-      <tr><td>Button</td><td>icon</td><td><code>h-11 w-11</code></td><td>44Ã—44 px âœ…</td></tr>
+      <tr><td>Button</td><td>default</td><td><code>h-11 px-4 py-2</code></td><td><strong>44×44 px</strong> ✅ WCAG</td></tr>
+      <tr><td>Button</td><td>sm</td><td><code>h-9 px-3</code></td><td>36×32 px</td></tr>
+      <tr><td>Button</td><td>lg</td><td><code>h-12 px-10</code></td><td>48×≥40 px</td></tr>
+      <tr><td>Button</td><td>icon</td><td><code>h-11 w-11</code></td><td>44×44 px ✅</td></tr>
       <tr><td>Input</td><td>default</td><td><code>h-11</code></td><td>44 px</td></tr>
       <tr><td>Dialog</td><td>default</td><td><code>max-w-lg</code></td><td>512 px</td></tr>
       <tr><td>Sheet</td><td>default</td><td><code>max-w-sm</code></td><td>384 px</td></tr>
@@ -399,9 +399,9 @@
 
 <!-- =========================================================== -->
 <section class="ad-section" id="components">
-  <span class="ad-section__num">05 Â· COMPONENTS</span>
+  <span class="ad-section__num">05 · COMPONENTS</span>
   <h2 class="ad-section__title">Component library</h2>
-  <p class="ad-section__deck">Three tiers â€” <code>components/ui/*</code> (shadcn primitives, 29 files), <code>components/shared/*</code> (composites), and <code>app/(public)/_components/*</code> (marketing sections).</p>
+  <p class="ad-section__deck">Three tiers — <code>components/ui/*</code> (shadcn primitives, 29 files), <code>components/shared/*</code> (composites), and <code>app/(public)/_components/*</code> (marketing sections).</p>
 
   <h3 style="font-size: 18px; font-weight: 500; margin: 24px 0 12px;">Buttons</h3>
   <div class="ad-btn-row">
@@ -434,7 +434,7 @@
 
   <h3 style="font-size: 18px; font-weight: 500; margin: 24px 0 12px;">Card</h3>
   <div class="ad-card" style="max-width: 420px;">
-    <h3>Category B1 â€” Mechanical</h3>
+    <h3>Category B1 — Mechanical</h3>
     <p>Issue certifications of release to service following maintenance on aircraft structure, power plants, and mechanical / electrical systems.</p>
     <div style="display: flex; gap: 8px; margin-top: 12px;">
       <button class="ad-btn ad-btn--aero ad-btn--sm">Learn more</button>
@@ -442,9 +442,9 @@
     </div>
   </div>
 
-  <h3 style="font-size: 18px; font-weight: 500; margin: 24px 0 12px;">Hero preview (Variant C â€” live)</h3>
+  <h3 style="font-size: 18px; font-weight: 500; margin: 24px 0 12px;">Hero preview (Variant C — live)</h3>
   <div class="ad-hero">
-    <div class="ad-hero__eyebrow">EASA Part-66 Â· Accra, Ghana</div>
+    <div class="ad-hero__eyebrow">EASA Part-66 · Accra, Ghana</div>
     <h2 class="ad-hero__title">Your Journey to Becoming a Certified Aircraft Technician Starts Here.</h2>
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
       <button class="ad-btn ad-btn--sky">Apply now</button>
@@ -473,9 +473,9 @@
 
 <!-- =========================================================== -->
 <section class="ad-section" id="motion">
-  <span class="ad-section__num">06 Â· MOTION</span>
+  <span class="ad-section__num">06 · MOTION</span>
   <h2 class="ad-section__title">Motion & interaction</h2>
-  <p class="ad-section__deck">The portal keeps motion <strong>short, restrained, and purposeful</strong> â€” no parallax, no scroll-jacking, no long reveals. All durations and easings below are pulled from the live code.</p>
+  <p class="ad-section__deck">The portal keeps motion <strong>short, restrained, and purposeful</strong> — no parallax, no scroll-jacking, no long reveals. All durations and easings below are pulled from the live code.</p>
 
   <h3 style="font-size: 18px; font-weight: 500; margin: 24px 0 12px;">Core durations</h3>
   <table class="ad-table">
@@ -524,7 +524,7 @@
 
 <!-- =========================================================== -->
 <section class="ad-section" id="icons">
-  <span class="ad-section__num">07 Â· ICONS & IMAGERY</span>
+  <span class="ad-section__num">07 · ICONS & IMAGERY</span>
   <h2 class="ad-section__title">Icons, illustrations, and imagery</h2>
   <p class="ad-section__deck">All icons are SVG via <code>lucide-react</code>. All marketing photography is <code>.webp</code>, optimised through <code>sharp</code>. <strong>No emoji as icons.</strong></p>
 
@@ -581,7 +581,7 @@
   </div>
 
   <h3 style="font-size: 18px; font-weight: 500; margin: 24px 0 12px;">Default icon size</h3>
-  <p class="ad-meta">The <code>Button</code> stylesheet sets <code>[&_svg]:size-4 [&_svg]:shrink-0</code>, so every icon inside a Button is <strong>16Ã—16</strong>. To override per icon: <code>h-4 w-4</code> / <code>h-5 w-5</code> / <code>h-6 w-6</code> / <code>h-8 w-8</code>.</p>
+  <p class="ad-meta">The <code>Button</code> stylesheet sets <code>[&_svg]:size-4 [&_svg]:shrink-0</code>, so every icon inside a Button is <strong>16×16</strong>. To override per icon: <code>h-4 w-4</code> / <code>h-5 w-5</code> / <code>h-6 w-6</code> / <code>h-8 w-8</code>.</p>
 
   <h3 style="font-size: 18px; font-weight: 500; margin: 24px 0 12px;">Imagery set</h3>
   <p class="ad-meta">All marketing photography in <code>public/images/</code>. Paths are centralised in <code>app/design-lab/shared.tsx</code> so a designer can swap shots in one place.</p>
@@ -610,7 +610,7 @@
 
 <!-- =========================================================== -->
 <section class="ad-section" id="rules">
-  <span class="ad-section__num">08 Â· RULES</span>
+  <span class="ad-section__num">08 · RULES</span>
   <h2 class="ad-section__title">Do & don't</h2>
   <p class="ad-section__deck">Hard rules from the codebase and the design gap audit. Violating these typically causes a code review rejection or a "design system debt" entry in <code>docs/audits/</code>.</p>
 
@@ -622,20 +622,20 @@
         <li>Compose pages from <code>components/marketing/sections/*</code>.</li>
         <li>Reach for the <code>font-sans</code> / <code>font-serif</code> / <code>font-outfit</code> aliases, not raw family names.</li>
         <li>Use <code>focus-visible:ring-2 focus-visible:ring-ring</code> on every interactive element.</li>
-        <li>Keep buttons at <strong>44Ã—44 px</strong> minimum.</li>
+        <li>Keep buttons at <strong>44×44 px</strong> minimum.</li>
         <li>Use Lucide <code>ArrowRight</code> for CTAs.</li>
-        <li>Reach for the 4-pt spacing scale â€” <code>p-2</code> â€¦ <code>py-32</code>.</li>
+        <li>Reach for the 4-pt spacing scale — <code>p-2</code> … <code>py-32</code>.</li>
       </ul>
     </div>
     <div class="ad-duo__pane ad-duo__pane--dark">
       <div class="ad-duo__label" style="color: rgba(255,255,255,0.5);">don't</div>
       <ul>
         <li>No emoji as icons. Always Lucide.</li>
-        <li>No raw <code>bg-blue-500</code> / <code>bg-red-500</code> on the public site â€” use <code>--aero-*</code>.</li>
-        <li>No <code>text-white</code> inside portal chrome â€” use <code>text-card-foreground</code>.</li>
-        <li>No buttons smaller than 44Ã—44 px (WCAG).</li>
-        <li>No <code>transition-all</code> on heavy properties â€” <code>transition-colors</code> or <code>transition-transform</code>.</li>
-        <li>No default <code>font-bold</code> on body â€” <code>font-medium</code> (500) is the heading cap.</li>
+        <li>No raw <code>bg-blue-500</code> / <code>bg-red-500</code> on the public site — use <code>--aero-*</code>.</li>
+        <li>No <code>text-white</code> inside portal chrome — use <code>text-card-foreground</code>.</li>
+        <li>No buttons smaller than 44×44 px (WCAG).</li>
+        <li>No <code>transition-all</code> on heavy properties — <code>transition-colors</code> or <code>transition-transform</code>.</li>
+        <li>No default <code>font-bold</code> on body — <code>font-medium</code> (500) is the heading cap.</li>
         <li>No emoji as bullet markers.</li>
       </ul>
     </div>
@@ -650,10 +650,10 @@
 </main>
 
 <footer class="ad-foot">
-  <strong>Aerojet Academy Â· Design System v1.0</strong> &middot;
+  <strong>Aerojet Academy · Design System v1.0</strong> &middot;
   Generated from <code>app/globals.css</code> and <code>tailwind.config.ts</code> &middot;
   Markdown sources at <code>docs/design/</code> &middot;
-  <a href="./index.html">â† back to docs index</a>
+  <a href="./index.html">← back to docs index</a>
 </footer>
 
 </div>

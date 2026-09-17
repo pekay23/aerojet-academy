@@ -5,7 +5,7 @@ export const DEFAULT_LATE_BOOKING_SURCHARGE = 50
 
 export async function calculateBookingPrice(
   poolId: string,
-  userId: string
+  _userId: string
 ): Promise<{
   basePrice: number
   surcharge: number

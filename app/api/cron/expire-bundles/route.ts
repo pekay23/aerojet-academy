@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
       success: true,
       expired: result.count,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CRON] expire-bundles error:', error)
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }

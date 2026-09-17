@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Logo from '@/components/shared/Logo'
 import { AuthThemeProvider } from '@/components/shared/AuthThemeProvider'
+import ClientYear from '@/components/shared/ClientYear'
 
 export const metadata: Metadata = {
   title: {
@@ -16,7 +17,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <AuthThemeProvider>
       <div className="flex min-h-screen">
         {/* Left branding panel - hidden on mobile */}
-        <div className="bg-aerojet-blue relative hidden flex-col justify-between overflow-hidden p-12 lg:flex lg:w-[45%] xl:w-[40%]">
+        <aside
+          className="bg-aerojet-blue relative hidden flex-col justify-between overflow-hidden p-12 lg:flex lg:w-[45%] xl:w-[40%]"
+          aria-label="Marketing content"
+          role="complementary"
+        >
           <div className="from-aerojet-blue absolute inset-0 bg-linear-to-br via-[#003a7c] to-[#001a3c]" />
           <div
             className="absolute inset-0 bg-cover bg-center opacity-20"
@@ -53,10 +58,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               ))}
             </div>
           </div>
-        </div>
+        </aside>
 
         {/* Right form panel */}
-        <div className="relative flex min-h-screen flex-1 flex-col bg-slate-50">
+        <main id="main-content" className="relative flex min-h-screen flex-1 flex-col bg-slate-50">
           {/* Mobile header */}
           <div className="flex items-center justify-between border-b border-slate-100 bg-white p-4 lg:hidden">
             <Link href="/">
@@ -77,12 +82,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
           {/* Footer */}
           <div className="border-t border-slate-100 p-6 text-center">
-            <p className="text-[10px] tracking-widest text-slate-400 uppercase">
-              &copy; {new Date().getFullYear()} Aerojet Aviation Training Academy. All rights
-              reserved.
+            <p className="text-[10px] tracking-widest text-slate-600 uppercase dark:text-slate-300">
+              &copy; <ClientYear /> Aerojet Aviation Training Academy. All rights reserved.
             </p>
           </div>
-        </div>
+        </main>
       </div>
     </AuthThemeProvider>
   )

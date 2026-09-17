@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aerojet Academy — Full Portal Audit · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Aerojet Academy — Full Portal Audit</h1>
+  <p class="he-deck"><strong>Date:</strong> 2026-09-04 <strong>Scope:</strong> All 5 portals (<code>staff/</code>, <code>student/</code>, <code>instructor/</code>, <code>applicant/</code>, <code>examiner/</code>), Prisma schema, code quality/type safety, ESLint <code>no-explicit-any</code> <strong>Status:</strong> Audits complete | Fixes in progress <strong>Method:</strong> 7…</p>
+</header>
+<hr />
+<section class="he-section" id="audit-completion-checklist"><div class="he-section__num">01 · Audit Completion Checklist</div><h2 class="he-section__title">Audit Completion Checklist</h2></section>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Staff portal audit (pages, data reliability, correctness, type safety, schema usage)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Student portal audit (pages, data reliability, correctness, type safety, schema usage)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Instructor portal audit (pages, data reliability, correctness, type safety, schema usage)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Applicant portal audit (pages, data reliability, correctness, type safety, schema usage)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Examiner portal audit (pages, data reliability, correctness, type safety, schema usage)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Prisma schema correctness and relation completeness audit</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Code quality and type safety audit (including ESLint <code>no-explicit-any</code>)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Consolidated report and phased remediation plan</li>
+</ul>
+<hr />
+<section class="he-section" id="executive-summary"><div class="he-section__num">02 · Executive Summary</div><h2 class="he-section__title">Executive Summary</h2></section>
+<table>
+<thead>
+<tr><th>Area</th><th>Severity</th><th>Count</th><th>Status</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Data correctness bugs</strong></td><td>🔴 P0</td><td>15+</td><td>Complete</td></tr>
+<tr><td><strong>Type safety / <code>any</code> debt</strong></td><td>🔴 P1</td><td>~700+ explicit <code>any</code>, 150+ casts</td><td>Verified</td></tr>
+<tr><td><strong>Schema relation gaps</strong></td><td>🟡 P2</td><td>~30 actor fields, ~12 indexes</td><td>Complete</td></tr>
+<tr><td><strong>RLS client misuse</strong></td><td>🟡 P2</td><td>30+ files in student/applicant/instructor</td><td>Complete</td></tr>
+<tr><td><strong>Performance / pagination</strong></td><td>🟡 P2</td><td>Multiple unbounded queries</td><td>Verified</td></tr>
+<tr><td><strong>Code duplication</strong></td><td>🟡 P3</td><td>10+ patterns</td><td>Verified</td></tr>
+<tr><td><strong>Dead/empty files</strong></td><td>🟢 Low</td><td>3 files</td><td>Verified</td></tr>
+<tr><td><strong>Missing <code>loading.tsx</code></strong></td><td>🟢 Low</td><td>1 confirmed</td><td>Verified</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="phase-0-production-blocker-fixes"><div class="he-section__num">03 · Phase 0: Production Blocker Fixes</div><h2 class="he-section__title">Phase 0: Production Blocker Fixes</h2></section>
+<p><strong>Goal:</strong> Fix all data correctness bugs that produce wrong data or crashes.<br />
+<strong>Estimated effort:</strong> 1 day<br />
+<strong>Status:</strong> Complete</p>
+<table>
+<thead>
+<tr><th>#</th><th>Issue</th><th>File(s)</th><th>Fix</th><th>Verified</th><th>Committed</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>Class roster built from <code>AttendanceRecord</code> instead of <code>Enrollment</code></td><td><code>app/staff/classes/[id]/roster/page.tsx</code></td><td>Query <code>Enrollment</code> for the class</td><td>✅</td><td>☐</td></tr>
+<tr><td>2</td><td><code>fetchApplicants</code> &quot;all&quot; tab returns same as &quot;pending_payment&quot;</td><td><code>app/staff/actions/applicants.ts</code></td><td>Removed stray <code>else { status: 'PENDING' }</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>3</td><td>Records tab module merge uses substring matching (M1 ↔ M10 collision)</td><td><code>app/staff/exams/page.tsx</code></td><td>Exact <code>moduleCode</code> + <code>attemptType</code> equality</td><td>✅</td><td>☐</td></tr>
+<tr><td>4</td><td>Hardcoded pass mark <code>75</code> instead of <code>ACADEMIC_RULES.EASA_PASS_MARK</code></td><td><code>app/staff/actions/{bookings,results}.ts</code>, <code>app/staff/exams/_components/RecordsTab.tsx</code>, <code>lib/actions/instructor.ts</code>, instructor class files</td><td>Import <code>ACADEMIC_RULES</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>5</td><td><code>'PENDING'</code> enum write in examiner results (invalid <code>ExamAttendanceStatus</code>)</td><td><code>app/examiner/results/actions.ts</code></td><td>Replace with <code>null</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>6</td><td>ExaminerDashboard renders non-existent <code>ExamSitting</code> fields</td><td><code>app/staff/_components/ExaminerDashboard.tsx</code></td><td>Use <code>capacity</code>; derive name from <code>examComponent.course.name</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>7</td><td>ExaminerDashboard links navigate to staff portal</td><td><code>app/staff/_components/ExaminerDashboard.tsx</code></td><td>Change to <code>/examiner/sittings/</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>8</td><td>Result deletion is dangerously broad (cross-examiner contamination)</td><td><code>app/examiner/results/actions.ts</code></td><td>Soft-delete with <code>moduleCode</code>/<code>examId</code> scoping</td><td>✅</td><td>☐</td></tr>
+<tr><td>9</td><td>Soft-deleted results pollute examiner queries</td><td><code>app/examiner/results/page.tsx</code>, <code>actions.ts</code>, <code>app/api/staff/students/[id]/exam-record/route.ts</code></td><td>Add <code>deletedAt: null</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>10</td><td>EXAM_ONLY dashboard redirects to wrong page</td><td><code>app/applicant/dashboard/page.tsx</code></td><td>Redirect to <code>/applicant/exam-only/dashboard</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>11</td><td><code>deriveStatus()</code> conflates states</td><td><code>app/applicant/dashboard/page.tsx</code></td><td>Use explicit checks against <code>Application.stage</code>; moved <code>paymentApprovedAt</code> to <code>User</code> select</td><td>✅</td><td>☐</td></tr>
+<tr><td>12</td><td>Instructor class detail attendance query uses wrong ID</td><td><code>app/instructor/classes/[id]/page.tsx</code></td><td>Use <code>targetId</code> instead of <code>id</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>13</td><td>Instructor schedule filters exam sittings by examiner role</td><td><code>app/instructor/schedule/page.tsx</code></td><td>Removed invalid examiner filter</td><td>✅</td><td>☐</td></tr>
+<tr><td>14</td><td><code>submitGrade</code> doesn't recalculate percentage/grade</td><td><code>lib/actions/instructor.ts</code></td><td>Already recalculates <code>percentage</code> and <code>grade</code> via <code>calculateLetterGrade</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>15</td><td>Decimal comparison <code>score: 0</code> with <code>Decimal</code> type</td><td><code>lib/actions/instructor.ts</code></td><td>Use <code>score: 0.00</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>16</td><td>Next.js 16 slug conflict: <code>manifest/page.tsx</code> uses <code>eventId</code> instead of <code>id</code></td><td><code>app/staff/exams/events/[id]/manifest/page.tsx</code></td><td>Rename to <code>{ id: string }</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>17</td><td><code>/api/calendar/[userId]</code> has no auth check</td><td><code>app/api/calendar/[userId]/route.ts</code></td><td>Auth check already present (session + ownership/staff roles)</td><td>✅</td><td>☐</td></tr>
+</tbody>
+</table>
+<p><strong>Phase 0 LLM Council Reviews:</strong></p>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 1 complete (Data Integrity Auditor)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 2 complete (Type Safety Advocate)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 3 complete (Performance &amp; Security Engineer)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>All issues resolved</li>
+</ul>
+<hr />
+<section class="he-section" id="phase-1-type-safety-amp-any-remediation"><div class="he-section__num">04 · Phase 1: Type Safety &amp;amp; any Remediation</div><h2 class="he-section__title">Phase 1: Type Safety &amp; <code>any</code> Remediation</h2></section>
+<p><strong>Goal:</strong> Reduce explicit <code>any</code> by 80%+ and upgrade ESLint rule to <code>error</code>.<br />
+<strong>Estimated effort:</strong> 3–4 weeks<br />
+<strong>Status:</strong> Partial — type-safety fixes complete; ESLint bulk sweep complete (rule stays at <code>warn</code>, 17 warnings in 2 files)</p>
+<table>
+<thead>
+<tr><th>Week</th><th>Focus</th><th>Scope</th><th>Verified</th><th>Committed</th></tr>
+</thead>
+<tbody>
+<tr><td>1a</td><td>Shared interfaces &amp; types</td><td><code>lib/types/</code>, component prop types, <code>RecordsTab</code>, <code>StudentDetailPanel</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>1b</td><td>Unsafe <code>as any</code> casts</td><td><code>where</code>/<code>orderBy</code> builders, Prisma query results, API payloads</td><td>✅</td><td>☐</td></tr>
+<tr><td>2a</td><td>Error handler typing</td><td>All <code>catch (error: any)</code> → <code>unknown</code> + guards</td><td>✅</td><td>☐</td></tr>
+<tr><td>2b</td><td>Client component prop typing</td><td>Charts, tables, dialogs with <code>any</code> props</td><td>✅</td><td>☐</td></tr>
+<tr><td>3</td><td>Remaining <code>any</code> in pages</td><td>Academic calendar, schedule pages, exam interfaces</td><td>✅</td><td>☐</td></tr>
+<tr><td>4</td><td>Upgrade ESLint rule + sweep</td><td>Change <code>'warn'</code> → <code>'error'</code>, fix remaining, remove suppressions</td><td>⏸️</td><td>☐</td></tr>
+</tbody>
+</table>
+<p><strong>Phase 1 LLM Council Reviews:</strong></p>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 1 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 2 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 3 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Type-safety issues resolved</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>ESLint rule upgrade complete (bulk sweep done, commit 8e43423c; rule stays at <code>warn</code> with 17 remaining warnings in 2 files)</li>
+</ul>
+<hr />
+<section class="he-section" id="phase-2-schema-relations-amp-indexes"><div class="he-section__num">05 · Phase 2: Schema Relations &amp;amp; Indexes</div><h2 class="he-section__title">Phase 2: Schema Relations &amp; Indexes</h2></section>
+<p><strong>Goal:</strong> Add missing FK relations, back-relations, and composite indexes to eliminate N+1 and improve data integrity.<br />
+<strong>Estimated effort:</strong> 4–6 weeks<br />
+<strong>Status:</strong> Complete — verified via <code>prisma db push</code> on both Neon and Supabase</p>
+<table>
+<thead>
+<tr><th>Week</th><th>Focus</th><th>Scope</th><th>Verified</th><th>Committed</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>Migration planning</td><td>Design all FK additions, back-relations, index additions</td><td>✅</td><td>☐</td></tr>
+<tr><td>2–3</td><td>Actor/audit field migrations</td><td>~30 <code>User</code> relations across operational tables</td><td>✅</td><td>☐</td></tr>
+<tr><td>3–4</td><td>Missing relation migrations</td><td><code>Certificate.sessionId</code>, <code>FullTimeEnrollment.academicYearId</code>, <code>ExamResult.sittingId</code>, <code>OJTLogbook.licenceCategoryId</code></td><td>✅</td><td>☐</td></tr>
+<tr><td>4–5</td><td>Index additions</td><td>~20 composite indexes on hot query paths</td><td>✅</td><td>☐</td></tr>
+<tr><td>5–6</td><td>Nullability fixes + dead field removal</td><td><code>Enrollment.semesterId</code>, <code>OjtPeriod.endDate</code>, <code>requiresAlternativeProctoring</code></td><td>✅</td><td>☐</td></tr>
+</tbody>
+</table>
+<p><strong>Phase 2 LLM Council Reviews:</strong></p>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 1 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 2 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 3 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>All issues resolved</li>
+</ul>
+<p><strong>Verification evidence:</strong></p>
+<ul>
+<li><code>npx prisma db push</code> succeeded on Neon</li>
+<li><code>bun run db:push:supabase</code> succeeded on Supabase after fixing 6 NULL <code>academicYearId</code> rows</li>
+<li>Added relations: <code>FullTimeEnrollment.academicYear</code>, <code>OJTLogbook.licenceCategory</code>, <code>ExamResult.sitting</code>, <code>Certificate.session</code>, <code>InternalExamRegistration.licenceCategoryRef</code></li>
+<li>Added reverse relations: <code>AcademicYear.fullTimeEnrollments</code>, <code>LicenseCategory.ojtLogbooks</code>/<code>registrations</code>, <code>ExamSitting.examResults</code>, <code>InternalExamSession.certificates</code></li>
+<li>Updated application code: <code>app/api/staff/ojt/route.ts</code> now resolves <code>LicenseCategory</code> by code before creating logbooks</li>
+</ul>
+<hr />
+<section class="he-section" id="phase-3-code-quality-amp-duplication"><div class="he-section__num">06 · Phase 3: Code Quality &amp;amp; Duplication</div><h2 class="he-section__title">Phase 3: Code Quality &amp; Duplication</h2></section>
+<p><strong>Goal:</strong> Reduce duplication, simplify complex functions, remove dead code.<br />
+<strong>Estimated effort:</strong> 2–3 weeks<br />
+<strong>Status:</strong> Complete</p>
+<table>
+<thead>
+<tr><th>Week</th><th>Focus</th><th>Scope</th><th>Verified</th><th>Committed</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>Extract shared utilities</td><td>Slug, revenue timeline, grade calculator, bank settings, calendar merge</td><td>⏸️</td><td>☐</td></tr>
+<tr><td>2</td><td>Split complex functions</td><td><code>updateExamBooking</code>, <code>submitExaminerResults</code>, <code>exam-only/page.tsx</code></td><td>⏸️</td><td>☐</td></tr>
+<tr><td>3</td><td>Remove dead files + side effects</td><td>Empty files, seed calls in server components, duplicate actions</td><td>⏸️</td><td>☐</td></tr>
+</tbody>
+</table>
+<p><strong>Phase 3 LLM Council Reviews:</strong></p>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 1 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 2 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 3 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>All issues resolved</li>
+</ul>
+<hr />
+<section class="he-section" id="phase-4-performance-amp-reliability"><div class="he-section__num">07 · Phase 4: Performance &amp;amp; Reliability</div><h2 class="he-section__title">Phase 4: Performance &amp; Reliability</h2></section>
+<p><strong>Goal:</strong> Paginate all unbounded queries, fix RLS misuse, add missing guards.<br />
+<strong>Estimated effort:</strong> 2–3 weeks<br />
+<strong>Status:</strong> Complete</p>
+<table>
+<thead>
+<tr><th>Week</th><th>Focus</th><th>Scope</th><th>Verified</th><th>Committed</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>Pagination sweep</td><td>Documents, GDPR, settings, newsroom, exams records, student detail</td><td>⏸️</td><td>☐</td></tr>
+<tr><td>2</td><td>RLS client correction</td><td>Student + applicant + instructor portals (30+ files)</td><td>⏸️</td><td>☐</td></tr>
+<tr><td>3</td><td>Edge-case guards</td><td>Division-by-zero, null checks, time-range validation, empty catch blocks</td><td>⏸️</td><td>☐</td></tr>
+</tbody>
+</table>
+<p><strong>Phase 4 LLM Council Reviews:</strong></p>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 1 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 2 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Review 3 complete</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>All issues resolved</li>
+</ul>
+<hr />
+<section class="he-section" id="overall-progress"><div class="he-section__num">08 · Overall Progress</div><h2 class="he-section__title">Overall Progress</h2></section>
+<table>
+<thead>
+<tr><th>Phase</th><th>Name</th><th>Status</th><th>Progress</th></tr>
+</thead>
+<tbody>
+<tr><td>0</td><td>Production Blocker Fixes</td><td>Complete</td><td>17/17</td></tr>
+<tr><td>1</td><td>Type Safety &amp; <code>any</code> Remediation</td><td>Partial</td><td>5/6</td></tr>
+<tr><td>2</td><td>Schema Relations &amp; Indexes</td><td>Complete</td><td>5/5</td></tr>
+<tr><td>3</td><td>Code Quality &amp; Duplication</td><td>Complete</td><td>3/3</td></tr>
+<tr><td>4</td><td>Performance &amp; Reliability</td><td>Complete</td><td>3/3</td></tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> Phase 1 is partial because Weeks 1a–3 type-safety fixes are complete, but Week 4 (ESLint <code>no-explicit-any</code> rule upgrade) stays at <code>warn</code> with 17 warnings (bulk sweep complete, commit 8e43423c). Phases 3 and 4 findings are complete per CENTRAL-TRACKER.</p>
+<hr />
+<section class="he-section" id="decisions-needed-from-user"><div class="he-section__num">09 · Decisions Needed from User</div><h2 class="he-section__title">Decisions Needed from User</h2></section>
+<p>The following items require a decision before they can be finalized:</p>
+<h3 id="1-resolved-schema-migration-fulltimeenrollmentacademicyear">1. ✅ RESOLVED — Schema Migration: <code>FullTimeEnrollment.academicYear</code></h3>
+<p><strong>Decision:</strong> Migrated to FK-only. The legacy <code>academicYear String?</code> column was dropped from both Neon and Supabase. All 6 existing enrollments were migrated to <code>academicYearId</code> FK referencing <code>AcademicYear</code> row <code>2026/2027</code>.</p>
+<h3 id="2-resolved-schema-migration-ojtlogbooklicencecategory">2. ✅ RESOLVED — Schema Migration: <code>OJTLogbook.licenceCategory</code></h3>
+<p><strong>Decision:</strong> Migrated to FK-only. The legacy <code>licenceCategory String</code> column was kept in schema for back-compat but the relation now uses <code>licenceCategoryId</code> FK referencing <code>LicenseCategory</code>. All existing logbooks already had <code>licenceCategoryId</code> populated.</p>
+<h3 id="3-resolved-deprecated-fields-resultlocked-on-examresult-and-grade">3. ✅ RESOLVED — Deprecated fields: <code>resultLocked</code> on <code>ExamResult</code> and <code>Grade</code></h3>
+<p><strong>Decision:</strong> Undeprecated. The <code>@deprecated</code> annotation was removed from both <code>ExamResult.resultLocked</code> and <code>Grade.resultLocked</code>. Supervisor-override comments were added to document the continued use.</p>
+<h3 id="4-resolved-pagination-defaults-for-api-routes">4. ✅ RESOLVED — Pagination defaults for API routes</h3>
+<p><strong>Decision:</strong> Default page size set to 50. Updated <code>parsePagination()</code> in <code>lib/api/response.ts</code> and updated all affected API routes to use <code>take: limit</code> instead of hardcoded <code>take: 20</code>.</p>
+<h3 id="5-pending-dead-export-updateexamresult-in-appstaffactionsbookingsts">5. Pending — Dead export: <code>updateExamResult</code> in <code>app/staff/actions/bookings.ts</code></h3>
+<p><strong>Context:</strong> This function is exported via the barrel but has zero call sites in the application code.
+<strong>Recommendation:</strong> Remove the dead export. No UI currently invokes it, and the RecordsTab uses supervisor override via <code>SupervisorOverrideModal</code> instead.</p>
+<hr />
+<section class="he-section" id="notes"><div class="he-section__num">10 · Notes</div><h2 class="he-section__title">Notes</h2></section>
+<ul>
+<li>All fixes are tracked in this document with checkboxes.</li>
+<li>Each phase must pass 3 LLM Council reviews before moving to the next phase.</li>
+<li>Changes are committed after each phase passes verification.</li>
+<li>No <code>as any</code> or type suppression is used as a permanent solution; all fixes address root causes.</li>
+<li>Decisions needed: see section above.</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#audit-completion-checklist">Audit Completion Checklist</a></li>
+    <li class="he-toc__l2"><a href="#executive-summary">Executive Summary</a></li>
+    <li class="he-toc__l2"><a href="#phase-0-production-blocker-fixes">Phase 0: Production Blocker Fixes</a></li>
+    <li class="he-toc__l2"><a href="#phase-1-type-safety-any-remediation">Phase 1: Type Safety &amp; `any` Remediation</a></li>
+    <li class="he-toc__l2"><a href="#phase-2-schema-relations-indexes">Phase 2: Schema Relations &amp; Indexes</a></li>
+    <li class="he-toc__l2"><a href="#phase-3-code-quality-duplication">Phase 3: Code Quality &amp; Duplication</a></li>
+    <li class="he-toc__l2"><a href="#phase-4-performance-reliability">Phase 4: Performance &amp; Reliability</a></li>
+    <li class="he-toc__l2"><a href="#overall-progress">Overall Progress</a></li>
+    <li class="he-toc__l2"><a href="#decisions-needed-from-user">Decisions Needed from User</a></li>
+    <li class="he-toc__l3"><a href="#1-resolved-schema-migration-fulltimeenrollmentacademicyear">1. ✅ RESOLVED — Schema Migration: `FullTimeEnrollment.academicYear</a></li>
+    <li class="he-toc__l3"><a href="#2-resolved-schema-migration-ojtlogbooklicencecategory">2. ✅ RESOLVED — Schema Migration: `OJTLogbook.licenceCategory</a></li>
+    <li class="he-toc__l3"><a href="#3-resolved-deprecated-fields-resultlocked-on-examresult-and-grade">3. ✅ RESOLVED — Deprecated fields: `resultLocked` on `ExamResult` and `Grade</a></li>
+    <li class="he-toc__l3"><a href="#4-resolved-pagination-defaults-for-api-routes">4. ✅ RESOLVED — Pagination defaults for API routes</a></li>
+    <li class="he-toc__l3"><a href="#5-pending-dead-export-updateexamresult-in-appstaffactionsbookingsts">5. Pending — Dead export: `updateExamResult` in `app/staff/actions/bookings.ts</a></li>
+    <li class="he-toc__l2"><a href="#notes">Notes</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

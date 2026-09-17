@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 import { requireStudent } from '@/lib/auth/helpers'
 import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
@@ -15,7 +15,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const { amount, proofUrl, notes } = validation.data
   const reference = `WTU-${crypto.randomBytes(4).toString('hex').toUpperCase()}`
 
-  const payment = await prisma.payment.create({
+  const payment = await prismaUnfiltered.payment.create({
     data: {
       userId: user.id,
       paymentMethod: 'WALLET_TOP_UP',

@@ -1,0 +1,120 @@
+1. What is the most common form of matter in the universe?
+   - a) Liquid
+   - b) *Plasma*
+   - c) Solid
+2. Which state of matter is characterized by having molecules with the least motion?
+   - a) Gas
+   - b) *Solid*
+   - c) Liquid
+3. Which substance is a good example of a catalyst?
+   - a) Water
+   - b) *Two-part epoxy mix*
+   - c) Oxygen gas
+4. What happens to the boiling point of a liquid when pressure is increased?
+   - a) It decreases
+   - b) It remains the same
+   - c) *It increases*
+5. Which state of matter is compressible?
+   - a) Solid
+   - b) *Gas*
+   - c) Plasma
+6. What type of substance has molecules that are tightly bound together?
+   - a) Gas
+   - b) *Solid*
+   - c) Liquid
+7. What is the physical condition of a substance called?
+   - a) *State of matter*
+   - b) Temperature
+   - c) Chemical composition
+8. Which state of matter has the ability to conduct electricity?
+   - a) Solid
+   - b) Liquid
+   - c) *Plasma*
+9. What is the temperature at which a substance changes from a liquid to a vapor?
+   - a) Freezing point
+   - b) Melting point
+   - c) *Boiling point*
+10. What is the primary factor determining the state of matter of a substance?
+   - a) Chemical composition
+   - b) Volume
+   - c) *Degree of motion between particles*
+11. What causes surface tension in liquids?
+   - a) Increased pressure
+   - b) Decreased temperature
+   - c) *Closely packed molecules*
+12. Which state of matter contains molecules with the most energy and movement?
+   - a) Solid
+   - b) Liquid
+   - c) *Gas*
+13. What is the pressure exerted by the vapor above a liquid in a closed container called?
+   - a) Atmospheric pressure
+   - b) Surface tension
+   - c) *Vapor pressure*
+14. What happens to the boiling point of a liquid when pressure is decreased?
+   - a) It decreases
+   - b) It remains the same
+   - c) *It decreases*
+15. Which state of matter has molecules that take the shape of their container?
+   - a) Solid
+   - b) *Liquid*
+   - c) Gas
+16. What type of substance is a two-part epoxy mix?
+   - a) Catalyst
+   - b) *Catalyst*
+   - c) Inhibitor
+17. What is the temperature at which a substance changes from a vapor to a liquid?
+   - a) Melting point
+   - b) Freezing point
+   - c) *Condensation point*
+18. What is the primary state of matter of concern for aviation maintenance professionals?
+   - a) Plasma
+   - b) Gas
+   - c) *Solid*
+19. What is the physical condition of a substance related to?
+   - a) Chemical composition
+   - b) Volume
+   - c) *Degree of motion between particles*
+20. What is a substance that causes or accelerates a chemical reaction without itself being affected?
+   - a) *Catalyst*
+   - b) Inhibitor
+   - c) Reactant
+21. What is the state of matter comprised of ionized gas with positive ions and free electrons?
+   - a) Solid
+   - b) Liquid
+   - c) *Plasma*
+22. What type of substance has molecules with increased movement but still closely packed enough to create surface tension?
+   - a) Solid
+   - b) *Liquid*
+   - c) Gas
+23. What term is used to describe the temperature at which a vapor condenses into a liquid?
+   - a) Boiling point
+   - b) Freezing point
+   - c) *Condensation point*
+24. What happens to the boiling point of a liquid when pressure is increased?
+   - a) It decreases
+   - b) It remains the same
+   - c) *It increases*
+25. Which state of matter is incompressible?
+   - a) *Solid*
+   - b) Liquid
+   - c) Gas
+26. What type of substance has molecules that resist changing shape or volume?
+   - a) Liquid
+   - b) Gas
+   - c) *Solid*
+27. What causes a substance to change between states?
+   - a) Chemical composition
+   - b) Volume
+   - c) *Adding or removing energy*
+28. What is the pressure of the vapor that exists above a liquid in an enclosed container at a given temperature called?
+   - a) Atmospheric pressure
+   - b) Surface tension
+   - c) *Vapor pressure*
+29. What happens to the boiling point of a liquid when pressure is decreased?
+   - a) It decreases
+   - b) It remains the same
+   - c) *It decreases*
+30. What type of matter is sustained easily at extremely high temperatures and is the most common form of matter in the universe?
+   - a) Liquid
+   - b) Solid
+   - c) *Plasma*

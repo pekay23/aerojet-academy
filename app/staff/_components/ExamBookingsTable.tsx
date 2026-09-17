@@ -8,9 +8,7 @@ import {
   Square,
   CheckCircle2,
   XCircle,
-  Trash2,
   Calendar,
-  CreditCard,
   Edit,
   Clock,
   Trophy,
@@ -26,18 +24,18 @@ import BulkActionsDropdown from './BulkActionsDropdown'
 import SearchInput from '@/components/SearchInput'
 
 
-interface ExamBookingWithDetails {
+export interface ExamBookingWithDetails {
   id: string
-  status: any
+  status: string
   bookingType: string
-  amountPaid: any
+  amountPaid: number | string
   bookedAt: string | Date
   examDate?: string | Date | null
   moduleCode: string | null
   user: {
     email: string
     profile: { firstName: string; middleName?: string | null; lastName: string } | null
-    registrationFee?: number | string | any
+    registrationFee?: number | string
   }
   event: { name: string; startDate: string | Date } | null
   exam: {
@@ -52,9 +50,9 @@ interface ExamBookingWithDetails {
       examDate: string | Date
     }
   }>
-  score?: any
-  maxScore?: any
-  percentage?: any
+  score?: number | string | null
+  maxScore?: number | string | null
+  percentage?: number | string | null
 }
 
 interface ExamBookingsTableProps {
@@ -449,7 +447,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
               <button
                 type="submit"
                 disabled={isUpdating}
-                className="bg-aerojet-blue min-w-[140px] rounded-xl px-6 py-2.5 text-sm font-black uppercase tracking-wider text-white shadow-lg shadow-aerojet-blue/20 transition hover:bg-aerojet-blue/90 disabled:opacity-50"
+                className="bg-aerojet-blue min-w-35 rounded-xl px-6 py-2.5 text-sm font-black uppercase tracking-wider text-white shadow-lg shadow-aerojet-blue/20 transition hover:bg-aerojet-blue/90 disabled:opacity-50"
               >
                 {isUpdating ? 'Saving...' : 'Update Entry'}
               </button>

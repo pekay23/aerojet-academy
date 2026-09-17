@@ -17,15 +17,11 @@ interface TransactionHistoryProps {
   walletId?: string
 }
 
-export function TransactionHistory({ walletId }: TransactionHistoryProps) {
+export function TransactionHistory({ walletId: _walletId }: TransactionHistoryProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [page, setPage] = useState(1)
   const perPage = 10
-
-  useEffect(() => {
-    fetchTransactions()
-  }, [])
 
   const fetchTransactions = async () => {
     try {
@@ -40,6 +36,11 @@ export function TransactionHistory({ walletId }: TransactionHistoryProps) {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchTransactions()
+  }, [])
 
   const getTypeIcon = (type: string) => {
     switch (type) {

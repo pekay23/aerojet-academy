@@ -1,22 +1,22 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 
 // Minimum Part 145 experience thresholds
-const MIN_EXPERIENCE = {
+const _MIN_EXPERIENCE = {
   B1_B2: 12, // months for B1/B2
   CAT_A: 6,  // months for Cat A
 }
 
 // GET — list OJT logbooks with progress
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext) => {
   await requireStaff()
   const url = new URL(req.url)
   const status = url.searchParams.get('status')
 
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   if (status) where.status = status
 
   const logbooks = await prismaUnfiltered.oJTLogbook.findMany({
@@ -51,7 +51,7 @@ const createSchema = z.object({
   mentorId: z.string().optional(),
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext) => {
   await requireStaff()
   const body = await req.json()
   const parsed = createSchema.safeParse(body)
@@ -64,10 +64,17 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
   if (existing) return apiError('Student already has an OJT logbook', 409)
 
   const logbook = await prismaUnfiltered.$transaction(async (tx) => {
+    const licenseCategory = await tx.licenseCategory.findUnique({
+      where: { code: parsed.data.licenceCategory },
+    })
+    if (!licenseCategory) {
+      return apiError('Invalid licence category', 400)
+    }
+
     const lb = await tx.oJTLogbook.create({
       data: {
         studentProfileId: parsed.data.studentProfileId,
-        licenceCategory: parsed.data.licenceCategory,
+        licenceCategoryId: licenseCategory.id,
         facilityName: parsed.data.facilityName,
         facilityApprovalNo: parsed.data.facilityApprovalNo || null,
         startDate: new Date(parsed.data.startDate),

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Save } from 'lucide-react'
+import { FormDirtyIndicator } from '@/components/shared/FormDirtyIndicator'
 
 interface Policy {
   id: string
@@ -20,6 +21,17 @@ export default function RetentionEditor({ policies }: { policies: Policy[] }) {
   const [isPending, startTransition] = useTransition()
   const [draft, setDraft] = useState<Policy[]>(policies)
   const dirty = JSON.stringify(draft) !== JSON.stringify(policies)
+
+  // Warn before closing the tab / navigating away with unsaved edits.
+  useEffect(() => {
+    if (!dirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [dirty])
 
   const update = (id: string, patch: Partial<Policy>) => {
     setDraft((d) => d.map((p) => (p.id === id ? { ...p, ...patch } : p)))
@@ -55,6 +67,7 @@ export default function RetentionEditor({ policies }: { policies: Policy[] }) {
           className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-3 py-2 text-sm font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" /> Save changes
+          <FormDirtyIndicator isDirty={dirty} />
         </button>
       </div>
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900">

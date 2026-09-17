@@ -32,7 +32,7 @@ export async function GET(request: Request) {
       50_000
     )
 
-    let data: any[] = []
+    let data: Record<string, string | number | boolean>[] = []
     let filename = 'export.csv'
 
     if (type === 'students') {
@@ -81,10 +81,10 @@ export async function GET(request: Request) {
         Date: t.createdAt.toISOString(),
         Student:
           `${t.wallet.user.profile?.firstName || ''} ${t.wallet.user.profile?.lastName || ''}`.trim(),
-        Type: t.type,
-        Reference: t.referenceType,
-        Amount: t.amount,
-        Description: t.description,
+        Type: String(t.type),
+        Reference: t.referenceType ?? '',
+        Amount: t.amount.toNumber(),
+        Description: t.description ?? '',
       }))
       filename = 'financial_transactions.csv'
     } else if (type === 'audit-logs') {
@@ -141,8 +141,8 @@ export async function GET(request: Request) {
         'Content-Disposition': `attachment; filename="${filename}"`,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CSV_EXPORT]', error)
-    return NextResponse.json({ error: error.message || 'Failed to export data' }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to export data' }, { status: 500 })
   }
 }

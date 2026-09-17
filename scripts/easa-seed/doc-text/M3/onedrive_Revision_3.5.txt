@@ -1,0 +1,715 @@
+**Primary Cell:**
+ Which metals are commonly used for the cathode (+) terminal in primary cell batteries?
+    a) Silver and gold
+    b) Zinc and graphite
+    c) Aluminum and copper
+   **Answer: b) Zinc and graphite**
+What is the typical application of dry cell batteries?
+    a) Powering laptops
+    b) Energizing electric cars
+    c) Operating flashlights
+   **Answer: c) Operating flashlights**
+ What happens to one of the metals in a primary cell during discharge?
+    a) It evaporates.
+    b) It gets magnetized.
+    c) It gets consumed.
+   **Answer: c) It gets consumed.**
+ Why is recharging a primary cell not recommended?
+    a) It's too expensive.
+    b) It's inefficient.
+    c) It can be dangerous.
+   **Answer: c) It can be dangerous.**
+ Which primary cell types are commonly used today besides dry cells?
+    a) Carbon-zinc cells only
+    b) Alkaline batteries, silver-oxide, and lithium batteries
+    c) Nickel-cadmium cells
+   **Answer: b) Alkaline batteries, silver-oxide, and lithium batteries**
+**Secondary Cell:**
+What is the chemical composition of the positive electrode in a lead-acid battery?
+    a) Zinc
+    b) Lead peroxide
+    c) Aluminum
+   **Answer: b) Lead peroxide**
+ What electrolyte is used in a lead-acid car battery?
+    a) Water
+    b) Sulfuric acid
+    c) Saltwater
+   **Answer: b) Sulfuric acid**
+ How many volts does each cell in a lead-acid battery produce?
+    a) 1 volt
+    b) 2 volts
+    c) 6 volts
+   **Answer: b) 2 volts**
+. What are other common secondary cell chemistry types besides lead-acid?
+    a) Silver-oxide and nickel metal hydride (NiMH)
+    b) Alkaline and lithium-ion (Li-ion)
+    c) Carbon-zinc and nickel cadmium (NiCd)
+   **Answer: a) Silver-oxide and nickel metal hydride (NiMH)**
+. Which of the following is not a common secondary cell chemistry?
+    a) Nickel-cadmium (NiCd)
+    b) Lithium-ion polymer (Li-ion polymer)
+    c) Hydrogen-ion (H-ion)
+   **Answer: c) Hydrogen-ion (H-ion)**
+**Lead-Acid Batteries:**
+. What are the materials used for the negative electrode in a lead-acid battery?
+    a) Copper
+    b) Lead
+    c) Zinc
+   **Answer: b) Lead**
+. How is short-circuiting between the positive and negative plates in a lead-acid battery prevented?
+    a) By using rubber seals
+    b) By using porous separators
+    c) By using solid separators
+   **Answer: b) By using porous separators**
+. What does the vent plug in a lead-acid battery allow?
+    a) It allows gases to escape from the battery.
+    b) It allows for easy filling of the electrolyte.
+    c) It prevents overcharging.
+   **Answer: a) It allows gases to escape from the battery.**
+. How is the electrolyte strength tested in a lead-acid battery?
+    a) By measuring its temperature
+    b) By measuring its color
+    c) By using a hydrometer
+   **Answer: c) By using a hydrometer**
+. What is the primary role of separators between positive and negative plates in a lead-acid battery?
+    a) To increase voltage output
+    b) To prevent short circuits
+    c) To enhance chemical reactions
+   **Answer: b) To prevent short circuits**
+Certainly, here are 30 multiple-choice questions related to the information about batteries, along with their solutions:
+**Primary Cell:**
+1. What is the most common type of primary cell battery?
+   a) Alkaline battery
+   b) Lithium-ion battery
+   c) Dry cell
+   **Answer: c) Dry cell**
+2. How is the cathode terminal represented in a dry cell?
+   a) Metal electrode
+   b) Graphite rod
+   c) Zinc container
+   **Answer: a) Metal electrode**
+3. In a primary cell, what happens during discharge?
+   a) Reversible electrochemical reaction
+   b) Consumption of one of the metals
+   c) Accumulation of charge
+   **Answer: b) Consumption of one of the metals**
+4. Why is attempting to recharge a primary cell dangerous?
+   a) It can lead to a chemical explosion.
+   b) It can cause overheating.
+   c) It can create a short circuit.
+   **Answer: a) It can lead to a chemical explosion.**
+5. Which types of primary cells are common today?
+   a) Carbon-zinc cells
+   b) Alkaline batteries
+   c) Silver-oxide batteries
+   **Answer: b) Alkaline batteries**
+**Secondary Cell:**
+6. What distinguishes a secondary cell from a primary cell?
+   a) Secondary cells are larger.
+   b) Secondary cells have a higher voltage.
+   c) Secondary cells have a reversible electrochemical reaction.
+   **Answer: c) Secondary cells have a reversible electrochemical reaction.**
+7. What is the electrolyte in a lead-acid car battery?
+   a) Battery acid
+   b) Zinc paste
+   c) Silver oxide
+   **Answer: a) Battery acid**
+8. How many cells are typically found in a lead-acid car battery?
+   a) 2 cells
+   b) 6 cells
+   c) 12 cells
+   **Answer: b) 6 cells**
+9. Name another type of secondary cell chemistry besides lead-acid.
+   a) Carbon-zinc
+   b) Nickel cadmium (NiCd)
+   c) Silver-oxide
+   **Answer: b) Nickel cadmium (NiCd)**
+10. What is the total voltage produced by a lead-acid car battery?
+    a) 2 volts
+    b) 6 volts
+    c) 12 volts
+    **Answer: c) 12 volts**
+**Lead-Acid Batteries:**
+11. What are the components of a lead-acid battery's electrolyte?
+    a) Water and oil
+    b) Sulfuric acid and water
+    c) Sodium bicarbonate and vinegar
+    **Answer: b) Sulfuric acid and water**
+12. How is the circulation of electrolyte around the plates in a lead-acid battery ensured?
+    a) By using porous separators
+    b) By using solid separators
+    c) By using rubber seals
+    **Answer: a) By using porous separators**
+13. What is the purpose of the vent plug in a lead-acid battery?
+    a) To prevent leakage
+    b) To test electrolyte strength
+    c) To allow gases to escape
+    **Answer: c) To allow gases to escape**
+14. How is the venting of gases from a lead-acid battery managed during flight?
+    a) Through a vent tube connected to the battery drain sump
+    b) By sealing the battery completely
+    c) By increasing the battery pressure
+    **Answer: a) Through a vent tube connected to the battery drain sump**
+15. What role does the acid-resisting metal container (battery box) play in a lead-acid battery?
+    a) It holds the electrolyte.
+    b) It shields against electricity.
+    c) It protects against mechanical damage.
+    **Answer: c) It protects against mechanical damage.**
+16. How are individual cells of the battery connected in a lead-acid battery?
+    a) Through chemical bonds
+    b) By heavy gage metal straps
+    c) By insulating materials
+    **Answer: b) By heavy gage metal straps**
+17. What happens to the specific gravity of the electrolyte after discharge in a lead-acid battery?
+    a) It remains the same.
+    b) It increases.
+    c) It decreases.
+    **Answer: c) It decreases.**
+18. What is the function of the lead weight in the vent plug of a lead-acid battery?
+    a) To increase the battery's weight
+    b) To block the vent hole during inverted flight
+    c) To enhance the battery's performance
+    **Answer: b) To block the vent hole during inverted flight.**
+19. What is the purpose of the non-spill vent cap on a lead-acid battery?
+    a) To prevent gases from escaping
+    b) To allow for electrolyte refilling
+    c) To prevent leakage during handling
+    **Answer: c) To prevent leakage during handling.**
+20. How does a quick disconnect assembly facilitate battery installation and removal in aircraft?
+    a) It allows for easy recharging of the battery.
+    b) It simplifies the electrical connections.
+    c) It reduces the battery's weight.
+    **Answer: b) It simplifies the electrical connections.**
+21. What voltage does each lead-acid cell typically produce?
+    a) 2 volts
+    b) 6 volts
+    c) 12 volts
+    **Answer: a) 2 volts**
+22. How is the voltage required for a specific application achieved using lead-acid cells?
+    a) By connecting cells in parallel
+    b) By connecting cells in series
+    c) By varying the electrolyte strength
+    **Answer: b) By connecting cells in series.**
+23. Why are lead-acid batteries used in aircraft similar to those in automobiles?
+    a) Because aircraft and automobiles use the same power sources
+    b) Because aircraft batteries are designed for use in automobiles
+    c) Because lead-acid batteries are versatile and readily available
+    **Answer: c) Because lead-acid batteries are versatile and readily available.**
+Here are 30 multiple-choice questions related to the information about battery ratings, battery life cycles, and lead-acid battery testing methods, along with their solutions:
+**Battery Ratings:**
+1. How is the voltage of a battery determined?
+   a) By the type of metal used in the cells
+   b) By the number of cells connected in series
+   c) By the size of the battery case
+   **Answer: b) By the number of cells connected in series**
+2. What is the typical voltage rating of a lead-acid cell?
+   a) 2.2 volts
+   b) 2 volts
+   c) 3 volts
+   **Answer: b) 2 volts**
+3. How many lead-acid cells are connected in series to create a 12-volt battery?
+   a) 3 cells
+   b) 6 cells
+   c) 12 cells
+   **Answer: b) 6 cells**
+4. What is the most common rating used to measure battery capacity?
+   a) Voltage rating
+   b) Amp-hour rating
+   c) Wattage rating
+   **Answer: b) Amp-hour rating**
+5. What does a battery with a capacity of 1 amp-hour mean?
+   a) It can supply 1 ampere for 1 hour.
+   b) It can supply 2 amperes for 1 hour.
+   c) It can supply 1 ampere for 2 hours.
+   **Answer: a) It can supply 1 ampere for 1 hour.**
+**Battery Life Cycle:**
+6. How is the life cycle of a battery defined?
+   a) The number of times it can be charged
+   b) The number of complete charge/discharge cycles before capacity falls below 80%
+   c) The time it takes to fully discharge the battery
+   **Answer: b) The number of complete charge/discharge cycles before capacity falls below 80%**
+7. What can cause the deterioration of a battery and shorten its service life?
+   a) Overcharging
+   b) Rapid discharging
+   c) Over-discharging and rapid charging or discharging
+   **Answer: c) Over-discharging and rapid charging or discharging**
+8. What happens to a battery's efficiency with heavy discharge current?
+   a) It increases
+   b) It remains the same
+   c) It decreases
+   **Answer: c) It decreases**
+9. Under what conditions is a 5-hour discharge time used for rating battery capacity?
+   a) In actual service conditions
+   b) During charging
+   c) For the basis of rating
+   **Answer: c) For the basis of rating**
+10. How does connecting batteries in parallel affect amp-hour capacity?
+    a) Increases it
+    b) Decreases it
+    c) Has no effect on it
+    **Answer: a) Increases it**
+**Lead-Acid Battery Testing Methods:**
+11. What is used to check the state of charge of a battery?
+    a) Voltage
+    b) Hydrometer
+    c) Ammeter
+    **Answer: b) Hydrometer**
+12. What does a hydrometer measure in the electrolyte of a battery?
+    a) Temperature
+    b) Voltage
+    c) Specific gravity
+    **Answer: c) Specific gravity**
+13. How does the specific gravity of the electrolyte change during discharge?
+    a) It becomes denser
+    b) It remains the same
+    c) It becomes less dense
+    **Answer: c) It becomes less dense**
+14. What specific gravity reading indicates a high state of charge?
+    a) 1.100 to 1.200
+    b) 1.200 to 1.240
+    c) 1.275 to 1.300
+    **Answer: c) 1.275 to 1.300**
+15. When is it recommended to take hydrometer readings in relation to adding distilled water?
+    a) After adding distilled water
+    b) Before adding distilled water
+    c) It doesn't matter when
+    **Answer: b) Before adding distilled water**
+16. What should be done if sulfuric acid comes in contact with the skin?
+    a) Wash with water and apply bicarbonate of soda
+    b) Leave it alone; it will evaporate
+    c) Apply oil or grease to neutralize it
+    **Answer: a) Wash with water and apply bicarbonate of soda**
+Certainly, here are more multiple-choice questions related to the information about battery ratings, battery life cycles, and lead-acid battery testing methods, along with their solutions:
+**Battery Ratings:**
+17. What is the typical voltage rating of a 24-volt battery composed of lead-acid cells connected in series?
+    a) 12 volts
+    b) 24 volts
+    c) 48 volts
+    **Answer: b) 24 volts**
+18. Which factor determines the amp-hour capacity of a battery?
+    a) The size of the battery case
+    b) The rate of discharge
+    c) The total effective plate area
+    **Answer: c) The total effective plate area**
+19. How does connecting batteries in series affect voltage?
+    a) Increases it
+    b) Decreases it
+    c) Has no effect on it
+    **Answer: a) Increases it**
+20. In an aircraft battery, what does a low state of charge indicate?
+    a) Less than 20% capacity remaining
+    b) An immediate need for recharging
+    c) Sufficient charge for normal operation
+    **Answer: b) An immediate need for recharging**
+**Lead-Acid Battery Testing Methods:**
+21. What does a hydrometer measure in the electrolyte of a battery?
+    a) Temperature
+    b) Voltage
+    c) Specific gravity
+    **Answer: c) Specific gravity**
+22. What specific gravity reading indicates a low state of charge?
+    a) 1.300 to 1.275
+    b) 1.240 to 1.200
+    c) Below 1.200
+    **Answer: b) 1.240 to 1.200**
+23. When should you take hydrometer readings if distilled water has been added recently?
+    a) Before adding distilled water
+    b) After adding distilled water
+    c) It doesn't matter when
+    **Answer: b) After adding distilled water**
+24. How does temperature affect hydrometer readings?
+    a) It has no effect on readings
+    b) It can cause hydrometer damage
+    c) Correction factors must be applied
+    **Answer: c) Correction factors must be applied**
+25. What should you do if the electrolyte in a cell has additives other than distilled water?
+    a) Conduct the hydrometer test as usual
+    b) Avoid conducting the hydrometer test
+    c) Consult the manufacturer for specific gravity values
+    **Answer: b) Avoid conducting the hydrometer test**
+26. Why is it important to handle the electrolyte in lead-acid cells with care?
+    a) To prevent it from evaporating
+    b) To avoid contamination
+    c) To increase its density
+    **Answer: b) To avoid contamination**
+Certainly! Here are 20 multiple-choice questions related to the information about lead-acid battery charging methods, along with their solutions:
+1. What is the primary purpose of passing direct current through a storage battery in the opposite direction of discharge current?
+   a) To increase internal resistance
+   b) To discharge the battery
+   c) To charge the battery
+   **Answer: c) To charge the battery**
+2. Why does the external charging source voltage need to be greater than the open circuit voltage of a lead-acid battery?
+   a) To reduce the internal resistance
+   b) To prevent overcharging
+   c) To overcome the voltage drop caused by internal resistance
+   **Answer: c) To overcome the voltage drop caused by internal resistance**
+3. What happens to the internal resistance of a battery over time?
+   a) It decreases
+   b) It remains constant
+   c) It increases
+   **Answer: c) It increases**
+4. Which charging method requires a longer time to fully charge a battery and presents the danger of overcharging?
+   a) Constant voltage method
+   b) Constant current method
+   c) Both methods take the same amount of time
+   **Answer: b) Constant current method**
+5. What is generated by a storage battery during the charging process and requires precautions to prevent ignition?
+   a) Carbon dioxide
+   b) Nitrogen
+   c) Hydrogen and oxygen
+   **Answer: c) Hydrogen and oxygen**
+6. What precaution should be taken when connecting or disconnecting a battery to the charge?
+   a) Leave the vent caps open
+   b) Ensure open flames are present
+   c) Turn off the power by means of a remote switch
+   **Answer: c) Turn off the power by means of a remote switch**
+7. In lead-acid batteries, what causes the internal resistance to increase over time?
+   a) Charging at higher voltages
+   b) Conversion of active material to lead sulfate
+   c) Use of a voltage regulator
+   **Answer: b) Conversion of active material to lead sulfate**
+8. Which method of charging a lead-acid battery is characterized by a high initial current that tapers off as the battery becomes fully charged?
+   a) Constant voltage method
+   b) Constant current method
+   c) Variable voltage method
+   **Answer: a) Constant voltage method**
+9. What is the danger associated with the constant current method of charging a battery?
+   a) Over-discharging
+   b) Overheating of the plates
+   c) Voltage drop in the external circuit
+   **Answer: b) Overheating of the plates**
+10. How is the specific gravity of the electrolyte in a lead-acid cell measured?
+    a) Using a voltmeter
+    b) Using a hydrometer
+    c) Using an ammeter
+    **Answer: b) Using a hydrometer**
+11. When should hydrometer readings be taken for a lead-acid battery?
+    a) After adding distilled water
+    b) Before adding distilled water
+    c) During the charging process
+    **Answer: b) Before adding distilled water**
+12. What is the purpose of adding distilled water to a lead-acid battery?
+    a) To increase the specific gravity
+    b) To decrease the internal resistance
+    c) To replace evaporated water
+    **Answer: c) To replace evaporated water**
+13. Why is it important to consider the temperature when using a hydrometer to measure specific gravity?
+    a) Temperature affects the battery's color
+    b) Temperature affects the battery's voltage
+    c) Temperature affects the hydrometer readings
+    **Answer: c) Temperature affects the hydrometer readings**
+14. What precautions should be taken when handling the electrolyte in a lead-acid battery?
+    a) Wear gloves and safety goggles
+    b) Use a voltmeter to check acidity
+    c) Heat the electrolyte to reduce resistance
+    **Answer: a) Wear gloves and safety goggles**
+15. What precautions should be taken to prevent ignition of the hydrogen and oxygen mixture generated during battery charging?
+    a) Tighten the vent caps
+    b) Use open flames for illumination
+    c) Avoid open flames and sparks in the vicinity
+    **Answer: c) Avoid open flames and sparks in the vicinity**
+16. How is the voltage of an external charging source adjusted to charge a lead-acid battery?
+    a) By increasing the internal resistance
+    b) By using a voltage regulator
+    c) By decreasing the charging current
+    **Answer: b) By using a voltage regulator**
+17. What is the purpose of the vent caps on a lead-acid battery during the charging process?
+    a) To release excess oxygen
+    b) To prevent overcharging
+    c) To allow gases to escape safely
+    **Answer: c) To allow gases to escape safely**
+18. Which method of charging a lead-acid battery is more commonly used in aircraft charging systems?
+    a) Constant voltage method
+    b) Constant current method
+    c) Variable voltage method
+    **Answer: a) Constant voltage method**
+19. When should the power be turned off by means of a remote switch when working with a battery?
+    a) After connecting the battery to the charge
+    b) Before connecting the battery to the charge
+    c) During the charging process
+    **Answer: b) Before connecting the battery to the charge**
+20. What is the primary danger associated with overcharging a lead-acid battery?
+    a) Decreased internal resistance
+    b) Increased specific gravity
+    c) Thermal runaway and potential battery damage
+    **Answer: c) Thermal runaway and potential battery damage**
+1. What are the active materials in nickel-cadmium cells?
+   a) Nickel and hydrogen
+   b) Nickel hydrate and sponge cadmium
+   c) Cadmium oxide and potassium hydroxide
+   **Answer: b) Nickel hydrate and sponge cadmium**
+2. What is the electrolyte used in nickel-cadmium cells?
+   a) Sulfuric acid
+   b) Potassium hydroxide (KOH)
+   c) Distilled water
+   **Answer: b) Potassium hydroxide (KOH)**
+3. What is the typical open circuit voltage of a nickel-cadmium battery cell?
+   a) 1.5 volts
+   b) 1.0 volt
+   c) 1.25 volts
+   **Answer: c) 1.25 volts**
+4. What happens to the negative plates of a nickel-cadmium battery during the charging process?
+   a) They gain oxygen
+   b) They lose oxygen and form metallic cadmium
+   c) They remain unchanged
+   **Answer: b) They lose oxygen and form metallic cadmium**
+5. What causes gassing in nickel-cadmium cells during charging?
+   a) Formation of metallic nickel
+   b) Decomposition of the electrolyte into hydrogen and oxygen
+   c) Overcharging of the positive plates
+   **Answer: b) Decomposition of the electrolyte into hydrogen and oxygen**
+6. When is it appropriate to add water to a nickel-cadmium battery?
+   a) During discharge
+   b) After the cells emit gas
+   c) Only when the battery is fully charged
+   **Answer: c) Only when the battery is fully charged**
+7. What is the result of the chemical action in a nickel-cadmium battery during discharge?
+   a) Conversion of electrical energy into chemical energy
+   b) Conversion of oxygen into hydrogen
+   c) Conversion of chemical energy into electrical energy
+   **Answer: c) Conversion of chemical energy into electrical energy**
+8. What type of battery is typically interchangeable with a nickel-cadmium battery?
+   a) Alkaline battery
+   b) Lead-acid battery
+   c) Lithium-ion battery
+   **Answer: b) Lead-acid battery**
+9. In what condition should the battery compartment be when replacing a lead acid battery with a nickel-cadmium battery?
+   a) Wet and filled with acid
+   b) Dry, clean, and free of acid residues
+   c) Painted with sulfuric acid-resistant varnish
+   **Answer: b) Dry, clean, and free of acid residues**
+10. In extended standby applications, which type of battery is often preferred over nickel-cadmium batteries?
+    a) Nickel-cadmium (Ni-Cad)
+    b) Lead-acid
+    c) Alkaline
+    **Answer: b) Lead-acid**
+11. What should be done to the battery sump jar pad before connecting the battery vent system?
+    a) Soak it in distilled water
+    b) Saturate it with a boric acid and water solution
+    c) Replace it with a new pad
+    **Answer: b) Saturate it with a boric acid and water solution**
+12. Which element is found in the charged positive plate (Anode) of a nickel-cadmium cell?
+    a) Nickel
+    b) Cadmium
+    c) Hydrogen
+    **Answer: a) Nickel**
+13. What is the electrolyte solution used in nickel-cadmium cells composed of?
+    a) Pure KOH in distilled water
+    b) Sulfuric acid and distilled water
+    c) Cadmium-hydroxide in potassium solution
+    **Answer: a) Pure KOH in distilled water**
+14. Which type of nickel-cadmium cells are suited for very high-rate charge and discharge service?
+    a) Pocket plate cells
+    b) Thin sintered plate cells
+    c) Sintered nickel matrices cells
+    **Answer: b) Thin sintered plate cells**
+15. What is the purpose of the porous plate grid structure in sintered nickel-cadmium cells?
+    a) To reduce internal resistance
+    b) To increase the weight of the battery
+    c) To provide mechanical strength
+    **Answer: a) To reduce internal resistance**
+16. What causes the emission of gas in nickel-cadmium cells during charging or overcharging?
+    a) Formation of metallic nickel
+    b) Decomposition of the water in the electrolyte
+    c) Conversion of hydrogen into oxygen
+    **Answer: b) Decomposition of the water in the electrolyte**
+17. During discharge, what happens to the electrolyte level in a nickel-cadmium battery?
+    a) It remains constant
+    b) It decreases significantly
+    c) It increases
+    **Answer: c) It increases**
+18. What should be added to a battery compartment after cleaning it when replacing a lead acid battery with a nickel-cadmium battery?
+    a) Sulfuric acid
+    b) Alkaline solution
+    c) Alkali resisting varnish
+    **Answer: c) Alkali resisting varnish**
+19. In what type of applications do sealed lead acid (SLA) batteries perform well as compared to Ni-Cad batteries?
+    a) Low voltage, full-discharge, high-cycle applications
+    b) Extended standby applications
+    c) Applications with high charging currents
+    **Answer: b) Extended standby applications**
+20. What is the primary characteristic of Ni-Cad batteries in terms of their performance in low voltage, full-discharge, high-cycle applications?
+    a) They perform poorly
+    b) They perform exceptionally well
+    c) Their performance is similar to SLA batteries
+    **Answer: b) They perform exceptionally well**
+Certainly! Here are 35 multiple-choice questions related to the topics of battery maintenance, safety precautions, thermocouples, and photo-cells, along with their solutions (a-c):
+**Battery Maintenance and Safety Precautions:**
+1. What is the purpose of hydrating cells in nickel-cadmium (Ni-Cad) batteries?
+   a) To increase their voltage
+   b) To supply water lost during overcharging
+   c) To reduce internal resistance
+   **Answer: b) To supply water lost during overcharging**
+2. Why is it important to maintain inter-cell connectors at proper torque values in Ni-Cad batteries?
+   a) To increase battery capacity
+   b) To prevent cell reversal
+   c) To reduce electrolyte spillage
+   **Answer: b) To prevent cell reversal**
+3. How should you clean cell tops and exposed sides of Ni-Cad batteries to avoid grounding paths?
+   a) Use a damp cloth
+   b) Use a potassium hydroxide solution
+   c) Use distilled water and dry them
+   **Answer: c) Use distilled water and dry them**
+4. What is the purpose of wearing safety goggles, plastic gloves, and an apron when handling Ni-Cad batteries?
+   a) To prevent the battery from overheating
+   b) To protect the eyes, skin, and clothes from caustic electrolyte
+   c) To enhance battery performance
+   **Answer: b) To protect the eyes, skin, and clothes from caustic electrolyte**
+5. Under what conditions do explosive mixtures of hydrogen and oxygen develop in Ni-Cad cells?
+   a) During discharge
+   b) During normal charging
+   c) During overcharging
+   **Answer: c) During overcharging**
+6. What is the maximum allowable hydrogen concentration in the air in areas with Ni-Cad batteries to prevent explosions?
+   a) One percent by volume
+   b) Two percent by volume
+   c) Four percent by volume
+   **Answer: a) One percent by volume**
+7. Why is cell matching important when servicing Ni-Cad batteries?
+   a) To increase battery capacity
+   b) To prevent unbalance and cell reversal
+   c) To reduce the risk of voltage depression
+   **Answer: b) To prevent unbalance and cell reversal**
+8. What is the term for the undesirable characteristic in Ni-Cad batteries caused by constant overcharge and infrequent discharges?
+   a) Voltage depression
+   b) Memory effect
+   c) Cell reversal
+   **Answer: a) Voltage depression**
+9. How often should Ni-Cad batteries typically undergo deep cycle maintenance?
+   a) Monthly
+   b) Annually
+   c) As needed
+   **Answer: b) Annually**
+10. What type of batteries are inherently matched and do not require cell matching?
+    a) Nickel-cadmium (Ni-Cad) batteries
+    b) Lead-acid batteries
+    c) Sealed lead acid (SLA) batteries
+    **Answer: c) Sealed lead acid (SLA) batteries**
+**Thermocouples:**
+11. What is a thermocouple?
+    a) A type of battery
+    b) A circuit of two like metals
+    c) A connection of two unlike metals
+    **Answer: c) A connection of two unlike metals**
+12. How does a thermocouple measure temperature?
+    a) By measuring electrical resistance
+    b) By generating an electromotive force (EMF)
+    c) By detecting changes in voltage
+    **Answer: b) By generating an electromotive force (EMF)**
+13. What happens when a photon strikes a semiconductor atom in a photo-cell?
+    a) It raises the energy level of the atom
+    b) It decreases the energy level of the atom
+    c) It has no effect on the atom
+    **Answer: a) It raises the energy level of the atom**
+14. What type of energy is carried by photons in light?
+    a) Electrical energy
+    b) Electromagnetic energy
+    c) Thermal energy
+    **Answer: b) Electromagnetic energy**
+15. How is the amount of energy in a photon related to its frequency?
+    a) Higher frequency photons have less energy
+    b) Higher frequency photons have more energy
+    c) Frequency and energy are not related
+    **Answer: b) Higher frequency photons have more energy**
+16. What is the primary application of thermocouples in aviation?
+    a) Fire detection systems
+    b) Radio communication
+    c) Navigation systems
+    **Answer: a) Fire detection systems**
+17. What type of temperature is typically measured using a thermocouple in aviation?
+    a) Ambient temperature
+    b) Cylinder head temperature (CHT)
+    c) Altitude temperature
+    **Answer: b) Cylinder head temperature (CHT)**
+18. What materials are commonly used for thermocouple junctions in EGT (Exhaust Gas Temperature) measurement?
+    a) Iron and aluminum
+    b) Chromel and alumel
+    c) Copper and constantan
+    **Answer: b) Chromel and alumel**
+19. What does the voltage produced by thermocouples measure in millivolts?
+    a) Temperature
+    b) Pressure
+    c) Humidity
+    **Answer: a) Temperature**
+20. How does a thermocouple alarm system work in fire detection applications?
+    a) It measures changes in resistance
+    b) It detects changes in voltage
+    c) It senses changes in temperature and triggers an alarm
+    **Answer: c) It senses changes in temperature and triggers an alarm**
+**Photo-cells:**
+21. What type of energy does light contain?
+    a) Thermal energy
+    b) Electromagnetic energy
+    c) Chemical energy
+    **Answer: b) Electromagnetic energy**
+22. What happens when a photon strikes a semiconductor atom in a photo-cell?
+    a) It increases the atom's resistance
+    b) It decreases the atom's conductivity
+    c) It raises the atom's energy level
+    **Answer: c) It raises the atom's energy level**
+23. What is the effect of a photon striking a semiconductor atom on its energy level?
+    a) It decreases the energy level
+    b) It raises the energy level
+    c) It has no effect on the energy level
+    **Answer: b) It raises the energy level**
+24. What type of electricity is generated when photons strike a semiconductor in a photo-cell?
+    a) Direct current (DC)
+    b) Alternating current (AC)
+    c) Photovoltaic current (PC)
+    **Answer: a) Direct current (DC)**
+25. Where are photo-cells commonly used in aviation?
+    a) In fire detection systems
+    b) In navigation lights
+    c) In flight control systems
+    **Answer: b) In navigation lights**
+26. What kind of control do photo-cells provide in aviation applications?
+    a) Temperature control
+    b) Light control
+    c) Pressure control
+    **Answer: b) Light control**
+27. What does a photo-cell detect and respond to?
+    a) Changes in temperature
+    b) Changes in light intensity
+    c) Changes in humidity
+    **
+Answer: b) Changes in light intensity**
+28. In photo-cells, what type of energy does light carry?
+    a) Electrical energy
+    b) Electromagnetic energy
+    c) Chemical energy
+    **Answer: b) Electromagnetic energy**
+29. What is the main purpose of a photo-cell in electronics?
+    a) To convert light into sound
+    b) To convert light into electrical energy
+    c) To convert electrical energy into light
+    **Answer: b) To convert light into electrical energy**
+30. How are photo-cells commonly used for the electronic control of mechanical systems?
+    a) To measure temperature
+    b) To detect changes in light
+    c) To regulate air pressure
+    **Answer: b) To detect changes in light**
+31. What does a thermocouple consist of?
+    a) A circuit of two like metals
+    b) A connection of two unlike metals
+    c) A circuit of two identical metals
+    **Answer: b) A connection of two unlike metals**
+32. In a thermocouple, where is one of the junctions typically placed for temperature monitoring?
+    a) In a flight deck instrument
+    b) In a remote location
+    c) In a sealed container
+    **Answer: b) In a remote location**
+33. How does a thermocouple generate an electromotive force (EMF)?
+    a) By increasing resistance in the circuit
+    b) By raising the temperature at the junctions
+    c) By maintaining a constant temperature difference
+    **Answer: b) By raising the temperature at the junctions**
+34. What does the voltage generated by a thermocouple directly correlate with?
+    a) Voltage supplied by the power source
+    b) Temperature at the "hot junction"
+    c) Resistance in the circuit
+    **Answer: b) Temperature at the "hot junction"**
+35. What application does thermocouples have in aviation?
+    a) Detecting changes in light intensity
+    b) Monitoring changes in humidity
+    c) Measuring high temperatures
+    **Answer: c) Measuring high temperatures**

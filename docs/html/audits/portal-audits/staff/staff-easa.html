@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Staff Portal — EASA 147/145 Compliance Audit · Aerojet Academy</title>
+<link rel="stylesheet" href="../../../design-tokens.css">
+<link rel="stylesheet" href="../../../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Staff Portal — EASA 147/145 Compliance Audit</h1>
+  <p class="he-deck">Date: 2026-08-27 Auditor: EASA Compliance Auditor Agent…</p>
+</header>
+<section class="he-section" id="executive-summary"><div class="he-section__num">01 · Executive Summary</div><h2 class="he-section__title">Executive Summary</h2></section>
+<p>The Aerojet Academy Staff portal contains a partially mature EASA compliance substrate: attendance tracking enforces a configurable 80% threshold, exam scheduling includes sophisticated conflict detection and demand analytics, and certificate release logic encodes pathway-specific rules. However, critical regulatory gaps remain in OJT/Part-145 experience tracking (no staff-facing review workflow), practical assessment management (no dedicated UI despite a complete schema), certificate expiration and renewal tracking, and formal compliance reporting for aviation authority submission.</p>
+<section class="he-section" id="findings"><div class="he-section__num">02 · Findings</div><h2 class="he-section__title">Findings</h2></section>
+<h3 id="attendance-tracking-part-147">Attendance Tracking (Part-147)</h3>
+<h4 id="no-part-147-session-type-distinction">No Part-147 Session-Type Distinction</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/attendance/_components/AttendanceManager.tsx</code></li>
+<li><strong>Lines</strong>: 16-24, 125-126</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: Attendance statuses are generic (PRESENT, ABSENT, LATE, EXCUSED). Part-147 training requires differentiation between theoretical knowledge instruction, practical training, and simulator sessions, each with distinct minimum attendance requirements. The current UI calculates a single attendance rate without weighting by session type.</li>
+<li><strong>Recommendation</strong>: Add a <code>sessionType</code> field (THEORY / PRACTICAL / SIMULATOR) to the <code>AttendanceRecord</code> model and AttendanceManager UI. Enforce per-module thresholds in <code>lib/attendance.ts</code> rather than a single global rate.</li>
+<li><strong>Code Reference</strong>: <code>lib/attendance.ts:68</code> — <code>const percentage = Math.round((attendedCount / total) * 100)</code> computes a flat rate with no session-type weighting.</li>
+</ul>
+<h4 id="missing-module-level-attendance-compliance-reporting">Missing Module-Level Attendance Compliance Reporting</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/reports/attendance/page.tsx</code></li>
+<li><strong>Lines</strong>: 1-5</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: The attendance report page redirects to <code>/staff/reports?tab=attendance</code>, which shows aggregate metrics only. Part-147 requires per-module attendance evidence to demonstrate individual student compliance with training programme requirements.</li>
+<li><strong>Recommendation</strong>: Build a per-student, per-module attendance compliance report that flags students below threshold by module, with export capability (CSV/PDF) for authority audits.</li>
+<li><strong>Code Reference</strong>: <code>app/staff/reports/page.tsx:712-847</code> — <code>AttendanceTab</code> shows only aggregate charts and a flat recent-history table.</li>
+</ul>
+<h4 id="attendance-api-lacks-module-filtering">Attendance API Lacks Module Filtering</h4>
+<ul>
+<li><strong>File</strong>: <code>app/api/staff/attendance/route.ts</code></li>
+<li><strong>Lines</strong>: 24-88</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: The GET endpoint filters by <code>classId</code> and <code>date</code> only. There is no way to query attendance for a specific module or course across classes, which is required for Part-147 compliance verification.</li>
+<li><strong>Recommendation</strong>: Add <code>courseId</code> and <code>moduleCode</code> query parameters to the attendance API.</li>
+<li><strong>Code Reference</strong>: <code>app/api/staff/attendance/route.ts:32-37</code> — <code>where</code> clause only supports <code>classId</code> and <code>date</code>.</li>
+</ul>
+<hr />
+<h3 id="ojt-experience-tracking-part-145">OJT / Experience Tracking (Part-145)</h3>
+<h4 id="no-staff-facing-ojt-logbook-review-or-approval-workflow">No Staff-Facing OJT Logbook Review or Approval Workflow</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/users/[id]/_components/OjtSection.tsx</code></li>
+<li><strong>Lines</strong>: 33-307</li>
+<li><strong>Severity</strong>: Critical</li>
+<li><strong>Type</strong>: Bug</li>
+<li><strong>Description</strong>: <code>OjtSection</code> is a read-only display plus status-toggle for OJT periods. Staff can change status (PENDING/ACTIVE/COMPLETED/FAILED) but cannot review, approve, or edit <code>OJTLogbookEntry</code> records. The <code>OJTLogbookEntry</code> schema includes <code>supervisorSignature</code>, <code>studentSignature</code>, <code>verifiedByManagement</code>, and <code>competencyRating</code> — none of which have staff-facing management interfaces.</li>
+<li><strong>Recommendation</strong>: Create <code>app/staff/ojt/</code> with pages for logbook review, entry approval, competency rating, and mentor assignment management. Wire audit logging for all Part-145 experience approvals.</li>
+<li><strong>Code Reference</strong>: <code>prisma/schema.prisma:2163-2196</code> — <code>OJTLogbookEntry</code> defines full Part-145 evidence fields but no staff UI exists to manage them.</li>
+</ul>
+<h4 id="missing-part-145-facility-and-mentor-tracking-ui">Missing Part-145 Facility and Mentor Tracking UI</h4>
+<ul>
+<li><strong>File</strong>: <code>prisma/schema.prisma</code></li>
+<li><strong>Lines</strong>: 2199-2236</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: The <code>OJTLogbook</code> model stores <code>facilityName</code>, <code>facilityApprovalNo</code>, and <code>OJTMentorAssignment</code> links, but there is no staff interface to verify facility approvals, assign/revoke mentors, or track mentor-to-student ratios per EASA 145.147 requirements.</li>
+<li><strong>Recommendation</strong>: Add facility approval verification and mentor assignment management under the OJT section. Display <code>facilityApprovalNo</code> and mentor credentials for inspector review.</li>
+<li><strong>Code Reference</strong>: <code>prisma/schema.prisma:2203-2204</code> — <code>facilityName</code> and <code>facilityApprovalNo</code> exist in the model but have no staff-facing validation UI.</li>
+</ul>
+<h4 id="no-ojt-api-route">No OJT API Route</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/users/[id]/_components/OjtSection.tsx</code></li>
+<li><strong>Lines</strong>: 72-93, 96-112</li>
+<li><strong>Severity</strong>: Critical</li>
+<li><strong>Type</strong>: Bug</li>
+<li><strong>Description</strong>: The component calls <code>POST /api/staff/students/${userId}/ojt</code> and <code>PATCH /api/staff/students/${userId}/ojt</code>, but these routes do not exist in the codebase. OJT status updates and creation will fail at runtime.</li>
+<li><strong>Recommendation</strong>: Implement the missing API routes with proper validation, RLS, and audit logging.</li>
+<li><strong>Code Reference</strong>: <code>app/staff/users/[id]/_components/OjtSection.tsx:72</code> — <code>fetch(</code>/api/staff/students/${userId}/ojt<code>, ...)</code> with no matching route file.</li>
+</ul>
+<hr />
+<h3 id="exam-management">Exam Management</h3>
+<h4 id="no-easa-exam-session-manifest-for-authority-review">No EASA Exam Session Manifest for Authority Review</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/exams/events/[id]/page.tsx</code></li>
+<li><strong>Lines</strong>: 293-336</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: The exam event detail page shows sittings and assignments but does not generate a regulatory manifest (candidate list, examiner credentials, venue, session times, attendance outcomes) required for EASA 147 examination oversight.</li>
+<li><strong>Recommendation</strong>: Add a &quot;Generate Authority Manifest&quot; button that produces a timestamped PDF/CSV containing all candidates, their attendance status, scores, examiner name and signature, and venue details per sitting.</li>
+<li><strong>Code Reference</strong>: <code>app/staff/exams/events/[id]/page.tsx:293-336</code> — sittings are listed with <code>_count.assignments</code> but no exportable manifest.</li>
+</ul>
+<h4 id="question-bank-changes-lack-immutable-audit-trail">Question Bank Changes Lack Immutable Audit Trail</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/exams/internal/_components/ExamBankManager.tsx</code></li>
+<li><strong>Lines</strong>: 1-239</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: The ExamBankManager shows pool health and pending questions but does not track who added, modified, or retired questions. EASA 147 requires question bank integrity controls.</li>
+<li><strong>Recommendation</strong>: Add versioning and immutable change logs for exam questions and bank metadata. Include reviewer, timestamp, and diff in the audit trail.</li>
+<li><strong>Code Reference</strong>: <code>app/staff/exams/internal/_components/ExamBankManager.tsx:45-55</code> — <code>fetchBanks</code> loads current state only; no history is queried or displayed.</li>
+</ul>
+<h4 id="exam-result-editing-without-integrity-check">Exam Result Editing Without Integrity Check</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/actions.ts</code></li>
+<li><strong>Lines</strong>: 297-529</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Bug</li>
+<li><strong>Description</strong>: <code>updateExamBooking</code> allows staff to edit exam scores, results, and categories with only a generic <code>UPDATE</code> audit log. There is no immutability flag, no two-person verification, and no prevention of result alteration after certificate issuance. This undermines result integrity for EASA compliance.</li>
+<li><strong>Recommendation</strong>: Freeze <code>ExamResult</code> records once a certificate is issued. Add a <code>resultLocked</code> boolean and require supervisor override for post-lock edits. Enrich audit log with before/after diff.</li>
+<li><strong>Code Reference</strong>: <code>app/staff/actions.ts:372-401</code> — booking updates allow unrestricted score/result mutation.</li>
+</ul>
+<hr />
+<h3 id="certificate-management">Certificate Management</h3>
+<h4 id="no-certificate-expiration-or-renewal-tracking">No Certificate Expiration or Renewal Tracking</h4>
+<ul>
+<li><strong>File</strong>: <code>prisma/schema.prisma</code></li>
+<li><strong>Lines</strong>: 2454-2474</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>StudentDocument</code> has an <code>expiresAt</code> field, but there is no staff-facing expiration dashboard, no renewal reminders, and no workflow to trigger re-issuance. EASA certificates and ratings have mandatory validity periods.</li>
+<li><strong>Recommendation</strong>: Build a certificate expiration tracker under <code>app/staff/certificates/</code> that lists documents approaching expiry, automates reminder notifications, and initiates renewal workflows.</li>
+<li><strong>Code Reference</strong>: <code>prisma/schema.prisma:2463</code> — <code>expiresAt DateTime?</code> exists but is not surfaced in any staff report.</li>
+</ul>
+<h4 id="rating-license-expiration-not-modeled">Rating / License Expiration Not Modeled</h4>
+<ul>
+<li><strong>File</strong>: <code>prisma/schema.prisma</code></li>
+<li><strong>Lines</strong>: 338-347</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>StudentLicenseTarget</code> links students to <code>LicenseCategory</code> but stores no expiration date, validity period, or rating class details. EASA 147/145 requires tracking of license ratings, type ratings, and their expiry for both training and maintenance staff.</li>
+<li><strong>Recommendation</strong>: Extend <code>StudentLicenseTarget</code> (or create a <code>LicenseInstance</code> model) with <code>issuedAt</code>, <code>expiresAt</code>, <code>issuingAuthority</code>, and <code>ratingCode</code>. Add a staff dashboard for rating status and renewal.</li>
+<li><strong>Code Reference</strong>: <code>prisma/schema.prisma:338-347</code> — <code>StudentLicenseTarget</code> is a minimal join table with no temporal or validity fields.</li>
+</ul>
+<h4 id="certificate-release-override-lacks-supervisor-authorization">Certificate Release Override Lacks Supervisor Authorization</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/actions.ts</code></li>
+<li><strong>Lines</strong>: 967-1015</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>setCertificateRelease</code> allows any staff member to force-release certificates. There is no role check beyond <code>requireStaff()</code>, no secondary authorization, and no justification field in the audit log for the override reason.</li>
+<li><strong>Recommendation</strong>: Restrict force-release to ADMIN/SUPER_ADMIN roles. Add an override justification field and require it for audit completeness.</li>
+<li><strong>Code Reference</strong>: <code>app/staff/actions.ts:972</code> — <code>await requireStaff()</code> is the only gate.</li>
+</ul>
+<hr />
+<h3 id="practical-assessments">Practical Assessments</h3>
+<h4 id="no-staff-facing-practical-assessment-management">No Staff-Facing Practical Assessment Management</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/students/[id]/_components/StudentDetailTabs.tsx</code></li>
+<li><strong>Lines</strong>: 15-22</li>
+<li><strong>Severity</strong>: Critical</li>
+<li><strong>Type</strong>: Bug</li>
+<li><strong>Description</strong>: The student detail tabs include Profile, Journey, Exams, Wallet, Academic, and Admin Notes — but no Practical Training tab. The <code>PracticalTrainingRecord</code> model exists with <code>instructorId</code>, <code>assessorId</code>, <code>result</code>, <code>signedByInstructor</code>, <code>signedByStudent</code>, and <code>ataChapterId</code>, yet there is no staff UI to create, review, or approve practical assessments.</li>
+<li><strong>Recommendation</strong>: Add a Practical Assessments tab to <code>StudentDetailTabs</code> and build <code>app/staff/practical/</code> pages for assessment scheduling, evidence upload, dual-sign-off, and ATA-chapter task tracking.</li>
+<li><strong>Code Reference</strong>: <code>app/staff/students/[id]/_components/StudentDetailTabs.tsx:15-22</code> — <code>TABS</code> array omits practical assessments entirely.</li>
+</ul>
+<h4 id="practical-assessment-result-cannot-be-amended-after-sign-off">Practical Assessment Result Cannot Be Amended After Sign-Off</h4>
+<ul>
+<li><strong>File</strong>: <code>prisma/schema.prisma</code></li>
+<li><strong>Lines</strong>: 2238-2269</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>PracticalTrainingRecord</code> has <code>signedByInstructor</code> and <code>signedByStudent</code> booleans but no <code>lockedAt</code> or <code>lockedBy</code> fields. Once signed, there is no technical prevention against later modification, which compromises assessment integrity.</li>
+<li><strong>Recommendation</strong>: Add <code>lockedAt</code> / <code>lockedBy</code> fields and enforce immutability in the API layer once both signatures are recorded.</li>
+<li><strong>Code Reference</strong>: <code>prisma/schema.prisma:2255-2257</code> — signature booleans exist without a lock mechanism.</li>
+</ul>
+<hr />
+<h3 id="scheduling">Scheduling</h3>
+<h4 id="no-instructor-availability-validation-in-class-creation">No Instructor Availability Validation in Class Creation</h4>
+<ul>
+<li><strong>File</strong>: <code>lib/scheduling/conflicts.ts</code></li>
+<li><strong>Lines</strong>: 29-127</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>findConflicts</code> detects overlaps after they exist but does not check instructor availability windows (e.g., declared unavailability, maximum daily instructional hours per EASA 147). Staff can double-book instructors across classes.</li>
+<li><strong>Recommendation</strong>: Integrate <code>StaffAvailability</code> slots into conflict detection. Block class creation when an instructor has no availability window for the proposed time slot.</li>
+<li><strong>Code Reference</strong>: <code>lib/scheduling/conflicts.ts:34-61</code> — queries <code>Class</code> records only; no join to instructor availability.</li>
+</ul>
+<h4 id="recurrence-expansion-does-not-respect-maxdailyhours">Recurrence Expansion Does Not Respect maxDailyHours</h4>
+<ul>
+<li><strong>File</strong>: <code>lib/scheduling/recurrence.ts</code></li>
+<li><strong>Lines</strong>: 60-120</li>
+<li><strong>Severity</strong>: Low</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>expandClass</code> generates occurrences for recurring classes but does not validate that total instructional hours per day stay within EASA 147 limits (typically 8 hours theory, fewer for practical).</li>
+<li><strong>Recommendation</strong>: Add a daily-hours cap check in <code>expandClass</code> or in the class creation/update action.</li>
+<li><strong>Code Reference</strong>: <code>lib/scheduling/recurrence.ts:93-118</code> — the while loop emits every allowed day occurrence without duration validation.</li>
+</ul>
+<hr />
+<h3 id="reporting">Reporting</h3>
+<h4 id="no-easa-compliance-report-export">No EASA Compliance Report Export</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/reports/page.tsx</code></li>
+<li><strong>Lines</strong>: 1-1128+</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: The reports dashboard provides operational analytics (enrollment, revenue, attendance, exams) but no EASA-specific compliance report. There is no export to PDF/CSV formatted for Part-147/145 authority submission.</li>
+<li><strong>Recommendation</strong>: Add a &quot;Compliance Reports&quot; section generating: (1) Part-147 training completion report per student/module, (2) Part-145 OJT experience logbook summary, (3) exam session manifest, (4) certificate/rating status register.</li>
+<li><strong>Code Reference</strong>: <code>app/staff/reports/page.tsx:55-270</code> — OverviewTab shows only operational KPIs with no compliance framing.</li>
+</ul>
+<h4 id="no-attendance-compliance-report-per-student">No Attendance Compliance Report per Student</h4>
+<ul>
+<li><strong>File</strong>: <code>app/api/staff/attendance/summary/route.ts</code></li>
+<li><strong>Lines</strong>: 11-69</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: The summary endpoint returns per-class attendance rates and cumulative training hours toward 2,400h, but it does not flag students who are non-compliant with Part-147 module attendance requirements or identify those at risk of failing the programme.</li>
+<li><strong>Recommendation</strong>: Add a <code>complianceStatus</code> field (COMPLIANT / AT_RISK / NON_COMPLIANT) and include it in the response.</li>
+<li><strong>Code Reference</strong>: <code>app/api/staff/attendance/summary/route.ts:37-45</code> — <code>belowThreshold</code> is computed but not returned as a structured compliance status.</li>
+</ul>
+<hr />
+<h3 id="data-integrity">Data Integrity</h3>
+<h4 id="exam-results-can-be-deleted-without-trace">Exam Results Can Be Deleted Without Trace</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/actions.ts</code></li>
+<li><strong>Lines</strong>: 731-762</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Bug</li>
+<li><strong>Description</strong>: <code>deleteExamRecord</code> hard-deletes <code>ExamResult</code> or <code>ExamBooking</code> rows. For EASA compliance, exam results must be immutable once issued; deletion destroys the evidence chain.</li>
+<li><strong>Recommendation</strong>: Replace hard delete with a soft-delete flag (<code>deletedAt</code>) and require ADMIN+ role. Never allow deletion of issued results; only allow supersession via a new record with a reference to the original.</li>
+<li><strong>Code Reference</strong>: <code>app/staff/actions.ts:741-745</code> — <code>prismaUnfiltered.examResult.delete()</code> and <code>prismaUnfiltered.examBooking.delete()</code>.</li>
+</ul>
+<h4 id="audit-log-does-not-capture-ip-or-user-agent-consistently">Audit Log Does Not Capture IP or User-Agent Consistently</h4>
+<ul>
+<li><strong>File</strong>: <code>lib/audit/logger.ts</code></li>
+<li><strong>Lines</strong>: 39-60</li>
+<li><strong>Severity</strong>: Low</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>logAuditEvent</code> accepts <code>ipAddress</code> and <code>userAgent</code> but most callers (including <code>updateExamBooking</code>, <code>createExamRecord</code>, <code>setCertificateRelease</code>) do not pass them. Regulatory audits require provenance metadata.</li>
+<li><strong>Recommendation</strong>: Update all audit log callers in <code>app/staff/actions.ts</code> to pass <code>ipAddress</code> and <code>userAgent</code> from the request context.</li>
+<li><strong>Code Reference</strong>: <code>app/staff/actions.ts:505-522</code> — <code>createAuditLog</code> is called without IP/UA fields.</li>
+</ul>
+<section class="he-section" id="appendix"><div class="he-section__num">03 · Appendix</div><h2 class="he-section__title">Appendix</h2></section>
+<h3 id="files-audited">Files Audited</h3>
+<ul>
+<li><code>app/staff/attendance/page.tsx</code></li>
+<li><code>app/staff/attendance/_components/AttendanceManager.tsx</code></li>
+<li><code>app/staff/users/[id]/_components/OjtSection.tsx</code></li>
+<li><code>app/staff/students/[id]/_components/CertificateReleaseControl.tsx</code></li>
+<li><code>app/staff/students/[id]/_components/ExamsTab.tsx</code></li>
+<li><code>app/staff/students/[id]/_components/StudentDetailTabs.tsx</code></li>
+<li><code>app/staff/students/[id]/page.tsx</code></li>
+<li><code>app/staff/users/[id]/page.tsx</code></li>
+<li><code>app/staff/exams/internal/_components/ExamBankManager.tsx</code></li>
+<li><code>app/staff/exams/internal/page.tsx</code></li>
+<li><code>app/staff/exams/events/[id]/page.tsx</code></li>
+<li><code>app/staff/reports/page.tsx</code></li>
+<li><code>app/staff/reports/attendance/page.tsx</code></li>
+<li><code>app/staff/timetable/conflicts/page.tsx</code></li>
+<li><code>app/staff/actions.ts</code></li>
+<li><code>app/api/staff/attendance/route.ts</code></li>
+<li><code>app/api/staff/attendance/summary/route.ts</code></li>
+<li><code>lib/attendance.ts</code></li>
+<li><code>lib/exams/attendance.ts</code></li>
+<li><code>lib/exams/scheduler.ts</code></li>
+<li><code>lib/scheduling/recurrence.ts</code></li>
+<li><code>lib/scheduling/conflicts.ts</code></li>
+<li><code>lib/certificates/eligibility.ts</code></li>
+<li><code>lib/audit/logger.ts</code></li>
+<li><code>prisma/schema.prisma</code> (models: AttendanceRecord, OJTLogbook, OJTLogbookEntry, OJTMentorAssignment, PracticalTrainingRecord, ExamAttendance, ExamResult, ExamBooking, ExamSitting, ExamEvent, StudentDocument, StudentLicenseTarget, Maintenance145Transfer, Class, Classroom)</li>
+</ul>
+<h3 id="total-findings">Total Findings</h3>
+<ul>
+<li>Critical: 3</li>
+<li>High: 6</li>
+<li>Medium: 7</li>
+<li>Low: 2</li>
+<li>No Action Needed: 0</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#executive-summary">Executive Summary</a></li>
+    <li class="he-toc__l2"><a href="#findings">Findings</a></li>
+    <li class="he-toc__l3"><a href="#attendance-tracking-part-147">Attendance Tracking (Part-147)</a></li>
+    <li class="he-toc__l3"><a href="#ojt-experience-tracking-part-145">OJT / Experience Tracking (Part-145)</a></li>
+    <li class="he-toc__l3"><a href="#exam-management">Exam Management</a></li>
+    <li class="he-toc__l3"><a href="#certificate-management">Certificate Management</a></li>
+    <li class="he-toc__l3"><a href="#practical-assessments">Practical Assessments</a></li>
+    <li class="he-toc__l3"><a href="#scheduling">Scheduling</a></li>
+    <li class="he-toc__l3"><a href="#reporting">Reporting</a></li>
+    <li class="he-toc__l3"><a href="#data-integrity">Data Integrity</a></li>
+    <li class="he-toc__l2"><a href="#appendix">Appendix</a></li>
+    <li class="he-toc__l3"><a href="#files-audited">Files Audited</a></li>
+    <li class="he-toc__l3"><a href="#total-findings">Total Findings</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

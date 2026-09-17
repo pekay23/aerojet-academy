@@ -31,8 +31,8 @@ export default function MROPage() {
               >
                 Accra MRO Project
               </a>{' '}
-              is a flagship initiative by Aerojet Aviation to position Ghana
-              as the primary aviation technical hub for the West African sub-region.
+              is a flagship initiative by Aerojet Aviation to position Ghana as the primary aviation
+              technical hub for the West African sub-region.
             </p>
             <p className="leading-relaxed text-slate-500">
               Currently, a significant percentage of heavy aircraft maintenance for regional

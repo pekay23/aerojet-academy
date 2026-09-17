@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Award, FileText } from 'lucide-react'
 import { toast } from 'sonner'
-import { setCertificateRelease } from '@/app/staff/actions'
+import { setCertificateRelease } from '@/app/staff/actions/index'
 
 interface Props {
   studentId: string
@@ -22,17 +22,23 @@ export default function CertificateReleaseControl({
 }: Props) {
   const [certs, setCerts] = useState(initialCertificatesReleased)
   const [docs, setDocs] = useState(initialDocumentsReleased)
+  const [justification, setJustification] = useState('')
   const [isPending, startTransition] = useTransition()
 
   const isFT4Y = pathwayCode === 'FULL_TIME_4Y'
   const isScholarship = fundingSource === 'SCHOLARSHIP'
 
   const save = (next: { certificatesReleased?: boolean; documentsReleased?: boolean }) => {
+    if (next.certificatesReleased === true || next.documentsReleased === true) {
+      if (!justification.trim()) {
+        toast.error('Override justification is required for certificate/document release.')
+        return
+      }
+    }
     startTransition(async () => {
-      const res = await setCertificateRelease(studentId, next)
+      const res = await setCertificateRelease(studentId, { ...next, overrideJustification: justification })
       if (res.error) {
         toast.error(res.error)
-        // revert optimistic state
         setCerts(initialCertificatesReleased)
         setDocs(initialDocumentsReleased)
       } else {
@@ -53,6 +59,16 @@ export default function CertificateReleaseControl({
             ? '4-year programme — EASA exam certificates release after the first half; remaining documents after OJT. Toggle to release earlier.'
             : 'Force-release controls. Certificates normally release automatically once the Academy uploads them.'}
       </p>
+      <div className="mb-4">
+        <label className="mb-1 block text-xs font-bold uppercase text-slate-500">Override Justification</label>
+        <textarea
+          value={justification}
+          onChange={(e) => setJustification(e.target.value)}
+          rows={2}
+          placeholder="Required when releasing certificates/documents..."
+          className="w-full rounded-lg border border-slate-200 p-2 text-sm focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20"
+        />
+      </div>
       <div className="flex flex-wrap gap-4">
         <label className="flex items-center gap-2 text-sm">
           <input

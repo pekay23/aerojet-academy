@@ -9,7 +9,7 @@ import {
   Calendar,
   Loader2,
   Check,
-  ChevronsUpDown,
+  ChevronsUpDown as _ChevronsUpDown,
 } from 'lucide-react'
 
 type AcademicYear = {
@@ -61,7 +61,11 @@ export default function BatchEnrollForm({
   const toggleStudent = (id: string) => {
     setSelectedStudentIds((prev) => {
       const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
       return next
     })
   }
@@ -69,7 +73,11 @@ export default function BatchEnrollForm({
   const toggleCourse = (id: string) => {
     setSelectedCourseIds((prev) => {
       const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
       return next
     })
   }
@@ -126,7 +134,7 @@ export default function BatchEnrollForm({
       }
 
       setResult({ created: data.created, skipped: data.skipped })
-    } catch (err) {
+    } catch (_err) {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)

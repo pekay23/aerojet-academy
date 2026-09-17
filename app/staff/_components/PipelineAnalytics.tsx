@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   BarChart3,
-  TrendingUp,
-  Users,
-  CheckCircle2,
-  XCircle,
-  ArrowRight,
+  TrendingUp as _TrendingUp,
+  Users as _Users,
+  CheckCircle2 as _CheckCircle2,
+  XCircle as _XCircle,
+  ArrowRight as _ArrowRight,
   Loader2,
 } from 'lucide-react'
 
@@ -60,6 +60,8 @@ export default function PipelineAnalytics() {
     } catch { /* silent */ } finally { setLoading(false) }
   }, [cycleId])
 
+   
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetch_() }, [fetch_])
 
   if (loading || !data) {

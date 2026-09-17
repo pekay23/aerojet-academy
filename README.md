@@ -8,6 +8,8 @@ EASA Part-66 Aviation Maintenance Training Portal — a multi-portal web applica
 - **Applicant** — Registration, course purchase, payment upload
 - **Student** — Dashboard, wallet, exam pools, grades, certificates
 - **Instructor** — Classes, attendance, grading, schedule
+- **Examiner** — Exam administration, results, question bank
+- **Examiner** — Exam administration, results, question bank
 
 ## 📂 Documentation
 
@@ -16,7 +18,8 @@ All docs live under [`docs/`](./docs/) — start with the [docs index](./docs/RE
 ### Key resources
 - **[Handover guide](./docs/guides/handover.md)** — start here for a new developer
 - **[Architecture overview](./docs/architecture/system-overview.md)** + [database detail](./docs/architecture/database-detail.md) + [security model](./docs/architecture/security-model.md)
-- **[Latest audit](./docs/audits/2026-05-20-comprehensive.md)** — consolidated finding-by-finding cross-check (CRITICAL/HIGH all resolved)
+- **[Latest audit](./docs/audits/2026-05-21-final-audit.md)** — consolidated finding-by-finding cross-check (CRITICAL/HIGH all resolved)
+- **[Compliance register](./docs/compliance/security-data-protection.md)** — ISO/IEC 27001 & Ghana Act 843 control mapping
 - **[Known issues](./docs/audits/known-issues.md)** · **[Future roadmap](./docs/plans/future-plans.md)**
 
 ## Tech Stack
@@ -24,12 +27,13 @@ All docs live under [`docs/`](./docs/) — start with the [docs index](./docs/RE
 - **Framework:** Next.js 16 (App Router) · React 19
 - **Language:** TypeScript
 - **Database:** PostgreSQL (**Neon** - Primary, **Supabase** - Redundant Backup) + Prisma ORM
-- **Auth:** NextAuth.js v4
+- **Auth:** NextAuth.js v4 + passkeys (WebAuthn) + TOTP 2FA
 - **UI:** Tailwind CSS + shadcn/ui + Radix
 - **Email:** Resend
-- **Files:** UploadThing
-- **Payments:** Manual (bank transfer) + Stripe (future)
-- **Testing:** Vitest
+- **Files:** UploadThing (primary) + Supabase Storage (mirror/replica)
+- **Payments:** Manual (bank transfer) + Stripe (future, deferred)
+- **Testing:** Vitest (unit/component) · Playwright (E2E) · Storybook (visual)
+- **Storybook:** `bun run storybook` (port 6006)
 
 ## Getting Started
 
