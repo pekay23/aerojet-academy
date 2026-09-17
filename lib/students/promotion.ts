@@ -8,13 +8,13 @@ import type { EnrollmentType } from '@prisma/client'
  */
 export async function promoteToStudent(
   userId: string,
-  enrollmentType: EnrollmentType = 'MODULAR'
+  _enrollmentType: EnrollmentType = 'MODULAR'
 ): Promise<PromotionResult> {
   try {
     const result = await promoteApplicantToStudent(userId, userId)
     return { success: true, studentId: result.studentId }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[PROMOTION ERROR]', err)
-    return { success: false, error: err.message }
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
   }
 }

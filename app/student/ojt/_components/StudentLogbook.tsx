@@ -16,6 +16,7 @@ import {
   Pen,
 } from 'lucide-react'
 import { LogbookPreview } from '@/components/shared/LogbookPreview'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface Entry {
   id: string
@@ -76,6 +77,7 @@ export default function StudentLogbook({ data }: { data: LogbookData }) {
   const router = useRouter()
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null)
   const [signing, setSigning] = useState<string | null>(null)
+  const { items, requestSort, sortConfig } = useSort(data.entries, { key: 'date', order: 'desc' })
 
   const handleSign = async (entryId: string) => {
     setSigning(entryId)
@@ -189,36 +191,81 @@ export default function StudentLogbook({ data }: { data: LogbookData }) {
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
             <tr>
-              <th className="px-4 py-3 font-medium">Date</th>
-              <th className="px-4 py-3 font-medium">Aircraft</th>
-              <th className="px-4 py-3 font-medium">ATA</th>
-              <th className="px-4 py-3 font-medium">Task</th>
-              <th className="px-4 py-3 font-medium">Type</th>
-              <th className="px-4 py-3 font-medium">Hours</th>
-              <th className="px-4 py-3 font-medium">Signed</th>
+              <SortHeader
+                label="Date"
+                sortKey="date"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                align="right"
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="Aircraft"
+                sortKey="aircraftType"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="ATA"
+                sortKey="ataChapter.code"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="Task"
+                sortKey="taskDescription"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="Type"
+                sortKey="maintenanceType"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="Hours"
+                sortKey="durationHours"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                align="right"
+                className="px-4 py-3 font-medium"
+              />
+              <SortHeader
+                label="Signed"
+                sortKey="supervisorSignature"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                align="center"
+                className="px-4 py-3 font-medium"
+              />
               <th className="w-10 px-4 py-3"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-            {data.entries.length === 0 ? (
+            {items.length === 0 ? (
               <tr>
                 <td colSpan={8} className="py-12 text-center text-slate-500">
                   No logbook entries yet. Your supervisor will add entries as you complete tasks.
                 </td>
               </tr>
             ) : (
-              data.entries.map((entry) => (
+              items.map((entry) => (
                 <>
                   <tr
                     key={entry.id}
                     onClick={() => setExpandedEntry(expandedEntry === entry.id ? null : entry.id)}
                     className="cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
                   >
-                    <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">
-                      {format(new Date(entry.date), 'dd MMM yyyy')}
+                    <td className="px-4 py-3 text-right font-medium text-slate-700 tabular-nums dark:text-slate-300">
+                      {format(new Date(entry.date), 'MMM d, yyyy')}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-bold text-slate-800 dark:text-white">
+                      <div className="truncate font-bold text-slate-800 dark:text-white">
                         {entry.aircraftType}
                       </div>
                       <div className="text-xs text-slate-500">{entry.aircraftRegistration}</div>
@@ -238,11 +285,11 @@ export default function StudentLogbook({ data }: { data: LogbookData }) {
                         {entry.maintenanceType.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-bold text-slate-800 dark:text-white">
+                    <td className="px-4 py-3 text-right font-bold text-slate-800 tabular-nums dark:text-white">
                       {entry.durationHours}h
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-1">
                         {entry.supervisorSignature ? (
                           <CheckCircle2 className="h-4 w-4 text-green-500" />
                         ) : (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useState } from 'react'
 import { AlertTriangle, Users, UserX, Box, ShieldAlert } from 'lucide-react'
 
 type ConflictType = 'CANDIDATE_OVERLAP' | 'EXAMINER_OVERLAP' | 'SPARE_CAPACITY' | 'UNSCHEDULED_GUARANTEED'
@@ -34,6 +34,7 @@ export default function SchedulingWarningsPanel({ eventId }: { eventId: string }
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     setError(null)
     fetch(`/api/staff/exam-sittings/conflicts?eventId=${eventId}`)

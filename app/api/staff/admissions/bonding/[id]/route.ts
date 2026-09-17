@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
 import { BondingStatus } from '@prisma/client'
@@ -23,9 +23,9 @@ const updateSchema = z.object({
   endDate: z.string().datetime().optional().nullable(),
 })
 
-export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
+export const GET = withErrorHandler(async (_req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = ctx.params
+  const { id } = (await ctx!.params) as { id: string }
 
   const contract = await prismaUnfiltered.bondingContract.findUnique({
     where: { id },
@@ -54,9 +54,9 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
   return apiSuccess(contract)
 })
 
-export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const PUT = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   const staff = await requireStaff()
-  const { id } = ctx.params
+  const { id } = (await ctx!.params) as { id: string }
 
   const body = await req.json()
   const parsed = updateSchema.safeParse(body)

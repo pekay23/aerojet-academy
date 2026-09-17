@@ -13,10 +13,25 @@ interface DashboardAlert {
   count?: number
 }
 
-const SEVERITY_STYLE: Record<DashboardAlert['severity'], { bg: string; text: string; Icon: React.ComponentType<any> }> = {
-  CRITICAL: { bg: 'bg-red-50 dark:bg-red-900/20', text: 'text-red-700 dark:text-red-300', Icon: AlertOctagon },
-  WARNING: { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300', Icon: AlertTriangle },
-  INFO: { bg: 'bg-indigo-50 dark:bg-indigo-900/20', text: 'text-indigo-700 dark:text-indigo-300', Icon: Info },
+const SEVERITY_STYLE: Record<
+  DashboardAlert['severity'],
+  { bg: string; text: string; Icon: React.ComponentType<{ className?: string }> }
+> = {
+  CRITICAL: {
+    bg: 'bg-red-50 dark:bg-red-900/20',
+    text: 'text-red-700 dark:text-red-300',
+    Icon: AlertOctagon,
+  },
+  WARNING: {
+    bg: 'bg-amber-50 dark:bg-amber-900/20',
+    text: 'text-amber-700 dark:text-amber-300',
+    Icon: AlertTriangle,
+  },
+  INFO: {
+    bg: 'bg-indigo-50 dark:bg-indigo-900/20',
+    text: 'text-indigo-700 dark:text-indigo-300',
+    Icon: Info,
+  },
 }
 
 /**
@@ -30,6 +45,8 @@ export default function AlertsCenter({ initialAlerts }: { initialAlerts: Dashboa
   const router = useRouter()
 
   // Keep state in sync when the server re-fetches.
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setAlerts(initialAlerts), [initialAlerts])
 
   useEffect(() => {
@@ -41,7 +58,7 @@ export default function AlertsCenter({ initialAlerts }: { initialAlerts: Dashboa
 
   if (alerts.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/60 p-4 text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
+      <div className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/60 p-4 text-center text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
         🎉 No active alerts.
       </div>
     )
@@ -56,14 +73,14 @@ export default function AlertsCenter({ initialAlerts }: { initialAlerts: Dashboa
           <Wrapper
             key={a.id}
             {...(a.href ? { href: a.href } : {})}
-            className={`flex items-start gap-3 rounded-2xl border border-slate-100 p-4 dark:border-slate-800 ${bg} ${a.href ? 'cursor-pointer hover:shadow-sm' : ''}`}
+            className={`flex items-center justify-center gap-3 rounded-2xl border border-slate-100 p-4 dark:border-slate-800 ${bg} ${a.href ? 'cursor-pointer hover:shadow-sm' : ''}`}
           >
-            <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${text}`} />
-            <div className="flex-1">
+            <Icon className={`h-5 w-5 shrink-0 ${text}`} />
+            <div className="text-center">
               <p className={`text-sm font-bold ${text}`}>{a.title}</p>
               <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-300">{a.description}</p>
             </div>
-            {a.href && <ArrowRight className={`mt-1 h-4 w-4 ${text}`} />}
+            {a.href && <ArrowRight className={`h-4 w-4 ${text}`} />}
           </Wrapper>
         )
       })}

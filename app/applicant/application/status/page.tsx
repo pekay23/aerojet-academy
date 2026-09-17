@@ -1,17 +1,12 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import {
-  CheckCircle2,
-  Clock,
-  User,
-  CreditCard,
-  ShieldCheck,
-} from 'lucide-react'
+import { CheckCircle2, User, CreditCard, ShieldCheck } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
+import { formatDateLong } from '@/lib/utils/date'
 import {
   isPipelineEnabled,
   getPipelineStageConfig,
@@ -22,8 +17,9 @@ import {
   getMilestoneStages,
   getActiveStagesForConfig,
 } from '@/lib/admissions/constants'
-import type { ApplicationStage } from '@prisma/client'
+import type { ApplicationStage as _ApplicationStage } from '@prisma/client'
 import PipelineTracker from './_components/PipelineTracker'
+import { PageTransition } from '@/components/shared/PageTransition'
 
 export const metadata: Metadata = { title: 'Application Status | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -52,7 +48,7 @@ export default async function ApplicationStatusPage() {
 
   // Fetch user + application data in parallel with the pipeline feature flag
   const [applicant, pipelineEnabled] = await Promise.all([
-    prisma.user.findUnique({
+    prismaUnfiltered.user.findUnique({
       where: { id: userId },
       select: {
         registrationPaid: true,
@@ -117,15 +113,18 @@ export default async function ApplicationStatusPage() {
     const progress = calculateProgress(application.stage, activeStages)
 
     // Build a serializable stage info map for the client component
-    const stageInfoMap: Record<string, {
-      label: string
-      shortLabel: string
-      description: string
-      color: string
-      textColor: string
-      applicantInstruction: string
-      group: string
-    }> = {}
+    const stageInfoMap: Record<
+      string,
+      {
+        label: string
+        shortLabel: string
+        description: string
+        color: string
+        textColor: string
+        applicantInstruction: string
+        group: string
+      }
+    > = {}
 
     for (const [stage, info] of Object.entries(STAGE_INFO)) {
       stageInfoMap[stage] = {
@@ -143,7 +142,9 @@ export default async function ApplicationStatusPage() {
       <PipelineTracker
         currentStage={application.stage}
         previousStage={application.previousStage}
-        programmeLabel={PROGRAMME_LABELS[application.programmeChoice] ?? application.programmeChoice}
+        programmeLabel={
+          PROGRAMME_LABELS[application.programmeChoice] ?? application.programmeChoice
+        }
         registrationCode={applicant.registrationCode}
         rejectionReason={application.rejectionReason}
         progress={progress}
@@ -169,7 +170,7 @@ export default async function ApplicationStatusPage() {
   const steps = [
     {
       label: 'Account Created',
-      description: `Registered on ${applicant.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+      description: `Registered on ${formatDateLong(applicant.createdAt)}`,
       done: true,
       icon: User,
     },
@@ -187,7 +188,7 @@ export default async function ApplicationStatusPage() {
     {
       label: 'Payment Verified',
       description: paymentVerified
-        ? `Verified on ${applicant.paymentApprovedAt?.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) ?? 'N/A'}`
+        ? `Verified on ${formatDateLong(applicant.paymentApprovedAt) ?? 'N/A'}`
         : 'Pending admissions review.',
       done: paymentVerified,
       icon: CheckCircle2,
@@ -205,9 +206,9 @@ export default async function ApplicationStatusPage() {
   ]
 
   return (
-    <div className="max-w-7xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <PageTransition className="max-w-7xl space-y-8">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Application Status
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -217,9 +218,9 @@ export default async function ApplicationStatusPage() {
 
       {/* Application Reference */}
       {applicant.registrationCode && (
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-aerojet-blue p-6 text-white">
+        <div className="bg-aerojet-blue flex flex-wrap items-center justify-between gap-4 rounded-2xl p-6 text-white">
           <div>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/60">
+            <p className="mb-1 text-xs font-semibold tracking-widest text-white/60 uppercase">
               Registration Code
             </p>
             <p className="font-mono text-2xl font-black tracking-widest">
@@ -227,7 +228,7 @@ export default async function ApplicationStatusPage() {
             </p>
           </div>
           <div className="text-right">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/60">
+            <p className="mb-1 text-xs font-semibold tracking-widest text-white/60 uppercase">
               Status
             </p>
             <span
@@ -258,7 +259,7 @@ export default async function ApplicationStatusPage() {
       )}
 
       {/* Timeline */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
         <h2 className="mb-6 font-bold text-slate-900 dark:text-slate-100">Application Progress</h2>
         <ol className="relative ml-3 space-y-8 border-l border-slate-200 dark:border-slate-700">
           {steps.map((step, i) => {
@@ -278,11 +279,13 @@ export default async function ApplicationStatusPage() {
                   >
                     {step.label}
                   </h3>
-                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{step.description}</p>
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    {step.description}
+                  </p>
                   {step.action && (
                     <Link
                       href={step.action.href}
-                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-aerojet-blue underline underline-offset-2 hover:text-aerojet-sky"
+                      className="text-aerojet-blue hover:text-aerojet-sky mt-2 inline-flex items-center gap-1.5 text-xs font-bold underline underline-offset-2"
                     >
                       <CreditCard className="h-3.5 w-3.5" />
                       {step.action.label}
@@ -296,12 +299,12 @@ export default async function ApplicationStatusPage() {
       </div>
 
       {/* Personal Details Summary */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="font-bold text-slate-900 dark:text-slate-100">Personal Details</h2>
           <Link
             href="/applicant/profile"
-            className="text-xs font-bold text-aerojet-blue hover:underline"
+            className="text-aerojet-blue text-xs font-bold hover:underline"
           >
             Edit Profile
           </Link>
@@ -322,7 +325,7 @@ export default async function ApplicationStatusPage() {
           ].map(({ label, value }) => (
             <div key={label} className="flex items-start gap-3">
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <dt className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
                   {label}
                 </dt>
                 <dd className="mt-0.5 font-medium text-slate-700 dark:text-slate-300">{value}</dd>
@@ -331,6 +334,6 @@ export default async function ApplicationStatusPage() {
           ))}
         </dl>
       </div>
-    </div>
+    </PageTransition>
   )
 }

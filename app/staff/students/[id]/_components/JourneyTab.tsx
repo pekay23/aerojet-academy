@@ -1,6 +1,10 @@
 'use client'
 
 import { useMemo } from 'react'
+import type {
+  SerializedExamResult,
+  SerializedStudent,
+} from '@/lib/types/staff'
 import {
   UserPlus,
   CreditCard,
@@ -70,7 +74,7 @@ interface TimelineEvent {
   date: Date
   title: string
   description: string
-  icon: React.ElementType
+  icon: React.ComponentType<{ className?: string }>
   color: 'blue' | 'green' | 'amber' | 'red' | 'purple' | 'slate' | 'emerald' | 'sky'
   category: 'account' | 'payment' | 'enrollment' | 'exam' | 'wallet' | 'milestone'
   metadata?: Record<string, string>
@@ -137,7 +141,7 @@ const COLOR_MAP = {
 
 // ─── Component ──────────────────────────────────────────────────
 interface Props {
-  student: any
+  student: SerializedStudent
 }
 
 export default function JourneyTab({ student }: Props) {
@@ -159,13 +163,13 @@ export default function JourneyTab({ student }: Props) {
 
     // Wallet top-ups
     const walletTopUps = (student.walletTransactions || [])
-      .filter((t: any) => t.type === 'TOP_UP')
-      .reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0)
+      .filter((t) => t.type === 'TOP_UP')
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0)
 
     // Approved payment records (registration, services, etc.)
     const approvedPayments = (student.payments || [])
-      .filter((p: any) => p.status === 'APPROVED' || p.status === 'COMPLETED')
-      .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0)
+      .filter((p) => p.status === 'APPROVED' || p.status === 'COMPLETED')
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0)
 
     const totalPayments = walletTopUps + approvedPayments
 
@@ -173,7 +177,7 @@ export default function JourneyTab({ student }: Props) {
     const results = student.examResults || []
 
     const examCount = bookings.length
-    const examsPassed = results.filter((r: any) => r.passed).length
+    const examsPassed = results.filter((r: SerializedExamResult) => r.passed).length
 
     return {
       totalDuration: formatDuration(totalDuration),
@@ -252,7 +256,7 @@ export default function JourneyTab({ student }: Props) {
                   <div key={event.id}>
                     {/* Duration gap indicator */}
                     {gap && (
-                      <div className="relative flex items-center py-1.5 pl-[26px] sm:pl-[30px]">
+                      <div className="relative flex items-center py-1.5 pl-6.5 sm:pl-7.5">
                         <div className="flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-0.5 text-[10px] font-bold text-slate-400 dark:bg-slate-800 dark:text-slate-500">
                           <ArrowRight className="h-3 w-3" />
                           {gap}
@@ -319,7 +323,7 @@ export default function JourneyTab({ student }: Props) {
 }
 
 // ─── Build the full timeline from student data ──────────────────
-function buildTimeline(student: any): TimelineEvent[] {
+function buildTimeline(student: SerializedStudent): TimelineEvent[] {
   const events: TimelineEvent[] = []
 
   // 1. Account Created
@@ -411,9 +415,11 @@ function buildTimeline(student: any): TimelineEvent[] {
   // 6. Full-Time Enrollments
   const fullTimeEnrollments = student.fullTimeEnrollments || []
   for (const fte of fullTimeEnrollments) {
+    const fteDate = fte.startDate || fte.createdAt
+    if (!fteDate) continue
     events.push({
       id: `fte-${fte.id}`,
-      date: new Date(fte.startDate || fte.createdAt),
+      date: new Date(fteDate),
       title: `Full-Time Programme Enrollment`,
       description: `Enrolled in ${fte.programme?.name || fte.programme?.code || 'Unknown'}`,
       icon: BookOpen,
@@ -423,7 +429,7 @@ function buildTimeline(student: any): TimelineEvent[] {
         Programme: fte.programme?.name || fte.programme?.code || '—',
         Year: `Year ${fte.currentYearNumber}`,
         Status: fte.status?.replace(/_/g, ' ') || '—',
-        'Academic Year': fte.academicYear || '—',
+        'Academic Year': fte.academicYear?.name || '—',
       },
     })
 
@@ -446,9 +452,11 @@ function buildTimeline(student: any): TimelineEvent[] {
           },
         })
       } else {
+        const msDate = ms.dueDate || ms.createdAt
+        if (!msDate) continue
         events.push({
           id: `milestone-due-${ms.id}`,
-          date: new Date(ms.dueDate || ms.createdAt),
+          date: new Date(msDate),
           title: `Milestone Due: ${ms.milestoneType?.replace(/_/g, ' ')}`,
           description: `Year ${ms.yearNumber} — EUR ${Number(ms.amountDue).toLocaleString()} due`,
           icon: AlertCircle,
@@ -548,10 +556,12 @@ function buildTimeline(student: any): TimelineEvent[] {
       bk.course?.name || bk.exam?.examComponent?.course?.name || bk.moduleCode || 'Unknown Module'
     const moduleCode =
       bk.course?.code || bk.exam?.examComponent?.course?.code || bk.moduleCode || ''
+    const bkDate = bk.bookedAt || bk.createdAt
+    if (!bkDate) continue
 
     events.push({
       id: `exam-booking-${bk.id}`,
-      date: new Date(bk.bookedAt || bk.createdAt),
+      date: new Date(bkDate),
       title: `Exam Booked: ${moduleCode}`,
       description: `${moduleName}${bk.event?.name ? ` — ${bk.event.name}` : ''}`,
       icon: ClipboardCheck,
@@ -575,6 +585,7 @@ function buildTimeline(student: any): TimelineEvent[] {
   // 9. Exam Results
   const results = student.examResults || []
   for (const res of results) {
+    if (!res.createdAt) continue
     const moduleCode = res.moduleCode || res.exam?.examComponent?.course?.code || ''
     const moduleName = res.exam?.examComponent?.course?.name || moduleCode || 'Unknown'
 
@@ -597,6 +608,7 @@ function buildTimeline(student: any): TimelineEvent[] {
   // 10. Modular Enrollments
   const modularEnrollments = student.modularEnrollments || []
   for (const me of modularEnrollments) {
+    if (!me.createdAt) continue
     events.push({
       id: `modular-${me.id}`,
       date: new Date(me.createdAt),
@@ -608,7 +620,7 @@ function buildTimeline(student: any): TimelineEvent[] {
       metadata: {
         Package: me.package?.name || '—',
         Status: me.status || '—',
-        Paid: `EUR ${Number(me.amountPaid).toLocaleString()}`,
+        Paid: `EUR ${Number(me.amountPaid || 0).toLocaleString()}`,
       },
     })
   }
@@ -618,7 +630,7 @@ function buildTimeline(student: any): TimelineEvent[] {
   for (const enr of courseEnrollments) {
     events.push({
       id: `course-enr-${enr.id}`,
-      date: new Date(enr.enrolledAt || enr.createdAt),
+      date: new Date(enr.enrolledAt),
       title: `Course Enrollment: ${enr.course?.code || 'Unknown'}`,
       description: `Enrolled in ${enr.course?.name || 'Unknown'}`,
       icon: BookOpen,
@@ -632,9 +644,11 @@ function buildTimeline(student: any): TimelineEvent[] {
 
     const grades = enr.grades || []
     for (const grade of grades) {
+      const gradeDate = grade.assessmentDate || grade.createdAt
+      if (!gradeDate) continue
       events.push({
         id: `grade-${grade.id}`,
-        date: new Date(grade.assessmentDate || grade.createdAt),
+        date: new Date(gradeDate),
         title: `Grade Recorded: ${grade.assessmentName || 'Assessment'}`,
         description: `Score: ${Number(grade.score)}/${Number(grade.maxScore)} (${Number(grade.percentage)}%) for ${enr.course?.code || 'Unknown'}`,
         icon: ClipboardCheck,
@@ -652,6 +666,7 @@ function buildTimeline(student: any): TimelineEvent[] {
   // 12. Exam Bundles
   const examBundles = student.examBundles || []
   for (const eb of examBundles) {
+    if (!eb.createdAt) continue
     events.push({
       id: `exam-bundle-${eb.id}`,
       date: new Date(eb.createdAt),
@@ -671,9 +686,11 @@ function buildTimeline(student: any): TimelineEvent[] {
   // 13. Attendance Records
   const attendance = student.attendanceRecords || []
   for (const att of attendance) {
+    const attDate = att.date || att.createdAt
+    if (!attDate) continue
     events.push({
       id: `attendance-${att.id}`,
-      date: new Date(att.date || att.createdAt),
+      date: new Date(attDate),
       title: `Class Attendance`,
       description: `Status: ${att.status?.replace(/_/g, ' ')} for ${att.class?.course?.code || 'Class'}`,
       icon: Clock,
@@ -713,7 +730,7 @@ function StatCard({
   value,
   color,
 }: {
-  icon: React.ElementType
+  icon: React.ComponentType<{ className?: string }>
   label: string
   value: string
   color: keyof typeof COLOR_MAP

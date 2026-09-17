@@ -2,12 +2,7 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import {
   ClipboardCheck,
-  Calendar,
   AlertCircle,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  MapPin,
   FileBarChart2,
   History as HistoryIcon,
   RefreshCcw,
@@ -32,9 +27,7 @@ import {
 } from '@/lib/exams/fulfillment'
 
 // The newly extracted tabs
-import AvailablePoolsTab from './_components/AvailablePoolsTab'
 import MyBookingsTab from './_components/MyBookingsTab'
-import BookingActionTab from './_components/BookingActionTab'
 import ResitBookingTab from './_components/ResitBookingTab'
 import BookExamTab from './_components/BookExamTab'
 import { UnifiedExamRecord } from '@/lib/student/types'
@@ -103,7 +96,6 @@ export default async function ExamsPage({
 
     return (
       <div className="space-y-8">
-
         <PaymentRequiredBanner
           accessLevel={accessLevel}
           milestoneStatus={milestoneStatus}
@@ -168,7 +160,7 @@ export default async function ExamsPage({
   let allHistory: UnifiedExamRecord[] = []
   let completedAttempts: UnifiedExamRecord[] = []
   let failedAttempts: UnifiedExamRecord[] = []
-  
+
   if (tab === 'records' && results && bookings && examAttendances) {
     const records: UnifiedExamRecord[] = []
     const seenModuleAttempts = new Set<string>()
@@ -178,10 +170,10 @@ export default async function ExamsPage({
     results.forEach((r) => {
       const moduleCode = r.moduleCode || r.exam?.examComponent?.course?.code || '—'
       const attemptKey = `${moduleCode}_${r.attemptType || 'FIRST'}`
-      
+
       records.push({
         id: r.id,
-        type: (r.migrationRef || r.sourceNotes?.includes('migrated')) ? 'HISTORICAL' : 'ORIGINAL',
+        type: r.migrationRef || r.sourceNotes?.includes('migrated') ? 'HISTORICAL' : 'ORIGINAL',
         moduleCode,
         moduleName: r.exam?.examComponent?.course?.name || r.exam?.name || 'Manual Result',
         date: r.exam?.examDate || r.createdAt,
@@ -200,14 +192,20 @@ export default async function ExamsPage({
 
     // 2. Process bookings that don't have a formal result yet
     bookings.forEach((b) => {
-      const moduleCode = b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—'
+      const moduleCode =
+        b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—'
       const attemptKey = `${moduleCode}_${b.attemptType || 'FIRST'}`
       const activeAssignment = b.sittingAssignments?.[0] || null
-      const attendanceStatus = b.examAttendance?.status || activeAssignment?.attendanceStatus || null
-      const effectiveExamDate = activeAssignment?.sitting?.startTime || b.examAttendance?.sitting?.startTime || b.examDate || null
+      const attendanceStatus =
+        b.examAttendance?.status || activeAssignment?.attendanceStatus || null
+      const effectiveExamDate =
+        activeAssignment?.sitting?.startTime ||
+        b.examAttendance?.sitting?.startTime ||
+        b.examDate ||
+        null
       const dateDisplayKind = effectiveExamDate
         ? 'DATE'
-        : (b.eventId || ['POOLED', 'SCHEDULED', 'POSTPONED'].includes(b.demandStatus))
+        : b.eventId || ['POOLED', 'SCHEDULED', 'POSTPONED'].includes(b.demandStatus)
           ? 'TBC'
           : 'TBD'
       const displayResult = deriveBookingDisplayResult({
@@ -226,7 +224,8 @@ export default async function ExamsPage({
         id: b.id,
         type: b.bookingType === 'MANUAL' ? 'MANUAL' : 'BOOKING',
         moduleCode,
-        moduleName: b.course?.name || b.exam?.name || b.exam?.examComponent?.course?.name || 'Exam Booking',
+        moduleName:
+          b.course?.name || b.exam?.name || b.exam?.examComponent?.course?.name || 'Exam Booking',
         date: effectiveExamDate || b.bookedAt,
         dateDisplayKind,
         dateDisplay: effectiveExamDate ? null : dateDisplayKind,
@@ -234,7 +233,12 @@ export default async function ExamsPage({
           ? `Day ${activeAssignment.sitting.dayNumber} ${activeAssignment.sitting.sessionType}`
           : null,
         attendanceStatus,
-        passed: b.result?.toLowerCase() === 'pass' ? true : (b.result?.toLowerCase() === 'fail' ? false : null),
+        passed:
+          b.result?.toLowerCase() === 'pass'
+            ? true
+            : b.result?.toLowerCase() === 'fail'
+              ? false
+              : null,
         score: b.score ? Number(b.score) : null,
         percentage: b.percentage ? Number(b.percentage) : null,
         attemptType: b.attemptType,
@@ -283,13 +287,13 @@ export default async function ExamsPage({
   // Full-time students have their exams managed by the academy staff.
   const canBook = isExamOnly || isModular
   const isFullTimeStudent = isFullTime
-  
+
   const validTabs = isFullTimeStudent
     ? ['records']
     : canBook
       ? ['book', 'resit', 'bookings', 'records']
       : ['bookings', 'records']
-      
+
   const effectiveTab = validTabs.includes(tab) ? tab : 'records'
 
   return (
@@ -306,14 +310,14 @@ export default async function ExamsPage({
           <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/20 p-8 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-900/50">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-black text-aerojet-blue dark:text-white">
+                <h2 className="text-xl font-black text-blue-800 dark:text-white">
                   {studentProfile?.pathwayRel?.name || 'General Pathway'} Progress
                 </h2>
                 <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                   Track your progress towards licensing requirements across all modules.
                 </p>
               </div>
-              <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-aerojet-blue text-white sm:flex">
+              <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-blue-800 text-white sm:flex">
                 <ClipboardCheck className="h-6 w-6" />
               </div>
             </div>
@@ -333,14 +337,18 @@ export default async function ExamsPage({
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
                 <p className="text-xs font-bold text-slate-400 uppercase">Total Failed</p>
-                <p className="mt-1 text-2xl font-black text-red-600 dark:text-red-400">{failedAttempts.length}</p>
+                <p className="mt-1 text-2xl font-black text-red-600 dark:text-red-400">
+                  {failedAttempts.length}
+                </p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
                 <p className="text-xs font-bold text-slate-400 uppercase">Success Rate</p>
-                <p className="mt-1 text-2xl font-black text-aerojet-blue dark:text-blue-400">
+                <p className="mt-1 text-2xl font-black text-blue-800 dark:text-blue-400">
                   {completedAttempts.length > 0
                     ? Math.round(
-                        (completedAttempts.filter((h) => h.passed).length / completedAttempts.length) * 100
+                        (completedAttempts.filter((h) => h.passed).length /
+                          completedAttempts.length) *
+                          100
                       )
                     : 0}
                   %
@@ -370,8 +378,12 @@ export default async function ExamsPage({
             ) : (
               <>
                 <div className="flex flex-wrap gap-3 rounded-xl border border-amber-100 bg-amber-50/50 px-4 py-3 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
-                  <span><strong>TBC</strong>: final sitting/date is still to be confirmed.</span>
-                  <span><strong>TBD</strong>: no exam date has been set yet.</span>
+                  <span>
+                    <strong>TBC</strong>: final sitting/date is still to be confirmed.
+                  </span>
+                  <span>
+                    <strong>TBD</strong>: no exam date has been set yet.
+                  </span>
                 </div>
                 <ExamHistoryTable results={allHistory} />
               </>
@@ -395,7 +407,7 @@ export default async function ExamsPage({
                   </p>
                   {canBook && (
                     <div className="mt-4">
-                      <Link 
+                      <Link
                         href="/student/exams?tab=resit"
                         className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-red-700 active:scale-95"
                       >

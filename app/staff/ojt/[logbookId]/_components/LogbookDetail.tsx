@@ -23,6 +23,8 @@ import Link from 'next/link'
 import { useConfirmDialog } from '@/hooks/use-confirm-dialog'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { LogbookPreview } from '@/components/shared/LogbookPreview'
+import ReviewSignoffPanel from './ReviewSignoffPanel'
+import MentorAssignments from './MentorAssignments'
 
 interface Entry {
   id: string
@@ -61,7 +63,7 @@ interface LogbookData {
   targetEndDate: string | null
   totalLoggedHours: number
   status: string
-  entries: any[]
+  entries: Entry[]
   analytics: {
     monthsExperience: number
     totalHours: number
@@ -71,6 +73,14 @@ interface LogbookData {
     signedEntries: number
     unsignedEntries: number
   }
+  mentorAssignments: Array<{
+    id: string
+    mentorId: string
+    assignedDate: string
+    endDate?: string | null
+    isPrimary: boolean
+    notes: string | null
+  }>
 }
 
 interface ATAOption {
@@ -117,10 +127,14 @@ export default function LogbookDetail({
   logbook,
   ataChapters,
   supervisors,
+  staffId,
+  mentorAssignments = [],
 }: {
   logbook: LogbookData
   ataChapters: ATAOption[]
   supervisors: SupervisorOption[]
+  staffId: string
+  mentorAssignments: LogbookData['mentorAssignments']
 }) {
   const router = useRouter()
   const confirmDialog = useConfirmDialog()
@@ -148,6 +162,12 @@ export default function LogbookDetail({
   }
 
   const [form, setForm] = useState(defaultFormValues)
+  const [editingFacility, setEditingFacility] = useState(false)
+  const [facilityForm, setFacilityForm] = useState({
+    facilityName: logbook.facilityName,
+    facilityApprovalNo: logbook.facilityApprovalNo || '',
+  })
+  const [savingFacility, setSavingFacility] = useState(false)
 
   const handleCreateClick = () => {
     setForm(defaultFormValues)
@@ -155,7 +175,7 @@ export default function LogbookDetail({
     setShowForm(!showForm)
   }
 
-  const handleEditClick = (entry: any) => {
+  const handleEditClick = (entry: Entry) => {
     setEditingEntryId(entry.id)
     setForm({
       date: new Date(entry.date).toISOString().split('T')[0],
@@ -265,10 +285,79 @@ export default function LogbookDetail({
           <h1 className="text-aerojet-blue text-2xl font-black dark:text-white">
             {logbook.studentName}
           </h1>
-          <p className="text-sm text-slate-500">
-            {logbook.studentId} · {logbook.licenceCategory} · {logbook.facilityName}
-            {logbook.facilityApprovalNo && ` (${logbook.facilityApprovalNo})`}
-          </p>
+          {editingFacility ? (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault()
+                setSavingFacility(true)
+                try {
+                  const res = await fetch(`/api/staff/ojt/${logbook.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(facilityForm),
+                  })
+                  if (!res.ok) throw new Error('Failed to update')
+                  toast.success('Facility details updated')
+                  setEditingFacility(false)
+                  router.refresh()
+                } catch {
+                  toast.error('Failed to update facility details')
+                } finally {
+                  setSavingFacility(false)
+                }
+              }}
+              className="mt-1 flex items-center gap-2"
+            >
+              <input
+                type="text"
+                value={facilityForm.facilityName}
+                onChange={(e) => setFacilityForm({ ...facilityForm, facilityName: e.target.value })}
+                className="rounded-lg border border-slate-200 px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
+                placeholder="Facility name"
+              />
+              <input
+                type="text"
+                value={facilityForm.facilityApprovalNo}
+                onChange={(e) =>
+                  setFacilityForm({ ...facilityForm, facilityApprovalNo: e.target.value })
+                }
+                className="rounded-lg border border-slate-200 px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
+                placeholder="Approval No."
+              />
+              <button
+                type="submit"
+                disabled={savingFacility}
+                className="bg-aerojet-blue rounded-lg px-3 py-1 text-xs font-bold text-white disabled:opacity-50"
+              >
+                {savingFacility ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingFacility(false)
+                  setFacilityForm({
+                    facilityName: logbook.facilityName,
+                    facilityApprovalNo: logbook.facilityApprovalNo || '',
+                  })
+                }}
+                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300"
+              >
+                Cancel
+              </button>
+            </form>
+          ) : (
+            <p className="text-sm text-slate-500">
+              {logbook.studentId} · {logbook.licenceCategory} · {logbook.facilityName}
+              {logbook.facilityApprovalNo && ` (${logbook.facilityApprovalNo})`}
+              <button
+                onClick={() => setEditingFacility(true)}
+                className="hover:text-aerojet-blue ml-2 rounded p-1 text-slate-400"
+                title="Edit facility details"
+              >
+                <Edit className="h-3.5 w-3.5" />
+              </button>
+            </p>
+          )}
         </div>
         <span
           className={`rounded-full px-3 py-1 text-xs font-bold ${
@@ -831,6 +920,14 @@ export default function LogbookDetail({
           </tbody>
         </table>
       </div>
+
+      <ReviewSignoffPanel entries={logbook.entries} logbookId={logbook.id} staffId={staffId} />
+      <MentorAssignments
+        logbookId={logbook.id}
+        mentorAssignments={mentorAssignments}
+        availableMentors={supervisors}
+        staffId={staffId}
+      />
     </div>
   )
 }

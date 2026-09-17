@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2026-09-08 Encoding Mojibake Fixes · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">2026-09-08 Encoding Mojibake Fixes</h1>
+  <p class="he-deck">A comprehensive encoding audit and remediation was performed on 2026-09-08 to eliminate mis-encoded Unicode characters (mojibake) across the codebase.</p>
+</header>
+<section class="he-section" id="summary"><div class="he-section__num">01 · Summary</div><h2 class="he-section__title">Summary</h2></section>
+<p>A comprehensive encoding audit and remediation was performed on 2026-09-08 to eliminate mis-encoded Unicode characters (mojibake) across the codebase. The work was verified through an LLM Council with three independent reviewers: Encoding Specialist, Code Quality Reviewer, and Build/CI Verifier.</p>
+<section class="he-section" id="scope"><div class="he-section__num">02 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<p>All source files under the following directories were scanned and fixed:</p>
+<ul>
+<li><code>app/</code></li>
+<li><code>lib/</code></li>
+<li><code>components/</code></li>
+<li><code>docs/</code></li>
+<li><code>tests/</code></li>
+<li><code>prisma/</code></li>
+</ul>
+<p>Excluded from scan: <code>node_modules/</code>, <code>.next/</code>, <code>.venv/</code>, <code>__pycache__/</code>, <code>scripts/</code></p>
+<section class="he-section" id="files-fixed"><div class="he-section__num">03 · Files Fixed</div><h2 class="he-section__title">Files Fixed</h2></section>
+<h3 id="round-1-box-drawing-and-common-patterns-9-files">Round 1 — Box-drawing and common patterns (9 files)</h3>
+<table>
+<thead>
+<tr><th>File</th><th>Patterns Fixed</th><th>Count</th></tr>
+</thead>
+<tbody>
+<tr><td><code>app/instructor/exams/_components/InstructorExamsDashboard.tsx</code></td><td><code>â&quot;€</code> → <code>─</code></td><td>489</td></tr>
+<tr><td><code>app/staff/_components/ReportsPanel.tsx</code></td><td><code>â&quot;€</code> → <code>─</code></td><td>24</td></tr>
+<tr><td><code>app/staff/exams/_components/RecordsTab.tsx</code></td><td><code>â&quot;€</code> → <code>─</code></td><td>12</td></tr>
+<tr><td><code>app/staff/exams/internal/preview/_components/ExamPreviewClient.tsx</code></td><td><code>â&quot;€</code> → <code>─</code></td><td>6</td></tr>
+<tr><td><code>app/staff/finance/refunds/_components/RefundsManager.tsx</code></td><td><code>â&quot;€</code> → <code>─</code></td><td>31</td></tr>
+<tr><td><code>app/staff/settings/_components/EmailRegistryTab.tsx</code></td><td><code>â&quot;€</code> → <code>─</code></td><td>77</td></tr>
+<tr><td><code>app/student/exams/internal/_components/InternalExamInterface.tsx</code></td><td><code>â&quot;€</code> → <code>─</code></td><td>12</td></tr>
+<tr><td><code>components/layouts/DashboardSidebar.tsx</code></td><td><code>â&quot;€</code> → <code>─</code></td><td>41</td></tr>
+<tr><td><code>components/Tour/AppTour.tsx</code></td><td><code>â&quot;€</code> → <code>─</code></td><td>403</td></tr>
+</tbody>
+</table>
+<h3 id="round-2-additional-source-files-8-files">Round 2 — Additional source files (8 files)</h3>
+<table>
+<thead>
+<tr><th>File</th><th>Patterns Fixed</th><th>Count</th></tr>
+</thead>
+<tbody>
+<tr><td><code>app/applicant/exam-only/page.tsx</code></td><td><code>â‚¬</code> → <code>€</code>, <code>â‚µ</code> → <code>₵</code></td><td>15</td></tr>
+<tr><td><code>app/staff/exams/internal/_components/ExamOperations.tsx</code></td><td><code>â†'</code> → <code>→</code></td><td>1</td></tr>
+<tr><td><code>app/staff/settings/_components/EmailDeliveryTab.tsx</code></td><td><code>â†'</code> → <code>→</code>, <code>â†'</code> → <code>←</code></td><td>2</td></tr>
+<tr><td><code>app/staff/_components/RevenueChart.tsx</code></td><td><code>â‚¬</code> → <code>€</code></td><td>1</td></tr>
+<tr><td><code>components/charts/RevenueChart.tsx</code></td><td><code>â‚¬</code> → <code>€</code></td><td>2</td></tr>
+<tr><td><code>components/CurrencyToggle.tsx</code></td><td><code>â‚¬</code> → <code>€</code>, <code>â‚µ</code> → <code>₵</code>, <code>â†'</code> → <code>→</code></td><td>3</td></tr>
+<tr><td><code>components/exam-only/MyPoolsDashboard.tsx</code></td><td><code>âœ…</code> → <code>✅</code>, <code>â‚¬</code> → <code>€</code></td><td>3</td></tr>
+<tr><td><code>components/public/SearchModal.tsx</code></td><td><code>âœˆï¸</code> → <code>✈</code>, <code>â†µ</code> → <code>↕</code></td><td>2</td></tr>
+</tbody>
+</table>
+<h3 id="round-3-prefixed-patterns-and-html-2-files">Round 3 — Ã/Â-prefixed patterns and HTML (2 files)</h3>
+<table>
+<thead>
+<tr><th>File</th><th>Patterns Fixed</th><th>Count</th></tr>
+</thead>
+<tbody>
+<tr><td><code>app/staff/exams/internal/_components/ExamBankManager.tsx</code></td><td><code>Ã—</code> → <code>×</code></td><td>3</td></tr>
+<tr><td><code>docs/html/design-system.html</code></td><td><code>Ã—</code> → <code>×</code>, <code>Â·</code> → <code>·</code>, <code>â€&quot;</code> → <code>–</code>, <code>â€&quot;</code> → <code>—</code>, <code>âœ…</code> → <code>✅</code>, <code>â‰¥</code> → <code>≥</code>, <code>â†'</code> → <code>←</code>, <code>â€¦</code> → <code>…</code></td><td>40</td></tr>
+</tbody>
+</table>
+<h3 id="round-4-emoji-mojibake-3-files">Round 4 — Emoji mojibake (3 files)</h3>
+<table>
+<thead>
+<tr><th>File</th><th>Patterns Fixed</th><th>Count</th></tr>
+</thead>
+<tbody>
+<tr><td><code>app/staff/dashboard/_components/AlertsCenter.tsx</code></td><td><code>ðŸŽ‰</code> → <code>🎉</code></td><td>1</td></tr>
+<tr><td><code>components/exam-only/MyPoolsDashboard.tsx</code></td><td><code>ðŸ“‹</code> → <code>📋</code>, <code>ðŸ“…</code> → <code>📅</code>, <code>ðŸ’°</code> → <code>💰</code></td><td>3</td></tr>
+<tr><td><code>components/public/SearchModal.tsx</code></td><td><code>ðŸŽ¯</code> → <code>🎯</code>, <code>ðŸ“¦</code> → <code>📦</code>, <code>ðŸ“‹</code> → <code>📋</code></td><td>3</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="total-impact"><div class="he-section__num">04 · Total Impact</div><h2 class="he-section__title">Total Impact</h2></section>
+<ul>
+<li><strong>20 files</strong> fixed</li>
+<li><strong>1,095</strong> box-drawing replacements (<code>â&quot;€</code> → <code>─</code>)</li>
+<li><strong>26</strong> currency/arrow/emoji replacements in Round 2</li>
+<li><strong>43</strong> <code>Ã</code>/<code>Â</code>-prefixed replacements in Round 3</li>
+<li><strong>7</strong> emoji replacements in Round 4</li>
+<li><strong>1,171</strong> total replacements</li>
+</ul>
+<section class="he-section" id="root-cause"><div class="he-section__num">05 · Root Cause</div><h2 class="he-section__title">Root Cause</h2></section>
+<p>Mojibake occurred when UTF-8 byte sequences for special characters were misinterpreted as Windows-1252/Latin-1 and then re-encoded as UTF-8. Common patterns:</p>
+<table>
+<thead>
+<tr><th>Original</th><th>UTF-8 Bytes</th><th>Misread As</th><th>Mojibake</th></tr>
+</thead>
+<tbody>
+<tr><td><code>─</code> (U+2500)</td><td><code>E2 94 80</code></td><td>Windows-1252</td><td><code>â&quot;€</code></td></tr>
+<tr><td><code>€</code> (U+20AC)</td><td><code>E2 82 AC</code></td><td>Windows-1252</td><td><code>â‚¬</code></td></tr>
+<tr><td><code>×</code> (U+00D7)</td><td><code>C3 97</code></td><td>Windows-1252</td><td><code>Ã—</code></td></tr>
+<tr><td><code>·</code> (U+00B7)</td><td><code>C2 B7</code></td><td>Windows-1252</td><td><code>Â·</code></td></tr>
+<tr><td><code>🎉</code> (U+1F389)</td><td><code>F0 9F 8E 89</code></td><td>UTF-8→Latin-1</td><td><code>ðŸŽ‰</code></td></tr>
+</tbody>
+</table>
+<section class="he-section" id="prevention-measures-implemented"><div class="he-section__num">06 · Prevention Measures Implemented</div><h2 class="he-section__title">Prevention Measures Implemented</h2></section>
+<h3 id="1-pre-commit-hook">1. Pre-commit Hook</h3>
+<p>Added encoding check to <code>.husky/pre-commit</code>:</p>
+<pre><code class="language-bash">bun run scripts/check-encoding.mjs
+npx lint-staged
+</code></pre>
+<p>This runs before every commit and fails if any source file contains mojibake prefixes (<code>â</code>, <code>Ã</code>, <code>Â</code>, <code>ð</code>).</p>
+<h3 id="2-ci-check">2. CI Check</h3>
+<p>Added encoding check to <code>.github/workflows/ci.yml</code>:</p>
+<pre><code class="language-yaml">- name: Check encoding
+  run: bun run scripts/check-encoding.mjs
+</code></pre>
+<p>This runs on every push and PR, failing the build if mojibake is detected.</p>
+<h3 id="3-fix-scripts">3. Fix Scripts</h3>
+<p>The following scripts are maintained in the repo for future remediation:</p>
+<ul>
+<li><code>scripts/check-encoding.mjs</code> — detection scanner</li>
+<li><code>scripts/fix-encoding-all.mjs</code> — box-drawing/currency/arrow fixes</li>
+<li><code>scripts/fix-encoding-remaining.mjs</code> — arrow fixes</li>
+<li><code>scripts/fix-encoding-final.mjs</code> — <code>Ã</code>/<code>Â</code>-prefixed patterns</li>
+<li><code>scripts/fix-encoding-emoji.mjs</code> — emoji corruption fixes</li>
+</ul>
+<section class="he-section" id="recommendations"><div class="he-section__num">07 · Recommendations</div><h2 class="he-section__title">Recommendations</h2></section>
+<ol>
+<li><strong>Use Unicode escapes in generated code</strong>: Agents and scripts should emit <code>\u2014</code> for <code>—</code>, <code>\u2500</code> for <code>─</code>, <code>\u2192</code> for <code>→</code>, etc., instead of raw characters.</li>
+<li><strong>Avoid copy-pasting from PDFs/Word</strong>: These are common sources of Windows-1252 characters.</li>
+<li><strong>Ensure UTF-8 editor settings</strong>: Verify that editors/terminals use UTF-8 without BOM.</li>
+<li><strong>Run encoding check before committing</strong>: <code>bun run scripts/check-encoding.mjs</code></li>
+<li><strong>If mojibake is found</strong>: Use the appropriate fix script or run all fix scripts in sequence.</li>
+</ol>
+<section class="he-section" id="verification"><div class="he-section__num">08 · Verification</div><h2 class="he-section__title">Verification</h2></section>
+<ul>
+<li><strong>TypeScript</strong>: 0 errors (<code>bun run type-check</code>)</li>
+<li><strong>Tests</strong>: Pre-existing failures only (unrelated to encoding fixes)</li>
+<li><strong>Mojibake scan</strong>: 0 instances remaining in source files</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#summary">Summary</a></li>
+    <li class="he-toc__l2"><a href="#scope">Scope</a></li>
+    <li class="he-toc__l2"><a href="#files-fixed">Files Fixed</a></li>
+    <li class="he-toc__l3"><a href="#round-1-box-drawing-and-common-patterns-9-files">Round 1 — Box-drawing and common patterns (9 files)</a></li>
+    <li class="he-toc__l3"><a href="#round-2-additional-source-files-8-files">Round 2 — Additional source files (8 files)</a></li>
+    <li class="he-toc__l3"><a href="#round-3-prefixed-patterns-and-html-2-files">Round 3 — Ã/Â-prefixed patterns and HTML (2 files)</a></li>
+    <li class="he-toc__l3"><a href="#round-4-emoji-mojibake-3-files">Round 4 — Emoji mojibake (3 files)</a></li>
+    <li class="he-toc__l2"><a href="#total-impact">Total Impact</a></li>
+    <li class="he-toc__l2"><a href="#root-cause">Root Cause</a></li>
+    <li class="he-toc__l2"><a href="#prevention-measures-implemented">Prevention Measures Implemented</a></li>
+    <li class="he-toc__l3"><a href="#1-pre-commit-hook">1. Pre-commit Hook</a></li>
+    <li class="he-toc__l3"><a href="#2-ci-check">2. CI Check</a></li>
+    <li class="he-toc__l3"><a href="#3-fix-scripts">3. Fix Scripts</a></li>
+    <li class="he-toc__l2"><a href="#recommendations">Recommendations</a></li>
+    <li class="he-toc__l2"><a href="#verification">Verification</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

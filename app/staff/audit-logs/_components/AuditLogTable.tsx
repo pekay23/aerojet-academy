@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import TablePagination from '../../_components/TablePagination'
 import { format } from 'date-fns'
 import {
@@ -15,7 +15,8 @@ import {
   Fingerprint,
   ExternalLink,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 type AuditLog = {
   id: string
@@ -178,10 +179,15 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
 
-  // paged is now the raw logs array since the server handles slicing
-  const paged = logs
+  const sortableLogs = useMemo(
+    () => logs.map((log) => ({ ...log, _userName: getUserNameValue(log) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [logs]
+  )
+  const { items: sortedLogs, requestSort, sortConfig } = useSort(sortableLogs)
+  const paged = sortedLogs
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -196,16 +202,18 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, perPage])
 
   // Effect to handle page changes
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     // Skip first fetch if it's the initial page and we have initial logs
     const isInitial = page === 1 && perPage === 25
     if (!isInitial) {
-      fetchLogs()
+        fetchLogs()
     }
-  }, [page, perPage])
+  }, [page, perPage, fetchLogs])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   function actionStyle(act: string) {
     if (
@@ -249,6 +257,10 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
       : (log.user?.email ?? 'System')
   }
 
+  function getUserNameValue(log: AuditLog): string {
+    return getUserName(log)
+  }
+
   function getUserInitials(name: string) {
     if (name === 'System') return 'SY'
     const parts = name.split(' ')
@@ -263,21 +275,42 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
           {/* Header Row */}
           <thead>
             <tr className="hidden border-b border-slate-100 bg-slate-50/50 text-xs font-bold tracking-wider text-slate-500 uppercase lg:table-row dark:border-slate-800/80 dark:bg-slate-900/50 dark:text-slate-400">
-              <th className="px-6 py-4 text-left font-bold" scope="col">
-                Timestamp
-              </th>
-              <th className="px-6 py-4 text-left font-bold" scope="col">
-                Action
-              </th>
-              <th className="px-6 py-4 text-left font-bold" scope="col">
-                Entity & Context
-              </th>
-              <th className="px-6 py-4 text-left font-bold" scope="col">
-                User
-              </th>
-              <th className="px-6 py-4 text-right font-bold" scope="col">
-                IP Address
-              </th>
+              <SortHeader
+                label="Timestamp"
+                sortKey="createdAt"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-6 py-4 text-left font-bold"
+              />
+              <SortHeader
+                label="Action"
+                sortKey="action"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-6 py-4 text-left font-bold"
+              />
+              <SortHeader
+                label="Entity & Context"
+                sortKey="entity"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-6 py-4 text-left font-bold"
+              />
+              <SortHeader
+                label="User"
+                sortKey="_userName"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                className="px-6 py-4 text-left font-bold"
+              />
+              <SortHeader
+                label="IP Address"
+                sortKey="ipAddress"
+                currentSort={sortConfig}
+                onSort={requestSort}
+                align="right"
+                className="px-6 py-4 text-right font-bold"
+              />
             </tr>
           </thead>
 

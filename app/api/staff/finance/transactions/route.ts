@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
+import type { SerializedTransactionRow } from '@/lib/types/staff'
 
 /**
  * GET /api/staff/finance/transactions
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest) {
       : undefined
 
     // Build orderBy
-    const orderBy: any = {}
+    const orderBy: Record<string, 'asc' | 'desc'> = {}
     if (['createdAt', 'amount', 'type'].includes(sortBy)) {
       orderBy[sortBy] = sortDir
     } else {
@@ -62,17 +63,17 @@ export async function GET(req: NextRequest) {
     ])
 
     const serialized = serializePrisma(transactions)
-    const transactionIds = serialized.map((tx: any) => tx.id)
+    const transactionIds = serialized.map((tx: SerializedTransactionRow) => tx.id)
 
     const paymentIds = serialized
-      .filter((tx: any) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
-      .map((tx: any) => tx.referenceId!)
+      .filter((tx: SerializedTransactionRow) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
+      .map((tx: SerializedTransactionRow) => tx.referenceId!)
     const examBookingReferenceIds = serialized
-      .filter((tx: any) => tx.referenceType === 'EXAM_BOOKING' && tx.referenceId)
-      .map((tx: any) => tx.referenceId!)
+      .filter((tx: SerializedTransactionRow) => tx.referenceType === 'EXAM_BOOKING' && tx.referenceId)
+      .map((tx: SerializedTransactionRow) => tx.referenceId!)
     const fullTimeEnrollmentIds = serialized
-      .filter((tx: any) => tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId)
-      .map((tx: any) => tx.referenceId!)
+      .filter((tx: SerializedTransactionRow) => tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId)
+      .map((tx: SerializedTransactionRow) => tx.referenceId!)
 
     // Fetch related data in parallel
     const [relatedPayments, relatedExamBookings, relatedFullTimeEnrollments, relatedModularEnrollments, relatedMilestones] =

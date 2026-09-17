@@ -11,15 +11,18 @@ const TABS = [
   { key: 'records', label: 'Records', icon: FilePlus2 },
 ]
 
+const VALID_TABS = TABS.map((t) => t.key)
+
 export default function StaffExamsTabs({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const currentTab = searchParams.get('tab') || 'events'
+  const rawTab = searchParams.get('tab') || 'events'
+  const currentTab = VALID_TABS.includes(rawTab) ? rawTab : 'events'
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+        <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
           Exams
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

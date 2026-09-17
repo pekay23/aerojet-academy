@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { z } from 'zod'
 import { sendContactEnquiryConfirmation } from '@/lib/email/service'
+import { getRegistryFromAddress } from '@/lib/email/registry'
 import { checkRateLimit, getClientIp } from '@/lib/auth/helpers'
 import { apiTooManyRequests } from '@/lib/api/response'
 import { EMAIL_ADDRESSES } from '@/lib/constants/business-rules'
@@ -86,9 +87,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Send original notification to admin
+    const fromAddress =
+      process.env.FROM_EMAIL ||
+      (await getRegistryFromAddress('noreply_system')) ||
+      EMAIL_ADDRESSES.fromNoReply
+    const contactRecipient =
+      (await getRegistryFromAddress('contact_form_recipient')) ||
+      'trainingprograms@aerojet-academy.com'
+
     await resend.emails.send({
-      from: process.env.FROM_EMAIL || EMAIL_ADDRESSES.fromNoReply,
-      to: 'trainingprograms@aerojet-academy.com',
+      from: fromAddress,
+      to: contactRecipient,
       replyTo: email,
       subject: `Contact Form Enquiry: ${subject}`,
       html: `

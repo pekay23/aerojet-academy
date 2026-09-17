@@ -1,16 +1,17 @@
 import { NextRequest } from 'next/server'
 import { requireStudent } from '@/lib/auth/helpers'
-import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiCreated, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { joinPoolSchema, validateBody } from '@/lib/validation/schemas'
 import { joinPool } from '@/lib/pools/operations'
+import type { PoolJoinResult } from '@/lib/pools/types'
 import { createAuditLog } from '@/lib/audit/logger'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 
 export const POST = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireStudent()
-    const poolId = ctx?.params?.id
+    const poolId = (await ctx!.params).id
     if (!poolId) return apiError('Pool ID required')
 
     const body = await req.json()
@@ -18,7 +19,7 @@ export const POST = withErrorHandler(
     if (!validation.success) return apiError(validation.error)
 
     // Find the exam component for the selected module
-    const examComponent = await prisma.examComponent.findFirst({
+    const examComponent = await prismaUnfiltered.examComponent.findFirst({
       where: { code: validation.data.selectedModule },
     })
 
@@ -26,12 +27,12 @@ export const POST = withErrorHandler(
       return apiError(`Module ${validation.data.selectedModule} not found`)
     }
 
-    const result = await joinPool({
+    const result = (await joinPool({
       poolId,
       userId: user.id,
       examComponentId: examComponent.id,
       moduleCode: validation.data.selectedModule,
-    })
+    })) as PoolJoinResult
 
     if (!result.success) {
       return apiError(result.error || 'Failed to join booking')

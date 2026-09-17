@@ -3,7 +3,7 @@
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 
 interface RegistrationFeeDisplayProps {
-  fee: number | any
+  fee: number
   currency: string
 }
 

@@ -4,19 +4,71 @@ import { ClipboardCheck, ExternalLink } from 'lucide-react'
 import { requireExaminer } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
+import { unstable_cache } from 'next/cache'
+import { parsePagination } from '@/lib/api/response'
 import ResultsEntry from './_components/ResultsEntry'
 
 export const metadata: Metadata = { title: 'Results Entry | Examiner Portal' }
 export const dynamic = 'force-dynamic'
 
-export default async function ExaminerResultsPage() {
+const _getCachedResultsHistory = (examinerId: string) =>
+  unstable_cache(
+    async () => {
+      const sittingIds = (
+        await prismaUnfiltered.examSitting.findMany({
+          where: { examinerId },
+          select: { id: true },
+        })
+      ).map((s) => s.id)
+
+      const userIds = sittingIds.length
+        ? (
+            await prismaUnfiltered.examSittingAssignment.findMany({
+              where: { sittingId: { in: sittingIds } },
+              select: { userId: true },
+            })
+          ).map((a) => a.userId)
+        : []
+      const candidateIds = [...new Set(userIds.filter((id): id is string => Boolean(id)))]
+
+      if (candidateIds.length === 0) return []
+
+      const rows = await prismaUnfiltered.examResult.findMany({
+        where: { userId: { in: candidateIds }, examCategory: 'OFFICIAL_EASA' },
+        include: {
+          user: { include: { profile: { select: { firstName: true, lastName: true } } } },
+          exam: {
+            include: {
+              event: { select: { name: true } },
+              examComponent: { include: { course: { select: { code: true, name: true } } } },
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+      })
+      return serializePrisma(rows)
+    },
+    ['examiner-results-history', examinerId],
+    { revalidate: 300, tags: ['examiner-results-history', `examiner-${examinerId}`] }
+  )()
+
+export default async function ExaminerResultsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; limit?: string; skip?: string }>
+}) {
   const user = await requireExaminer()
+  const sp = await searchParams
+  const { page: _page, limit, skip } = parsePagination(new URLSearchParams(sp as Record<string, string>))
 
   const examiner = await prismaUnfiltered.examiner.findUnique({
     where: { userId: user.id },
     include: {
       sittings: {
         orderBy: { startTime: 'desc' },
+        skip,
+        take: limit,
         include: {
           event: { select: { name: true } },
           examComponent: { include: { course: { select: { code: true, name: true } } } },
@@ -43,7 +95,7 @@ export default async function ExaminerResultsPage() {
     : []
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           Results Entry
@@ -74,7 +126,7 @@ export default async function ExaminerResultsPage() {
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
             No sittings assigned
           </h3>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+          <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-300">
             Sittings assigned to you by staff will appear here for result entry.
           </p>
         </div>

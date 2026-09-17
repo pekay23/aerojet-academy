@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { requireAuth, requireStaff, requireAdmin } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { WithdrawalStatus } from '@prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 /**
@@ -18,7 +19,7 @@ const OPEN_STATUSES = ['REQUESTED', 'STAFF_CONFIRMED', 'ADMIN_APPROVED'] as cons
 
 async function hasOpenRequest(userId: string) {
   return prismaUnfiltered.withdrawalRequest.findFirst({
-    where: { userId, status: { in: OPEN_STATUSES as unknown as any } },
+    where: { userId, status: { in: OPEN_STATUSES as unknown as WithdrawalStatus[] } },
     select: { id: true },
   })
 }

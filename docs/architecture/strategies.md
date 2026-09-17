@@ -3,8 +3,8 @@
 This document explains the "Why" behind our implementation choices and the strategies used to fix common issues.
 
 ## 🎨 Branding Strategy: Aerojet Blue
-The project uses a custom branding color `aerojet-blue`. 
-- **Tailwind Config**: Defined in `tailwind.config.ts` as `aerojet-blue: '#002855'`.
+The project uses a custom branding color namespace `aerojet-blue`.
+- **Tailwind Config**: Defined in `tailwind.config.ts` as `aerojet.blue: 'hsl(var(--aero-blue))'` (a CSS variable referencing `#002855` defined in the global CSS).
 - **Consistency Rule**: All primary headings, labels, and active UI states in the recruitment and student portals should use `text-aerojet-blue` or `bg-aerojet-blue`.
 - **Refactoring Strategy**: We recently moved away from generic `text-blue-900` or `text-slate-900` to this specific brand color to ensure professional consistency across the multi-step forms.
 
@@ -50,7 +50,7 @@ For complex forms across the portal:
 **Strategy**:
 1. The credentials provider throws a specific error string `'2FA_REQUIRED'` when the user has 2FA enabled but no TOTP code was provided.
 2. The `LoginForm` client component catches this error, shows a TOTP input field, and re-authenticates with the `totpCode` parameter included.
-3. On the second attempt, the provider verifies the TOTP code against the stored secret using `otplib` v5's `verify()` function.
+3. On the second attempt, the provider verifies the TOTP code against the stored secret using the custom `verifyTOTP()` function from `lib/auth/totp.ts` (timing-safe, with replay protection).
 **Why this approach?** NextAuth doesn't support custom authentication flows or intermediate states. Using the error channel avoids patching NextAuth internals while keeping the flow entirely within the existing `signIn('credentials', ...)` API.
 
 ## 🎯 Interactive Floor Plan: CSS Grid + Paint-Drag

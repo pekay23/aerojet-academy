@@ -1,5 +1,5 @@
 "use client";
-export default function StaffError({ error, reset }: { error: Error; reset: () => void }) {
+export default function StaffError({ _error, reset }: { _error: Error; reset: () => void }) {
   return (
     <div className="flex items-center justify-center min-h-[60vh]" role="alert">
       <div className="text-center max-w-md">

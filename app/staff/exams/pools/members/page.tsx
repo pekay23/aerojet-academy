@@ -3,22 +3,35 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
-import { ChevronLeft, Users, BookOpen, Search, Filter, Calendar } from 'lucide-react'
+import { ChevronLeft, Users, BookOpen, Calendar } from 'lucide-react'
 import SearchInput from '@/components/SearchInput'
+import { buildOrderBy } from '@/lib/utils/build-order-by'
+import { SortableTh } from '@/components/ui/sortable-th'
+import type { Prisma } from '@prisma/client'
 
 export const metadata: Metadata = { title: 'Booking Members Report | Staff Portal' }
 export const dynamic = 'force-dynamic'
 
+const ALLOWED_SORT_KEYS = {
+  event: 'startDate',
+  name: 'name',
+  student: 'user.profile.lastName',
+  module: 'examComponent.course.code',
+  status: 'status',
+} as const
+type SortKey = keyof typeof ALLOWED_SORT_KEYS
+
 export default async function PoolMembersReportPage({
   searchParams,
 }: {
-  searchParams: Promise<{ query?: string }>
+  searchParams: Promise<{ query?: string; sort?: string; order?: string }>
 }) {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
   const params = await searchParams
   const query = params.query?.toLowerCase()
+  const orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { startDate: 'desc' })
 
   const events = await prismaUnfiltered.examEvent.findMany({
     where: {
@@ -59,7 +72,7 @@ export default async function PoolMembersReportPage({
         },
       },
     },
-    orderBy: { startDate: 'desc' },
+    orderBy: orderBy as Prisma.ExamEventOrderByWithRelationInput,
   })
 
   // Filter out events/pools with no matching members after query
@@ -150,9 +163,9 @@ export default async function PoolMembersReportPage({
                       <table className="w-full text-left text-sm">
                         <thead className="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
                           <tr>
-                            <th className="px-6 py-3">Student</th>
-                            <th className="px-6 py-3">Module / Component</th>
-                            <th className="px-6 py-3">Booking Status</th>
+                            <SortableTh sortKey="student" label="Student" />
+                            <SortableTh sortKey="module" label="Module / Component" />
+                            <SortableTh sortKey="status" label="Booking Status" />
                             <th className="px-6 py-3 text-right">Actions</th>
                           </tr>
                         </thead>

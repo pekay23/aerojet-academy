@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SEB Deployment Plan · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Plans</p>
+  <h1 class="he-title">SEB Deployment Plan</h1>
+  <p class="he-deck"><strong>Date:</strong> 2026-08-31 <strong>Status:</strong> Ready for implementation <strong>Audience:</strong> IT staff, exam administrators, instructors……</p>
+</header>
+<hr />
+<section class="he-section" id="1-what-is-seb"><div class="he-section__num">01 · 1. What is SEB?</div><h2 class="he-section__title">1. What is SEB?</h2></section>
+<p><strong>Safe Exam Browser (SEB)</strong> is an open-source lockdown browser that transforms any computer into a secure exam kiosk. It prevents students from:</p>
+<ul>
+<li>Opening other applications or browser tabs</li>
+<li>Copying/pasting exam content</li>
+<li>Accessing keyboard shortcuts (F12, Ctrl+C/V, etc.)</li>
+<li>Taking screenshots or screen recordings</li>
+<li>Using DevTools or inspection tools</li>
+</ul>
+<p>SEB is the <strong>most effective anti-cheat control</strong> because it operates at the OS level, not just within the browser. For EASA-regulated exams, it is a mandatory component of the &quot;controlled examination environment.&quot;</p>
+<h3 id="key-features">Key Features</h3>
+<table>
+<thead>
+<tr><th>Feature</th><th>Benefit</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Kiosk mode</strong></td><td>Locks the computer to a single exam URL</td></tr>
+<tr><td><strong>Browser Exam Key (BEK)</strong></td><td>Cryptographic verification that the server is legitimate</td></tr>
+<tr><td><strong>Configurable rules</strong></td><td>Allow/block specific applications, printers, USB drives</td></tr>
+<tr><td><strong>Multi-platform</strong></td><td>Windows, macOS, iOS, Android</td></tr>
+<tr><td><strong>Open source</strong></td><td>Free to deploy, no per-seat licensing</td></tr>
+</tbody>
+</table>
+<h3 id="why-seb-matters-for-aerojet-academy">Why SEB Matters for Aerojet Academy</h3>
+<ol>
+<li><strong>EASA compliance</strong> — NPA 2023-10 requires &quot;controlled examination environments under full organisational control&quot;</li>
+<li><strong>Fraud prevention</strong> — Eliminates tab-switching, copy-paste, and DevTools at the OS level</li>
+<li><strong>Managed hardware</strong> — Academy-provided laptops can have SEB pre-installed by IT</li>
+<li><strong>Graceful fallback</strong> — Personal laptops can still take exams via the supervised alternative pathway</li>
+</ol>
+<hr />
+<section class="he-section" id="2-current-implementation-status"><div class="he-section__num">02 · 2. Current Implementation Status</div><h2 class="he-section__title">2. Current Implementation Status</h2></section>
+<h3 id="already-implemented">Already Implemented</h3>
+<table>
+<thead>
+<tr><th>Component</th><th>Status</th><th>Location</th></tr>
+</thead>
+<tbody>
+<tr><td><code>sebRequired</code> flag on <code>InternalExamClassSchedule</code></td><td>✅ Schema</td><td><code>prisma/schema.prisma:2028</code></td></tr>
+<tr><td>SEB detection middleware</td><td>✅ Code</td><td><code>lib/middleware/seb-detection.ts</code></td></tr>
+<tr><td>SEB config download API</td><td>✅ Code</td><td><code>app/api/staff/exams/internal/sessions/[id]/seb-config/route.ts</code></td></tr>
+<tr><td>BEK constants</td><td>✅ Code</td><td><code>lib/constants/business-rules.ts</code></td></tr>
+<tr><td>SEB enforcement in exam routes</td><td>✅ Code</td><td><code>InternalExamInterface.tsx</code></td></tr>
+</tbody>
+</table>
+<h3 id="missing-this-plan">Missing (This Plan)</h3>
+<table>
+<thead>
+<tr><th>Component</th><th>Status</th></tr>
+</thead>
+<tbody>
+<tr><td><code>.seb</code> config file generation</td><td>❌ Not implemented</td></tr>
+<tr><td>BEK verification endpoint</td><td>❌ Not implemented</td></tr>
+<tr><td>SEB deployment guide</td><td>❌ Not documented</td></tr>
+<tr><td>Managed laptop imaging script</td><td>❌ Not created</td></tr>
+<tr><td>SEB version pinning</td><td>❌ Not configured</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="3-seb-configuration-architecture"><div class="he-section__num">03 · 3. SEB Configuration Architecture</div><h2 class="he-section__title">3. SEB Configuration Architecture</h2></section>
+<h3 id="31-configuration-file-seb">3.1 Configuration File (<code>.seb</code>)</h3>
+<p>SEB uses <code>.seb</code> configuration files (ZIP archives containing XML + crypto keys). The academy needs:</p>
+<ol>
+<li><strong>Base template</strong> — Default config for all exams</li>
+<li><strong>Exam-specific configs</strong> — Per-session overrides (URL, time window, allowed apps)</li>
+<li><strong>BEK pairs</strong> — Private key (server) + public key (config)</li>
+</ol>
+<h3 id="32-configuration-flow">3.2 Configuration Flow</h3>
+<pre><code>Admin creates exam session
+  → System generates .seb config with:
+    - start_url: https://merrie-unwagered-eloise.ngrok-free.dev/student/exams/internal/start?sessionId=XXX
+    - config_key: public BEK
+    - allowed_applications: [] (locked down)
+    - show_taskbar: false
+    - enable_exit_sequencer: false
+  → Config encrypted with admin password
+  → Student downloads .seb file
+  → Student opens in SEB → BEK verified → exam launches
+</code></pre>
+<h3 id="33-server-side-bek-verification">3.3 Server-Side BEK Verification</h3>
+<p>When SEB launches an exam, it sends:</p>
+<pre><code>X-SafeExamBrowser-RequestHash: &lt;hash&gt;
+X-SafeExamBrowser-ConfigKey: &lt;public_key&gt;
+</code></pre>
+<p>Server verifies:</p>
+<ol>
+<li><code>RequestHash</code> matches expected hash for this session</li>
+<li><code>ConfigKey</code> matches stored BEK</li>
+<li>Session is active and not expired</li>
+</ol>
+<hr />
+<section class="he-section" id="4-implementation-plan"><div class="he-section__num">04 · 4. Implementation Plan</div><h2 class="he-section__title">4. Implementation Plan</h2></section>
+<h3 id="phase-1-seb-config-generation-week-1">Phase 1: SEB Config Generation (Week 1)</h3>
+<p><strong>Goal:</strong> Generate valid <code>.seb</code> configuration files server-side.</p>
+<h4 id="41-seb-config-generator">4.1 SEB Config Generator</h4>
+<p><strong>File:</strong> <code>lib/internal-exam/seb-config.ts</code></p>
+<pre><code class="language-typescript">export interface SebConfig {
+  startUrl: string
+  configKey: string
+  allowQuit: boolean
+  showTaskbar: boolean
+  enableExitSequencer: boolean
+  allowedApplications: string[]
+  blockedApplications: string[]
+  enablePrintScreen: boolean
+  enableClipboard: boolean
+  enableDeveloperTools: boolean
+}
+
+export function generateSebConfig(config: SebConfig): Buffer
+export function encryptSebConfig(configBuffer: Buffer, password: string): Buffer
+</code></pre>
+<h4 id="42-bek-key-pair-generation">4.2 BEK Key Pair Generation</h4>
+<p><strong>File:</strong> <code>lib/internal-exam/seb-keys.ts</code></p>
+<pre><code class="language-typescript">export interface BekPair {
+  publicKey: string
+  privateKey: string
+  configKey: string
+}
+
+export function generateBekPair(): BekPair
+export function verifySebRequestHash(requestHash: string, bekPair: BekPair, sessionId: string): boolean
+</code></pre>
+<h4 id="43-api-route">4.3 API Route</h4>
+<p><strong>File:</strong> <code>app/api/staff/exams/internal/sessions/[id]/seb-config/route.ts</code> (already exists, needs update)</p>
+<ul>
+<li>Generate BEK pair per session</li>
+<li>Store <code>privateKey</code> encrypted in session metadata</li>
+<li>Return <code>.seb</code> file download with <code>application/octet-stream</code> content-type</li>
+</ul>
+<h3 id="phase-2-seb-deployment-guide-week-1">Phase 2: SEB Deployment Guide (Week 1)</h3>
+<p><strong>File:</strong> <code>docs/guides/seb-deployment.md</code></p>
+<p>Sections:</p>
+<ol>
+<li>Download SEB for Windows/macOS/iOS/Android</li>
+<li>Managed laptop imaging script (PowerShell + MDT/SCCM)</li>
+<li>IT deployment checklist</li>
+<li>Student self-installation guide</li>
+<li>Troubleshooting (BEK mismatch, URL blocked, etc.)</li>
+</ol>
+<h3 id="phase-3-admin-ui-toggle-week-2">Phase 3: Admin UI Toggle (Week 2)</h3>
+<p><strong>File:</strong> <code>app/staff/exams/internal/sessions/[id]/seb-config/_components/SebConfigPanel.tsx</code></p>
+<p>Features:</p>
+<ul>
+<li>Generate <code>.seb</code> config with one click</li>
+<li>Download button</li>
+<li>BEK status display (active/expired)</li>
+<li>Copy config to clipboard for manual distribution</li>
+</ul>
+<hr />
+<section class="he-section" id="5-certificate-template-amp-pdf-generation"><div class="he-section__num">05 · 5. Certificate Template &amp;amp; PDF Generation</div><h2 class="he-section__title">5. Certificate Template &amp; PDF Generation</h2></section>
+<h3 id="51-admin-toggle">5.1 Admin Toggle</h3>
+<p>Add <code>certificateEnabled</code> boolean to <code>InternalExamBank</code>:</p>
+<pre><code class="language-prisma">model InternalExamBank {
+  ...
+  certificateEnabled Boolean @default(false)
+  certificateTemplate String?  // JSON template config
+}
+</code></pre>
+<h3 id="52-certificate-configuration">5.2 Certificate Configuration</h3>
+<p>Admins can configure:</p>
+<ul>
+<li>Template version (EASA Part-66 standard, academy custom)</li>
+<li>Include/exclude fields (score, module list, invigilator name)</li>
+<li>Signature type (digital, none)</li>
+<li>Validity period</li>
+</ul>
+<h3 id="53-pdf-generation">5.3 PDF Generation</h3>
+<p><strong>Library:</strong> <code>pdf-lib</code> (server-side, no client deps)</p>
+<p><strong>Flow:</strong></p>
+<ol>
+<li>Student passes exam</li>
+<li>System checks <code>bank.certificateEnabled</code></li>
+<li>If enabled → generate PDF → store in Supabase Storage</li>
+<li>Send email with download link</li>
+<li>If disabled → skip PDF generation</li>
+</ol>
+<p><strong>Certificate Fields:</strong></p>
+<table>
+<thead>
+<tr><th>Field</th><th>Source</th><th>EASA Requirement</th></tr>
+</thead>
+<tbody>
+<tr><td>Candidate name</td><td><code>InternalExamRegistration.fullName</code></td><td>Passport match</td></tr>
+<tr><td>Licence category</td><td><code>InternalExamRegistration.licenceCategory</code></td><td>B1.1, B1.2, B2, etc.</td></tr>
+<tr><td>Module(s)</td><td><code>InternalExamRegistration.moduleCode</code></td><td>M1–M17</td></tr>
+<tr><td>Examination date</td><td><code>InternalExamRegistration.examDate</code></td><td>Auto-filled</td></tr>
+<tr><td>Examination location</td><td><code>InternalExamSession.location</code></td><td>Part-147 centre</td></tr>
+<tr><td>Score</td><td><code>InternalExamSession.percentage</code></td><td>Immediate result</td></tr>
+<tr><td>Pass/fail</td><td><code>InternalExamSession.passed</code></td><td>Required</td></tr>
+<tr><td>Part-147 approval number</td><td><code>lib/constants/business-rules.ts</code></td><td>Fixed</td></tr>
+<tr><td>Unique certificate ID</td><td>Hash of session + timestamp</td><td>Tamper evidence</td></tr>
+<tr><td>Digital signature</td><td>Future: PKI</td><td>Optional</td></tr>
+</tbody>
+</table>
+<h3 id="54-implementation-files">5.4 Implementation Files</h3>
+<pre><code>lib/internal-exam/
+  certificates/
+    generator.ts      # PDF generation logic
+    template.ts       # EASA template definition
+    storage.ts        # Supabase Storage upload
+    types.ts          # CertificateConfig interface
+
+app/api/student/exams/internal/
+  certificate/
+    [sessionId]/
+      route.ts        # GET certificate PDF
+</code></pre>
+<hr />
+<section class="he-section" id="6-testing-plan"><div class="he-section__num">06 · 6. Testing Plan</div><h2 class="he-section__title">6. Testing Plan</h2></section>
+<h3 id="61-seb-tests">6.1 SEB Tests</h3>
+<table>
+<thead>
+<tr><th>Test</th><th>Method</th><th>Tool</th></tr>
+</thead>
+<tbody>
+<tr><td><code>.seb</code> config validates against SEB schema</td><td>Load in SEB client</td><td>Manual + automated snapshot</td></tr>
+<tr><td>BEK verification rejects tampered requests</td><td>Modify hash → expect 401</td><td>Playwright</td></tr>
+<tr><td>BEK verification accepts valid requests</td><td>Valid hash → expect 200</td><td>Playwright</td></tr>
+<tr><td>Config download returns binary</td><td>GET /seb-config → content-type</td><td>Vitest</td></tr>
+<tr><td>Expired session blocks SEB launch</td><td>Expired session → 403</td><td>Vitest</td></tr>
+</tbody>
+</table>
+<h3 id="62-certificate-tests">6.2 Certificate Tests</h3>
+<table>
+<thead>
+<tr><th>Test</th><th>Method</th><th>Tool</th></tr>
+</thead>
+<tbody>
+<tr><td>PDF generation produces valid PDF</td><td>Generate → parse with <code>pdf-lib</code></td><td>Vitest</td></tr>
+<tr><td>PDF contains required fields</td><td>Extract text → assert fields</td><td>Vitest</td></tr>
+<tr><td>Certificate disabled → no PDF generated</td><td><code>certificateEnabled: false</code> → no file</td><td>Vitest</td></tr>
+<tr><td>Certificate enabled → PDF generated</td><td><code>certificateEnabled: true</code> → file in Storage</td><td>Vitest</td></tr>
+<tr><td>Unique certificate ID per exam</td><td>Generate twice → IDs differ</td><td>Vitest</td></tr>
+<tr><td>Storage upload succeeds</td><td>Mock Supabase → assert upload</td><td>Vitest</td></tr>
+<tr><td>Email includes download link</td><td>Mock sendEmail → assert link</td><td>Vitest</td></tr>
+</tbody>
+</table>
+<h3 id="63-integration-tests">6.3 Integration Tests</h3>
+<table>
+<thead>
+<tr><th>Test</th><th>Method</th><th>Tool</th></tr>
+</thead>
+<tbody>
+<tr><td>Full flow: exam → pass → certificate</td><td>End-to-end</td><td>Playwright</td></tr>
+<tr><td>Admin toggles certificate on/off</td><td>UI test</td><td>Playwright</td></tr>
+<tr><td>Student downloads certificate</td><td>Authenticated flow</td><td>Playwright</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="7-implementation-checklist"><div class="he-section__num">07 · 7. Implementation Checklist</div><h2 class="he-section__title">7. Implementation Checklist</h2></section>
+<h3 id="seb">SEB</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>lib/internal-exam/seb-config.ts</code> — config generator + encryptor</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>lib/internal-exam/seb-keys.ts</code> — BEK key pair generation + verification</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>app/api/staff/exams/internal/sessions/[id]/seb-config/route.ts</code> — download endpoint</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>docs/guides/seb-deployment.md</code> — IT + student guides</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Add <code>configKey</code> field to <code>InternalExamSession</code> schema</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Unit tests for config generation + BEK verification</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Playwright test for BEK verification flow</li>
+</ul>
+<h3 id="certificates">Certificates</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Add <code>certificateEnabled</code> + <code>certificateTemplate</code> to <code>InternalExamBank</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>lib/internal-exam/certificates/generator.ts</code> — PDF generation</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>lib/internal-exam/certificates/template.ts</code> — EASA template</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>lib/internal-exam/certificates/storage.ts</code> — Supabase upload</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled><code>app/api/student/exams/internal/certificate/[sessionId]/route.ts</code> — download endpoint</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Admin UI toggle in exam bank settings</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Unit tests for PDF generation + storage</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Playwright integration test for full flow</li>
+</ul>
+<hr />
+<p><em>End of SEB &amp; Certificate Implementation Plan</em></p>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#1-what-is-seb">1. What is SEB?</a></li>
+    <li class="he-toc__l3"><a href="#key-features">Key Features</a></li>
+    <li class="he-toc__l3"><a href="#why-seb-matters-for-aerojet-academy">Why SEB Matters for Aerojet Academy</a></li>
+    <li class="he-toc__l2"><a href="#2-current-implementation-status">2. Current Implementation Status</a></li>
+    <li class="he-toc__l3"><a href="#already-implemented">Already Implemented</a></li>
+    <li class="he-toc__l3"><a href="#missing-this-plan">Missing (This Plan)</a></li>
+    <li class="he-toc__l2"><a href="#3-seb-configuration-architecture">3. SEB Configuration Architecture</a></li>
+    <li class="he-toc__l3"><a href="#31-configuration-file-seb">3.1 Configuration File (`.seb`)</a></li>
+    <li class="he-toc__l3"><a href="#32-configuration-flow">3.2 Configuration Flow</a></li>
+    <li class="he-toc__l3"><a href="#33-server-side-bek-verification">3.3 Server-Side BEK Verification</a></li>
+    <li class="he-toc__l2"><a href="#4-implementation-plan">4. Implementation Plan</a></li>
+    <li class="he-toc__l3"><a href="#phase-1-seb-config-generation-week-1">Phase 1: SEB Config Generation (Week 1)</a></li>
+    <li class="he-toc__l3"><a href="#phase-2-seb-deployment-guide-week-1">Phase 2: SEB Deployment Guide (Week 1)</a></li>
+    <li class="he-toc__l3"><a href="#phase-3-admin-ui-toggle-week-2">Phase 3: Admin UI Toggle (Week 2)</a></li>
+    <li class="he-toc__l2"><a href="#5-certificate-template-pdf-generation">5. Certificate Template &amp; PDF Generation</a></li>
+    <li class="he-toc__l3"><a href="#51-admin-toggle">5.1 Admin Toggle</a></li>
+    <li class="he-toc__l3"><a href="#52-certificate-configuration">5.2 Certificate Configuration</a></li>
+    <li class="he-toc__l3"><a href="#53-pdf-generation">5.3 PDF Generation</a></li>
+    <li class="he-toc__l3"><a href="#54-implementation-files">5.4 Implementation Files</a></li>
+    <li class="he-toc__l2"><a href="#6-testing-plan">6. Testing Plan</a></li>
+    <li class="he-toc__l3"><a href="#61-seb-tests">6.1 SEB Tests</a></li>
+    <li class="he-toc__l3"><a href="#62-certificate-tests">6.2 Certificate Tests</a></li>
+    <li class="he-toc__l3"><a href="#63-integration-tests">6.3 Integration Tests</a></li>
+    <li class="he-toc__l2"><a href="#7-implementation-checklist">7. Implementation Checklist</a></li>
+    <li class="he-toc__l3"><a href="#seb">SEB</a></li>
+    <li class="he-toc__l3"><a href="#certificates">Certificates</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

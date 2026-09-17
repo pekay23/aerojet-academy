@@ -1,25 +1,25 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireAdmin } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     await requireAdmin()
-    const setting = await prismaUnfiltered.systemSetting.findUnique({ where: { key: ctx?.params?.key } })
+    const setting = await prismaUnfiltered.systemSetting.findUnique({ where: { key: (await ctx!.params).key } })
     if (!setting) return apiNotFound('Setting not found')
     return apiSuccess(setting)
   }
 )
 
 export const PUT = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const admin = await requireAdmin()
     const body = await req.json()
     const { value, description } = body
     if (value === undefined) return apiError('Value is required')
-    const key = ctx?.params?.key!
+    const key = (await ctx!.params).key!
     const existing = await prismaUnfiltered.systemSetting.findUnique({ where: { key } })
 
     const setting = await prismaUnfiltered.systemSetting.upsert({

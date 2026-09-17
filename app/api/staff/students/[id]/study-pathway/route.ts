@@ -86,7 +86,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       pathwayCode,
       message: 'Pathway updated',
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Pathway override error:', error)
     return NextResponse.json({ error: 'Failed to update pathway' }, { status: 500 })
   }

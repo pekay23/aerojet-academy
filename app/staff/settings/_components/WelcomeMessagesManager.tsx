@@ -1,10 +1,14 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { Plus, Trash2, Save, Loader2, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { DEFAULT_ROLE_WELCOME_MESSAGES } from '@/lib/welcome-messages'
 import MotionTabs from '@/components/ui/MotionTabs'
+import { useSettingsDirty } from './SettingsTabs'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import { UnsavedChangesDialog } from '@/components/shared/UnsavedChangesDialog'
+import { FormDirtyIndicator } from '@/components/shared/FormDirtyIndicator'
 
 interface WelcomeMessagesManagerProps {
   initialMessages: Record<string, string[]> | string[]
@@ -44,6 +48,34 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
   const [newMessage, setNewMessage] = useState('')
   const [saving, setSaving] = useState(false)
 
+  const {
+    markDirty: markDirtySettings,
+    markClean: markCleanSettings,
+  } = useSettingsDirty()
+
+  // Local instance for per-role tab switching dialog.
+  const {
+    markDirty: markDirtyLocal,
+    markClean: markCleanLocal,
+    confirmLeave,
+    pendingTab,
+    proceedLeave,
+    cancelLeave,
+  } = useUnsavedChanges()
+
+  const markBothDirty = useCallback(() => {
+    markDirtySettings();
+    markDirtyLocal();
+  }, [markDirtySettings, markDirtyLocal])
+
+  const markBothClean = useCallback(() => {
+    markCleanSettings();
+    markCleanLocal();
+  }, [markCleanSettings, markCleanLocal])
+
+  // Track whether the current role has unsaved edits vs the committed baseline.
+  const isDirty = JSON.stringify(allMessages) !== JSON.stringify(normalizedInitial)
+
   const currentMessages = allMessages[activeRole] || []
 
   const addMessage = () => {
@@ -58,6 +90,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
       [activeRole]: [...currentMessages, trimmed],
     })
     setNewMessage('')
+    markBothDirty()
   }
 
   const removeMessage = (idx: number) => {
@@ -65,6 +98,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
       ...allMessages,
       [activeRole]: currentMessages.filter((_, i) => i !== idx),
     })
+    markBothDirty()
   }
 
   const resetToDefaults = () => {
@@ -73,6 +107,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
       [activeRole]: [...DEFAULT_ROLE_WELCOME_MESSAGES[activeRole]],
     })
     toast.info(`Reset ${activeRole} messages to defaults — click Save to apply.`)
+    markBothDirty()
   }
 
   const handleSave = async () => {
@@ -93,6 +128,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Save failed')
       toast.success(`Saved welcome messages for all roles`)
+      markBothClean()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Save failed')
     } finally {
@@ -117,6 +153,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
             tabs={ROLE_TABS}
             activeTab={activeRole}
             onChange={setActiveRole}
+            onBeforeChange={confirmLeave}
             layoutId="role-tabs"
           />
         </div>
@@ -201,8 +238,15 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Save All Changes
+          <FormDirtyIndicator isDirty={isDirty} />
         </button>
       </div>
+
+      <UnsavedChangesDialog
+        open={pendingTab !== null}
+        onProceed={proceedLeave}
+        onCancel={cancelLeave}
+      />
     </div>
   )
 }

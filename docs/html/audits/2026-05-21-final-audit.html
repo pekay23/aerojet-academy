@@ -14,11 +14,13 @@
   <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
     <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +28,58 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Final Audit — 2026-05-21</h1>
-  <p class="he-deck"><p>Comprehensive sweep performed after the internal-exams hardening work landed in commits <code>eee14c5</code> and <code>907c4a7</code>.</p>
-</p>
+  <p class="he-deck">Comprehensive sweep performed after the internal-exams hardening work landed in commits <code>eee14c5</code> and <code>907c4a7</code>.</p>
 </header>
-<section class="he-section" id="verification"><div class="he-section__num">01 · Verification</div><h2 class="he-section__title">Verification</h2>CheckResult<code>bun run type-check</code>✓ clean<code>bun run test --run</code>✓ 116/116 (15 files)<code>bun run build</code>✓ exit 0Working treeclean<section class="he-section" id="status-of-prior-findings-exam-1exam-14"><div class="he-section__num">02 · Status of prior findings (EXAM-1..EXAM-14)</div><h2 class="he-section__title">Status of prior findings (EXAM-1..EXAM-14)</h2>All 14 internal-exams findings from the prior audit are committed and confirmed in place:CRITICAL EXAM-1 (void schema columns) — <code>voidedAt</code>/<code>voidedBy</code>/<code>voidReason</code> present in <a href="../../prisma/schema.prisma">prisma/schema.prisma</a>; void route writes them without casts. ✅HIGH EXAM-2 (audit logs on publish/void) — <code>createAuditLog</code> calls in <a href="../../app/api/staff/exams/internal/operations/publish/route.ts">publish/route.ts</a> and <a href="../../app/api/staff/exams/internal/operations/void/route.ts">void/route.ts</a>. ✅HIGH EXAM-3 (status-leak in progress endpoint) — fixed by setting <code>entry.status</code> only at entry creation (newest session first via DESC ordering). ✅HIGH EXAM-4 (dead retake/ban computation) — removed from <a href="../../app/api/student/exams/internal/submit/route.ts">submit/route.ts</a>. ✅HIGH EXAM-5 (sessions payload size) — split into list (<a href="../../app/api/staff/exams/internal/operations/sessions/route.ts">sessions/route.ts</a>) + detail (<a href="../../app/api/staff/exams/internal/operations/sessions/[id]/route.ts">sessions/[id]/route.ts</a>). ~95% list payload reduction. ✅EXAM-6..14 — all addressed (zod validation, visibility-aware polling at 30s, lazy-fetch on row expand, <code>subTopic</code> removed from student-facing question shape, 4-option seed, pending-reports alert added to dashboard). ✅<section class="he-section" id="new-findings-this-pass"><div class="he-section__num">03 · New findings this pass</div><h2 class="he-section__title">New findings this pass</h2><h3 id="final-1-low-as-any-casts-in-internal-exams-routes-fixed-in-this-audit">FINAL-1 (LOW) — <code>as any</code> casts in internal-exams routes — fixed in this audit</h3>Three minor casts existed after the EXAM fixes landed; they masked nothing dangerous but obscured intent.<a href="../../app/api/staff/exams/internal/banks/route.ts#L75">app/api/staff/exams/internal/banks/route.ts:75,92</a> — <code>_ctx: any</code> on POST signature (unused) and <code>parsed.data.ruleSet as any</code>. zod enum aligns with Prisma <code>ExamRuleSet</code>, cast unnecessary.<a href="../../app/api/staff/exams/internal/banks/[bankId]/questions/route.ts#L78">app/api/staff/exams/internal/banks/[bankId]/questions/route.ts:78</a> — <code>parsed.data.difficulty as any</code>. Same — aligns with <code>QuestionDifficulty</code>.<a href="../../app/api/student/exams/internal/start/route.ts#L19">app/api/student/exams/internal/start/route.ts:19,143</a> — <code>_ctx: any</code> + <code>(eligibility as any).attemptNumber</code>. Replaced with <code>'attemptNumber' in eligibility ? eligibility.attemptNumber : 1</code> to narrow the discriminated union returned by <code>checkEligibility</code>.Verification: <code>bun run type-check</code> clean after fix.<h3 id="no-issues-found">No issues found</h3>The following sweeps came up clean and are noted for the record:Auth boundaries — every <code>/api/staff/exams/internal/*</code> route calls <code>requireStaff()</code> or stricter; every <code>/api/student/exams/internal/*</code> route validates <code>session.user.role === 'STUDENT'</code>.<code>as any</code> / <code>@ts-ignore</code> outside internal-exams — no new occurrences introduced by the two commits.<code>console.*</code> in API routes — 92 files contain at least one, but spot checks show all are intentional <code>console.error</code> calls in catch blocks for cron/uploadthing/webhook diagnostics. No <code>console.log</code> debug leftovers in the internal-exams area.Schema drift — <code>prisma generate</code> matches schema; <code>prismaUnfiltered.internalExamSession</code> types include <code>voidedAt</code>/<code>voidedBy</code>/<code>voidReason</code>/<code>isPublished</code>.Audit logs — every privileged mutation in the internal-exams area now writes through <code>createAuditLog</code> with <code>description:</code> + <code>changes:</code> per project convention.Cron registry — <code>vercel.json</code> declares 16 jobs; all 16 have route files under <code>app/api/cron/*</code>. No orphans either direction.<section class="he-section" id="files-touched-in-this-audit"><div class="he-section__num">04 · Files touched in this audit</div><h2 class="he-section__title">Files touched in this audit</h2><code>app/api/staff/exams/internal/banks/route.ts</code> — drop two <code>any</code>s<code>app/api/staff/exams/internal/banks/[bankId]/questions/route.ts</code> — drop <code>any</code><code>app/api/student/exams/internal/start/route.ts</code> — drop two <code>any</code>s, narrow eligibility union<code>docs/audits/2026-05-21-final-audit.md</code> — this fileNo schema changes, no migrations, no behaviour changes. Pure type-safety cleanup.
+<section class="he-section" id="verification"><div class="he-section__num">01 · Verification</div><h2 class="he-section__title">Verification</h2></section>
+<table>
+<thead>
+<tr><th>Check</th><th>Result</th></tr>
+</thead>
+<tbody>
+<tr><td><code>bun run type-check</code></td><td>✓ clean</td></tr>
+<tr><td><code>bun run test --run</code></td><td>✓ 116/116 (15 files)</td></tr>
+<tr><td><code>bun run build</code></td><td>✓ exit 0</td></tr>
+<tr><td>Working tree</td><td>clean</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="status-of-prior-findings-exam-1exam-14"><div class="he-section__num">02 · Status of prior findings (EXAM-1..EXAM-14)</div><h2 class="he-section__title">Status of prior findings (EXAM-1..EXAM-14)</h2></section>
+<p>All 14 internal-exams findings from the prior audit are committed and confirmed in place:</p>
+<ul>
+<li><strong>CRITICAL</strong> EXAM-1 (void schema columns) — <code>voidedAt</code>/<code>voidedBy</code>/<code>voidReason</code> present in <a href="../../prisma/schema.prisma">prisma/schema.prisma</a>; void route writes them without casts. ✅</li>
+<li><strong>HIGH</strong> EXAM-2 (audit logs on publish/void) — <code>createAuditLog</code> calls in <a href="../../app/api/staff/exams/internal/operations/publish/route.ts">publish/route.ts</a> and <a href="../../app/api/staff/exams/internal/operations/void/route.ts">void/route.ts</a>. ✅</li>
+<li><strong>HIGH</strong> EXAM-3 (status-leak in progress endpoint) — fixed by setting <code>entry.status</code> only at entry creation (newest session first via DESC ordering). ✅</li>
+<li><strong>HIGH</strong> EXAM-4 (dead retake/ban computation) — removed from <a href="../../app/api/student/exams/internal/submit/route.ts">submit/route.ts</a>. ✅</li>
+<li><strong>HIGH</strong> EXAM-5 (sessions payload size) — split into list (<a href="../../app/api/staff/exams/internal/operations/sessions/route.ts">sessions/route.ts</a>) + detail (<a href="../../app/api/staff/exams/internal/operations/sessions/%5Bid%5D/route.ts">sessions/[id]/route.ts</a>). ~95% list payload reduction. ✅</li>
+<li>EXAM-6..14 — all addressed (zod validation, visibility-aware polling at 30s, lazy-fetch on row expand, <code>subTopic</code> removed from student-facing question shape, 4-option seed, pending-reports alert added to dashboard). ✅</li>
+</ul>
+<section class="he-section" id="new-findings-this-pass"><div class="he-section__num">03 · New findings this pass</div><h2 class="he-section__title">New findings this pass</h2></section>
+<h3 id="final-1-low-as-any-casts-in-internal-exams-routes-fixed-in-this-audit">FINAL-1 (LOW) — <code>as any</code> casts in internal-exams routes — fixed in this audit</h3>
+<p>Three minor casts existed after the EXAM fixes landed; they masked nothing dangerous but obscured intent.</p>
+<ul>
+<li><a href="../../app/api/staff/exams/internal/banks/route.ts#L75">app/api/staff/exams/internal/banks/route.ts:75,92</a> — <code>_ctx: any</code> on POST signature (unused) and <code>parsed.data.ruleSet as any</code>. zod enum aligns with Prisma <code>ExamRuleSet</code>, cast unnecessary.</li>
+<li><a href="../../app/api/staff/exams/internal/banks/%5BbankId%5D/questions/route.ts#L78">app/api/staff/exams/internal/banks/[bankId]/questions/route.ts:78</a> — <code>parsed.data.difficulty as any</code>. Same — aligns with <code>QuestionDifficulty</code>.</li>
+<li><a href="../../app/api/student/exams/internal/start/route.ts#L19">app/api/student/exams/internal/start/route.ts:19,143</a> — <code>_ctx: any</code> + <code>(eligibility as any).attemptNumber</code>. Replaced with <code>'attemptNumber' in eligibility ? eligibility.attemptNumber : 1</code> to narrow the discriminated union returned by <code>checkEligibility</code>.</li>
+</ul>
+<p>Verification: <code>bun run type-check</code> clean after fix.</p>
+<h3 id="no-issues-found">No issues found</h3>
+<p>The following sweeps came up clean and are noted for the record:</p>
+<ul>
+<li><strong>Auth boundaries</strong> — every <code>/api/staff/exams/internal/*</code> route calls <code>requireStaff()</code> or stricter; every <code>/api/student/exams/internal/*</code> route validates <code>session.user.role === 'STUDENT'</code>.</li>
+<li><strong><code>as any</code> / <code>@ts-ignore</code> outside internal-exams</strong> — no new occurrences introduced by the two commits.</li>
+<li><strong><code>console.*</code> in API routes</strong> — 92 files contain at least one, but spot checks show all are intentional <code>console.error</code> calls in catch blocks for cron/uploadthing/webhook diagnostics. No <code>console.log</code> debug leftovers in the internal-exams area.</li>
+<li><strong>Schema drift</strong> — <code>prisma generate</code> matches schema; <code>prismaUnfiltered.internalExamSession</code> types include <code>voidedAt</code>/<code>voidedBy</code>/<code>voidReason</code>/<code>isPublished</code>.</li>
+<li><strong>Audit logs</strong> — every privileged mutation in the internal-exams area now writes through <code>createAuditLog</code> with <code>description:</code> + <code>changes:</code> per project convention.</li>
+<li><strong>Cron registry</strong> — <code>vercel.json</code> declares 16 jobs; all 16 have route files under <code>app/api/cron/*</code>. No orphans either direction.</li>
+</ul>
+<section class="he-section" id="files-touched-in-this-audit"><div class="he-section__num">04 · Files touched in this audit</div><h2 class="he-section__title">Files touched in this audit</h2></section>
+<ul>
+<li><code>app/api/staff/exams/internal/banks/route.ts</code> — drop two <code>any</code>s</li>
+<li><code>app/api/staff/exams/internal/banks/[bankId]/questions/route.ts</code> — drop <code>any</code></li>
+<li><code>app/api/student/exams/internal/start/route.ts</code> — drop two <code>any</code>s, narrow eligibility union</li>
+<li><code>docs/audits/2026-05-21-final-audit.md</code> — this file</li>
+</ul>
+<p>No schema changes, no migrations, no behaviour changes. Pure type-safety cleanup.</p>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -45,7 +95,7 @@
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

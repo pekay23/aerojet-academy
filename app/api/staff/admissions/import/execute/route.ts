@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 const PROGRAMMES = ['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR', 'MODULAR', 'EXAM_ONLY'] as const
@@ -16,10 +16,10 @@ const rowSchema = z.object({
   customFields: z.record(z.string(), z.string()).optional()
 }).passthrough()
 
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, _ctx: RouteContext) => {
   await requireStaff()
   
-  const body = await req.json()
+  const body = await req.json() as { validRows: unknown[] }
   if (!Array.isArray(body.validRows)) return apiError('Invalid input: validRows must be an array')
 
   let importedCount = 0
@@ -37,7 +37,7 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
     const data = parsed.data
 
     try {
-      await prismaUnfiltered.$transaction(async (tx: any) => {
+      await prismaUnfiltered.$transaction(async (tx) => {
         // 1. Find or create user
         let user = await tx.user.findUnique({ where: { email: data.email } })
         if (!user) {
@@ -100,8 +100,8 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
         }
       })
       importedCount++
-    } catch (e: any) {
-      errors.push(`Row ${i} (${data.email}): ${e.message}`)
+    } catch (e: unknown) {
+      errors.push(`Row ${i} (${data.email}): ${e instanceof Error ? e.message : String(e)}`)
     }
   }
 

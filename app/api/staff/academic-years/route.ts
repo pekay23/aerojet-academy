@@ -4,9 +4,9 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
-    const session = await requireStaff()
+    const _session = await requireStaff()
 
     const academicYears = await prismaUnfiltered.academicYear.findMany({
       include: {
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json(academicYears)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to fetch academic years:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     revalidateTag('academic-years', 'max')
     return NextResponse.json(academicYear, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to create academic year:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }

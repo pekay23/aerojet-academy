@@ -128,8 +128,9 @@ export default function SeatingAssignment({
       toast.success('Seating assignments saved', {
         description: `${assignedCount} of ${students.length} students assigned`,
       })
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to save')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save'
+      toast.error(message)
     } finally {
       setSaving(false)
     }
@@ -239,7 +240,7 @@ export default function SeatingAssignment({
         </div>
 
         {/* Floor Plan View */}
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
           <div className="flex justify-center">
             <div className="space-y-2">
               <div className="mb-4 flex items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white/50 px-6 py-2 dark:border-slate-700 dark:bg-slate-900/50">

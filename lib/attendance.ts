@@ -31,7 +31,7 @@ export async function getAttendanceThreshold(): Promise<{
 
 export async function calculateAttendancePercentage(
   userId: string,
-  enrollmentType?: string
+  _enrollmentType?: string
 ): Promise<{
   percentage: number
   total: number

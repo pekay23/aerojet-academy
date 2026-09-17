@@ -66,7 +66,6 @@ export default function PageHero({ title, subtitle, backgroundImage }: PageHeroP
         </motion.p>
       </motion.div>
 
-
       {/* Bottom fade to white for a smooth transition to page content */}
       <div className="absolute right-0 bottom-0 left-0 z-10 h-24 bg-linear-to-t from-white to-transparent" />
     </section>

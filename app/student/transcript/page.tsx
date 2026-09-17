@@ -1,12 +1,17 @@
+import 'server-only'
+
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { calculateAttendancePercentage } from '@/lib/attendance'
 import { getLicenseProgress } from '@/lib/license/progress'
 import { getStudentStatus } from '@/lib/access-control'
 import PrintButton from './PrintButton'
+import { PageTransition } from '@/components/shared/PageTransition'
+import ExamResultsTable from './_components/ExamResultsTable'
+import EnrolmentTable from './_components/EnrolmentTable'
 
 export const metadata: Metadata = {
   title: 'Academic Transcript | Student Portal',
@@ -22,7 +27,7 @@ export default async function TranscriptPage() {
   const showLicenseProgress = isFullTime
 
   const [profile, enrollments, results, attendance, licenseProgress] = await Promise.all([
-    prisma.studentProfile.findUnique({
+    prismaUnfiltered.studentProfile.findUnique({
       where: { userId: session.user.id },
       select: {
         studentId: true,
@@ -35,7 +40,7 @@ export default async function TranscriptPage() {
         pathwayRel: { select: { name: true } },
       },
     }),
-    prisma.enrollment.findMany({
+    prismaUnfiltered.enrollment.findMany({
       where: { userId: session.user.id },
       select: {
         status: true,
@@ -44,7 +49,7 @@ export default async function TranscriptPage() {
       },
       orderBy: { createdAt: 'asc' },
     }),
-    prisma.examResult.findMany({
+    prismaUnfiltered.examResult.findMany({
       where: { userId: session.user.id },
       select: {
         moduleCode: true,
@@ -66,190 +71,104 @@ export default async function TranscriptPage() {
     getLicenseProgress(session.user.id),
   ])
 
+  const resultsNumber = results.map((r) => ({
+    ...r,
+    percentage: r.percentage ? Number(r.percentage) : null,
+  }))
+
   const fullName = profile?.user.profile
     ? `${profile.user.profile.firstName} ${profile.user.profile.lastName}`
     : (profile?.user.email ?? 'Student')
 
-  const moduleName = (r: (typeof results)[number]) =>
+  const _moduleName = (r: (typeof results)[number]) =>
     r.exam?.examComponent?.course?.name ?? r.moduleCode ?? '—'
-  const moduleCode = (r: (typeof results)[number]) =>
+  const _moduleCode = (r: (typeof results)[number]) =>
     r.exam?.examComponent?.course?.code ?? r.moduleCode ?? '—'
 
   return (
-    <div className="space-y-6 print:space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white print:text-2xl">
-            Academic Transcript
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {isExamOnly || isModular
-              ? 'Summary of your EASA examination results. This is not an official EASA certificate.'
-              : 'Academy-issued record. This is not an official EASA certificate. No grade-point average is computed — this is an EASA Part-147 training record.'}
-          </p>
-        </div>
-        <PrintButton />
-      </div>
-
-      {/* Identity */}
-      <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-100 bg-white p-5 text-sm sm:grid-cols-4 dark:border-slate-800 dark:bg-slate-900">
-        <Field label="Name" value={fullName} />
-        <Field label="Student ID" value={profile?.studentId ?? '—'} />
-        <Field
-          label="Pathway"
-          value={profile?.pathwayRel?.name ?? profile?.enrollmentType ?? '—'}
-        />
-        {isFullTime && (
-          <Field
-            label="Current Term"
-            value={`Year ${profile?.currentYearNumber ?? 1}, Sem ${profile?.currentSemesterNumber ?? 1}`}
-          />
-        )}
-        <Field
-          label="Enrolled"
-          value={profile?.enrollmentDate?.toLocaleDateString('en-GB') ?? '—'}
-        />
-        <Field
-          label="Graduated"
-          value={profile?.graduationDate?.toLocaleDateString('en-GB') ?? '—'}
-        />
-        {isFullTime && (
-          <Field
-            label="Attendance"
-            value={attendance.total > 0 ? `${attendance.percentage}%` : 'N/A'}
-          />
-        )}
-      </div>
-
-      {/* Exam results */}
-      <Section title="Examination Record">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-100 text-left dark:border-slate-800">
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Module
-              </th>
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Category
-              </th>
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Attempt
-              </th>
-              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Score
-              </th>
-              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Result
-              </th>
-              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Date
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-            {results.map((r, i) => (
-              <tr key={i}>
-                <td className="px-3 py-2">
-                  <span className="font-mono font-bold">{moduleCode(r)}</span>{' '}
-                  <span className="text-slate-500">{moduleName(r)}</span>
-                </td>
-                <td className="px-3 py-2 text-xs text-slate-500">
-                  {r.examCategory === 'INTERNAL' ? 'Internal' : 'Official EASA'}
-                </td>
-                <td className="px-3 py-2 text-xs text-slate-500">
-                  {(r.attemptType || 'FIRST').replace(/_/g, ' ')}
-                </td>
-                <td className="px-3 py-2 text-center font-mono">
-                  {r.percentage != null ? `${r.percentage}%` : '—'}
-                </td>
-                <td className="px-3 py-2 text-center">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                      r.passed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {r.passed ? 'Pass' : 'Fail'}
-                  </span>
-                </td>
-                <td className="px-3 py-2 text-center text-xs text-slate-500">
-                  {(r.exam?.examDate ?? r.createdAt).toLocaleDateString('en-GB')}
-                </td>
-              </tr>
-            ))}
-            {results.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-3 py-6 text-center text-sm text-slate-400">
-                  No exam records.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </Section>
-
-      {showEnrollments && (
-        <Section title="Course Enrolment Record">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-left dark:border-slate-800">
-                <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Course
-                </th>
-                <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Completed
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-              {enrollments.map((e, i) => (
-                <tr key={i}>
-                  <td className="px-3 py-2">
-                    <span className="font-mono font-bold">{e.course.code}</span>{' '}
-                    <span className="text-slate-500">{e.course.name}</span>
-                  </td>
-                  <td className="px-3 py-2 text-xs">{e.status}</td>
-                  <td className="px-3 py-2 text-center text-xs text-slate-500">
-                    {e.completedAt?.toLocaleDateString('en-GB') ?? '—'}
-                  </td>
-                </tr>
-              ))}
-              {enrollments.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="px-3 py-6 text-center text-sm text-slate-400">
-                    No course enrolments.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </Section>
-      )}
-
-      {showLicenseProgress && licenseProgress.length > 0 && (
-        <Section title="License Progress">
-          <div className="space-y-2">
-            {licenseProgress.map((lp) => (
-              <div key={lp.licenseCategoryId} className="flex items-center justify-between text-sm">
-                <span className="font-bold">
-                  {lp.code} — {lp.name}
-                </span>
-                <span className="text-slate-500">
-                  {lp.passedCount}/{lp.totalRequired} modules ({lp.percentage}%)
-                </span>
-              </div>
-            ))}
+    <PageTransition>
+      <div className="space-y-6 print:space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white print:text-2xl">
+              Academic Transcript
+            </h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {isExamOnly || isModular
+                ? 'Summary of your EASA examination results. This is not an official EASA certificate.'
+                : 'Academy-issued record. This is not an official EASA certificate. No grade-point average is computed — this is an EASA Part-147 training record.'}
+            </p>
           </div>
-        </Section>
-      )}
+          <PrintButton />
+        </div>
 
-      <p className="text-xs text-slate-400 print:mt-6">
-        Generated {new Date().toLocaleString('en-GB')} · Aerojet Aviation Training Academy (EASA
-        Part-147)
-      </p>
-    </div>
+        {/* Identity */}
+        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-100 bg-white p-5 text-sm sm:grid-cols-4 dark:border-slate-800 dark:bg-slate-900">
+          <Field label="Name" value={fullName} />
+          <Field label="Student ID" value={profile?.studentId ?? '—'} />
+          <Field
+            label="Pathway"
+            value={profile?.pathwayRel?.name ?? profile?.enrollmentType ?? '—'}
+          />
+          {isFullTime && (
+            <Field
+              label="Current Term"
+              value={`Year ${profile?.currentYearNumber ?? 1}, Sem ${profile?.currentSemesterNumber ?? 1}`}
+            />
+          )}
+          <Field
+            label="Enrolled"
+            value={profile?.enrollmentDate?.toLocaleDateString('en-GB') ?? '—'}
+          />
+          <Field
+            label="Graduated"
+            value={profile?.graduationDate?.toLocaleDateString('en-GB') ?? '—'}
+          />
+          {isFullTime && (
+            <Field
+              label="Attendance"
+              value={attendance.total > 0 ? `${attendance.percentage}%` : 'N/A'}
+            />
+          )}
+        </div>
+
+        {/* Exam results */}
+        <Section title="Examination Record">
+          <ExamResultsTable results={resultsNumber} />
+        </Section>
+
+        {showEnrollments && (
+          <Section title="Course Enrolment Record">
+            <EnrolmentTable enrollments={enrollments} />
+          </Section>
+        )}
+
+        {showLicenseProgress && licenseProgress.length > 0 && (
+          <Section title="License Progress">
+            <div className="space-y-2">
+              {licenseProgress.map((lp) => (
+                <div
+                  key={lp.licenseCategoryId}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <span className="font-bold">
+                    {lp.code} — {lp.name}
+                  </span>
+                  <span className="text-slate-500">
+                    {lp.passedCount}/{lp.totalRequired} modules ({lp.percentage}%)
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        <p className="text-xs text-slate-400 print:mt-6">
+          Generated {new Date().toLocaleString('en-GB')} · Aerojet Aviation Training Academy (EASA
+          Part-147)
+        </p>
+      </div>
+    </PageTransition>
   )
 }
 

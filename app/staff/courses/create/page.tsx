@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, type Resolver } from 'react-hook-form'
+import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import * as z from 'zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -77,13 +77,15 @@ export default function CreateCoursePage() {
           setCategories(catsData.data)
         }
         if (licensesData.success) {
-          setLicenseCategories(licensesData.data.map((l: any) => ({
+          setLicenseCategories(licensesData.data.map((l: { code: string; name: string }) => ({
             label: `${l.code} - ${l.name}`,
             value: l.code
           })))
         }
       } catch (error) {
         console.error('Failed to fetch data:', error)
+        toast.error('Failed to load course data')
+        toast.error('Failed to load course data')
       }
     }
     fetchData()
@@ -93,6 +95,7 @@ export default function CreateCoursePage() {
     defaultValues: defaultValues as CourseFormValues,
     mode: 'onChange',
   })
+  const requiresPrerequisite = useWatch({ control: form.control, name: 'requiresPrerequisite' })
 
   async function onSubmit(values: CourseFormValues) {
     setIsLoading(true)
@@ -122,7 +125,7 @@ export default function CreateCoursePage() {
 
       toast.success('Course created successfully')
       router.push('/staff/courses')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to create course')
     } finally {
       setIsLoading(false)
@@ -227,7 +230,7 @@ export default function CreateCoursePage() {
                 />
               </div>
 
-              {form.watch('requiresPrerequisite') && (
+              {requiresPrerequisite && (
                 <FormField
                   control={form.control}
                   name="prerequisites"

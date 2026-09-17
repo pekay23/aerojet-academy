@@ -16,12 +16,12 @@ async function main() {
       role: 'STAFF',
       status: 'ACTIVE',
       profile: {
-        create: { firstName: 'Alice', lastName: 'Coordinator' }
+        create: { firstName: 'Alice', lastName: 'Coordinator' },
       },
       staffProfile: {
-        create: { employeeId: 'ST-002', department: 'Academic', position: 'Coordinator' }
-      }
-    }
+        create: { employeeId: 'ST-002', department: 'Academic', position: 'Coordinator' },
+      },
+    },
   })
   console.log('✅ Staff User created.')
 
@@ -35,34 +35,34 @@ async function main() {
       role: 'INSTRUCTOR',
       status: 'ACTIVE',
       profile: {
-        create: { firstName: 'Robert', lastName: 'Exams' }
+        create: { firstName: 'Robert', lastName: 'Exams' },
       },
       examinerProfile: {
-        create: { 
+        create: {
           isActive: true,
-          maxParallelSittings: 2
-        }
-      }
-    }
+          maxParallelSittings: 2,
+        },
+      },
+    },
   })
-  
+
   const examinerRecord = await prisma.examiner.findFirst({ where: { userId: examiner.id } })
   console.log('✅ Examiner created.')
 
   // 3. Exam Sittings & Assignments
-  const bookings = await prisma.examBooking.findMany({ 
-    where: { 
+  const bookings = await prisma.examBooking.findMany({
+    where: {
       examComponentId: { not: null },
-      user: { email: { startsWith: 'test' } } // Target test students only
+      user: { email: { startsWith: 'test' } }, // Target test students only
     },
-    take: 5 
+    take: 5,
   })
   if (bookings.length > 0) {
     const event = await prisma.examEvent.findFirst()
     if (event) {
       // Check if sitting already exists for this hall/time
       let sitting = await prisma.examSitting.findFirst({
-        where: { venue: 'Main Exam Hall', startTime: new Date('2026-06-15T09:00:00Z') }
+        where: { venue: 'Main Exam Hall', startTime: new Date('2026-06-15T09:00:00Z') },
       })
 
       if (!sitting) {
@@ -77,8 +77,8 @@ async function main() {
             capacity: 28,
             status: 'SCHEDULED',
             venue: 'Main Exam Hall',
-            examinerId: examinerRecord?.id
-          }
+            examinerId: examinerRecord?.id,
+          },
         })
       }
 
@@ -90,8 +90,8 @@ async function main() {
             sittingId: sitting.id,
             bookingId: booking.id,
             userId: booking.userId,
-            status: 'CONFIRMED'
-          }
+            status: 'CONFIRMED',
+          },
         })
       }
       console.log(`✅ Exam Sitting created/verified and ${bookings.length} students assigned.`)
@@ -99,11 +99,11 @@ async function main() {
   }
 
   // 4. Invoices
-  const student = await prisma.user.findFirst({ 
-    where: { 
+  const student = await prisma.user.findFirst({
+    where: {
       role: 'STUDENT',
-      email: { startsWith: 'test' } // Avoid historical academy students
-    } 
+      email: { startsWith: 'test' }, // Avoid historical academy students
+    },
   })
   if (student) {
     const invNum = 'INV-REG-TEST-001'
@@ -113,23 +113,21 @@ async function main() {
       create: {
         userId: student.id,
         invoiceNumber: invNum,
-        amount: 350.00,
+        amount: 350.0,
         status: 'UNPAID',
-        items: [
-          { description: 'Registration Fee', amount: 350.00 }
-        ],
-        dueDate: new Date('2026-07-01')
-      }
+        items: [{ description: 'Registration Fee', amount: 350.0 }],
+        dueDate: new Date('2026-07-01'),
+      },
     })
     console.log('✅ Sample Invoice created.')
   }
 
   // 5. Exam Bundles
   const modularStudent = await prisma.user.findFirst({
-    where: { 
+    where: {
       studentProfile: { pathwayRel: { code: 'MODULAR' } },
-      email: { startsWith: 'test' }
-    }
+      email: { startsWith: 'test' },
+    },
   })
   if (modularStudent) {
     await prisma.examBundle.upsert({
@@ -140,11 +138,11 @@ async function main() {
         userId: modularStudent.id,
         bundleType: 'FOUR_PACK',
         totalSeats: 4,
-        usedSeats: 1,
-        amountPaid: 1100.00,
+        usedSeats: 0,
+        amountPaid: 1100.0,
         validUntil: new Date('2027-05-01'),
-        status: 'ACTIVE'
-      }
+        status: 'ACTIVE',
+      },
     })
     console.log('✅ Exam Bundle created for Modular Student.')
   }
@@ -160,8 +158,8 @@ async function main() {
         referrerId: studentA.id,
         refereeId: studentB.id,
         status: 'QUALIFIED',
-        qualifiedAt: new Date()
-      }
+        qualifiedAt: new Date(),
+      },
     })
     console.log('✅ Referral link created.')
   }
@@ -182,8 +180,8 @@ async function main() {
         status: 'PENDING',
         hoursCompleted: 320,
         hoursRequired: 2000,
-        notes: 'Initial engine shop rotation'
-      }
+        notes: 'Initial engine shop rotation',
+      },
     })
     console.log('✅ OJT Period created.')
   }
@@ -196,8 +194,8 @@ async function main() {
         recipientId: staff.id,
         subject: 'Inquiry about M5 Schedule',
         body: 'Hello, I would like to know if there are any changes to the M5 revision schedule next week?',
-        isRead: false
-      }
+        isRead: false,
+      },
     })
     console.log('✅ Message thread initialized.')
   }
@@ -207,13 +205,13 @@ async function main() {
     await prisma.payment.create({
       data: {
         userId: student.id,
-        amount: 1400.00,
+        amount: 1400.0,
         paymentMethod: 'BANK_TRANSFER',
         status: 'PENDING',
         proofUrl: 'https://example.com/proof.pdf',
         proofUploadedAt: new Date(),
-        referenceCode: `DEP-${Date.now()}`
-      }
+        referenceCode: `DEP-${Date.now()}`,
+      },
     })
     console.log('✅ Pending Payment with proof created.')
   }

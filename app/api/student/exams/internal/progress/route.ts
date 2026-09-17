@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
@@ -71,18 +71,41 @@ export const GET = withErrorHandler(async () => {
   })
 
   // Group by bank
-  const byBank: Record<string, {
-    bank: any
-    attempts: any[]
-    passed: boolean
-    bestScore: number
-    latestAttempt: Date | null
-    retakeEligibleAt: Date | null
-    banned: boolean
-    banLiftDate: Date | null
-    isPublished: boolean
+  interface BankSummary {
+    id: string
+    name: string
+    moduleCode: string | null
+    categoryCode: string | null
+    categoryConfig: Prisma.JsonValue | null
+    course: { name: string; code: string }
+  }
+
+  interface SessionAttempt {
+    id: string
+    attemptNumber: number
     status: string
-  }> = {}
+    score: number | null
+    totalPoints: number | null
+    percentage: number | null
+    passed: boolean | null
+    submittedAt: Date | null
+  }
+
+  const byBank: Record<
+    string,
+    {
+      bank: BankSummary
+      attempts: SessionAttempt[]
+      passed: boolean
+      bestScore: number
+      latestAttempt: Date | null
+      retakeEligibleAt: Date | null
+      banned: boolean
+      banLiftDate: Date | null
+      isPublished: boolean
+      status: string
+    }
+  > = {}
 
   // Sessions come back ordered `createdAt` DESC — newest first. We only
   // set `status` on the FIRST insertion per bank so it reflects the
@@ -130,12 +153,16 @@ export const GET = withErrorHandler(async () => {
   }
 
   // 10-year completion window
-  const firstAttempt = sessions.length > 0
-    ? sessions.reduce((earliest, s) => {
-        const t = s.createdAt
-        return !earliest || t < earliest ? t : earliest
-      }, null as Date | null)
-    : null
+  const firstAttempt =
+    sessions.length > 0
+      ? sessions.reduce(
+          (earliest, s) => {
+            const t = s.createdAt
+            return !earliest || t < earliest ? t : earliest
+          },
+          null as Date | null
+        )
+      : null
 
   let completionWindow = null
   if (firstAttempt) {
@@ -151,7 +178,10 @@ export const GET = withErrorHandler(async () => {
       deadline: deadline.toISOString(),
       yearsTotal: EASA_DEFAULTS.completionWindowYears,
       percentElapsed: Math.min(100, percentElapsed),
-      remainingDays: Math.max(0, Math.ceil((deadline.getTime() - now.getTime()) / (24 * 60 * 60 * 1000))),
+      remainingDays: Math.max(
+        0,
+        Math.ceil((deadline.getTime() - now.getTime()) / (24 * 60 * 60 * 1000))
+      ),
     }
   }
 
@@ -169,6 +199,7 @@ export const GET = withErrorHandler(async () => {
   const allBanks = await prismaUnfiltered.internalExamBank.findMany({
     where: {
       isActive: true,
+      reviewState: 'APPROVED',
       courseId: { in: enrolledCourseIds },
     },
     select: {
@@ -181,11 +212,19 @@ export const GET = withErrorHandler(async () => {
     },
   })
 
+  // Natural sort by moduleCode so M2 comes before M10, M11A, etc.
+  allBanks.sort((a, b) =>
+    (a.moduleCode || '').localeCompare(b.moduleCode || '', undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    })
+  )
+
   const eligibleBanks = allBanks.filter((bank) =>
     categoryMatchesTarget(getInternalBankCategoryCode(bank), targetCategories)
   )
 
-  const bankProgress = eligibleBanks.map(bank => {
+  const bankProgress = eligibleBanks.map((bank) => {
     const progress = byBank[bank.id]
     const categoryCode = getInternalBankCategoryCode(bank)
     // Only show scores if admin has published the results
@@ -198,23 +237,28 @@ export const GET = withErrorHandler(async () => {
       courseName: bank.course.name,
       courseCode: bank.course.code,
       attempted: !!progress,
-      passed: isPublished ? (progress?.passed || false) : false,
-      bestScore: isPublished ? (progress?.bestScore || 0) : 0,
+      passed: isPublished ? progress?.passed || false : false,
+      bestScore: isPublished ? progress?.bestScore || 0 : 0,
       totalAttempts: progress?.attempts.length || 0,
       banned: progress?.banned || false,
       banLiftDate: progress?.banLiftDate?.toISOString() || null,
       retakeEligibleAt: progress?.retakeEligibleAt?.toISOString() || null,
       isPublished,
-      pendingReview: !!progress && !isPublished && (progress.status === 'COMPLETED' || progress.status === 'TIMED_OUT'),
+      pendingReview:
+        !!progress &&
+        !isPublished &&
+        (progress.status === 'COMPLETED' || progress.status === 'TIMED_OUT'),
     }
   })
 
   const totalBanks = eligibleBanks.length
-  const passedBanks = bankProgress.filter(b => b.passed).length
+  const passedBanks = bankProgress.filter((b) => b.passed).length
 
   return apiSuccess({
     studentDetails: {
-      name: user.profile ? `${user.profile.firstName} ${user.profile.lastName}` : session.user.email,
+      name: user.profile
+        ? `${user.profile.firstName} ${user.profile.lastName}`
+        : session.user.email,
       email: user.email,
       studentId: user.studentProfile?.studentId || null,
       dateOfBirth: user.profile?.dateOfBirth?.toISOString() || null,

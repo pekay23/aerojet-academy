@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { FileText, FileCode, Archive, ExternalLink, Download, Clock, BookOpen, GraduationCap, ClipboardList, Shield } from 'lucide-react'
+import { FileText, FileCode, Archive, ExternalLink, Download, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
@@ -37,6 +37,8 @@ export default function StudentResourceCard({ resource }: StudentResourceCardPro
 
   const getCategoryColor = (category: string) => {
     switch (category.toUpperCase()) {
+      case 'STUDENT_GUIDE':
+        return 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'
       case 'ACADEMIC':
         return 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
       case 'ADMINISTRATIVE':
@@ -47,6 +49,13 @@ export default function StudentResourceCard({ resource }: StudentResourceCardPro
         return 'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
     }
   }
+
+  const humanCategory = (category: string) =>
+    category
+      .toLowerCase()
+      .split('_')
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(' ')
 
   return (
     <motion.div
@@ -67,7 +76,7 @@ export default function StudentResourceCard({ resource }: StudentResourceCardPro
               getCategoryColor(resource.category)
             )}
           >
-            {resource.category}
+            {humanCategory(resource.category)}
           </span>
         </div>
 

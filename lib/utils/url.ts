@@ -15,7 +15,7 @@ export async function getBaseUrl(): Promise<string> {
     if (host) {
       return `${proto}://${host}`
     }
-  } catch (e) {
+  } catch (_e) {
     // Falls through to static env vars if called outside request context (e.g. client or build)
   }
 

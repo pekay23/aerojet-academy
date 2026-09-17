@@ -4,7 +4,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler } from '@/lib/api/response'
 import { serializePrisma } from '@/lib/utils/serialization'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   await requireStaff()
 
   const payments = await prismaUnfiltered.payment.findMany({

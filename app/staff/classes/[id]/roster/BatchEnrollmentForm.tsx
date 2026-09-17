@@ -49,8 +49,9 @@ export default function BatchEnrollmentForm({ classId, cohorts, currentOccupancy
         description: `Successfully added ${data.addedCount} students to the class.` 
       })
       router.refresh()
-    } catch (error: any) {
-      toast.error('Enrollment Failed', { description: error.message })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Enrollment failed'
+      toast.error('Enrollment Failed', { description: message })
     } finally {
       setIsLoading(false)
       setSelectedCohort('')

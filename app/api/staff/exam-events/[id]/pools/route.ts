@@ -1,15 +1,15 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiCreated, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { createExamPoolSchema, validateBody } from '@/lib/validation/schemas'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     await requireStaff()
     const pools = await prismaUnfiltered.examPool.findMany({
-      where: { eventId: ctx?.params?.id },
+      where: { eventId: (await ctx!.params).id },
       include: { _count: { select: { memberships: true } } },
       orderBy: { examDate: 'asc' },
     })
@@ -18,10 +18,10 @@ export const GET = withErrorHandler(
 )
 
 export const POST = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const staff = await requireStaff()
     const body = await req.json()
-    const data = { ...body, eventId: ctx?.params?.id }
+    const data = { ...body, eventId: (await ctx!.params).id }
     const validation = validateBody(createExamPoolSchema, data)
     if (!validation.success) return apiError(validation.error)
 

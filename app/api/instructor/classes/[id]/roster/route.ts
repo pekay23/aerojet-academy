@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireAuth } from '@/lib/auth/helpers'
-import { apiSuccess, apiForbidden, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiForbidden, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { UserRole } from '@prisma/client'
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireAuth()
     if (user.role !== UserRole.INSTRUCTOR) return apiForbidden('Instructor access required')
 
@@ -14,7 +14,7 @@ export const GET = withErrorHandler(
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
 
     const classItem = await prisma.class.findUnique({
-      where: { id: ctx?.params?.id },
+      where: { id: (await ctx!.params).id },
       include: { course: true },
     })
     if (!classItem) return apiNotFound('Class not found')

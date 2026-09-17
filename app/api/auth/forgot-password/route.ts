@@ -6,10 +6,10 @@ import { generateToken } from '@/lib/auth/helpers'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  let body: any
+  let body: { email?: string }
   try {
     body = await req.json()
-  } catch (e) {
+  } catch (_e) {
     return apiError('Invalid request body', 400)
   }
 

@@ -7,17 +7,18 @@ export async function getTransactions(
   const wallet = await prisma.wallet.findUnique({ where: { userId } })
   if (!wallet) return { transactions: [], total: 0 }
 
-  const where: any = { walletId: wallet.id }
-  if (opts?.type) where.type = opts.type
+  const where = { walletId: wallet.id, ...(opts?.type ? { type: opts.type } : {}) }
 
   const [transactions, total] = await Promise.all([
     prisma.walletTransaction.findMany({
-      where,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      where: where as any,
       orderBy: { createdAt: 'desc' },
       take: opts?.limit || 20,
       skip: opts?.offset || 0,
     }),
-    prisma.walletTransaction.count({ where }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    prisma.walletTransaction.count({ where: where as any }),
   ])
 
   return { transactions, total }

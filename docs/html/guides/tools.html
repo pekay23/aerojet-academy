@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tools · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Guides</p>
+  <h1 class="he-title">Tools</h1>
+  <p class="he-deck">Then convert to PDF: ``…</p>
+</header>
+<section class="he-section" id="flipbook-scraper"><div class="he-section__num">01 · Flipbook Scraper</div><h2 class="he-section__title">Flipbook Scraper</h2></section>
+<h3 id="purpose">Purpose</h3>
+<p>Downloads HTML5 flipbook pages from courses.suntech-bc.com and converts them to PDF.</p>
+<h3 id="quick-start-cli">Quick Start (CLI)</h3>
+<pre><code class="language-bash">bun run tools/flipbook-scraper/index.ts \
+  --url &quot;https://courses.suntech-bc.com/module/8&quot; \
+  --username &quot;user@example.com&quot; \
+  --password &quot;password&quot; \
+  --name &quot;EASA-Module-8&quot; \
+  --pages 110
+</code></pre>
+<h3 id="inspect-mode">Inspect Mode</h3>
+<pre><code class="language-bash">bun run tools/flipbook-scraper/inspect.ts \
+  --url &quot;https://courses.suntech-bc.com/module/8&quot; \
+  --username &quot;user@example.com&quot; \
+  --password &quot;password&quot;
+</code></pre>
+<h3 id="tauri-desktop-app">Tauri Desktop App</h3>
+<pre><code class="language-bash">cd tools/flipbook-app
+bun tauri dev  # Development
+bun tauri build  # Release
+</code></pre>
+<h3 id="wpf-desktop-app">WPF Desktop App</h3>
+<pre><code class="language-bash">cd tools/flipbook-wpf-app
+dotnet build -c Release
+dotnet run  # Debug
+</code></pre>
+<h3 id="presets">Presets</h3>
+<ul>
+<li><code>tools/flipbook-scraper/presets/suntech.json</code> — Suntech course selectors</li>
+</ul>
+<h3 id="output-location">Output Location</h3>
+<p>PDFs are saved to OneDrive directories:</p>
+<ul>
+<li>Module 8: <code>OneDrive/Module 8 - Aerodynamics/suntech/</code></li>
+<li>Module 9: <code>OneDrive/Module 9 - Human Factors/suntech/</code></li>
+<li>Module 10: <code>OneDrive/Module 10 - Aviation Legislation/suntech/</code></li>
+</ul>
+<h3 id="cli-options">CLI Options</h3>
+<table>
+<thead>
+<tr><th>Flag</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--url</code></td><td>Flipbook module URL</td></tr>
+<tr><td><code>--username</code></td><td>Login email</td></tr>
+<tr><td><code>--password</code></td><td>Login password</td></tr>
+<tr><td><code>--name</code></td><td>Document name (folder + filename)</td></tr>
+<tr><td><code>--pages</code></td><td>Manual page count (overrides auto-detection)</td></tr>
+<tr><td><code>--start-page</code></td><td>Resume from page N</td></tr>
+<tr><td><code>--output</code></td><td>Output directory</td></tr>
+<tr><td><code>--images-only</code></td><td>Skip PDF conversion</td></tr>
+<tr><td><code>--headless</code></td><td>Run headless (true/false)</td></tr>
+<tr><td><code>--capture-method</code></td><td><code>interception</code> (image) or <code>screenshot</code></td></tr>
+</tbody>
+</table>
+<h3 id="capture-methods">Capture Methods</h3>
+<ul>
+<li><strong>interception</strong> (default): Captures actual flipbook images via Playwright route interception. Higher quality, smaller files. Requires CDN URL matching.</li>
+<li><strong>screenshot</strong>: Screenshots the flipbook container element. Lower quality but more reliable across all platforms.</li>
+</ul>
+<h3 id="re-running-scrapers">Re-running Scrapers</h3>
+<pre><code class="language-bash"># Module 8 - Basic Aerodynamics (~110 pages)
+bun run tools/flipbook-scraper/index.ts \
+  --url &quot;https://courses.suntech-bc.com/module/8&quot; \
+  --username &quot;&quot; \
+  --password &quot;&quot; \
+  --name &quot;EASA-Module-8-Basic-Aerodynamics&quot; \
+  --pages 110 \
+  --output &quot;./flipbook-output&quot;
+
+# Module 9a - Human Factors (~301 pages)
+bun run tools/flipbook-scraper/index.ts \
+  --url &quot;https://courses.suntech-bc.com/module/9a&quot; \
+  --username &quot;&quot; \
+  --password &quot;&quot; \
+  --name &quot;EASA-Module-9a-Human-Factors&quot; \
+  --pages 301 \
+  --output &quot;./flipbook-output&quot;
+
+# Module 10 - Aviation Legislation (~289 pages)
+bun run tools/flipbook-scraper/index.ts \
+  --url &quot;https://courses.suntech-bc.com/module/10&quot; \
+  --username &quot;&quot; \
+  --password &quot;&quot; \
+  --name &quot;EASA-Module-10-Aviation-Legislation&quot; \
+  --pages 289 \
+  --output &quot;./flipbook-output&quot;
+</code></pre>
+<p>Then convert to PDF:</p>
+<pre><code class="language-bash">bun run scripts/images-to-pdf.ts ./flipbook-output/EASA-Module-8-Basic-Aerodynamics ./flipbook-output/EASA-Module-8-Basic-Aerodynamics.pdf
+bun run scripts/images-to-pdf.ts ./flipbook-output/EASA-Module-9a-Human-Factors ./flipbook-output/EASA-Module-9a-Human-Factors.pdf
+bun run scripts/images-to-pdf.ts ./flipbook-output/EASA-Module-10-Aviation-Legislation ./flipbook-output/EASA-Module-10-Aviation-Legislation.pdf
+</code></pre>
+<h3 id="building-desktop-apps">Building Desktop Apps</h3>
+<h4 id="tauri-exe">Tauri EXE</h4>
+<pre><code class="language-bash">cd tools/flipbook-app
+bun install
+bun tauri build
+</code></pre>
+<p>Output: <code>src-tauri/target/release/bundle/</code></p>
+<p>Prerequisites: Rust toolchain, WebView2 (Windows), Tauri CLI.</p>
+<h4 id="wpf-exe">WPF EXE</h4>
+<pre><code class="language-bash">cd tools/flipbook-wpf-app
+dotnet build -c Release
+</code></pre>
+<p>Output: <code>bin/Release/net8.0-windows/FlipbookWpfApp.exe</code></p>
+<p>Prerequisites: .NET 8 SDK, Playwright browsers (<code>pwsh bin/Debug/net8.0-windows/playwright.ps1 install chromium</code>).</p>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#flipbook-scraper">Flipbook Scraper</a></li>
+    <li class="he-toc__l3"><a href="#purpose">Purpose</a></li>
+    <li class="he-toc__l3"><a href="#quick-start-cli">Quick Start (CLI)</a></li>
+    <li class="he-toc__l3"><a href="#inspect-mode">Inspect Mode</a></li>
+    <li class="he-toc__l3"><a href="#tauri-desktop-app">Tauri Desktop App</a></li>
+    <li class="he-toc__l3"><a href="#wpf-desktop-app">WPF Desktop App</a></li>
+    <li class="he-toc__l3"><a href="#presets">Presets</a></li>
+    <li class="he-toc__l3"><a href="#output-location">Output Location</a></li>
+    <li class="he-toc__l3"><a href="#cli-options">CLI Options</a></li>
+    <li class="he-toc__l3"><a href="#capture-methods">Capture Methods</a></li>
+    <li class="he-toc__l3"><a href="#re-running-scrapers">Re-running Scrapers</a></li>
+    <li class="he-toc__l3"><a href="#building-desktop-apps">Building Desktop Apps</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

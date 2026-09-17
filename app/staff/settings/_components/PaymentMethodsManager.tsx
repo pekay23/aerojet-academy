@@ -89,6 +89,8 @@ export default function PaymentMethodsManager() {
     }
   }, [])
 
+   
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchMethods() }, [fetchMethods])
 
   const handleToggle = async (id: string) => {
@@ -201,6 +203,17 @@ export default function PaymentMethodsManager() {
     setEditingId(null)
     setForm({ ...emptyForm })
   }
+
+  // Warn before navigating away with an open add/edit form.
+  useEffect(() => {
+    if (!showForm) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [showForm])
 
   if (loading) {
     return (

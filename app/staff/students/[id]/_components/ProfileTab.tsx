@@ -1,54 +1,70 @@
 'use client'
 
-import {
-  Mail,
-  Phone,
-  Globe,
-  Calendar,
-  BookOpen,
-  GraduationCap,
-  User,
-} from 'lucide-react'
+import { Mail, Phone, Globe, Calendar, BookOpen, GraduationCap, User } from 'lucide-react'
 import EditProfileDialog from '@/app/staff/users/[id]/_components/EditProfileDialog'
 import EditIdDialog from '@/app/staff/users/[id]/_components/EditIdDialog'
 import EditPathwayDialog from '@/app/staff/users/[id]/_components/EditPathwayDialog'
 import EditAcademicPeriodDialog from '@/app/staff/users/[id]/_components/EditAcademicPeriodDialog'
 import UserActionsMenu from '@/app/staff/_components/UserActionsMenu'
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import type { SerializedStudent } from '@/lib/types/staff'
+
+type ReferralLite = {
+  id: string
+  status?: string
+  createdAt?: string | Date
+  referee?: { profile?: { firstName?: string; lastName?: string }; email?: string }
+  referrer?: { profile?: { firstName?: string; lastName?: string }; email?: string }
+}
+
 interface Props {
-  student: {
-    id: string
-    email: string
-    personalEmail?: string | null
-    academyEmail?: string | null
-    status: string
-    emailVerified: string | Date | null
-    createdAt: string | Date
-    lastLoginAt?: string | Date | null
-    registrationPaid: boolean
-    isAmbassador: boolean
-    referralCode?: string | null
-    programmeChoice?: string | null
-    referralsReceived?: any[]
-    referralsMade?: any[]
-    profile: any
-    studentProfile: any
-  }
-  academicYears: { id: string; name: string }[]
-  semesters: { id: string; name: string }[]
-  studyPathways: { id: string; name: string; code: string }[]
+  student: SerializedStudent
   onRefresh: () => void
 }
 
 export default function ProfileTab({
   student,
-  academicYears,
-  semesters,
-  studyPathways,
   onRefresh,
 }: Props) {
   const profile = student.profile
   const sp = student.studentProfile
+  const referralsReceived = (student.referralsReceived || []) as unknown as ReferralLite[]
+  const referralsMade = (student.referralsMade || []) as unknown as ReferralLite[]
 
   const fullName = profile
     ? [profile.firstName, profile.middleName, profile.lastName].filter(Boolean).join(' ')
@@ -72,24 +88,54 @@ export default function ProfileTab({
           }`}
         >
           {student.registrationPaid ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
           )}
         </div>
         <div className="flex-1">
-          <p className={`text-sm font-black ${
-            student.registrationPaid
-              ? 'text-emerald-800 dark:text-emerald-300'
-              : 'text-amber-800 dark:text-amber-300'
-          }`}>
+          <p
+            className={`text-sm font-black ${
+              student.registrationPaid
+                ? 'text-emerald-800 dark:text-emerald-300'
+                : 'text-amber-800 dark:text-amber-300'
+            }`}
+          >
             {student.registrationPaid ? 'Registration Fee Paid' : 'Registration Fee Outstanding'}
           </p>
-          <p className={`mt-0.5 text-xs ${
-            student.registrationPaid
-              ? 'text-emerald-600/70 dark:text-emerald-400/60'
-              : 'text-amber-600/70 dark:text-amber-400/60'
-          }`}>
+          <p
+            className={`mt-0.5 text-xs ${
+              student.registrationPaid
+                ? 'text-emerald-600/70 dark:text-emerald-400/60'
+                : 'text-amber-600/70 dark:text-amber-400/60'
+            }`}
+          >
             {student.registrationPaid
               ? 'This student has completed registration payment and is fully onboarded.'
               : 'This student has not yet completed their registration fee payment.'}
@@ -139,7 +185,11 @@ export default function ProfileTab({
           {student.academyEmail && (
             <Field icon={Mail} label="Academy Email" value={student.academyEmail} />
           )}
-          <Field icon={Mail} label="Personal Email" value={student.personalEmail || student.email} />
+          <Field
+            icon={Mail}
+            label="Personal Email"
+            value={student.personalEmail || student.email}
+          />
           <Field icon={Phone} label="Phone" value={profile?.phone ?? '—'} />
           <Field icon={Globe} label="Nationality" value={profile?.nationality ?? '—'} />
           <Field
@@ -203,23 +253,28 @@ export default function ProfileTab({
             label="Enrollment Type"
             value={sp?.enrollmentType?.replace(/_/g, ' ') ?? '—'}
           />
-          <Field
-            icon={BookOpen}
-            label="Study Pathway"
-            value={sp?.pathwayRel?.name ?? '—'}
-          />
+          <Field icon={BookOpen} label="Study Pathway" value={sp?.pathwayRel?.name ?? '—'} />
           <Field
             icon={GraduationCap}
             label="Programme Choice"
-            value={sp?.programmeChoice?.replace(/_/g, ' ') ?? student.programmeChoice?.replace(/_/g, ' ') ?? '—'}
+            value={
+              sp?.programmeChoice?.replace(/_/g, ' ') ??
+              student.programmeChoice?.replace(/_/g, ' ') ??
+              '—'
+            }
           />
-          {sp?.licenseTargets?.length > 0 && (
+          {(sp?.licenseTargets?.length ?? 0) > 0 && (
             <Field
               icon={BookOpen}
               label="License Targets"
-              value={sp.licenseTargets
-                .map((t: any) => t.licenseCategory?.name || t.licenseCategory?.code)
-                .join(', ')}
+              value={
+                sp?.licenseTargets
+                  ?.map(
+                    (t: { licenseCategory: { name?: string | null; code?: string | null } | null }) =>
+                      t.licenseCategory?.name || t.licenseCategory?.code
+                  )
+                  .join(', ') ?? '—'
+              }
             />
           )}
           <Field
@@ -244,16 +299,8 @@ export default function ProfileTab({
         }
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field
-            icon={Calendar}
-            label="Academic Year"
-            value={sp?.academicYear?.name ?? '—'}
-          />
-          <Field
-            icon={Calendar}
-            label="Semester"
-            value={sp?.semester?.name ?? '—'}
-          />
+          <Field icon={Calendar} label="Academic Year" value={sp?.academicYear?.name ?? '—'} />
+          <Field icon={Calendar} label="Semester" value={sp?.semester?.name ?? '—'} />
           <Field
             icon={Calendar}
             label="Current Year"
@@ -264,9 +311,7 @@ export default function ProfileTab({
             label="Current Semester"
             value={sp?.currentSemesterNumber ? `Semester ${sp.currentSemesterNumber}` : '—'}
           />
-          {sp?.CGPA && (
-            <Field icon={GraduationCap} label="CGPA" value={String(sp.CGPA)} />
-          )}
+          {sp?.CGPA && <Field icon={GraduationCap} label="CGPA" value={String(sp.CGPA)} />}
         </div>
       </Section>
 
@@ -314,21 +359,13 @@ export default function ProfileTab({
                 : 'Never'
             }
           />
-          <Field
-            icon={Mail}
-            label="Email Verified"
-            value={student.emailVerified ? 'Yes' : 'No'}
-          />
+          <Field icon={Mail} label="Email Verified" value={student.emailVerified ? 'Yes' : 'No'} />
           <Field
             icon={User}
             label="Registration Paid"
             value={student.registrationPaid ? 'Yes' : 'No'}
           />
-          <Field
-            icon={User}
-            label="Is Ambassador"
-            value={student.isAmbassador ? 'Yes' : 'No'}
-          />
+          <Field icon={User} label="Is Ambassador" value={student.isAmbassador ? 'Yes' : 'No'} />
           {student.referralCode && (
             <Field icon={User} label="Referral Code" value={student.referralCode} />
           )}
@@ -340,54 +377,66 @@ export default function ProfileTab({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Referrer */}
           <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
-            <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Referred By</h4>
-            {student.referralsReceived && student.referralsReceived.length > 0 ? (
+            <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              Referred By
+            </h4>
+            {referralsReceived.length > 0 ? (
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-aerojet-blue font-bold dark:bg-blue-900/30">
-                  {student.referralsReceived[0].referrer.profile?.firstName?.[0]}{student.referralsReceived[0].referrer.profile?.lastName?.[0]}
+                <div className="text-aerojet-blue flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold dark:bg-blue-900/30">
+                  {referralsReceived[0]?.referrer?.profile?.firstName?.[0]}
+                  {referralsReceived[0]?.referrer?.profile?.lastName?.[0]}
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900 dark:text-white">
-                    {student.referralsReceived[0].referrer.profile?.firstName} {student.referralsReceived[0].referrer.profile?.lastName}
+                    {referralsReceived[0]?.referrer?.profile?.firstName}{' '}
+                    {referralsReceived[0]?.referrer?.profile?.lastName}
                   </p>
-                  <p className="text-xs text-slate-500">{student.referralsReceived[0].referrer.email}</p>
+                  <p className="text-xs text-slate-500">
+                    {referralsReceived[0]?.referrer?.email}
+                  </p>
                 </div>
               </div>
             ) : (
-              <p className="text-xs italic text-slate-400">Direct registration (No referrer)</p>
+              <p className="text-xs text-slate-400 italic">Direct registration (No referrer)</p>
             )}
           </div>
 
           {/* Referrals Made */}
           <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
-            <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Referrals Made</h4>
-            {student.referralsMade && student.referralsMade.length > 0 ? (
+            <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              Referrals Made
+            </h4>
+            {referralsMade.length > 0 ? (
               <div className="space-y-3">
-                {student.referralsMade.slice(0, 5).map((ref: any) => (
+                {referralsMade.slice(0, 5).map((ref) => (
                   <div key={ref.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-slate-200 text-[10px] flex items-center justify-center font-bold dark:bg-slate-700">
-                        {ref.referee.profile?.firstName?.[0]}
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold dark:bg-slate-700">
+                        {ref.referee?.profile?.firstName?.[0]}
                       </div>
                       <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {ref.referee.profile?.firstName} {ref.referee.profile?.lastName}
+                        {ref.referee?.profile?.firstName} {ref.referee?.profile?.lastName}
                       </p>
                     </div>
-                    <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md ${
-                      ref.status === 'QUALIFIED' 
-                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                        : 'bg-slate-100 text-slate-500 dark:bg-slate-700'
-                    }`}>
+                    <span
+                      className={`rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase ${
+                        ref.status === 'QUALIFIED'
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                          : 'bg-slate-100 text-slate-500 dark:bg-slate-700'
+                      }`}
+                    >
                       {ref.status}
                     </span>
                   </div>
                 ))}
-                {student.referralsMade.length > 5 && (
-                  <p className="text-[10px] text-center text-slate-400">+{student.referralsMade.length - 5} more referrals</p>
+                {referralsMade.length > 5 && (
+                  <p className="text-center text-[10px] text-slate-400">
+                    + {referralsMade.length - 5} more
+                  </p>
                 )}
               </div>
             ) : (
-              <p className="text-xs italic text-slate-400">Has not referred anyone yet</p>
+              <p className="text-xs text-slate-400 italic">Has not referred anyone yet</p>
             )}
           </div>
         </div>
@@ -420,7 +469,15 @@ function Section({
   )
 }
 
-function Field({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+function Field({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  value: string
+}) {
   return (
     <div className="rounded-xl border border-slate-200/60 bg-white px-4 py-3 dark:border-slate-700/50 dark:bg-slate-900">
       <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase">

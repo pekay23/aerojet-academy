@@ -2,8 +2,8 @@
 /migration-output
 
 # dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.js
 .yarn/install-state.gz
 
@@ -29,6 +29,7 @@ inspect-*.js
 migrate*.cjs
 
 # debug
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -55,7 +56,62 @@ prisma/migrations
 
 # kilo local config
 .kilo/kilo.jsonc
+.kilo/plans/
+
+# temp / scratch / one-off scripts
+/tsc-errors*.txt
+/tsc-app-lib-errors.txt
+/tsc_check*.txt
+/tsc_final.txt
+/tsc_output*.txt
+/tsc_sig*.txt
+/tsc_upload*.txt
+/test_output.txt
+/temp.*
+/scratch.*
+/scratch/
+/check-backticks*.cjs
+/fix.js
+/fix.ts
+/fix-mocks.ps1
+/migrate_enums.js
+/convertImages.js
+/run-tsc*.bat
+/run-tsc-node.*
+/test-db-connection.ts
+/test-prisma.js
+/update_vercel_env.ps1
+/_easa_part66_modules.html
+/apikey-*.txt
+/env-backup.zip
+/dotnet-tools.json
+/middleware.ts
+
+# build outputs & artifacts
+node_modules/
+/tools/flipbook-app/node_modules/
+/tools/flipbook-wpf-app/bin/
+/tools/flipbook-wpf-app/obj/
+/artifacts/
+/test-results/
+/playwright-report/
+/aerojet master/
 
 # uploads
 /uploads
 /tmp
+/flipbook-output
+
+# flipbook scraper output
+/flipbook-output
+
+# Tauri / Rust build artifacts
+/tools/flipbook-app/src-tauri/target/
+
+# Lock files for tools (not needed in source)
+/tools/flipbook-app/bun.lock
+/tools/flipbook-app/src-tauri/Cargo.lock
+
+# .NET user files
+/tools/flipbook-wpf-app/*.csproj.user
+/tools/flipbook-wpf-app/**/*.csproj.user

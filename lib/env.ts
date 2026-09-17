@@ -57,7 +57,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   SUPABASE_DATABASE_URL: z.string().url().optional(),
-  SUPABASE_BACKUP_ENABLED: z.boolean().optional().default(false),
+   SUPABASE_BACKUP_ENABLED: z.boolean().optional().default(true),
   SUPABASE_BACKUP_BUCKET: z.string().optional().default('backups'),
 
   // Application

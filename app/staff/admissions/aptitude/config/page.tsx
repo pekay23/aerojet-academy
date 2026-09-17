@@ -4,11 +4,21 @@ import { useState, useEffect, useCallback } from 'react'
 import { Check, Loader2, Save } from 'lucide-react'
 
 interface SystemSettings {
-  [key: string]: any
+  aptitude_time_limit_minutes: number
+  aptitude_pass_threshold_pct: number
+  aptitude_max_tab_switches: number
+  aptitude_math_count: number
+  aptitude_english_count: number
+  aptitude_engineering_count: number
+  aptitude_reasoning_count: number
+  aptitude_physics_count: number
+  aptitude_require_for_modular: boolean
+  aptitude_shuffle_questions: boolean
+  aptitude_shuffle_options: boolean
 }
 
 export default function AptitudeConfigPage() {
-  const [settings, setSettings] = useState<SystemSettings>({})
+  const [settings, setSettings] = useState<Partial<SystemSettings>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -47,7 +57,7 @@ export default function AptitudeConfigPage() {
     }
   }
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = <K extends keyof SystemSettings>(key: K, value: SystemSettings[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }))
   }
 

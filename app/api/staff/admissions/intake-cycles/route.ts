@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiCreated, apiError, apiPaginated, withErrorHandler, parsePagination } from '@/lib/api/response'
+import { apiCreated, apiError, apiPaginated, withErrorHandler, parsePagination } from '@/lib/api/response'
 import { z } from 'zod'
 
 const createSchema = z.object({
@@ -43,7 +43,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (!parsed.success) return apiError(parsed.error.issues[0].message)
 
   const cycle = await prismaUnfiltered.intakeCycle.create({
-    data: parsed.data as any,
+    data: parsed.data,
     include: { academicYear: { select: { id: true, name: true } } },
   })
 

@@ -15,9 +15,15 @@ export const ACADEMIC_RULES = {
   GRADE_THRESHOLD_PASS: 75, // Green
   GRADE_THRESHOLD_WARNING: 50, // Amber
 
+  /** EASA standard time per question (seconds) */
+  TIME_PER_QUESTION_SECS: 75,
+
   /** Default values when a class / event doesn't specify its own */
   DEFAULT_MAX_CANDIDATES: 28,
   MAX_MODULES_PER_EVENT: 4,
+
+  /** Max instructional hours per instructor per day (EASA Part-147) */
+  MAX_DAILY_INSTRUCTIONAL_HOURS: 10,
 } as const
 
 // ── Pool / exam pool defaults ──────────────────────────────────────────
@@ -47,9 +53,9 @@ export const POOL_DEFAULTS = {
 // drift across noreply@aerojet.aviation vs noreply@aerojet-academy.com.
 export const EMAIL_ADDRESSES = {
   /** Default `from:` for transactional email (welcome / verification / etc.) */
-  fromTransactional: 'Aerojet Academy <admissions@mail.aerojet-academy.com>',
+  fromTransactional: 'Aerojet Academy <admissions@aerojet-academy.com>',
   /** Default `from:` for system-generated / no-reply email (backups, alerts) */
-  fromNoReply: 'Aerojet Academy <noreply@mail.aerojet-academy.com>',
+  fromNoReply: 'Aerojet Academy <noreply@aerojet-academy.com>',
   /** Address users can write to for support (visible in emails / contact form) */
   support: 'support@aerojet-academy.com',
   /** Address admissions team monitors */
@@ -65,6 +71,23 @@ export const WALLET_DEFAULTS = {
   RESIT_FEE_EUR: 150,
 } as const
 
+// ── Pathway / programme pricing defaults ────────────────────────────────
+export const PATHWAY_PRICING = {
+  FULL_TIME_4YEAR: {
+    year1: 8500,
+    total: 32000,
+    name: 'EASA Part-66 Full-Time (4 Years)',
+    years: 4,
+  },
+  FULL_TIME_2YEAR: {
+    year1: 9500,
+    total: 18000,
+    name: 'EASA Part-66 Full-Time (2 Years)',
+    years: 2,
+  },
+  MILITARY_1YEAR: { year1: 6500, total: 6500, name: 'Military Certification (1 Year)', years: 1 },
+} as const
+
 // ── Time windows ───────────────────────────────────────────────────────
 export const TIME_WINDOWS = {
   /** GDPR Article 12(3) response SLA */
@@ -75,4 +98,61 @@ export const TIME_WINDOWS = {
   BUNDLE_EXPIRY_DAYS: 365,
   /** Hours before exam the booking window closes */
   EXAM_CUTOFF_HOURS: 24,
+  /** Estimated business days for payment proof verification */
+  PAYMENT_VERIFICATION_DAYS: 2,
+} as const
+
+// ── Safe Exam Browser (SEB) ────────────────────────────────────────────
+export const SEB = {
+  /** Browser Exam Key used to validate SEB request hashes */
+  BROWSER_EXAM_KEY: process.env.SEB_BROWSER_EXAM_KEY || '',
+  /** Origins allowed to launch SEB config downloads */
+  ALLOWED_ORIGINS: [
+    'https://safeexambrowser.org',
+    'https://safeexambrowser.org:4444',
+    'http://localhost:3000',
+    'http://localhost:3001',
+  ],
+} as const
+
+// ── PDF / Document Text Defaults ───────────────────────────────────────────
+// Centralised fallback text for PDF templates. These are the build-time
+// defaults consumed when no template is configured. Staff can override
+// any of these via the PDF Template System UI.
+
+export const DEFAULT_PDF_TEXT = {
+  /** Default certificate title */
+  CERTIFICATE_TITLE: 'Certificate of Completion',
+
+  /** Default certificate subtitle */
+  CERTIFICATE_SUBTITLE: 'This is to certify that',
+
+  /** Default certificate completion statement */
+  CERTIFICATE_COMPLETION_TEXT:
+    'has successfully completed the prescribed training and assessment requirements for',
+
+  /** Default EASA Part-147 accreditation text for certificates */
+  CERTIFICATE_ACCREDITATION_TEXT:
+    'Aerojet Aviation Training Academy is an EASA Part-147 Approved Maintenance Training ' +
+    'Organisation. This certificate attests to the completion of the approved training ' +
+    'programme and does not constitute an EASA Part-66 Aircraft Maintenance Licence.',
+
+  /** Default signature labels for certificates */
+  CERTIFICATE_SIGNATURE_LABELS: ['Training Manager', 'Academy Director'],
+
+  /** Default transcript section headers */
+  TRANSCRIPT_SECTION_HEADERS: {
+    studentInfo: 'Student Information',
+    academicRecord: 'Academic Record',
+  },
+
+  /** Default transcript disclaimer text */
+  TRANSCRIPTDisclaimerText:
+    'This is an Academy-issued record. It is not an official EASA certificate. No grade-point ' +
+    'average is computed — this is an EASA Part-147 training record. For EASA Part-66 licence ' +
+    'applications, please refer to your official examination results issued by the competent ' +
+    'authority.',
+
+  /** Default signature labels for transcripts */
+  TRANSCRIPT_SIGNATURE_LABELS: ['Registrar'],
 } as const

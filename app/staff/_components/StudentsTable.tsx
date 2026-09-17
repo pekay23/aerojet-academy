@@ -9,7 +9,6 @@ import {
   RefreshCw,
   CheckSquare,
   Square,
-  AlignJustify,
   CheckCircle2,
   AlertTriangle,
   Trash2,
@@ -18,7 +17,8 @@ import {
   Archive,
 } from 'lucide-react'
 import StudentDetailPanel from './StudentDetailPanel'
-import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
+
+import Image from 'next/image'
 
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
@@ -103,7 +103,7 @@ export default function StudentsTable({
       })
       const res = await fetch(`/api/staff/students?${params}`)
       const data = await res.json()
-      
+
       if (data.success) {
         setStudents(data.data ?? [])
         setTotal(data.meta?.total ?? 0)
@@ -117,6 +117,7 @@ export default function StudentsTable({
   }, [filter, search, page, perPage])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [filter, search])
 
@@ -136,9 +137,7 @@ export default function StudentsTable({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-400">
-            {initialCounts.all ?? total} registered students
-          </p>
+          <p className="text-sm text-slate-400">{initialCounts.all ?? total} registered students</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -207,8 +206,9 @@ export default function StudentsTable({
                     if (!res.ok) throw new Error(data.error || 'Failed')
                     toast.success(`Credentials sent to ${data.data.summary.sent} students`)
                     fetchStudents()
-                  } catch (err: any) {
-                    toast.error(err.message || 'Failed')
+                  } catch (err: unknown) {
+                    const message = err instanceof Error ? err.message : 'Failed'
+                    toast.error(message)
                   }
                 },
               },
@@ -278,11 +278,9 @@ export default function StudentsTable({
       </div>
 
       {/* Split Panel */}
-      <div
-        className="flex h-[calc(100vh-300px)] min-h-[500px] overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-      >
+      <div className="flex h-[calc(100vh-300px)] min-h-125 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         {/* Left: List */}
-        <div className="flex w-full shrink-0 flex-col border-r border-slate-100 lg:w-[380px] xl:w-[420px] dark:border-slate-800">
+        <div className="flex w-full shrink-0 flex-col border-r border-slate-100 lg:w-95 xl:w-105 dark:border-slate-800">
           {/* Search + Filters */}
           <div className="space-y-3 border-b border-slate-100 p-4 dark:border-slate-800">
             <div className="relative">
@@ -321,10 +319,7 @@ export default function StudentsTable({
                 <CheckSquare className="h-3.5 w-3.5" />
               </button>
               {STATUS_FILTERS.map((f) => {
-                const count =
-                  f.key === 'all'
-                    ? initialCounts.all
-                    : initialCounts[f.key]
+                const count = f.key === 'all' ? initialCounts.all : initialCounts[f.key]
                 return (
                   <button
                     key={f.key}
@@ -336,9 +331,7 @@ export default function StudentsTable({
                     }`}
                   >
                     {f.label}
-                    {count !== undefined && (
-                      <span className="ml-1 opacity-70">({count})</span>
-                    )}
+                    {count !== undefined && <span className="ml-1 opacity-70">({count})</span>}
                   </button>
                 )
               })}
@@ -392,10 +385,10 @@ export default function StudentsTable({
                     onClick={() => setSelected(student)}
                     className={`group relative mx-2 my-1 cursor-pointer rounded-xl border p-4 transition-all duration-150 ease-out ${
                       isSelected
-                        ? 'border-aerojet-blue/30 bg-aerojet-blue/5 shadow-sm ring-1 ring-aerojet-blue/20'
+                        ? 'border-aerojet-blue/30 bg-aerojet-blue/5 ring-aerojet-blue/20 shadow-sm ring-1'
                         : selectedIds.includes(student.id)
                           ? 'border-aerojet-blue/20 bg-aerojet-blue/5'
-                          : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-accent hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:bg-accent'
+                          : 'hover:bg-accent dark:hover:bg-accent border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700'
                     }`}
                   >
                     <div className="mb-2 flex items-start justify-between">
@@ -425,17 +418,19 @@ export default function StudentsTable({
 
                         <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
                           {student.profile?.profilePhotoUrl ? (
-                            <img
+                            <Image
                               src={student.profile.profilePhotoUrl}
                               alt={fullName}
-                              className="h-full w-full object-cover"
+                              fill
+                              sizes="40px"
+                              className="object-cover"
                             />
                           ) : (
                             initials
                           )}
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-bold text-slate-800 group-hover:text-aerojet-blue dark:text-slate-200 transition-colors duration-150">
+                          <p className="group-hover:text-aerojet-blue text-sm font-bold text-slate-800 transition-colors duration-150 dark:text-slate-200">
                             {fullName}
                           </p>
                           <p className="font-mono text-xs text-slate-400">
@@ -443,7 +438,9 @@ export default function StudentsTable({
                           </p>
                         </div>
                       </div>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${statusStyle}`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${statusStyle}`}
+                      >
                         {student.status}
                       </span>
                     </div>

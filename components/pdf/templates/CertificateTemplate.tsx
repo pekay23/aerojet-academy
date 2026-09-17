@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import { PDFBaseTemplate, PDFBaseTemplateProps } from '../PDFBaseTemplate'
 
 const COLORS = {
@@ -122,6 +122,46 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     textAlign: 'center',
   },
+  examDetailsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '80%',
+    marginBottom: 20,
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  examDetailBlock: {
+    alignItems: 'center',
+    minWidth: 90,
+  },
+  examDetailLabel: {
+    fontSize: 6.5,
+    color: COLORS.slate,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  examDetailValue: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: COLORS.navy,
+    textAlign: 'center',
+  },
+  passBadge: {
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    backgroundColor: COLORS.gold,
+    borderRadius: 4,
+  },
+  passBadgeText: {
+    fontSize: 8,
+    color: COLORS.white,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   dateText: {
     fontSize: 10,
     color: COLORS.text,
@@ -171,6 +211,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 1.4,
   },
+  qrCode: {
+    width: 50,
+    height: 50,
+    marginTop: 12,
+  },
+  qrLabel: {
+    fontSize: 6,
+    color: COLORS.slate,
+    marginTop: 3,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
 })
 
 export interface CertificateTemplateProps extends Omit<PDFBaseTemplateProps, 'children' | 'title'> {
@@ -178,6 +230,12 @@ export interface CertificateTemplateProps extends Omit<PDFBaseTemplateProps, 'ch
   programName: string
   issueDate: string
   certificateNumber: string
+  moduleCode?: string
+  score?: number
+  totalPoints?: number
+  percentage?: number
+  passMarkPct?: number
+  qrDataUrl?: string
 }
 
 export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
@@ -185,8 +243,15 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
   programName,
   issueDate,
   certificateNumber,
+  moduleCode,
+  score,
+  totalPoints,
+  percentage,
+  passMarkPct,
+  qrDataUrl,
   ...baseProps
 }) => {
+  const passed = percentage != null && passMarkPct != null && percentage >= passMarkPct
   return (
     <PDFBaseTemplate title={`Certificate — ${certificateNumber}`} {...baseProps}>
       {/* Decorative double border */}
@@ -211,6 +276,37 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
           </Text>
 
           <Text style={styles.programName}>{programName}</Text>
+
+          {moduleCode && (
+            <Text style={styles.subtitle}>Module: {moduleCode}</Text>
+          )}
+
+          {percentage != null && (
+            <View style={styles.examDetailsContainer}>
+              <View style={styles.examDetailBlock}>
+                <Text style={styles.examDetailLabel}>Percentage</Text>
+                <Text style={styles.examDetailValue}>{percentage.toFixed(1)}%</Text>
+              </View>
+              {score != null && totalPoints != null && totalPoints > 0 && (
+                <View style={styles.examDetailBlock}>
+                  <Text style={styles.examDetailLabel}>Score</Text>
+                  <Text style={styles.examDetailValue}>{score}/{totalPoints}</Text>
+                </View>
+              )}
+              {passMarkPct != null && (
+                <View style={styles.examDetailBlock}>
+                  <Text style={styles.examDetailLabel}>Pass Mark</Text>
+                  <Text style={styles.examDetailValue}>{passMarkPct}%</Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {passed && (
+            <View style={styles.passBadge}>
+              <Text style={styles.passBadgeText}>PASSED</Text>
+            </View>
+          )}
 
           <Text style={styles.certNumber}>Certificate No. {certificateNumber}</Text>
 
@@ -239,6 +335,14 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
               programme and does not constitute an EASA Part-66 Aircraft Maintenance Licence.
             </Text>
           </View>
+
+          {qrDataUrl && (
+            <View style={{ alignItems: 'center', marginTop: 10 }}>
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
+              <Image src={qrDataUrl} style={styles.qrCode} />
+              <Text style={styles.qrLabel}>Scan to verify</Text>
+            </View>
+          )}
         </View>
       </View>
     </PDFBaseTemplate>

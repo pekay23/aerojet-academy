@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 
 interface UsePaginationOptions { initialPage?: number; pageSize?: number; total?: number }
 

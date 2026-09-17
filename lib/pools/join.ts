@@ -11,6 +11,7 @@ import type { PoolJoinInput, PoolJoinResult } from './types'
 import { resolveStandardPoolForJoin } from './assignment'
 import { reserveFunds } from '@/lib/wallet/operations'
 import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
+import { trackEvent } from '@/lib/analytics/events'
 
 // Simple string hash to generate two 32-bit integers for PG advisory locks
 function getLockKeys(str: string): [number, number] {
@@ -53,9 +54,9 @@ export async function joinPool(input: PoolJoinInput): Promise<PoolJoinResult> {
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     )
 
-    if (result.success && result.triggeredNearFull && result.pool?.id) {
+    if (result.success && result.triggeredNearFull && (result.pool as { id: string } | undefined)?.id) {
       const memberships = await prisma.poolMembership.findMany({
-        where: { poolId: result.pool.id, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
+        where: { poolId: (result.pool as { id: string }).id, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
         include: {
           user: { include: { profile: true } },
           pool: { select: { name: true, examDate: true } },
@@ -87,9 +88,9 @@ export async function joinPool(input: PoolJoinInput): Promise<PoolJoinResult> {
     }
 
     return result
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[POOL JOIN ERROR]', err)
-    return { success: false, error: err.message || 'Failed to join booking' }
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to join booking' }
   }
 }
 
@@ -256,8 +257,11 @@ export async function joinPoolInternal(
   }
 
   if (input.bundleId) {
-    const { useBundleSeat } = await import('./bundles')
-    await useBundleSeat(tx, input.bundleId)
+    // Imported dynamically and aliased to avoid a false-positive on the React
+    // hooks linter, which treats any `use*` function call as a hook call.
+    // `useBundleSeat` is a server-side bundle-redemption function, not a hook.
+    const { useBundleSeat: applyBundleSeat } = await import('./bundles')
+    await applyBundleSeat(tx, input.bundleId)
     feeToReserve = 0
   }
 
@@ -274,7 +278,7 @@ export async function joinPoolInternal(
     )
   }
 
-  let booking: any = null
+  let booking: Prisma.ExamBookingGetPayload<{}> | null = null
   if (eventIdForBooking && input.moduleCode) {
     booking = await tx.examBooking.create({
       data: {
@@ -375,6 +379,7 @@ export async function joinPoolInternal(
   }
 
   const triggeredNearFull = newStatus === 'NEAR_FULL' && pool.status !== 'NEAR_FULL'
+  trackEvent('EXAM_POOL_JOINED', { poolId: pool.id }, input.userId).catch(() => {})
   return {
     success: true,
     membership,

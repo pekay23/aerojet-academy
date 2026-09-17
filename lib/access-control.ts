@@ -1,31 +1,48 @@
 import { cache } from 'react'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { resolveEffectiveEnrollmentType, resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
 
 export type PaymentAccessLevel = 'FULL_ACCESS' | 'SEAT_ONLY' | 'RESTRICTED'
 
-export type FeatureType = 'courses' | 'classes' | 'exams' | 'materials' | 'milestones' | 'pools'
+export type FeatureType = 'courses' | 'classes' | 'exams' | 'materials' | 'milestones' | 'pools' | 'wallet'
 
 const FEATURE_ACCESS_MATRIX: Record<PaymentAccessLevel, FeatureType[]> = {
-  FULL_ACCESS: ['courses', 'classes', 'exams', 'materials', 'milestones', 'pools'],
+  FULL_ACCESS: ['courses', 'classes', 'exams', 'materials', 'milestones', 'pools', 'wallet'],
   SEAT_ONLY: ['milestones', 'pools'],
   RESTRICTED: ['milestones', 'pools'],
 }
 
+interface PrefetchedData {
+  profile?: {
+    enrollmentType?: string | null
+    pathwayRel?: { code?: string | null } | null
+  }
+  enrollment?: {
+    currentYearNumber?: number
+    milestones?: Array<{
+      id: string
+      milestoneType: string
+      yearNumber: number
+      amountDue: unknown
+      status: string
+      dueDate: Date
+      paidAt: Date | null
+    }>
+    programme?: { name?: string } | null
+  } | null
+}
+
 export async function getStudentPaymentAccessLevel(
   userId: string,
-  preFetchedData?: {
-    profile?: any
-    enrollment?: any
-  }
+  preFetchedData?: PrefetchedData
 ): Promise<PaymentAccessLevel> {
-  const { isModular, isExamOnly, enrollmentType, pathwayCode } = await getStudentStatus(userId, preFetchedData?.profile)
+  const { isModular, isExamOnly } = await getStudentStatus(userId, preFetchedData?.profile)
 
   if (isModular || isExamOnly) {
     return 'FULL_ACCESS'
   }
 
-  const ftEnrollment = preFetchedData?.enrollment || await prisma.fullTimeEnrollment.findFirst({
+  const ftEnrollment = preFetchedData?.enrollment || await prismaUnfiltered.fullTimeEnrollment.findFirst({
     where: { studentId: userId },
     include: {
       milestones: {
@@ -38,11 +55,10 @@ export async function getStudentPaymentAccessLevel(
     return 'RESTRICTED'
   }
 
-  // Handle case where enrollment was fetched without milestones
   const milestones = ftEnrollment.milestones || []
   
   const seatPaid = milestones.some(
-    (m: any) => m.milestoneType === 'SEAT_CONFIRMATION' && m.status === 'PAID'
+    (m: { milestoneType: string; status: string }) => m.milestoneType === 'SEAT_CONFIRMATION' && m.status === 'PAID'
   )
 
   if (!seatPaid) {
@@ -50,7 +66,7 @@ export async function getStudentPaymentAccessLevel(
   }
 
   const sem1Paid = milestones.some(
-    (m: any) => m.milestoneType === 'SEM1_DUE' && m.status === 'PAID'
+    (m: { milestoneType: string; status: string }) => m.milestoneType === 'SEM1_DUE' && m.status === 'PAID'
   )
 
   if (!sem1Paid) {
@@ -66,8 +82,11 @@ export async function getStudentPaymentAccessLevel(
  * even if multiple pages/components call it in parallel. This eliminates
  * the 3–5 redundant studentProfile DB queries per page load.
  */
-export const getStudentStatus = cache(async (userId: string, preFetchedProfile?: any) => {
-  const profile = preFetchedProfile || await prisma.studentProfile.findUnique({
+export const getStudentStatus = cache(async (userId: string, preFetchedProfile?: {
+  enrollmentType?: string | null
+  pathwayRel?: { code?: string | null } | null
+} | null) => {
+  const profile = preFetchedProfile || await prismaUnfiltered.studentProfile.findUnique({
     where: { userId },
     select: {
       enrollmentType: true,
@@ -101,11 +120,26 @@ export async function canAccessFeature(userId: string, feature: FeatureType): Pr
 export async function getEnrollmentMilestoneStatus(
   userId: string,
   preFetchedData?: {
-    profile?: any
-    enrollment?: any
+    profile?: {
+      enrollmentType?: string | null
+      pathwayRel?: { code?: string | null } | null
+    }
+    enrollment?: {
+      currentYearNumber?: number
+      milestones?: Array<{
+        id: string
+        milestoneType: string
+        yearNumber: number
+        amountDue: unknown
+        status: string
+        dueDate: Date
+        paidAt: Date | null
+      }>
+      programme?: { name?: string } | null
+    } | null
   }
 ) {
-  const { isExamOnly, isModular, enrollmentType, pathwayCode } = await getStudentStatus(userId, preFetchedData?.profile)
+  const { isExamOnly, isModular } = await getStudentStatus(userId, preFetchedData?.profile)
 
   if (isModular || isExamOnly) {
     const label = isExamOnly ? 'Exam-Only Pathway' : 'Modular Programme'
@@ -120,7 +154,7 @@ export async function getEnrollmentMilestoneStatus(
     }
   }
 
-  const ftEnrollment = preFetchedData?.enrollment || await prisma.fullTimeEnrollment.findFirst({
+  const ftEnrollment = preFetchedData?.enrollment || await prismaUnfiltered.fullTimeEnrollment.findFirst({
     where: { studentId: userId },
     include: {
       programme: true,
@@ -145,13 +179,13 @@ export async function getEnrollmentMilestoneStatus(
   const milestones = ftEnrollment.milestones || []
 
   const seatPaid = milestones.some(
-    (m: any) => m.milestoneType === 'SEAT_CONFIRMATION' && m.status === 'PAID'
+    (m: { milestoneType: string; status: string }) => m.milestoneType === 'SEAT_CONFIRMATION' && m.status === 'PAID'
   )
   const sem1Paid = milestones.some(
-    (m: any) => m.milestoneType === 'SEM1_DUE' && m.status === 'PAID'
+    (m: { milestoneType: string; status: string }) => m.milestoneType === 'SEM1_DUE' && m.status === 'PAID'
   )
   const sem2Paid = milestones.some(
-    (m: any) => m.milestoneType === 'SEM2_DUE' && m.status === 'PAID'
+    (m: { milestoneType: string; status: string }) => m.milestoneType === 'SEM2_DUE' && m.status === 'PAID'
   )
 
   return {
@@ -159,9 +193,17 @@ export async function getEnrollmentMilestoneStatus(
     seatPaid,
     sem1Paid,
     sem2Paid,
-    currentYear: ftEnrollment.currentYearNumber,
+    currentYear: (ftEnrollment.currentYearNumber as number | null) ?? null,
     programmeName: ftEnrollment.programme?.name || 'Full-Time Programme',
-    milestones: milestones.map((m: any) => ({
+    milestones: milestones.map((m: {
+      id: string
+      milestoneType: string
+      yearNumber: number
+      amountDue: unknown
+      status: string
+      dueDate: Date
+      paidAt: Date | null
+    }) => ({
       id: m.id,
       type: m.milestoneType,
       yearNumber: m.yearNumber,
@@ -179,12 +221,12 @@ export async function getNextDueMilestone(userId: string) {
   if (!status.hasEnrollment) return null
 
   const unpaidMilestones = status.milestones.filter(
-    (m: any) => m.status === 'DUE' || m.status === 'OVERDUE'
+    (m: { status: string }) => m.status === 'DUE' || m.status === 'OVERDUE'
   )
 
   if (unpaidMilestones.length === 0) return null
 
   return unpaidMilestones.sort(
-    (a: any, b: any) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+    (a: { dueDate: Date }, b: { dueDate: Date }) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
   )[0]
 }

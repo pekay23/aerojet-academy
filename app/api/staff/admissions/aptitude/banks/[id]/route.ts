@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
+import { ProgrammeChoice } from '@prisma/client'
 import { z } from 'zod'
 
 const updateSchema = z.object({
@@ -12,9 +13,9 @@ const updateSchema = z.object({
 })
 
 // GET /api/staff/admissions/aptitude/banks/[id]
-export const GET = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await params
+  const { id } = (await ctx!.params) as { id: string }
 
   const bank = await prismaUnfiltered.aptitudeTestBank.findUnique({
     where: { id },
@@ -28,9 +29,9 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: { param
 })
 
 // PUT /api/staff/admissions/aptitude/banks/[id]
-export const PUT = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const PUT = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await params
+  const { id } = (await ctx!.params) as { id: string }
   const body = await req.json()
   const parsed = updateSchema.safeParse(body)
   if (!parsed.success) return apiError(parsed.error.issues[0].message)
@@ -38,19 +39,22 @@ export const PUT = withErrorHandler(async (req: NextRequest, { params }: { param
   try {
     const bank = await prismaUnfiltered.aptitudeTestBank.update({
       where: { id },
-      data: parsed.data as any,
+      data: {
+        ...parsed.data,
+        applicableProgrammes: parsed.data.applicableProgrammes as ProgrammeChoice[] | undefined
+      },
     })
     return apiSuccess(bank)
-  } catch (error: any) {
-    if (error.code === 'P2025') return apiError('Bank not found', 404)
+  } catch (error: unknown) {
+    if (error instanceof Error && 'code' in error && (error as Error & { code?: string }).code === 'P2025') return apiError('Bank not found', 404)
     throw error
   }
 })
 
 // DELETE /api/staff/admissions/aptitude/banks/[id]
-export const DELETE = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const DELETE = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
   await requireStaff()
-  const { id } = await params
+  const { id } = (await ctx!.params) as { id: string }
 
   // Check if bank has sessions
   const bank = await prismaUnfiltered.aptitudeTestBank.findUnique({

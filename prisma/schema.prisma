@@ -64,6 +64,7 @@ model User {
   attendanceRecords           AttendanceRecord[]
   auditLogs                   AuditLog[]
   bookingEntitlements         BookingEntitlement[]
+  certificates                 Certificate[]
   classSessions               ClassSession[]
   dsrAssigned                 DataSubjectRequest[]      @relation("DsrAssignee")
   dsrRequested                DataSubjectRequest[]      @relation("DsrRequester")
@@ -80,7 +81,11 @@ model User {
   grades                      Grade[]
   instructorProfile           InstructorProfile?
   internalExamReports         InternalExamReport[]
-  internalExamSessions        InternalExamSession[]
+    internalExamSessions        InternalExamSession[]
+   internalExamRegistrations   InternalExamRegistration[]
+   internalExamViolations      InternalExamViolation[]   @relation("InternalExamViolationStudent")
+   submittedQuestions          InternalExamQuestion[]    @relation("QuestionSubmittedBy")
+   reviewedQuestions           InternalExamQuestion[]    @relation("QuestionReviewedBy")
   interviewEvaluationsGiven   InterviewEvaluation[]     @relation("InterviewEvaluator")
   invoices                    Invoice[]
   maintenance145Transfers     Maintenance145Transfer[]
@@ -113,6 +118,8 @@ model User {
   createdTuitionRuns          TuitionRun[]              @relation("CreatedTuitionRuns")
   wallet                      Wallet?
   withdrawalRequests          WithdrawalRequest[]
+  /// @deprecated No longer used, preserved for historical data
+  requiresAlternativeProctoring Boolean?
 
   @@index([email])
   @@index([academyEmail])
@@ -248,6 +255,7 @@ model InstructorProfile {
   user                     User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   instructorQualifications InstructorQualification[]
   instructorRecency        InstructorRecency[]
+  internalExamBankInstructors InternalExamBankInstructor[]
 
   @@index([employeeId])
   @@map("instructor_profiles")
@@ -277,6 +285,8 @@ model LicenseCategory {
   academicTerms  AcademicTerm[]
   requirements   LicenseModuleRequirement[]
   studentTargets StudentLicenseTarget[]
+  ojtLogbooks    OJTLogbook[]
+  registrations  InternalExamRegistration[] @relation("RegLicenceCategory")
 
   @@map("license_categories")
 }
@@ -339,6 +349,10 @@ model StudentLicenseTarget {
   id                String          @id @default(cuid())
   studentProfileId  String
   licenseCategoryId String
+  expiresAt         DateTime?
+  validFrom         DateTime?
+  ratingClass       String?
+  validityPeriodMonths Int?
   licenseCategory   LicenseCategory @relation(fields: [licenseCategoryId], references: [id])
   studentProfile    StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
 
@@ -472,6 +486,7 @@ model Class {
   semester             Semester?             @relation(fields: [semesterId], references: [id])
   examAttendances      ExamAttendance[]
   internalExamSessions InternalExamSession[]
+  internalExamClassSchedules InternalExamClassSchedule[]
 
   @@index([courseId])
   @@index([instructorId])
@@ -505,6 +520,8 @@ model AttendanceRecord {
   recordedBy  String?
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  /// @deprecated No longer used, preserved for historical data
+  sessionType String           @default("")
   class       Class            @relation(fields: [classId], references: [id], onDelete: Cascade)
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -536,6 +553,8 @@ model Grade {
   updatedAt      DateTime      @updatedAt
   deletedAt      DateTime?
   category       GradeCategory @default(INTERNAL_CA)
+  /// @deprecated No longer used, preserved for historical data
+  resultLocked   Boolean?
   enrollment     Enrollment    @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -891,6 +910,7 @@ model ExamSitting {
   updatedAt            DateTime                @updatedAt
   attendances          ExamAttendance[]
   assignments          ExamSittingAssignment[]
+  examResults          ExamResult[]
   event                ExamEvent               @relation(fields: [eventId], references: [id], onDelete: Cascade)
   examComponent        ExamComponent           @relation(fields: [examComponentId], references: [id])
   examiner             Examiner?               @relation(fields: [examinerId], references: [id])
@@ -901,6 +921,7 @@ model ExamSitting {
   @@index([examComponentId])
   @@index([dayNumber, sessionType])
   @@index([status])
+  @@index([eventId, status])
   @@map("exam_sittings")
 }
 
@@ -967,6 +988,10 @@ model ExamResult {
   sourceNotes       String?
   examCategory      ExamCategory @default(OFFICIAL_EASA)
   deletedAt         DateTime?
+  /// @deprecated No longer used, preserved for historical data
+  resultLocked      Boolean?
+  sittingId         String?
+  sitting           ExamSitting? @relation(fields: [sittingId], references: [id])
   exam              Exam?        @relation(fields: [examId], references: [id], onDelete: Cascade)
   user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -974,6 +999,7 @@ model ExamResult {
   @@index([userId])
   @@index([moduleCode])
   @@index([deletedAt])
+  @@index([sittingId])
   @@map("exam_results")
 }
 
@@ -1087,22 +1113,27 @@ model Message {
 }
 
 model AuditLog {
-  id          String   @id @default(cuid())
-  userId      String?
-  action      String
-  entity      String?
-  entityId    String?
-  description String?
-  changes     Json?
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
-  user        User?    @relation(fields: [userId], references: [id])
+  id           String   @id @default(cuid())
+  userId       String?
+  action       String
+  entity       String?
+  entityId     String?
+  description  String?
+  changes      Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+  previousHash String?
+  hash         String?
+  /// @deprecated Replaced by hash chain, preserved for historical data
+  entryHash    String?
+  user         User?    @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([action])
   @@index([entity, entityId])
   @@index([createdAt(sort: Desc)])
+  @@index([hash])
   @@map("audit_logs")
 }
 
@@ -1119,10 +1150,13 @@ model AuditLogArchive {
   userAgent         String?
   originalCreatedAt DateTime
   archivedAt        DateTime @default(now())
+  previousHash      String?
+  hash              String?
 
   @@index([originalCreatedAt])
   @@index([action])
   @@index([originalId])
+  @@index([hash])
   @@map("audit_log_archives")
 }
 
@@ -1255,6 +1289,7 @@ model AcademicYear {
   intakeCycles    IntakeCycle[]
   semesters       Semester[]
   studentProfiles StudentProfile[]
+  fullTimeEnrollments FullTimeEnrollment[]
 
   @@index([isActive])
   @@map("academic_years")
@@ -1322,7 +1357,8 @@ model FullTimeEnrollment {
   status            FullTimeEnrollmentStatus @default(PENDING_CONFIRMATION)
   currentYearNumber Int                      @default(1)
   startDate         DateTime                 @default(now())
-  academicYear      String?                  @default("2026/2027")
+  academicYearId    String
+  academicYear      AcademicYear             @relation(fields: [academicYearId], references: [id])
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
   programme         FullTimeProgramme        @relation(fields: [programmeId], references: [id])
@@ -1332,6 +1368,7 @@ model FullTimeEnrollment {
   milestones        PaymentMilestone[]
 
   @@unique([studentId, programmeId])
+  @@index([academicYearId])
   @@map("full_time_enrollments")
 }
 
@@ -1941,12 +1978,46 @@ model InternalExamAnswer {
   isCorrect      Boolean?
   pointsAwarded  Int                  @default(0)
   answeredAt     DateTime             @default(now())
+  /// @deprecated No longer used, preserved for historical data
+  flaggedForReview Boolean?
   question       InternalExamQuestion @relation(fields: [questionId], references: [id])
   session        InternalExamSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, questionId])
   @@index([sessionId])
   @@map("internal_exam_answers")
+}
+
+/// @deprecated Question versioning no longer used, preserved for historical data
+model InternalExamQuestionVersion {
+  id         String   @id @default(cuid())
+  questionId String
+  version    Int
+  content    Json?
+  createdAt  DateTime @default(now())
+  /// @deprecated Preserved for historical data
+  changeReason String?
+  /// @deprecated Preserved for historical data
+  changeType   String           @default("")
+  /// @deprecated Preserved for historical data
+  changedAt    DateTime?
+  /// @deprecated Preserved for historical data
+  changedById  String?
+  /// @deprecated Preserved for historical data
+  correctAnswer String?
+  /// @deprecated Preserved for historical data
+  difficulty   String           @default("")
+  /// @deprecated Preserved for historical data
+  isActive     Boolean?
+  /// @deprecated Preserved for historical data
+  options      Json?
+  /// @deprecated Preserved for historical data
+  points       Int?
+  /// @deprecated Preserved for historical data
+  text         String?
+
+  @@index([questionId])
+  @@map("internal_exam_question_versions")
 }
 
 model InternalExamBank {
@@ -1963,13 +2034,23 @@ model InternalExamBank {
   createdAt       DateTime                  @default(now())
   updatedAt       DateTime                  @updatedAt
   categoryCode    String?
+  sebConfig       Json?
+  certificateEnabled Boolean        @default(false)
+  reviewState     InternalExamBankReviewState @default(DRAFT)
+  reviewedAt      DateTime?
+  reviewedById    String?
+  reviewNote      String?
   course          Course                    @relation(fields: [courseId], references: [id])
   questions       InternalExamQuestion[]
   ruleOverride    InternalExamRuleOverride?
   sessions        InternalExamSession[]
+  instructors     InternalExamBankInstructor[]
+  schedules       InternalExamClassSchedule[]
+  violations      InternalExamViolation[]
 
   @@index([courseId])
   @@index([categoryCode])
+  @@index([reviewState])
   @@map("internal_exam_banks")
 }
 
@@ -1997,11 +2078,18 @@ model InternalExamQuestion {
   status         QuestionStatus       @default(DRAFT)
   submittedById  String?
   syllabusRef    String?
-  answers        InternalExamAnswer[]
-  bank           InternalExamBank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
-  reports        InternalExamReport[]
+  explanation    String?
+  // AI provenance (EASA seed pipeline)
+  aiSourceRef    String?
+  aiConfidence   Float?
+  aiSolvedAt     DateTime?
+   answers        InternalExamAnswer[]
+   bank           InternalExamBank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
+   reports        InternalExamReport[]
+   submittedBy    User?                @relation("QuestionSubmittedBy", fields: [submittedById], references: [id])
+   reviewedBy     User?                @relation("QuestionReviewedBy", fields: [reviewedById], references: [id])
 
-  @@index([bankId, isActive, status])
+   @@index([bankId, isActive, status])
   @@index([bankId, syllabusRef])
   @@index([status])
   @@map("internal_exam_questions")
@@ -2057,18 +2145,73 @@ model InternalExamSession {
   /// the single-attempt block so the student can retake).
   voidedAt         DateTime?
   voidedBy         String?
+  timeExtensionSec Int                  @default(0)
+  timeExtensionRecoveredAt DateTime?
+  lastActivityAt   DateTime?
+  supervised       Boolean              @default(false)
+  recoveredAt      DateTime?
+  recoveredBy      String?
+  recoveryReason   String?
+  bekExpiresAt     DateTime?
+  sebKeys          Json?
+  /// DB-level immutability trigger prevents modification of published results
+  /// (see scripts/create-immutability-trigger.sql)
+  /// Persisted randomized question order for paper randomization
+  questionOrder    Json?
   answers          InternalExamAnswer[]
   reports          InternalExamReport[]
+  accessCodes      InternalExamAccessCode[]
+  violations       InternalExamViolation[]
+  registrations    InternalExamRegistration[]
   bank             InternalExamBank     @relation(fields: [bankId], references: [id])
   class            Class?               @relation(fields: [classId], references: [id])
   sitting          ExamSitting?         @relation(fields: [sittingId], references: [id])
   student          User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  certificates     Certificate[]
 
   @@index([bankId])
   @@index([status])
   @@index([studentId])
   @@index([categoryCode])
+  @@index([classId, status])
   @@map("internal_exam_sessions")
+}
+
+/// Pre-exam registration binding a candidate to an exam session.
+/// Created when an access code is validated; filled in by the pre-exam form.
+model InternalExamRegistration {
+  id                  String              @id @default(cuid())
+  sessionId           String
+  userId              String
+  fullName            String?
+  dateOfBirth         DateTime?
+  nationality         String?
+  email               String?
+  phone               String?
+  licenceCategory     String?
+  licenceCategoryId   String?
+  licenceCategoryRef  LicenseCategory?    @relation("RegLicenceCategory", fields: [licenceCategoryId], references: [id])
+  examDate            DateTime?
+  examLocation        String?
+  candidatePhoto      String?
+  idDocumentType      String?
+  idDocumentNumber    String?
+  consentTruthfulness Boolean             @default(false)
+  consentMonitoring   Boolean             @default(false)
+  consentIdentity     Boolean             @default(false)
+  consentProcessing   Boolean             @default(false)
+  status              String              @default("PENDING")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  modules             String[]            @default([])
+  session             InternalExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([userId])
+  @@index([sessionId])
+  @@index([licenceCategoryId])
+  @@map("internal_exam_registrations")
 }
 
 model InternalExamReport {
@@ -2199,7 +2342,8 @@ model OJTLogbookEntry {
 model OJTLogbook {
   id                    String                @id @default(cuid())
   studentProfileId      String                @unique
-  licenceCategory       String
+  licenceCategoryId     String
+  licenceCategory       LicenseCategory       @relation(fields: [licenceCategoryId], references: [id])
   facilityName          String
   facilityApprovalNo    String?
   startDate             DateTime
@@ -2216,6 +2360,7 @@ model OJTLogbook {
   studentProfile        StudentProfile        @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
   mentorAssignments     OJTMentorAssignment[]
 
+  @@index([licenceCategoryId])
   @@map("ojt_logbooks")
 }
 
@@ -2833,6 +2978,7 @@ enum NotificationType {
   SUCCESS
   WARNING
   ERROR
+  CRITICAL
   POOL_UPDATE
   PAYMENT_UPDATE
   EXAM_REMINDER
@@ -3089,6 +3235,13 @@ enum TestSessionStatus {
   VOIDED
 }
 
+enum RetentionCategory {
+  EXAM_SESSION
+  EXAM_RESULT
+  CERTIFICATE
+  AUDIT_LOG
+}
+
 enum UpgradeStatus {
   PENDING
   APPROVED
@@ -3267,6 +3420,233 @@ enum ReferralPayoutStatus {
   REJECTED
 }
 
+/// Many-to-many join between instructors and exam banks with edit permission
+/// NOTE: instructorId references InstructorProfile (not User.id as the UI plan
+/// specifies). This divergence is intentional — changing it would require a data
+/// migration and break existing functionality. The API layer handles mapping
+/// between User.id and InstructorProfile.id where needed.
+model InternalExamBankInstructor {
+  id             String          @id @default(cuid())
+  bankId         String
+  instructorId   String
+  canEdit        Boolean         @default(false)
+  canReview      Boolean         @default(false)
+  canMonitor     Boolean         @default(false)
+  canPublish     Boolean         @default(false)
+  assignedBy     String?
+  assignedAt     DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  bank           InternalExamBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  instructor     InstructorProfile @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+
+  @@unique([bankId, instructorId])
+  @@index([instructorId])
+  @@map("internal_exam_bank_instructors")
+}
+
+/// Scheduled exam window for a class using a specific bank
+model InternalExamClassSchedule {
+  id              String          @id @default(cuid())
+  bankId          String
+  classId         String?
+  scheduledStart  DateTime?
+  scheduledEnd    DateTime?
+  isActive        Boolean         @default(true)
+  allowLateStart  Boolean         @default(false)
+  sebRequired     Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  bank            InternalExamBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  class           Class?          @relation(fields: [classId], references: [id], onDelete: SetNull)
+
+  @@index([bankId])
+  @@index([classId])
+  @@map("internal_exam_class_schedules")
+}
+
+/// Single-use access code granting entry to an exam session
+model InternalExamAccessCode {
+  id          String             @id @default(cuid())
+  code        String             @unique
+  sessionId   String
+  candidateId String?
+  used        Boolean            @default(false)
+  usedAt      DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime           @default(now())
+  session     InternalExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([candidateId])
+  @@map("internal_exam_access_codes")
+}
+
+/// Proctoring violation logged during an exam session
+model InternalExamViolation {
+  id          String             @id @default(cuid())
+  sessionId   String
+  studentId   String
+  classId     String?
+  bankId      String
+  type        String
+  severity    String             @default("WARNING")
+  detail      String?
+  deviceInfo  Json?
+  reviewed    Boolean            @default(false)
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  reviewOutcome String?
+  createdAt   DateTime           @default(now())
+  session     InternalExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student     User               @relation("InternalExamViolationStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  bank        InternalExamBank    @relation(fields: [bankId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([studentId])
+  @@index([bankId])
+  @@map("internal_exam_violations")
+}
+
+/// Generated certificate for a completed exam session
+model Certificate {
+  id            String   @id @default(cuid())
+  certificateId String   @unique
+  sessionId     String   @unique
+  studentId     String
+  courseId      String?
+  moduleCode    String?
+  score         Int?
+  percentage    Float?
+  template      String   @default("internal_exam")
+  pdfUrl        String?
+  issuedAt      DateTime @default(now())
+  issuedBy      String?
+  verified      Boolean  @default(false)
+  revokedAt     DateTime?
+  revokedBy     String?
+  revokeReason  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  retentionCategory RetentionCategory @default(CERTIFICATE)
+  session       InternalExamSession? @relation(fields: [sessionId], references: [id])
+  student       User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([sessionId])
+  @@map("certificates")
+}
+
+enum PdfTemplateType {
+  CERTIFICATE
+  TRANSCRIPT
+}
+
+enum PdfTemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+/// Stores template configurations for data-driven PDF generation.
+/// Staff can customise text content, signatures, branding, and numbering format per template.
+model PdfTemplate {
+  id                String                @id @default(cuid())
+  name              String                @unique
+  slug              String                @unique
+  type              PdfTemplateType
+  layout            String                @default("default")
+  status            PdfTemplateStatus     @default(DRAFT)
+  isDefault         Boolean               @default(false)
+  /// JSON: title, subtitle, completionText, accreditationText, signatureLabels, etc.
+  content           Json                  @default("{}")
+  /// JSON: logoUrl, watermarkUrl, watermarkOpacity, footerText (overrides global)
+  branding          Json?
+  /// e.g. "CERT-{YYYY}-{SEQ:4}"
+  numberFormat      String?
+  lastSequence      Int                   @default(0)
+  lastSequenceYear  Int?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  createdBy         String?
+  updatedBy         String?
+  clonedFromId      String?
+  signatures        PdfTemplateSignature[]
+  verifications     DocumentVerification[]
+
+  @@index([type, isDefault])
+  @@index([status])
+  @@map("pdf_templates")
+}
+
+/// Uploaded digital signature images stored in Supabase Storage.
+model PdfSignature {
+  id          String                  @id @default(cuid())
+  /// Role title, e.g. "Training Manager", "Academy Director"
+  label       String
+  /// Full name of the person whose signature this is, e.g. "Capt. John Doe"
+  signerName  String
+  /// Supabase Storage path: "signatures/{id}.png"
+  imageUrl    String
+  isActive    Boolean                 @default(true)
+  sortOrder   Int                     @default(0)
+  /// When set, this signature should be rotated (staff role change, etc.)
+  expiresAt   DateTime?
+  /// User ID of the admin who uploaded this signature
+  uploadedBy  String?
+  /// User ID of the person whose consent was obtained for this signature
+  consentGivenBy String?
+  /// How consent was obtained: "in_person", "email", "verbal", "written"
+  consentMethod  String?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  templates   PdfTemplateSignature[]
+
+  @@map("pdf_signatures")
+}
+
+/// Join table: assigns a PdfSignature to a PdfTemplate position (left/right slot).
+model PdfTemplateSignature {
+  id          String       @id @default(cuid())
+  templateId  String
+  signatureId String
+  /// 0 = left slot, 1 = right slot
+  position    Int          @default(0)
+  template    PdfTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  signature   PdfSignature @relation(fields: [signatureId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, position])
+  @@map("pdf_template_signatures")
+}
+
+/// Public-facing verification record created when a document is generated.
+/// Used by the QR code verification page — no auth required.
+model DocumentVerification {
+  id              String       @id @default(cuid())
+  /// Short unique code shown in QR, e.g. "AJ-2026-A7X9K2"
+  code            String       @unique
+  templateId      String?
+  recipientName   String
+  /// e.g. "Certificate" | "Transcript"
+  documentType    String
+  certificateNo   String?      @unique
+  issueDate       DateTime
+  metadata        Json?
+  generatedBy     String?
+  /// When set, this verification record expires (e.g. for re-issued docs)
+  expiresAt       DateTime?
+  /// When set, this verification record has been revoked
+  revokedAt       DateTime?
+  /// User ID of the admin who revoked this record
+  revokedBy       String?
+  revokeReason    String?
+  createdAt       DateTime     @default(now())
+  template        PdfTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([code])
+  @@index([recipientName])
+  @@map("document_verifications")
+}
+
 enum PermissionScope {
   ROLE
   USER
@@ -3275,6 +3655,14 @@ enum PermissionScope {
 enum EmailRegistryCategory {
   AUTO
   CUSTOM
+}
+
+enum InternalExamBankReviewState {
+  DRAFT
+  PENDING_REVIEW
+  PENDING_ADMIN_REVIEW
+  APPROVED
+  REJECTED
 }
 
 enum EmailDeliveryStatus {

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sortable table pattern (server-paginated lists) · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Guides</p>
+  <h1 class="he-title">Sortable table pattern (server-paginated lists)</h1>
+  <p class="he-deck">All list endpoints in the Aerojet codebase follow the same shape: an authenticated page reads <code>searchParams</code>, runs a Prisma <code>findMany</code> with pagination, and hands the rows to a client table.</p>
+</header>
+<section class="he-section" id="tldr"><div class="he-section__num">01 · TL;DR</div><h2 class="he-section__title">TL;DR</h2></section>
+<ol>
+<li>Page reads <code>?sort=&lt;key&gt;&amp;order=&lt;asc|desc&gt;</code> from <code>searchParams</code>.</li>
+<li>A allow-list of <code>sortKey → Prisma field path</code> is declared in the page.</li>
+<li><code>buildOrderBy()</code> translates the URL params into a Prisma <code>orderBy</code> object.</li>
+<li>Clicking a column header pushes a new URL with <code>sort</code>, <code>order</code>, and <code>page=1</code>.</li>
+<li>Prisma returns the new order, the table re-renders.</li>
+</ol>
+<p>The reusable pieces live in two places:</p>
+<ul>
+<li><code>components/ui/sortable-th.tsx</code> — the <strong>client</strong> primitive. Exports <code>&lt;SortableTh&gt;</code> for headers and re-exports <code>buildOrderBy</code> for convenience.</li>
+<li><code>lib/utils/build-order-by.ts</code> — the <strong>server-safe</strong> <code>buildOrderBy</code> helper. Import from here in server components (page.tsx) to avoid the <code>'use client'</code> boundary.</li>
+</ul>
+<section class="he-section" id="files-to-touch-per-table"><div class="he-section__num">02 · Files to touch per table</div><h2 class="he-section__title">Files to touch per table</h2></section>
+<table>
+<thead>
+<tr><th>File</th><th>Change</th></tr>
+</thead>
+<tbody>
+<tr><td><code>app/&lt;portal&gt;/&lt;page&gt;/page.tsx</code></td><td>Add <code>sort</code> and <code>order</code> to <code>searchParams</code> type, declare allow-list, call <code>buildOrderBy</code>, pass result to Prisma <code>orderBy</code></td></tr>
+<tr><td><code>app/&lt;portal&gt;/&lt;page&gt;/_components/&lt;Table&gt;.tsx</code></td><td>Replace the static <code>&lt;TableHead&gt;</code> with <code>&lt;SortableTh sortKey=&quot;...&quot; label=&quot;...&quot; /&gt;</code></td></tr>
+</tbody>
+</table>
+<section class="he-section" id="reference-enrollments-table"><div class="he-section__num">03 · Reference: enrollments table</div><h2 class="he-section__title">Reference: enrollments table</h2></section>
+<p><code>app/staff/enrollments/page.tsx</code>:</p>
+<pre><code class="language-tsx">import { buildOrderBy } from '@/lib/utils/build-order-by'
+
+const ALLOWED_SORT_KEYS = {
+  student:    'user.profile.lastName',
+  course:     'course.name',
+  status:     'status',
+  enrolledAt: 'enrolledAt',
+  amount:     'amountPaid',
+} as const
+
+type SortKey = keyof typeof ALLOWED_SORT_KEYS
+
+export default async function EnrollmentsPage({ searchParams }) {
+  const params = await searchParams
+  // ... pagination as before ...
+
+  const orderBy = buildOrderBy&lt;SortKey&gt;(params, ALLOWED_SORT_KEYS, { createdAt: 'desc' })
+
+  const enrollments = await prismaUnfiltered.enrollment.findMany({
+    where,
+    orderBy: orderBy as Prisma.EnrollmentOrderByWithRelationInput,
+    // ...
+  })
+}
+</code></pre>
+<p><code>app/staff/enrollments/_components/EnrollmentsTable.tsx</code>:</p>
+<pre><code class="language-tsx">import { SortableTh } from '@/components/ui/sortable-th'
+
+// In the TableHeader:
+&lt;SortableTh sortKey=&quot;student&quot; label=&quot;Student&quot; /&gt;
+&lt;SortableTh sortKey=&quot;enrolledAt&quot; label=&quot;Enrolled Date&quot; /&gt;
+&lt;SortableTh sortKey=&quot;amount&quot; label=&quot;Amount Paid&quot; align=&quot;right&quot; /&gt;
+</code></pre>
+<section class="he-section" id="security-the-allow-list"><div class="he-section__num">04 · Security: the allow-list</div><h2 class="he-section__title">Security: the allow-list</h2></section>
+<p><code>buildOrderBy</code> will only emit an <code>orderBy</code> for keys that appear in the <code>allowed</code> map. Anything else falls through to <code>defaultOrderBy</code>. <strong>Never</strong> pass the raw <code>params.sort</code> value directly into Prisma — that lets users sort by any column including related models and computed fields.</p>
+<section class="he-section" id="prisma-field-path-syntax"><div class="he-section__num">05 · Prisma field path syntax</div><h2 class="he-section__title">Prisma field path syntax</h2></section>
+<p>The allow-list value is a dot path into the Prisma include shape:</p>
+<table>
+<thead>
+<tr><th>Allow-list value</th><th>Prisma <code>orderBy</code></th></tr>
+</thead>
+<tbody>
+<tr><td><code>enrolledAt</code></td><td><code>{ enrolledAt: 'asc' }</code></td></tr>
+<tr><td><code>user.profile.lastName</code></td><td><code>{ user: { profile: { lastName: 'asc' } } }</code></td></tr>
+<tr><td><code>course.name</code></td><td><code>{ course: { name: 'asc' } }</code></td></tr>
+</tbody>
+</table>
+<p><code>buildOrderBy</code> builds the nested object for you.</p>
+<section class="he-section" id="sort-cycle"><div class="he-section__num">06 · Sort cycle</div><h2 class="he-section__title">Sort cycle</h2></section>
+<p>Click cycle for a column: <code>unsorted → asc → desc → unsorted</code>. In practice the URL cycle is <code>?sort=&lt;key&gt;&amp;order=asc|desc</code> (no &quot;off&quot; state — clicking past desc returns to the default <code>{ createdAt: 'desc' }</code>).</p>
+<p>Pagination is reset to page 1 on every sort change so the user doesn't end up on a stale page from the old order.</p>
+<section class="he-section" id="what-does-not-use-this-pattern"><div class="he-section__num">07 · What does NOT use this pattern</div><h2 class="he-section__title">What does NOT use this pattern</h2></section>
+<ul>
+<li><strong>Client-side small tables</strong> (e.g. pickers, settings lists, sub-panels with &lt; 50 rows) — use <code>useSort&lt;T&gt;()</code> from <code>lib/hooks/useSort.tsx</code> + <code>&lt;SortHeader&gt;</code>.</li>
+<li><strong>The generic <code>DataTable</code> primitive</strong> at <code>components/shared/DataTable.tsx</code> — that has its own <code>sortable</code> + <code>onSort</code> props. New tables that fit the declarative column model should prefer that.</li>
+<li><strong>Layout-only tables</strong> (pricing, comparison, info rows) — not sortable by design.</li>
+</ul>
+<section class="he-section" id="conversion-checklist-for-each-follow-up-pr"><div class="he-section__num">08 · Conversion checklist for each follow-up PR</div><h2 class="he-section__title">Conversion checklist for each follow-up PR</h2></section>
+<ol>
+<li>Read the page's <code>searchParams</code> and the existing <code>where</code> / <code>orderBy</code>.</li>
+<li>List the visible headers that should be sortable — usually all of them.</li>
+<li>Build the allow-list, mapping each public key to a Prisma field path.</li>
+<li>Pass <code>orderBy</code> to Prisma.</li>
+<li>Replace the matching <code>&lt;TableHead&gt;</code> with <code>&lt;SortableTh sortKey=&quot;...&quot; label=&quot;...&quot; /&gt;</code>.</li>
+<li>Run <code>bun x tsc --noEmit</code> to verify the page compiles.</li>
+<li>Manually click each header to confirm the URL changes, the data re-sorts, and pagination resets to page 1.</li>
+</ol>
+<section class="he-section" id="tables-not-yet-sorted-target-for-follow-up-prs"><div class="he-section__num">09 · Tables not yet sorted (target for follow-up PRs)</div><h2 class="he-section__title">Tables not yet sorted (target for follow-up PRs)</h2></section>
+<p>See <code>docs/audits/2026-08-31-sortable-tables-inventory.md</code> for the full list of ~47 tables and which ones need server-paginated sort vs client-side sort.</p>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#tldr">TL;DR</a></li>
+    <li class="he-toc__l2"><a href="#files-to-touch-per-table">Files to touch per table</a></li>
+    <li class="he-toc__l2"><a href="#reference-enrollments-table">Reference: enrollments table</a></li>
+    <li class="he-toc__l2"><a href="#security-the-allow-list">Security: the allow-list</a></li>
+    <li class="he-toc__l2"><a href="#prisma-field-path-syntax">Prisma field path syntax</a></li>
+    <li class="he-toc__l2"><a href="#sort-cycle">Sort cycle</a></li>
+    <li class="he-toc__l2"><a href="#what-does-not-use-this-pattern">What does NOT use this pattern</a></li>
+    <li class="he-toc__l2"><a href="#conversion-checklist-for-each-follow-up-pr">Conversion checklist for each follow-up PR</a></li>
+    <li class="he-toc__l2"><a href="#tables-not-yet-sorted-target-for-follow-up-prs">Tables not yet sorted (target for follow-up PRs)</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

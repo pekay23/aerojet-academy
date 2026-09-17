@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GDPR Export Specification — Instructor Analytics CSV · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Compliance</p>
+  <h1 class="he-title">GDPR Export Specification — Instructor Analytics CSV</h1>
+  <p class="he-deck">This document defines the data-processing rules for the instructor analytics CSV export endpoint…</p>
+</header>
+<section class="he-section" id="1-overview"><div class="he-section__num">01 · 1. Overview</div><h2 class="he-section__title">1. Overview</h2></section>
+<p>This document defines the data-processing rules for the instructor analytics CSV export endpoint:</p>
+<pre><code>GET /api/instructor/exams/classes/[classId]/analytics?format=csv
+</code></pre>
+<p>The endpoint is restricted to authenticated instructors. Exported files contain exam session results and must comply with institutional GDPR obligations.</p>
+<hr />
+<section class="he-section" id="2-access-control"><div class="he-section__num">02 · 2. Access Control</div><h2 class="he-section__title">2. Access Control</h2></section>
+<ul>
+<li><strong>Who can export:</strong> Assigned instructor for the class (<code>requireInstructor</code> + ownership check).</li>
+<li><strong>Who cannot export:</strong> Students, applicants, staff without instructor assignment, unauthenticated users.</li>
+<li><strong>Audit logging:</strong> Every export request should be treated as a data-access event. The instructor portal should log the requesting user ID, class ID, timestamp, and <code>includePii</code> flag.</li>
+</ul>
+<hr />
+<section class="he-section" id="3-query-parameters"><div class="he-section__num">03 · 3. Query Parameters</div><h2 class="he-section__title">3. Query Parameters</h2></section>
+<table>
+<thead>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>format</code></td><td>string</td><td><code>json</code></td><td>Set to <code>csv</code> to receive a CSV file.</td></tr>
+<tr><td><code>includePii</code></td><td>boolean</td><td><code>true</code></td><td>When <code>false</code>, all personal identifiers are obfuscated.</td></tr>
+<tr><td><code>from</code></td><td>ISO 8601 date</td><td>—</td><td>Filter sessions submitted on or after this date.</td></tr>
+<tr><td><code>to</code></td><td>ISO 8601 date</td><td>—</td><td>Filter sessions submitted on or before this date.</td></tr>
+<tr><td><code>page</code></td><td>integer</td><td><code>1</code></td><td>JSON response pagination.</td></tr>
+<tr><td><code>limit</code></td><td>integer</td><td><code>20</code></td><td>JSON response page size (max 100).</td></tr>
+</tbody>
+</table>
+<h3 id="31-includepii-default-true">3.1 <code>includePii</code> (default: <code>true</code>)</h3>
+<p>When <code>includePii=false</code>:</p>
+<table>
+<thead>
+<tr><th>Column</th><th>PII value (includePii=true)</th><th>Exported value (includePii=false)</th></tr>
+</thead>
+<tbody>
+<tr><td><code>Student ID</code></td><td>Prisma user ID (UUID)</td><td>Opaque random ID: <code>S-XXXXXXXXXX</code></td></tr>
+<tr><td><code>Name</code></td><td><code>First Last</code> from profile</td><td><code>Student N</code> where N is 1-based row index</td></tr>
+<tr><td><code>Email</code></td><td>Student email address</td><td>Empty string</td></tr>
+</tbody>
+</table>
+<h3 id="32-maxrangedays-cap-365-days">3.2 <code>maxRangeDays</code> (cap: 365 days)</h3>
+<p>When both <code>from</code> and <code>to</code> are provided, the server computes:</p>
+<pre><code class="language-ts">diffDays = (to - from) / (1000 * 60 * 60 * 24)
+</code></pre>
+<p>If <code>diffDays &gt; 365</code>, the endpoint returns:</p>
+<pre><code>HTTP 400
+{
+  &quot;success&quot;: false,
+  &quot;error&quot;: &quot;Date range exceeds maximum allowed span of 365 days&quot;
+}
+</code></pre>
+<p>Single-sided filters (<code>from</code> only or <code>to</code> only) are not capped — they default to the full remaining history.</p>
+<hr />
+<section class="he-section" id="4-csv-column-definitions"><div class="he-section__num">04 · 4. CSV Column Definitions</div><h2 class="he-section__title">4. CSV Column Definitions</h2></section>
+<p>The CSV header row is fixed in the following order:</p>
+<table>
+<thead>
+<tr><th>#</th><th>Column</th><th>Type</th><th>PII</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td><code>Student ID</code></td><td>string</td><td>Yes</td><td>Obfuscated when <code>includePii=false</code></td></tr>
+<tr><td>2</td><td><code>Name</code></td><td>string</td><td>Yes</td><td>Obfuscated when <code>includePii=false</code></td></tr>
+<tr><td>3</td><td><code>Email</code></td><td>string</td><td>Yes</td><td>Empty when <code>includePii=false</code></td></tr>
+<tr><td>4</td><td><code>Bank</code></td><td>string</td><td>No</td><td>Question bank name</td></tr>
+<tr><td>5</td><td><code>Status</code></td><td>string</td><td>No</td><td><code>COMPLETED</code> or <code>TIMED_OUT</code></td></tr>
+<tr><td>6</td><td><code>Score</code></td><td>integer</td><td>No</td><td>Raw score</td></tr>
+<tr><td>7</td><td><code>Total Points</code></td><td>integer</td><td>No</td><td>Maximum possible points</td></tr>
+<tr><td>8</td><td><code>Percentage</code></td><td>number</td><td>No</td><td>0–100</td></tr>
+<tr><td>9</td><td><code>Passed</code></td><td>boolean</td><td>No</td><td><code>true</code>/<code>false</code>/empty</td></tr>
+<tr><td>10</td><td><code>Started At</code></td><td>string</td><td>No</td><td>ISO 8601: <code>yyyy-MM-dd HH:mm:ss</code></td></tr>
+<tr><td>11</td><td><code>Submitted At</code></td><td>string</td><td>No</td><td>ISO 8601: <code>yyyy-MM-dd HH:mm:ss</code></td></tr>
+</tbody>
+</table>
+<h3 id="41-date-format-standardization">4.1 Date Format Standardization</h3>
+<p>All date values use <strong>ISO 8601 compact format with time</strong>:</p>
+<pre><code>yyyy-MM-dd HH:mm:ss
+</code></pre>
+<p>Example: <code>2026-09-07 14:35:22</code></p>
+<p>This is consistent with the server-side <code>formatDateISO()</code> helper. Dates are rendered in the server timezone (UTC by default; PostgreSQL stores timestamps in UTC).</p>
+<hr />
+<section class="he-section" id="5-row-limits"><div class="he-section__num">05 · 5. Row Limits</div><h2 class="he-section__title">5. Row Limits</h2></section>
+<table>
+<thead>
+<tr><th>Response type</th><th>Limit</th></tr>
+</thead>
+<tbody>
+<tr><td>JSON (<code>format=json</code>)</td><td>Paginated: max <code>limit=100</code> per page</td></tr>
+<tr><td>CSV (<code>format=csv</code>)</td><td>Hard cap of <strong>1000 rows</strong> enforced server-side via <code>take: MAX_CSV_ROWS</code></td></tr>
+</tbody>
+</table>
+<p>If a class has more than 1000 completed/timed-out sessions, the CSV export returns the most recent 1000 rows ordered by <code>submittedAt DESC</code>. The instructor should use date-range filters to narrow results.</p>
+<hr />
+<section class="he-section" id="6-pii-inclusion-exclusion-rules"><div class="he-section__num">06 · 6. PII Inclusion / Exclusion Rules</div><h2 class="he-section__title">6. PII Inclusion / Exclusion Rules</h2></section>
+<h3 id="61-inclusion-includepiitrue-default">6.1 Inclusion (includePii=true, default)</h3>
+<p>Full personal identifiers are exported. This is the default because:</p>
+<ul>
+<li>The export is restricted to the assigned instructor.</li>
+<li>Instructors already have direct access to student records through the portal.</li>
+<li>GDPR Article 6(1)(b) / (c) — legitimate interest / legal obligation for exam administration.</li>
+</ul>
+<h3 id="62-exclusion-includepiifalse">6.2 Exclusion (includePii=false)</h3>
+<p>All direct identifiers are replaced:</p>
+<ol>
+<li><strong>Student ID</strong> — replaced with a random opaque identifier. No mapping back to the original user ID is retained in the exported file.</li>
+<li><strong>Name</strong> — replaced with sequential anonymization (<code>Student 1</code>, <code>Student 2</code>, …). The order preserves relative ranking (by <code>submittedAt DESC</code>) but does not identify individuals.</li>
+<li><strong>Email</strong> — replaced with empty string.</li>
+</ol>
+<p>Non-PII columns (bank name, status, scores, dates) are <strong>unchanged</strong> — they are necessary for academic analysis.</p>
+<hr />
+<section class="he-section" id="7-retention-policy-for-exported-files"><div class="he-section__num">07 · 7. Retention Policy for Exported Files</div><h2 class="he-section__title">7. Retention Policy for Exported Files</h2></section>
+<table>
+<thead>
+<tr><th>Aspect</th><th>Policy</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>On-disk retention</strong></td><td>No automated retention. CSV files are generated on-demand and streamed to the client. They are not stored server-side.</td></tr>
+<tr><td><strong>Instructor responsibility</strong></td><td>Instructors who download CSV files are responsible for their own local data handling and deletion in line with institutional GDPR policy.</td></tr>
+<tr><td><strong>Log retention</strong></td><td>Export-access audit logs (user ID, class ID, timestamp, PII flag) are retained per the standard audit log retention policy defined in <code>docs/guides/gdpr-retention-policy.md</code>.</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="8-error-responses"><div class="he-section__num">08 · 8. Error Responses</div><h2 class="he-section__title">8. Error Responses</h2></section>
+<table>
+<thead>
+<tr><th>Condition</th><th>HTTP Status</th><th>Body</th></tr>
+</thead>
+<tbody>
+<tr><td>Not instructor or not assigned</td><td>403</td><td><code>{ &quot;success&quot;: false, &quot;error&quot;: &quot;...&quot; }</code></td></tr>
+<tr><td>Date range &gt; 365 days</td><td>400</td><td><code>{ &quot;success&quot;: false, &quot;error&quot;: &quot;Date range exceeds maximum allowed span of 365 days&quot; }</code></td></tr>
+<tr><td>Internal exams disabled</td><td>403</td><td><code>{ &quot;success&quot;: false, &quot;error&quot;: &quot;Internal exams are not currently available&quot; }</code></td></tr>
+<tr><td>Class not found</td><td>404</td><td><code>{ &quot;success&quot;: false, &quot;error&quot;: &quot;Class not found&quot; }</code></td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="9-implementation-notes"><div class="he-section__num">09 · 9. Implementation Notes</div><h2 class="he-section__title">9. Implementation Notes</h2></section>
+<ul>
+<li>The <code>obfuscateStudent()</code> helper generates opaque IDs using <code>Math.random().toString(36)</code> — this is non-deterministic across exports. The same student will receive different opaque IDs in different exports. This is intentional: it prevents linkage across exports without a master mapping table.</li>
+<li>The <code>formatDateISO()</code> helper enforces consistent date formatting for both the JSON and CSV responses.</li>
+<li>The <code>MAX_CSV_ROWS</code> constant (1000) is enforced at the database query level (<code>take</code>) rather than post-query slicing, to prevent excessive memory usage.</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#1-overview">1. Overview</a></li>
+    <li class="he-toc__l2"><a href="#2-access-control">2. Access Control</a></li>
+    <li class="he-toc__l2"><a href="#3-query-parameters">3. Query Parameters</a></li>
+    <li class="he-toc__l3"><a href="#31-includepii-default-true">3.1 `includePii` (default: `true`)</a></li>
+    <li class="he-toc__l3"><a href="#32-maxrangedays-cap-365-days">3.2 `maxRangeDays` (cap: 365 days)</a></li>
+    <li class="he-toc__l2"><a href="#4-csv-column-definitions">4. CSV Column Definitions</a></li>
+    <li class="he-toc__l3"><a href="#41-date-format-standardization">4.1 Date Format Standardization</a></li>
+    <li class="he-toc__l2"><a href="#5-row-limits">5. Row Limits</a></li>
+    <li class="he-toc__l2"><a href="#6-pii-inclusion-exclusion-rules">6. PII Inclusion / Exclusion Rules</a></li>
+    <li class="he-toc__l3"><a href="#61-inclusion-includepiitrue-default">6.1 Inclusion (includePii=true, default)</a></li>
+    <li class="he-toc__l3"><a href="#62-exclusion-includepiifalse">6.2 Exclusion (includePii=false)</a></li>
+    <li class="he-toc__l2"><a href="#7-retention-policy-for-exported-files">7. Retention Policy for Exported Files</a></li>
+    <li class="he-toc__l2"><a href="#8-error-responses">8. Error Responses</a></li>
+    <li class="he-toc__l2"><a href="#9-implementation-notes">9. Implementation Notes</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

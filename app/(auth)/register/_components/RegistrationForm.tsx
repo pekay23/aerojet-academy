@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, Info } from 'lucide-react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, useWatch, type FieldErrors } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registerSchema } from '@/lib/validation/schemas'
 import type { z } from 'zod'
@@ -77,6 +79,7 @@ export default function RegistrationForm({
   fee?: string
 }) {
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registerSchema),
@@ -95,6 +98,10 @@ export default function RegistrationForm({
     },
     mode: 'onTouched', // Validate on touch for immediate feedback
   })
+
+  const phoneCountryCode = useWatch({ control: form.control, name: 'phoneCountryCode' })
+  const selectedProgramme = useWatch({ control: form.control, name: 'selectedProgramme' })
+  const licenseCategories = useWatch({ control: form.control, name: 'licenseCategories' }) || []
 
   // We need to keep track of the display name for the phone code select
   const [phoneCountryCodeName, setPhoneCountryCodeName] = useState('Ghanaian')
@@ -122,7 +129,7 @@ export default function RegistrationForm({
 
       if (res.ok) {
         toast.success('Application submitted successfully!')
-        window.location.href = '/register?success=true'
+        router.push('/register?success=true')
       } else {
         toast.error(responseData.error || 'Registration failed')
       }
@@ -134,7 +141,7 @@ export default function RegistrationForm({
   }
 
   // Handle generic validation errors visually via toast if they fail silently
-  const onError = (errors: any) => {
+  const onError = (errors: FieldErrors<RegistrationFormValues>) => {
     const errorCount = Object.keys(errors).length
     if (errorCount > 0) {
       toast.error(`Please correct the ${errorCount} error${errorCount > 1 ? 's' : ''} in the form.`)
@@ -156,6 +163,7 @@ export default function RegistrationForm({
                 <FormControl>
                   <Input
                     {...field}
+                    placeholder="Enter your first name"
                     className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2"
                   />
                 </FormControl>
@@ -193,6 +201,7 @@ export default function RegistrationForm({
                 <FormControl>
                   <Input
                     {...field}
+                    placeholder="Enter your last name"
                     className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2"
                   />
                 </FormControl>
@@ -217,6 +226,7 @@ export default function RegistrationForm({
                     {...field}
                     autoCapitalize="none"
                     autoCorrect="off"
+                    placeholder="you@example.com"
                     className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2"
                   />
                 </FormControl>
@@ -267,10 +277,10 @@ export default function RegistrationForm({
                         return (
                           <SelectItem key={`nat-${n.name}`} value={n.name}>
                             <div className="flex items-center gap-2">
-                              <img
+                              <Image
                                 src={`https://flagcdn.com/w20/${iso}.png`}
-                                srcSet={`https://flagcdn.com/w40/${iso}.png 2x`}
-                                width="20"
+                                width={20}
+                                height={30}
                                 alt={iso}
                                 className="shrink-0 rounded-sm shadow-sm"
                               />
@@ -321,10 +331,10 @@ export default function RegistrationForm({
                           return (
                             <SelectItem key={`phone-${n.name}`} value={n.name}>
                               <div className="flex items-center gap-2">
-                                <img
+                                <Image
                                   src={`https://flagcdn.com/w20/${iso}.png`}
-                                  srcSet={`https://flagcdn.com/w40/${iso}.png 2x`}
-                                  width="20"
+                                  width={20}
+                                  height={30}
                                   alt={iso}
                                   className="shrink-0 rounded-sm shadow-sm"
                                 />
@@ -352,7 +362,7 @@ export default function RegistrationForm({
                   <FormControl>
                     <Input
                       type="tel"
-                      placeholder={getPhonePlaceholder(form.watch('phoneCountryCode'))}
+                      placeholder={getPhonePlaceholder(phoneCountryCode ?? '')}
                       {...field}
                       className="focus:ring-aerojet-blue h-[50px] w-full rounded-lg border-gray-300 bg-white px-4 text-slate-900 focus:ring-2"
                     />
@@ -418,7 +428,7 @@ export default function RegistrationForm({
         </div>
 
         {/* License Category Selection — only for Full-Time & Military */}
-        {PROGRAMMES_REQUIRING_LICENSE.includes(form.watch('selectedProgramme')) && (
+        {PROGRAMMES_REQUIRING_LICENSE.includes(selectedProgramme ?? '') && (
           <div>
             <FormField
               control={form.control}
@@ -433,8 +443,7 @@ export default function RegistrationForm({
                   </p>
                   <div className="space-y-2">
                     {LICENSE_CATEGORIES.map((cat) => {
-                      const current = form.watch('licenseCategories') || []
-                      const isChecked = current.includes(cat.code)
+                      const isChecked = licenseCategories.includes(cat.code)
                       return (
                         <label
                           key={cat.code}
@@ -479,30 +488,32 @@ export default function RegistrationForm({
           control={form.control}
           name="acknowledgeFeeDeletion"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-amber-200 bg-amber-50 p-4 shadow-sm">
+            <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-lg border border-amber-200 bg-amber-50 p-4 shadow-sm">
               <FormControl>
                 <Checkbox
                   checked={field.value as boolean}
                   onCheckedChange={field.onChange}
-                  className="mt-0.5 bg-white data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
+                  className="mt-0.5 bg-white data-[state=checked]:border-amber-600 data-[state=checked]:bg-amber-600"
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel className="text-sm font-semibold text-amber-900">
                   Mandatory Payment Deadline <span className="text-red-500">*</span>
                 </FormLabel>
-                <p className="text-xs text-amber-700 leading-snug">
-                  I understand that I must transfer the {formatCurrency(fee, currency)} registration fee via bank deposit within 7 days of registering, or my account will be permanently deleted without notice.
+                <p className="text-xs leading-snug text-amber-700">
+                  I understand that I must transfer the {formatCurrency(fee, currency)} registration
+                  fee via bank deposit within 7 days of registering, or my account will be
+                  permanently deleted without notice.
                 </p>
               </div>
-              <FormMessage className="text-xs text-red-600 font-medium" />
+              <FormMessage className="text-xs font-medium text-red-600" />
             </FormItem>
           )}
         />
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || !form.formState.isValid}
           className="bg-aerojet-blue hover:bg-aerojet-sky mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-xl text-base font-bold text-white shadow-lg transition-all"
         >
           {loading ? (
@@ -516,11 +527,14 @@ export default function RegistrationForm({
 
         <p className="mt-4 text-center text-xs text-pretty text-gray-500">
           By clicking Start, you agree to the{' '}
-          <Link href="/online-application-terms" className="font-bold text-aerojet-sky hover:underline">
+          <Link
+            href="/online-application-terms"
+            className="text-aerojet-sky font-bold hover:underline"
+          >
             Application Terms
           </Link>{' '}
           and acknowledge the{' '}
-          <Link href="/privacy-policy" className="font-bold text-aerojet-sky hover:underline">
+          <Link href="/privacy-policy" className="text-aerojet-sky font-bold hover:underline">
             Privacy & Data Protection Notice
           </Link>
           . Your account login details will be emailed after payment verification.

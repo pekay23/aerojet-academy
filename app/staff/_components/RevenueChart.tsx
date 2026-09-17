@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-interface RevenueDataPoint {
+export interface RevenueDataPoint {
   month: string
   revenue: number
   target?: number
@@ -22,12 +22,22 @@ interface RevenueChartProps {
   currency?: string
 }
 
-const CustomTooltip = ({ active, payload, label, currency }: any) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  currency,
+}: {
+  active?: boolean
+  payload?: Array<{ name: string; value: number; color?: string }>
+  label?: string
+  currency?: string
+}) => {
   if (!active || !payload?.length) return null
   return (
     <div className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 shadow-xl dark:border-slate-800">
       <p className="mb-1 text-xs font-bold text-slate-400">{label}</p>
-      {payload.map((entry: any) => (
+      {payload.map((entry) => (
         <p key={entry.name} className="text-sm font-black" style={{ color: entry.color }}>
           {entry.name === 'revenue' ? 'Revenue' : 'Target'}: {currency}
           {Number(entry.value).toLocaleString()}
@@ -39,10 +49,12 @@ const CustomTooltip = ({ active, payload, label, currency }: any) => {
 
 export default function RevenueChart({ data, currency = '€' }: RevenueChartProps) {
   const [mounted, setMounted] = React.useState(false)
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
   return (
-    <div className="h-[256px] w-full">
+    <div className="h-64 w-full">
       {mounted ? (
         <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>

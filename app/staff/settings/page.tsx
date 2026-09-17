@@ -18,7 +18,9 @@ import BackupManager from './_components/BackupManager'
 import ExchangeRateDisplay from './_components/ExchangeRateDisplay'
 import TwoFactorSettings from './_components/TwoFactorSettings'
 import CustomFieldsManager from './custom-fields/_components/CustomFieldsManager'
+import VerificationRecords from './_components/VerificationRecords'
 import { PasskeySettings } from './_components/PasskeySettings'
+import { ReportPreviewButton } from './_components/ReportPreview/ReportPreviewButton'
 
 export const metadata: Metadata = { title: 'Settings | Staff Portal' }
 export const dynamic = 'force-dynamic'
@@ -106,6 +108,30 @@ const GENERAL_FEATURES_FIELDS = [
     description: 'Enable or disable the public exam schedule page and exam booking.',
     type: 'BOOLEAN' as const,
     default: 'true',
+  },
+  {
+    key: 'exam_reconciliation_grace_hours',
+    label: 'Exam Reconciliation Grace Period (hours)',
+    description:
+      'Hours after an exam date passes before the cron job marks it as missed/absent. Used by the automated exam reconciliation cron. Default: 24 hours.',
+    type: 'NUMBER' as const,
+    default: '24',
+  },
+  {
+    key: 'certificates_enabled',
+    label: 'Enable Certificate Generation',
+    description:
+      'When enabled, certificates are automatically generated and stored as PDFs when exam results are published for passing students. Disabled by default.',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'pdf_template_system_enabled',
+    label: 'Enable PDF Template System',
+    description:
+      'When enabled, staff can configure data-driven PDF templates, signatures, and document verification. Disabling hides the Templates tab and prevents certificate generation with templates.',
+    type: 'BOOLEAN' as const,
+    default: 'false',
   },
 ]
 
@@ -253,6 +279,26 @@ const NOTIFICATION_FIELDS = [
   },
 ]
 
+const SCHEDULED_REPORTS_FIELDS = [
+  {
+    key: 'report_schedule',
+    label: 'Report Frequency',
+    description:
+      'How often automated PDF reports are generated and emailed. Set to Off to pause delivery without removing recipients. Monthly fires on the 1st of each month.',
+    type: 'SELECT' as const,
+    default: 'off',
+    options: ['off', 'weekly', 'monthly'],
+  },
+  {
+    key: 'report_email',
+    label: 'Report Recipients',
+    description:
+      'One or more email addresses to receive the report. Separate multiple addresses with commas. Only used when frequency is set to Weekly or Monthly.',
+    type: 'STRING' as const,
+    default: '',
+  },
+]
+
 export default async function SettingsPage({
   searchParams,
 }: {
@@ -266,12 +312,13 @@ export default async function SettingsPage({
   // Fetch settings values and PDF-resolved settings in parallel
   const [existingSettings, pdfSettings] = await Promise.all([
     prismaUnfiltered.systemSetting.findMany({ take: 200 }),
-    tab === 'pdf' ? getPDFSettings('') : Promise.resolve(null),
+    tab === 'templates' ? getPDFSettings('') : Promise.resolve(null),
   ])
   const values: Record<string, string> = {}
   for (const s of existingSettings) {
     values[s.key] = s.value
   }
+  const pdfTemplateEnabled = values['pdf_template_system_enabled'] === 'true'
 
   return (
     <div className="mx-auto w-full px-4 pt-0 pb-8 sm:px-6 lg:px-8">
@@ -341,7 +388,23 @@ export default async function SettingsPage({
         {tab === 'templates' && (
           <div className="space-y-12">
             <WelcomeMessagesContent />
-            {pdfSettings && <PDFSettingsForm values={values} pdfSettings={pdfSettings} />}
+            {pdfTemplateEnabled && pdfSettings ? (
+              <>
+                <PDFSettingsForm values={values} pdfSettings={pdfSettings} />
+                <VerificationRecords />
+              </>
+            ) : (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-800 dark:bg-amber-950/30">
+                <h3 className="mb-2 text-lg font-medium text-amber-900 dark:text-amber-200">
+                  PDF Template System Disabled
+                </h3>
+                <p className="mb-4 text-sm text-amber-700 dark:text-amber-300">
+                  The PDF template system is currently disabled. Enable it in{' '}
+                  <strong>Settings → General → Public Features</strong> to access template
+                  management, signature upload, and document verification.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -351,6 +414,28 @@ export default async function SettingsPage({
             <SystemSettingsForm values={values} />
             <CustomFieldsContent />
             <BackupManager adminEmail={session.user?.email || ''} />
+            <div className="space-y-3">
+              {values.report_last_sent && (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Last report sent:{' '}
+                  {new Date(values.report_last_sent).toLocaleString(undefined, {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
+                </p>
+              )}
+              {values.report_last_error && (
+                <p className="text-xs text-amber-600 dark:text-amber-400">
+                  Last error: {values.report_last_error}
+                </p>
+              )}
+              <SettingsForm
+                fields={SCHEDULED_REPORTS_FIELDS}
+                values={values}
+                groupLabel="Scheduled Reports"
+              />
+              <ReportPreviewButton />
+            </div>
           </div>
         )}
 
@@ -362,7 +447,9 @@ export default async function SettingsPage({
 }
 
 async function WelcomeMessagesContent() {
-  const welcomeMessages = await getWelcomeMessagesGrouped(prismaUnfiltered)
+  const welcomeMessages = await getWelcomeMessagesGrouped(
+    prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient
+  )
   return <WelcomeMessagesManager initialMessages={welcomeMessages} />
 }
 async function SecurityContent({ userId }: { userId: string }) {

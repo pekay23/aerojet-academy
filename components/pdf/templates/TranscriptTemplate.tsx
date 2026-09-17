@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, StyleSheet } from '@react-pdf/renderer'
+import { View, Text, StyleSheet, Image } from '@react-pdf/renderer'
 import { PDFBaseTemplate, PDFBaseTemplateProps } from '../PDFBaseTemplate'
 
 const COLORS = {
@@ -167,6 +167,18 @@ const styles = StyleSheet.create({
     color: COLORS.subtext,
     lineHeight: 1.4,
   },
+  qrCode: {
+    width: 50,
+    height: 50,
+    marginTop: 12,
+  },
+  qrLabel: {
+    fontSize: 6,
+    color: COLORS.subtext,
+    marginTop: 3,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
 })
 
 export interface TranscriptRecord {
@@ -184,6 +196,7 @@ export interface TranscriptTemplateProps extends Omit<PDFBaseTemplateProps, 'chi
   programName: string
   records: TranscriptRecord[]
   generatedDate?: string
+  qrDataUrl?: string
 }
 
 function getStatusStyle(status: string) {
@@ -204,6 +217,7 @@ export function TranscriptTemplate({
   programName,
   records,
   generatedDate,
+  qrDataUrl,
   ...baseProps
 }: TranscriptTemplateProps) {
   const totalCredits = records.reduce((sum, r) => sum + r.credits, 0)
@@ -315,6 +329,14 @@ export function TranscriptTemplate({
           </View>
         </View>
       </View>
+
+      {qrDataUrl && (
+        <View style={{ alignItems: 'center', marginTop: 10 }}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
+          <Image src={qrDataUrl} style={styles.qrCode} />
+          <Text style={styles.qrLabel}>Scan to verify</Text>
+        </View>
+      )}
 
       {/* Disclaimer */}
       <View style={styles.disclaimer}>

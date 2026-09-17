@@ -16,7 +16,7 @@ export interface EmailResult {
   error?: string
 }
 
-export type EmailTemplate = 
+export type EmailTemplate =
   | 'welcome'
   | 'activation'
   | 'password-reset'
@@ -29,3 +29,4 @@ export type EmailTemplate =
   | 'pool-failed'
   | 'exam-reminder'
   | 'contact-form'
+  | 'scheduled-report'

@@ -10,6 +10,7 @@
  * Class.recurrenceDays is a comma-separated string of day-name prefixes
  * (e.g. "MON,WED,FRI") matching how the rest of the codebase encodes it.
  */
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 
 export type RecurrenceType = 'NONE' | 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY'
 
@@ -36,7 +37,7 @@ export interface Occurrence {
 
 const DAY_ABBR = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-function parseDays(s: string | null | undefined): Set<string> {
+export function parseDays(s: string | null | undefined): Set<string> {
   if (!s) return new Set()
   return new Set(s.split(/[,;]/).map((x) => x.trim().slice(0, 3).toUpperCase()))
 }
@@ -63,7 +64,8 @@ export function expandClass(
   windowEnd: Date
 ): Occurrence[] {
   const out: Occurrence[] = []
-  const rangeEnd = cls.recurrenceUntil && cls.recurrenceUntil < windowEnd ? cls.recurrenceUntil : windowEnd
+  const rangeEnd =
+    cls.recurrenceUntil && cls.recurrenceUntil < windowEnd ? cls.recurrenceUntil : windowEnd
   const span = Math.max(0, cls.endDate.getTime() - cls.startDate.getTime())
   const startTime = timeOfDay(cls.startDate)
 
@@ -84,11 +86,15 @@ export function expandClass(
 
   const allowedDays = parseDays(cls.recurrenceDays ?? '')
   const stepDays =
-    cls.recurrenceType === 'DAILY' ? 1
-    : cls.recurrenceType === 'WEEKLY' ? 7
-    : cls.recurrenceType === 'BIWEEKLY' ? 14
-    : cls.recurrenceType === 'MONTHLY' ? 30
-    : 1
+    cls.recurrenceType === 'DAILY'
+      ? 1
+      : cls.recurrenceType === 'WEEKLY'
+        ? 7
+        : cls.recurrenceType === 'BIWEEKLY'
+          ? 14
+          : cls.recurrenceType === 'MONTHLY'
+            ? 30
+            : 1
 
   // Iterate day-by-day from the later of (cls.startDate, windowStart)
   let cursor = startOfDay(cls.startDate > windowStart ? cls.startDate : windowStart)
@@ -114,7 +120,9 @@ export function expandClass(
     }
     // Advance: for WEEKLY/BIWEEKLY with day-of-week filter, step daily but
     // rely on dayAllowed to skip; for DAILY/MONTHLY use stepDays.
-    cursor = new Date(cursor.getTime() + (cls.recurrenceType === 'MONTHLY' ? stepDays : 1) * 86400000)
+    cursor = new Date(
+      cursor.getTime() + (cls.recurrenceType === 'MONTHLY' ? stepDays : 1) * 86400000
+    )
   }
   return out
 }
@@ -125,5 +133,18 @@ export function expandMany(
   windowStart: Date,
   windowEnd: Date
 ): Occurrence[] {
-  return classes.flatMap((c) => expandClass(c, windowStart, windowEnd))
+  const all = classes.flatMap((c) => expandClass(c, windowStart, windowEnd))
+
+  const MAX_DAILY_MS = ACADEMIC_RULES.MAX_DAILY_INSTRUCTIONAL_HOURS * 60 * 60 * 1000
+  const dayHours = new Map<string, number>()
+
+  return all.filter((occ) => {
+    if (!occ.instructorId) return true
+    const dayKey = `${occ.instructorId}|${occ.start.getFullYear()}-${occ.start.getMonth()}-${occ.start.getDate()}`
+    const current = dayHours.get(dayKey) || 0
+    const duration = occ.end.getTime() - occ.start.getTime()
+    if (current + duration > MAX_DAILY_MS) return false
+    dayHours.set(dayKey, current + duration)
+    return true
+  })
 }

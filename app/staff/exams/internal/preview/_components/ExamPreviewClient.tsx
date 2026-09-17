@@ -1,21 +1,31 @@
-'use client'
+﻿'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { toast } from 'sonner'
 import {
   ChevronLeft,
   ChevronRight,
-  Eye,
-  EyeOff,
-  Clock,
-  BarChart3,
-  CheckCircle2,
-  XCircle,
   Loader2,
+  AlertTriangle,
+  CheckCircle2,
+  Send,
+  XCircle,
+  Menu as _Menu,
+  X as _X,
+  Flag as _Flag,
+  Hourglass as _Hourglass,
+  Maximize,
+  ShieldAlert,
+  Bookmark as _Bookmark,
+  Clock,
+  BarChart3 as _BarChart3,
   RefreshCw,
-  ArrowLeft,
+  ArrowLeft as _ArrowLeft,
   BookOpen,
+  Download,
+  Lock as _Lock,
+  Eye as _Eye,
 } from 'lucide-react'
-import Link from 'next/link'
 
 interface BankOption {
   id: string
@@ -23,6 +33,9 @@ interface BankOption {
   courseCode: string
   courseName: string
   mcqCount: number
+  categoryCode: string | null
+  sebConfig: unknown | null
+  sebRequired: boolean
 }
 
 interface PreviewQuestion {
@@ -38,9 +51,34 @@ interface PreviewQuestion {
   knowledgeLevel: number | null
 }
 
+interface _BankRules {
+  timePerQuestionSecs: number
+  passMarkPct: number
+  allowKeyboardAutoSubmit: boolean
+  customInstructions?: string | null
+}
+
 interface PreviewData {
-  bank: { id: string; name: string; course: { code: string; name: string }; mcqCount: number; ruleSet: string }
-  config: { timePerQuestionSecs: number; totalTimeSecs: number; passMarkPct: number; totalQuestions: number; poolSize: number }
+  bank: {
+    id: string
+    name: string
+    course: { code: string; name: string }
+    mcqCount: number
+    ruleSet: string
+    categoryCode: string | null
+    sebConfig: unknown | null
+    sebRequired: boolean
+    bankSebConfig: unknown | null
+  }
+  config: {
+    timePerQuestionSecs: number
+    totalTimeSecs: number
+    passMarkPct: number
+    totalQuestions: number
+    poolSize: number
+    allowKeyboardAutoSubmit: boolean
+    customInstructions: string | null
+  }
   subTopics: { topic: string; count: number }[]
   questions: PreviewQuestion[]
 }
@@ -55,320 +93,616 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   const [selectedBankId, setSelectedBankId] = useState(banks[0]?.id || '')
   const [data, setData] = useState<PreviewData | null>(null)
   const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [result, setResult] = useState<{
+    score: number
+    correctCount: number
+    total: number
+  } | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({})
-  const [showAnswers, setShowAnswers] = useState(true)
-  const [mode, setMode] = useState<'select' | 'preview'>('select')
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [timeLeft, setTimeLeft] = useState(0)
+  const [_isLeftPanelOpen, _setIsLeftPanelOpen] = useState(true)
+  const [_showReport, _setShowReport] = useState(false)
+  const [reportReason, setReportReason] = useState('')
+  const [reportSubmitting, setReportSubmitting] = useState(false)
+  const [_reportSubmitted, setReportSubmitted] = useState(false)
+  const [showQuestionReport, setShowQuestionReport] = useState<string | null>(null)
+  const [questionReportReason, setQuestionReportReason] = useState('')
+  const [questionReportSubmitting, setQuestionReportSubmitting] = useState(false)
+  const [_reportedQuestions, setReportedQuestions] = useState<Set<string>>(new Set())
+  const [_isFullscreen, setIsFullscreen] = useState(false)
+  const [_tabSwitchCount, setTabSwitchCount] = useState(0)
+  const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false)
+  const [_flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set())
+  const [_showReviewLaterFilter, _setShowReviewLaterFilter] = useState(false)
+  const [_flagging, setFlagging] = useState<string | null>(null)
+  const [downloadingSeb, setDownloadingSeb] = useState<string | null>(null)
+  const [_showLobby, setShowLobby] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const logViolation = useCallback(
+    async (
+      type: string,
+      detail?: string,
+      opts?: { severity?: 'WARNING' | 'NOTICE' | 'CRITICAL' }
+    ) => {
+      void fetch('/api/staff/exams/internal/preview/violations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({
+          bankId: data?.bank.id,
+          type,
+          detail,
+          deviceInfo: {
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+            platform:
+              typeof navigator !== 'undefined'
+                ? (navigator as Navigator & { platform?: string }).platform
+                : undefined,
+            language: typeof navigator !== 'undefined' ? navigator.language : undefined,
+          },
+          ...(opts?.severity ? { severity: opts.severity } : {}),
+        }),
+      })
+      toast.warning(`Violation logged: ${type}`, {
+        duration: 4000,
+        position: 'bottom-right',
+        dismissible: true,
+      })
+    },
+    [data?.bank.id]
+  )
 
   const loadPreview = async () => {
     if (!selectedBankId) return
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch(`/api/staff/exams/internal/preview?bankId=${selectedBankId}`)
       const json = await res.json()
       if (json.success && json.data) {
         setData(json.data)
         setCurrentIndex(0)
-        setSelectedAnswers({})
-        setMode('preview')
+        setAnswers({})
+        setTimeLeft(json.data.config.totalTimeSecs)
+        setFlaggedQuestions(new Set())
+        setTabSwitchCount(0)
+        setShowLobby(false)
+        setResult(null)
       } else {
-        alert(json.error || 'Failed to generate preview')
+        setError(json.error || 'Failed to generate preview')
       }
+    } catch {
+      setError('Could not connect to exam server')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleAnswer = (questionId: string, answer: string) => {
-    setSelectedAnswers((prev) => ({ ...prev, [questionId]: answer }))
+  const handleDownloadSeb = async (bankId: string) => {
+    setDownloadingSeb(bankId)
+    try {
+      const res = await fetch(`/api/staff/exams/internal/banks/${bankId}/seb-config/download`)
+      if (!res.ok) {
+        toast.error('Could not download SEB config')
+        return
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `exam-${bankId}.seb`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('SEB config downloaded')
+    } catch {
+      toast.error('Could not download SEB config')
+    } finally {
+      setDownloadingSeb(null)
+    }
   }
 
-  if (mode === 'select' || !data) {
+  const enterFullscreen = useCallback(async () => {
+    try {
+      await document.documentElement.requestFullscreen()
+      setIsFullscreen(true)
+      setShowFullscreenPrompt(false)
+      document.body.classList.add('exam-lockdown')
+    } catch {
+      document.body.classList.add('exam-lockdown')
+    }
+  }, [])
+
+  const _toggleFlag = useCallback(async (questionId: string, flagged: boolean) => {
+    setFlagging(questionId)
+    try {
+      setFlaggedQuestions((prev) => {
+        const next = new Set(prev)
+        if (flagged) next.add(questionId)
+        else next.delete(questionId)
+        return next
+      })
+    } finally {
+      setFlagging(null)
+    }
+  }, [])
+
+  const selectAnswer = (questionId: string, answer: string) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: answer }))
+  }
+
+  const handleSubmit = async (_auto = false) => {
+    if (submitting) return
+    setSubmitting(true)
+    if (timerRef.current) clearInterval(timerRef.current)
+
+    const _answeredCount = Object.keys(answers).length
+    const correctCount = data!.questions.filter(
+      (q) => answers[q.questionId] === q.correctAnswer
+    ).length
+    const score = Math.round((correctCount / data!.questions.length) * 100)
+
+    setResult({ score, correctCount, total: data!.questions.length })
+    setShowConfirm(false)
+    setSubmitting(false)
+    document.body.classList.remove('exam-lockdown')
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
+  }
+
+  // ─── Fullscreen lockdown mode ───
+  useEffect(() => {
+    if (!data || result || showConfirm) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setShowFullscreenPrompt(true)
+  }, [data, result, showConfirm])
+
+  useEffect(() => {
+    if (!data || result || showConfirm) return
+    const onFsChange = () => {
+      const inFS = !!document.fullscreenElement
+      setIsFullscreen(inFS)
+      if (!inFS && !result) {
+        setShowFullscreenPrompt(true)
+        void logViolation('FULLSCREEN_EXIT', 'Staff exited fullscreen during preview')
+      }
+    }
+    document.addEventListener('fullscreenchange', onFsChange)
+    return () => document.removeEventListener('fullscreenchange', onFsChange)
+  }, [data, result, logViolation, showConfirm])
+
+  // Tab visibility
+  useEffect(() => {
+    if (!data || result || showConfirm) return
+    let warned = false
+    const onVisibility = () => {
+      if (document.hidden) {
+        setTabSwitchCount((p) => p + 1)
+        if (!warned) {
+          warned = true
+          void logViolation('TAB_SWITCH', 'Tab switched during preview')
+        }
+      } else warned = false
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [data, result, logViolation, showConfirm])
+
+  // Clipboard blocking
+  useEffect(() => {
+    if (!data || result || showConfirm) return
+    const onClipboard = (e: ClipboardEvent) => {
+      e.preventDefault()
+      void logViolation('CLIPBOARD_BLOCKED', `Clipboard event blocked: ${e.type}`)
+    }
+    document.addEventListener('copy', onClipboard)
+    document.addEventListener('cut', onClipboard)
+    document.addEventListener('paste', onClipboard)
+    return () => {
+      document.removeEventListener('copy', onClipboard)
+      document.removeEventListener('cut', onClipboard)
+      document.removeEventListener('paste', onClipboard)
+    }
+  }, [data, result, logViolation, showConfirm])
+
+  // Keyboard shortcuts + strict keypress auto-submit
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    if (!data?.config.allowKeyboardAutoSubmit || result || showConfirm) return
+    const MODIFIERS = new Set(['Shift', 'Control', 'Alt', 'Meta'])
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (MODIFIERS.has(e.key)) return
+      const target = e.target as HTMLElement | null
+      const tag = target?.tagName?.toLowerCase()
+      const inInput = tag === 'input' || tag === 'textarea' || target?.isContentEditable
+      const ctrlOrCmd = e.ctrlKey || e.metaKey
+      const k = e.key.toLowerCase()
+      const isCopyPaste = ctrlOrCmd && (k === 'c' || k === 'v')
+      const isF12 = e.key === 'F12'
+      const isDevTools = ctrlOrCmd && e.shiftKey && (k === 'i' || k === 'j' || k === 'c')
+      if (!inInput && (isCopyPaste || isF12 || isDevTools)) {
+        e.preventDefault()
+        void logViolation('KEYBOARD_SHORTCUT', `Blocked shortcut: ${e.key}`)
+        return
+      }
+      if (!submitting) {
+        e.preventDefault()
+        void logViolation('KEYBOARD_SHORTCUT', `Auto-submit triggered by key: ${e.key}`, {
+          severity: 'CRITICAL',
+        })
+        void handleSubmit(true)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [data?.config.allowKeyboardAutoSubmit, result, showConfirm, logViolation])
+  /* eslint-enable react-hooks/exhaustive-deps */
+
+  // Network detection
+  useEffect(() => {
+    if (!data || result || showConfirm) return
+    const onNet = () =>
+      void logViolation(
+        'NETWORK_DISCONNECT',
+        `Network ${navigator.onLine ? 'restored' : 'lost'} during preview`
+      )
+    window.addEventListener('online', onNet)
+    window.addEventListener('offline', onNet)
+    return () => {
+      window.removeEventListener('online', onNet)
+      window.removeEventListener('offline', onNet)
+    }
+  }, [data, result, logViolation, showConfirm])
+
+  // Page unload
+  useEffect(() => {
+    if (!data || result || showConfirm) return
+    const onUnload = () =>
+      void fetch('/api/staff/exams/internal/preview/violations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        keepalive: true,
+        body: JSON.stringify({
+          bankId: data.bank.id,
+          type: 'EXAM_INTERFACE_UNLOAD',
+          detail: 'Staff navigated away or closed preview during active mode',
+          deviceInfo: {
+            userAgent: navigator.userAgent,
+            platform: (navigator as Navigator & { platform?: string }).platform,
+          },
+        }),
+      })
+    document.addEventListener('beforeunload', onUnload)
+    document.addEventListener('pagehide', onUnload)
+    return () => {
+      document.removeEventListener('beforeunload', onUnload)
+      document.removeEventListener('pagehide', onUnload)
+    }
+  }, [data, result, showConfirm])
+
+  // Timer countdown
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    if (!data || result) return
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!)
+          handleSubmit(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [data, result])
+  /* eslint-enable react-hooks/exhaustive-deps */
+
+  // Cleanup on unmount
+  useEffect(
+    () => () => {
+      document.body.classList.remove('exam-lockdown')
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
+    },
+    []
+  )
+
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60),
+      s = secs % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
+
+  const _handleSubmitReport = async () => {
+    if (!reportReason.trim() || reportSubmitting) return
+    setReportSubmitting(true)
+    try {
+      await fetch('/api/staff/exams/internal/preview/violations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bankId: data?.bank.id,
+          type: 'DEVTOOLS_DETECTED',
+          detail: reportReason.trim(),
+        }),
+      })
+      setReportSubmitted(true)
+      setReportReason('')
+    } finally {
+      setReportSubmitting(false)
+    }
+  }
+
+  const _handleSubmitQuestionReport = async () => {
+    if (!questionReportReason.trim() || questionReportSubmitting || !showQuestionReport) return
+    setQuestionReportSubmitting(true)
+    try {
+      await fetch('/api/staff/exams/internal/preview/violations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bankId: data?.bank.id,
+          type: 'DEVTOOLS_DETECTED',
+          detail: `Question ${showQuestionReport}: ${questionReportReason.trim()}`,
+        }),
+      })
+      setReportedQuestions((prev) => new Set([...prev, showQuestionReport]))
+      setShowQuestionReport(null)
+      setQuestionReportReason('')
+    } finally {
+      setQuestionReportSubmitting(false)
+    }
+  }
+
+  if (loading) {
     return (
-      <div className="mx-auto max-w-2xl">
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/20">
-              <BookOpen className="h-6 w-6" />
-            </div>
-            <div>
-              <h2 className="text-lg font-black text-slate-800 dark:text-white">Start Exam Preview</h2>
-              <p className="text-sm text-slate-500">Select an exam bank to preview the student experience.</p>
-            </div>
-          </div>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="text-aerojet-blue h-10 w-10 animate-spin" />
+      </div>
+    )
+  }
 
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                Exam Bank
-              </label>
-              <select
-                value={selectedBankId}
-                onChange={(e) => setSelectedBankId(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              >
-                {banks.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    [{b.courseCode}] {b.name} ({b.mcqCount} questions)
-                  </option>
-                ))}
-              </select>
-            </div>
+  if (error) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+        <XCircle className="mb-4 h-12 w-12 text-red-500" />
+        <p className="text-lg font-bold text-slate-900 dark:text-white">{error}</p>
+      </div>
+    )
+  }
 
-            {banks.length === 0 && (
-              <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
-                No exam banks found. Create one first in the Internal Exam System page.
-              </div>
-            )}
-
+  if (!data) {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={selectedBankId}
+            onChange={(e) => setSelectedBankId(e.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          >
+            {banks.map((bank) => (
+              <option key={bank.id} value={bank.id}>
+                {bank.name} ({bank.courseCode})
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={loadPreview}
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold text-white"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            Load Preview
+          </button>
+          {selectedBankId && (
             <button
-              onClick={loadPreview}
-              disabled={loading || !selectedBankId}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 font-bold text-white shadow-lg shadow-aerojet-blue/20 transition-all hover:shadow-xl disabled:opacity-50"
+              onClick={() => handleDownloadSeb(selectedBankId)}
+              disabled={downloadingSeb === selectedBankId}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Eye className="h-5 w-5" />}
-              {loading ? 'Generating Preview...' : 'Generate Preview'}
+              {downloadingSeb === selectedBankId ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Download className="h-3.5 w-3.5" />
+              )}
+              Download SEB Config
+            </button>
+          )}
+        </div>
+        <p className="text-sm text-slate-500">Select an exam bank to preview.</p>
+      </div>
+    )
+  }
+
+  const questions = data.questions
+  const currentQ = questions[currentIndex]
+  const _answeredCount = Object.keys(answers).length
+  const optionLabels = ['A', 'B', 'C']
+
+  if (result) {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={selectedBankId}
+            onChange={(e) => setSelectedBankId(e.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          >
+            {banks.map((bank) => (
+              <option key={bank.id} value={bank.id}>
+                {bank.name} ({bank.courseCode})
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={loadPreview}
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold text-white"
+          >
+            <BookOpen className="h-3.5 w-3.5" /> Reload
+          </button>
+        </div>
+        <div className="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">
+          <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-500" />
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white">Preview Complete</h2>
+          <p className="mt-3 text-sm text-slate-500">
+            Score: {result.correctCount}/{result.total} ({result.score}%)
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {showFullscreenPrompt && !result && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <ShieldAlert className="mx-auto mb-4 h-16 w-16 text-amber-500" />
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              Enter Preview Mode
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">This preview runs in lockdown mode.</p>
+            <button
+              onClick={enterFullscreen}
+              className="bg-aerojet-blue mt-6 inline-flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-bold text-white"
+            >
+              <Maximize className="h-4 w-4" /> Enter Fullscreen
             </button>
           </div>
         </div>
-      </div>
-    )
-  }
+      )}
 
-  const q = data.questions[currentIndex]
-  if (!q) {
-    return (
-      <div className="mx-auto max-w-2xl text-center py-12">
-        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 mb-4 dark:bg-amber-900/30 dark:text-amber-500">
-          <BookOpen className="h-8 w-8" />
-        </div>
-        <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No Approved Questions Available</h2>
-        <p className="text-slate-500 mb-6">
-          There are no approved questions available in this bank for the preview. Please approve some questions in the bank's approval queue first.
-        </p>
-        <button
-          onClick={() => setMode('select')}
-          className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-        >
-          <ArrowLeft className="h-4 w-4" /> Go Back
-        </button>
-      </div>
-    )
-  }
-  const answered = selectedAnswers[q.questionId]
-  const isCorrect = answered === q.correctAnswer
-  const answeredCount = Object.keys(selectedAnswers).length
-  const correctCount = data.questions.filter((qu) => selectedAnswers[qu.questionId] === qu.correctAnswer).length
-  const totalMinutes = Math.floor(data.config.totalTimeSecs / 60)
-
-  return (
-    <div className="space-y-4">
-      {/* Top bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center gap-4">
-          <button onClick={() => setMode('select')} className="flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-aerojet-blue">
-            <ArrowLeft className="h-4 w-4" /> Back
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={selectedBankId}
+            onChange={(e) => setSelectedBankId(e.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          >
+            {banks.map((bank) => (
+              <option key={bank.id} value={bank.id}>
+                {bank.name} ({bank.courseCode})
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={loadPreview}
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold text-white"
+          >
+            <RefreshCw className="h-3.5 w-3.5" /> Reload
           </button>
-          <div className="text-sm font-bold text-slate-700 dark:text-slate-300">
-            [{data.bank.course.code}] {data.bank.name}
-          </div>
-          <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-            {data.bank.ruleSet}
+          {selectedBankId && (
+            <button
+              onClick={() => handleDownloadSeb(selectedBankId)}
+              disabled={downloadingSeb === selectedBankId}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            >
+              {downloadingSeb === selectedBankId ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Download className="h-3.5 w-3.5" />
+              )}
+              Download SEB Config
+            </button>
+          )}
+          <span
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold ${timeLeft < 120 ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}
+          >
+            <Clock className="h-4 w-4" /> {formatTime(timeLeft)}
           </span>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-            <Clock className="h-3.5 w-3.5" /> {totalMinutes} min ({data.config.timePerQuestionSecs}s/Q)
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+          <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+            <span className="text-xs font-bold text-slate-400 uppercase">
+              Question {currentIndex + 1} of {questions.length}
+            </span>
+            <span
+              className={`rounded-lg px-2.5 py-1 text-[10px] font-bold ${DIFFICULTY_COLORS[currentQ.difficulty] || ''}`}
+            >
+              {currentQ.difficulty}
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-            <BarChart3 className="h-3.5 w-3.5" /> Pass: {data.config.passMarkPct}%
+          <p className="text-base font-medium text-slate-900 dark:text-slate-100">
+            {currentQ.text}
+          </p>
+          <div className="mt-6 space-y-2">
+            {currentQ.options.map((opt, i) => {
+              const selected = answers[currentQ.questionId] === opt
+              return (
+                <button
+                  key={i}
+                  onClick={() => selectAnswer(currentQ.questionId, opt)}
+                  className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left ${selected ? 'border-aerojet-blue bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'}`}
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-600 dark:bg-slate-800">
+                    {optionLabels[i]}
+                  </span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {opt}
+                  </span>
+                </button>
+              )
+            })}
           </div>
-          <div className="text-xs font-bold text-slate-600 dark:text-slate-300">
-            {answeredCount}/{data.questions.length} answered
-            {answeredCount > 0 && (
-              <span className="ml-1 text-green-600">
-                ({correctCount} correct — {Math.round((correctCount / answeredCount) * 100)}%)
-              </span>
+          <div className="mt-6 flex items-center justify-between">
+            <button
+              onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+              disabled={currentIndex === 0}
+              className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-slate-600 disabled:opacity-40 dark:bg-slate-900 dark:text-slate-300"
+            >
+              <ChevronLeft className="h-4 w-4" /> Previous
+            </button>
+            {currentIndex < questions.length - 1 ? (
+              <button
+                onClick={() => setCurrentIndex(currentIndex + 1)}
+                className="bg-aerojet-blue flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white"
+              >
+                Next <ChevronRight className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowConfirm(true)}
+                className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white"
+              >
+                <Send className="h-4 w-4" /> Submit
+              </button>
             )}
           </div>
-          <button
-            onClick={() => setShowAnswers(!showAnswers)}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
-          >
-            {showAnswers ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            {showAnswers ? 'Hide Answers' : 'Show Answers'}
-          </button>
-          <button
-            onClick={loadPreview}
-            disabled={loading}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            Reshuffle
-          </button>
         </div>
       </div>
 
-      {/* Pool info */}
-      <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs dark:border-slate-800 dark:bg-slate-800/50">
-        <span className="font-semibold text-slate-500">Pool: {data.config.poolSize} questions</span>
-        <span className="text-slate-300 dark:text-slate-600">|</span>
-        <span className="font-semibold text-slate-500">Sampled: {data.config.totalQuestions}</span>
-        {data.subTopics.length > 0 && (
-          <>
-            <span className="text-slate-300 dark:text-slate-600">|</span>
-            <span className="text-slate-400">
-              Topics: {data.subTopics.map((t) => `${t.topic} (${t.count})`).join(', ')}
-            </span>
-          </>
-        )}
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
-        {/* Main question */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-black tracking-widest text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                Q{currentIndex + 1} of {data.questions.length}
-              </span>
-              {q.syllabusRef ? (
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300">
-                  📌 {q.syllabusRef}
-                </span>
-              ) : q.subTopic && (
-                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
-                  {q.subTopic}
-                </span>
-              )}
-              {q.knowledgeLevel ? (
-                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                  Level {q.knowledgeLevel}
-                </span>
-              ) : (
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${DIFFICULTY_COLORS[q.difficulty] || ''}`}>
-                  {q.difficulty}
-                </span>
-              )}
-            </div>
-            <span className="text-xs text-slate-400">{q.points} pt{q.points > 1 ? 's' : ''}</span>
-          </div>
-
-          <h2 className="mb-6 text-lg font-medium leading-relaxed text-slate-800 dark:text-slate-200">
-            {q.text}
-          </h2>
-
-          {/* EASA-style 3-option MCQ */}
-          <div className="space-y-3">
-            {q.options &&
-              Array.isArray(q.options) &&
-              q.options.map((opt: string, i: number) => {
-                const isSelected = answered === opt
-                const isAnswer = q.correctAnswer === opt
-                let borderClass = 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700'
-
-                if (isSelected && showAnswers) {
-                  borderClass = isCorrect
-                    ? 'border-green-400 bg-green-50 dark:border-green-600 dark:bg-green-900/20'
-                    : 'border-red-400 bg-red-50 dark:border-red-600 dark:bg-red-900/20'
-                } else if (isSelected) {
-                  borderClass = 'border-aerojet-blue bg-blue-50/50 shadow-sm dark:border-blue-500 dark:bg-blue-900/20'
-                } else if (showAnswers && isAnswer) {
-                  borderClass = 'border-green-300 bg-green-50/50 dark:border-green-700 dark:bg-green-900/10'
-                }
-
-                return (
-                  <button
-                    key={i}
-                    onClick={() => handleAnswer(q.questionId, opt)}
-                    className={`w-full rounded-xl border p-4 text-left transition-all ${borderClass}`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${
-                        isSelected
-                          ? 'border-aerojet-blue bg-aerojet-blue text-white'
-                          : showAnswers && isAnswer
-                            ? 'border-green-400 bg-green-100 text-green-700'
-                            : 'border-slate-300 text-slate-500 dark:border-slate-700'
-                      }`}>
-                        {showAnswers && isAnswer ? (
-                          <CheckCircle2 className="h-4 w-4" />
-                        ) : isSelected && showAnswers && !isCorrect ? (
-                          <XCircle className="h-4 w-4" />
-                        ) : (
-                          String.fromCharCode(65 + i)
-                        )}
-                      </div>
-                      <span className="font-medium text-slate-700 dark:text-slate-300">{opt}</span>
-                    </div>
-                  </button>
-                )
-              })}
-          </div>
-
-          {/* Navigation */}
-          <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
-            <button
-              onClick={() => setCurrentIndex((p) => Math.max(0, p - 1))}
-              disabled={currentIndex === 0}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-2.5 font-bold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-30 dark:border-slate-700 dark:text-slate-300"
-            >
-              <ChevronLeft className="h-5 w-5" /> Previous
-            </button>
-
-            <span className="text-xs font-bold text-slate-400">
-              {currentIndex + 1} / {data.questions.length}
-            </span>
-
-            <button
-              onClick={() => setCurrentIndex((p) => Math.min(data.questions.length - 1, p + 1))}
-              disabled={currentIndex === data.questions.length - 1}
-              className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2.5 font-bold text-white shadow-md transition-all hover:bg-blue-700 disabled:opacity-30"
-            >
-              Next <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
-              Question Navigator
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-amber-500" />
+            <h3 className="text-center text-xl font-black text-slate-900 dark:text-white">
+              Submit Preview?
             </h3>
-            <div className="grid grid-cols-5 gap-1.5">
-              {data.questions.map((qu, i) => {
-                const ans = selectedAnswers[qu.questionId]
-                let bg = 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                if (currentIndex === i) bg = 'bg-aerojet-blue text-white'
-                else if (ans && showAnswers)
-                  bg = ans === qu.correctAnswer
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                else if (ans) bg = 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-
-                return (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentIndex(i)}
-                    className={`rounded-lg py-1.5 text-xs font-bold transition-all hover:scale-105 ${bg}`}
-                  >
-                    {i + 1}
-                  </button>
-                )
-              })}
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleSubmit(false)}
+                className="flex-1 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white"
+              >
+                Confirm
+              </button>
             </div>
           </div>
-
-          <Link
-            href="/staff/exams/internal"
-            className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
-          >
-            <ArrowLeft className="h-4 w-4" /> Back to Exams
-          </Link>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   )
 }

@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { Prisma } from '@prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import {
-  apiSuccess,
   apiCreated,
   apiError,
   apiPaginated,
@@ -21,7 +21,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const search = parseSearch(searchParams)
   const categoryFilter = searchParams.get('category')
 
-  const where: any = {}
+  const where: Prisma.CourseWhereInput = {}
   if (categoryFilter) where.categoryId = categoryFilter
   if (search) {
     where.OR = [
@@ -74,4 +74,3 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   return apiCreated(serializePrisma(course))
 })
-

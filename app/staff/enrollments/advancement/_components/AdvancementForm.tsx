@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { ArrowRight, Eye, PlayCircle } from 'lucide-react'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { previewAdvancement, runAdvancement } from '@/lib/progression/actions'
 
 interface Opt {
@@ -29,6 +30,10 @@ export default function AdvancementForm({
     null
   )
   const [isPending, startTransition] = useTransition()
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    onConfirm: () => void
+  }>({ open: false, onConfirm: () => {} })
 
   const base = () => ({
     pathwayId: pathwayId || undefined,
@@ -50,19 +55,23 @@ export default function AdvancementForm({
       toast.error('Run a preview first.')
       return
     }
-    if (!window.confirm(`Advance ${preview.count} student(s) to Year ${preview.to.year}, Semester ${preview.to.semester}?`))
-      return
-    const holdUserIds = holdRaw
-      .split(/[\s,]+/)
-      .map((s) => s.trim())
-      .filter(Boolean)
-    startTransition(async () => {
-      const res = await runAdvancement({ ...base(), holdUserIds })
-      if (res.error) toast.error(res.error)
-      else {
-        toast.success(`Advanced ${res.advanced}, held ${res.held}`)
-        setPreview(null)
-      }
+    setConfirmDialog({
+      open: true,
+      onConfirm: () => {
+        setConfirmDialog((d) => ({ ...d, open: false }))
+        const holdUserIds = holdRaw
+          .split(/[\s,]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+        startTransition(async () => {
+          const res = await runAdvancement({ ...base(), holdUserIds })
+          if (res.error) toast.error(res.error)
+          else {
+            toast.success(`Advanced ${res.advanced}, held ${res.held}`)
+            setPreview(null)
+          }
+        })
+      },
     })
   }
 
@@ -165,6 +174,17 @@ export default function AdvancementForm({
           </span>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog((d) => ({ ...d, open }))}
+        title="Confirm Advancement"
+        description={`Advance ${preview?.count || 0} student(s) to Year ${preview?.to.year || '?'}, Semester ${preview?.to.semester || '?'}?`}
+        confirmLabel="Advance"
+        cancelLabel="Cancel"
+        variant="destructive"
+        onConfirm={confirmDialog.onConfirm}
+      />
     </div>
   )
 }

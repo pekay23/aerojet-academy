@@ -1,10 +1,10 @@
-import { Metadata } from 'next'
+
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getStudentStatus } from '@/lib/access-control'
-import { Calendar as CalendarIcon, Sparkles } from 'lucide-react'
+import { Calendar as _CalendarIcon } from 'lucide-react'
 import AcademicCalendar, { type UnifiedCalendarEvent } from '@/components/calendar/AcademicCalendar'
 import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '../actions'
 
@@ -59,7 +59,7 @@ export default async function StudentAcademicCalendarPage() {
   const assignedBookingIds = new Set(sittingAssignments.map((assignment) => assignment.bookingId))
 
   // Personal
-  personalEvents.forEach((evt: any) => {
+  personalEvents.forEach((evt) => {
     events.push({
       id: evt.id, dbId: evt.id, title: evt.title, description: evt.description,
       startDate: evt.startDate.toISOString(), endDate: evt.endDate?.toISOString() || null,
@@ -80,8 +80,8 @@ export default async function StudentAcademicCalendarPage() {
   });
 
   // Classes
-  enrollments.forEach((enrollment: any) => {
-    enrollment.course?.classes?.forEach((cls: any) => {
+  enrollments.forEach((enrollment) => {
+    enrollment.course?.classes?.forEach((cls) => {
       if (cls.startDate) {
         events.push({
           id: `class-${cls.id}`, dbId: cls.id, title: cls.name || `Class: ${enrollment.course.code}`,
@@ -95,7 +95,7 @@ export default async function StudentAcademicCalendarPage() {
   });
 
   // Admin Broadcasts
-  adminEvents.forEach((evt: any) => {
+  adminEvents.forEach((evt) => {
     if (evt.visibleTo === 'EXAM_ONLY' && enrollmentType !== 'EXAM_ONLY') return;
     if (evt.visibleTo === 'MODULAR' && enrollmentType !== 'MODULAR') return;
     if (evt.visibleTo === 'FULL_TIME' && enrollmentType !== 'FULL_TIME') return;
@@ -107,7 +107,7 @@ export default async function StudentAcademicCalendarPage() {
   });
 
   // Sitting Assignments
-  sittingAssignments.forEach((assignment: any) => {
+  sittingAssignments.forEach((assignment) => {
     const sitting = assignment.sitting
     if (sitting?.startTime) {
       events.push({
@@ -120,9 +120,9 @@ export default async function StudentAcademicCalendarPage() {
     }
   });
 
-  async function handleSave(data: any, editingId?: string) {
+  async function handleSave(data: Parameters<typeof createCalendarEvent>[0], editingId?: string) {
     'use server'
-    return editingId 
+    return editingId
       ? updateCalendarEvent(editingId, data)
       : createCalendarEvent(data)
   }
@@ -135,7 +135,7 @@ export default async function StudentAcademicCalendarPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white uppercase">
+        <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white uppercase">
           Academic Calendar
         </h1>
         <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">

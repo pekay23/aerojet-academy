@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 import { useRouter } from 'next/navigation'
 import { FileText, CheckCircle2, AlertCircle, Loader2, RefreshCw } from 'lucide-react'
 import { UploadDropzone } from '@/lib/uploads/uploadthing'
@@ -31,9 +32,12 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
   const [success, setSuccess] = useState(false)
   const router = useRouter()
 
+  const { markDirty, markClean } = useFormDirty()
+
   // Fetch EUR equivalent when amount or currency changes
   useEffect(() => {
     if (!amount || currency === 'EUR') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEurEquivalent(currency === 'EUR' ? Number(amount) || null : null)
       return
     }
@@ -49,7 +53,7 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
             setEurEquivalent(Math.round((Number(amount) / rate) * 100) / 100)
           }
         }
-      } catch (err: any) {
+      } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') return
         console.error('Rate fetch error:', err instanceof Error ? err.message : 'Unknown error')
       } finally {
@@ -92,10 +96,11 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
         throw new Error('Failed to submit payment details.')
       }
 
+      markClean()
       setSuccess(true)
       router.refresh()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setLoading(false)
     }
@@ -140,14 +145,17 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
               <button
                 key={c.code}
                 type="button"
-                onClick={() => setCurrency(c.code)}
+                onClick={() => {
+                  setCurrency(c.code)
+                  markDirty()
+                }}
                 className={`rounded-lg px-3 py-2 text-xs font-bold transition-all ${
                   currency === c.code
-                    ? 'bg-white text-aerojet-blue shadow-sm dark:bg-slate-700 dark:text-white'
+                    ? 'bg-white text-blue-800 shadow-sm dark:bg-slate-700 dark:text-white'
                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
                 }`}
               >
-                {c.symbol}{c.code !== 'EUR' ? ` ${c.code}` : ''}
+                {c.symbol} {c.code}
               </button>
             ))}
           </div>
@@ -157,9 +165,12 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
           step="0.01"
           required
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) => {
+            setAmount(e.target.value)
+            markDirty()
+          }}
           placeholder={`e.g. ${currency === 'GHS' ? '5,000.00' : currency === 'USD' ? '500.00' : '450.00'}`}
-          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-blue-800 focus:ring-2 focus:ring-blue-800/10 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
         />
         {amount && currency !== 'EUR' && (
           <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs dark:bg-blue-900/20">
@@ -194,6 +205,7 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
                     type: res[0].type || 'application/octet-stream',
                   })
                   toast.success('Receipt uploaded successfully')
+                  markDirty()
                 }
               }}
               onUploadError={(error: Error) => {
@@ -201,16 +213,16 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
               }}
               appearance={{
                 container: 'border-0 bg-slate-50/50',
-                label: 'text-aerojet-blue',
-                button: 'bg-aerojet-blue text-white hover:bg-[#003875]',
+                label: 'text-blue-800',
+                button: 'bg-blue-800 text-white hover:bg-[#003875]',
                 allowedContent: 'text-slate-400',
               }}
             />
           </div>
         ) : (
-          <div className="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4">
+          <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-aerojet-blue">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-800">
                 <FileText className="h-6 w-6" />
               </div>
               <div className="min-w-0 flex-1">
@@ -226,6 +238,7 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
                 onClick={() => {
                   setProofUrl(null)
                   setFileDetails(null)
+                  markDirty()
                 }}
                 className="rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 dark:text-slate-400"
               >
@@ -239,7 +252,7 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
       <button
         type="submit"
         disabled={loading || !proofUrl || !amount}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-4 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#003875] disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-800 py-4 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#003875] disabled:opacity-50"
       >
         {loading ? (
           <Loader2 className="h-5 w-5 animate-spin" />

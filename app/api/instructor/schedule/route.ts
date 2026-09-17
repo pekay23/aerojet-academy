@@ -15,7 +15,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const startDate = searchParams.get('start')
   const endDate = searchParams.get('end')
 
-  const where: any = { instructorId: instructorProfile.id }
+  const where: {
+    instructorId: string
+    startDate?: { gte?: Date; lte?: Date }
+  } = { instructorId: instructorProfile.id }
   if (startDate || endDate) {
     where.startDate = {}
     if (startDate) where.startDate.gte = new Date(startDate)

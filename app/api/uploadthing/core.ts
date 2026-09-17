@@ -1,7 +1,8 @@
-import { createUploadthing, type FileRouter } from 'uploadthing/next'
+﻿import { createUploadthing, type FileRouter } from 'uploadthing/next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { UploadThingError } from 'uploadthing/server'
 import { recordFileUpload } from '@/lib/storage/file-upload-record'
+import { trackDocumentUpload } from '@/lib/analytics/events'
 
 const f = createUploadthing()
 
@@ -40,7 +41,7 @@ export const ourFileRouter = {
   // Define as many FileRoutes as you like, each with a unique routeSlug
   paymentProof: f({ image: { maxFileSize: '4MB' }, pdf: { maxFileSize: '4MB' } })
     // Set permissions and file types for this FileRoute
-    .middleware(async ({ req }) => {
+    .middleware(async ({ req: _req }) => {
       // This code runs on your server before upload
       try {
         const session = await getAuthSession()
@@ -55,22 +56,24 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       await captureUpload({ metadata, route: 'paymentProof', file })
+      trackDocumentUpload('paymentProof', file.name, metadata.userId).catch(() => {})
       return { uploadedBy: metadata.userId }
     }),
 
   profileImage: f({ image: { maxFileSize: '2MB', maxFileCount: 1 } })
-    .middleware(async ({ req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session) throw new UploadThingError('Unauthorized')
       return { userId: session.user.id }
     })
     .onUploadComplete(async ({ metadata, file }) => {
       await captureUpload({ metadata, route: 'profileImage', file })
+      trackDocumentUpload('profileImage', file.name, metadata.userId).catch(() => {})
       return { uploadedBy: metadata.userId }
     }),
 
   newsCoverImage: f({ image: { maxFileSize: '4MB', maxFileCount: 1 } })
-    .middleware(async ({ req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
@@ -79,6 +82,7 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       await captureUpload({ metadata, route: 'newsCoverImage', file })
+      trackDocumentUpload('newsCoverImage', file.name, metadata.userId).catch(() => {})
       return { uploadedBy: metadata.userId }
     }),
 
@@ -88,7 +92,7 @@ export const ourFileRouter = {
     audio: { maxFileSize: '8MB', maxFileCount: 1 },
     blob: { maxFileSize: '4MB', maxFileCount: 1 },
   })
-    .middleware(async ({ req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
@@ -97,11 +101,12 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       await captureUpload({ metadata, route: 'newsAttachment', file })
+      trackDocumentUpload('newsAttachment', file.name, metadata.userId).catch(() => {})
       return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl }
     }),
 
   newsImage: f({ blob: { maxFileSize: '4MB', maxFileCount: 1 } })
-    .middleware(async ({ req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
@@ -110,11 +115,12 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       await captureUpload({ metadata, route: 'newsImage', file })
+      trackDocumentUpload('newsImage', file.name, metadata.userId).catch(() => {})
       return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl }
     }),
 
   newsAudio: f({ blob: { maxFileSize: '32MB', maxFileCount: 1 } })
-    .middleware(async ({ req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
@@ -123,6 +129,7 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       await captureUpload({ metadata, route: 'newsAudio', file })
+      trackDocumentUpload('newsAudio', file.name, metadata.userId).catch(() => {})
       return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl }
     }),
   // Admissions Pipeline — applicant document uploads (CV, ID, certificates, etc.)
@@ -130,13 +137,14 @@ export const ourFileRouter = {
     pdf: { maxFileSize: '4MB', maxFileCount: 1 },
     image: { maxFileSize: '4MB', maxFileCount: 1 },
   })
-    .middleware(async ({ req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session) throw new UploadThingError('Unauthorized')
       return { userId: session.user.id }
     })
     .onUploadComplete(async ({ metadata, file }) => {
       await captureUpload({ metadata, route: 'applicantDocument', file })
+      trackDocumentUpload('applicantDocument', file.name, metadata.userId).catch(() => {})
       return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl, fileName: file.name }
     }),
 
@@ -145,7 +153,7 @@ export const ourFileRouter = {
     image: { maxFileSize: '16MB', maxFileCount: 1 },
     blob: { maxFileSize: '32MB', maxFileCount: 1 },
   })
-    .middleware(async ({ req }) => {
+    .middleware(async ({ req: _req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
@@ -154,6 +162,43 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       await captureUpload({ metadata, route: 'resourceFile', file })
+      trackDocumentUpload('resourceFile', file.name, metadata.userId).catch(() => {})
+      return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl, fileName: file.name }
+    }),
+
+  candidatePhoto: f({ image: { maxFileSize: '4MB', maxFileCount: 1 } })
+    .middleware(async ({ req: _req }) => {
+      const session = await getAuthSession()
+      if (!session) throw new UploadThingError('Unauthorized')
+      return { userId: session.user.id }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      await captureUpload({ metadata, route: 'candidatePhoto', file })
+      trackDocumentUpload('candidatePhoto', file.name, metadata.userId).catch(() => {})
+      return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl, fileName: file.name }
+    }),
+
+  examQuestionImport: f({
+    'text/plain': { maxFileSize: '16MB', maxFileCount: 1 },
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': {
+      maxFileSize: '16MB',
+      maxFileCount: 1,
+    },
+    'application/pdf': { maxFileSize: '16MB', maxFileCount: 1 },
+    'application/json': { maxFileSize: '16MB', maxFileCount: 1 },
+  })
+    .middleware(async ({ req: _req }) => {
+      const session = await getAuthSession()
+      if (
+        !session ||
+        !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(session.user.role)
+      ) {
+        throw new UploadThingError('Unauthorized')
+      }
+      return { userId: session.user.id }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      await captureUpload({ metadata, route: 'examQuestionImport', file })
       return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl, fileName: file.name }
     }),
 } satisfies FileRouter

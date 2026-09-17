@@ -2,11 +2,18 @@ import 'server-only'
 import { Resend } from 'resend'
 import { EMAIL_ADDRESSES } from '@/lib/constants/business-rules'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { getRegistryFromAddress } from '@/lib/email/registry'
 import type { EmailOptions, EmailResult } from './types'
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
-const DEFAULT_FROM = process.env.FROM_EMAIL || EMAIL_ADDRESSES.fromTransactional
+/** Resolves the default `from:` address from the email registry first (allowing
+ *  admin-edited addresses from the comms tab to take effect), falling back to
+ *  the `FROM_EMAIL` env var or the code-defined constant. */
+async function getDefaultFrom(): Promise<string> {
+  if (process.env.FROM_EMAIL) return process.env.FROM_EMAIL
+  return (await getRegistryFromAddress('transactional_sender')) ?? EMAIL_ADDRESSES.fromTransactional
+}
 
 /** Total attempts including the first; bumped from 1 to harden the
  *  verify-email path against transient Resend / network failures. */
@@ -20,7 +27,9 @@ function isRetryable(err: unknown): boolean {
   const message = String((err as { message?: string }).message || err)
   // Resend returns these names for transient conditions
   if (/rate_limit|timeout|ECONN|ETIMEDOUT|ENETUNREACH|fetch failed/i.test(message)) return true
-  const status = (err as { statusCode?: number; status?: number }).statusCode ?? (err as { status?: number }).status
+  const status =
+    (err as { statusCode?: number; status?: number }).statusCode ??
+    (err as { status?: number }).status
   return typeof status === 'number' && (status === 429 || status >= 500)
 }
 
@@ -59,12 +68,13 @@ async function recordDelivery(args: {
 }
 
 export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
-  const { to, subject, html, from = DEFAULT_FROM, replyTo, template, userId } = options
+  const { to, subject, html, from, replyTo, template, userId } = options
   const recipient = Array.isArray(to) ? to.join(', ') : to
+  const fromAddress = from ?? (await getDefaultFrom())
 
   // Dev fallback: log to console if no API key, and skip the DB write.
   if (!resend) {
-    console.log(`[EMAIL] To: ${recipient} | Subject: ${subject}`)
+    console.log(`[EMAIL] To: ${recipient} | From: ${fromAddress} | Subject: ${subject}`)
     console.log(`[EMAIL] Body preview: ${html.substring(0, 200)}...`)
     return { success: true, messageId: `dev-${Date.now()}` }
   }
@@ -73,7 +83,7 @@ export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       const { data, error } = await resend.emails.send({
-        from,
+        from: fromAddress,
         to: Array.isArray(to) ? to : [to],
         subject,
         html,
@@ -84,7 +94,9 @@ export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
         lastError = error
         if (attempt < MAX_ATTEMPTS && isRetryable(error)) {
           const backoff = INITIAL_BACKOFF_MS * 2 ** (attempt - 1)
-          console.warn(`[EMAIL] retry ${attempt}/${MAX_ATTEMPTS} after ${backoff}ms · ${recipient} · ${error.message}`)
+          console.warn(
+            `[EMAIL] retry ${attempt}/${MAX_ATTEMPTS} after ${backoff}ms · ${recipient} · ${error.message}`
+          )
           await sleep(backoff)
           continue
         }
@@ -118,7 +130,9 @@ export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
       lastError = err
       if (attempt < MAX_ATTEMPTS && isRetryable(err)) {
         const backoff = INITIAL_BACKOFF_MS * 2 ** (attempt - 1)
-        console.warn(`[EMAIL] retry ${attempt}/${MAX_ATTEMPTS} after ${backoff}ms · ${recipient} · ${(err as Error).message}`)
+        console.warn(
+          `[EMAIL] retry ${attempt}/${MAX_ATTEMPTS} after ${backoff}ms · ${recipient} · ${(err as Error).message}`
+        )
         await sleep(backoff)
         continue
       }

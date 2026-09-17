@@ -146,6 +146,7 @@ export default function LicenseRequirementsClient({
                 className="group sticky left-0 z-10 cursor-pointer bg-white px-4 py-3 text-left text-xs font-black tracking-widest text-slate-400 uppercase transition-all duration-150 ease-out hover:bg-white hover:text-slate-600 hover:shadow-sm dark:bg-slate-900 dark:hover:bg-slate-800/60"
                 onClick={() => handleSort('code')}
               >
+              {/* eslint-disable-next-line react-hooks/static-components */}
                 Module <SortIndicator column="code" />
               </th>
               {licenseCategories.map((lc) => (
@@ -154,6 +155,7 @@ export default function LicenseRequirementsClient({
                   className="group cursor-pointer px-3 py-3 text-center text-xs font-black tracking-wider text-slate-500 transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
                   onClick={() => handleSort(lc.id)}
                 >
+                  { }
                   {lc.code} <SortIndicator column={lc.id} />
                 </th>
               ))}

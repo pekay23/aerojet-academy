@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Mail,
   Send,
@@ -109,18 +109,6 @@ export default function EmailPreviewsPage() {
   })
   const [testEmail, setTestEmail] = useState('')
 
-  // Fetch template data when editing starts
-  useEffect(() => {
-    if (isEditing) {
-      fetchTemplateContent()
-    }
-  }, [isEditing, activeTemplate])
-
-  // Fetch all templates on mount
-  useEffect(() => {
-    fetchAllTemplates()
-  }, [])
-
   const fetchAllTemplates = async () => {
     try {
       const res = await fetch('/api/staff/email-templates')
@@ -130,7 +118,7 @@ export default function EmailPreviewsPage() {
         // Merge DB templates with default TEMPLATES
         const mergedTemplates = [...TEMPLATES]
 
-        dbTemplates.forEach((dbTemp: any) => {
+        dbTemplates.forEach((dbTemp: { name?: string; description?: string | null }) => {
           const existingIndex = mergedTemplates.findIndex((t) => t.id === dbTemp.name)
           if (existingIndex === -1 && dbTemp.name) {
             // It's a brand new custom template
@@ -146,12 +134,12 @@ export default function EmailPreviewsPage() {
 
         setAllTemplates(mergedTemplates)
       }
-    } catch (error) {
-      console.error('Failed to fetch all templates:', error)
+    } catch (_error) {
+      toast.error('Failed to load email templates')
     }
   }
 
-  const fetchTemplateContent = async () => {
+  const fetchTemplateContent = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch(`/api/staff/email-templates?name=${activeTemplate}`)
@@ -167,12 +155,26 @@ export default function EmailPreviewsPage() {
           setEditData({ subject: '', body: '' })
         }
       }
-    } catch (error) {
-      console.error('Failed to fetch template:', error)
+    } catch (_error) {
+      toast.error('Failed to load template')
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeTemplate])
+
+  // Fetch template data when editing starts
+  useEffect(() => {
+    if (isEditing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchTemplateContent()
+    }
+  }, [isEditing, activeTemplate, fetchTemplateContent])
+
+  // Fetch all templates on mount
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchAllTemplates()
+  }, [])
 
   const handleSave = async () => {
     if (!editData.subject || !editData.body) {
@@ -201,7 +203,7 @@ export default function EmailPreviewsPage() {
       } else {
         toast.error('Failed to save template')
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Error saving template')
     } finally {
       setSaving(false)
@@ -220,7 +222,7 @@ export default function EmailPreviewsPage() {
       setIsEditing(false)
       const iframe = document.querySelector('iframe')
       if (iframe) iframe.src = iframe.src
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to reset')
     }
   }
@@ -247,7 +249,7 @@ export default function EmailPreviewsPage() {
       } else {
         toast.error('Failed to send test email', { id: toastId })
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Error sending test email', { id: toastId })
     } finally {
       setSendingTest(false)

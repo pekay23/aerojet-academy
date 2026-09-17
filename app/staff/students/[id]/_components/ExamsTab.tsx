@@ -5,24 +5,27 @@ import { naturalCompare } from '@/lib/utils/array'
 import {
   Search,
   Plus,
-  Calendar,
   CheckCircle2,
   XCircle,
   Clock,
   Edit,
   Trash2,
   FileCheck,
-  ShoppingCart,
-  Filter,
   ArrowUp,
   ArrowDown,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { updateExamBooking, deleteExamRecord } from '@/app/staff/actions'
+import { updateExamBooking, deleteExamRecord } from '@/app/staff/actions/index'
 import BookExamForStudentDialog from './BookExamForStudentDialog'
 import AddExamRecordDialog from './AddExamRecordDialog'
 import CertificateReleaseControl from './CertificateReleaseControl'
-import { deriveBookingDisplayResult } from '@/lib/exams/fulfillment'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
+import {
+  deriveBookingDisplayResult,
+  isUpcomingBooking as isUpcomingBookingFromLib,
+  isMissedBooking as isMissedBookingFromLib,
+} from '@/lib/exams/fulfillment'
+import type { SerializedExamComponent, SerializedExamBundle } from '@/lib/types/staff'
 
 const EXAM_FILTERS = [
   { key: 'all', label: 'All' },
@@ -32,15 +35,48 @@ const EXAM_FILTERS = [
   { key: 'internal', label: 'Internal' },
   { key: 'official', label: 'Official EASA' },
   { key: 'upcoming', label: 'Upcoming' },
+  { key: 'missed', label: 'Missed / Unresolved' },
   { key: 'completed', label: 'Completed' },
 ] as const
 
 type ExamFilter = (typeof EXAM_FILTERS)[number]['key']
 
+import type { SerializedStudent } from '@/lib/types/staff'
+type StudentSummary = SerializedStudent
+
+export type UnifiedExamRecord = {
+  id: string
+  source: 'booking' | 'result'
+  moduleCode: string
+  examName: string
+  examDate: string | null | undefined
+  courseId?: string | null
+  score: number | null
+  percentage: number | null
+  result: string | null
+  passed: boolean
+  status: string
+  bookingType: string | null
+  attemptType: string | null
+  isResit: boolean
+  eventName: string | null | undefined
+  eventStatus?: string | null | undefined
+  bookedAt: string | null | undefined
+  amountPaid: number
+  examCategory: string | null | undefined
+  attendanceStatus: string | null
+  demandStatus?: string | null | undefined
+  sittingLabel?: string | null
+  hasResult?: boolean
+  resultId?: string
+  sourceNotes?: string | null
+  certificateUrl?: string | null
+}
+
 interface Props {
-  student: any
-  examComponents: any[]
-  upcomingEvents: any[]
+  student: StudentSummary
+  examComponents: SerializedExamComponent[]
+  upcomingEvents: { id: string; name: string; startDate: string; endDate?: string }[]
   academicYears?: { id: string; name: string }[]
   semesters?: { id: string; name: string }[]
   onRefresh: () => void
@@ -66,49 +102,73 @@ export default function ExamsTab({
     bookingType?: string
     examCategory?: string
   }>({})
-  const [quickAddModule, setQuickAddModule] = useState<any>(null)
+  const [quickAddModule, setQuickAddModule] = useState<SerializedExamComponent | null>(null)
   const [sortBy, setSortBy] = useState<'moduleCode' | 'examDate' | 'score' | 'result'>('examDate')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
   // Merge exam bookings and exam results into unified history
   const allExamRecords = useMemo(() => {
-    const records: any[] = []
+    const records: UnifiedExamRecord[] = []
 
     // From examBookings
     for (const b of student.examBookings || []) {
+      const moduleCode =
+        b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—'
+
+      const examDate =
+        b.examDate ||
+        b.bookedAt ||
+        b.event?.startDate ||
+        (b.exam?.examDate
+          ? typeof b.exam.examDate === 'string'
+            ? b.exam.examDate
+            : (b.exam.examDate?.toISOString() ?? null)
+          : null)
+
       records.push({
         id: b.id,
         source: 'booking',
-        moduleCode: b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—',
+        moduleCode,
         examName:
           b.exam?.name || b.course?.name || b.exam?.examComponent?.course?.name || 'Manual Record',
-        examDate: b.examDate,
+        examDate,
         courseId: b.course?.id || null,
         score: b.score != null ? Number(b.score) : null,
         percentage: b.percentage != null ? Number(b.percentage) : null,
-        result: (b.result?.toUpperCase().includes('MIGRATE') || b.result?.toUpperCase().includes('HISTORICAL'))
-          ? null
-          : deriveBookingDisplayResult({
-              result: b.result,
-              demandStatus: b.demandStatus,
-              executedAt: b.executedAt,
-              rolloverToEventId: b.rolloverToEventId,
-              status: b.status,
-            }),
+        result:
+          b.result?.toUpperCase().includes('MIGRATE') ||
+          b.result?.toUpperCase().includes('HISTORICAL')
+            ? null
+            : deriveBookingDisplayResult({
+                result: b.result,
+                demandStatus: b.demandStatus,
+                executedAt: b.executedAt,
+                rolloverToEventId: b.rolloverToEventId,
+                status: b.status,
+              }),
         passed: b.result?.toLowerCase() === 'pass',
         status:
           (b.result != null && b.result !== '' && !b.result.toUpperCase().includes('MIGRATE')) ||
-          (b.score != null && b.examDate && new Date(b.examDate) < new Date())
+          (b.score != null && examDate && new Date(examDate) < new Date())
             ? 'COMPLETED'
             : b.status,
         bookingType: b.bookingType,
-        attemptType: (b.attemptType?.toUpperCase().includes('MIGRATE') || b.attemptType?.toUpperCase().includes('HISTORICAL')) ? null : b.attemptType,
+        attemptType:
+          b.attemptType?.toUpperCase().includes('MIGRATE') ||
+          b.attemptType?.toUpperCase().includes('HISTORICAL')
+            ? null
+            : b.attemptType,
         isResit: b.isResit || (b.attemptType?.toUpperCase().startsWith('RESIT') ?? false),
         eventName: b.event?.name,
+        eventStatus: b.event?.status || null,
+        demandStatus: b.demandStatus || null,
         bookedAt: b.bookedAt,
         amountPaid: Number(b.amountPaid || 0),
         examCategory: b.examCategory,
-        attendanceStatus: b.examAttendance?.status || b.sittingAssignments?.[0]?.attendanceStatus || null,
+        attendanceStatus:
+          b.examAttendance?.status || b.sittingAssignments?.[0]?.attendanceStatus || null,
         sittingLabel: b.sittingAssignments?.[0]?.sitting
           ? `Day ${b.sittingAssignments[0].sitting.dayNumber} ${b.sittingAssignments[0].sitting.sessionType}`
           : null,
@@ -122,9 +182,9 @@ export default function ExamsTab({
         (rec) =>
           rec.source === 'booking' &&
           rec.moduleCode?.toUpperCase() === rModuleCode.toUpperCase() &&
-          ((rec.attemptType || 'FIRST') === (r.attemptType || 'FIRST'))
+          (rec.attemptType || 'FIRST') === (r.attemptType || 'FIRST')
       )
-      
+
       if (existingBooking) {
         // Consolidate: Merge the score from ExamResult into the booking
         existingBooking.score = Number(r.score)
@@ -137,29 +197,31 @@ export default function ExamsTab({
         existingBooking.sourceNotes = r.sourceNotes
         existingBooking.examCategory = r.examCategory || existingBooking.examCategory
         // Treat "migrated" or "historical" results as pending for UI display purposes
-        if (existingBooking.result?.toUpperCase().includes('MIGRATE') || 
-            existingBooking.result?.toUpperCase().includes('HISTORICAL')) {
+        if (
+          existingBooking.result?.toUpperCase().includes('MIGRATE') ||
+          existingBooking.result?.toUpperCase().includes('HISTORICAL')
+        ) {
           existingBooking.result = null
         }
 
         const rType = r.attemptType?.toUpperCase() || ''
         const bType = existingBooking.attemptType?.toUpperCase() || ''
-        
-        const isPlaceholder = (s: string) => 
+
+        const isPlaceholder = (s: string) =>
           s.includes('MIGRATE') || s.includes('HISTORICAL') || s === '—'
-        
+
         if (rType && !isPlaceholder(rType)) {
           existingBooking.attemptType = r.attemptType
-          existingBooking.isResit = r.attemptType.startsWith('RESIT')
+          existingBooking.isResit = (r.attemptType || '').startsWith('RESIT')
         } else if (!bType || isPlaceholder(bType)) {
-           if (rType && !isPlaceholder(rType)) {
-             existingBooking.attemptType = r.attemptType
-             existingBooking.isResit = r.attemptType.startsWith('RESIT')
-           } else if (r.attemptType) {
-             // Fallback to result's attempt type even if it's a placeholder, 
-             // but only if booking has nothing better
-             existingBooking.attemptType = r.attemptType
-           }
+          if (rType && !isPlaceholder(rType)) {
+            existingBooking.attemptType = r.attemptType
+            existingBooking.isResit = (r.attemptType || '').startsWith('RESIT')
+          } else if (r.attemptType) {
+            // Fallback to result's attempt type even if it's a placeholder,
+            // but only if booking has nothing better
+            existingBooking.attemptType = r.attemptType
+          }
         }
       } else {
         records.push({
@@ -167,14 +229,18 @@ export default function ExamsTab({
           source: 'result',
           moduleCode: rModuleCode,
           examName: r.exam?.name || 'Manual Result',
-          examDate: r.exam?.examDate || r.createdAt,
+          examDate: r.exam?.examDate != null ? String(r.exam.examDate) : undefined,
           score: Number(r.score),
           percentage: Number(r.percentage),
           result: r.passed ? 'pass' : 'fail',
           passed: r.passed,
           status: 'COMPLETED',
           bookingType: null,
-          attemptType: (r.attemptType?.toUpperCase().includes('MIGRATE') || r.attemptType?.toUpperCase().includes('HISTORICAL')) ? null : r.attemptType,
+          attemptType:
+            r.attemptType?.toUpperCase().includes('MIGRATE') ||
+            r.attemptType?.toUpperCase().includes('HISTORICAL')
+              ? null
+              : r.attemptType,
           isResit: r.attemptType ? r.attemptType.toUpperCase().startsWith('RESIT') : false,
           eventName: null,
           sourceNotes: r.sourceNotes,
@@ -197,6 +263,24 @@ export default function ExamsTab({
     return records
   }, [student.examBookings, student.examResults])
 
+  // ---- Upcoming / Missed helpers ----
+  const isUpcomingBooking = (r: UnifiedExamRecord) =>
+    isUpcomingBookingFromLib({
+      examDate: r.examDate,
+      result: r.result,
+      demandStatus: r.demandStatus,
+      eventStatus: r.eventStatus,
+    })
+
+  const isMissedBooking = (r: UnifiedExamRecord) =>
+    isMissedBookingFromLib({
+      examDate: r.examDate,
+      result: r.result,
+      score: r.score,
+      demandStatus: r.demandStatus,
+      hasResult: r.hasResult,
+    })
+
   // Apply filters
   const filteredRecords = useMemo(() => {
     let filtered = allExamRecords
@@ -210,15 +294,13 @@ export default function ExamsTab({
         (r) => r.isResit || ['RESIT_1', 'RESIT_2', 'RESIT_3'].includes(r.attemptType || '')
       )
     } else if (filter === 'upcoming') {
-      filtered = filtered.filter(
-        (r) => r.examDate && new Date(r.examDate) > new Date() && r.status !== 'COMPLETED'
-      )
+      filtered = filtered.filter((r) => isUpcomingBooking(r))
+    } else if (filter === 'missed') {
+      filtered = filtered.filter((r) => isMissedBooking(r))
     } else if (filter === 'completed') {
       filtered = filtered.filter((r) => r.status === 'COMPLETED')
-    } else if (filter === 'internal') {
-      filtered = filtered.filter((r) => r.examCategory === 'INTERNAL')
     } else if (filter === 'official') {
-      filtered = filtered.filter((r) => r.examCategory === 'OFFICIAL_EASA' || !r.examCategory)
+      filtered = filtered.filter((r) => r.examCategory === 'OFFICIAL_EASA')
     }
 
     if (search) {
@@ -246,7 +328,7 @@ export default function ExamsTab({
     })
 
     return sorted
-  }, [allExamRecords, filter, search, sortBy, sortOrder])
+  }, [allExamRecords, filter, search, sortBy, sortOrder, isMissedBooking, isUpcomingBooking])
 
   // Filter counts
   const counts = useMemo(
@@ -257,18 +339,17 @@ export default function ExamsTab({
       resit: allExamRecords.filter(
         (r) => r.isResit || ['RESIT_1', 'RESIT_2', 'RESIT_3'].includes(r.attemptType || '')
       ).length,
-      upcoming: allExamRecords.filter(
-        (r) => r.examDate && new Date(r.examDate) > new Date() && r.status !== 'COMPLETED'
-      ).length,
+      upcoming: allExamRecords.filter((r) => isUpcomingBooking(r)).length,
+      missed: allExamRecords.filter((r) => isMissedBooking(r)).length,
       completed: allExamRecords.filter((r) => r.status === 'COMPLETED').length,
       internal: allExamRecords.filter((r) => r.examCategory === 'INTERNAL').length,
-      official: allExamRecords.filter((r) => r.examCategory === 'OFFICIAL_EASA' || !r.examCategory).length,
+      official: allExamRecords.filter((r) => r.examCategory === 'OFFICIAL_EASA').length,
     }),
-    [allExamRecords]
+    [allExamRecords, isMissedBooking, isUpcomingBooking]
   )
 
   // Handle inline edit save
-  const handleSaveEdit = async (record: any) => {
+  const handleSaveEdit = async (record: UnifiedExamRecord) => {
     try {
       const res = await updateExamBooking(record.id, {
         score: editData.score,
@@ -277,10 +358,11 @@ export default function ExamsTab({
         moduleCode: editData.moduleCode || undefined,
         attemptType: editData.attemptType || undefined,
         bookingType: editData.bookingType || undefined,
-        examCategory: editData.examCategory as any || undefined,
-        resultIdToSync: record.resultId || undefined,
+        examCategory:
+          (editData.examCategory as 'INTERNAL' | 'OFFICIAL_EASA' | undefined) || undefined,
+        resultIdToSync: (record as { resultId?: string }).resultId || undefined,
       })
-      if (res.error) {
+      if ('error' in res && res.error) {
         toast.error(res.error)
       } else {
         toast.success('Exam record updated')
@@ -293,11 +375,17 @@ export default function ExamsTab({
   }
 
   // Handle delete
-  const handleDelete = async (recordId: string) => {
-    if (!confirm('Are you sure you want to delete this exam record?')) return
+  const handleDelete = (recordId: string) => {
+    setPendingDeleteId(recordId)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return
+    setShowDeleteConfirm(false)
     try {
-      const res = await deleteExamRecord(recordId)
-      if (res.error) {
+      const res = await deleteExamRecord(pendingDeleteId)
+      if ('error' in res && res.error) {
         toast.error(res.error)
       } else {
         toast.success('Exam record deleted')
@@ -305,11 +393,13 @@ export default function ExamsTab({
       }
     } catch {
       toast.error('Failed to delete record')
+    } finally {
+      setPendingDeleteId(null)
     }
   }
 
   // Quick add handlers
-  const handleQuickAdd = (module: any) => {
+  const handleQuickAdd = (module: SerializedExamComponent) => {
     setQuickAddModule(module)
   }
 
@@ -325,27 +415,29 @@ export default function ExamsTab({
 
   const handleQuickAddSave = async () => {
     if (!quickAddModule) return
-    
+
     const moduleCode = quickAddModule.course?.code || quickAddModule.code
     const courseId = quickAddModule.course?.id
-    
+
     try {
       const res = await fetch('/api/staff/students/' + student.id + '/exam-record', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          entries: [{
-            courseId,
-            moduleCode,
-            score: undefined,
-          }],
+          entries: [
+            {
+              courseId,
+              moduleCode,
+              score: undefined,
+            },
+          ],
           bookingType: 'INDIVIDUAL',
           examDate: undefined, // Leave date blank for admin to fill
           attemptType: 'FIRST',
           notes: 'Quick added from exam tab',
         }),
       })
-      
+
       const data = await res.json()
       if (res.ok && data.success) {
         toast.success('Module added! Click edit to add exam date and score.')
@@ -373,9 +465,7 @@ export default function ExamsTab({
   }, [examComponents])
 
   // Get list of modules that already have records
-  const existingModuleCodes = new Set(
-    allExamRecords.map((r) => r.moduleCode).filter(Boolean)
-  )
+  const existingModuleCodes = new Set(allExamRecords.map((r) => r.moduleCode).filter(Boolean))
 
   // Available modules to add (not yet in records)
   const availableModules = examComponents.filter(
@@ -407,7 +497,14 @@ export default function ExamsTab({
                 ? `${student.profile.firstName} ${student.profile.lastName}`
                 : student.email
             }
-            examComponents={examComponents}
+            examComponents={examComponents.map((ec) => ({
+              id: ec.id,
+              code: ec.code,
+              name: ec.name,
+              course: ec.course
+                ? { id: ec.course.id, name: ec.course.name || '', code: ec.course.code }
+                : undefined,
+            }))}
             onSuccess={onRefresh}
           />
           <BookExamForStudentDialog
@@ -422,8 +519,18 @@ export default function ExamsTab({
             enrollmentType={student.studentProfile?.enrollmentType}
             academicYears={academicYears}
             semesters={semesters}
-            examComponents={examComponents}
-            upcomingEvents={upcomingEvents}
+            examComponents={examComponents.map((ec) => ({
+              id: ec.id,
+              code: ec.code,
+              name: ec.name,
+              course: ec.course
+                ? { id: ec.course.id, name: ec.course.name || '', code: ec.course.code }
+                : undefined,
+            }))}
+            upcomingEvents={upcomingEvents.map((e) => ({
+              ...e,
+              endDate: (e as { endDate?: string }).endDate ?? '',
+            }))}
             onSuccess={onRefresh}
           />
         </div>
@@ -440,7 +547,7 @@ export default function ExamsTab({
               <button
                 key={module.id}
                 onClick={() => handleQuickAdd(module)}
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:border-aerojet-blue hover:text-aerojet-blue dark:border-slate-600 dark:bg-slate-700"
+                className="hover:border-aerojet-blue hover:text-aerojet-blue flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-all dark:border-slate-600 dark:bg-slate-700"
               >
                 <Plus className="h-3 w-3" />
                 {module.course?.code || module.code}
@@ -462,9 +569,7 @@ export default function ExamsTab({
             <h3 className="mb-4 text-lg font-bold">
               Add {quickAddModule.course?.code || quickAddModule.code}
             </h3>
-            <p className="mb-4 text-sm text-slate-500">
-              Module: {quickAddModule.course?.name || quickAddModule.name}
-            </p>
+            <p className="mb-4 text-sm text-slate-500">Module: {quickAddModule.name}</p>
             <p className="mb-4 text-xs text-amber-600">
               You can add the exam date and score later by editing this record.
             </p>
@@ -477,7 +582,7 @@ export default function ExamsTab({
               </button>
               <button
                 onClick={handleQuickAddSave}
-                className="rounded-lg bg-aerojet-blue px-4 py-2 text-sm font-medium text-white"
+                className="bg-aerojet-blue rounded-lg px-4 py-2 text-sm font-medium text-white"
               >
                 Add Module
               </button>
@@ -488,14 +593,14 @@ export default function ExamsTab({
 
       {/* Search & Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative max-w-xs min-w-[200px] flex-1">
+        <div className="relative max-w-xs min-w-50 flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search module or exam..."
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800/50"
+            className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
           />
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -517,7 +622,7 @@ export default function ExamsTab({
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <SummaryCard
           icon={CheckCircle2}
           label="Passed"
@@ -538,6 +643,13 @@ export default function ExamsTab({
           value={counts.upcoming}
           color="text-blue-600"
           bg="bg-blue-50 dark:bg-blue-900/20"
+        />
+        <SummaryCard
+          icon={XCircle}
+          label="Missed / Unresolved"
+          value={counts.missed}
+          color="text-amber-600"
+          bg="bg-amber-50 dark:bg-amber-900/20"
         />
         <SummaryCard
           icon={FileCheck}
@@ -562,14 +674,17 @@ export default function ExamsTab({
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900/50">
                 <th
-                  className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
+                  className="hover:text-aerojet-blue cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase"
                   onClick={() => handleSort('moduleCode')}
                 >
                   <span className="flex items-center gap-1">
                     Module
-                    {sortBy === 'moduleCode' && (
-                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                    )}
+                    {sortBy === 'moduleCode' &&
+                      (sortOrder === 'asc' ? (
+                        <ArrowUp className="h-3 w-3" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" />
+                      ))}
                   </span>
                 </th>
                 <th className="px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
@@ -582,36 +697,45 @@ export default function ExamsTab({
                   Attempt
                 </th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
+                  className="hover:text-aerojet-blue cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase"
                   onClick={() => handleSort('examDate')}
                 >
                   <span className="flex items-center gap-1">
                     Date
-                    {sortBy === 'examDate' && (
-                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                    )}
+                    {sortBy === 'examDate' &&
+                      (sortOrder === 'asc' ? (
+                        <ArrowUp className="h-3 w-3" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" />
+                      ))}
                   </span>
                 </th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
+                  className="hover:text-aerojet-blue cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase"
                   onClick={() => handleSort('score')}
                 >
                   <span className="flex items-center justify-center gap-1">
                     Score
-                    {sortBy === 'score' && (
-                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                    )}
+                    {sortBy === 'score' &&
+                      (sortOrder === 'asc' ? (
+                        <ArrowUp className="h-3 w-3" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" />
+                      ))}
                   </span>
                 </th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
+                  className="hover:text-aerojet-blue cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase"
                   onClick={() => handleSort('result')}
                 >
                   <span className="flex items-center justify-center gap-1">
                     Result
-                    {sortBy === 'result' && (
-                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                    )}
+                    {sortBy === 'result' &&
+                      (sortOrder === 'asc' ? (
+                        <ArrowUp className="h-3 w-3" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" />
+                      ))}
                   </span>
                 </th>
                 <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
@@ -638,38 +762,46 @@ export default function ExamsTab({
                         onChange={(e) => setEditData((d) => ({ ...d, moduleCode: e.target.value }))}
                         className="w-28 rounded border border-slate-200 px-2 py-1 font-mono text-xs"
                       >
-                        {examComponents.map((ec: any) => (
+                        {examComponents.map((ec: SerializedExamComponent) => (
                           <option key={ec.id} value={ec.course?.code || ec.code}>
                             {ec.course?.code || ec.code}
                           </option>
                         ))}
                       </select>
-                    ) : (() => {
-                      const cid = record.courseId || courseLookup.get(record.moduleCode?.toUpperCase() || '')
-                      return cid ? (
-                        <a
-                          href={`/staff/courses/${cid}`}
-                          className="font-mono font-bold text-aerojet-blue hover:underline dark:text-aerojet-sky"
-                        >
-                          {record.moduleCode}
-                        </a>
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                          {record.moduleCode}
-                        </span>
-                      )
-                    })()}
+                    ) : (
+                      (() => {
+                        const cid =
+                          record.courseId ||
+                          courseLookup.get(record.moduleCode?.toUpperCase() || '')
+                        return cid ? (
+                          <a
+                            href={`/staff/courses/${cid}`}
+                            className="text-aerojet-blue dark:text-aerojet-sky font-mono font-bold hover:underline"
+                          >
+                            {record.moduleCode}
+                          </a>
+                        ) : (
+                          <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                            {record.moduleCode}
+                          </span>
+                        )
+                      })()
+                    )}
                   </td>
-                  <td className="max-w-[200px] px-4 py-3 text-xs text-slate-500">
+                  <td className="max-w-50 px-4 py-3 text-xs text-slate-500">
                     <div className="flex flex-col">
                       <span className="truncate font-medium text-slate-800 dark:text-slate-200">
                         {record.examName}
                       </span>
                       {record.eventName && (
-                        <span className="text-[10px] text-slate-400">Event: {record.eventName}</span>
+                        <span className="text-[10px] text-slate-400">
+                          Event: {record.eventName}
+                        </span>
                       )}
                       {record.sittingLabel && (
-                        <span className="text-[10px] text-slate-400">Sitting: {record.sittingLabel}</span>
+                        <span className="text-[10px] text-slate-400">
+                          Sitting: {record.sittingLabel}
+                        </span>
                       )}
                     </div>
                   </td>
@@ -677,18 +809,25 @@ export default function ExamsTab({
                     {editingId === record.id ? (
                       <select
                         value={editData.examCategory ?? record.examCategory ?? 'OFFICIAL_EASA'}
-                        onChange={(e) => setEditData((d) => ({ ...d, examCategory: e.target.value }))}
+                        onChange={(e) =>
+                          setEditData((d) => ({
+                            ...d,
+                            examCategory: e.target.value as 'INTERNAL' | 'OFFICIAL_EASA',
+                          }))
+                        }
                         className="w-24 rounded border border-slate-200 px-1 py-0.5 text-[10px]"
                       >
                         <option value="OFFICIAL_EASA">OFFICIAL EASA</option>
                         <option value="INTERNAL">INTERNAL</option>
                       </select>
                     ) : (
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                        record.examCategory === 'INTERNAL' 
-                          ? 'bg-amber-100 text-amber-700' 
-                          : 'bg-blue-100 text-blue-700'
-                      }`}>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                          record.examCategory === 'INTERNAL'
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-blue-100 text-blue-700'
+                        }`}
+                      >
                         {record.examCategory === 'INTERNAL' ? 'INTERNAL' : 'OFFICIAL EASA'}
                       </span>
                     )}
@@ -697,7 +836,9 @@ export default function ExamsTab({
                     {editingId === record.id ? (
                       <select
                         value={editData.attemptType ?? record.attemptType ?? 'FIRST'}
-                        onChange={(e) => setEditData((d) => ({ ...d, attemptType: e.target.value }))}
+                        onChange={(e) =>
+                          setEditData((d) => ({ ...d, attemptType: e.target.value }))
+                        }
                         className="w-28 rounded border border-slate-200 px-2 py-1 text-xs"
                       >
                         <option value="FIRST">First Attempt</option>
@@ -706,11 +847,13 @@ export default function ExamsTab({
                         <option value="RESIT_3">Resit 3</option>
                       </select>
                     ) : (
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                        record.attemptType === 'FIRST' || !record.attemptType
-                          ? 'bg-slate-100 text-slate-500'
-                          : 'bg-amber-100 text-amber-700'
-                      }`}>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          record.attemptType === 'FIRST' || !record.attemptType
+                            ? 'bg-slate-100 text-slate-500'
+                            : 'bg-amber-100 text-amber-700'
+                        }`}
+                      >
                         {(record.attemptType || 'FIRST').replace(/_/g, ' ')}
                       </span>
                     )}
@@ -780,7 +923,9 @@ export default function ExamsTab({
                     {editingId === record.id ? (
                       <select
                         value={editData.bookingType ?? record.bookingType ?? 'INDIVIDUAL'}
-                        onChange={(e) => setEditData((d) => ({ ...d, bookingType: e.target.value }))}
+                        onChange={(e) =>
+                          setEditData((d) => ({ ...d, bookingType: e.target.value }))
+                        }
                         className="w-28 rounded border border-slate-200 px-2 py-1 text-xs"
                       >
                         <option value="INDIVIDUAL">Individual</option>
@@ -796,19 +941,26 @@ export default function ExamsTab({
                   </td>
                   <td className="px-4 py-3 text-center">
                     <div className="flex flex-col items-center gap-1">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                          record.status === 'COMPLETED'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : record.status === 'PENDING'
-                              ? 'bg-amber-100 text-amber-700'
-                              : record.status === 'FAILED' || record.status === 'NO_SHOW'
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-slate-100 text-slate-500'
-                        }`}
-                      >
-                        {record.status}
-                      </span>
+                      {isMissedBooking(record) && (
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black text-amber-700 uppercase">
+                          MISSED
+                        </span>
+                      )}
+                      {!isMissedBooking(record) && (
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
+                            record.status === 'COMPLETED'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : record.status === 'PENDING'
+                                ? 'bg-amber-100 text-amber-700'
+                                : record.status === 'FAILED' || record.status === 'NO_SHOW'
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-slate-100 text-slate-500'
+                          }`}
+                        >
+                          {record.status}
+                        </span>
+                      )}
                       {record.attendanceStatus && (
                         <span
                           className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
@@ -887,13 +1039,13 @@ export default function ExamsTab({
       )}
 
       {/* Bundles */}
-      {student.examBundles?.length > 0 && (
+      {(student.examBundles?.length ?? 0) > 0 && (
         <div>
           <h3 className="mb-3 text-xs font-black tracking-widest text-slate-400 uppercase">
             Active Bundles
           </h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {student.examBundles.map((bundle: any) => (
+            {(student.examBundles || []).map((bundle: SerializedExamBundle) => (
               <div
                 key={bundle.id}
                 className="rounded-xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
@@ -933,6 +1085,18 @@ export default function ExamsTab({
           </div>
         </div>
       )}
+
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          open={showDeleteConfirm}
+          onOpenChange={setShowDeleteConfirm}
+          title="Delete exam record"
+          description="Are you sure you want to delete this exam record? This action cannot be undone."
+          confirmLabel="Delete"
+          variant="destructive"
+          onConfirm={confirmDelete}
+        />
+      )}
     </div>
   )
 }
@@ -944,7 +1108,7 @@ function SummaryCard({
   color,
   bg,
 }: {
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   label: string
   value: number
   color: string

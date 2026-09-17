@@ -7,8 +7,8 @@ import type { ApprovalResult, ApprovalOptions } from './types'
 
 export async function approveApplicant(
   userId: string,
-  options: ApprovalOptions
-): Promise<ApprovalResult> {
+  _options: ApprovalOptions
+): Promise<ApprovalResult<{ academyEmail: string; tempPassword: string }>> {
   try {
     const user = await prisma.user.findUnique({ where: { id: userId }, include: { profile: true } })
     if (!user) return { success: false, error: 'User not found' }
@@ -40,8 +40,8 @@ export async function approveApplicant(
     }).catch(() => {})
 
     return { success: true, data: { academyEmail, tempPassword } }
-  } catch (err: any) {
-    return { success: false, error: err.message }
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
   }
 }
 
@@ -89,7 +89,7 @@ export async function approvePayment(
     }).catch(() => {})
 
     return { success: true }
-  } catch (err: any) {
-    return { success: false, error: err.message }
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
   }
 }

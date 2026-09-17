@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client'
 import dotenv from 'dotenv'
-import { randomBytes, createHmac } from 'crypto'
 
 dotenv.config()
 
@@ -18,11 +16,11 @@ async function main() {
   try {
     console.log('Testing Database connection...')
     const prisma = (await import('../lib/prisma/client.js')).default;
-    await (prisma as any).$connect()
-    await (prisma as any).user.findFirst({ select: { id: true } })
+    await (prisma as unknown as { $connect: () => Promise<void> }).$connect()
+    await (prisma as unknown as { user: { findFirst: (args: unknown) => Promise<unknown> } }).user.findFirst({ select: { id: true } })
     console.log('✅ Database: Connected successfully')
     results.database = true
-    await (prisma as any).$disconnect()
+    await (prisma as unknown as { $disconnect: () => Promise<void> }).$disconnect()
   } catch (err) {
     console.error('❌ Database: Connection failed', err)
   }
@@ -76,3 +74,5 @@ async function main() {
 }
 
 main()
+
+

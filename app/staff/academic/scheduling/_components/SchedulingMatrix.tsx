@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { CalendarDays, BookOpen, Plus, X, Check, Loader2, Search } from 'lucide-react'
 import { compareNatural } from '@/lib/utils/natural-sort'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -60,6 +61,13 @@ export default function SchedulingMatrix({
   const [selectedPathwayId, setSelectedPathwayId] = useState<string>(initialPathways[0]?.id ?? '')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    title: string
+    description: string
+    onConfirm: () => void
+  }>({ open: false, title: '', description: '', onConfirm: () => {} })
+
   // Mobile specific state
   const [isMobileSidebarExpanded, setIsMobileSidebarExpanded] = useState(false)
 
@@ -71,8 +79,9 @@ export default function SchedulingMatrix({
       if (!res.ok) throw new Error('Failed to refresh')
       const data = await res.json()
       setPathways(data.data?.pathways ?? data.pathways ?? [])
-    } catch {
-      // Silent — data will be stale but user already saw the toast
+    } catch (err) {
+      console.error('[SchedulingMatrix] Failed to refresh pathways:', err)
+      toast.error('Failed to refresh scheduling data')
     }
   }, [])
 
@@ -132,35 +141,42 @@ export default function SchedulingMatrix({
       }
       toast.success('Course assigned to term')
       await refetchPathways()
-    } catch (err: any) {
-      toast.error(err.message ?? 'Failed to assign course')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to assign course'
+      toast.error(message)
     } finally {
       setActionLoading(null)
     }
   }
 
   const handleRemove = async (termId: string, courseId: string) => {
-    const confirmed = window.confirm('Remove this course from the term? This cannot be undone.')
-    if (!confirmed) return
-
-    const key = `${termId}-${courseId}`
-    setActionLoading(key)
-    try {
-      const res = await fetch(
-        `/api/staff/academic/scheduling?termId=${termId}&courseId=${courseId}`,
-        { method: 'DELETE' }
-      )
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
-        throw new Error(errData.error ?? 'Failed to remove assignment')
-      }
-      toast.success('Course removed from term')
-      await refetchPathways()
-    } catch (err: any) {
-      toast.error(err.message ?? 'Failed to remove assignment')
-    } finally {
-      setActionLoading(null)
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Remove course from term?',
+      description: 'This cannot be undone.',
+      onConfirm: async () => {
+        setConfirmDialog((d) => ({ ...d, open: false }))
+        const key = `${termId}-${courseId}`
+        setActionLoading(key)
+        try {
+          const res = await fetch(
+            `/api/staff/academic/scheduling?termId=${termId}&courseId=${courseId}`,
+            { method: 'DELETE' }
+          )
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}))
+            throw new Error(errData.error ?? 'Failed to remove assignment')
+          }
+          toast.success('Course removed from term')
+          await refetchPathways()
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'Failed to remove assignment'
+          toast.error(message)
+        } finally {
+          setActionLoading(null)
+        }
+      },
+    })
   }
 
   const handleCellClick = (termId: string, courseId: string) => {
@@ -232,7 +248,7 @@ export default function SchedulingMatrix({
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
-                      <th className="sticky left-0 z-20 w-[180px] min-w-[180px] border-r border-slate-200 bg-slate-50 px-4 py-5 text-left text-[11px] font-black tracking-wider text-slate-500 uppercase shadow-[2px_0_5px_rgba(0,0,0,0.05)] dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
+                      <th className="sticky left-0 z-20 w-45 min-w-45 border-r border-slate-200 bg-slate-50 px-4 py-5 text-left text-[11px] font-black tracking-wider text-slate-500 uppercase shadow-[2px_0_5px_rgba(0,0,0,0.05)] dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
                         <div className="flex items-center gap-2">
                           <BookOpen className="text-aerojet-sky h-3.5 w-3.5" />
                           Course
@@ -241,7 +257,7 @@ export default function SchedulingMatrix({
                       {termColumns.map((term) => (
                         <th
                           key={term.id}
-                          className="min-w-[120px] border-r border-slate-200 px-4 py-5 text-center dark:border-slate-800"
+                          className="min-w-30 border-r border-slate-200 px-4 py-5 text-center dark:border-slate-800"
                         >
                           <div className="flex flex-col items-center gap-1">
                             <span className="text-aerojet-blue text-sm font-bold dark:text-slate-100">
@@ -261,7 +277,7 @@ export default function SchedulingMatrix({
                         key={course.id}
                         className="group border-b border-slate-100 transition-all duration-150 ease-out hover:bg-white/80 dark:border-slate-800/50 dark:hover:bg-slate-800/40"
                       >
-                        <td className="sticky left-0 z-10 w-[180px] border-r border-slate-200 bg-white px-4 py-3 shadow-[2px_0_5px_rgba(0,0,0,0.05)] transition-all duration-150 ease-out group-hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:group-hover:bg-slate-800/40">
+                        <td className="sticky left-0 z-10 w-45 border-r border-slate-200 bg-white px-4 py-3 shadow-[2px_0_5px_rgba(0,0,0,0.05)] transition-all duration-150 ease-out group-hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:group-hover:bg-slate-800/40">
                           <div className="space-y-0.5">
                             <div
                               className="text-aerojet-blue truncate text-xs leading-tight font-bold dark:text-slate-100"
@@ -291,7 +307,7 @@ export default function SchedulingMatrix({
                                     ? `Remove ${course.code} from Year ${term.yearNumber} Sem ${term.semesterNumber}`
                                     : `Assign ${course.code} to Year ${term.yearNumber} Sem ${term.semesterNumber}`
                                 }
-                                className={`flex h-full min-h-[56px] w-full items-center justify-center transition-all ${actionLoading && actionLoading !== key ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} ${isAssigned ? 'hover:bg-red-50 dark:hover:bg-red-900/10' : 'hover:bg-blue-50/50 dark:hover:bg-blue-900/10'}`}
+                                className={`flex h-full min-h-14 w-full items-center justify-center transition-all ${actionLoading && actionLoading !== key ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} ${isAssigned ? 'hover:bg-red-50 dark:hover:bg-red-900/10' : 'hover:bg-blue-50/50 dark:hover:bg-blue-900/10'}`}
                               >
                                 {isCellLoading ? (
                                   <Loader2 className="text-aerojet-sky h-5 w-5 animate-spin" />
@@ -312,7 +328,7 @@ export default function SchedulingMatrix({
                   </tbody>
                   <tfoot>
                     <tr className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
-                      <td className="sticky left-0 z-10 w-[180px] border-r border-slate-200 bg-slate-50 px-4 py-4 text-[10px] font-black tracking-wider text-slate-500 uppercase shadow-[2px_0_5px_rgba(0,0,0,0.05)] dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
+                      <td className="sticky left-0 z-10 w-45 border-r border-slate-200 bg-slate-50 px-4 py-4 text-[10px] font-black tracking-wider text-slate-500 uppercase shadow-[2px_0_5px_rgba(0,0,0,0.05)] dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
                         Total courses
                       </td>
                       {termColumns.map((term) => (
@@ -320,7 +336,7 @@ export default function SchedulingMatrix({
                           key={term.id}
                           className="border-r border-slate-200 px-4 py-4 text-center dark:border-slate-800"
                         >
-                          <span className="bg-aerojet-blue inline-flex min-w-[28px] items-center justify-center rounded-lg px-2 py-1 text-xs font-bold text-white">
+                          <span className="bg-aerojet-blue inline-flex min-w-7 items-center justify-center rounded-lg px-2 py-1 text-xs font-bold text-white">
                             {termCounts[term.id] ?? 0}
                           </span>
                         </td>
@@ -358,7 +374,7 @@ export default function SchedulingMatrix({
                   <thead>
                     <tr className="bg-slate-50/50 dark:bg-slate-900/80">
                       <th
-                        className={`sticky left-0 z-20 border-r border-slate-100 bg-white px-2 py-4 text-center shadow-[4px_0_8px_rgba(0,0,0,0.04)] transition-all duration-300 dark:border-slate-800 dark:bg-slate-900 ${isMobileSidebarExpanded ? 'w-[160px]' : 'w-[65px]'}`}
+                        className={`sticky left-0 z-20 border-r border-slate-100 bg-white px-2 py-4 text-center shadow-[4px_0_8px_rgba(0,0,0,0.04)] transition-all duration-300 dark:border-slate-800 dark:bg-slate-900 ${isMobileSidebarExpanded ? 'w-40' : 'w-16.25'}`}
                       >
                         <div className="flex flex-col items-center gap-1">
                           <BookOpen className="text-aerojet-sky h-3.5 w-3.5" />
@@ -370,7 +386,7 @@ export default function SchedulingMatrix({
                       {termColumns.map((term) => (
                         <th
                           key={term.id}
-                          className="min-w-[85px] border-r border-slate-50 px-2 py-3 text-center dark:border-slate-800"
+                          className="min-w-21.25 border-r border-slate-50 px-2 py-3 text-center dark:border-slate-800"
                         >
                           <div className="flex flex-col items-center">
                             <span className="text-aerojet-blue text-[10px] font-black dark:text-slate-100">
@@ -379,7 +395,7 @@ export default function SchedulingMatrix({
                             <span className="text-[9px] font-bold text-slate-400">
                               S{term.semesterNumber}
                             </span>
-                            <div className="mt-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-100 px-1 text-[8px] font-black dark:bg-slate-800">
+                            <div className="mt-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-100 px-1 text-[8px] font-black dark:bg-slate-800">
                               {termCounts[term.id] ?? 0}
                             </div>
                           </div>
@@ -394,7 +410,7 @@ export default function SchedulingMatrix({
                         className="border-b border-slate-50 dark:border-slate-800/50"
                       >
                         <td
-                          className={`sticky left-0 z-10 border-r border-slate-100 bg-white p-2 shadow-[4px_0_8px_rgba(0,0,0,0.04)] transition-all duration-300 dark:border-slate-800 dark:bg-slate-900 ${isMobileSidebarExpanded ? 'w-[160px]' : 'w-[65px]'}`}
+                          className={`sticky left-0 z-10 border-r border-slate-100 bg-white p-2 shadow-[4px_0_8px_rgba(0,0,0,0.04)] transition-all duration-300 dark:border-slate-800 dark:bg-slate-900 ${isMobileSidebarExpanded ? 'w-40' : 'w-16.25'}`}
                         >
                           <div className="flex flex-col items-center space-y-1">
                             {isMobileSidebarExpanded && (
@@ -427,7 +443,7 @@ export default function SchedulingMatrix({
                                     ? `Remove ${course.code} from Y${term.yearNumber} S${term.semesterNumber}`
                                     : `Assign ${course.code} to Y${term.yearNumber} S${term.semesterNumber}`
                                 }
-                                className="flex h-[72px] w-full items-center justify-center active:bg-slate-50 dark:active:bg-slate-800"
+                                className="flex h-18 w-full items-center justify-center active:bg-slate-50 dark:active:bg-slate-800"
                               >
                                 {isCellLoading ? (
                                   <Loader2 className="text-aerojet-sky h-4 w-4 animate-spin" />
@@ -463,6 +479,17 @@ export default function SchedulingMatrix({
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog((d) => ({ ...d, open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmLabel="Remove"
+        cancelLabel="Cancel"
+        variant="destructive"
+        onConfirm={confirmDialog.onConfirm}
+      />
     </div>
   )
 }

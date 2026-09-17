@@ -7,6 +7,7 @@ import { ChevronLeft, Calendar as CalendarIcon, Users } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Attendance Tracker | Instructor Portal' }
+export const dynamic = 'force-dynamic'
 
 export default async function Page({
   params,
@@ -26,17 +27,17 @@ export default async function Page({
   const enrollments = classData.course.enrollments || []
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <Link
             href="/instructor/classes"
-            className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
+            className="hover:text-aerojet-sky mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors dark:text-slate-300"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
             Back to My Classes
           </Link>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             Attendance Tracker
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -45,7 +46,7 @@ export default async function Page({
         </div>
 
         <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <CalendarIcon className="h-4 w-4 text-aerojet-sky" />
+          <CalendarIcon className="text-aerojet-sky h-4 w-4" />
           <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
             {format(targetDate, 'MMMM d, yyyy')}
           </span>
@@ -66,7 +67,7 @@ export default async function Page({
                 const record = records.find((r) => r.userId === enrollment.userId)
                 return (
                   <AttendanceRow
-                    key={enrollment.userId}
+                    key={enrollment.id}
                     classId={id}
                     userId={enrollment.userId}
                     studentName={`${enrollment.user.profile?.firstName} ${enrollment.user.profile?.lastName}`}

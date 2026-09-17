@@ -20,23 +20,16 @@ import {
   ListOrdered,
   Image as ImageIcon,
   Music,
-  Video,
-  Type,
-  Loader2,
-  Quote,
-  Palette,
-  AlignCenter,
-  AlignLeft,
-  AlignRight,
-  Baseline,
-  Pilcrow,
-  CaseSensitive,
-  ArrowUpDown,
-  Eye,
   PenLine,
   Undo,
   Redo,
-  MoreHorizontal,
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Pilcrow,
+  CaseSensitive,
+  Quote,
+  Palette,
 } from 'lucide-react'
 import { UploadButton } from '@/lib/uploads/uploadthing'
 import { toast } from 'sonner'
@@ -518,10 +511,9 @@ export default function NewsMarkdownEditor({
           <UploadButton
             endpoint="newsImage"
             onClientUploadComplete={(res) => {
-              console.log('Image upload response:', res)
               if (res && res[0]) {
-                const url =
-                  (res[0] as any).ufsUrl || res[0].url || (res[0] as any).serverData?.fileUrl
+                const file = res[0]
+                const url = file.ufsUrl ?? file.url ?? file.serverData?.fileUrl
                 editor.chain().focus().setImage({ src: url }).run()
                 toast.success(`Image inserted!`)
                 setActiveMediaTab(null)
@@ -569,18 +561,16 @@ export default function NewsMarkdownEditor({
           <UploadButton
             endpoint="newsAudio"
             onClientUploadComplete={(res) => {
-              console.log('Audio upload response:', res)
               if (res && res[0]) {
-                const url =
-                  (res[0] as any).ufsUrl || res[0].url || (res[0] as any).serverData?.fileUrl
+                const file = res[0]
+                const url = file.ufsUrl ?? file.url ?? file.serverData?.fileUrl
                 editor.chain().focus().setAudio({ src: url }).run()
                 toast.success(`Audio inserted!`)
                 setActiveMediaTab(null)
               }
             }}
-            onUploadError={(error: Error) => {
-              console.error('Audio upload error:', error)
-              toast.error(`Upload failed: ${error.message}`)
+            onUploadError={(_error: Error) => {
+              toast.error('Audio upload failed')
             }}
             appearance={{
               button:

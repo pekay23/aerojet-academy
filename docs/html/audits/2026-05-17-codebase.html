@@ -14,11 +14,13 @@
   <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
     <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,13 +28,412 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Codebase Audit Report — 2026-05-17</h1>
-  <p class="he-deck"><p>Comprehensive audit across 4 phases: Auth &amp; Security, Database &amp; Data Layer, Frontend &amp; Performance, Testing &amp; Docs.</p>
-</p>
+  <p class="he-deck">Comprehensive audit across 4 phases: Auth &amp; Security, Database &amp; Data Layer, Frontend &amp; Performance, Testing &amp; Docs.</p>
 </header>
-<blockquote>Status (2026-05-20): All CRITICAL/HIGH findings resolved or intentionally
+<blockquote class="he-pull">
+<p><strong>Status (2026-05-20)</strong>: All CRITICAL/HIGH findings resolved or intentionally
 deferred. See <a href="./2026-05-20-comprehensive.html">2026-05-20-comprehensive.md</a>
 for the full cross-check with file:line evidence and the consolidated
-verification log. Original findings preserved below for historical context.</blockquote><section class="he-section" id="critical"><div class="he-section__num">01 · CRITICAL</div><h2 class="he-section__title">CRITICAL</h2><h3 id="sec-1-plaintext-passwords-returned-in-api-responses">SEC-1: Plaintext Passwords Returned in API Responses</h3><code>app/api/staff/users/[id]/reset-password/route.ts:65</code> — returns <code>tempPassword</code> in JSON response body alongside sending it via email<code>app/api/staff/students/import/route.ts:712-724</code> — bulk import returns array of all generated passwords in responseFix: Remove <code>tempPassword</code> from response bodies. Email is the only safe delivery channel.<h3 id="sec-2-ical-calendar-endpoint-has-no-authentication">SEC-2: iCal Calendar Endpoint Has No Authentication</h3><code>app/api/calendar/[userId]/route.ts</code> — accepts a bare <code>userId</code> URL param, returns full <code>.ics</code> with exam bookings, enrollments, classes — no session checkFix: Add <code>getAuthSession()</code> check, verify <code>session.user.id === userId</code> or caller is staff. For public calendar apps, use a per-user signed token with expiry.<h3 id="sec-3-unsubscribe-endpoint-user-enumeration-unauthenticated-modification">SEC-3: Unsubscribe Endpoint — User Enumeration + Unauthenticated Modification</h3><code>app/api/unsubscribe/route.ts:26</code> — returns 404 "Email not found" (leaks existence), no rate limiting, no authFix: Return uniform success response regardless. Add rate limiting. Require signed unsubscribe token.<h3 id="sec-4-get-apistaffusers-missing-role-check">SEC-4: <code>GET /api/staff/users</code> Missing Role Check</h3><code>app/api/staff/users/route.ts:6-8</code> — only checks <code>if (!session)</code>, any authenticated user (student, applicant) can list all users with emails, phones, rolesFix: Add <code>if (!['ADMIN','SUPER_ADMIN','STAFF','EXAMINER'].includes(session.user.role)) return apiUnauthorized()</code><h3 id="sec-5-2fa-setup-accepts-client-supplied-secret">SEC-5: 2FA Setup Accepts Client-Supplied Secret</h3><code>app/api/auth/2fa/verify/route.ts:17-28</code> — accepts <code>secret</code> from request body and saves it directly. Attacker can register 2FA with a secret they control.Fix: Store generated secret server-side temporarily (session or short-lived DB record) during the <code>generate</code> step. <code>verify</code> retrieves it server-side — never accept from client.<h3 id="db-1-admincalendarevent-missing-from-softdeletemodels">DB-1: <code>AdminCalendarEvent</code> Missing from <code>SOFT_DELETE_MODELS</code></h3>Has <code>deletedAt</code> field and <code>@@index([deletedAt])</code> but not in <code>lib/prisma/soft-delete-extension.ts</code>All queries return soft-deleted records to usersFix: Add <code>'AdminCalendarEvent'</code> to <code>SOFT_DELETE_MODELS</code><h3 id="db-2-queryrawunsafe-with-select-bypasses-soft-delete">DB-2: <code>$queryRawUnsafe</code> with <code>SELECT *</code> Bypasses Soft-Delete</h3><code>lib/pools/withdraw.ts:37</code>, <code>lib/pools/join.ts:136</code> — raw SQL bypasses soft-delete extensionFix: Replace with Prisma model queries + separate advisory lock via <code>$executeRaw</code><h3 id="ci-1-ci-workflow-uses-node-20-packagejson-requires-node-24">CI-1: CI Workflow Uses Node 20, package.json Requires Node 24</h3><code>.github/workflows/ci.yml</code> specifies <code>node-version: '20'</code>, engines field says <code>"node": "24.x"</code>Fix: Update CI to <code>node-version: '24'</code><h3 id="ci-2-no-envexample-file-exists">CI-2: No <code>.env.example</code> File Exists</h3><code>docs/guides/setup.md</code> references <code>cp .env.example .env.local</code> but file doesn't existFix: Create <code>.env.example</code> with placeholder values for all required env vars<h3 id="ci-3-supabase-env-var-name-mismatch">CI-3: Supabase Env Var Name Mismatch</h3><code>.env</code> uses <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code><code>lib/supabase/client.ts</code> reads <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>Two separate Supabase client stacks (<code>lib/supabase/</code> and <code>utils/supabase/</code>) use different var namesFix: Standardize on one name across all files<section class="he-section" id="high"><div class="he-section__num">02 · HIGH</div><h2 class="he-section__title">HIGH</h2><h3 id="sec-6-in-memory-rate-limiting-ineffective-in-production">SEC-6: In-Memory Rate Limiting — Ineffective in Production</h3><code>lib/security/rate-limit.ts</code> uses <code>Map<string, ...></code> — resets on cold start, per-instance in serverlessFix: Replace with Redis-backed rate limiter (e.g., <code>@upstash/ratelimit</code>)<h3 id="sec-7-no-totp-replay-protection">SEC-7: No TOTP Replay Protection</h3><code>lib/auth/totp.ts</code> allows the same code to be used multiple times within the 90-second windowFix: Store last-used TOTP counter in user record, reject codes with counter <= last-used<h3 id="sec-8-passkey-login-missing-challenge-user-validation">SEC-8: Passkey Login Missing Challenge-User Validation</h3><code>app/api/auth/passkey/login-verify/route.ts:44-48</code> — doesn't verify <code>storedChallenge.userId === passkey.userId</code>Fix: Add user-ID consistency check before <code>verifyAuthenticationResponse</code><h3 id="sec-9-requireuserverification-false-in-passkey-flows">SEC-9: <code>requireUserVerification: false</code> in Passkey Flows</h3>Both <code>register-verify</code> and <code>login-verify</code> set this — allows authenticators without biometric/PINFix: Set <code>requireUserVerification: true</code><h3 id="sec-10-token-based-auto-login-skips-account-status-check">SEC-10: Token-Based Auto-Login Skips Account Status Check</h3><code>lib/auth/auth-options.ts</code> — <code>pk_</code> token login path doesn't check <code>user.status</code> (suspended/archived users can authenticate)Fix: Add status check in token-based login branch<h3 id="sec-11-no-rate-limiting-on-resend-verification-endpoint">SEC-11: No Rate Limiting on <code>resend-verification</code> Endpoint</h3><code>app/api/auth/resend-verification/route.ts</code> — unlimited verification emails, leaks whether email is verifiedFix: Add IP-based rate limiting, return uniform response<h3 id="sec-12-password-resetemail-verifypasskey-bridge-share-single-token-field">SEC-12: Password Reset/Email Verify/Passkey Bridge Share Single Token Field</h3>All use <code>verifyToken</code>/<code>verifyTokenExpires</code> — requesting one invalidates the othersFix: Separate token storage by purpose (distinct fields or a <code>PendingToken</code> table)<h3 id="sec-13-no-root-middlewarets-route-protection-relies-entirely-on-per-route-checks">SEC-13: No Root <code>middleware.ts</code> — Route Protection Relies Entirely on Per-Route Checks</h3>A missed <code>getAuthSession()</code> call (e.g., SEC-4) is a silent vulnerabilityFix: Implement root middleware enforcing role checks for <code>/api/staff/**</code>, <code>/api/student/**</code>, etc.<h3 id="db-3-n1-query-pattern-in-payment-deadlines-cron">DB-3: N+1 Query Pattern in <code>payment-deadlines</code> Cron</h3><code>app/api/cron/payment-deadlines/route.ts:30-141</code> — O(events x bookings) DB round-tripsFix: Batch idempotency check, batch writes<h3 id="db-4-n1-unbounded-fetch-in-milestone-reminders-cron">DB-4: N+1 + Unbounded Fetch in <code>milestone-reminders</code> Cron</h3><code>app/api/cron/milestone-reminders/route.ts</code> — no <code>take</code> limit, 2 queries per milestoneFix: Add pagination, batch the idempotency check<h3 id="db-5-unbounded-findmany-in-reconcilepending">DB-5: Unbounded <code>findMany</code> in <code>reconcile/pending</code></h3><code>app/api/staff/finance/reconcile/pending/route.ts:10</code> — no <code>take</code> or paginationFix: Add <code>take: 100</code> and paginate<h3 id="db-6-staffpayments-hardcoded-take-50-without-pagination">DB-6: <code>staff/payments</code> Hardcoded <code>take: 50</code> Without Pagination</h3><code>app/api/staff/payments/route.ts:46</code> — computes <code>total</code> but caps at 50 with no skip/pageFix: Add proper pagination params like <code>payments/pending/route.ts</code><h3 id="db-7-rls-per-query-transaction-overhead">DB-7: RLS Per-Query Transaction Overhead</h3><code>lib/prisma/rls-hardened.ts:155-164</code> — every non-admin read opens a separate transactionNon-admin pages firing 5-10 concurrent reads open 5-10 transactions each with 2x <code>set_config</code> round-tripsFix: Batch RLS setup per-request rather than per-query<h3 id="fe-1-yoychartstsx-imports-recharts-directly-200kb">FE-1: <code>YoYCharts.tsx</code> Imports Recharts Directly (~200KB)</h3><code>app/staff/reports/_components/YoYCharts.tsx</code> — no <code>next/dynamic</code> wrapperFix: Wrap with <code>dynamic(() => import('./YoYCharts'), { ssr: false })</code><h3 id="fe-2-richtexteditortsx-imports-tiptap-directly-150kb">FE-2: <code>RichTextEditor.tsx</code> Imports TipTap Directly (~150KB)</h3><code>components/shared/RichTextEditor.tsx</code> — any consumer gets TipTap in their bundleFix: Consumers should import via <code>next/dynamic</code><h3 id="fe-3-staffsettingspagetsx-imports-emailpreviewspage-directly">FE-3: <code>staff/settings/page.tsx</code> Imports <code>EmailPreviewsPage</code> Directly</h3>Bundles full email preview client component regardless of active tabFix: Use <code>next/dynamic</code> for tab content<h3 id="fe-4-55-route-segments-missing-loadingtsx">FE-4: ~55 Route Segments Missing <code>loading.tsx</code></h3>Entire <code>(auth)</code> portal: 7 pages, zero loading.tsx filesEntire <code>instructor</code> portal sub-routes: 12 pages, only root loading exists20+ <code>(public)</code> pages including all course detail pages12+ <code>staff</code> pages including attendance, classrooms, ATA chaptersExaminer root, multiple student pagesSee Phase 3 report for complete list<h3 id="fe-5-sequential-awaits-in-critical-pages">FE-5: Sequential Awaits in Critical Pages</h3><code>app/applicant/exam-only/top-up/page.tsx</code> — 8-9 sequential DB queries<code>app/applicant/pathway/page.tsx</code> — 5+ sequential queries (core enrollment flow)<code>app/applicant/wallet-top-up/page.tsx</code> — 5 independent awaits<code>app/instructor/layout.tsx</code> — sequential when staff layout correctly uses <code>Promise.all</code><code>app/staff/classes/[id]/roster/page.tsx</code> — 4 sequential queriesFix: Group independent queries with <code>Promise.all</code><h3 id="test-1-zero-tests-for-critical-business-logic">TEST-1: Zero Tests for Critical Business Logic</h3><code>lib/pools/operations.ts</code> (joinPool — race-condition critical), <code>lib/auth/auth-options.ts</code> (credentials provider, 2FA), payment approval handler, wallet charge, encryption, email service, all 13 cron handlers, all server actions, internal exam engine, admissions state machineFix: Prioritize tests for financial and auth paths<h3 id="test-2-integration-tests-only-assert-on-static-fixtures">TEST-2: "Integration Tests" Only Assert on Static Fixtures</h3><code>tests/integration/api/payment-approval.test.ts</code>, <code>pool-join.test.ts</code>, <code>tests/integration/workflows/*.test.ts</code>Test fixture shape, not behaviorFix: Replace with actual handler/workflow tests<h3 id="test-3-e2e-tests-depend-on-seeded-credentials">TEST-3: E2E Tests Depend on Seeded Credentials</h3>Tests use <code>student@aerojet-academy.com / REDACTED_PASSWORD</code> etc. — fail if seed not run<code>pool-joining.test.ts</code> has soft skip that silently passes with no poolFix: Add setup/teardown, remove silent skips<h3 id="test-4-deploy-stagingyml-runs-migrations-after-deployment">TEST-4: deploy-staging.yml Runs Migrations After Deployment</h3>App deploys with new code but old schema — window of failuresFix: Run migration step before deployment<section class="he-section" id="medium"><div class="he-section__num">03 · MEDIUM</div><h2 class="he-section__title">MEDIUM</h2><h3 id="sec-14-csp-header-only-has-frame-ancestors-self">SEC-14: CSP Header Only Has <code>frame-ancestors 'self'</code></h3><code>next.config.ts:41-44</code> — no <code>default-src</code>, <code>script-src</code>, <code>connect-src</code>, etc.Fix: Implement full CSP policy<h3 id="sec-15-examiner-role-inconsistency">SEC-15: <code>EXAMINER</code> Role Inconsistency</h3><code>isStaff()</code> excludes EXAMINER, <code>requireStaff()</code> includes it, RLS bypass includes itSQL <code>is_admin_or_staff()</code> function only has SUPER_ADMIN/ADMIN/STAFF — EXAMINER bypasses app-level RLS but SQL RLS still restricts, causing write failuresFix: Align EXAMINER treatment across all helpers and SQL<h3 id="sec-16-staff-can-hard-delete-users">SEC-16: STAFF Can Hard-Delete Users</h3><code>app/api/staff/users/[id]/route.ts:215-267</code> — only requires STAFF for <code>?hard=true</code>Fix: Require ADMIN/SUPER_ADMIN for hard delete<h3 id="sec-17-mestudy-pathway-accessible-by-any-role">SEC-17: <code>me/study-pathway</code> Accessible by Any Role</h3>Any authenticated user can create a <code>studentProfile</code> for themselvesFix: Restrict to APPLICANT/STUDENT roles<h3 id="sec-18-totp-comparison-not-timing-safe">SEC-18: TOTP Comparison Not Timing-Safe</h3><code>lib/auth/totp.ts:49</code> — uses <code>===</code> instead of <code>crypto.timingSafeEqual</code>Fix: Use <code>crypto.timingSafeEqual(Buffer.from(generated), Buffer.from(token))</code><h3 id="sec-19-scryptsync-blocks-event-loop-in-encryption-module">SEC-19: <code>scryptSync</code> Blocks Event Loop in Encryption Module</h3><code>lib/security/encryption.ts:12</code> — called on every encrypt/decryptFix: Cache derived key or use pre-derived master key<h3 id="sec-20-resend-webhook-processes-unverified-payloads">SEC-20: Resend Webhook Processes Unverified Payloads</h3><code>app/api/webhooks/resend/route.ts:39-42</code> — if <code>RESEND_WEBHOOK_SECRET</code> not set, processes payload without signature checkFix: Reject with 503 if secret not configured<h3 id="sec-21-superadmin-blocked-from-email-preview">SEC-21: SUPER_ADMIN Blocked from Email Preview</h3><code>app/api/staff/email-preview/route.ts:9</code> — checks for ADMIN and STAFF onlyFix: Include SUPER_ADMIN in role check<h3 id="sec-22-role-field-in-updateuserschema-allows-staff-to-change-roles-via-patch">SEC-22: <code>role</code> Field in <code>updateUserSchema</code> Allows STAFF to Change Roles via PATCH</h3><code>app/api/staff/users/[id]/route.ts:42</code> — bypasses dedicated <code>/role</code> endpoint permission checkFix: Remove <code>role</code> from <code>updateUserSchema</code><h3 id="sec-23-unbounded-financial-export">SEC-23: Unbounded Financial Export</h3><code>app/api/staff/export/route.ts:55-68</code> — no <code>take</code> limit on <code>walletTransaction.findMany</code>Fix: Add limit, date-range params, or streaming<h3 id="db-8-10-models-use-bare-string-for-status-instead-of-enums">DB-8: 10 Models Use Bare <code>String</code> for Status Instead of Enums</h3><code>AttendanceRecord</code>, <code>PoolWaitlist</code>, <code>Invoice</code>, <code>FullTimeEnrollment</code>, <code>OjtPeriod</code>, <code>PaymentMilestone</code>, <code>TuitionRun</code>, <code>TuitionBooking</code>, <code>ExamBundle</code>, <code>Referral</code>Fix: Define proper enums<h3 id="db-9-serializeprisma-fails-on-bigintbytes">DB-9: <code>serializePrisma</code> Fails on BigInt/Bytes</h3><code>Passkey.counter</code> is BigInt, <code>Passkey.publicKey</code> is Bytes — <code>JSON.stringify</code> will throw on BigIntFix: Add <code>typeof data === 'bigint'</code> and <code>Buffer.isBuffer(data)</code> branches<h3 id="db-10-academicyearisactive-and-semesterisactive-lack-indexes">DB-10: <code>AcademicYear.isActive</code> and <code>Semester.isActive</code> Lack Indexes</h3>Commonly filtered fields with no <code>@@index</code>Fix: Add <code>@@index([isActive])</code><h3 id="db-11-instructor-excluded-from-rls-bypass">DB-11: <code>INSTRUCTOR</code> Excluded from RLS Bypass</h3>Pays per-query transaction overhead unnecessarilyFix: Add to bypass list (align with SQL policies)<h3 id="db-12-production-pool-max-20-dangerous-in-serverless">DB-12: Production Pool <code>max: 20</code> Dangerous in Serverless</h3><code>lib/prisma/db-base.ts:57-64</code> — 10 concurrent Lambda instances x 20 connections = 200, exhausts Neon limitsFix: Reduce pool size, ensure pooler URL is used<h3 id="fe-6-appstaffacademicschedulingpagetsx-client-component-fetching-in-useeffect">FE-6: <code>app/staff/academic/scheduling/page.tsx</code> — Client Component Fetching in useEffect</h3>Should be server component with client sub-componentFix: Restructure as RSC<h3 id="fe-7-no-server-only-guards-on-server-only-lib-files">FE-7: No <code>server-only</code> Guards on Server-Only Lib Files</h3>Accidental client import of server code won't error at import timeFix: Add <code>import 'server-only'</code> to <code>lib/prisma/</code>, <code>lib/auth/</code>, <code>lib/email/</code><h3 id="fe-8-examiner-layout-missing-idmain-content">FE-8: Examiner Layout Missing <code>id="main-content"</code></h3>Breaks skip-navigation links for screen readersFix: Add <code>id="main-content"</code> to examiner <code><main></code><h3 id="doc-1-system-overviewmd-shows-wrong-nextjsreact-versions">DOC-1: <code>system-overview.md</code> Shows Wrong Next.js/React Versions</h3>Says "Next.js 15, React 18" — actual is Next.js 16.2.4, React 19.2.4Fix: Update<h3 id="doc-2-securitymdknown-issuesmd-wrong-otplib-version">DOC-2: SECURITY.md/known-issues.md Wrong otplib Version</h3>Documents v5 API, actual installed version is v13Fix: Update to match reality (v13, custom TOTP for verification)<h3 id="doc-3-deploymentmd-missingextra-cron-jobs">DOC-3: DEPLOYMENT.md Missing/Extra Cron Jobs</h3>Missing: <code>/api/cron/scheduled-reports</code> (in vercel.json)Exist but unregistered in vercel.json: <code>aptitude-reminders</code>, <code>interview-reminders</code>, <code>modular-deadlines</code>Fix: Sync docs, vercel.json, and route files<h3 id="doc-4-tailwind-v4-with-v3-style-config">DOC-4: Tailwind v4 with v3-Style Config</h3><code>tailwind.config.ts</code> uses deprecated v3 API (<code>Config</code> type, <code>theme.extend</code>, <code>plugins</code>)Fix: Migrate to v4 CSS-first <code>@theme</code> config or verify compat shim works<h3 id="doc-5-bun-vs-npm-inconsistency">DOC-5: bun vs npm Inconsistency</h3><code>SETUP.md</code> says <code>bun install</code>, CI uses <code>npm ci</code>, pre-push runs <code>npm test</code>Fix: Standardize on bun throughout<h3 id="doc-6-vitest-coverage-misses-appapi-routes">DOC-6: Vitest Coverage Misses <code>app/api/</code> Routes</h3>Config only includes <code>lib/**</code>, <code>hooks/**</code>, <code>components/**</code>Fix: Add <code>app/api/**</code> to coverage includes<section class="he-section" id="low"><div class="he-section__num">04 · LOW</div><h2 class="he-section__title">LOW</h2><h3 id="sec-24-duplicate-requireauth-in-two-files">SEC-24: Duplicate <code>requireAuth</code> in Two Files</h3><code>lib/auth/helpers.ts:177</code> and <code>lib/auth/session.ts:13</code>Fix: Consolidate, remove <code>session.ts</code> or re-export<h3 id="sec-25-duplicate-rate-limit-map-in-helpersts">SEC-25: Duplicate Rate-Limit Map in <code>helpers.ts</code></h3><code>lib/auth/helpers.ts:5-13</code> — separate from <code>lib/security/rate-limit.ts</code>, no cleanupFix: Import from canonical location<h3 id="sec-26-verify-email-response-leaks-rolestatusregistrationcode">SEC-26: <code>verify-email</code> Response Leaks Role/Status/RegistrationCode</h3><code>app/api/auth/verify-email/route.ts:46-53</code>Fix: Return only <code>{ success: true }</code><h3 id="sec-27-lan-ips-in-alloweddevorigins-without-dev-guard">SEC-27: LAN IPs in <code>allowedDevOrigins</code> Without Dev Guard</h3><code>next.config.ts:18</code> — unconditionally presentFix: Wrap in <code>NODE_ENV === 'development'</code> check<h3 id="db-13-rls-optimizedts-is-dead-code">DB-13: <code>rls-optimized.ts</code> is Dead Code</h3>No-op file with comment "kept only to satisfy stale bundler caches"Fix: Delete<h3 id="db-14-uniform-300s-cache-ttl-not-differentiated">DB-14: Uniform 300s Cache TTL Not Differentiated</h3><code>lib/cached-queries.ts</code> — academic structure data changes yearly, 300s is too shortFix: Use 3600+ for academic data, keep 300 for operational data<h3 id="db-15-seed-data-bugs">DB-15: Seed Data Bugs</h3><code>ProgrammeYear.semesters</code> JSON: <code>startDate === endDate</code>Seed re-runs unconditionally overwrite admin-configured bank detailsHardcoded passwords for non-admin roles (no env var fallback)Fix: Fix dates, use <code>update: {}</code> for bank settings, add env var fallbacks<h3 id="fe-9-sparse-aria-label-coverage">FE-9: Sparse <code>aria-label</code> Coverage</h3>83 occurrences across 200+ client component files — icon-only buttons likely unlabelledFix: Audit interactive elements for accessible names<h3 id="fe-10-all-auth-pages-missing-export-const-metadata">FE-10: All <code>(auth)</code> Pages Missing <code>export const metadata</code></h3><code>'use client'</code> pages can't export metadata — shows root layout title onlyFix: Use server wrapper or parent segment <code>generateMetadata</code><h3 id="test-5-zustand-unused-remove-from-dependencies">TEST-5: <code>zustand</code> Unused — Remove from Dependencies</h3>Zero imports anywhere in the codebaseFix: <code>bun remove zustand</code><h3 id="test-6-stripe-only-used-in-stub-consider-moving-to-devdependencies">TEST-6: <code>stripe</code> Only Used in Stub — Consider Moving to devDependencies</h3><code>lib/payments/stripe.ts</code> is all <code>console.log</code> stubsFix: Move to devDependencies until implemented<h3 id="test-7-postgres-package-misplaced-in-production-dependencies">TEST-7: <code>postgres</code> Package Misplaced in Production Dependencies</h3>Only used in <code>scripts/apply-rls.ts</code> (dev utility)Fix: Move to devDependencies<h3 id="test-8-prisma-mock-in-testssetupts-missing-many-production-models">TEST-8: Prisma Mock in <code>tests/setup.ts</code> Missing Many Production Models</h3>Missing: <code>emailTemplate</code>, <code>enrollment</code>, <code>course</code>, <code>class</code>, <code>grade</code>, <code>attendanceRecord</code>, <code>examEvent</code>, <code>examBooking</code>, many moreFix: Expand mock or use auto-mock pattern<h3 id="test-9-ci-build-missing-required-env-vars">TEST-9: CI Build Missing Required Env Vars</h3><code>lib/env.ts</code> Zod schema requires vars not set in CI workflowFix: Document all required CI secrets in workflow file<section class="he-section" id="summary"><div class="he-section__num">05 · Summary</div><h2 class="he-section__title">Summary</h2>SeverityCountTop ConcernsCRITICAL11Auth bypasses (SEC-1 to SEC-5), soft-delete gaps (DB-1/2), CI config (CI-1 to CI-3)HIGH22Rate limiting, TOTP replay, passkey validation, N+1 queries, missing loading.tsx, zero test coverage on critical pathsMEDIUM25CSP, role inconsistencies, unbounded queries, status enums, serialization, bundle size, doc inaccuraciesLOW13Dead code, cache tuning, seed bugs, accessibility, unused deps<h3 id="recommended-priority-order">Recommended Priority Order</h3>Immediate: SEC-1 through SEC-5 (auth/security criticals)This week: SEC-6 through SEC-13 (high security), DB-1/DB-2 (data integrity)This sprint: FE-4/FE-5 (loading.tsx + Promise.all), TEST-1 (critical path tests)Next sprint: Medium findings, doc updates, bundle optimization
+verification log. Original findings preserved below for historical context.</p>
+</blockquote>
+<hr />
+<section class="he-section" id="critical"><div class="he-section__num">01 · CRITICAL</div><h2 class="he-section__title">CRITICAL</h2></section>
+<h3 id="sec-1-plaintext-passwords-returned-in-api-responses">SEC-1: Plaintext Passwords Returned in API Responses</h3>
+<ul>
+<li><code>app/api/staff/users/[id]/reset-password/route.ts:65</code> — returns <code>tempPassword</code> in JSON response body alongside sending it via email</li>
+<li><code>app/api/staff/students/import/route.ts:712-724</code> — bulk import returns array of all generated passwords in response</li>
+<li><strong>Fix</strong>: Remove <code>tempPassword</code> from response bodies. Email is the only safe delivery channel.</li>
+</ul>
+<h3 id="sec-2-ical-calendar-endpoint-has-no-authentication">SEC-2: iCal Calendar Endpoint Has No Authentication</h3>
+<ul>
+<li><code>app/api/calendar/[userId]/route.ts</code> — accepts a bare <code>userId</code> URL param, returns full <code>.ics</code> with exam bookings, enrollments, classes — no session check</li>
+<li><strong>Fix</strong>: Add <code>getAuthSession()</code> check, verify <code>session.user.id === userId</code> or caller is staff. For public calendar apps, use a per-user signed token with expiry.</li>
+</ul>
+<h3 id="sec-3-unsubscribe-endpoint-user-enumeration-unauthenticated-modification">SEC-3: Unsubscribe Endpoint — User Enumeration + Unauthenticated Modification</h3>
+<ul>
+<li><code>app/api/unsubscribe/route.ts:26</code> — returns 404 &quot;Email not found&quot; (leaks existence), no rate limiting, no auth</li>
+<li><strong>Fix</strong>: Return uniform success response regardless. Add rate limiting. Require signed unsubscribe token.</li>
+</ul>
+<h3 id="sec-4-get-apistaffusers-missing-role-check">SEC-4: <code>GET /api/staff/users</code> Missing Role Check</h3>
+<ul>
+<li><code>app/api/staff/users/route.ts:6-8</code> — only checks <code>if (!session)</code>, any authenticated user (student, applicant) can list all users with emails, phones, roles</li>
+<li><strong>Fix</strong>: Add <code>if (!['ADMIN','SUPER_ADMIN','STAFF','EXAMINER'].includes(session.user.role)) return apiUnauthorized()</code></li>
+</ul>
+<h3 id="sec-5-2fa-setup-accepts-client-supplied-secret">SEC-5: 2FA Setup Accepts Client-Supplied Secret</h3>
+<ul>
+<li><code>app/api/auth/2fa/verify/route.ts:17-28</code> — accepts <code>secret</code> from request body and saves it directly. Attacker can register 2FA with a secret they control.</li>
+<li><strong>Fix</strong>: Store generated secret server-side temporarily (session or short-lived DB record) during the <code>generate</code> step. <code>verify</code> retrieves it server-side — never accept from client.</li>
+</ul>
+<h3 id="db-1-admincalendarevent-missing-from-softdeletemodels">DB-1: <code>AdminCalendarEvent</code> Missing from <code>SOFT_DELETE_MODELS</code></h3>
+<ul>
+<li>Has <code>deletedAt</code> field and <code>@@index([deletedAt])</code> but not in <code>lib/prisma/soft-delete-extension.ts</code></li>
+<li>All queries return soft-deleted records to users</li>
+<li><strong>Fix</strong>: Add <code>'AdminCalendarEvent'</code> to <code>SOFT_DELETE_MODELS</code></li>
+</ul>
+<h3 id="db-2-queryrawunsafe-with-select-bypasses-soft-delete">DB-2: <code>$queryRawUnsafe</code> with <code>SELECT *</code> Bypasses Soft-Delete</h3>
+<ul>
+<li><code>lib/pools/withdraw.ts:37</code>, <code>lib/pools/join.ts:136</code> — raw SQL bypasses soft-delete extension</li>
+<li><strong>Fix</strong>: Replace with Prisma model queries + separate advisory lock via <code>$executeRaw</code></li>
+</ul>
+<h3 id="ci-1-ci-workflow-uses-node-20-packagejson-requires-node-24">CI-1: CI Workflow Uses Node 20, package.json Requires Node 24</h3>
+<ul>
+<li><code>.github/workflows/ci.yml</code> specifies <code>node-version: '20'</code>, engines field says <code>&quot;node&quot;: &quot;24.x&quot;</code></li>
+<li><strong>Fix</strong>: Update CI to <code>node-version: '24'</code></li>
+</ul>
+<h3 id="ci-2-no-envexample-file-exists">CI-2: No <code>.env.example</code> File Exists</h3>
+<ul>
+<li><code>docs/guides/setup.md</code> references <code>cp .env.example .env.local</code> but file doesn't exist</li>
+<li><strong>Fix</strong>: Create <code>.env.example</code> with placeholder values for all required env vars</li>
+</ul>
+<h3 id="ci-3-supabase-env-var-name-mismatch">CI-3: Supabase Env Var Name Mismatch</h3>
+<ul>
+<li><code>.env</code> uses <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code></li>
+<li><code>lib/supabase/client.ts</code> reads <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
+<li>Two separate Supabase client stacks (<code>lib/supabase/</code> and <code>utils/supabase/</code>) use different var names</li>
+<li><strong>Fix</strong>: Standardize on one name across all files</li>
+</ul>
+<hr />
+<section class="he-section" id="high"><div class="he-section__num">02 · HIGH</div><h2 class="he-section__title">HIGH</h2></section>
+<h3 id="sec-6-in-memory-rate-limiting-ineffective-in-production">SEC-6: In-Memory Rate Limiting — Ineffective in Production</h3>
+<ul>
+<li><code>lib/security/rate-limit.ts</code> uses <code>Map&lt;string, ...&gt;</code> — resets on cold start, per-instance in serverless</li>
+<li><strong>Fix</strong>: Replace with Redis-backed rate limiter (e.g., <code>@upstash/ratelimit</code>)</li>
+</ul>
+<h3 id="sec-7-no-totp-replay-protection">SEC-7: No TOTP Replay Protection</h3>
+<ul>
+<li><code>lib/auth/totp.ts</code> allows the same code to be used multiple times within the 90-second window</li>
+<li><strong>Fix</strong>: Store last-used TOTP counter in user record, reject codes with counter &lt;= last-used</li>
+</ul>
+<h3 id="sec-8-passkey-login-missing-challenge-user-validation">SEC-8: Passkey Login Missing Challenge-User Validation</h3>
+<ul>
+<li><code>app/api/auth/passkey/login-verify/route.ts:44-48</code> — doesn't verify <code>storedChallenge.userId === passkey.userId</code></li>
+<li><strong>Fix</strong>: Add user-ID consistency check before <code>verifyAuthenticationResponse</code></li>
+</ul>
+<h3 id="sec-9-requireuserverification-false-in-passkey-flows">SEC-9: <code>requireUserVerification: false</code> in Passkey Flows</h3>
+<ul>
+<li>Both <code>register-verify</code> and <code>login-verify</code> set this — allows authenticators without biometric/PIN</li>
+<li><strong>Fix</strong>: Set <code>requireUserVerification: true</code></li>
+</ul>
+<h3 id="sec-10-token-based-auto-login-skips-account-status-check">SEC-10: Token-Based Auto-Login Skips Account Status Check</h3>
+<ul>
+<li><code>lib/auth/auth-options.ts</code> — <code>pk_</code> token login path doesn't check <code>user.status</code> (suspended/archived users can authenticate)</li>
+<li><strong>Fix</strong>: Add status check in token-based login branch</li>
+</ul>
+<h3 id="sec-11-no-rate-limiting-on-resend-verification-endpoint">SEC-11: No Rate Limiting on <code>resend-verification</code> Endpoint</h3>
+<ul>
+<li><code>app/api/auth/resend-verification/route.ts</code> — unlimited verification emails, leaks whether email is verified</li>
+<li><strong>Fix</strong>: Add IP-based rate limiting, return uniform response</li>
+</ul>
+<h3 id="sec-12-password-resetemail-verifypasskey-bridge-share-single-token-field">SEC-12: Password Reset/Email Verify/Passkey Bridge Share Single Token Field</h3>
+<ul>
+<li>All use <code>verifyToken</code>/<code>verifyTokenExpires</code> — requesting one invalidates the others</li>
+<li><strong>Fix</strong>: Separate token storage by purpose (distinct fields or a <code>PendingToken</code> table)</li>
+</ul>
+<h3 id="sec-13-no-root-middlewarets-route-protection-relies-entirely-on-per-route-checks">SEC-13: No Root <code>middleware.ts</code> — Route Protection Relies Entirely on Per-Route Checks</h3>
+<ul>
+<li>A missed <code>getAuthSession()</code> call (e.g., SEC-4) is a silent vulnerability</li>
+<li><strong>Fix</strong>: Implement root middleware enforcing role checks for <code>/api/staff/**</code>, <code>/api/student/**</code>, etc.</li>
+</ul>
+<h3 id="db-3-n1-query-pattern-in-payment-deadlines-cron">DB-3: N+1 Query Pattern in <code>payment-deadlines</code> Cron</h3>
+<ul>
+<li><code>app/api/cron/payment-deadlines/route.ts:30-141</code> — O(events x bookings) DB round-trips</li>
+<li><strong>Fix</strong>: Batch idempotency check, batch writes</li>
+</ul>
+<h3 id="db-4-n1-unbounded-fetch-in-milestone-reminders-cron">DB-4: N+1 + Unbounded Fetch in <code>milestone-reminders</code> Cron</h3>
+<ul>
+<li><code>app/api/cron/milestone-reminders/route.ts</code> — no <code>take</code> limit, 2 queries per milestone</li>
+<li><strong>Fix</strong>: Add pagination, batch the idempotency check</li>
+</ul>
+<h3 id="db-5-unbounded-findmany-in-reconcilepending">DB-5: Unbounded <code>findMany</code> in <code>reconcile/pending</code></h3>
+<ul>
+<li><code>app/api/staff/finance/reconcile/pending/route.ts:10</code> — no <code>take</code> or pagination</li>
+<li><strong>Fix</strong>: Add <code>take: 100</code> and paginate</li>
+</ul>
+<h3 id="db-6-staffpayments-hardcoded-take-50-without-pagination">DB-6: <code>staff/payments</code> Hardcoded <code>take: 50</code> Without Pagination</h3>
+<ul>
+<li><code>app/api/staff/payments/route.ts:46</code> — computes <code>total</code> but caps at 50 with no skip/page</li>
+<li><strong>Fix</strong>: Add proper pagination params like <code>payments/pending/route.ts</code></li>
+</ul>
+<h3 id="db-7-rls-per-query-transaction-overhead">DB-7: RLS Per-Query Transaction Overhead</h3>
+<ul>
+<li><code>lib/prisma/rls-hardened.ts:155-164</code> — every non-admin read opens a separate transaction</li>
+<li>Non-admin pages firing 5-10 concurrent reads open 5-10 transactions each with 2x <code>set_config</code> round-trips</li>
+<li><strong>Fix</strong>: Batch RLS setup per-request rather than per-query</li>
+</ul>
+<h3 id="fe-1-yoychartstsx-imports-recharts-directly-200kb">FE-1: <code>YoYCharts.tsx</code> Imports Recharts Directly (~200KB)</h3>
+<ul>
+<li><code>app/staff/reports/_components/YoYCharts.tsx</code> — no <code>next/dynamic</code> wrapper</li>
+<li><strong>Fix</strong>: Wrap with <code>dynamic(() =&gt; import('./YoYCharts'), { ssr: false })</code></li>
+</ul>
+<h3 id="fe-2-richtexteditortsx-imports-tiptap-directly-150kb">FE-2: <code>RichTextEditor.tsx</code> Imports TipTap Directly (~150KB)</h3>
+<ul>
+<li><code>components/shared/RichTextEditor.tsx</code> — any consumer gets TipTap in their bundle</li>
+<li><strong>Fix</strong>: Consumers should import via <code>next/dynamic</code></li>
+</ul>
+<h3 id="fe-3-staffsettingspagetsx-imports-emailpreviewspage-directly">FE-3: <code>staff/settings/page.tsx</code> Imports <code>EmailPreviewsPage</code> Directly</h3>
+<ul>
+<li>Bundles full email preview client component regardless of active tab</li>
+<li><strong>Fix</strong>: Use <code>next/dynamic</code> for tab content</li>
+</ul>
+<h3 id="fe-4-55-route-segments-missing-loadingtsx">FE-4: ~55 Route Segments Missing <code>loading.tsx</code></h3>
+<ul>
+<li><strong>Entire <code>(auth)</code> portal</strong>: 7 pages, zero loading.tsx files</li>
+<li><strong>Entire <code>instructor</code> portal sub-routes</strong>: 12 pages, only root loading exists</li>
+<li><strong>20+ <code>(public)</code> pages</strong> including all course detail pages</li>
+<li><strong>12+ <code>staff</code> pages</strong> including attendance, classrooms, ATA chapters</li>
+<li><strong>Examiner root</strong>, multiple student pages</li>
+<li>See Phase 3 report for complete list</li>
+</ul>
+<h3 id="fe-5-sequential-awaits-in-critical-pages">FE-5: Sequential Awaits in Critical Pages</h3>
+<ul>
+<li><code>app/applicant/exam-only/top-up/page.tsx</code> — 8-9 sequential DB queries</li>
+<li><code>app/applicant/pathway/page.tsx</code> — 5+ sequential queries (core enrollment flow)</li>
+<li><code>app/applicant/wallet-top-up/page.tsx</code> — 5 independent awaits</li>
+<li><code>app/instructor/layout.tsx</code> — sequential when staff layout correctly uses <code>Promise.all</code></li>
+<li><code>app/staff/classes/[id]/roster/page.tsx</code> — 4 sequential queries</li>
+<li><strong>Fix</strong>: Group independent queries with <code>Promise.all</code></li>
+</ul>
+<h3 id="test-1-zero-tests-for-critical-business-logic">TEST-1: Zero Tests for Critical Business Logic</h3>
+<ul>
+<li><code>lib/pools/operations.ts</code> (joinPool — race-condition critical), <code>lib/auth/auth-options.ts</code> (credentials provider, 2FA), payment approval handler, wallet charge, encryption, email service, all 13 cron handlers, all server actions, internal exam engine, admissions state machine</li>
+<li><strong>Fix</strong>: Prioritize tests for financial and auth paths</li>
+</ul>
+<h3 id="test-2-quotintegration-testsquot-only-assert-on-static-fixtures">TEST-2: &quot;Integration Tests&quot; Only Assert on Static Fixtures</h3>
+<ul>
+<li><code>tests/integration/api/payment-approval.test.ts</code>, <code>pool-join.test.ts</code>, <code>tests/integration/workflows/*.test.ts</code></li>
+<li>Test fixture shape, not behavior</li>
+<li><strong>Fix</strong>: Replace with actual handler/workflow tests</li>
+</ul>
+<h3 id="test-3-e2e-tests-depend-on-seeded-credentials">TEST-3: E2E Tests Depend on Seeded Credentials</h3>
+<ul>
+<li>Tests use <code>student@aerojet-academy.com / REDACTED_PASSWORD</code> etc. — fail if seed not run</li>
+<li><code>pool-joining.test.ts</code> has soft skip that silently passes with no pool</li>
+<li><strong>Fix</strong>: Add setup/teardown, remove silent skips</li>
+</ul>
+<h3 id="test-4-deploy-stagingyml-runs-migrations-after-deployment">TEST-4: deploy-staging.yml Runs Migrations After Deployment</h3>
+<ul>
+<li>App deploys with new code but old schema — window of failures</li>
+<li><strong>Fix</strong>: Run migration step before deployment</li>
+</ul>
+<hr />
+<section class="he-section" id="medium"><div class="he-section__num">03 · MEDIUM</div><h2 class="he-section__title">MEDIUM</h2></section>
+<h3 id="sec-14-csp-header-only-has-frame-ancestors-self">SEC-14: CSP Header Only Has <code>frame-ancestors 'self'</code></h3>
+<ul>
+<li><code>next.config.ts:41-44</code> — no <code>default-src</code>, <code>script-src</code>, <code>connect-src</code>, etc.</li>
+<li><strong>Fix</strong>: Implement full CSP policy</li>
+</ul>
+<h3 id="sec-15-examiner-role-inconsistency">SEC-15: <code>EXAMINER</code> Role Inconsistency</h3>
+<ul>
+<li><code>isStaff()</code> excludes EXAMINER, <code>requireStaff()</code> includes it, RLS bypass includes it</li>
+<li>SQL <code>is_admin_or_staff()</code> function only has SUPER_ADMIN/ADMIN/STAFF — EXAMINER bypasses app-level RLS but SQL RLS still restricts, causing write failures</li>
+<li><strong>Fix</strong>: Align EXAMINER treatment across all helpers and SQL</li>
+</ul>
+<h3 id="sec-16-staff-can-hard-delete-users">SEC-16: STAFF Can Hard-Delete Users</h3>
+<ul>
+<li><code>app/api/staff/users/[id]/route.ts:215-267</code> — only requires STAFF for <code>?hard=true</code></li>
+<li><strong>Fix</strong>: Require ADMIN/SUPER_ADMIN for hard delete</li>
+</ul>
+<h3 id="sec-17-mestudy-pathway-accessible-by-any-role">SEC-17: <code>me/study-pathway</code> Accessible by Any Role</h3>
+<ul>
+<li>Any authenticated user can create a <code>studentProfile</code> for themselves</li>
+<li><strong>Fix</strong>: Restrict to APPLICANT/STUDENT roles</li>
+</ul>
+<h3 id="sec-18-totp-comparison-not-timing-safe">SEC-18: TOTP Comparison Not Timing-Safe</h3>
+<ul>
+<li><code>lib/auth/totp.ts:49</code> — uses <code>===</code> instead of <code>crypto.timingSafeEqual</code></li>
+<li><strong>Fix</strong>: Use <code>crypto.timingSafeEqual(Buffer.from(generated), Buffer.from(token))</code></li>
+</ul>
+<h3 id="sec-19-scryptsync-blocks-event-loop-in-encryption-module">SEC-19: <code>scryptSync</code> Blocks Event Loop in Encryption Module</h3>
+<ul>
+<li><code>lib/security/encryption.ts:12</code> — called on every encrypt/decrypt</li>
+<li><strong>Fix</strong>: Cache derived key or use pre-derived master key</li>
+</ul>
+<h3 id="sec-20-resend-webhook-processes-unverified-payloads">SEC-20: Resend Webhook Processes Unverified Payloads</h3>
+<ul>
+<li><code>app/api/webhooks/resend/route.ts:39-42</code> — if <code>RESEND_WEBHOOK_SECRET</code> not set, processes payload without signature check</li>
+<li><strong>Fix</strong>: Reject with 503 if secret not configured</li>
+</ul>
+<h3 id="sec-21-superadmin-blocked-from-email-preview">SEC-21: SUPER_ADMIN Blocked from Email Preview</h3>
+<ul>
+<li><code>app/api/staff/email-preview/route.ts:9</code> — checks for ADMIN and STAFF only</li>
+<li><strong>Fix</strong>: Include SUPER_ADMIN in role check</li>
+</ul>
+<h3 id="sec-22-role-field-in-updateuserschema-allows-staff-to-change-roles-via-patch">SEC-22: <code>role</code> Field in <code>updateUserSchema</code> Allows STAFF to Change Roles via PATCH</h3>
+<ul>
+<li><code>app/api/staff/users/[id]/route.ts:42</code> — bypasses dedicated <code>/role</code> endpoint permission check</li>
+<li><strong>Fix</strong>: Remove <code>role</code> from <code>updateUserSchema</code></li>
+</ul>
+<h3 id="sec-23-unbounded-financial-export">SEC-23: Unbounded Financial Export</h3>
+<ul>
+<li><code>app/api/staff/export/route.ts:55-68</code> — no <code>take</code> limit on <code>walletTransaction.findMany</code></li>
+<li><strong>Fix</strong>: Add limit, date-range params, or streaming</li>
+</ul>
+<h3 id="db-8-10-models-use-bare-string-for-status-instead-of-enums">DB-8: 10 Models Use Bare <code>String</code> for Status Instead of Enums</h3>
+<ul>
+<li><code>AttendanceRecord</code>, <code>PoolWaitlist</code>, <code>Invoice</code>, <code>FullTimeEnrollment</code>, <code>OjtPeriod</code>, <code>PaymentMilestone</code>, <code>TuitionRun</code>, <code>TuitionBooking</code>, <code>ExamBundle</code>, <code>Referral</code></li>
+<li><strong>Fix</strong>: Define proper enums</li>
+</ul>
+<h3 id="db-9-serializeprisma-fails-on-bigintbytes">DB-9: <code>serializePrisma</code> Fails on BigInt/Bytes</h3>
+<ul>
+<li><code>Passkey.counter</code> is BigInt, <code>Passkey.publicKey</code> is Bytes — <code>JSON.stringify</code> will throw on BigInt</li>
+<li><strong>Fix</strong>: Add <code>typeof data === 'bigint'</code> and <code>Buffer.isBuffer(data)</code> branches</li>
+</ul>
+<h3 id="db-10-academicyearisactive-and-semesterisactive-lack-indexes">DB-10: <code>AcademicYear.isActive</code> and <code>Semester.isActive</code> Lack Indexes</h3>
+<ul>
+<li>Commonly filtered fields with no <code>@@index</code></li>
+<li><strong>Fix</strong>: Add <code>@@index([isActive])</code></li>
+</ul>
+<h3 id="db-11-instructor-excluded-from-rls-bypass">DB-11: <code>INSTRUCTOR</code> Excluded from RLS Bypass</h3>
+<ul>
+<li>Pays per-query transaction overhead unnecessarily</li>
+<li><strong>Fix</strong>: Add to bypass list (align with SQL policies)</li>
+</ul>
+<h3 id="db-12-production-pool-max-20-dangerous-in-serverless">DB-12: Production Pool <code>max: 20</code> Dangerous in Serverless</h3>
+<ul>
+<li><code>lib/prisma/db-base.ts:57-64</code> — 10 concurrent Lambda instances x 20 connections = 200, exhausts Neon limits</li>
+<li><strong>Fix</strong>: Reduce pool size, ensure pooler URL is used</li>
+</ul>
+<h3 id="fe-6-appstaffacademicschedulingpagetsx-client-component-fetching-in-useeffect">FE-6: <code>app/staff/academic/scheduling/page.tsx</code> — Client Component Fetching in useEffect</h3>
+<ul>
+<li>Should be server component with client sub-component</li>
+<li><strong>Fix</strong>: Restructure as RSC</li>
+</ul>
+<h3 id="fe-7-no-server-only-guards-on-server-only-lib-files">FE-7: No <code>server-only</code> Guards on Server-Only Lib Files</h3>
+<ul>
+<li>Accidental client import of server code won't error at import time</li>
+<li><strong>Fix</strong>: Add <code>import 'server-only'</code> to <code>lib/prisma/</code>, <code>lib/auth/</code>, <code>lib/email/</code></li>
+</ul>
+<h3 id="fe-8-examiner-layout-missing-idquotmain-contentquot">FE-8: Examiner Layout Missing <code>id=&quot;main-content&quot;</code></h3>
+<ul>
+<li>Breaks skip-navigation links for screen readers</li>
+<li><strong>Fix</strong>: Add <code>id=&quot;main-content&quot;</code> to examiner <code>&lt;main&gt;</code></li>
+</ul>
+<h3 id="doc-1-system-overviewmd-shows-wrong-nextjsreact-versions">DOC-1: <code>system-overview.md</code> Shows Wrong Next.js/React Versions</h3>
+<ul>
+<li>Says &quot;Next.js 15, React 18&quot; — actual is Next.js 16.2.4, React 19.2.4</li>
+<li><strong>Fix</strong>: Update</li>
+</ul>
+<h3 id="doc-2-securitymdknown-issuesmd-wrong-otplib-version">DOC-2: SECURITY.md/known-issues.md Wrong otplib Version</h3>
+<ul>
+<li>Documents v5 API, actual installed version is v13</li>
+<li><strong>Fix</strong>: Update to match reality (v13, custom TOTP for verification)</li>
+</ul>
+<h3 id="doc-3-deploymentmd-missingextra-cron-jobs">DOC-3: DEPLOYMENT.md Missing/Extra Cron Jobs</h3>
+<ul>
+<li>Missing: <code>/api/cron/scheduled-reports</code> (in vercel.json)</li>
+<li>Exist but unregistered in vercel.json: <code>aptitude-reminders</code>, <code>interview-reminders</code>, <code>modular-deadlines</code></li>
+<li><strong>Fix</strong>: Sync docs, vercel.json, and route files</li>
+</ul>
+<h3 id="doc-4-tailwind-v4-with-v3-style-config">DOC-4: Tailwind v4 with v3-Style Config</h3>
+<ul>
+<li><code>tailwind.config.ts</code> uses deprecated v3 API (<code>Config</code> type, <code>theme.extend</code>, <code>plugins</code>)</li>
+<li><strong>Fix</strong>: Migrate to v4 CSS-first <code>@theme</code> config or verify compat shim works</li>
+</ul>
+<h3 id="doc-5-bun-vs-npm-inconsistency">DOC-5: bun vs npm Inconsistency</h3>
+<ul>
+<li><code>SETUP.md</code> says <code>bun install</code>, CI uses <code>npm ci</code>, pre-push runs <code>npm test</code></li>
+<li><strong>Fix</strong>: Standardize on bun throughout</li>
+</ul>
+<h3 id="doc-6-vitest-coverage-misses-appapi-routes">DOC-6: Vitest Coverage Misses <code>app/api/</code> Routes</h3>
+<ul>
+<li>Config only includes <code>lib/**</code>, <code>hooks/**</code>, <code>components/**</code></li>
+<li><strong>Fix</strong>: Add <code>app/api/**</code> to coverage includes</li>
+</ul>
+<hr />
+<section class="he-section" id="low"><div class="he-section__num">04 · LOW</div><h2 class="he-section__title">LOW</h2></section>
+<h3 id="sec-24-duplicate-requireauth-in-two-files">SEC-24: Duplicate <code>requireAuth</code> in Two Files</h3>
+<ul>
+<li><code>lib/auth/helpers.ts:177</code> and <code>lib/auth/session.ts:13</code></li>
+<li><strong>Fix</strong>: Consolidate, remove <code>session.ts</code> or re-export</li>
+</ul>
+<h3 id="sec-25-duplicate-rate-limit-map-in-helpersts">SEC-25: Duplicate Rate-Limit Map in <code>helpers.ts</code></h3>
+<ul>
+<li><code>lib/auth/helpers.ts:5-13</code> — separate from <code>lib/security/rate-limit.ts</code>, no cleanup</li>
+<li><strong>Fix</strong>: Import from canonical location</li>
+</ul>
+<h3 id="sec-26-verify-email-response-leaks-rolestatusregistrationcode">SEC-26: <code>verify-email</code> Response Leaks Role/Status/RegistrationCode</h3>
+<ul>
+<li><code>app/api/auth/verify-email/route.ts:46-53</code></li>
+<li><strong>Fix</strong>: Return only <code>{ success: true }</code></li>
+</ul>
+<h3 id="sec-27-lan-ips-in-alloweddevorigins-without-dev-guard">SEC-27: LAN IPs in <code>allowedDevOrigins</code> Without Dev Guard</h3>
+<ul>
+<li><code>next.config.ts:18</code> — unconditionally present</li>
+<li><strong>Fix</strong>: Wrap in <code>NODE_ENV === 'development'</code> check</li>
+</ul>
+<h3 id="db-13-rls-optimizedts-is-dead-code">DB-13: <code>rls-optimized.ts</code> is Dead Code</h3>
+<ul>
+<li>No-op file with comment &quot;kept only to satisfy stale bundler caches&quot;</li>
+<li><strong>Fix</strong>: Delete</li>
+</ul>
+<h3 id="db-14-uniform-300s-cache-ttl-not-differentiated">DB-14: Uniform 300s Cache TTL Not Differentiated</h3>
+<ul>
+<li><code>lib/cached-queries.ts</code> — academic structure data changes yearly, 300s is too short</li>
+<li><strong>Fix</strong>: Use 3600+ for academic data, keep 300 for operational data</li>
+</ul>
+<h3 id="db-15-seed-data-bugs">DB-15: Seed Data Bugs</h3>
+<ul>
+<li><code>ProgrammeYear.semesters</code> JSON: <code>startDate === endDate</code></li>
+<li>Seed re-runs unconditionally overwrite admin-configured bank details</li>
+<li>Hardcoded passwords for non-admin roles (no env var fallback)</li>
+<li><strong>Fix</strong>: Fix dates, use <code>update: {}</code> for bank settings, add env var fallbacks</li>
+</ul>
+<h3 id="fe-9-sparse-aria-label-coverage">FE-9: Sparse <code>aria-label</code> Coverage</h3>
+<ul>
+<li>83 occurrences across 200+ client component files — icon-only buttons likely unlabelled</li>
+<li><strong>Fix</strong>: Audit interactive elements for accessible names</li>
+</ul>
+<h3 id="fe-10-all-auth-pages-missing-export-const-metadata">FE-10: All <code>(auth)</code> Pages Missing <code>export const metadata</code></h3>
+<ul>
+<li><code>'use client'</code> pages can't export metadata — shows root layout title only</li>
+<li><strong>Fix</strong>: Use server wrapper or parent segment <code>generateMetadata</code></li>
+</ul>
+<h3 id="test-5-zustand-unused-remove-from-dependencies">TEST-5: <code>zustand</code> Unused — Remove from Dependencies</h3>
+<ul>
+<li>Zero imports anywhere in the codebase</li>
+<li><strong>Fix</strong>: <code>bun remove zustand</code></li>
+</ul>
+<h3 id="test-6-stripe-only-used-in-stub-consider-moving-to-devdependencies">TEST-6: <code>stripe</code> Only Used in Stub — Consider Moving to devDependencies</h3>
+<ul>
+<li><code>lib/payments/stripe.ts</code> is all <code>console.log</code> stubs</li>
+<li><strong>Fix</strong>: Move to devDependencies until implemented</li>
+</ul>
+<h3 id="test-7-postgres-package-misplaced-in-production-dependencies">TEST-7: <code>postgres</code> Package Misplaced in Production Dependencies</h3>
+<ul>
+<li>Only used in <code>scripts/apply-rls.ts</code> (dev utility)</li>
+<li><strong>Fix</strong>: Move to devDependencies</li>
+</ul>
+<h3 id="test-8-prisma-mock-in-testssetupts-missing-many-production-models">TEST-8: Prisma Mock in <code>tests/setup.ts</code> Missing Many Production Models</h3>
+<ul>
+<li>Missing: <code>emailTemplate</code>, <code>enrollment</code>, <code>course</code>, <code>class</code>, <code>grade</code>, <code>attendanceRecord</code>, <code>examEvent</code>, <code>examBooking</code>, many more</li>
+<li><strong>Fix</strong>: Expand mock or use auto-mock pattern</li>
+</ul>
+<h3 id="test-9-ci-build-missing-required-env-vars">TEST-9: CI Build Missing Required Env Vars</h3>
+<ul>
+<li><code>lib/env.ts</code> Zod schema requires vars not set in CI workflow</li>
+<li><strong>Fix</strong>: Document all required CI secrets in workflow file</li>
+</ul>
+<hr />
+<section class="he-section" id="summary"><div class="he-section__num">05 · Summary</div><h2 class="he-section__title">Summary</h2></section>
+<table>
+<thead>
+<tr><th>Severity</th><th>Count</th><th>Top Concerns</th></tr>
+</thead>
+<tbody>
+<tr><td>CRITICAL</td><td>11</td><td>Auth bypasses (SEC-1 to SEC-5), soft-delete gaps (DB-1/2), CI config (CI-1 to CI-3)</td></tr>
+<tr><td>HIGH</td><td>22</td><td>Rate limiting, TOTP replay, passkey validation, N+1 queries, missing loading.tsx, zero test coverage on critical paths</td></tr>
+<tr><td>MEDIUM</td><td>25</td><td>CSP, role inconsistencies, unbounded queries, status enums, serialization, bundle size, doc inaccuracies</td></tr>
+<tr><td>LOW</td><td>13</td><td>Dead code, cache tuning, seed bugs, accessibility, unused deps</td></tr>
+</tbody>
+</table>
+<h3 id="recommended-priority-order">Recommended Priority Order</h3>
+<ol>
+<li><strong>Immediate</strong>: SEC-1 through SEC-5 (auth/security criticals)</li>
+<li><strong>This week</strong>: SEC-6 through SEC-13 (high security), DB-1/DB-2 (data integrity)</li>
+<li><strong>This sprint</strong>: FE-4/FE-5 (loading.tsx + Promise.all), TEST-1 (critical path tests)</li>
+<li><strong>Next sprint</strong>: Medium findings, doc updates, bundle optimization</li>
+</ol>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -118,7 +519,7 @@ verification log. Original findings preserved below for historical context.</blo
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

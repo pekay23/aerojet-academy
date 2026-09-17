@@ -1,10 +1,32 @@
 import { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { requireExaminer } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { ShieldCheck, CheckCircle2, Clock, FileText, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns'
 
 export const metadata: Metadata = { title: 'Compliance | Examiner Portal' }
+
+const getCachedComplianceCounts = (examinerId: string) =>
+  unstable_cache(
+    async () => {
+      const [completedSittings, upcomingSittings] = await Promise.all([
+        prismaUnfiltered.examSitting.count({
+          where: { examinerId, status: 'COMPLETED' },
+        }),
+        prismaUnfiltered.examSitting.count({
+          where: {
+            examinerId,
+            status: { in: ['DRAFT', 'OPEN', 'SCHEDULED', 'CONFIRMED'] },
+            startTime: { gte: new Date() },
+          },
+        }),
+      ])
+      return { completedSittings, upcomingSittings }
+    },
+    ['examiner-compliance-counts', examinerId],
+    { revalidate: 300, tags: ['examiner-compliance', `examiner-${examinerId}`] }
+  )()
 
 export default async function ExaminerCompliancePage() {
   const user = await requireExaminer()
@@ -30,18 +52,7 @@ export default async function ExaminerCompliancePage() {
     )
   }
 
-  const [completedSittings, upcomingSittings] = await Promise.all([
-    prismaUnfiltered.examSitting.count({
-      where: { examinerId: examiner.id, status: 'COMPLETED' },
-    }),
-    prismaUnfiltered.examSitting.count({
-      where: {
-        examinerId: examiner.id,
-        status: { in: ['DRAFT', 'OPEN', 'SCHEDULED', 'CONFIRMED'] },
-        startTime: { gte: new Date() },
-      },
-    }),
-  ])
+  const { completedSittings, upcomingSittings } = await getCachedComplianceCounts(examiner.id)
 
   const fullName = examiner.user.profile
     ? `${examiner.user.profile.firstName} ${examiner.user.profile.lastName}`
@@ -51,7 +62,7 @@ export default async function ExaminerCompliancePage() {
     { label: 'Status', value: examiner.isActive ? 'Active' : 'Inactive', icon: ShieldCheck, color: examiner.isActive ? 'text-emerald-600' : 'text-red-600' },
     { label: 'Completed Sessions', value: completedSittings.toString(), icon: CheckCircle2, color: 'text-blue-600' },
     { label: 'Upcoming Sessions', value: upcomingSittings.toString(), icon: Clock, color: 'text-amber-600' },
-    { label: 'Max Parallel Sittings', value: examiner.maxParallelSittings.toString(), icon: FileText, color: 'text-indigo-600' },
+    { label: 'Max Parallel Sittings', value: (examiner.maxParallelSittings ?? 0).toString(), icon: FileText, color: 'text-indigo-600' },
   ]
 
   return (

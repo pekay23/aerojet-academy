@@ -1,7 +1,7 @@
 'use client'
 
 import ChangePasswordForm from '@/components/shared/ChangePasswordForm'
-import { ShieldCheck, Lock, AlertCircle } from 'lucide-react'
+import { ShieldCheck, Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface ForcePasswordChangeProps {
@@ -13,7 +13,7 @@ export default function ForcePasswordChange({
   apiEndpoint = '/api/applicant/profile/change-password',
   portalName = 'Aerojet Academy',
 }: ForcePasswordChangeProps) {
-  const router = useRouter()
+  const _router = useRouter()
 
   const handleSuccess = () => {
     window.location.reload()

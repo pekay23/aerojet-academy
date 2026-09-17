@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aerojet Academy · Design System · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Design</p>
+  <h1 class="he-title">Aerojet Academy · Design System</h1>
+  <p class="he-deck">This document is the <strong>canonical reference</strong> — every value below is extracted directly from the running app, not paraphrased.</p>
+</header>
+<blockquote>
+<p>Source of truth for color tokens, fonts, sizes, spacing, and the visual
+language that holds the public site, the staff portal, and the design lab
+together. Mirrored as <code>docs/html/design-system.html</code> for browser-friendly
+browsing.</p>
+</blockquote>
+<p>This document is the <strong>canonical reference</strong> — every value below is
+extracted directly from the running app, not paraphrased.</p>
+<table>
+<thead>
+<tr><th>Source of truth</th><th>File</th></tr>
+</thead>
+<tbody>
+<tr><td>Color &amp; font CSS vars</td><td><code>app/globals.css</code></td></tr>
+<tr><td>Tailwind config</td><td><code>tailwind.config.ts</code></td></tr>
+<tr><td>shadcn/ui base</td><td><code>components.json</code> (<code>baseColor: slate</code>)</td></tr>
+<tr><td>shadcn/ui tokens</td><td><code>components/ui/*</code></td></tr>
+<tr><td>Public nav colors</td><td><code>components/layouts/PublicNav.tsx</code></td></tr>
+<tr><td>Font loading</td><td><code>app/layout.tsx</code> (Inter / Outfit / Playfair)</td></tr>
+<tr><td>Dark mode toggle</td><td><code>next-themes</code> (<code>app/providers.tsx</code>)</td></tr>
+<tr><td>Theme defaults (DB)</td><td><code>ThemeConfig</code> Prisma model</td></tr>
+<tr><td>Brand examples</td><td><code>app/(public)/_components/*.tsx</code></td></tr>
+<tr><td>Home variants</td><td><code>app/design-lab/variants/*.tsx</code></td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="1-brand-foundations"><div class="he-section__num">01 · 1 · Brand foundations</div><h2 class="he-section__title">1 · Brand foundations</h2></section>
+<h3 id="11-voice-amp-visual-language">1.1 Voice &amp; visual language</h3>
+<ul>
+<li><strong>Editorial / aviation-meets-luxury.</strong> Headings in a serif (Playfair) for
+the public site; a geometric sans (Outfit) for the design-lab and a more
+neutral sans (Inter) for body and portal UI.</li>
+<li><strong>Three canonical &quot;looks&quot; coexist in the repo</strong> — visible in
+<code>app/design-lab/variants/</code>:
+<ul>
+<li><strong>Variant A / B</strong> — dark, technical, sci-fi cockpit (navy + sky blue).</li>
+<li><strong>Variant C</strong> — editorial / newsprint (paper background, blue ink).</li>
+<li><strong>Variant D / E</strong> — modern flat marketing (white, big type, accent pills).</li>
+</ul>
+</li>
+<li>The <strong>public site</strong> is currently a Variant-C-style editorial layout
+(paper background, <code>text-aerojet-blue</code>, Playfair headings, <code>bg-paper</code>).</li>
+<li>The <strong>staff/student portals</strong> use a sidebar-based shadcn/ui layout on a
+near-white / near-black surface.</li>
+</ul>
+<h3 id="12-color-hex-cheat-sheet-for-designers">1.2 Color hex cheat-sheet (for designers)</h3>
+<table>
+<thead>
+<tr><th>Token</th><th>HSL</th><th>Hex</th><th>Role</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--aero-blue</code></td><td><code>213 100% 18%</code></td><td><code>#002a5c</code></td><td>Brand primary / headings on paper</td></tr>
+<tr><td><code>--aero-sky</code></td><td><code>210 82% 45%</code></td><td><code>#1f7ad6</code></td><td>Accent / interactive (light)</td></tr>
+<tr><td><code>--aero-light</code></td><td><code>204 65% 40%</code></td><td><code>#2e7eb3</code></td><td>Mid-blue hover / link state</td></tr>
+<tr><td><code>--aero-soft-blue</code></td><td><code>210 100% 40%</code></td><td><code>#0066ff</code></td><td>Focus ring / CTA hover</td></tr>
+<tr><td><code>--aero-slate</code></td><td><code>210 29% 24%</code></td><td><code>#2c3e50</code></td><td>Body / heading on light bg</td></tr>
+<tr><td><code>--aero-offwhite</code></td><td><code>0 0% 98%</code></td><td><code>#f9f9f9</code></td><td>Off-white surface</td></tr>
+<tr><td><code>--public-primary</code></td><td><code>211 100% 18%</code></td><td><code>#002347</code></td><td>Public nav / footer primary</td></tr>
+<tr><td><code>--public-secondary</code></td><td><code>212 82% 61%</code></td><td><code>#4993e4</code></td><td>Public nav CTA / accents</td></tr>
+<tr><td><code>--public-dark</code></td><td><code>216 34% 25%</code></td><td><code>#2f3e57</code></td><td>Footer text / dark surface</td></tr>
+<tr><td><code>bg-paper</code></td><td>—</td><td><code>#f7f3ec</code></td><td>Editorial page background</td></tr>
+<tr><td><code>bg-paper-dark</code></td><td>—</td><td><code>#efe8dc</code></td><td>Editorial card surface</td></tr>
+<tr><td><code>background-light</code></td><td>—</td><td><code>#f6f6f8</code></td><td>Dashboard light surface</td></tr>
+<tr><td><code>background-dark</code></td><td>—</td><td><code>#101622</code></td><td>Dashboard dark surface</td></tr>
+<tr><td>Sidebar bg (light)</td><td><code>222 47% 11%</code></td><td><code>#0f172a</code></td><td>Slate-900 dashboard chrome</td></tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ All brand blues were deliberately <strong>darkened from their HSL
+prototypes</strong> to meet WCAG AA 4.5:1 contrast against white. Comments in
+<code>app/globals.css</code> preserve the original light-mode values for reference.</p>
+</blockquote>
+<hr />
+<section class="he-section" id="2-color-tokens-tailwind-class-css-var-hsl"><div class="he-section__num">02 · 2 · Color tokens (Tailwind class → CSS var → HSL)</div><h2 class="he-section__title">2 · Color tokens (Tailwind class → CSS var → HSL)</h2></section>
+<h3 id="21-shadcnui-semantic-palette-light-dark">2.1 shadcn/ui semantic palette (light → dark)</h3>
+<p>These come from the <code>slate</code> base + a <code>dark</code> class on <code>&lt;html&gt;</code>, declared in
+<code>app/globals.css</code> and re-exported as Tailwind utilities via
+<code>tailwind.config.ts</code>.</p>
+<table>
+<thead>
+<tr><th>Tailwind class</th><th>CSS var</th><th>Light HSL</th><th>Dark HSL</th><th>Use</th></tr>
+</thead>
+<tbody>
+<tr><td><code>bg-background</code></td><td><code>--background</code></td><td><code>0 0% 100%</code></td><td><code>222.2 84% 4.9%</code></td><td>Page bg</td></tr>
+<tr><td><code>text-foreground</code></td><td><code>--foreground</code></td><td><code>222.2 84% 4.9%</code></td><td><code>210 40% 98%</code></td><td>Default text</td></tr>
+<tr><td><code>bg-card</code> / <code>text-card-foreground</code></td><td><code>--card</code></td><td><code>0 0% 100%</code></td><td><code>222.2 84% 4.9%</code></td><td>Card surface</td></tr>
+<tr><td><code>bg-popover</code></td><td><code>--popover</code></td><td><code>0 0% 100%</code></td><td><code>222.2 84% 4.9%</code></td><td>Popover, dropdown, sheet</td></tr>
+<tr><td><code>bg-primary</code></td><td><code>--primary</code></td><td><code>222.2 47.4% 11.2%</code></td><td><code>210 40% 98%</code></td><td>Primary action / brand chrome</td></tr>
+<tr><td><code>text-primary-foreground</code></td><td><code>--primary-foreground</code></td><td><code>210 40% 98%</code></td><td><code>222.2 47.4% 11.2%</code></td><td>Text on primary</td></tr>
+<tr><td><code>bg-secondary</code></td><td><code>--secondary</code></td><td><code>210 40% 96.1%</code></td><td><code>217.2 32.6% 17.5%</code></td><td>Secondary surface</td></tr>
+<tr><td><code>bg-muted</code></td><td><code>--muted</code></td><td><code>210 40% 96.1%</code></td><td><code>217.2 32.6% 17.5%</code></td><td>Muted surface</td></tr>
+<tr><td><code>text-muted-foreground</code></td><td><code>--muted-foreground</code></td><td><code>215.4 16.3% 35%</code></td><td><code>215 20.2% 75%</code></td><td>Captions, helper text (contrast tuned)</td></tr>
+<tr><td><code>bg-accent</code></td><td><code>--accent</code></td><td><code>210 40% 96.1%</code></td><td><code>217.2 32.6% 17.5%</code></td><td>Hover/active accent</td></tr>
+<tr><td><code>bg-destructive</code></td><td><code>--destructive</code></td><td><code>0 84.2% 60.2%</code></td><td><code>0 62.8% 30.6%</code></td><td>Destructive / error</td></tr>
+<tr><td><code>border-border</code></td><td><code>--border</code></td><td><code>214.3 31.8% 91.4%</code></td><td><code>217.2 32.6% 17.5%</code></td><td>Default 1px border</td></tr>
+<tr><td><code>ring-ring</code></td><td><code>--ring</code></td><td><code>222.2 84% 4.9%</code></td><td><code>212.7 26.8% 83.9%</code></td><td>Focus ring</td></tr>
+</tbody>
+</table>
+<h3 id="22-sidebar-tokens">2.2 Sidebar tokens</h3>
+<table>
+<thead>
+<tr><th>Token</th><th>Light</th><th>Dark</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--sidebar-background</code></td><td><code>222 47% 11%</code></td><td><code>222 47% 5%</code></td></tr>
+<tr><td><code>--sidebar-foreground</code></td><td><code>210 40% 98%</code></td><td><code>210 40% 98%</code></td></tr>
+<tr><td><code>--sidebar-primary</code></td><td><code>217 91% 60%</code></td><td><code>217 91% 60%</code></td></tr>
+<tr><td><code>--sidebar-accent</code></td><td><code>217 33% 17%</code></td><td><code>217 33% 12%</code></td></tr>
+<tr><td><code>--sidebar-border</code></td><td><code>217 33% 17%</code></td><td><code>217 33% 12%</code></td></tr>
+<tr><td><code>--sidebar-ring</code></td><td><code>217.2 91.2% 59.8%</code></td><td>same</td></tr>
+</tbody>
+</table>
+<p>Reached via <code>bg-sidebar</code>, <code>text-sidebar-foreground</code>, <code>border-sidebar-border</code>,
+etc.</p>
+<h3 id="23-aerojet-brand-tokens-light">2.3 Aerojet brand tokens (light)</h3>
+<p>Declared under <code>:root</code> and overridden in <code>.dark</code>. Use these on the <strong>public
+marketing surface</strong>, not inside portal chrome.</p>
+<table>
+<thead>
+<tr><th>Token</th><th>Light HSL</th><th>Hex</th><th>Tailwind class</th></tr>
+</thead>
+<tbody>
+<tr><td>Aerojet blue</td><td><code>213 100% 18%</code></td><td><code>#002a5c</code></td><td><code>text-aerojet-blue</code> / <code>bg-aerojet-blue</code></td></tr>
+<tr><td>Aerojet sky</td><td><code>210 82% 45%</code></td><td><code>#1f7ad6</code></td><td><code>text-aerojet-sky</code> / <code>bg-aerojet-sky</code></td></tr>
+<tr><td>Aerojet light</td><td><code>204 65% 40%</code></td><td><code>#2e7eb3</code></td><td><code>text-aerojet-light</code></td></tr>
+<tr><td>Aerojet soft-blue</td><td><code>210 100% 40%</code></td><td><code>#0066ff</code></td><td><code>text-aerojet-soft-blue</code></td></tr>
+<tr><td>Aerojet slate</td><td><code>210 29% 24%</code></td><td><code>#2c3e50</code></td><td><code>text-aerojet-slate</code></td></tr>
+<tr><td>Aerojet offwhite</td><td><code>0 0% 98%</code></td><td><code>#f9f9f9</code></td><td><code>bg-aerojet-offwhite</code></td></tr>
+</tbody>
+</table>
+<h3 id="24-public-site-tokens">2.4 Public-site tokens</h3>
+<table>
+<thead>
+<tr><th>Token</th><th>Value</th><th>Tailwind class</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--public-primary</code></td><td><code>211 100% 18%</code></td><td><code>bg-public-primary</code></td><td>Footer / dark CTAs</td></tr>
+<tr><td><code>--public-secondary</code></td><td><code>212 82% 61%</code></td><td><code>bg-public-secondary</code></td><td>Accent CTA in public nav</td></tr>
+<tr><td><code>--public-dark</code></td><td><code>216 34% 25%</code></td><td><code>bg-public-dark</code></td><td>Footer surface</td></tr>
+</tbody>
+</table>
+<h3 id="25-hard-coded-page-surfaces-not-in-css-vars">2.5 Hard-coded page surfaces (not in CSS vars)</h3>
+<table>
+<thead>
+<tr><th>Class</th><th>Hex</th><th>Used in</th></tr>
+</thead>
+<tbody>
+<tr><td><code>bg-paper</code></td><td><code>#f7f3ec</code></td><td><code>(public)</code> editorial page bg</td></tr>
+<tr><td><code>bg-paper-dark</code></td><td><code>#efe8dc</code></td><td><code>(public)</code> editorial hover row</td></tr>
+<tr><td><code>bg-[#0a1628]</code></td><td><code>#0a1628</code></td><td>Hero variants A / D</td></tr>
+<tr><td><code>bg-[#0b0e13]</code></td><td><code>#0b0e13</code></td><td>Hero variant B</td></tr>
+<tr><td><code>bg-[#f7f3ec]</code></td><td><code>#f7f3ec</code></td><td>Hero variant C</td></tr>
+<tr><td><code>text-[#1b2430]</code></td><td><code>#1b2430</code></td><td>Editorial body text (Variant C / live)</td></tr>
+<tr><td><code>text-[#0a1628]</code></td><td><code>#0a1628</code></td><td>Editorial body text (Variant E)</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="3-typography"><div class="he-section__num">03 · 3 · Typography</div><h2 class="he-section__title">3 · Typography</h2></section>
+<h3 id="31-loaded-families-applayouttsx">3.1 Loaded families (<code>app/layout.tsx</code>)</h3>
+<p>All three are loaded via <code>next/font/google</code> with <code>display: 'swap'</code> and
+exposed as CSS variables on <code>&lt;html&gt;</code>:</p>
+<table>
+<thead>
+<tr><th>Family</th><th>CSS var</th><th>Weights (default)</th><th>Used for</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Inter</strong></td><td><code>--font-inter</code></td><td>400–700</td><td><code>font-sans</code> default — body, portal UI</td></tr>
+<tr><td><strong>Outfit</strong></td><td><code>--font-outfit</code></td><td>400–900</td><td>Design-lab variants, marketing headlines</td></tr>
+<tr><td><strong>Playfair Display</strong></td><td><code>--font-playfair</code></td><td>400–700</td><td>Live public-site editorial headings (<code>font-serif</code>)</td></tr>
+</tbody>
+</table>
+<h3 id="32-tailwind-font-family-aliases-tailwindconfigts">3.2 Tailwind font family aliases (<code>tailwind.config.ts</code>)</h3>
+<pre><code>font-sans    → var(--font-inter) → system-ui → sans-serif
+font-outfit  → var(--font-outfit) → sans-serif
+font-heading → var(--font-cal)   → var(--font-inter) → system-ui → sans-serif
+font-serif   → var(--font-playfair) → Georgia → serif
+</code></pre>
+<blockquote>
+<p><code>font-heading</code> is declared but the <code>--font-cal</code> variable is <strong>not loaded
+in <code>app/layout.tsx</code> yet</strong> — it falls through to Inter. Consider this a
+stub for a future &quot;Cal Sans&quot; or similar.</p>
+</blockquote>
+<h3 id="33-live-site-type-scale-variant-c-editorial">3.3 Live-site type scale (Variant C / editorial)</h3>
+<p>Pulled from the actual <code>(public)/_components/*.tsx</code> and <code>(public)/page.tsx</code>:</p>
+<table>
+<thead>
+<tr><th>Role</th><th>Class</th><th>Size</th><th>Weight</th><th>Tracking</th></tr>
+</thead>
+<tbody>
+<tr><td>Hero H1</td><td><code>font-serif text-4xl ... sm:text-6xl lg:text-7xl</code></td><td>4rem</td><td><code>font-medium</code> (500)</td><td><code>tracking-tight</code> (0.04em)</td></tr>
+<tr><td>Section H2</td><td><code>font-serif text-3xl font-medium sm:text-4xl</code></td><td>1.875rem</td><td>500</td><td>default</td></tr>
+<tr><td>H3 / Card title</td><td><code>font-serif text-2xl font-medium</code></td><td>1.5rem</td><td>500</td><td>default</td></tr>
+<tr><td>Eyebrow</td><td><code>text-[11px] font-bold tracking-[0.3em] uppercase</code></td><td>0.6875rem</td><td>700</td><td><code>0.3em</code> wide</td></tr>
+<tr><td>Body lead</td><td><code>text-lg leading-relaxed text-[#1b2430]/85</code></td><td>1.125rem</td><td>400</td><td>—</td></tr>
+<tr><td>Body</td><td><code>text-base leading-relaxed</code></td><td>1rem</td><td>400</td><td>—</td></tr>
+<tr><td>Drop cap</td><td><code>first-letter:font-serif first-letter:text-6xl first-letter:font-medium</code></td><td>3.75rem</td><td>500</td><td><code>leading-[0.8]</code></td></tr>
+<tr><td>Nav CTA</td><td><code>text-xs font-black tracking-[0.25em] uppercase</code></td><td>0.75rem</td><td>900</td><td><code>0.25em</code></td></tr>
+<tr><td>Stat number</td><td><code>font-serif text-3xl font-medium</code></td><td>1.875rem</td><td>500</td><td>—</td></tr>
+<tr><td>Stat label</td><td><code>text-[10px] font-bold tracking-[0.2em] uppercase</code></td><td>0.625rem</td><td>700</td><td><code>0.2em</code></td></tr>
+</tbody>
+</table>
+<h3 id="34-portal-dashboard-type-scale-shadcnui-defaults">3.4 Portal / dashboard type scale (shadcn/ui defaults)</h3>
+<table>
+<thead>
+<tr><th>Role</th><th>Class</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>H1</td><td><code>text-4xl font-semibold tracking-tight</code></td><td>Page header</td></tr>
+<tr><td>H2</td><td><code>text-3xl font-semibold</code></td><td>Section</td></tr>
+<tr><td>H3 / CardTitle</td><td><code>text-2xl font-semibold leading-none tracking-tight</code></td><td>Card title</td></tr>
+<tr><td>Body</td><td><code>text-sm text-muted-foreground</code></td><td>Default body in cards</td></tr>
+<tr><td>Small / cap</td><td><code>text-xs font-medium</code></td><td>Inline meta</td></tr>
+</tbody>
+</table>
+<h3 id="35-shadcn-button-badge-input">3.5 shadcn <code>Button</code> / <code>Badge</code> / <code>Input</code></h3>
+<ul>
+<li><code>Button</code> default body: <code>text-sm font-medium</code>.</li>
+<li><code>Badge</code>: <code>text-xs font-semibold</code>.</li>
+<li><code>Input</code> height: <code>h-11</code> (44px — WCAG min touch target).</li>
+</ul>
+<hr />
+<section class="he-section" id="4-sizing-amp-spacing"><div class="he-section__num">04 · 4 · Sizing &amp;amp; spacing</div><h2 class="he-section__title">4 · Sizing &amp; spacing</h2></section>
+<h3 id="41-border-radius-tailwindconfigts">4.1 Border radius (<code>tailwind.config.ts</code>)</h3>
+<table>
+<thead>
+<tr><th>Token</th><th>Value</th><th>Use</th></tr>
+</thead>
+<tbody>
+<tr><td><code>rounded-sm</code></td><td><code>calc(var(--radius) - 4px)</code> = 4px</td><td>Tight inputs, badges</td></tr>
+<tr><td><code>rounded-md</code></td><td><code>calc(var(--radius) - 2px)</code> = 6px</td><td>Default <code>Button</code>, <code>Card</code>, <code>Input</code></td></tr>
+<tr><td><code>rounded-lg</code></td><td><code>var(--radius)</code> = 8px</td><td>Larger cards, sheets</td></tr>
+<tr><td><code>rounded-xl</code></td><td>12px (Tailwind default)</td><td>Marketing CTAs</td></tr>
+<tr><td><code>rounded-2xl</code></td><td>16px</td><td>Marketing feature tiles</td></tr>
+<tr><td><code>rounded-3xl</code></td><td>24px</td><td>Hero image frames</td></tr>
+<tr><td><code>rounded-4xl</code></td><td>32px</td><td>Variant D hero block</td></tr>
+<tr><td><code>rounded-full</code></td><td>9999px</td><td>Pills, chips, avatar</td></tr>
+</tbody>
+</table>
+<p><code>--radius</code> is set to <code>0.5rem</code> (8px) in <code>app/globals.css</code>.</p>
+<h3 id="42-component-sizes-shadcn">4.2 Component sizes (shadcn)</h3>
+<table>
+<thead>
+<tr><th>Component</th><th>Size</th><th>Class</th><th>Touch target</th></tr>
+</thead>
+<tbody>
+<tr><td><code>Button</code></td><td><code>default</code></td><td><code>h-11 px-4 py-2</code></td><td><strong>44×44</strong> ✅ WCAG</td></tr>
+<tr><td><code>Button</code></td><td><code>sm</code></td><td><code>h-9 px-3</code></td><td>36×32</td></tr>
+<tr><td><code>Button</code></td><td><code>lg</code></td><td><code>h-12 px-10</code></td><td>48×≥40</td></tr>
+<tr><td><code>Button</code></td><td><code>icon</code></td><td><code>h-11 w-11</code></td><td>44×44</td></tr>
+<tr><td><code>Input</code></td><td>default</td><td><code>h-11</code></td><td>44</td></tr>
+<tr><td>`Switch</td><td></td><td></td><td></td></tr>
+</tbody>
+</table>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#1-brand-foundations">1 · Brand foundations</a></li>
+    <li class="he-toc__l3"><a href="#11-voice-visual-language">1.1 Voice &amp; visual language</a></li>
+    <li class="he-toc__l3"><a href="#12-color-hex-cheat-sheet-for-designers">1.2 Color hex cheat-sheet (for designers)</a></li>
+    <li class="he-toc__l2"><a href="#2-color-tokens-tailwind-class-css-var-hsl">2 · Color tokens (Tailwind class → CSS var → HSL)</a></li>
+    <li class="he-toc__l3"><a href="#21-shadcnui-semantic-palette-light-dark">2.1 shadcn/ui semantic palette (light → dark)</a></li>
+    <li class="he-toc__l3"><a href="#22-sidebar-tokens">2.2 Sidebar tokens</a></li>
+    <li class="he-toc__l3"><a href="#23-aerojet-brand-tokens-light">2.3 Aerojet brand tokens (light)</a></li>
+    <li class="he-toc__l3"><a href="#24-public-site-tokens">2.4 Public-site tokens</a></li>
+    <li class="he-toc__l3"><a href="#25-hard-coded-page-surfaces-not-in-css-vars">2.5 Hard-coded page surfaces (not in CSS vars)</a></li>
+    <li class="he-toc__l2"><a href="#3-typography">3 · Typography</a></li>
+    <li class="he-toc__l3"><a href="#31-loaded-families-applayouttsx">3.1 Loaded families (`app/layout.tsx`)</a></li>
+    <li class="he-toc__l3"><a href="#32-tailwind-font-family-aliases-tailwindconfigts">3.2 Tailwind font family aliases (`tailwind.config.ts`)</a></li>
+    <li class="he-toc__l3"><a href="#33-live-site-type-scale-variant-c-editorial">3.3 Live-site type scale (Variant C / editorial)</a></li>
+    <li class="he-toc__l3"><a href="#34-portal-dashboard-type-scale-shadcnui-defaults">3.4 Portal / dashboard type scale (shadcn/ui defaults)</a></li>
+    <li class="he-toc__l3"><a href="#35-shadcn-button-badge-input">3.5 shadcn `Button` / `Badge` / `Input</a></li>
+    <li class="he-toc__l2"><a href="#4-sizing-spacing">4 · Sizing &amp; spacing</a></li>
+    <li class="he-toc__l3"><a href="#41-border-radius-tailwindconfigts">4.1 Border radius (`tailwind.config.ts`)</a></li>
+    <li class="he-toc__l3"><a href="#42-component-sizes-shadcn">4.2 Component sizes (shadcn)</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

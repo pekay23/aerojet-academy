@@ -23,7 +23,6 @@ async function main() {
       'Option A is incorrect',
       'Option B is the correct answer',
       'Option C is also incorrect',
-      'Option D is also incorrect',
     ],
     correctAnswer: 'Option B is the correct answer',
     subTopic: `Topic ${Math.floor(i / 5) + 1}`,
@@ -31,6 +30,7 @@ async function main() {
     knowledgeLevel: (i % 3) + 1,
     difficulty: (i % 3 === 0 ? 'EASY' : i % 3 === 1 ? 'MEDIUM' : 'HARD') as QuestionDifficulty,
     points: 1,
+    explanation: i % 2 === 0 ? `Explanation for question ${i + 1}: Option B is correct because...` : null,
     isEssay: false,
     isActive: true,
     status: 'APPROVED' as QuestionStatus,
@@ -46,3 +46,5 @@ async function main() {
 main()
   .catch(console.error)
   .finally(() => prisma.$disconnect())
+
+

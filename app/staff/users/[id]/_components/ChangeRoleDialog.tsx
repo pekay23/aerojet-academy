@@ -2,7 +2,15 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShieldAlert, Loader2, ChevronRight, AlertTriangle, CheckCircle2, Mail, Database } from 'lucide-react'
+import {
+  ShieldAlert,
+  Loader2,
+  ChevronRight,
+  AlertTriangle,
+  CheckCircle2,
+  Mail,
+  Database,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -21,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface ChangeRoleDialogProps {
   userId: string
@@ -47,7 +56,7 @@ interface PreviewResponse {
 
 type Step = 'select' | 'preview' | 'confirm'
 
-const SIDE_EFFECT_ICON: Record<string, React.ComponentType<any>> = {
+const SIDE_EFFECT_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
   CREATE_INSTRUCTOR_PROFILE: Database,
   CREATE_STAFF_PROFILE: Database,
   CREATE_STUDENT_PROFILE: Database,
@@ -70,6 +79,8 @@ export default function ChangeRoleDialog({
   const [confirmName, setConfirmName] = useState('')
   const router = useRouter()
 
+  const { markDirty, markClean } = useFormDirty()
+
   const reset = () => {
     setStep('select')
     setPreview(null)
@@ -81,6 +92,7 @@ export default function ChangeRoleDialog({
     onOpenChange(false)
     // Reset after dialog close animation
     setTimeout(reset, 300)
+    markClean()
   }
 
   const onLoadPreview = async () => {
@@ -99,8 +111,12 @@ export default function ChangeRoleDialog({
       if (!res.ok) throw new Error(json?.error || 'Preview failed')
       setPreview(json.data ?? json)
       setStep('preview')
-    } catch (e: any) {
-      toast.error(e.message)
+    } catch (e) {
+      if (e instanceof Error) {
+        toast.error(e.message)
+      } else {
+        toast.error('An unknown error occurred')
+      }
     } finally {
       setLoading(false)
     }
@@ -123,10 +139,15 @@ export default function ChangeRoleDialog({
         throw new Error(data.error || 'Failed to update role')
       }
       toast.success(`Role updated to ${newRole} for ${userName}`)
+      markClean()
       close()
       router.refresh()
-    } catch (e: any) {
-      toast.error(e.message)
+    } catch (e) {
+      if (e instanceof Error) {
+        toast.error(e.message)
+      } else {
+        toast.error('An unknown error occurred')
+      }
     } finally {
       setLoading(false)
     }
@@ -134,18 +155,28 @@ export default function ChangeRoleDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => (v ? onOpenChange(true) : close())}>
-      <DialogContent className="sm:max-w-[520px]">
+      <DialogContent className="sm:max-w-130">
         <DialogHeader>
           <DialogTitle>Change User Role</DialogTitle>
-          <DialogDescription className="sr-only">3-step wizard: select role, preview side effects, confirm.</DialogDescription>
+          <DialogDescription className="sr-only">
+            3-step wizard: select role, preview side effects, confirm.
+          </DialogDescription>
         </DialogHeader>
 
         {/* Step indicator */}
         <div className="flex items-center justify-center gap-2 text-xs font-bold">
           {(['select', 'preview', 'confirm'] as Step[]).map((s, i) => (
             <div key={s} className="flex items-center gap-2">
-              <span className={`flex h-6 w-6 items-center justify-center rounded-full ${step === s ? 'bg-aerojet-blue text-white' : ['select', 'preview', 'confirm'].indexOf(step) > i ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{i + 1}</span>
-              <span className={step === s ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400'}>{s[0].toUpperCase() + s.slice(1)}</span>
+              <span
+                className={`flex h-6 w-6 items-center justify-center rounded-full ${step === s ? 'bg-aerojet-blue text-white' : ['select', 'preview', 'confirm'].indexOf(step) > i ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'}`}
+              >
+                {i + 1}
+              </span>
+              <span
+                className={step === s ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400'}
+              >
+                {s[0].toUpperCase() + s.slice(1)}
+              </span>
               {i < 2 && <ChevronRight className="h-3 w-3 text-slate-300" />}
             </div>
           ))}
@@ -156,12 +187,21 @@ export default function ChangeRoleDialog({
             <div className="flex items-center gap-4 rounded-xl bg-amber-50 p-4 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
               <ShieldAlert className="h-5 w-5 shrink-0" />
               <div className="text-xs font-medium">
-                Pick the target role for <strong>{userName}</strong>. Next step shows exactly what will change.
+                Pick the target role for <strong>{userName}</strong>. Next step shows exactly what
+                will change.
               </div>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="role">New Role</Label>
-              <Select value={newRole} onValueChange={setNewRole} name="role" autoComplete="off">
+              <Select
+                value={newRole}
+                onValueChange={(val) => {
+                  setNewRole(val)
+                  markDirty()
+                }}
+                name="role"
+                autoComplete="off"
+              >
                 <SelectTrigger id="role" className="w-full">
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
@@ -181,16 +221,20 @@ export default function ChangeRoleDialog({
         {step === 'preview' && preview && (
           <div className="grid gap-3 py-4">
             <div className="rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-800/40">
-              <p className="font-bold text-slate-700 dark:text-slate-200">{preview.currentRole} → {preview.newRole}</p>
+              <p className="font-bold text-slate-700 dark:text-slate-200">
+                {preview.currentRole} → {preview.newRole}
+              </p>
             </div>
             <div>
-              <p className="mb-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">Side effects ({preview.sideEffects.length})</p>
+              <p className="mb-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Side effects ({preview.sideEffects.length})
+              </p>
               <ul className="space-y-1.5">
                 {preview.sideEffects.map((s, i) => {
                   const Icon = SIDE_EFFECT_ICON[s.kind] ?? Database
                   return (
                     <li key={i} className="flex items-start gap-2 text-xs">
-                      <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-aerojet-blue" />
+                      <Icon className="text-aerojet-blue mt-0.5 h-3.5 w-3.5 shrink-0" />
                       <span className="text-slate-700 dark:text-slate-300">{s.description}</span>
                     </li>
                   )
@@ -199,9 +243,13 @@ export default function ChangeRoleDialog({
             </div>
             {preview.warnings.length > 0 && (
               <div className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
-                <p className="mb-1 flex items-center gap-1 font-bold"><AlertTriangle className="h-3 w-3" /> Warnings</p>
+                <p className="mb-1 flex items-center gap-1 font-bold">
+                  <AlertTriangle className="h-3 w-3" /> Warnings
+                </p>
                 <ul className="ml-4 list-disc space-y-0.5">
-                  {preview.warnings.map((w, i) => <li key={i}>{w}</li>)}
+                  {preview.warnings.map((w, i) => (
+                    <li key={i}>{w}</li>
+                  ))}
                 </ul>
               </div>
             )}
@@ -213,35 +261,62 @@ export default function ChangeRoleDialog({
             <p className="text-sm text-slate-700 dark:text-slate-200">
               Type the user's name <strong>exactly</strong> to commit the role change:
             </p>
-            <code className="rounded bg-slate-100 px-2 py-1 text-sm dark:bg-slate-800">{userName}</code>
+            <code className="rounded bg-slate-100 px-2 py-1 text-sm dark:bg-slate-800">
+              {userName}
+            </code>
             <input
               value={confirmName}
-              onChange={(e) => setConfirmName(e.target.value)}
+              onChange={(e) => {
+                setConfirmName(e.target.value)
+                markDirty()
+              }}
               placeholder="Type the name here"
               className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
             />
-            <a href="/docs/html/role-transitions.html" target="_blank" className="text-xs text-aerojet-blue hover:underline">What does this change exactly?</a>
+            <a
+              href="/docs/html/role-transitions.html"
+              target="_blank"
+              className="text-aerojet-blue text-xs hover:underline"
+            >
+              What does this change exactly?
+            </a>
           </div>
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={close} disabled={loading}>Cancel</Button>
+          <Button variant="outline" onClick={close} disabled={loading}>
+            Cancel
+          </Button>
           {step === 'select' && (
-            <Button onClick={onLoadPreview} disabled={loading || newRole === currentRole} className="bg-aerojet-blue">
+            <Button
+              onClick={onLoadPreview}
+              disabled={loading || newRole === currentRole}
+              className="bg-aerojet-blue"
+            >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Preview changes
             </Button>
           )}
           {step === 'preview' && (
             <>
-              <Button variant="outline" onClick={() => setStep('select')}>Back</Button>
-              <Button onClick={() => setStep('confirm')} className="bg-aerojet-blue">Continue</Button>
+              <Button variant="outline" onClick={() => setStep('select')}>
+                Back
+              </Button>
+              <Button onClick={() => setStep('confirm')} className="bg-aerojet-blue">
+                Continue
+              </Button>
             </>
           )}
           {step === 'confirm' && (
             <>
-              <Button variant="outline" onClick={() => setStep('preview')}>Back</Button>
-              <Button onClick={onCommit} disabled={loading || confirmName.trim() !== userName.trim()} className="bg-red-600 hover:bg-red-700">
+              <Button variant="outline" onClick={() => setStep('preview')}>
+                Back
+              </Button>
+              <Button
+                onClick={onCommit}
+                disabled={loading || confirmName.trim() !== userName.trim()}
+                className="bg-red-600 hover:bg-red-700"
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Commit role change
               </Button>

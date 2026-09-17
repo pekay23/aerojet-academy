@@ -1,10 +1,10 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { CalendarDays, Users, MapPin, Clock, BookOpen, Info } from 'lucide-react'
+import { CalendarDays, Users, MapPin, BookOpen, Info } from 'lucide-react'
 import { Suspense } from 'react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 import Link from 'next/link'
 import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
@@ -94,9 +94,9 @@ async function PoolList() {
   const currency = await getSystemSetting('course_currency', 'EUR')
 
   const { getCurrencySymbol } = await import('@/lib/currency')
-  const symbol = getCurrencySymbol(currency)
+  const _symbol = getCurrencySymbol(currency)
 
-  const pools = await prisma.examPool.findMany({
+  const pools = await prismaUnfiltered.examPool.findMany({
     where: {
       status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
     },
@@ -205,7 +205,12 @@ async function PoolList() {
                   {currency} {Number(pool.seatPrice).toLocaleString()}
                 </p>
               </div>
-              <span className="text-xs text-slate-400 italic">Enrolled students only</span>
+              <Link
+                href={`/applicant/exam-bookings/${pool.id}`}
+                className="text-xs font-bold text-aerojet-blue hover:underline"
+              >
+                View Details
+              </Link>
             </div>
           </div>
         )

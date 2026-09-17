@@ -102,7 +102,7 @@ export default function VariantB() {
           {...reveal}
           className="text-aerojet-sky mb-10 font-mono text-[11px] tracking-[0.3em] uppercase"
         >
-          // Training Sequence
+          {'// Training Sequence'}
         </motion.div>
         <div className="grid gap-px overflow-hidden rounded-md border border-white/10 bg-white/10 lg:grid-cols-3">
           {JOURNEY.map((j, i) => (
@@ -126,7 +126,7 @@ export default function VariantB() {
           {...reveal}
           className="text-aerojet-sky mb-3 font-mono text-[11px] tracking-[0.3em] uppercase"
         >
-          // Licence Specification
+          {'// Licence Specification'}
         </motion.div>
         <motion.p {...reveal} className="mb-10 max-w-3xl text-slate-400">
           {LICENSING.intro}
@@ -180,7 +180,7 @@ export default function VariantB() {
             {...reveal}
             className="text-aerojet-sky mb-8 font-mono text-[11px] tracking-[0.3em] uppercase"
           >
-            // Programmes
+            {'// Programmes'}
           </motion.div>
           <div className="overflow-hidden rounded-md border border-white/10 font-mono">
             {PROGRAMMES.map((p, i) => (

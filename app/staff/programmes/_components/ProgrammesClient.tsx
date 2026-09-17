@@ -30,9 +30,9 @@ export interface ProgrammeSemester {
 interface ProgrammeYear {
   id: string
   yearNumber: number
-  yearFeeAmount: string | null
-  seatConfirmationFee: string
-  firstPaymentAmount: string
+  yearFeeAmount: number | null
+  seatConfirmationFee: number
+  firstPaymentAmount: number
   semesters: ProgrammeSemester[]
   isActive: boolean
 }
@@ -42,7 +42,7 @@ interface Programme {
   code: string
   name: string
   durationYears: number
-  totalFee: string
+  totalFee: number
   currency: string
   description: string | null
   isActive: boolean
@@ -103,8 +103,8 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
       setTotalFee('')
       setDescription('')
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setLoading(false)
     }
@@ -115,7 +115,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
     setCode(programme.code)
     setName(programme.name)
     setDurationYears(String(programme.durationYears))
-    setTotalFee(programme.totalFee)
+    setTotalFee(String(programme.totalFee))
     setDescription(programme.description || '')
     setIsActive(programme.isActive)
     setError('')
@@ -143,8 +143,8 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
       setTotalFee('')
       setDescription('')
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setLoading(false)
     }
@@ -171,9 +171,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
     setEditingYearId(year.id)
     setYearProgrammeId(programmeId)
     setYearNumber(String(year.yearNumber))
-    setYearFee(year.yearFeeAmount || '')
-    setSeatFee(year.seatConfirmationFee)
-    setFirstPayment(year.firstPaymentAmount)
+    setYearFee(year.yearFeeAmount != null ? String(year.yearFeeAmount) : '')
+    setSeatFee(String(year.seatConfirmationFee))
+    setFirstPayment(String(year.firstPaymentAmount))
     setSemesters(
       year.semesters && year.semesters.length > 0
         ? [...year.semesters]
@@ -218,8 +218,8 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
       if (!res.ok) throw new Error(data.error || 'Failed to save year')
       setYearOpen(false)
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setLoading(false)
     }

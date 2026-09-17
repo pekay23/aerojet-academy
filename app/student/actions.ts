@@ -2,18 +2,25 @@
 
 import { Prisma } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
+import { joinPool } from '@/lib/pools/operations'
 import {
-  joinPool,
-  confirmPool,
-  failPool,
-  getPoolWithDetails,
-  getAvailablePools,
-} from '@/lib/pools/operations'
-import { bookStandaloneExam, bookResitExam, placeExamBookingInStandardPool } from '@/lib/enrollment/exams'
+  bookStandaloneExam,
+  bookResitExam,
+  placeExamBookingInStandardPool,
+} from '@/lib/enrollment/exams'
 import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { UserStatus, UserRole, EnrollmentStatus, PoolStatus, MembershipStatus, PaymentStatus } from '@/types/enums'
+
+import {
+  UserStatus,
+  UserRole,
+  EnrollmentStatus,
+  PoolStatus,
+  MembershipStatus,
+  PaymentStatus,
+} from '@/types/enums'
+
 import { requireAuth, requireStudent } from '@/lib/auth/helpers'
 import { hash, compare } from 'bcryptjs'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
@@ -58,8 +65,8 @@ export async function enrollInCourse(courseId: string) {
   })
   if (!profile) return { error: 'Student profile not found.' }
 
-  const { allowed, error: validationError } = await import('@/lib/enrollment/validation').then(v => 
-    v.validateCourseEnrollment(user.id, courseId)
+  const { allowed, error: validationError } = await import('@/lib/enrollment/validation').then(
+    (v) => v.validateCourseEnrollment(user.id, courseId)
   )
 
   if (!allowed) {
@@ -78,7 +85,15 @@ export async function enrollInCourse(courseId: string) {
     where: {
       userId: user.id,
       courseId: courseId,
-      status: { in: [EnrollmentStatus.ACTIVE, EnrollmentStatus.ENROLLED, EnrollmentStatus.APPROVED, EnrollmentStatus.PENDING, EnrollmentStatus.SUSPENDED] },
+      status: {
+        in: [
+          EnrollmentStatus.ACTIVE,
+          EnrollmentStatus.ENROLLED,
+          EnrollmentStatus.APPROVED,
+          EnrollmentStatus.PENDING,
+          EnrollmentStatus.SUSPENDED,
+        ],
+      },
     },
   })
 
@@ -127,57 +142,60 @@ export async function enrollInCourse(courseId: string) {
 
       // We need to capture the funds directly and auto-enroll
 
-      await prisma.$transaction(async (tx) => {
-        // Direct charge
-        await chargeWallet(
-          tx,
-          user.id,
-          coursePrice,
-          `Enrollment in ${course.code}: ${course.name}${isFullTime ? ' (Additional)' : ''}`,
-          course.id,
-          'COURSE_ID'
-        )
+      await prisma.$transaction(
+        async (tx) => {
+          // Direct charge
+          await chargeWallet(
+            tx,
+            user.id,
+            coursePrice,
+            `Enrollment in ${course.code}: ${course.name}${isFullTime ? ' (Additional)' : ''}`,
+            course.id,
+            'COURSE_ID'
+          )
 
-        // Create Active Enrollment
-        await tx.enrollment.create({
-          data: {
-            userId: user.id,
-            courseId: courseId,
-            status: EnrollmentStatus.ACTIVE, // Auto-approved because paid in full
-            enrolledAt: new Date(),
-            approvedAt: new Date(),
-            amountPaid: coursePrice,
-          },
-        })
+          // Create Active Enrollment
+          await tx.enrollment.create({
+            data: {
+              userId: user.id,
+              courseId: courseId,
+              status: EnrollmentStatus.ACTIVE, // Auto-approved because paid in full
+              enrolledAt: new Date(),
+              approvedAt: new Date(),
+              amountPaid: coursePrice,
+            },
+          })
 
-        // Upgrade APPLICANT to STUDENT if needed
-        const authUser = await tx.user.findUnique({ where: { id: user.id } })
-        if (authUser?.role === UserRole.APPLICANT) {
-          await tx.user.update({
-            where: { id: user.id },
-            data: { role: UserRole.STUDENT },
+          // Upgrade APPLICANT to STUDENT if needed
+          const authUser = await tx.user.findUnique({ where: { id: user.id } })
+          if (authUser?.role === UserRole.APPLICANT) {
+            await tx.user.update({
+              where: { id: user.id },
+              data: { role: UserRole.STUDENT },
+            })
+            await tx.studentProfile.update({
+              where: { userId: user.id },
+              data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
+            })
+          }
+
+          // Send Notification
+          await tx.notification.create({
+            data: {
+              userId: user.id,
+              title: 'Course Enrollment Successful',
+              message: `You have successfully enrolled in ${course.code}: ${course.name}.`,
+              type: 'SUCCESS',
+              linkUrl: '/student/courses',
+              linkText: 'View Courses',
+            },
           })
-          await tx.studentProfile.update({
-            where: { userId: user.id },
-            data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
-          })
+        },
+        {
+          maxWait: 15000,
+          timeout: 30000,
         }
-
-        // Send Notification
-        await tx.notification.create({
-          data: {
-            userId: user.id,
-            title: 'Course Enrollment Successful',
-            message: `You have successfully enrolled in ${course.code}: ${course.name}.`,
-            type: 'SUCCESS',
-            linkUrl: '/student/courses',
-            linkText: 'View Courses',
-          },
-        })
-      }, {
-        maxWait: 15000,
-        timeout: 30000,
-      })
+      )
     } else {
       // Mandatory FULL_TIME course
       await prisma.enrollment.create({
@@ -269,8 +287,11 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     return { error: `No exam component found for module ${moduleCode}.` }
   }
 
-  const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
-  if (targetCategories.length > 0 && !categoryMatchesTarget(examComponent.categoryCode, targetCategories)) {
+  const targetCategories = await getStudentTargetCategoryCodes(prismaUnfiltered, user.id)
+  if (
+    targetCategories.length > 0 &&
+    !categoryMatchesTarget(examComponent.categoryCode, targetCategories)
+  ) {
     return { error: 'This module/category is not part of your selected licence pathway.' }
   }
 
@@ -305,21 +326,24 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
 
   // 6. Role upgrade: APPLICANT → STUDENT (portal-specific concern)
   if (user.role === UserRole.APPLICANT) {
-    await prisma.$transaction(async (tx) => {
-      await tx.user.update({
-        where: { id: user.id },
-        data: { role: UserRole.STUDENT },
-      })
-      const sp = await tx.studentProfile.findUnique({ where: { userId: user.id } })
-      if (sp) {
-        await tx.studentProfile.update({
-          where: { userId: user.id },
-          data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
+    await prisma.$transaction(
+      async (tx) => {
+        await tx.user.update({
+          where: { id: user.id },
+          data: { role: UserRole.STUDENT },
         })
+        const sp = await tx.studentProfile.findUnique({ where: { userId: user.id } })
+        if (sp) {
+          await tx.studentProfile.update({
+            where: { userId: user.id },
+            data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
+          })
+        }
+      },
+      {
+        timeout: 20000,
       }
-    }, {
-      timeout: 20000
-    })
+    )
   }
 
   // 7. In-app notification
@@ -409,8 +433,11 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
     })
     if (!examComponent) return { error: `No exam component found for module ${moduleCode}.` }
 
-    const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
-    if (targetCategories.length > 0 && !categoryMatchesTarget(examComponent.categoryCode, targetCategories)) {
+    const targetCategories = await getStudentTargetCategoryCodes(prismaUnfiltered, user.id)
+    if (
+      targetCategories.length > 0 &&
+      !categoryMatchesTarget(examComponent.categoryCode, targetCategories)
+    ) {
       return { error: 'This module/category is not part of your selected licence pathway.' }
     }
 
@@ -430,106 +457,109 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
     }
 
     // 5. Atomic Transaction: Create Pool + Join Student
-    const pool = await prisma.$transaction(async (tx) => {
-      const { reserveFunds } = await import('@/lib/wallet/operations')
+    const pool = await prisma.$transaction(
+      async (tx) => {
+        const { reserveFunds } = await import('@/lib/wallet/operations')
 
-      // A. Create Pool
-      const newPool = await tx.examPool.create({
-        data: {
-          eventId,
-          name: isGroup
-            ? organizationName || `Group - ${poolModuleCode}`
-            : `Student Initiated - ${poolModuleCode}`,
-          examDate: date,
-          examStartTime: startTime,
-          examEndTime: endTime,
-          seatPrice,
-          allowedModules: [poolModuleCode],
-          status: isGroup ? PoolStatus.CONFIRMED : PoolStatus.OPEN,
-          currentMemberCount: isGroup ? seats || 1 : 1,
-          maxCandidates: isGroup ? seats || 28 : 28,
-          createdBy: user.id,
-        },
-      })
-
-      // B. Reserve Funds
-      await reserveFunds(
-        tx,
-        user.id,
-        seatPrice,
-        `Seat reservation for new pool: ${newPool.name} — Module ${moduleCode}`,
-        newPool.id,
-        'POOL_ID'
-      )
-
-      // C. Create Membership — reuse examComponent from step 3 when possible
-      const primaryModule = poolModuleCode
-      const primaryExamComponentId = examComponent.id
-
-      const booking = await tx.examBooking.create({
-        data: {
-          userId: user.id,
-          eventId,
-          examComponentId: primaryExamComponentId,
-          bookingType: isGroup ? 'GROUP_CHARTER' : 'POOL',
-          moduleCode: primaryModule,
-          examDate: date,
-          amountPaid: seatPrice,
-          status: PaymentStatus.PENDING,
-          groupName: isGroup ? organizationName || null : null,
-          groupRepId: isGroup ? user.id : null,
-        },
-      })
-
-      await tx.poolMembership.create({
-        data: {
-          userId: user.id,
-          poolId: newPool.id,
-          bookingId: booking.id,
-          status: MembershipStatus.RESERVED,
-          examComponentId: primaryExamComponentId,
-          amountReserved: seatPrice,
-        },
-      })
-
-      // D. Role Upgrade: APPLICANT → STUDENT
-      if (user.role === UserRole.APPLICANT) {
-        await tx.user.update({
-          where: { id: user.id },
-          data: { role: UserRole.STUDENT },
+        // A. Create Pool
+        const newPool = await tx.examPool.create({
+          data: {
+            eventId,
+            name: isGroup
+              ? organizationName || `Group - ${poolModuleCode}`
+              : `Student Initiated - ${poolModuleCode}`,
+            examDate: date,
+            examStartTime: startTime,
+            examEndTime: endTime,
+            seatPrice,
+            allowedModules: [poolModuleCode],
+            status: isGroup ? PoolStatus.CONFIRMED : PoolStatus.OPEN,
+            currentMemberCount: isGroup ? seats || 1 : 1,
+            maxCandidates: isGroup ? seats || 28 : 28,
+            createdBy: user.id,
+          },
         })
-        const studentProfile = await tx.studentProfile.findUnique({ where: { userId: user.id } })
-        if (studentProfile) {
-          await tx.studentProfile.update({
-            where: { userId: user.id },
-            data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
+
+        // B. Reserve Funds
+        await reserveFunds(
+          tx,
+          user.id,
+          seatPrice,
+          `Seat reservation for new pool: ${newPool.name} — Module ${moduleCode}`,
+          newPool.id,
+          'POOL_ID'
+        )
+
+        // C. Create Membership — reuse examComponent from step 3 when possible
+        const primaryModule = poolModuleCode
+        const primaryExamComponentId = examComponent.id
+
+        const booking = await tx.examBooking.create({
+          data: {
+            userId: user.id,
+            eventId,
+            examComponentId: primaryExamComponentId,
+            bookingType: isGroup ? 'GROUP_CHARTER' : 'POOL',
+            moduleCode: primaryModule,
+            examDate: date,
+            amountPaid: seatPrice,
+            status: PaymentStatus.PENDING,
+            groupName: isGroup ? organizationName || null : null,
+            groupRepId: isGroup ? user.id : null,
+          },
+        })
+
+        await tx.poolMembership.create({
+          data: {
+            userId: user.id,
+            poolId: newPool.id,
+            bookingId: booking.id,
+            status: MembershipStatus.RESERVED,
+            examComponentId: primaryExamComponentId,
+            amountReserved: seatPrice,
+          },
+        })
+
+        // D. Role Upgrade: APPLICANT → STUDENT
+        if (user.role === UserRole.APPLICANT) {
+          await tx.user.update({
+            where: { id: user.id },
+            data: { role: UserRole.STUDENT },
           })
+          const studentProfile = await tx.studentProfile.findUnique({ where: { userId: user.id } })
+          if (studentProfile) {
+            await tx.studentProfile.update({
+              where: { userId: user.id },
+              data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
+            })
+          }
         }
+
+        // Send Notification
+        await tx.notification.create({
+          data: {
+            userId: user.id,
+            title: 'Exam Booking Created',
+            message: `You have successfully created a new exam booking for module ${poolModuleCode} and reserved your seat.`,
+            type: 'SUCCESS',
+            linkUrl: '/student/exam-bookings/my-bookings',
+            linkText: 'View Bookings',
+          },
+        })
+
+        return newPool
+      },
+      {
+        timeout: 30000,
       }
-
-      // Send Notification
-      await tx.notification.create({
-        data: {
-          userId: user.id,
-          title: 'Exam Booking Created',
-          message: `You have successfully created a new exam booking for module ${poolModuleCode} and reserved your seat.`,
-          type: 'SUCCESS',
-          linkUrl: '/student/exam-bookings/my-bookings',
-          linkText: 'View Bookings',
-        },
-      })
-
-      return newPool
-    }, {
-      timeout: 30000
-    })
+    )
 
     revalidatePath('/student/exam-bookings')
     revalidatePath('/student/wallet')
     revalidatePath('/student')
 
     return { success: true, poolId: pool.id }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(
       'Create Student Pool Error:',
       error instanceof Error ? error.message : 'Unknown error'
@@ -607,12 +637,17 @@ export async function payPendingExamBooking(bookingId: string) {
     })
 
     if (!booking) return { error: 'Booking not found.' }
-    if (booking.status !== PaymentStatus.PENDING) return { error: 'This booking is not pending payment.' }
+    if (booking.status !== PaymentStatus.PENDING)
+      return { error: 'This booking is not pending payment.' }
 
     // If it's part of a group, we pay for the entire group
     const groupBookings = booking.bookingGroupRef
       ? await prisma.examBooking.findMany({
-          where: { bookingGroupRef: booking.bookingGroupRef, userId: user.id, status: PaymentStatus.PENDING },
+          where: {
+            bookingGroupRef: booking.bookingGroupRef,
+            userId: user.id,
+            status: PaymentStatus.PENDING,
+          },
         })
       : [booking]
 
@@ -624,35 +659,37 @@ export async function payPendingExamBooking(bookingId: string) {
       return { error: 'Insufficient funds in wallet. Please top up.' }
     }
 
+    await prisma.$transaction(
+      async (tx) => {
+        await chargeWallet(
+          tx,
+          user.id,
+          totalAmount,
+          `Payment for ${booking.bookingGroupRef ? 'Bundle' : 'Exam'}: ${booking.moduleCode || 'Invoiced'}`,
+          booking.id,
+          'EXAM_BOOKING'
+        )
 
-    await prisma.$transaction(async (tx) => {
-      await chargeWallet(
-        tx,
-        user.id,
-        totalAmount,
-        `Payment for ${booking.bookingGroupRef ? 'Bundle' : 'Exam'}: ${booking.moduleCode || 'Invoiced'}`,
-        booking.id,
-        'EXAM_BOOKING'
-      )
+        await tx.examBooking.updateMany({
+          where: { id: { in: groupBookings.map((b) => b.id) } },
+          data: { status: PaymentStatus.APPROVED },
+        })
 
-      await tx.examBooking.updateMany({
-        where: { id: { in: groupBookings.map((b) => b.id) } },
-        data: { status: PaymentStatus.APPROVED },
-      })
-
-      await tx.notification.create({
-        data: {
-          userId: user.id,
-          title: 'Exam Payment Successful',
-          message: `Your payment was processed. Seats for ${groupBookings.length} module(s) are now secured.`,
-          type: 'SUCCESS',
-          linkUrl: '/student/exams',
-          linkText: 'View My Exams',
-        },
-      })
-    }, {
-      timeout: 20000
-    })
+        await tx.notification.create({
+          data: {
+            userId: user.id,
+            title: 'Exam Payment Successful',
+            message: `Your payment was processed. Seats for ${groupBookings.length} module(s) are now secured.`,
+            type: 'SUCCESS',
+            linkUrl: '/student/exams',
+            linkText: 'View My Exams',
+          },
+        })
+      },
+      {
+        timeout: 20000,
+      }
+    )
 
     revalidatePath('/student/exams')
     revalidatePath('/student/wallet')
@@ -687,6 +724,18 @@ export async function changePassword(current: string, newPass: string) {
   }
 }
 
+interface UserSettings {
+  notifications?: {
+    email?: boolean
+    sms?: boolean
+    push?: boolean
+  }
+  appearance?: {
+    theme?: 'light' | 'dark' | 'system'
+  }
+  [key: string]: unknown
+}
+
 export async function updateEmailNotifications(enabled: boolean) {
   const user = await requireStudent()
 
@@ -696,7 +745,7 @@ export async function updateEmailNotifications(enabled: boolean) {
       select: { settings: true },
     })
 
-    const currentSettings = (dbUser?.settings as any) || {}
+    const currentSettings = (dbUser?.settings as UserSettings) || {}
     const newSettings = {
       ...currentSettings,
       notifications: {
@@ -718,18 +767,6 @@ export async function updateEmailNotifications(enabled: boolean) {
   }
 }
 
-interface UserSettings {
-  notifications?: {
-    email?: boolean;
-    sms?: boolean;
-    push?: boolean;
-  };
-  appearance?: {
-    theme?: 'light' | 'dark' | 'system';
-  };
-  [key: string]: any;
-}
-
 export async function updateUserSettings(settings: UserSettings) {
   const user = await requireStudent()
 
@@ -739,7 +776,7 @@ export async function updateUserSettings(settings: UserSettings) {
       select: { settings: true },
     })
 
-    const currentSettings = (dbUser?.settings as any) || {}
+    const currentSettings = (dbUser?.settings as UserSettings) || {}
     const newSettings = {
       ...currentSettings,
       ...settings,
@@ -795,7 +832,14 @@ export async function getAvailableRecipients() {
   const enrollments = await prisma.enrollment.findMany({
     where: {
       userId: session.user.id,
-      status: { in: [EnrollmentStatus.ACTIVE, EnrollmentStatus.ENROLLED, EnrollmentStatus.APPROVED, EnrollmentStatus.GRADUATED] },
+      status: {
+        in: [
+          EnrollmentStatus.ACTIVE,
+          EnrollmentStatus.ENROLLED,
+          EnrollmentStatus.APPROVED,
+          EnrollmentStatus.GRADUATED,
+        ],
+      },
     },
     include: {
       course: {
@@ -831,8 +875,20 @@ export async function getAvailableRecipients() {
     },
   })
 
+  type InstructorUser = {
+    id: string
+    email: string | null
+    role: string
+    profile: {
+      firstName: string
+      middleName: string | null
+      lastName: string
+      profilePhotoUrl: string | null
+    } | null
+  }
+
   // Extract unique instructors
-  const instructorMap = new Map<string, any>()
+  const instructorMap = new Map<string, InstructorUser>()
 
   enrollments.forEach((enrollment) => {
     enrollment.course.classes.forEach((cls) => {
@@ -860,11 +916,12 @@ export async function getAvailableRecipients() {
     roleOverride?: string
   ) => {
     const role = roleOverride || u.role
-    const roleLabel = role === 'INSTRUCTOR'
-      ? 'Instructor'
-      : role === 'SUPER_ADMIN' || role === 'ADMIN'
-        ? 'Administrator'
-        : 'Staff'
+    const roleLabel =
+      role === 'INSTRUCTOR'
+        ? 'Instructor'
+        : role === 'SUPER_ADMIN' || role === 'ADMIN'
+          ? 'Administrator'
+          : 'Staff'
     return {
       id: u.id,
       label: u.profile
@@ -984,55 +1041,15 @@ export async function bookStandaloneExamAction(params: {
     revalidatePath('/student/wallet')
     revalidatePath('/student')
     return { success: true, usedBundle: result.usedBundle }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('bookStandaloneExamAction error:', error)
-    return { error: error.message || 'Failed to book exam.' }
+    const message = error instanceof Error ? error.message : 'Failed to book exam.'
+    return { error: message }
   }
 }
 
 export async function bookBundleExamsAction(params: { moduleCodes: string[]; eventId: string }) {
   return bookBundleExamsAtomicAction(params)
-
-  try {
-    const user = await requireStudent()
-    await assertExamOnlyPathway(user.id)
-    const { moduleCodes, eventId } = params
-
-    if (!moduleCodes.length || !eventId) {
-      return { error: 'Missing booking parameters.' }
-    }
-
-    // Book all modules — if any fails, the entire batch is rolled back
-    const results: { moduleCode: string; usedBundle: boolean }[] = []
-    for (const moduleCode of moduleCodes) {
-      const result = await bookStandaloneExam(user.id, { moduleCode, eventId })
-      results.push({ moduleCode, usedBundle: result.usedBundle })
-    }
-
-    const usedBundle = results.some((r) => r.usedBundle)
-    const typeStr = usedBundle ? 'Exam Package seats' : 'wallet balance'
-    const modulesStr = moduleCodes.join(', ')
-
-    await prisma.notification.create({
-      data: {
-        userId: user.id,
-        title: `Bundle Booking Confirmed (${moduleCodes.length} seats)`,
-        message: `You booked modules ${modulesStr} using ${typeStr}.`,
-        type: 'SUCCESS',
-        linkUrl: '/student/exams',
-        linkText: 'View Exams',
-      },
-    })
-
-    revalidatePath('/student/exam-bookings')
-    revalidatePath('/student/exams')
-    revalidatePath('/student/wallet')
-    revalidatePath('/student')
-    return { success: true, bookedCount: results.length }
-  } catch (error: any) {
-    console.error('bookBundleExamsAction error:', error)
-    return { error: error.message || 'Failed to book bundle. No seats were reserved.' }
-  }
 }
 
 export async function bookBundleExamsAtomicAction(params: {
@@ -1055,8 +1072,7 @@ export async function bookBundleExamsAtomicAction(params: {
     }
 
     const pricing = await getExamPricingConfig()
-    const bundlePrice =
-      bookingType === 'TWIN_PACK' ? pricing.twoSeatBundle : pricing.fourSeatBundle
+    const bundlePrice = bookingType === 'TWIN_PACK' ? pricing.twoSeatBundle : pricing.fourSeatBundle
     const components = await prisma.examComponent.findMany({
       where: { code: { in: moduleCodes } },
       include: { course: true },
@@ -1069,9 +1085,14 @@ export async function bookBundleExamsAtomicAction(params: {
     const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
     if (
       targetCategories.length > 0 &&
-      components.some((component) => !categoryMatchesTarget(component.categoryCode, targetCategories))
+      components.some(
+        (component) => !categoryMatchesTarget(component.categoryCode, targetCategories)
+      )
     ) {
-      return { error: 'One or more selected module categories are not part of your selected licence pathway.' }
+      return {
+        error:
+          'One or more selected module categories are not part of your selected licence pathway.',
+      }
     }
 
     const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
@@ -1150,9 +1171,121 @@ export async function bookBundleExamsAtomicAction(params: {
     revalidatePath('/student/wallet')
     revalidatePath('/student')
     return { success: true, bookedCount: components.length }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('bookBundleExamsAtomicAction error:', error)
-    return { error: error.message || 'Failed to book bundle. No seats were reserved.' }
+    return {
+      error:
+        error instanceof Error ? error.message : 'Failed to book bundle. No seats were reserved.',
+    }
+  }
+}
+
+export async function useExistingBundleSeatsAction(params: {
+  moduleCodes: string[]
+  eventId: string
+  bundleId: string
+}) {
+  try {
+    const user = await requireStudent()
+    await assertExamOnlyPathway(user.id)
+    const { moduleCodes, eventId, bundleId } = params
+
+    if (!moduleCodes.length || !eventId || !bundleId) {
+      return { error: 'Missing booking parameters.' }
+    }
+
+    // Verify the bundle belongs to this user and has remaining seats
+    const bundle = await prisma.examBundle.findFirst({
+      where: {
+        id: bundleId,
+        userId: user.id,
+        status: 'ACTIVE',
+        validUntil: { gt: new Date() },
+      },
+    })
+    if (!bundle) {
+      return { error: 'Active bundle not found.' }
+    }
+    if (bundle.usedSeats + moduleCodes.length > bundle.totalSeats) {
+      return {
+        error: `Not enough seats. Bundle has ${bundle.totalSeats - bundle.usedSeats} remaining but you selected ${moduleCodes.length}.`,
+      }
+    }
+
+    const components = await prisma.examComponent.findMany({
+      where: { code: { in: moduleCodes } },
+      include: { course: true },
+    })
+    if (components.length !== moduleCodes.length) {
+      return { error: 'One or more selected modules could not be found.' }
+    }
+
+    const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
+    if (
+      targetCategories.length > 0 &&
+      components.some(
+        (component) => !categoryMatchesTarget(component.categoryCode, targetCategories)
+      )
+    ) {
+      return {
+        error:
+          'One or more selected module categories are not part of your selected licence pathway.',
+      }
+    }
+
+    const bookingType = bundle.bundleType === 'TWO_SEAT' ? 'TWIN_PACK' : 'FOUR_PACK'
+
+    await prisma.$transaction(
+      async (tx) => {
+        for (const component of components) {
+          const result = await placeExamBookingInStandardPool(tx, {
+            userId: user.id,
+            eventId,
+            examComponentId: component.id,
+            moduleCode: component.course.code,
+            bookingType,
+            reserveAmount: 0,
+            bundleId: bundle.id,
+          })
+          if (!result.success) {
+            throw new Error(result.error || `Failed to place module ${component.course.code}.`)
+          }
+        }
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        timeout: 20000,
+      }
+    )
+
+    const typeStr =
+      bookingType === 'TWIN_PACK' ? 'Twin Pack' : bookingType === 'FOUR_PACK' ? '4-Pack' : 'exam'
+    const modulesStr = components.map((c) => c.code).join(', ')
+
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        title: `Bundle Seats Used (${moduleCodes.length})`,
+        message: `You booked modules ${modulesStr} using your existing ${typeStr} bundle.`,
+        type: 'SUCCESS',
+        linkUrl: '/student/exam-bookings',
+        linkText: 'View Bookings',
+      },
+    })
+
+    revalidatePath('/student/exam-bookings')
+    revalidatePath('/student/exams')
+    revalidatePath('/student/wallet')
+    revalidatePath('/student')
+    return { success: true, bookedCount: components.length }
+  } catch (error: unknown) {
+    console.error('useExistingBundleSeatsAction error:', error)
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to use bundle seats. No seats were reserved.',
+    }
   }
 }
 
@@ -1165,7 +1298,11 @@ export async function bookResitExamAction(moduleCode: string, eventId: string) {
       select: { categoryCode: true },
     })
     const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
-    if (component && targetCategories.length > 0 && !categoryMatchesTarget(component.categoryCode, targetCategories)) {
+    if (
+      component &&
+      targetCategories.length > 0 &&
+      !categoryMatchesTarget(component.categoryCode, targetCategories)
+    ) {
       return { error: 'This resit category is not part of your selected licence pathway.' }
     }
     await bookResitExam(user.id, moduleCode, eventId)
@@ -1185,9 +1322,9 @@ export async function bookResitExamAction(moduleCode: string, eventId: string) {
     revalidatePath('/student/wallet')
     revalidatePath('/student')
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('bookResitExamAction error:', error)
-    return { error: error.message || 'Failed to book resit exam.' }
+    return { error: error instanceof Error ? error.message : 'Failed to book resit exam.' }
   }
 }
 
@@ -1236,8 +1373,11 @@ export async function cancelMyBookingAction(bookingId: string, reason?: string) 
       refundAmount: result.refundAmount,
       refundType: result.refundType,
     }
-  } catch (error: any) {
-    console.error('cancelMyBookingAction error:', error instanceof Error ? error.message : 'Unknown error')
+  } catch (error: unknown) {
+    console.error(
+      'cancelMyBookingAction error:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
     return { error: 'Failed to cancel booking. Please try again.' }
   }
 }
@@ -1245,13 +1385,13 @@ export async function cancelMyBookingAction(bookingId: string, reason?: string) 
 export async function changeModuleBookingAction(bookingId: string, newModuleCode: string) {
   try {
     const user = await requireStudent()
-    
+
     // Find the booking
     const booking = await prisma.examBooking.findUnique({
       where: { id: bookingId },
       include: {
         poolMemberships: { include: { pool: { include: { memberships: true } } } },
-      }
+      },
     })
 
     if (!booking || booking.userId !== user.id) {
@@ -1263,7 +1403,7 @@ export async function changeModuleBookingAction(bookingId: string, newModuleCode
       where: {
         userId: user.id,
         status: 'ACTIVE',
-      }
+      },
     })
 
     if (!bundle || bundle.freeModuleChanges <= bundle.usedModuleChanges) {
@@ -1285,29 +1425,29 @@ export async function changeModuleBookingAction(bookingId: string, newModuleCode
         data: {
           moduleCode: newModuleCode,
           examComponentId: newComponent.id,
-        }
+        },
       })
 
       // Update pool membership if exists
       if (booking.poolMemberships.length > 0) {
         await tx.poolMembership.updateMany({
           where: { bookingId },
-          data: { examComponentId: newComponent.id }
+          data: { examComponentId: newComponent.id },
         })
       }
 
       // Consume a free change
       await tx.examBundle.update({
         where: { id: bundle.id },
-        data: { usedModuleChanges: { increment: 1 } }
+        data: { usedModuleChanges: { increment: 1 } },
       })
     })
 
     revalidatePath('/student/exam-bookings')
     revalidatePath('/student/exam-bookings/' + bookingId)
     return { success: true }
-  } catch (error: any) {
-    return { error: error.message || 'Failed to change module.' }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Failed to change module.' }
   }
 }
 
@@ -1334,8 +1474,11 @@ export async function createGroupBookingAction(params: {
     revalidatePath('/student/wallet')
     revalidatePath('/student')
     return { success: true, poolId: result.pool.id, bookingId: result.booking.id }
-  } catch (error: any) {
-    console.error('createGroupBookingAction error:', error instanceof Error ? error.message : 'Unknown error')
+  } catch (error: unknown) {
+    console.error(
+      'createGroupBookingAction error:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
     return { error: error instanceof Error ? error.message : 'Failed to create group booking.' }
   }
 }
@@ -1343,10 +1486,10 @@ export async function createGroupBookingAction(params: {
 export async function setReferrerAction(input: string) {
   try {
     const user = await requireStudent()
-    
+
     // 1. Check if already referred (one person can only be referred by one person)
     const existingReferral = await prisma.referral.findFirst({
-      where: { refereeId: user.id }
+      where: { refereeId: user.id },
     })
 
     if (existingReferral) {
@@ -1358,9 +1501,9 @@ export async function setReferrerAction(input: string) {
       where: {
         OR: [
           { email: input.toLowerCase().trim() },
-          { referralCode: { equals: input.trim(), mode: 'insensitive' } }
-        ]
-      }
+          { referralCode: { equals: input.trim(), mode: 'insensitive' } },
+        ],
+      },
     })
 
     if (!referrer) {
@@ -1379,8 +1522,8 @@ export async function setReferrerAction(input: string) {
     const circularReferral = await prisma.referral.findFirst({
       where: {
         referrerId: user.id,
-        refereeId: referrer.id
-      }
+        refereeId: referrer.id,
+      },
     })
 
     if (circularReferral) {
@@ -1391,13 +1534,13 @@ export async function setReferrerAction(input: string) {
       data: {
         referrerId: referrer.id,
         refereeId: user.id,
-        status: 'PENDING'
-      }
+        status: 'PENDING',
+      },
     })
 
     revalidatePath('/student/ambassador')
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('setReferrerAction error:', error)
     return { error: 'Failed to set referrer.' }
   }
@@ -1431,7 +1574,9 @@ export async function createCalendarEvent(data: {
         startDate: new Date(data.startDate),
         endDate: data.endDate ? new Date(data.endDate) : null,
         color: data.color || '#3b82f6',
-        recurrenceType: (data.recurrenceType as any) || 'NONE',
+        recurrenceType:
+          (data.recurrenceType as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM' | undefined) ||
+          'NONE',
         recurrenceDays: data.recurrenceDays || null,
         recurrenceUntil: data.recurrenceUntil ? new Date(data.recurrenceUntil) : null,
       },
@@ -1475,11 +1620,17 @@ export async function updateCalendarEvent(
         ...(data.title !== undefined && { title: data.title.trim() }),
         ...(data.description !== undefined && { description: data.description.trim() || null }),
         ...(data.startDate && { startDate: new Date(data.startDate) }),
-        ...(data.endDate !== undefined && { endDate: data.endDate ? new Date(data.endDate) : null }),
+        ...(data.endDate !== undefined && {
+          endDate: data.endDate ? new Date(data.endDate) : null,
+        }),
         ...(data.color && { color: data.color }),
-        ...(data.recurrenceType !== undefined && { recurrenceType: data.recurrenceType as any }),
+        ...(data.recurrenceType !== undefined && {
+          recurrenceType: data.recurrenceType as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM',
+        }),
         ...(data.recurrenceDays !== undefined && { recurrenceDays: data.recurrenceDays || null }),
-        ...(data.recurrenceUntil !== undefined && { recurrenceUntil: data.recurrenceUntil ? new Date(data.recurrenceUntil) : null }),
+        ...(data.recurrenceUntil !== undefined && {
+          recurrenceUntil: data.recurrenceUntil ? new Date(data.recurrenceUntil) : null,
+        }),
       },
     })
 

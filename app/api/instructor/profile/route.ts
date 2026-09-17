@@ -1,12 +1,11 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
-import { requireAuth, verifyPassword, hashPassword } from '@/lib/auth/helpers'
+import { requireAuth } from '@/lib/auth/helpers'
 import { apiSuccess, apiForbidden, apiError, withErrorHandler } from '@/lib/api/response'
-import { updateProfileSchema, changePasswordSchema, validateBody } from '@/lib/validation/schemas'
-import { createAuditLog } from '@/lib/audit/logger'
+import { updateProfileSchema, validateBody } from '@/lib/validation/schemas'
 import { UserRole } from '@prisma/client'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   const user = await requireAuth()
   if (user.role !== UserRole.INSTRUCTOR) return apiForbidden('Instructor access required')
 

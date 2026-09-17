@@ -1,9 +1,9 @@
 import prisma from '@/lib/prisma/client'
+import { Prisma } from '@prisma/client'
 import { joinPoolInternal } from './join'
 import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export async function joinWaitlist(poolId: string, userId: string, examComponentId: string) {
-  // 1. Check if already on waitlist
   const existing = await prisma.poolWaitlist.findUnique({
     where: {
       poolId_userId_examComponentId: {
@@ -17,7 +17,6 @@ export async function joinWaitlist(poolId: string, userId: string, examComponent
     return { success: false, error: 'You are already on the waitlist for this pool.' }
   }
 
-  // 2. Check if already a member
   const inPool = await prisma.poolMembership.findFirst({
     where: { poolId, userId, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
   })
@@ -25,7 +24,6 @@ export async function joinWaitlist(poolId: string, userId: string, examComponent
     return { success: false, error: 'You are already a member of this pool.' }
   }
 
-  // 3. Get next priority
   const lastEntry = await prisma.poolWaitlist.findFirst({
     where: { poolId },
     orderBy: { priority: 'desc' },
@@ -45,11 +43,17 @@ export async function joinWaitlist(poolId: string, userId: string, examComponent
   return { success: true, entry }
 }
 
-/**
- * Attempts to promote the next person on the waitlist into the pool.
- * Must be called within a transaction that has already locked the pool row.
- */
-export async function promoteNextFromWaitlist(poolId: string, tx: any): Promise<any> {
+export interface WaitlistPromotionResult {
+  candidate: { id: string; userId: string; examComponentId: string; status: string }
+  result: {
+    success: boolean
+    membership?: { id: string } | Prisma.PoolMembershipGetPayload<{}>
+    booking?: { id: string } | Prisma.ExamBookingGetPayload<{}> | null
+    pool?: { id: string; name: string }
+  }
+}
+
+export async function promoteNextFromWaitlist(poolId: string, tx: Prisma.TransactionClient): Promise<WaitlistPromotionResult | null> {
   const next = await tx.poolWaitlist.findFirst({
     where: { poolId, status: 'PENDING' },
     orderBy: { priority: 'asc' },
@@ -62,7 +66,6 @@ export async function promoteNextFromWaitlist(poolId: string, tx: any): Promise<
     select: { course: { select: { code: true } } },
   })
 
-  // Attempt to join the pool using the internal function
   const result = await joinPoolInternal(tx, {
     poolId,
     userId: next.userId,
@@ -71,19 +74,16 @@ export async function promoteNextFromWaitlist(poolId: string, tx: any): Promise<
   })
 
   if (result.success) {
-    // Mark waitlist entry as PROMOTED
     await tx.poolWaitlist.update({
       where: { id: next.id },
-      data: { status: 'PROMOTED' },
+      data: { status: 'CONFIRMED' },
     })
-    return { candidate: next, result }
+    return { candidate: next, result: { success: result.success, membership: result.membership, booking: result.booking, pool: result.pool } }
   } else {
-    // If promotion fails (e.g. no funds), mark entry as CANCELLED and try next
     await tx.poolWaitlist.update({
       where: { id: next.id },
-      data: { status: 'CANCELLED' },
+      data: { status: 'CANCELLED' as const },
     })
-    // Recursive call to try the next person
     return promoteNextFromWaitlist(poolId, tx)
   }
 }

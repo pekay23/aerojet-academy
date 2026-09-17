@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Anti-Cheat Examination System — Architecture &amp; Implementation Plan · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Plans</p>
+  <h1 class="he-title">Anti-Cheat Examination System — Architecture &amp; Implementation Plan</h1>
+  <p class="he-deck">---…</p>
+</header>
+<section class="he-section" id="goal"><div class="he-section__num">01 · Goal</div><h2 class="he-section__title">Goal</h2></section>
+<p>Build a secure online examination system for EASA Part-147 / Part-66 aviation training (aligned with Suntech Aviation-style workflows) that enforces exam integrity via browser-level lockdown, server-authoritative timing, randomized question delivery, access-code gating, pre-exam student detail capture, and automated certificate generation — all deployable as an intranet or public SaaS module inside the existing Aerojet Academy Next.js application.</p>
+<hr />
+<section class="he-section" id="1-regulatory-amp-threat-landscape-why-this-exists"><div class="he-section__num">02 · 1. Regulatory &amp;amp; Threat Landscape (Why This Exists)</div><h2 class="he-section__title">1. Regulatory &amp; Threat Landscape (Why This Exists)</h2></section>
+<h3 id="11-regulatory-drivers">1.1 Regulatory Drivers</h3>
+<ul>
+<li><strong>EASA ED Decision 2023/019/R</strong> mandates new training methods and teaching technologies for Part-147 MTOs, with explicit attention to examination integrity.</li>
+<li><strong>NPA 2023-10</strong> (EASA) targets fraud reduction in Part-147 examinations, requiring:
+<ul>
+<li>Controlled examination environments under full organisational control.</li>
+<li>Secure storage and randomised delivery of examination material.</li>
+<li>Automated grading with immediate result availability.</li>
+</ul>
+</li>
+<li><strong>H.C.A.A. (March 2025)</strong> now requires:
+<ul>
+<li>Computerised electronic examination (no paper).</li>
+<li>Random question generation per candidate.</li>
+<li>Automated grading with immediate score availability.</li>
+</ul>
+</li>
+<li><strong>FAA Part-147</strong> (14 CFR §147.23) requires testing integrity procedures, test security, and cheating-handling workflows.</li>
+<li><strong>EASA SIB 2014-32</strong> documented the HATA fraud case — certificates of recognition were fraudulently obtained and used to release aircraft without requisite knowledge.</li>
+</ul>
+<h3 id="12-threat-model-from-research">1.2 Threat Model (from research)</h3>
+<table>
+<thead>
+<tr><th>Threat</th><th>Severity</th><th>Mitigation in This Design</th></tr>
+</thead>
+<tbody>
+<tr><td>Pre-exam question leakage (memorisation / sharing)</td><td>Critical</td><td>Tight scheduling windows, randomised question banks, unique papers per candidate</td></tr>
+<tr><td>Tab-switch / search-engine lookup</td><td>High</td><td>Browser fullscreen lock, tab-switch detection, auto-submit on threshold</td></tr>
+<tr><td>Second device (phone under desk)</td><td>High</td><td>Webcam proctoring (AI + human review), suspicious-gaze detection</td></tr>
+<tr><td>Screen recording / screenshot</td><td>High</td><td>Clipboard block, PrintScreen block, right-click block, SEB-style lockdown</td></tr>
+<tr><td>Remote desktop / VM-based cheating</td><td>High</td><td>VM detection (RDTSC timing, thermal zone, SCSI ID), process blacklist kill</td></tr>
+<tr><td>Proxy candidate (someone else sits the exam)</td><td>High</td><td>Access-code login + identity verification + optional webcam face match</td></tr>
+<tr><td>Browser DevTools / inspect element</td><td>Medium</td><td>DevTools detection, keyboard shortcut block, SEB enforcement</td></tr>
+<tr><td>Copy-paste of questions to AI tools</td><td>Medium</td><td>Copy-paste block, honeypot fields, invisible watermarking</td></tr>
+<tr><td>Post-exam answer sharing</td><td>Medium</td><td>Option shuffle + question shuffle, large question bank (&gt;5x required questions)</td></tr>
+<tr><td>Timer manipulation (client-side clock change)</td><td>Medium</td><td>Server-authoritative timer via WebSocket/SSE, not client clock</td></tr>
+<tr><td>Session hijacking / credential reuse</td><td>Medium</td><td>Single-device login, JWT with exam-session binding, IP/device fingerprint</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="2-system-architecture"><div class="he-section__num">03 · 2. System Architecture</div><h2 class="he-section__title">2. System Architecture</h2></section>
+<h3 id="21-high-level-layered-architecture">2.1 High-Level Layered Architecture</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                     Presentation Layer                       │
+│  Next.js 16 App Router (existing Aerojet codebase)          │
+│  - Exam portal pages (staff/instructor/student roles)        │
+│  - Secure exam delivery client (React + Tailwind)            │
+│  - Webcam + fullscreen + anti-cheat client SDK               │
+├─────────────────────────────────────────────────────────────┤
+│                     Delivery Gate                            │
+│  - Access-code validation (one-time use, time-bound)         │
+│  - Pre-exam student detail form                              │
+│  - Exam session creation (server-side state machine)         │
+│  - Question randomisation (server-side, never client)        │
+├─────────────────────────────────────────────────────────────┤
+│                     Integrity Layer                          │
+│  - Fullscreen enforcement + tab-switch detection             │
+│  - Clipboard / print-screen / DevTools block                 │
+│  - Webcam snapshot/video capture (server-side storage)       │
+│  - VM / process blacklist detection (client + server)        │
+│  - Keystroke dynamics + mouse pattern analysis               │
+│  - Violation event stream → audit log                        │
+├─────────────────────────────────────────────────────────────┤
+│                     Proctoring Gate                           │
+│  - AI flagging pipeline (gaze, multi-face, off-screen)       │
+│  - Human reviewer queue (flagged moments)                    │
+│  - Real-time proctor dashboard (staff/instructor view)       │
+├─────────────────────────────────────────────────────────────┤
+│                     Scoring Gate                              │
+│  - Server-side blind grading (correct answers never to client)│
+│  - Auto-grade MCQs; route essays to instructor rubric        │
+│  - Immediate result calculation + pass/fail logic            │
+├─────────────────────────────────────────────────────────────┤
+│                     Credential Gate                           │
+│  - Certificate of Recognition (CoR) generation               │
+│  - PDF with EASA-formatted fields (module, date, score)      │
+│  - Digital signature / hash chain for tamper evidence        │
+├─────────────────────────────────────────────────────────────┤
+│                     Integrity Spine                           │
+│  - Append-only audit log (cryptographic hash chain)          │
+│  - Every event: login, fullscreen, violation, submit, grade  │
+│  - Retention: 7–10 years per aviation regulation             │
+├─────────────────────────────────────────────────────────────┤
+│                     Data Layer                                │
+│  - PostgreSQL (existing Neon via Prisma dual-client)         │
+│  - Supabase Storage (exam recordings, snapshots)             │
+│  - Question bank (versioned, approval workflow)              │
+│  - Exam session, attempt, violation, certificate tables      │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="22-data-flow-happy-path">2.2 Data Flow (Happy Path)</h3>
+<ol>
+<li><strong>Administrator</strong> creates an exam session: selects module(s), sets time window, generates access codes, assigns candidates.</li>
+<li><strong>Student</strong> opens exam portal → enters access code → pre-exam detail form captures: full name, email, licence category, module(s), examination date, photo ID.</li>
+<li>System validates access code (one-time, time-windowed, candidate-bound) → creates <code>ExamAttempt</code> record.</li>
+<li><strong>Delivery Gate</strong> serves first question block. Server has already randomised question order and shuffled options. Correct answers are stored server-side only.</li>
+<li>Client enters <strong>forced fullscreen</strong>. Anti-cheat SDK activates: tab-switch listener, clipboard block, keyboard shortcut block, webcam capture every 15s.</li>
+<li>Student answers. Each answer auto-saves to server (save-as-you-go). Timer runs server-side via SSE push.</li>
+<li>On submit (manual or auto-submit after N violations / timer expiry):
+<ul>
+<li>Client sends answer set.</li>
+<li><strong>Scoring Gate</strong> grades server-side via <code>SECURITY DEFINER</code> function.</li>
+<li>Result stored, audit log updated.</li>
+</ul>
+</li>
+<li>If pass: <strong>Credential Gate</strong> generates signed Certificate of Recognition PDF (EASA Part-66 compliant fields).</li>
+<li>All events appended to <strong>Integrity Spine</strong> audit log with hash chain.</li>
+</ol>
+<hr />
+<section class="he-section" id="3-module-breakdown"><div class="he-section__num">04 · 3. Module Breakdown</div><h2 class="he-section__title">3. Module Breakdown</h2></section>
+<h3 id="31-exam-configuration-admin-instructor">3.1 Exam Configuration (Admin / Instructor)</h3>
+<ul>
+<li><strong>Exam Builder</strong>: author MCQs (and essay) with module/subsection taxonomy matching EASA Part-66 Appendix I.</li>
+<li><strong>Question Bank</strong>: versioned, approval workflow, minimum 5x required questions per exam for high randomisation.</li>
+<li><strong>Exam Session</strong>: schedule window, duration, access-code list, candidate allowlist, VM detection toggle, SEB requirement toggle, violation threshold (default: 3 strikes → auto-submit).</li>
+<li><strong>Access Code Management</strong>: 32-char codes (excludes 0/O/1/I), one-time use, expiry, candidate-binding.</li>
+</ul>
+<h3 id="32-pre-exam-student-detail-form">3.2 Pre-Exam Student Detail Form</h3>
+<p>Fields required for EASA Certificate of Recognition:</p>
+<ul>
+<li>Full legal name (as per passport / national ID)</li>
+<li>Date of birth</li>
+<li>Nationality / country of residence</li>
+<li>Email address</li>
+<li>Phone number</li>
+<li>EASA licence category applied for (B1.1, B1.2, B2, etc.)</li>
+<li>Module(s) to be examined (M1–M17, type modules)</li>
+<li>Examination date (auto-filled from session schedule)</li>
+<li>Examination location (Part-147 approved centre)</li>
+<li>Candidate photo (uploaded via UploadThing → Supabase Storage)</li>
+<li>ID document number &amp; type (passport / national ID)</li>
+<li>Declaration of truthfulness (electronic signature / checkbox)</li>
+<li>Consent to proctoring (webcam, behavioural logging) — GDPR-compliant plain-language consent</li>
+</ul>
+<p>Form validation: Zod schema server-side + client-side. Submission creates <code>ExamRegistration</code> record linked to <code>ExamAttempt</code>.</p>
+<h3 id="33-exam-delivery-client-react">3.3 Exam Delivery Client (React)</h3>
+<ul>
+<li><strong>Fullscreen Gate</strong>: <code>requestFullscreen()</code> on mount; <code>fullscreenchange</code> listener logs exits; overlay blocks UI when not fullscreen.</li>
+<li><strong>Anti-Cheat SDK</strong> (client-side, <code>lib/exam/proctoring.ts</code>):
+<ul>
+<li><code>visibilitychange</code> → tab-switch counter</li>
+<li><code>keydown</code> → block Ctrl+C, Ctrl+V, Ctrl+P, PrintScreen, F12, Alt+Tab, Cmd+Tab</li>
+<li><code>paste</code> / <code>copy</code> / <code>cut</code> → clipboard block</li>
+<li><code>contextmenu</code> → right-click block</li>
+<li><code>beforeunload</code> → warn on accidental close</li>
+<li><code>devtools</code> detection → flag (periodic <code>debugger</code> timing trick + <code>window.outerWidth</code> check)</li>
+<li><code>BroadcastChannel</code> → multi-tab prevention</li>
+<li>Clipboard scrubber (periodic <code>navigator.clipboard.readText()</code> if permission granted)</li>
+</ul>
+</li>
+<li><strong>Question Renderer</strong>: one question per page or scroll; per-page timer persisted in <code>sessionStorage</code> (24h cookie).</li>
+<li><strong>Answer Persistence</strong>: auto-save to server every 2s or on selection change.</li>
+<li><strong>Webcam Capture</strong>: <code>getUserMedia</code> → capture still every 15s → upload to Supabase Storage. Camera-off detection after 30s gap.</li>
+<li><strong>SEB Integration</strong>: optional <code>.seb</code> config download; server verifies <code>X-SafeExamBrowser-RequestHash</code> against Browser Exam Key.</li>
+</ul>
+<h3 id="34-server-authoritative-timer">3.4 Server-Authoritative Timer</h3>
+<ul>
+<li>Timer started on <code>ExamAttempt</code> creation, stored in DB.</li>
+<li>SSE endpoint pushes remaining time every 1s.</li>
+<li>Client cannot extend timer; if client disconnects, server auto-submits at deadline.</li>
+<li>Warning toast at 60s remaining.</li>
+</ul>
+<h3 id="35-auto-submit-on-key-press-mcq-mode">3.5 Auto-Submit on Key Press (MCQ Mode)</h3>
+<ul>
+<li>User requirement: &quot;hitting any key on the keyboard auto submits the session.&quot;</li>
+<li>Implementation:
+<ul>
+<li>In exam mode, a hidden <code>&lt;input&gt;</code> is always focused.</li>
+<li><code>keydown</code> listener on document: if exam config <code>strictMode: true</code>, any key press (excluding navigation keys if configured) triggers <code>handleSubmit()</code>.</li>
+<li>Debounce 100ms to prevent double-submit from key-hold.</li>
+<li>Violation logged: <code>violationType: 'KEY_PRESS_SUBMIT'</code>.</li>
+<li>Client shows confirmation toast: &quot;Key press detected. Exam auto-submitted.&quot;</li>
+</ul>
+</li>
+</ul>
+<h3 id="36-server-side-blind-grading">3.6 Server-Side Blind Grading</h3>
+<ul>
+<li>Correct answers stored in <code>answer_keys</code> table (RLS: admin-only read).</li>
+<li>Grading executed in PostgreSQL <code>SECURITY DEFINER</code> function:
+<pre><code class="language-sql">CREATE OR REPLACE FUNCTION submit_attempt(p_attempt_id UUID)
+RETURNS TABLE(score INT, passed BOOLEAN) AS $$
+BEGIN
+  -- validate attempt ownership, compute score, update attempt, log audit
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+</code></pre>
+</li>
+<li>MCQ: 1 point per correct answer; pass mark per EASA (typically 72%–75% per module).</li>
+<li>Essay: routed to instructor rubric grading UI.</li>
+</ul>
+<h3 id="37-certificate-of-recognition-cor-generation">3.7 Certificate of Recognition (CoR) Generation</h3>
+<ul>
+<li>PDF generated via <code>pdf-lib</code> or <code>react-pdf</code> on server.</li>
+<li>Fields:
+<ul>
+<li>Candidate name, licence category, module(s)</li>
+<li>Examination date &amp; location</li>
+<li>Score &amp; pass/fail status</li>
+<li>Part-147 MTO name, approval number (e.g., SI.147.005)</li>
+<li>Unique certificate ID (hash of attempt + timestamp)</li>
+<li>Digital signature placeholder (future: PKI)</li>
+</ul>
+</li>
+<li>Stored in Supabase Storage; download link in student portal.</li>
+<li>Hash of PDF appended to audit log.</li>
+</ul>
+<h3 id="38-audit-amp-compliance-spine">3.8 Audit &amp; Compliance Spine</h3>
+<ul>
+<li><code>audit_logs</code> table: <code>id, actor_id, target_id, action, description, changes JSONB, ip_address, user_agent, created_at</code>.</li>
+<li>Cryptographic hash chain: each entry stores <code>previous_hash</code>; <code>SELECT ... ORDER BY created_at</code> allows integrity verification.</li>
+<li>Immutable: no UPDATE/DELETE allowed; only INSERT.</li>
+<li>EASA-required retention: 7 years minimum.</li>
+</ul>
+<hr />
+<section class="he-section" id="4-integration-with-existing-aerojet-academy"><div class="he-section__num">05 · 4. Integration with Existing Aerojet Academy</div><h2 class="he-section__title">4. Integration with Existing Aerojet Academy</h2></section>
+<h3 id="41-routes-nextjs-app-router">4.1 Routes (Next.js App Router)</h3>
+<pre><code>app/
+  (staff)/
+    exams/
+      page.tsx                    # Admin dashboard: exam list, create button
+      create/
+        page.tsx                  # Exam builder
+      [id]/
+        page.tsx                  # Exam config / candidate management
+        candidates/
+          page.tsx                # Candidate list, access-code generation
+  (student)/
+    exams/
+      page.tsx                    # Available exams list
+      [code]/
+        page.tsx                  # Access-code entry + pre-exam form
+      attempt/
+        [id]/
+          page.tsx                # Secure exam delivery
+          submit/
+            page.tsx              # Result + certificate download
+  api/
+    exams/
+      route.ts                    # CRUD for exam sessions
+      [id]/access-codes/
+        route.ts                  # Generate / validate access codes
+      [id]/attempts/
+        route.ts                  # Create attempt, submit, grade
+    exams/proctoring/
+      events/
+        route.ts                  # Receive client-side violation events
+      webcam/
+        route.ts                  # Upload webcam snapshots
+    exams/certificate/
+      [attemptId]/
+        route.ts                  # Generate and return signed PDF
+    exams/audit/
+      route.ts                    # Query audit log for exam session
+</code></pre>
+<h3 id="42-database-schema-prisma">4.2 Database Schema (Prisma)</h3>
+<pre><code class="language-prisma">model Exam {
+  id            String    @id @default(cuid())
+  title         String
+  moduleCode    String    // e.g. &quot;M1&quot;, &quot;M7&quot;
+  licenceCategory String  // e.g. &quot;B1.1&quot;, &quot;B2&quot;
+  durationMinutes Int
+  passMark      Int       // percentage, e.g. 72
+  config        Json      // fullscreen, sebRequired, violationThreshold, etc.
+  status        String    // draft | active | archived
+  createdById   String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  questions     ExamQuestion[]
+  sessions      ExamSession[]
+}
+
+model ExamSession {
+  id              String    @id @default(cuid())
+  examId          String
+  exam            Exam      @relation(fields: [examId], references: [id])
+  startTime       DateTime
+  endTime         DateTime
+  location        String?   // Part-147 approved centre
+  accessCodes     ExamAccessCode[]
+  registrations   ExamRegistration[]
+  attempts        ExamAttempt[]
+  createdAt       DateTime  @default(now())
+}
+
+model ExamAccessCode {
+  id          String    @id @default(cuid())
+  sessionId   String
+  session     ExamSession @relation(fields: [sessionId], references: [id])
+  code        String    @unique
+  candidateId String?   // bound to specific candidate
+  used        Boolean   @default(false)
+  usedAt      DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+}
+
+model ExamRegistration {
+  id              String    @id @default(cuid())
+  sessionId       String
+  session         ExamSession @relation(fields: [sessionId], references: [id])
+  userId          String
+  fullName        String
+  email           String
+  dob             DateTime?
+  nationality     String?
+  licenceCategory String
+  moduleCode      String
+  examDate        DateTime
+  examLocation    String
+  idDocumentType  String?
+  idDocumentNumber String?
+  photoUrl        String?
+  consentGiven    Boolean   @default(false)
+  signatureData   String?   // base64 of drawn signature or checkbox IP
+  submittedAt     DateTime  @default(now())
+  attempt         ExamAttempt?
+}
+
+model ExamAttempt {
+  id              String    @id @default(cuid())
+  registrationId  String    @unique
+  registration    ExamRegistration @relation(fields: [registrationId], references: [id])
+  examId          String
+  exam            Exam      @relation(fields: [examId], references: [id])
+  startedAt       DateTime  @default(now())
+  submittedAt     DateTime?
+  score           Int?
+  passed          Boolean?
+  autoSubmitted   Boolean   @default(false)
+  violationCount  Int       @default(0)
+  certificateUrl  String?
+  answers         ExamAnswer[]
+  violations      ExamViolation[]
+}
+
+model ExamAnswer {
+  id            String   @id @default(cuid())
+  attemptId     String
+  attempt       ExamAttempt @relation(fields: [attemptId], references: [id])
+  questionId    String
+  selectedOption String?  // MCQ: &quot;A&quot; | &quot;B&quot; | &quot;C&quot; | &quot;D&quot;
+  textAnswer    String?  // Essay
+  isCorrect     Boolean?  // populated at grading time
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([attemptId, questionId])
+}
+
+model ExamViolation {
+  id          String   @id @default(cuid())
+  attemptId   String
+  attempt     ExamAttempt @relation(fields: [attemptId], references: [id])
+  type        String   // FULLSCREEN_EXIT | TAB_SWITCH | KEY_PRESS_SUBMIT | CLIPBOARD | DEVTOOLS | VM_DETECTED | CAMERA_OFF
+  severity    String   // warning | critical
+  detail      String?
+  timestamp   DateTime @default(now())
+}
+
+model ExamQuestion {
+  id            String   @id @default(cuid())
+  examId        String
+  exam          Exam     @relation(fields: [examId], references: [id])
+  questionText  String
+  questionType  String   // mcq | essay | msq
+  options       Json?    // [&quot;A) ...&quot;, &quot;B) ...&quot;, ...]
+  correctAnswer String   // never sent to client
+  explanation   String?
+  moduleSubsection String?
+  knowledgeLevel Int?    // 1 | 2 | 3 per EASA
+  sortOrder     Int?
+  createdAt     DateTime @default(now())
+}
+</code></pre>
+<h3 id="43-reuse-of-existing-aerojet-infrastructure">4.3 Reuse of Existing Aerojet Infrastructure</h3>
+<ul>
+<li><strong>Prisma dual-client</strong>: use <code>prismaUnfiltered</code> in exam admin routes; RLS client for student self-service.</li>
+<li><strong>UploadThing</strong>: candidate photo upload in pre-exam form.</li>
+<li><strong>Supabase Storage</strong>: webcam snapshots, certificate PDFs.</li>
+<li><strong>Email (Resend)</strong>: send access codes, result notifications, certificate download links.</li>
+<li><strong>Auth helpers</strong>: <code>requireStaff</code>, <code>requireInstructor</code>, <code>requireStudent</code> from <code>lib/auth/helpers.ts</code>.</li>
+<li><strong>Audit logger</strong>: extend <code>lib/audit/logger.ts</code> with <code>ExamAction</code> enum.</li>
+<li><strong>Cached queries</strong>: cache active exams, upcoming sessions.</li>
+<li><strong>Loading skeletons</strong>: <code>TableSkeleton</code>, <code>DashboardSkeleton</code> for exam lists.</li>
+</ul>
+<hr />
+<section class="he-section" id="5-security-controls-by-layer-defense-in-depth"><div class="he-section__num">06 · 5. Security Controls by Layer (Defense in Depth)</div><h2 class="he-section__title">5. Security Controls by Layer (Defense in Depth)</h2></section>
+<h3 id="51-client-side-controls">5.1 Client-Side Controls</h3>
+<table>
+<thead>
+<tr><th>Control</th><th>Implementation</th><th>Bypass Risk</th></tr>
+</thead>
+<tbody>
+<tr><td>Fullscreen lock</td><td>Fullscreen API + <code>fullscreenchange</code> listener + overlay</td><td>Medium (user can Esc out; overlay warns)</td></tr>
+<tr><td>Tab-switch detection</td><td><code>visibilitychange</code> + <code>blur</code> events</td><td>Low (cannot spoof from within browser)</td></tr>
+<tr><td>Clipboard block</td><td><code>copy</code>/<code>cut</code>/<code>paste</code> event <code>preventDefault()</code></td><td>Medium (clipboard API, DevTools)</td></tr>
+<tr><td>DevTools detection</td><td><code>debugger</code> timing + <code>window.outerWidth - innerWidth</code></td><td>Low-Medium</td></tr>
+<tr><td>PrintScreen block</td><td><code>keydown</code> on PrintScreen key</td><td>Low (OS-level screenshots bypass)</td></tr>
+<tr><td>Keyboard shortcut block</td><td><code>keydown</code> for Ctrl+C/V/P, Alt+Tab, F12</td><td>Medium (accessibility tools)</td></tr>
+<tr><td>Multi-tab prevention</td><td><code>BroadcastChannel</code> + <code>localStorage</code> heartbeat</td><td>Low</td></tr>
+<tr><td>Webcam capture</td><td><code>getUserMedia</code> → snapshot every 15s</td><td>Medium (user can cover camera)</td></tr>
+<tr><td>SEB enforcement</td><td><code>.seb</code> config + <code>X-SafeExamBrowser-RequestHash</code></td><td>Low (requires SEB install)</td></tr>
+</tbody>
+</table>
+<h3 id="52-server-side-controls">5.2 Server-Side Controls</h3>
+<table>
+<thead>
+<tr><th>Control</th><th>Implementation</th><th>Bypass Risk</th></tr>
+</thead>
+<tbody>
+<tr><td>Server-authoritative timer</td><td>SSE push + DB <code>submittedAt</code> vs <code>startedAt</code> diff</td><td>Very Low</td></tr>
+<tr><td>Blind grading</td><td><code>SECURITY DEFINER</code> function; correct answers never to client</td><td>Very Low</td></tr>
+<tr><td>Access-code validation</td><td>One-time use, time-windowed, candidate-bound in DB</td><td>Very Low</td></tr>
+<tr><td>Single-device login</td><td><code>deviceFingerprint</code> stored on attempt creation</td><td>Low</td></tr>
+<tr><td>VM detection (server-side)</td><td>Client sends <code>navigator.hardwareConcurrency</code>, <code>WebGL</code> renderer, <code>screen</code> dimensions; anomaly scoring</td><td>Medium</td></tr>
+<tr><td>Audit log hash chain</td><td>Append-only with <code>previous_hash</code></td><td>Very Low</td></tr>
+<tr><td>RLS on exam data</td><td>Prisma RLS for student self-service; <code>prismaUnfiltered</code> for admin</td><td>Very Low</td></tr>
+</tbody>
+</table>
+<h3 id="53-physical-process-controls">5.3 Physical / Process Controls</h3>
+<ul>
+<li>Exam sessions scheduled in tight windows (e.g., 2 hours) to limit question-sharing.</li>
+<li>Proctor / invigilator required for on-site sessions (physical separation per 147.A.100(b)2).</li>
+<li>Post-exam statistical analysis: identical wrong-answer patterns, completion-time outliers, IP clustering.</li>
+</ul>
+<hr />
+<section class="he-section" id="6-uiux-flow"><div class="he-section__num">07 · 6. UI/UX Flow</div><h2 class="he-section__title">6. UI/UX Flow</h2></section>
+<h3 id="61-student-journey">6.1 Student Journey</h3>
+<ol>
+<li><strong>Landing</strong>: <code>/exams</code> → list of available exam sessions.</li>
+<li><strong>Access Code Entry</strong>: <code>/exams/[code]</code> → validate code → redirect to pre-exam form.</li>
+<li><strong>Pre-Exam Form</strong>: capture personal details, photo, consent. One-time per session.</li>
+<li><strong>Exam Gate</strong>: dark overlay listing active controls. &quot;Enter Fullscreen to Begin.&quot;</li>
+<li><strong>Exam Interface</strong>: question by question, timer at top, webcam thumbnail (bottom-right), violation counter (bottom-left). Navigation panel on right.</li>
+<li><strong>Auto-Submit</strong>: on threshold breach → red overlay → exam locked → redirect to results.</li>
+<li><strong>Results</strong>: score, pass/fail, violation summary, certificate download (if passed).</li>
+</ol>
+<h3 id="62-admin-instructor-journey">6.2 Admin / Instructor Journey</h3>
+<ol>
+<li><strong>Dashboard</strong>: <code>/staff/exams</code> → active sessions, pass rates, flagged attempts.</li>
+<li><strong>Exam Builder</strong>: wizard for module selection, question import (bulk CSV), randomised paper config.</li>
+<li><strong>Candidate Management</strong>: generate access codes, bulk upload candidate list, seat assignment.</li>
+<li><strong>Proctor Review</strong>: flagged moments (webcam snapshots + timeline), accept/dismiss workflow.</li>
+<li><strong>Certificate Management</strong>: view issued CoRs, reprint, verify authenticity (hash lookup).</li>
+</ol>
+<hr />
+<section class="he-section" id="7-technology-choices-amp-rationale"><div class="he-section__num">08 · 7. Technology Choices &amp;amp; Rationale</div><h2 class="he-section__title">7. Technology Choices &amp; Rationale</h2></section>
+<table>
+<thead>
+<tr><th>Component</th><th>Choice</th><th>Rationale</th></tr>
+</thead>
+<tbody>
+<tr><td>Framework</td><td>Next.js 16 (existing)</td><td>Zero new infra; SSR for SEO; API routes for backend logic</td></tr>
+<tr><td>Database</td><td>PostgreSQL (Neon) + Prisma</td><td>Existing dual-client pattern; RLS; <code>SECURITY DEFINER</code> functions</td></tr>
+<tr><td>Storage</td><td>Supabase Storage</td><td>Existing; webcam snapshots, certificates</td></tr>
+<tr><td>Auth</td><td>NextAuth.js (existing)</td><td>JWT sessions; role guards already wired</td></tr>
+<tr><td>Client State</td><td>Zustand</td><td>Lightweight; already used in mock-test reference</td></tr>
+<tr><td>PDF Generation</td><td><code>pdf-lib</code> (server)</td><td>No client-side deps; signed PDFs</td></tr>
+<tr><td>Anti-Cheat SDK</td><td>Custom (<code>lib/exam/proctoring.ts</code>)</td><td>Full control; SEB-compatible headers; no vendor lock-in</td></tr>
+<tr><td>Proctoring AI</td><td>Future: TensorFlow.js (client-side) or server-side worker pool</td><td>BlockProctor / VigilantEx reference architecture</td></tr>
+<tr><td>WebSocket / SSE</td><td>Native <code>EventSource</code></td><td>Low overhead; server-authoritative timer</td></tr>
+<tr><td>Audit Log</td><td>Custom table + hash chain</td><td>No third-party dependency; EASA retention compliant</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="8-implementation-phases"><div class="he-section__num">09 · 8. Implementation Phases</div><h2 class="he-section__title">8. Implementation Phases</h2></section>
+<h3 id="phase-1-core-exam-delivery-weeks-14">Phase 1: Core Exam Delivery (Weeks 1–4)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Database schema migration (Exam, ExamSession, ExamQuestion, ExamAttempt, ExamAnswer, ExamViolation, ExamAccessCode, ExamRegistration).</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Admin exam builder (CRUD exams, import questions, configure sessions).</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Access-code generation and validation API.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Pre-exam student detail form with UploadThing photo capture.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Secure exam delivery client: fullscreen, question renderer, answer auto-save.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Server-authoritative timer + auto-submit on expiry.</li>
+</ul>
+<h3 id="phase-2-anti-cheat-amp-integrity-weeks-58">Phase 2: Anti-Cheat &amp; Integrity (Weeks 5–8)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Anti-Cheat SDK: tab-switch, clipboard, DevTools, PrintScreen, keyboard block.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Violation event logging API + audit log integration.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Auto-submit on configurable threshold (default 3 strikes).</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Webcam snapshot capture every 15s → Supabase Storage.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>VM / process blacklist detection (client-side heuristics).</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Proctor dashboard: live violation feed, snapshot gallery per attempt.</li>
+</ul>
+<h3 id="phase-3-grading-amp-certificates-weeks-912">Phase 3: Grading &amp; Certificates (Weeks 9–12)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Server-side blind grading (<code>SECURITY DEFINER</code> function).</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Essay question routing to instructor rubric UI.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Certificate of Recognition PDF generation.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Email delivery of certificate + result notification.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Post-exam analytics: identical-answer detection, time-outlier analysis.</li>
+</ul>
+<h3 id="phase-4-hardening-amp-compliance-weeks-1316">Phase 4: Hardening &amp; Compliance (Weeks 13–16)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>SEB integration (<code>.seb</code> config download + BEK verification).</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>AI proctoring pipeline (optional add-on): gaze detection, multi-face detection.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Hash-chain audit log integrity verifier.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>GDPR consent flows + data-retention sweeps.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>EASA compliance report generation (session logs, question bank audit trail).</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Load testing (500 concurrent candidates).</li>
+</ul>
+<hr />
+<section class="he-section" id="9-risks-amp-mitigations"><div class="he-section__num">10 · 9. Risks &amp;amp; Mitigations</div><h2 class="he-section__title">9. Risks &amp; Mitigations</h2></section>
+<table>
+<thead>
+<tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr>
+</thead>
+<tbody>
+<tr><td>Client-side anti-cheat bypassed via VM</td><td>Medium</td><td>High</td><td>Server-side VM heuristics; optional SEB; proctor review</td></tr>
+<tr><td>Webcam bypass (cover lens)</td><td>Medium</td><td>Medium</td><td>Camera-off detection → warning → auto-submit after 30s</td></tr>
+<tr><td>Timer manipulation</td><td>Low</td><td>High</td><td>Server-authoritative timer; SSE push; no client clock dependency</td></tr>
+<tr><td>Question bank leakage</td><td>Medium</td><td>Critical</td><td>Tight scheduling windows; large bank (&gt;5x); versioned questions; approval workflow</td></tr>
+<tr><td>Access-code sharing</td><td>Low</td><td>Medium</td><td>One-time use + candidate binding + IP fingerprint</td></tr>
+<tr><td>Certificate forgery</td><td>Low</td><td>Critical</td><td>Cryptographic hash chain; unique CoR ID; verification API</td></tr>
+<tr><td>GDPR / privacy complaint</td><td>Medium</td><td>High</td><td>Explicit consent at form; minimal data retention; right-to-erasure workflow for non-aviation data</td></tr>
+<tr><td>Browser compatibility (Fullscreen API)</td><td>Low</td><td>Low</td><td>Graceful fallback: exam blocked until fullscreen entered; mobile detection → redirect</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="10-verification-amp-testing-plan"><div class="he-section__num">11 · 10. Verification &amp;amp; Testing Plan</div><h2 class="he-section__title">10. Verification &amp; Testing Plan</h2></section>
+<h3 id="101-unit-tests">10.1 Unit Tests</h3>
+<ul>
+<li>Access-code validation logic (one-time, expiry, candidate binding).</li>
+<li>Grading function (MCQ + essay).</li>
+<li>Certificate PDF generation field mapping.</li>
+<li>Hash-chain audit log append + verify.</li>
+<li>Violation threshold logic (auto-submit at N strikes).</li>
+</ul>
+<h3 id="102-integration-tests">10.2 Integration Tests</h3>
+<ul>
+<li>Full exam flow: create session → generate codes → student registers → attempt → submit → grade → certificate.</li>
+<li>Simultaneous attempts with randomised questions (no two candidates see identical paper).</li>
+<li>Server timer auto-submit when client disconnects.</li>
+<li>SEB header verification (valid vs invalid BEK).</li>
+</ul>
+<h3 id="103-security-tests">10.3 Security Tests</h3>
+<ul>
+<li>Attempt to bypass fullscreen (Esc, F11, DevTools) → violation logged.</li>
+<li>Attempt to copy-paste question text → blocked + logged.</li>
+<li>Attempt to open DevTools → detected + flagged.</li>
+<li>Attempt to submit with manipulated answer payload → server-side validation rejects.</li>
+<li>Attempt to reuse access code → rejected.</li>
+<li>Attempt to take exam from two tabs → BroadcastChannel detection blocks second.</li>
+</ul>
+<h3 id="104-easa-compliance-validation">10.4 EASA Compliance Validation</h3>
+<ul>
+<li>Question bank metadata: module, subsection, knowledge level (1/2/3), reference page.</li>
+<li>Exam session log: candidate list, invigilator name, start/end times, location.</li>
+<li>Certificate fields: Part-147 approval number, module, date, score.</li>
+<li>Audit trail: 7-year retention plan documented.</li>
+</ul>
+<hr />
+<section class="he-section" id="11-open-questions-amp-out-of-scope-items"><div class="he-section__num">12 · 11. Open Questions &amp;amp; Out-of-Scope Items</div><h2 class="he-section__title">11. Open Questions &amp; Out-of-Scope Items</h2></section>
+<h3 id="in-scope-this-plan">In Scope (this plan)</h3>
+<ul>
+<li>MCQ + essay exam delivery.</li>
+<li>Anti-cheat: fullscreen, tab-switch, clipboard, keyboard block, webcam snapshots.</li>
+<li>Access-code gating + pre-exam student form.</li>
+<li>Server-authoritative timer + auto-submit.</li>
+<li>Certificate of Recognition generation.</li>
+<li>Audit log with hash chain.</li>
+<li>Integration into existing Aerojet Academy Next.js app.</li>
+</ul>
+<h3 id="out-of-scope-future-phases">Out of Scope (future phases)</h3>
+<ul>
+<li>Live AI proctoring with gaze tracking (requires GPU workers, third-party ML pipeline).</li>
+<li>Biometric continuous authentication (face recognition) — requires consent infrastructure + model hosting.</li>
+<li>Blockchain-based credential verification (BlockProctor-style) — deferred to Phase 4+.</li>
+<li>Mobile exam delivery — desktop-only by design per aviation regulation.</li>
+<li>Multi-tenancy / white-label for external MTOs — single-tenant initially.</li>
+</ul>
+<h3 id="open-questions-for-user">Open Questions for User</h3>
+<ol>
+<li><strong>Strict key-press auto-submit</strong>: Is the requirement &quot;any key press anywhere&quot; or &quot;any key press outside of answer options&quot;? (Current plan: any key press triggers submit — need confirmation.)</li>
+<li><strong>Webcam requirement</strong>: Is webcam capture mandatory for all exams, or only high-stakes modules?</li>
+<li><strong>Certificate format</strong>: Do you need a specific EASA template, or is a generic signed PDF sufficient?</li>
+<li><strong>SEB deployment</strong>: Will candidates install SEB themselves, or will the school provide managed laptops?</li>
+</ol>
+<hr />
+<section class="he-section" id="12-references"><div class="he-section__num">13 · 12. References</div><h2 class="he-section__title">12. References</h2></section>
+<ul>
+<li>EasyEvaluate Architecture Guide (2026)</li>
+<li>Safe Exam Browser Documentation</li>
+<li>EASA ED Decision 2023/019/R (Part-66/147 review)</li>
+<li>EASA NPA 2023-10 (fraud prevention)</li>
+<li>EASA SIB 2014-32 (HATA fraud case)</li>
+<li>UK CAA Electronic Examination Systems (CAAi / Aspeq)</li>
+<li>QBgenerator Part-66 exam management system</li>
+<li>360 Aviation Life — secure online exams in aviation</li>
+<li>ResearchGate: ProctorSense, VigilantEx, BlockProctor, ExamShield-AI</li>
+<li>GitHub: take-a-test, mock-test-fullSecurity, ExamSentinel</li>
+<li>Forasoft — Proctoring &amp; Assessment Reference Design (2026)</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#goal">Goal</a></li>
+    <li class="he-toc__l2"><a href="#1-regulatory-threat-landscape-why-this-exists">1. Regulatory &amp; Threat Landscape (Why This Exists)</a></li>
+    <li class="he-toc__l3"><a href="#11-regulatory-drivers">1.1 Regulatory Drivers</a></li>
+    <li class="he-toc__l3"><a href="#12-threat-model-from-research">1.2 Threat Model (from research)</a></li>
+    <li class="he-toc__l2"><a href="#2-system-architecture">2. System Architecture</a></li>
+    <li class="he-toc__l3"><a href="#21-high-level-layered-architecture">2.1 High-Level Layered Architecture</a></li>
+    <li class="he-toc__l3"><a href="#22-data-flow-happy-path">2.2 Data Flow (Happy Path)</a></li>
+    <li class="he-toc__l2"><a href="#3-module-breakdown">3. Module Breakdown</a></li>
+    <li class="he-toc__l3"><a href="#31-exam-configuration-admin-instructor">3.1 Exam Configuration (Admin / Instructor)</a></li>
+    <li class="he-toc__l3"><a href="#32-pre-exam-student-detail-form">3.2 Pre-Exam Student Detail Form</a></li>
+    <li class="he-toc__l3"><a href="#33-exam-delivery-client-react">3.3 Exam Delivery Client (React)</a></li>
+    <li class="he-toc__l3"><a href="#34-server-authoritative-timer">3.4 Server-Authoritative Timer</a></li>
+    <li class="he-toc__l3"><a href="#35-auto-submit-on-key-press-mcq-mode">3.5 Auto-Submit on Key Press (MCQ Mode)</a></li>
+    <li class="he-toc__l3"><a href="#36-server-side-blind-grading">3.6 Server-Side Blind Grading</a></li>
+    <li class="he-toc__l3"><a href="#37-certificate-of-recognition-cor-generation">3.7 Certificate of Recognition (CoR) Generation</a></li>
+    <li class="he-toc__l3"><a href="#38-audit-compliance-spine">3.8 Audit &amp; Compliance Spine</a></li>
+    <li class="he-toc__l2"><a href="#4-integration-with-existing-aerojet-academy">4. Integration with Existing Aerojet Academy</a></li>
+    <li class="he-toc__l3"><a href="#41-routes-nextjs-app-router">4.1 Routes (Next.js App Router)</a></li>
+    <li class="he-toc__l3"><a href="#42-database-schema-prisma">4.2 Database Schema (Prisma)</a></li>
+    <li class="he-toc__l3"><a href="#43-reuse-of-existing-aerojet-infrastructure">4.3 Reuse of Existing Aerojet Infrastructure</a></li>
+    <li class="he-toc__l2"><a href="#5-security-controls-by-layer-defense-in-depth">5. Security Controls by Layer (Defense in Depth)</a></li>
+    <li class="he-toc__l3"><a href="#51-client-side-controls">5.1 Client-Side Controls</a></li>
+    <li class="he-toc__l3"><a href="#52-server-side-controls">5.2 Server-Side Controls</a></li>
+    <li class="he-toc__l3"><a href="#53-physical-process-controls">5.3 Physical / Process Controls</a></li>
+    <li class="he-toc__l2"><a href="#6-uiux-flow">6. UI/UX Flow</a></li>
+    <li class="he-toc__l3"><a href="#61-student-journey">6.1 Student Journey</a></li>
+    <li class="he-toc__l3"><a href="#62-admin-instructor-journey">6.2 Admin / Instructor Journey</a></li>
+    <li class="he-toc__l2"><a href="#7-technology-choices-rationale">7. Technology Choices &amp; Rationale</a></li>
+    <li class="he-toc__l2"><a href="#8-implementation-phases">8. Implementation Phases</a></li>
+    <li class="he-toc__l3"><a href="#phase-1-core-exam-delivery-weeks-14">Phase 1: Core Exam Delivery (Weeks 1–4)</a></li>
+    <li class="he-toc__l3"><a href="#phase-2-anti-cheat-integrity-weeks-58">Phase 2: Anti-Cheat &amp; Integrity (Weeks 5–8)</a></li>
+    <li class="he-toc__l3"><a href="#phase-3-grading-certificates-weeks-912">Phase 3: Grading &amp; Certificates (Weeks 9–12)</a></li>
+    <li class="he-toc__l3"><a href="#phase-4-hardening-compliance-weeks-1316">Phase 4: Hardening &amp; Compliance (Weeks 13–16)</a></li>
+    <li class="he-toc__l2"><a href="#9-risks-mitigations">9. Risks &amp; Mitigations</a></li>
+    <li class="he-toc__l2"><a href="#10-verification-testing-plan">10. Verification &amp; Testing Plan</a></li>
+    <li class="he-toc__l3"><a href="#101-unit-tests">10.1 Unit Tests</a></li>
+    <li class="he-toc__l3"><a href="#102-integration-tests">10.2 Integration Tests</a></li>
+    <li class="he-toc__l3"><a href="#103-security-tests">10.3 Security Tests</a></li>
+    <li class="he-toc__l3"><a href="#104-easa-compliance-validation">10.4 EASA Compliance Validation</a></li>
+    <li class="he-toc__l2"><a href="#11-open-questions-out-of-scope-items">11. Open Questions &amp; Out-of-Scope Items</a></li>
+    <li class="he-toc__l3"><a href="#in-scope-this-plan">In Scope (this plan)</a></li>
+    <li class="he-toc__l3"><a href="#out-of-scope-future-phases">Out of Scope (future phases)</a></li>
+    <li class="he-toc__l3"><a href="#open-questions-for-user">Open Questions for User</a></li>
+    <li class="he-toc__l2"><a href="#12-references">12. References</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

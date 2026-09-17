@@ -102,8 +102,8 @@ export async function GET(req: NextRequest) {
           })
 
           results.reminders7Day++
-        } catch (err: any) {
-          results.errors.push(`7-day reminder ${membership.userId}: ${err.message}`)
+        } catch (err: unknown) {
+          results.errors.push(`7-day reminder ${membership.userId}: ${err instanceof Error ? err.message : String(err)}`)
         }
       })
       await Promise.all(emailPromises)
@@ -137,8 +137,8 @@ export async function GET(req: NextRequest) {
           })
 
           results.reminders1Day++
-        } catch (err: any) {
-          results.errors.push(`1-day reminder ${membership.userId}: ${err.message}`)
+        } catch (err: unknown) {
+          results.errors.push(`1-day reminder ${membership.userId}: ${err instanceof Error ? err.message : String(err)}`)
         }
       })
       await Promise.all(emailPromises)
@@ -157,8 +157,8 @@ export async function GET(req: NextRequest) {
       results,
       timestamp: now.toISOString(),
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Cron send-reminders error:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

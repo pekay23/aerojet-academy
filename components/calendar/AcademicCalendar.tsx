@@ -21,7 +21,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  Filter,
   BookOpen,
   GraduationCap,
   CalendarDays,
@@ -36,6 +35,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 export interface UnifiedCalendarEvent {
   id: string
@@ -54,16 +54,27 @@ export interface UnifiedCalendarEvent {
   targetUserId?: string | null
 }
 
+interface CalendarEventData {
+  title: string
+  description?: string
+  startDate: string
+  endDate?: string
+  color?: string
+  visibleTo?: string
+  targetUserId?: string
+  recurrenceType?: string
+}
+
 interface Props {
   events: UnifiedCalendarEvent[]
   initialDate?: Date
   currentUserId: string
   canCreate?: boolean
-  onSave?: (data: any, editingEventId?: string) => Promise<{ error?: string }>
+  onSave?: (data: CalendarEventData, editingEventId?: string) => Promise<{ error?: string }>
   onDelete?: (dbId: string) => Promise<{ error?: string }>
 }
 
-const AUDIENCE_OPTIONS = [
+const _AUDIENCE_OPTIONS = [
   { value: 'ALL', label: 'Everyone', icon: Globe },
   { value: 'STUDENTS', label: 'Students Only', icon: UserCheck },
   { value: 'INSTRUCTORS', label: 'Instructors Only', icon: Users },
@@ -73,9 +84,9 @@ const AUDIENCE_OPTIONS = [
   { value: 'SPECIFIC_USER', label: 'Specific User', icon: UserCheck },
 ]
 
-const COLOR_OPTIONS = ['#4A72E8', '#FF4F33', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4']
+const _COLOR_OPTIONS = ['#4A72E8', '#FF4F33', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4']
 
-function getEventStyles(source: string, color: string) {
+function getEventStyles(source: string, _color: string) {
   if (source === 'exam') return 'bg-[#FF4F33] text-white'
   if (source === 'class') return 'bg-[#EBF1FF] text-[#4A72E8]'
   if (source === 'personal') return 'bg-amber-50 text-amber-700 border-l-4 border-amber-400'
@@ -85,7 +96,7 @@ function getEventStyles(source: string, color: string) {
 export default function AcademicCalendar({
   events,
   initialDate,
-  currentUserId,
+  currentUserId: _currentUserId,
   canCreate = false,
   onSave,
   onDelete,
@@ -96,6 +107,7 @@ export default function AcademicCalendar({
   const [showModal, setShowModal] = useState(false)
   const [editingEvent, setEditingEvent] = useState<UnifiedCalendarEvent | null>(null)
   const [isPending, startTransition] = useTransition()
+  const { markDirty, markClean } = useFormDirty()
 
   // Form state
   const [formTitle, setFormTitle] = useState('')
@@ -198,6 +210,7 @@ export default function AcademicCalendar({
       } else {
         toast.success(editingEvent ? 'Event updated!' : 'Event created!')
         setShowModal(false)
+        markClean()
       }
     })
   }
@@ -211,6 +224,7 @@ export default function AcademicCalendar({
       } else {
         toast.success('Event deleted')
         setPopupEvent(null)
+        markClean()
       }
     })
   }
@@ -235,7 +249,7 @@ export default function AcademicCalendar({
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm md:flex-row dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-4xlxl flex flex-col items-center justify-between gap-4 border border-slate-100 bg-white p-4 shadow-sm md:flex-row dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center gap-3">
           <button
             aria-label="Previous period"
@@ -244,7 +258,7 @@ export default function AcademicCalendar({
           >
             <ChevronLeft className="h-5 w-5 text-slate-500" />
           </button>
-          <span className="min-w-[160px] text-center text-xl font-black text-slate-900 dark:text-white">
+          <span className="min-w-40 text-center text-xl font-black text-slate-900 dark:text-white">
             {label}
           </span>
           <button
@@ -256,13 +270,13 @@ export default function AcademicCalendar({
           </button>
           <button
             onClick={() => setCurrentDate(new Date())}
-            className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 transition-colors hover:text-slate-900 dark:border-slate-700 dark:hover:text-white"
+            className="rounded-4xll border border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 transition-colors hover:text-slate-900 dark:border-slate-700 dark:hover:text-white"
           >
             Today
           </button>
         </div>
         <div className="flex gap-2">
-          <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
+          <div className="rounded-4xll flex items-center border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
             <button
               onClick={() => setViewMode('Month')}
               className={cn(
@@ -300,7 +314,7 @@ export default function AcademicCalendar({
           {canCreate && (
             <button
               onClick={openAdd}
-              className="flex items-center gap-2 rounded-xl bg-[#FF4F33] px-6 py-2 text-sm font-bold text-white shadow-lg shadow-[#FF4F33]/20 transition-all hover:scale-105 hover:bg-[#E6462D] active:scale-95"
+              className="rounded-4xll flex items-center gap-2 bg-[#FF4F33] px-6 py-2 text-sm font-bold text-white shadow-lg shadow-[#FF4F33]/20 transition-all hover:scale-105 hover:bg-[#E6462D] active:scale-95"
             >
               New Event <Plus className="h-4 w-4" />
             </button>
@@ -308,7 +322,7 @@ export default function AcademicCalendar({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 text-xs font-bold text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-4xlxl flex flex-wrap items-center gap-3 border border-slate-100 bg-white px-4 py-3 text-xs font-bold text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-full bg-[#4A72E8]" /> Classes
         </span>
@@ -323,7 +337,7 @@ export default function AcademicCalendar({
         </span>
       </div>
 
-      <div className="space-y-2 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm md:hidden dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-4xlxl space-y-2 border border-slate-100 bg-white p-4 shadow-sm md:hidden dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center justify-between">
           <span className="text-xs font-black tracking-widest text-slate-400 uppercase">
             Daily Agenda
@@ -341,10 +355,10 @@ export default function AcademicCalendar({
             <button
               key={evt.id}
               onClick={() => setPopupEvent(evt)}
-              className="flex w-full items-start gap-3 rounded-xl border border-slate-100 p-3 text-left dark:border-slate-800"
+              className="rounded-4xll flex w-full items-start gap-3 border border-slate-100 p-3 text-left dark:border-slate-800"
             >
               <span className="mt-1 h-3 w-3 rounded-full" style={{ backgroundColor: evt.color }} />
-              <span className="min-w-0 flex-1">
+              <span className="min-w-40 flex-1">
                 <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">
                   {evt.title}
                 </span>
@@ -359,14 +373,14 @@ export default function AcademicCalendar({
       </div>
 
       {viewMode === 'Day' && (
-        <div className="flex flex-col rounded-[32px] border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-col rounded-4xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="border-b border-slate-100 p-4 dark:border-slate-800">
             <p className="text-sm font-bold text-slate-500">{format(currentDate, 'EEEE')}</p>
             <h3 className="text-2xl font-black text-slate-900 dark:text-white">
               {format(currentDate, 'MMMM d')}
             </h3>
           </div>
-          <div className="max-h-[760px] overflow-y-auto">
+          <div className="max-h-190 overflow-y-auto">
             {timeSlots.map((hour) => {
               const hourEvents = currentDayEvents.filter(
                 (evt) => getHours(new Date(evt.startDate)) === hour
@@ -374,7 +388,7 @@ export default function AcademicCalendar({
               return (
                 <div
                   key={hour}
-                  className="grid min-h-[84px] grid-cols-[72px_1fr] border-b border-slate-100 dark:border-slate-800"
+                  className="grid min-h-21 grid-cols-[72px_1fr] border-b border-slate-100 dark:border-slate-800"
                 >
                   <div className="border-r border-slate-100 px-3 py-4 text-right text-xs font-bold text-slate-400 dark:border-slate-800">
                     {hour === 0
@@ -392,7 +406,7 @@ export default function AcademicCalendar({
                         onClick={() => setPopupEvent(evt)}
                         title={`${evt.title} - ${format(new Date(evt.startDate), 'hh:mm a')}`}
                         className={cn(
-                          'w-full rounded-2xl p-3 text-left text-sm font-black shadow-sm',
+                          'rounded-4xlxl w-full p-3 text-left text-sm font-black shadow-sm',
                           getEventStyles(evt.source, evt.color)
                         )}
                         style={
@@ -418,7 +432,7 @@ export default function AcademicCalendar({
 
       {/* Week View */}
       {viewMode === 'Week' && (
-        <div className="hidden flex-col overflow-hidden rounded-[32px] border border-slate-100 bg-white shadow-sm md:flex dark:border-slate-800 dark:bg-slate-900">
+        <div className="hidden flex-col overflow-hidden rounded-4xl border border-slate-100 bg-white shadow-sm md:flex dark:border-slate-800 dark:bg-slate-900">
           <div className="grid grid-cols-[80px_1fr] border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center justify-center border-r border-slate-100 p-2 dark:border-slate-800">
               <Clock className="h-4 w-4 text-slate-300" />
@@ -455,11 +469,11 @@ export default function AcademicCalendar({
               })}
             </div>
           </div>
-          <div className="flex h-[720px] overflow-y-auto">
+          <div className="flex h-180 overflow-y-auto">
             <div className="relative grid w-full grid-cols-[80px_1fr]">
               <div className="border-r border-slate-100 bg-slate-50/30 dark:border-slate-800 dark:bg-slate-900/30">
                 {timeSlots.map((h) => (
-                  <div key={h} className="relative h-[80px]">
+                  <div key={h} className="relative h-20">
                     <span className="absolute -top-3 left-0 w-full text-center text-[10px] font-black text-slate-400 uppercase">
                       {h === 0 ? '12 am' : h < 12 ? `${h} am` : h === 12 ? '12 pm' : `${h - 12} pm`}
                     </span>
@@ -471,7 +485,7 @@ export default function AcademicCalendar({
                   {timeSlots.map((h) => (
                     <div
                       key={h}
-                      className="h-[80px] border-b border-slate-100/50 dark:border-slate-800/50"
+                      className="h-20 border-b border-slate-100/50 dark:border-slate-800/50"
                     />
                   ))}
                 </div>
@@ -500,7 +514,7 @@ export default function AcademicCalendar({
                       >
                         <div
                           className={cn(
-                            'flex h-full w-full flex-col overflow-hidden rounded-2xl border-l-4 p-3 shadow-sm transition-all hover:shadow-md',
+                            'rounded-4xlxl flex h-full w-full flex-col overflow-hidden border-l-4 p-3 shadow-sm transition-all hover:shadow-md',
                             getEventStyles(evt.source, evt.color)
                           )}
                           style={
@@ -529,7 +543,7 @@ export default function AcademicCalendar({
 
       {/* Month View */}
       {viewMode === 'Month' && (
-        <div className="hidden flex-col overflow-hidden rounded-[32px] border border-slate-100 bg-white shadow-sm md:flex dark:border-slate-800 dark:bg-slate-900">
+        <div className="hidden flex-col overflow-hidden rounded-4xl border border-slate-100 bg-white shadow-sm md:flex dark:border-slate-800 dark:bg-slate-900">
           <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/50">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
               <div
@@ -550,14 +564,14 @@ export default function AcademicCalendar({
                 <div
                   key={idx}
                   className={cn(
-                    'relative min-h-[140px] border-r border-b border-slate-100 p-2 transition-colors dark:border-slate-800',
+                    'relative min-h-35 border-r border-b border-slate-100 p-2 transition-colors dark:border-slate-800',
                     !isCur && 'bg-slate-50/30 dark:bg-slate-900/30',
                     isToday && 'bg-blue-50/30 dark:bg-blue-900/10'
                   )}
                 >
                   <span
                     className={cn(
-                      'mb-2 inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-black',
+                      'mb-2 inline-flex h-180 w-7 items-center justify-center rounded-lg text-xs font-black',
                       isToday
                         ? 'bg-aerojet-blue shadow-aerojet-blue/20 text-white shadow-md'
                         : !isCur
@@ -611,11 +625,11 @@ export default function AcademicCalendar({
           onClick={() => setPopupEvent(null)}
         >
           <div
-            className="relative w-full max-w-sm overflow-hidden rounded-[32px] bg-white p-8 shadow-2xl dark:bg-slate-900"
+            className="relative w-full max-w-sm overflow-hidden rounded-4xl bg-white p-8 shadow-2xl dark:bg-slate-900"
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className="absolute top-0 left-0 h-2 w-full"
+              className="absolute top-0 left-0 h-180 w-full"
               style={{ backgroundColor: popupEvent.color }}
             />
             <button
@@ -628,7 +642,7 @@ export default function AcademicCalendar({
 
             <div className="mb-6 flex items-center gap-3">
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-2xl text-lg font-black text-white shadow-lg"
+                className="rounded-4xlxl flex h-10 w-10 items-center justify-center text-lg font-black text-white shadow-lg"
                 style={{ backgroundColor: popupEvent.color }}
               >
                 {popupEvent.title.charAt(0).toUpperCase()}
@@ -651,7 +665,7 @@ export default function AcademicCalendar({
               )}
 
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                <div className="rounded-4xlxl flex items-center gap-3 bg-slate-50 p-3 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                   <CalendarDays className="text-aerojet-blue h-4 w-4" />
                   <div>
                     <div className="text-[10px] font-black text-slate-400 uppercase">
@@ -670,14 +684,14 @@ export default function AcademicCalendar({
                 <div className="flex gap-2 pt-2">
                   <button
                     onClick={() => openEdit(popupEvent)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="rounded-4xll flex flex-1 items-center justify-center gap-2 border border-slate-200 py-3 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                   >
                     <Pencil className="h-4 w-4" /> Edit
                   </button>
                   <button
                     aria-label="Delete event"
                     onClick={() => handleDelete(popupEvent)}
-                    className="flex w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 transition-all hover:bg-red-100 dark:bg-red-950/20"
+                    className="rounded-4xll flex w-12 items-center justify-center bg-red-50 text-red-600 transition-all hover:bg-red-100 dark:bg-red-950/20"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -690,12 +704,12 @@ export default function AcademicCalendar({
 
       {/* Modal for Creating/Editing (Only if onSave is provided) */}
       {showModal && onSave && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-xl">
-          <div className="w-full max-w-md rounded-[32px] border border-slate-100 bg-white p-8 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/60 backdrop-blur-xl">
+          <div className="w-full max-w-md rounded-4xl border border-slate-100 bg-white p-8 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
             {/* Simple form implementation for personal events or admin events */}
             <div className="mb-8 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-900/20">
+                <div className="rounded-4xll flex h-10 w-10 items-center justify-center bg-orange-100 text-orange-600 dark:bg-orange-900/20">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <h3 className="text-xl font-black tracking-tight text-slate-900 uppercase dark:text-white">
@@ -718,9 +732,12 @@ export default function AcademicCalendar({
                 </label>
                 <input
                   value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
+                  onChange={(e) => {
+                    setFormTitle(e.target.value)
+                    markDirty()
+                  }}
                   placeholder="What's happening?"
-                  className="focus:border-aerojet-blue w-full rounded-2xl border-2 border-slate-50 bg-slate-50/50 px-5 py-4 text-sm font-bold text-slate-900 shadow-sm transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                  className="focus:border-aerojet-blue rounded-4xlxl w-full border-2 border-slate-50 bg-slate-50/50 px-5 py-4 text-sm font-bold text-slate-900 shadow-sm transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                 />
               </div>
 
@@ -732,8 +749,11 @@ export default function AcademicCalendar({
                   <input
                     type="datetime-local"
                     value={formStart}
-                    onChange={(e) => setFormStart(e.target.value)}
-                    className="focus:border-aerojet-blue w-full rounded-2xl border-2 border-slate-50 bg-slate-50/50 px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                    onChange={(e) => {
+                      setFormStart(e.target.value)
+                      markDirty()
+                    }}
+                    className="focus:border-aerojet-blue rounded-4xlxl w-full border-2 border-slate-50 bg-slate-50/50 px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                   />
                 </div>
                 <div>
@@ -743,8 +763,11 @@ export default function AcademicCalendar({
                   <input
                     type="datetime-local"
                     value={formEnd}
-                    onChange={(e) => setFormEnd(e.target.value)}
-                    className="focus:border-aerojet-blue w-full rounded-2xl border-2 border-slate-50 bg-slate-50/50 px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                    onChange={(e) => {
+                      setFormEnd(e.target.value)
+                      markDirty()
+                    }}
+                    className="focus:border-aerojet-blue rounded-4xlxl w-full border-2 border-slate-50 bg-slate-50/50 px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -752,7 +775,7 @@ export default function AcademicCalendar({
               <button
                 onClick={handleSave}
                 disabled={isPending}
-                className="bg-aerojet-blue shadow-aerojet-blue/20 w-full rounded-2xl py-5 text-sm font-black tracking-widest text-white uppercase shadow-xl transition-all hover:scale-[1.02] hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
+                className="bg-aerojet-blue shadow-aerojet-blue/20 rounded-4xlxl w-full py-5 text-sm font-black tracking-widest text-white uppercase shadow-xl transition-all hover:scale-[1.02] hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
               >
                 {isPending ? 'Saving...' : editingEvent ? 'Update Event' : 'Create Event'}
               </button>

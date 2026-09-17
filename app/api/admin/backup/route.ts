@@ -64,9 +64,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   try {
     await sendBackupEmail(email, backup)
-  } catch (err: any) {
-    console.error('[Backup Email] Failed:', err.message)
-    return apiError(err.message, 500)
+  } catch (err: unknown) {
+    console.error('[Backup Email] Failed:', err instanceof Error ? err.message : 'Unknown error')
+    return apiError(err instanceof Error ? err.message : 'Unknown error', 500)
   }
 
   await createAuditLog({

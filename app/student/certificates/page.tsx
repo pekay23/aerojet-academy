@@ -1,9 +1,12 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { Award, Download, Calendar, AlertCircle, Lock, FileText } from 'lucide-react'
+import { format } from 'date-fns'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
+import { SortableTh } from '@/components/ui/sortable-th'
+import { buildOrderBy } from '@/lib/utils/build-order-by'
 import {
   canAccessFeature,
   getEnrollmentMilestoneStatus,
@@ -13,14 +16,32 @@ import {
 import { getCertificateEligibility } from '@/lib/certificates/eligibility'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
+type SortKey = 'module' | 'exam' | 'score' | 'result' | 'date'
+
+const ALLOWED_SORT_KEYS = {
+  module: 'moduleCode',
+  exam: 'exam.examComponent.course.name',
+  score: 'percentage',
+  result: 'passed',
+  date: 'exam.examDate',
+} as const satisfies Record<SortKey, string>
+
 export const metadata: Metadata = {
   title: 'Certificates | Student Portal',
   description: 'Download your certificates and credentials.',
 }
+export const dynamic = 'force-dynamic'
 
-export default async function CertificatesPage() {
+export default async function CertificatesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string; order?: string }>
+}) {
   const session = await getAuthSession()
   if (!session) redirect('/login')
+
+  const params = await searchParams
+  const _orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { createdAt: 'desc' })
 
   const { isFullTime } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'courses')
@@ -28,7 +49,7 @@ export default async function CertificatesPage() {
   if (isFullTime && !hasAccess) {
     const [milestoneStatus, wallet, accessLevel] = await Promise.all([
       getEnrollmentMilestoneStatus(session.user.id),
-      prisma.wallet.findUnique({
+      prismaUnfiltered.wallet.findUnique({
         where: { userId: session.user.id },
         select: { availableBalance: true, reservedBalance: true, currency: true },
       }),
@@ -42,9 +63,9 @@ export default async function CertificatesPage() {
     }
 
     return (
-      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             My Certificates
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -63,12 +84,12 @@ export default async function CertificatesPage() {
 
   const [eligibility, examResults] = await Promise.all([
     getCertificateEligibility(session.user.id),
-    prisma.examResult.findMany({
+    prismaUnfiltered.examResult.findMany({
       where: { userId: session.user.id },
       include: {
         exam: { include: { examComponent: { include: { course: true } } } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { createdAt: 'desc' }),
     }),
   ])
 
@@ -82,9 +103,9 @@ export default async function CertificatesPage() {
     r.exam?.examComponent?.course?.code ?? r.moduleCode ?? '—'
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
           My Certificates
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -199,21 +220,11 @@ export default async function CertificatesPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/80 text-left dark:border-slate-800 dark:bg-slate-900/50">
-                    <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Module
-                    </th>
-                    <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Exam
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Score
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Result
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Date
-                    </th>
+                    <SortableTh sortKey="module" label="Module" />
+                    <SortableTh sortKey="exam" label="Exam" />
+                    <SortableTh sortKey="score" label="Score" align="center" />
+                    <SortableTh sortKey="result" label="Result" align="center" />
+                    <SortableTh sortKey="date" label="Date" align="center" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -225,26 +236,20 @@ export default async function CertificatesPage() {
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                         {courseName(r)}
                       </td>
-                      <td className="px-4 py-3 text-center font-mono font-black">
+                      <td className="px-4 py-3 text-center font-mono font-black tabular-nums">
                         {r.percentage != null ? `${r.percentage}%` : '—'}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span
                           className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                            r.passed
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-red-100 text-red-700'
+                            r.passed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
                           }`}
                         >
                           {r.passed ? 'Pass' : 'Fail'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center text-xs text-slate-500">
-                        {(r.exam?.examDate ?? r.createdAt).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                      <td className="px-4 py-3 text-center text-xs text-slate-500 tabular-nums">
+                        {format(r.exam?.examDate ?? r.createdAt, 'MMM d, yyyy')}
                       </td>
                     </tr>
                   ))}
@@ -260,8 +265,7 @@ export default async function CertificatesPage() {
                 No exam scores yet
               </h3>
               <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                Your Academy transcript will populate here as the Academy uploads your exam
-                results.
+                Your Academy transcript will populate here as the Academy uploads your exam results.
               </p>
             </div>
           )}

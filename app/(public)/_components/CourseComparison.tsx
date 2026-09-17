@@ -115,7 +115,7 @@ export default function CourseComparison() {
                   href={p.href}
                   className={`inline-block rounded-xl px-5 py-2.5 text-xs font-black tracking-widest uppercase transition-all ${
                     p.highlight
-                      ? 'bg-aerojet-sky text-white hover:bg-aerojet-blue'
+                      ? 'bg-aerojet-sky hover:bg-aerojet-blue text-white'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >

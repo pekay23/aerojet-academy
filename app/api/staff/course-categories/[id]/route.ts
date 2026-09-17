@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { z } from 'zod'
 
 const updateSchema = z.object({
@@ -10,10 +10,10 @@ const updateSchema = z.object({
 })
 
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     await requireStaff()
 
-    const id = ctx?.params?.id
+    const id = (await ctx!.params).id
     if (!id) return apiError('Missing category ID', 400)
 
     const body = await req.json()
@@ -46,10 +46,10 @@ export const PATCH = withErrorHandler(
 )
 
 export const DELETE = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     await requireStaff()
 
-    const id = ctx?.params?.id
+    const id = (await ctx!.params).id
     if (!id) return apiError('Missing category ID', 400)
 
     // Block if courses are still assigned

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { Prisma } from '@prisma/client'
 
 /**
  * GET: Fetch class details with enrolled students and classroom seating info

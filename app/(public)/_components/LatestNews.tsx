@@ -1,8 +1,9 @@
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Inbox } from 'lucide-react'
 import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { unstable_cache } from 'next/cache'
 import NewsCard from './NewsCard'
+import { EmptyState } from '@/components/shared/EmptyState'
 
 const getRecentArticles = unstable_cache(
   async () => {
@@ -38,7 +39,17 @@ export default async function LatestNews() {
   }
 
   if (!articles || articles.length === 0) {
-    return null
+    return (
+      <section className="bg-paper py-20 sm:py-28 dark:bg-[#1b2430]">
+        <div className="container mx-auto w-full px-6">
+          <EmptyState
+            icon={Inbox}
+            title="No news yet"
+            description="Check back later for the latest updates and announcements."
+          />
+        </div>
+      </section>
+    )
   }
 
   return (

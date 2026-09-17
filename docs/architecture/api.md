@@ -4,9 +4,10 @@ Base URL: `/api` — all routes are Next.js App Router route handlers under
 `app/api/**/route.ts`. Server Actions (in `app/**/actions.ts`) handle most
 portal mutations and are not exposed as REST routes.
 
-This document was last regenerated against the codebase on **2026-07-23**.
+This document was last regenerated against the codebase on **2026-08-28**.
 For the canonical list, run `find app/api -name 'route.ts' | sort` and cross-
-reference the source.
+reference the source. Note: the route list below is a curated summary, not an
+exhaustive inventory — many additional sub-routes exist under each prefix.
 
 ## Auth (NextAuth + helpers)
 
@@ -85,6 +86,20 @@ reference the source.
 - `POST /api/instructor/classes/[id]/grades`
 - `GET /api/instructor/schedule`
 - `/api/instructor/profile`
+
+## Examiner (EXAMINER role)
+
+- `GET /api/examiner/sittings` — View exam sittings
+- `GET/POST /api/examiner/results` — Exam results review
+- `GET /api/examiner/compliance` — Compliance verification
+- `GET/POST /api/examiner/availability` — Availability scheduling
+
+## Examiner (EXAMINER role)
+
+- `GET /api/examiner/sittings` — View exam sittings
+- `GET/POST /api/examiner/results` — Exam results review
+- `GET /api/examiner/compliance` — Compliance verification
+- `GET/POST /api/examiner/availability` — Availability scheduling
 
 ## Staff (STAFF/ADMIN/SUPER_ADMIN)
 
@@ -178,8 +193,9 @@ reference the source.
 
 ## Server Actions (internal API)
 
-Primary data-mutation path for portal interfaces. Located in
-`app/(portal)/actions.ts` and domain-specific `actions.ts` files.
+Primary data-mutation path for portal interfaces. Located in colocated
+`actions.ts` files within each portal (e.g., `app/staff/actions.ts`,
+`app/applicant/actions.ts`) and domain-specific `actions.ts` files.
 
 ### Staff actions
 
@@ -191,11 +207,14 @@ Primary data-mutation path for portal interfaces. Located in
 
 ## Conventions
 
-- All mutation routes go through `withErrorHandler` (`lib/api/handler.ts`)
-  which converts thrown `'Unauthorized'` / `'Forbidden'` to 401 / 403.
-- Pagination: `getPaginationParams(req)` returns `{ page, limit, skip }`
-  with `limit` capped at 100 (`lib/api-helpers.ts`).
+- All mutation routes go through `withErrorHandler` (`lib/api/response.ts`)
+  which converts thrown errors: `'Unauthorized'`→401, `'Forbidden'`→403,
+  `'not found'`→404, `'Permission denied'`→403, else→500.
+- Pagination: `parsePagination(searchParams)` returns `{ page, limit, skip }`
+  with `limit` capped at 100 (`lib/api/response.ts`).
 - Every route that mutates state emits an `AuditLog` row.
 - Every successful response uses `apiSuccess(data)` → `{ success: true, data }`.
-- Every error response uses `apiError(message, status, error?)` → `{ error, details? }`
-  (details only outside production; **no** `success: false` flag).
+- Every error response uses `apiError(error, status, data?)` → `{ success: false, error, ...data }`
+  where `data` is spread into the response (used for validation errors, etc.). The `withErrorHandler`
+  wrapper strips stack traces in production — error messages become generic `'Internal server error'`
+  outside development.

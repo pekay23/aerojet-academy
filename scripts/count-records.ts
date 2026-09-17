@@ -46,3 +46,5 @@ async function countRecords() {
 }
 
 countRecords().catch(console.error)
+
+

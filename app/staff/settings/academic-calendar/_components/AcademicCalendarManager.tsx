@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Plus,
   Edit2,
   Trash2,
   Calendar,
-  MoreVertical,
+  MoreVertical as _MoreVertical,
   Layers,
   CheckCircle,
   XCircle,
@@ -17,7 +17,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger as _DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 
@@ -46,7 +46,7 @@ export default function AcademicCalendarManager({
   initialYears: AcademicYear[]
 }) {
   const router = useRouter()
-  const [years, setYears] = useState<AcademicYear[]>(initialYears)
+  const [_years, _setYears] = useState<AcademicYear[]>(initialYears)
 
   // Handlers for Add/Edit
   const [editingYear, setEditingYear] = useState<AcademicYear | null>(null)
@@ -56,6 +56,18 @@ export default function AcademicCalendarManager({
   } | null>(null)
   const [isYearModalOpen, setYearModalOpen] = useState(false)
   const [isSemModalOpen, setSemModalOpen] = useState(false)
+
+  // Warn before navigating away with an open edit/create modal.
+  const hasUnsavedEdits = isYearModalOpen || isSemModalOpen
+  useEffect(() => {
+    if (!hasUnsavedEdits) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [hasUnsavedEdits])
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -88,69 +100,69 @@ export default function AcademicCalendarManager({
 
       setYearModalOpen(false)
       router.refresh()
-    } catch (err: any) {
-      alert(err.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Submits Semester form
-  const handleSemesterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsLoading(true)
-    const formData = new FormData(e.currentTarget)
-    const payload = {
-      name: formData.get('name') as string,
-      academicYearId: editingSemester?.yearId,
-      startDate: formData.get('startDate') as string,
-      endDate: formData.get('endDate') as string,
-      isActive: formData.get('isActive') === 'on',
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Unknown error')
+      } finally {
+        setIsLoading(false)
+      }
     }
 
-    try {
-      const isEdit = !!editingSemester?.sem?.id
-      const url = isEdit ? `/api/staff/semesters/${editingSemester!.sem!.id}` : '/api/staff/semesters'
-      const method = isEdit ? 'PUT' : 'POST'
+    // Submits Semester form
+    const handleSemesterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      setIsLoading(true)
+      const formData = new FormData(e.currentTarget)
+      const payload = {
+        name: formData.get('name') as string,
+        academicYearId: editingSemester?.yearId,
+        startDate: formData.get('startDate') as string,
+        endDate: formData.get('endDate') as string,
+        isActive: formData.get('isActive') === 'on',
+      }
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
+      try {
+        const isEdit = !!editingSemester?.sem?.id
+        const url = isEdit ? `/api/staff/semesters/${editingSemester!.sem!.id}` : '/api/staff/semesters'
+        const method = isEdit ? 'PUT' : 'POST'
 
-      if (!res.ok) throw new Error((await res.json()).error)
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
 
-      setSemModalOpen(false)
-      router.refresh()
-    } catch (err: any) {
-      alert(err.message)
-    } finally {
-      setIsLoading(false)
+        if (!res.ok) throw new Error((await res.json()).error)
+
+        setSemModalOpen(false)
+        router.refresh()
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Unknown error')
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }
 
-  const handleDeleteYear = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this Academic Year?')) return
-    try {
-      const res = await fetch(`/api/staff/academic-years/${id}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error((await res.json()).error)
-      router.refresh()
-    } catch (err: any) {
-      alert(err.message)
+    const handleDeleteYear = async (id: string) => {
+      if (!confirm('Are you sure you want to delete this Academic Year?')) return
+      try {
+        const res = await fetch(`/api/staff/academic-years/${id}`, { method: 'DELETE' })
+        if (!res.ok) throw new Error((await res.json()).error)
+        router.refresh()
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Unknown error')
+      }
     }
-  }
 
-  const handleDeleteSemester = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this Semester?')) return
-    try {
-      const res = await fetch(`/api/staff/semesters/${id}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error((await res.json()).error)
-      router.refresh()
-    } catch (err: any) {
-      alert(err.message)
+    const handleDeleteSemester = async (id: string) => {
+      if (!confirm('Are you sure you want to delete this Semester?')) return
+      try {
+        const res = await fetch(`/api/staff/semesters/${id}`, { method: 'DELETE' })
+        if (!res.ok) throw new Error((await res.json()).error)
+        router.refresh()
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Unknown error')
+      }
     }
-  }
 
   return (
     <div className="space-y-8">

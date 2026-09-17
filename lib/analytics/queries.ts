@@ -1,13 +1,12 @@
 import 'server-only'
 import { prismaUnfiltered as defaultPrisma } from '@/lib/prisma/client'
-import { subDays, subMonths, startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns'
-import { AnalyticsEventName, AnalyticsEntity } from './events'
+import { subDays, subMonths, startOfDay, startOfMonth } from 'date-fns'
+import { AnalyticsEventName } from './events'
 
 // Allow injecting a prisma client for testing
-type PrismaLike = typeof defaultPrisma
-let prisma: PrismaLike = defaultPrisma
+let prisma = defaultPrisma
 
-export function __setPrisma(client: PrismaLike) {
+export function __setPrisma(client: typeof defaultPrisma) {
   prisma = client
 }
 
@@ -58,7 +57,7 @@ export interface UserJourneyEvent {
   event: AnalyticsEventName
   entity: string
   timestamp: string
-  payload: Record<string, any>
+  payload: Record<string, unknown>
 }
 
 // ============================================================================
@@ -66,7 +65,12 @@ export interface UserJourneyEvent {
 // ============================================================================
 
 const STANDARD_FUNNELS: Record<string, AnalyticsEventName[]> = {
-  registration: ['REGISTRATION_STARTED', 'REGISTRATION_COMPLETED', 'PAYMENT_SUBMITTED', 'PAYMENT_APPROVED'],
+  registration: [
+    'REGISTRATION_STARTED',
+    'REGISTRATION_COMPLETED',
+    'PAYMENT_SUBMITTED',
+    'PAYMENT_APPROVED',
+  ],
   enrollment: ['REGISTRATION_COMPLETED', 'ENROLLMENT_CREATED', 'COURSE_ACCESSED'],
   exam: ['EXAM_POOL_JOINED', 'EXAM_COMPLETED'],
   payment: ['PAYMENT_SUBMITTED', 'PAYMENT_APPROVED'],
@@ -75,7 +79,7 @@ const STANDARD_FUNNELS: Record<string, AnalyticsEventName[]> = {
 export async function getFunnelMetrics(
   funnelName: keyof typeof STANDARD_FUNNELS = 'registration',
   from?: Date,
-  to?: Date,
+  to?: Date
 ): Promise<FunnelMetrics> {
   const now = new Date()
   const start = from ?? subDays(now, 30)
@@ -90,8 +94,8 @@ export async function getFunnelMetrics(
           entity: 'ANALYTICS',
           createdAt: { gte: start, lt: end },
         },
-      }),
-    ),
+      })
+    )
   )
 
   const steps: FunnelStep[] = events.map((event, i) => {
@@ -102,13 +106,17 @@ export async function getFunnelMetrics(
       label: formatEventLabel(event),
       count,
       conversionRate: previousCount > 0 ? Math.round((count / previousCount) * 100) : 0,
-      dropoffRate: i > 0 && previousCount > 0 ? Math.round(((previousCount - count) / previousCount) * 100) : 0,
+      dropoffRate:
+        i > 0 && previousCount > 0
+          ? Math.round(((previousCount - count) / previousCount) * 100)
+          : 0,
     }
   })
 
-  const overallConversion = steps.length >= 2 && steps[0].count > 0
-    ? Math.round((steps[steps.length - 1].count / steps[0].count) * 100)
-    : 0
+  const overallConversion =
+    steps.length >= 2 && steps[0].count > 0
+      ? Math.round((steps[steps.length - 1].count / steps[0].count) * 100)
+      : 0
 
   return {
     name: funnelName,
@@ -120,9 +128,7 @@ export async function getFunnelMetrics(
 }
 
 function formatEventLabel(event: string): string {
-  return event
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return event.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 // ============================================================================
@@ -130,11 +136,12 @@ function formatEventLabel(event: string): string {
 // ============================================================================
 
 export async function getCohortRetention(cohortDate?: Date): Promise<RetentionCohort[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cohortRetention: any[] = []
-  
+  const _cohortRetention: Array<Record<string, unknown>> = []
+
   // Get users who registered in the specified month
-  const targetMonth = cohortDate ? new Date(cohortDate.getFullYear(), cohortDate.getMonth(), 1) : startOfMonth(subMonths(new Date(), 1))
+  const targetMonth = cohortDate
+    ? new Date(cohortDate.getFullYear(), cohortDate.getMonth(), 1)
+    : startOfMonth(subMonths(new Date(), 1))
   const nextMonth = startOfMonth(subMonths(targetMonth, -1))
 
   const cohortUsers = await prisma.user.findMany({
@@ -149,7 +156,7 @@ export async function getCohortRetention(cohortDate?: Date): Promise<RetentionCo
     return []
   }
 
-  const userIds = cohortUsers.map((u) => u.id)
+  const userIds = cohortUsers.map((u: { id: string }) => u.id)
 
   // Check activity at D1, D7, D30
   const [d1Active, d7Active, d30Active] = await Promise.all([
@@ -188,17 +195,38 @@ export async function getCohortRetention(cohortDate?: Date): Promise<RetentionCo
     }),
   ])
 
-  const d1Set = new Set(d1Active.map((e: any) => e.userId))
-  const d7Set = new Set(d7Active.map((e: any) => e.userId))
-  const d30Set = new Set(d30Active.map((e: any) => e.userId))
+  const d1Set = new Set(
+    d1Active
+      .map((e: { userId: string | null }) => e.userId)
+      .filter((id): id is string => Boolean(id))
+  )
+  const d7Set = new Set(
+    d7Active
+      .map((e: { userId: string | null }) => e.userId)
+      .filter((id): id is string => Boolean(id))
+  )
+  const d30Set = new Set(
+    d30Active
+      .map((e: { userId: string | null }) => e.userId)
+      .filter((id): id is string => Boolean(id))
+  )
 
   return [
     {
       cohortDate: targetMonth.toISOString(),
       cohortSize: cohortUsers.length,
-      d1: { count: d1Set.size, rate: cohortUsers.length > 0 ? Math.round((d1Set.size / cohortUsers.length) * 100) : 0 },
-      d7: { count: d7Set.size, rate: cohortUsers.length > 0 ? Math.round((d7Set.size / cohortUsers.length) * 100) : 0 },
-      d30: { count: d30Set.size, rate: cohortUsers.length > 0 ? Math.round((d30Set.size / cohortUsers.length) * 100) : 0 },
+      d1: {
+        count: d1Set.size,
+        rate: cohortUsers.length > 0 ? Math.round((d1Set.size / cohortUsers.length) * 100) : 0,
+      },
+      d7: {
+        count: d7Set.size,
+        rate: cohortUsers.length > 0 ? Math.round((d7Set.size / cohortUsers.length) * 100) : 0,
+      },
+      d30: {
+        count: d30Set.size,
+        rate: cohortUsers.length > 0 ? Math.round((d30Set.size / cohortUsers.length) * 100) : 0,
+      },
     },
   ]
 }
@@ -207,7 +235,11 @@ export async function getCohortRetention(cohortDate?: Date): Promise<RetentionCo
 // Feature Adoption
 // ============================================================================
 
-export async function getFeatureAdoption(feature: string, from?: Date, to?: Date): Promise<FeatureAdoption | null> {
+export async function getFeatureAdoption(
+  feature: string,
+  from?: Date,
+  to?: Date
+): Promise<FeatureAdoption | null> {
   const now = new Date()
   const start = from ?? subMonths(now, 1)
   const end = to ?? now
@@ -231,15 +263,29 @@ export async function getFeatureAdoption(feature: string, from?: Date, to?: Date
   const adoptionRate = Math.round((adopters.length / totalUsers) * 100)
 
   // Calculate average time to adopt (from user creation to first use)
+  // Fetch actual user creation dates instead of using audit log timestamps
+  const adopterUserIds = adopters
+    .map((e: { userId: string | null }) => e.userId)
+    .filter((id): id is string => Boolean(id))
+  const users = await prisma.user.findMany({
+    where: { id: { in: adopterUserIds } },
+    select: { id: true, createdAt: true },
+  })
+
+  const userCreatedAt = new Map(
+    users.map((u: { id: string; createdAt: Date }) => [u.id, u.createdAt])
+  )
+
   const avgTimeToAdopt =
     adopters.length > 0
       ? Math.round(
-          adopters.reduce((sum: number, e: any) => {
-            const user = { createdAt: e.createdAt }
+          adopters.reduce((sum: number, e: { userId: string | null; createdAt: Date }) => {
+            if (!e.userId) return sum
+            const userCreated = userCreatedAt.get(e.userId) ?? new Date(e.createdAt)
             const adoptDate = new Date(e.createdAt)
-            const days = (adoptDate.getTime() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+            const days = (adoptDate.getTime() - userCreated.getTime()) / (1000 * 60 * 60 * 24)
             return sum + days
-          }, 0) / adopters.length,
+          }, 0) / adopters.length
         )
       : null
 
@@ -274,7 +320,7 @@ export async function getPageViews(from?: Date, to?: Date, limit = 20): Promise<
   })
 
   // Get unique visitors per page
-  const uniqueVisitorsPromises = pageViews.map((pv: any) =>
+  const uniqueVisitorsPromises = pageViews.map((pv) =>
     prisma.auditLog.findMany({
       where: {
         action: 'PAGE_VIEW',
@@ -284,16 +330,19 @@ export async function getPageViews(from?: Date, to?: Date, limit = 20): Promise<
       },
       select: { userId: true },
       distinct: ['userId'],
-    }),
+    })
   )
 
   const uniqueVisitorsLists = await Promise.all(uniqueVisitorsPromises)
 
-  return pageViews.map((pv: any, i: number) => ({
-    path: pv.entityId,
+  return pageViews.map((pv, i) => ({
+    path: pv.entityId ?? '',
     views: pv._count.id,
     uniqueVisitors: uniqueVisitorsLists[i].length,
-    avgViewsPerVisitor: uniqueVisitorsLists[i].length > 0 ? Number((pv._count.id / uniqueVisitorsLists[i].length).toFixed(1)) : 0,
+    avgViewsPerVisitor:
+      uniqueVisitorsLists[i].length > 0
+        ? Number((pv._count.id / uniqueVisitorsLists[i].length).toFixed(1))
+        : 0,
   }))
 }
 
@@ -317,19 +366,25 @@ export async function getUserJourney(userId: string, limit = 50): Promise<UserJo
     },
   })
 
-  return events.map((e: any) => ({
-    event: e.action as AnalyticsEventName,
-    entity: e.entity ?? 'UNKNOWN',
-    timestamp: e.createdAt.toISOString(),
-    payload: (e.changes as Record<string, any>) ?? {},
-  }))
+  return events.map(
+    (e: { action: string; entity: string | null; createdAt: Date; changes: unknown }) => ({
+      event: e.action as AnalyticsEventName,
+      entity: e.entity ?? 'UNKNOWN',
+      timestamp: e.createdAt.toISOString(),
+      payload: (e.changes as Record<string, unknown>) ?? {},
+    })
+  )
 }
 
 // ============================================================================
 // Event volume (for time-series charts)
 // ============================================================================
 
-export async function getEventVolume(from?: Date, to?: Date, groupBy: 'day' | 'week' | 'month' = 'day') {
+export async function getEventVolume(
+  from?: Date,
+  to?: Date,
+  groupBy: 'day' | 'week' | 'month' = 'day'
+) {
   const now = new Date()
   const start = from ?? subDays(now, 30)
   const end = to ?? now

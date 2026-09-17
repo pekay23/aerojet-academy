@@ -4,8 +4,10 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { getCachedExamComponents } from '@/lib/cached-queries'
 import Link from 'next/link'
-import Image from 'next/image'
+import { ProtectedImage } from '@/components/ProtectedImage'
+import { proxyImageUrl } from '@/lib/storage/signed-url'
 import { ArrowLeft, Mail, Phone, Globe, Calendar, User as UserIcon, Shield } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
 import UserActionsMenu from '../../_components/UserActionsMenu'
 import EditIdDialog from './_components/EditIdDialog'
 import EditProfileDialog from './_components/EditProfileDialog'
@@ -19,6 +21,7 @@ import EditStaffProfileDialog from './_components/EditStaffProfileDialog'
 import { Metadata } from 'next'
 import { PathwayCode } from './_components/EditPathwayDialog'
 import { UserStatus, UserRole, EnrollmentStatus } from '@/types/enums'
+import type { SerializedFullTimeEnrollmentForOjt, SerializedStudent } from '@/lib/staff/types'
 
 export const metadata: Metadata = { title: 'User Details | Staff Portal' }
 
@@ -97,7 +100,9 @@ export default async function UserProfilePage({ params }: Props) {
   })
 
   if (!userRaw) notFound()
-  const user = serializePrisma(userRaw)
+  const user = serializePrisma(
+    userRaw
+  ) as unknown as SerializedStudent as unknown as SerializedStudent
 
   // Fetch OJT + exam components in parallel (both independent of each other)
   const [ftEnrollmentsRaw, examComponentsRaw] = await Promise.all([
@@ -115,7 +120,7 @@ export default async function UserProfilePage({ params }: Props) {
 
   const ftEnrollments = serializePrisma(ftEnrollmentsRaw)
 
-  const ojtData = ftEnrollments.map((e: any) => ({
+  const ojtData = ftEnrollments.map((e: SerializedFullTimeEnrollmentForOjt) => ({
     id: e.id,
     programme: e.programme,
     ojtPeriods: e.ojtPeriods,
@@ -133,7 +138,8 @@ export default async function UserProfilePage({ params }: Props) {
     : user.email[0].toUpperCase()
 
   const statusColors: Record<string, string> = {
-    [UserStatus.ACTIVE]: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+    [UserStatus.ACTIVE]:
+      'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
     [UserStatus.PENDING]: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
     [UserStatus.SUSPENDED]: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
     [UserStatus.ARCHIVED]: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400',
@@ -145,8 +151,21 @@ export default async function UserProfilePage({ params }: Props) {
     [UserRole.ADMIN]: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
     [UserRole.STAFF]: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
     [UserRole.INSTRUCTOR]: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-    [UserRole.STUDENT]: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+    [UserRole.STUDENT]:
+      'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
     [UserRole.APPLICANT]: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+  }
+
+  const formatLastActive = (): string => {
+    const ts = user.lastSeenAt ?? user.lastLoginAt
+    if (!ts) return 'Never active'
+    const d = new Date(ts)
+    if (Number.isNaN(d.getTime())) return 'Never active'
+    const ms = Date.now() - d.getTime()
+    if (ms < 0) return d.toLocaleDateString()
+    // Within 90s → "online now" (matches presence ONLINE_THRESHOLD_MS)
+    if (ms < 90_000) return 'Online now'
+    return formatDistanceToNow(d, { addSuffix: true })
   }
 
   return (
@@ -155,21 +174,22 @@ export default async function UserProfilePage({ params }: Props) {
       <div className="mb-6">
         <Link
           href="/staff/users"
-          className="mb-4 inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-bold text-slate-400 transition-all duration-150 ease-out hover:bg-slate-100 hover:text-aerojet-blue dark:hover:bg-slate-800/60 dark:text-slate-500 dark:hover:text-blue-400"
+          className="hover:text-aerojet-blue mb-4 inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-bold text-slate-400 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-800/60 dark:hover:text-blue-400"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Users
         </Link>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-6">
             <div className="relative">
-              <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-aerojet-blue text-3xl font-black text-white shadow-lg shadow-blue-900/10 transition-all hover:shadow-xl dark:bg-blue-600">
+              <div className="bg-aerojet-blue relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl text-3xl font-black text-white shadow-lg shadow-blue-900/10 transition-all hover:shadow-xl dark:bg-blue-600">
                 {user.profile?.profilePhotoUrl ? (
-                  <Image
-                    src={user.profile.profilePhotoUrl}
+                  <ProtectedImage
+                    src={proxyImageUrl(user.profile.profilePhotoUrl, 'profile-photos')}
                     alt={fullName}
                     fill
                     sizes="96px"
                     className="object-cover"
+                    priority
                   />
                 ) : (
                   initials
@@ -181,7 +201,7 @@ export default async function UserProfilePage({ params }: Props) {
               />
             </div>
             <div>
-              <h1 className="mb-2 text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+              <h1 className="text-aerojet-blue mb-2 text-3xl font-black tracking-tight dark:text-white">
                 {fullName}
               </h1>
               <div className="flex items-center gap-3">
@@ -251,7 +271,7 @@ export default async function UserProfilePage({ params }: Props) {
                   {user.academyEmail ? 'Academy Email' : 'Email Address'}
                 </p>
                 <div className="flex items-center gap-2 font-bold break-all text-slate-700 dark:text-slate-300">
-                  <Mail className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
+                  <Mail className="text-aerojet-sky h-4 w-4 dark:text-blue-400" />
                   {user.academyEmail || user.email}
                 </div>
               </div>
@@ -261,7 +281,7 @@ export default async function UserProfilePage({ params }: Props) {
                     Personal Email
                   </p>
                   <div className="flex items-center gap-2 font-bold break-all text-slate-700 dark:text-slate-300">
-                    <Mail className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
+                    <Mail className="text-aerojet-sky h-4 w-4 dark:text-blue-400" />
                     {user.personalEmail}
                   </div>
                 </div>
@@ -271,7 +291,7 @@ export default async function UserProfilePage({ params }: Props) {
                   Phone Number
                 </p>
                 <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-                  <Phone className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
+                  <Phone className="text-aerojet-sky h-4 w-4 dark:text-blue-400" />
                   {user.profile?.phone ?? '—'}
                 </div>
               </div>
@@ -280,7 +300,7 @@ export default async function UserProfilePage({ params }: Props) {
                   Nationality
                 </p>
                 <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-                  <Globe className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
+                  <Globe className="text-aerojet-sky h-4 w-4 dark:text-blue-400" />
                   {user.profile?.nationality ?? '—'}
                 </div>
               </div>
@@ -289,7 +309,7 @@ export default async function UserProfilePage({ params }: Props) {
                   Date of Birth
                 </p>
                 <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-                  <Calendar className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
+                  <Calendar className="text-aerojet-sky h-4 w-4 dark:text-blue-400" />
                   {user.profile?.dateOfBirth
                     ? new Date(user.profile.dateOfBirth).toLocaleDateString()
                     : '—'}
@@ -299,7 +319,7 @@ export default async function UserProfilePage({ params }: Props) {
           </div>
 
           {/* Role Specific Details */}
-          {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as any) && (
+          {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as UserRole) && (
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
               <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
                 <UserIcon className="h-4 w-4" /> Student Profile
@@ -311,12 +331,12 @@ export default async function UserProfilePage({ params }: Props) {
                   </p>
                   <div className="flex items-center">
                     <p className="font-mono font-bold text-slate-700 dark:text-slate-300">
-                      {user.studentProfile?.studentId || 'Not Assigned'}
+                      {user.studentProfile?.studentId ?? 'Not Assigned'}
                     </p>
                     {user.studentProfile && (
                       <EditIdDialog
                         userId={user.id}
-                        currentId={user.studentProfile.studentId}
+                        currentId={user.studentProfile.studentId ?? ''}
                         type="studentId"
                         label="Student ID"
                       />
@@ -341,7 +361,9 @@ export default async function UserProfilePage({ params }: Props) {
                     </p>
                     <EditPathwayDialog
                       userId={user.id}
-                      currentPathway={(user.studentProfile?.pathwayRel?.code as PathwayCode) || null}
+                      currentPathway={
+                        (user.studentProfile?.pathwayRel?.code as PathwayCode) || null
+                      }
                       isLocked={user.studentProfile?.studyPathwayLocked || false}
                     />
                   </div>
@@ -358,9 +380,9 @@ export default async function UserProfilePage({ params }: Props) {
                     </p>
                     <EditAcademicPeriodDialog
                       userId={user.id}
-                      currentAcademicYearId={user.studentProfile?.academicYearId}
+                      currentAcademicYearId={user.studentProfile?.academicYear?.id}
                       currentAcademicYearName={user.studentProfile?.academicYear?.name}
-                      currentSemesterId={user.studentProfile?.semesterId}
+                      currentSemesterId={user.studentProfile?.semester?.id}
                       currentSemesterName={user.studentProfile?.semester?.name}
                     />
                   </div>
@@ -370,7 +392,7 @@ export default async function UserProfilePage({ params }: Props) {
           )}
 
           {/* Academic History for Students */}
-          {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as any) && (
+          {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as UserRole) && (
             <AcademicHistorySection
               studentId={user.id}
               studentName={fullName}
@@ -379,9 +401,7 @@ export default async function UserProfilePage({ params }: Props) {
                 id: e.id,
                 status: e.status,
                 completedAt: e.completedAt ?? null,
-                course: e.course,
-                academicYear: e.academicYear,
-                semester: e.semester,
+                course: { code: e.course?.code ?? '', name: e.course?.name ?? '' },
               }))}
               examBookings={(user.examBookings || []).map((b) => ({
                 id: b.id,
@@ -394,15 +414,19 @@ export default async function UserProfilePage({ params }: Props) {
                 status: b.status,
                 examCategory: b.examCategory,
               }))}
-              studentProfile={user.studentProfile ? {
-                studentId: user.studentProfile.studentId,
-                enrollmentStatus: user.studentProfile.enrollmentStatus,
-                fundingSource: user.studentProfile.fundingSource,
-                currentYearNumber: user.studentProfile.currentYearNumber,
-                currentSemesterNumber: user.studentProfile.currentSemesterNumber,
-                programmeChoice: user.studentProfile.programmeChoice,
-                enrollmentType: user.studentProfile.enrollmentType,
-              } : null}
+              studentProfile={
+                user.studentProfile
+                  ? {
+                      studentId: user.studentProfile.studentId ?? '',
+                      enrollmentStatus: user.studentProfile.enrollmentStatus ?? '',
+                      fundingSource: user.studentProfile.fundingSource ?? '',
+                      currentYearNumber: user.studentProfile.currentYearNumber ?? 0,
+                      currentSemesterNumber: user.studentProfile.currentSemesterNumber ?? 0,
+                      programmeChoice: user.studentProfile.programmeChoice ?? null,
+                      enrollmentType: user.studentProfile.enrollmentType ?? null,
+                    }
+                  : null
+              }
             />
           )}
 
@@ -482,8 +506,8 @@ export default async function UserProfilePage({ params }: Props) {
                 <EditStaffProfileDialog
                   userId={user.id}
                   initialData={{
-                    department: user.staffProfile.department,
-                    position: user.staffProfile.position,
+                    department: user.staffProfile.department ?? '',
+                    position: user.staffProfile.position ?? '',
                   }}
                 />
               </div>
@@ -544,7 +568,11 @@ export default async function UserProfilePage({ params }: Props) {
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                   Last Active
                 </span>
-                <span className="text-xs font-bold text-slate-800 dark:text-white">Today</span>
+                <span
+                  className={`text-xs font-bold ${formatLastActive() === 'Online now' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-800 dark:text-white'}`}
+                >
+                  {formatLastActive()}
+                </span>
               </div>
             </div>
           </div>

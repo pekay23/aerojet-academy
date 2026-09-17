@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 
@@ -35,9 +35,9 @@ const entrySchema = z.object({
 })
 
 // GET — get logbook detail with entries
-export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
+export const GET = withErrorHandler(async (_req: NextRequest, ctx: RouteContext) => {
   await requireStaff()
-  const { logbookId } = await ctx.params
+  const { logbookId } = ctx.params
 
   const logbook = await prismaUnfiltered.oJTLogbook.findUnique({
     where: { id: logbookId },
@@ -100,9 +100,9 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
 })
 
 // POST — add logbook entry
-export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx: RouteContext) => {
   await requireStaff()
-  const { logbookId } = await ctx.params
+  const { logbookId } = ctx.params
   const body = await req.json()
   const parsed = entrySchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid input')
@@ -121,7 +121,7 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
       taskDescription: parsed.data.taskDescription,
       workOrderReference: parsed.data.workOrderReference || null,
       maintenanceManualRef: parsed.data.maintenanceManualRef || null,
-      maintenanceType: parsed.data.maintenanceType as any,
+        maintenanceType: parsed.data.maintenanceType as 'LINE' | 'BASE' | 'COMPONENT_OVERHAUL' | 'ENGINE_OVERHAUL' | 'MODIFICATION' | 'REPAIR' | 'TROUBLESHOOTING' | 'INSPECTION' | 'SERVICING' | 'NDT',
       durationHours: parsed.data.durationHours,
       supervisorId: parsed.data.supervisorId,
       licenceCategory: parsed.data.licenceCategory || null,

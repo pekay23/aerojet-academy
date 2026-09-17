@@ -50,3 +50,5 @@ execSync("npx prisma db push --accept-data-loss", {
 
 console.log("");
 console.log("Done. Supabase tables now match prisma/schema.prisma.");
+
+

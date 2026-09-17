@@ -1,4 +1,5 @@
 import { vi } from 'vitest'
+import '@testing-library/jest-dom/vitest'
 
 // ---------------------------------------------------------------------------
 // MUST BE FIRST: prevent real DB connections at module-evaluation time.
@@ -27,23 +28,27 @@ vi.mock('@prisma/adapter-neon', () => ({
 }))
 
 // ---------------------------------------------------------------------------
-// Helper: create a model mock with common Prisma operations
+// Helper: create a model mock with common Prisma operations.
+// `vi.fn()` is given a loose signature here so mockResolvedValueOnce /
+// mockReturnValue etc. don't complain about argument arity for permissive
+// mock shapes (Prisma's strict generic args don't matter for test mocks).
 // ---------------------------------------------------------------------------
-function mockModel() {
+function mockModel(): Record<string, ReturnType<typeof vi.fn>> {
+  const fn = (): ReturnType<typeof vi.fn> => vi.fn() as unknown as ReturnType<typeof vi.fn>
   return {
-    findFirst: vi.fn(),
-    findUnique: vi.fn(),
-    findMany: vi.fn(),
-    create: vi.fn(),
-    createMany: vi.fn(),
-    update: vi.fn(),
-    updateMany: vi.fn(),
-    upsert: vi.fn(),
-    delete: vi.fn(),
-    deleteMany: vi.fn(),
-    count: vi.fn(),
-    aggregate: vi.fn(),
-    groupBy: vi.fn(),
+    findFirst: fn(),
+    findUnique: fn(),
+    findMany: fn(),
+    create: fn(),
+    createMany: fn(),
+    update: fn(),
+    updateMany: fn(),
+    upsert: fn(),
+    delete: fn(),
+    deleteMany: fn(),
+    count: fn(),
+    aggregate: fn(),
+    groupBy: fn(),
   }
 }
 
@@ -67,9 +72,13 @@ vi.mock('next-auth/react', () => ({
 }))
 
 // ---------------------------------------------------------------------------
-// Mock Prisma — covers all production models
+// Mock Prisma — covers all production models.
+// We wrap with a Proxy so that any model name (including ones added later
+// in the Prisma schema) returns a fresh mockModel() on access. This lets
+// generated test files reference models that aren't explicitly enumerated
+// below without triggering TS2339 "property does not exist" errors.
 // ---------------------------------------------------------------------------
-const prismaMock = {
+const prismaMockCore = {
   // Identity & Auth
   user: mockModel(),
   profile: mockModel(),
@@ -123,6 +132,8 @@ const prismaMock = {
   examBundle: mockModel(),
   examComponent: mockModel(),
   examSitting: mockModel(),
+  examiner: mockModel(),
+  examSittingAssignment: mockModel(),
   examAttendance: mockModel(),
   sittingAssignment: mockModel(),
   bookingEntitlement: mockModel(),
@@ -134,6 +145,8 @@ const prismaMock = {
   notification: mockModel(),
   message: mockModel(),
   emailTemplate: mockModel(),
+  emailRegistryEntry: mockModel(),
+  emailDelivery: mockModel(),
 
   // Content & Files
   fileUpload: mockModel(),
@@ -169,9 +182,20 @@ const prismaMock = {
   $executeRawUnsafe: vi.fn(),
 }
 
+const prismaMock: any = new Proxy(prismaMockCore, {
+  get(target, prop: string | symbol) {
+    if (prop in target) return (target as any)[prop]
+    if (typeof prop === 'symbol') return undefined
+    const m = mockModel()
+    ;(target as any)[prop] = m
+    return m
+  },
+})
+
 vi.mock('@/lib/prisma/client', () => ({
   default: prismaMock,
   prismaUnfiltered: prismaMock,
+  prisma: prismaMock,
 }))
 
 vi.mock('@/lib/prisma/db-base', () => ({
@@ -186,6 +210,35 @@ vi.mock('resend', () => ({
   Resend: vi.fn(() => ({
     emails: { send: vi.fn(() => ({ data: { id: 'test' }, error: null })) },
   })),
+}))
+
+// ---------------------------------------------------------------------------
+// Mock next/navigation
+// ---------------------------------------------------------------------------
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    refresh: vi.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/',
+}))
+
+// ---------------------------------------------------------------------------
+// Mock analytics server action
+// ---------------------------------------------------------------------------
+vi.mock('@/app/(portal)/_actions/analytics', () => ({
+  recordCourseEngagement: vi.fn(() => Promise.resolve({ success: true })),
+}))
+
+// ---------------------------------------------------------------------------
+// Mock realtime hook
+// ---------------------------------------------------------------------------
+vi.mock('@/hooks/useRealtimeMessages', () => ({
+  useRealtimeMessages: vi.fn(() => () => {}),
 }))
 
 // ---------------------------------------------------------------------------

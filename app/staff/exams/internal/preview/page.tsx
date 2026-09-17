@@ -20,16 +20,20 @@ export default async function InternalExamPreviewPage() {
     courseCode: b.course.code,
     courseName: b.course.name,
     mcqCount: b.mcqCount,
+    categoryCode: null,
+    sebConfig: null,
+    sebRequired: false,
   }))
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white sm:text-3xl">
+        <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
           Internal Exam Preview
         </h1>
         <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
-          Preview EASA-style module exams exactly as students will see them. Answers are shown for review.
+          Preview EASA-style module exams exactly as students will see them. Answers are shown for
+          review.
         </p>
       </div>
 

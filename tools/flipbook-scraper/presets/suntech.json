@@ -1,0 +1,24 @@
+{
+  "baseUrl": "https://courses.suntech-bc.com",
+  "loginUrl": "https://courses.suntech-bc.com/login",
+  "outputDir": "./flipbook-output",
+  "pageLoadDelay": 4000,
+  "imageFormat": "jpeg",
+  "loginSelectors": {
+    "usernameField": "input[name='log']",
+    "passwordField": "input[name='pwd']",
+    "submitButton": "input.wp-submit, button.accessally-login-form-submit-button"
+  },
+  "flipbookSelectors": {
+    "container": ".flipbook-main-wrapper",
+    "pageImage": ".book img, .flipbook-main-wrapper img, .book-page img, .turn-page img",
+    "nextButton": ".flipbook-next, .next-button, [class*='next'], .flipbook-nav-next",
+    "prevButton": ".flipbook-prev, .prev-button, [class*='prev'], .flipbook-nav-prev",
+    "pageIndicator": ".flipbook-page-count, .page-info, [class*='page-count']",
+    "totalPages": ".flipbook-total-pages, [class*='total-pages']"
+  },
+  "pdfOptions": {
+    "pageSize": "fit",
+    "margin": 0
+  }
+}

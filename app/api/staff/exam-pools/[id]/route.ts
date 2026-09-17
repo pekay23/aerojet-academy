@@ -1,15 +1,15 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { getPoolWithDetails } from '@/lib/pools/operations'
 import { updateExamPoolSchema, validateBody } from '@/lib/validation/schemas'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     await requireStaff()
-    const id = ctx?.params?.id
+    const id = (await ctx!.params).id
     const pool = await getPoolWithDetails(id!)
     if (!pool) return apiNotFound('Pool not found')
     return apiSuccess(pool)
@@ -17,9 +17,9 @@ export const GET = withErrorHandler(
 )
 
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const staff = await requireStaff()
-    const id = ctx?.params?.id
+    const id = (await ctx!.params).id
     const body = await req.json()
     const validation = validateBody(updateExamPoolSchema, body)
 

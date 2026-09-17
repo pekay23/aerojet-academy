@@ -2,10 +2,8 @@ import { NextRequest } from 'next/server'
 import { env } from '@/lib/env'
 import prisma from '@/lib/prisma/client'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
-import { sendMilestoneReminderEmail } from '@/lib/email/service'
-import { createNotification } from '@/lib/email/service'
 
-const REMINDER_DAYS = [14, 7, 1]
+const _REMINDER_DAYS = [14, 7, 1]
 
 function getReminderType(daysUntil: number): string | null {
   if (daysUntil === 14) return '14_DAY'

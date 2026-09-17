@@ -14,11 +14,13 @@
   <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
     <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,9 +28,69 @@
 <header>
   <p class="he-eyebrow">Architecture</p>
   <h1 class="he-title">Security Guidelines</h1>
-  
+  <p class="he-deck">The following P3 gaps identified in the May 2026 audits have been resolved…</p>
 </header>
-<section class="he-section" id="authentication"><div class="he-section__num">01 · Authentication</div><h2 class="he-section__title">Authentication</h2>NextAuth.js with JWT strategy (8-hour sessions)Passwords hashed with bcrypt (12 rounds)Force password change on first login for staff-created accountsRole-based middleware protecting all portal routes<section class="he-section" id="authorization"><div class="he-section__num">02 · Authorization</div><h2 class="he-section__title">Authorization</h2>Role hierarchy: SUPER_ADMIN > ADMIN > STAFF > INSTRUCTOR > STUDENT > APPLICANTAPI routes validate session and role before processingStaff routes use <code>requireStaff()</code> helper from <code>lib/auth/helpers</code> for consistent authCron endpoints protected by <code>CRON_SECRET</code> bearer token (all GET and POST handlers)Wallet operations use serializable transactions to prevent race conditions<section class="he-section" id="input-validation"><div class="he-section__num">03 · Input Validation</div><h2 class="he-section__title">Input Validation</h2>Zod schemas for all staff admin routes (charter, merge, proof, book-exam)Validation schemas centralized in <code>lib/validation/schemas.ts</code><code>validateBody()</code> helper for consistent error formattingAll API routes returning lists include <code>take</code> limits (never unbounded)<section class="he-section" id="data-protection"><div class="he-section__num">04 · Data Protection</div><h2 class="he-section__title">Data Protection</h2>All database queries use parameterized Prisma queries (SQL injection safe)Input sanitization on all user-facing endpointsCSRF protection via NextAuthWallet top-up uses Serializable transaction isolation to prevent race conditions<section class="he-section" id="sensitive-data"><div class="he-section__num">05 · Sensitive Data</div><h2 class="he-section__title">Sensitive Data</h2>Never commit .env.local, .env.productionAPI keys and secrets stored in environment variables onlyPayment proof URLs stored but files served through authenticated routes<section class="he-section" id="exam-pool-security"><div class="he-section__num">06 · Exam Pool Security</div><h2 class="he-section__title">Exam Pool Security</h2>Serializable transaction isolation for pool joinsSELECT FOR UPDATE to prevent double-joiningAtomic increment of member countAuto-confirm/fail logic runs server-side only<section class="he-section" id="two-factor-authentication-2fa"><div class="he-section__num">07 · Two-Factor Authentication (2FA)</div><h2 class="he-section__title">Two-Factor Authentication (2FA)</h2>TOTP-based 2FA available for STAFF, ADMIN, and SUPER_ADMIN accountsUses <code>otplib</code> v13 (<code>generateSecret</code>, <code>generateURI</code>) for secret/URI generation only, with SHA-1 algorithm, 6 digits, 30-second periodTOTP verification uses the custom <code>verifyTOTP()</code> from <code>lib/auth/totp.ts</code> (timing-safe, with replay protection), NOT otplibQR code generated server-side via <code>qrcode</code> package (data URI, never stored)Secret stored encrypted in <code>User.twoFactorSecret</code> field, enabled flag in <code>User.twoFactorEnabled</code>Login flow: credentials provider throws <code>2FA_REQUIRED</code> error string → client intercepts → shows TOTP input → re-authenticates with <code>totpCode</code> parameterSetup: <code>/api/auth/2fa/generate</code> → <code>/api/auth/2fa/verify</code> (enables on success)Disable: <code>/api/auth/2fa/disable</code> (requires valid TOTP code to confirm identity)All 2FA API routes require authenticated session with staff-level role<section class="he-section" id="known-security-gaps-p3-backlog"><div class="he-section__num">08 · Known Security Gaps (P3 backlog)</div><h2 class="he-section__title">Known Security Gaps (P3 backlog)</h2><code>api/auth/resend-verification</code> — No rate limiting, possible email enumeration<code>api/public/submit-payment-proof</code> — No rate limiting, registration code could be brute-forced
+<section class="he-section" id="authentication"><div class="he-section__num">01 · Authentication</div><h2 class="he-section__title">Authentication</h2></section>
+<ul>
+<li>NextAuth.js with JWT strategy (8-hour sessions)</li>
+<li>Passwords hashed with bcryptjs (12 rounds)</li>
+<li>Force password change on first login for staff-created accounts</li>
+<li>Role-based middleware protecting all portal routes</li>
+</ul>
+<section class="he-section" id="authorization"><div class="he-section__num">02 · Authorization</div><h2 class="he-section__title">Authorization</h2></section>
+<ul>
+<li>Role hierarchy: SUPER_ADMIN &gt; ADMIN &gt; STAFF &gt; INSTRUCTOR &gt; STUDENT &gt; APPLICANT</li>
+<li>API routes validate session and role before processing</li>
+<li>Staff routes use <code>requireStaff()</code> helper from <code>lib/auth/helpers</code> for consistent auth</li>
+<li>Cron endpoints protected by <code>CRON_SECRET</code> bearer token (all GET and POST handlers)</li>
+<li>Wallet operations use serializable transactions to prevent race conditions</li>
+</ul>
+<section class="he-section" id="input-validation"><div class="he-section__num">03 · Input Validation</div><h2 class="he-section__title">Input Validation</h2></section>
+<ul>
+<li>Zod schemas for all staff admin routes (charter, merge, proof, book-exam)</li>
+<li>Validation schemas centralized in <code>lib/validation/schemas.ts</code></li>
+<li><code>validateBody()</code> helper for consistent error formatting</li>
+<li>All API routes returning lists include <code>take</code> limits (never unbounded)</li>
+</ul>
+<section class="he-section" id="data-protection"><div class="he-section__num">04 · Data Protection</div><h2 class="he-section__title">Data Protection</h2></section>
+<ul>
+<li>All database queries use parameterized Prisma queries (SQL injection safe)</li>
+<li>Input sanitization on all user-facing endpoints</li>
+<li>CSRF protection via NextAuth</li>
+<li>Wallet top-up uses Serializable transaction isolation to prevent race conditions</li>
+</ul>
+<section class="he-section" id="sensitive-data"><div class="he-section__num">05 · Sensitive Data</div><h2 class="he-section__title">Sensitive Data</h2></section>
+<ul>
+<li>Never commit .env.local, .env.production</li>
+<li>API keys and secrets stored in environment variables only</li>
+<li>Payment proof URLs stored but files served through authenticated routes</li>
+</ul>
+<section class="he-section" id="exam-pool-security"><div class="he-section__num">06 · Exam Pool Security</div><h2 class="he-section__title">Exam Pool Security</h2></section>
+<ul>
+<li>Serializable transaction isolation for pool joins</li>
+<li>SELECT FOR UPDATE to prevent double-joining</li>
+<li>Atomic increment of member count</li>
+<li>Auto-confirm/fail logic runs server-side only</li>
+</ul>
+<section class="he-section" id="two-factor-authentication-2fa"><div class="he-section__num">07 · Two-Factor Authentication (2FA)</div><h2 class="he-section__title">Two-Factor Authentication (2FA)</h2></section>
+<ul>
+<li>TOTP-based 2FA available for STAFF, ADMIN, and SUPER_ADMIN accounts</li>
+<li>Uses <code>otplib</code> v13 (<code>generateSecret</code>, <code>generateURI</code>) for secret/URI generation only, with SHA-1 algorithm, 6 digits, 30-second period</li>
+<li>TOTP <strong>verification</strong> uses the custom <code>verifyTOTP()</code> from <code>lib/auth/totp.ts</code> (timing-safe, with replay protection), NOT otplib</li>
+<li>QR code generated server-side via <code>qrcode</code> package (data URI, never stored)</li>
+<li>Secret stored encrypted in <code>User.twoFactorSecret</code> field, enabled flag in <code>User.twoFactorEnabled</code></li>
+<li>Login flow: credentials provider throws <code>2FA_REQUIRED</code> error string → client intercepts → shows TOTP input → re-authenticates with <code>totpCode</code> parameter</li>
+<li>Setup: <code>/api/auth/2fa/generate</code> → <code>/api/auth/2fa/verify</code> (enables on success)</li>
+<li>Disable: <code>/api/auth/2fa/disable</code> (requires valid TOTP code to confirm identity)</li>
+<li>All 2FA API routes require authenticated session with staff-level role</li>
+</ul>
+<section class="he-section" id="known-security-gaps-p3-backlog-resolved-2026-05-06"><div class="he-section__num">08 · Known Security Gaps (P3 backlog) — Resolved (2026-05-06)</div><h2 class="he-section__title">Known Security Gaps (P3 backlog) — Resolved (2026-05-06)</h2></section>
+<p>The following P3 gaps identified in the May 2026 audits have been resolved:</p>
+<ul>
+<li><code>api/auth/resend-verification</code> — ✅ Rate limited to 3/hour per IP (<a href="../../lib/security/rate-limit.ts">lib/security/rate-limit.ts</a>, <a href="../../app/api/auth/resend-verification/route.ts#L12">route.ts:12</a>); uniform response prevents email enumeration (<a href="../../app/api/auth/resend-verification/route.ts#L15-L18">route.ts:15-18,32-46</a>)</li>
+<li><code>api/public/submit-payment-proof</code> — ✅ Rate limited to 5/hour per IP (<a href="../../lib/auth/helpers.ts">lib/auth/helpers.ts</a> <code>checkRateLimit</code>, <a href="../../app/api/public/submit-payment-proof/route.ts#L9-L12">route.ts:11-12</a>)</li>
+</ul>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -41,12 +103,12 @@
     <li class="he-toc__l2"><a href="#sensitive-data">Sensitive Data</a></li>
     <li class="he-toc__l2"><a href="#exam-pool-security">Exam Pool Security</a></li>
     <li class="he-toc__l2"><a href="#two-factor-authentication-2fa">Two-Factor Authentication (2FA)</a></li>
-    <li class="he-toc__l2"><a href="#known-security-gaps-p3-backlog">Known Security Gaps (P3 backlog)</a></li>
+    <li class="he-toc__l2"><a href="#known-security-gaps-p3-backlog-resolved-2026-05-06">Known Security Gaps (P3 backlog) — Resolved (2026-05-06)</a></li>
   </ul>
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

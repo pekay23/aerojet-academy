@@ -9,9 +9,9 @@ import {
   Calendar,
   FileCheck,
   ClipboardCheck,
-  UserCircle,
+  UserCircle as _UserCircle,
   LogOut,
-  ChevronLeft
+  ChevronLeft as _ChevronLeft
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -19,6 +19,7 @@ const MENU_ITEMS = [
   { href: '/examiner', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/examiner/schedule', label: 'Schedule', icon: Calendar },
   { href: '/examiner/results', label: 'Results Entry', icon: ClipboardCheck },
+  { href: '/examiner/results/history', label: 'Results History', icon: FileCheck },
   { href: '/examiner/availability', label: 'Availability', icon: Calendar },
   { href: '/examiner/compliance', label: 'Compliance', icon: FileCheck },
 ]
@@ -78,7 +79,7 @@ export default function ExaminerSidebar() {
       {/* Footer / Profile */}
       <div className="border-t border-slate-100 p-4 dark:border-slate-800">
         <button
-          onClick={() => signOut({ callbackUrl: `${window.location.origin}/login` })}
+          onClick={() => signOut({ callbackUrl: '/login' })}
           className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/20"
         >
           <LogOut className="h-5 w-5" />

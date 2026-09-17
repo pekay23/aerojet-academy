@@ -13,23 +13,24 @@ import {
   Mail,
 } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Course Materials | Instructor Portal' }
+export const dynamic = 'force-dynamic'
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') redirect('/login')
 
-  const classData = await prisma.class.findUnique({
+  const classData = await prismaUnfiltered.class.findUnique({
     where: { id },
     include: { course: true },
   })
 
   if (!classData) notFound()
 
-  const resources = await prisma.generalResource.findMany({
+  const resources = await prismaUnfiltered.generalResource.findMany({
     where: { showToInstructors: true },
     orderBy: { updatedAt: 'desc' },
   })
@@ -37,22 +38,22 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { course } = classData
 
   return (
-    <div className="mx-auto max-w-5xl space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-5xl space-y-10 duration-700">
       {/* Header */}
       <div className="space-y-4">
         <Link
           href="/instructor/classes"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
+          className="hover:text-aerojet-sky mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors dark:text-slate-300"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes
         </Link>
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             Course Materials
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            <span className="font-extrabold text-aerojet-sky">{course.code}</span>
+            <span className="text-aerojet-sky font-extrabold">{course.code}</span>
             <span className="mx-2 inline-block h-1 w-1 rounded-full bg-slate-200 align-middle dark:bg-slate-700" />
             {course.name}
           </p>
@@ -96,7 +97,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                     href={course.syllabusUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-sm transition-all hover:bg-aerojet-blue hover:text-white active:scale-95 dark:bg-slate-700 dark:text-white"
+                    className="hover:bg-aerojet-blue inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-sm transition-all hover:text-white active:scale-95 dark:bg-slate-700 dark:text-white"
                   >
                     <Download className="h-4 w-4" />
                   </a>
@@ -148,7 +149,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                     href={course.materialsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-sky active:scale-95"
+                    className="bg-aerojet-blue hover:bg-aerojet-sky inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black tracking-widest text-white uppercase transition-all active:scale-95"
                   >
                     Access
                     <ChevronRight className="h-3 w-3" />
@@ -207,7 +208,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                           href={resource.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-sm transition-all hover:bg-aerojet-blue hover:text-white active:scale-95 dark:bg-slate-700 dark:text-white"
+                          className="hover:bg-aerojet-blue inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-sm transition-all hover:text-white active:scale-95 dark:bg-slate-700 dark:text-white"
                         >
                           <Download className="h-4 w-4" />
                         </a>
@@ -233,7 +234,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               </p>
               <Link
                 href="/instructor/resources"
-                className="block w-full rounded-xl border border-slate-100 py-3 text-center text-xs font-black tracking-widest text-aerojet-blue uppercase transition-all hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
+                className="text-aerojet-blue block w-full rounded-xl border border-slate-100 py-3 text-center text-xs font-black tracking-widest uppercase transition-all hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
               >
                 View All Resources
               </Link>

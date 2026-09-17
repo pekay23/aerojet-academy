@@ -36,9 +36,9 @@ export async function mirrorOne(fileUploadId: string): Promise<string> {
       data: { mirroredAt: new Date() },
     })
     return 'mirrored'
-  } catch (err: any) {
-    console.error(`[uploadthing-mirror] ${fileUploadId} failed:`, err.message)
-    return `error:${err.message?.slice(0, 100) ?? 'unknown'}`
+  } catch (err: unknown) {
+    console.error(`[uploadthing-mirror] ${fileUploadId} failed:`, err instanceof Error ? err.message : 'unknown')
+    return `error:${err instanceof Error ? err.message?.slice(0, 100) : 'unknown'}`
   }
 }
 

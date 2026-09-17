@@ -4,7 +4,7 @@ import { useState } from 'react'
 import {
   BookOpen,
   Calendar,
-  Award,
+  Award as _Award,
   Clock,
   User,
   ChevronDown,
@@ -13,25 +13,81 @@ import {
   XCircle,
 } from 'lucide-react'
 
+interface Grade {
+  id: string
+  assessmentName?: string
+  assessmentType?: string
+  score: number
+  maxScore: number
+  percentage: number
+  grade?: string | null
+  assessmentDate?: string | null
+}
+
+interface Enrollment {
+  id: string
+  status: string
+  enrolledAt?: string | null
+  approvedAt?: string | null
+  completedAt?: string | null
+  course: { id: string; name: string; code: string | null; price: number }
+  grades?: Grade[]
+}
+
+interface AttendanceRecord {
+  id: string
+  date?: string | null
+  status?: string
+  minutesLate?: number | null
+  class?: { name?: string | null; course?: { code: string } | null } | null
+}
+
+interface OjtPeriod {
+  id: string
+  companyName: string
+  companyAddress?: string | null
+  supervisorName?: string | null
+  status: string
+  hoursCompleted: number
+  hoursRequired: number
+  startDate?: string | null
+  endDate?: string | null
+}
+
+interface FullTimeEnrollment {
+  id: string
+  currentYearNumber?: number | null
+  status: string
+  programme?: { code: string; name: string } | null
+  ojtPeriods?: OjtPeriod[]
+  academicYear?: { id: string; name: string } | null
+}
+
+interface Student {
+  enrollments: Enrollment[]
+  attendanceRecords: AttendanceRecord[]
+  fullTimeEnrollments: FullTimeEnrollment[]
+}
+
 interface Props {
-  student: any
+  student: Student
   onRefresh: () => void
 }
 
-export default function AcademicTab({ student, onRefresh }: Props) {
+export default function AcademicTab({ student, onRefresh: _onRefresh }: Props) {
   const [expandedEnrollment, setExpandedEnrollment] = useState<string | null>(null)
   const [expandedOjt, setExpandedOjt] = useState<string | null>(null)
 
-  const enrollments = student.enrollments || []
-  const attendanceRecords = student.attendanceRecords || []
-  const fullTimeEnrollments = student.fullTimeEnrollments || []
+  const enrollments: Enrollment[] = student.enrollments || []
+  const attendanceRecords: AttendanceRecord[] = student.attendanceRecords || []
+  const fullTimeEnrollments: FullTimeEnrollment[] = student.fullTimeEnrollments || []
 
   // Calculate attendance stats
   const attendanceStats = {
     total: attendanceRecords.length,
-    present: attendanceRecords.filter((r: any) => r.status === 'PRESENT').length,
-    absent: attendanceRecords.filter((r: any) => r.status === 'ABSENT').length,
-    late: attendanceRecords.filter((r: any) => r.status === 'LATE').length,
+    present: attendanceRecords.filter((r: AttendanceRecord) => r.status === 'PRESENT').length,
+    absent: attendanceRecords.filter((r: AttendanceRecord) => r.status === 'ABSENT').length,
+    late: attendanceRecords.filter((r: AttendanceRecord) => r.status === 'LATE').length,
   }
 
   return (
@@ -42,12 +98,12 @@ export default function AcademicTab({ student, onRefresh }: Props) {
           <EmptyState message="No course enrollments" />
         ) : (
           <div className="space-y-3">
-            {enrollments.map((enrollment: any) => {
+            {enrollments.map((enrollment: Enrollment) => {
               const isExpanded = expandedEnrollment === enrollment.id
               const grades = enrollment.grades || []
               const avgGrade =
                 grades.length > 0
-                  ? grades.reduce((sum: number, g: any) => sum + Number(g.percentage || 0), 0) /
+                  ? grades.reduce((sum: number, g: Grade) => sum + Number(g.percentage || 0), 0) /
                     grades.length
                   : null
 
@@ -137,7 +193,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                                {grades.map((grade: any) => (
+                                {grades.map((grade: Grade) => (
                                   <tr key={grade.id}>
                                     <td className="py-2">
                                       <span className="font-medium text-slate-700 dark:text-slate-300">
@@ -166,7 +222,9 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                                       </span>
                                     </td>
                                     <td className="py-2 text-right text-slate-400">
-                                      {new Date(grade.assessmentDate).toLocaleDateString('en-GB')}
+                                      {grade.assessmentDate
+                                        ? new Date(grade.assessmentDate).toLocaleDateString('en-GB')
+                                        : '—'}
                                     </td>
                                   </tr>
                                 ))}
@@ -225,16 +283,18 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {attendanceRecords.slice(0, 20).map((record: any) => (
+                {attendanceRecords.slice(0, 20).map((record: AttendanceRecord) => (
                   <tr key={record.id}>
                     <td className="px-4 py-2 text-slate-500">
-                      {new Date(record.date).toLocaleDateString('en-GB', {
-                        day: 'numeric',
-                        month: 'short',
-                      })}
+                      {record.date
+                        ? new Date(record.date).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                          })
+                        : '—'}
                     </td>
                     <td className="px-4 py-2 text-slate-700 dark:text-slate-300">
-                      {record.class?.course?.name || record.class?.name || '—'}
+                      {record.class?.name || record.class?.course?.code || '—'}
                     </td>
                     <td className="px-4 py-2 text-center">
                       {record.status === 'PRESENT' ? (
@@ -260,7 +320,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
       {fullTimeEnrollments.length > 0 && (
         <Section title="On-The-Job Training (OJT)" icon={User}>
           <div className="space-y-3">
-            {fullTimeEnrollments.map((fte: any) => (
+            {fullTimeEnrollments.map((fte: FullTimeEnrollment) => (
               <div
                 key={fte.id}
                 className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
@@ -276,15 +336,15 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                   </div>
                   <button
                     onClick={() => setExpandedOjt(expandedOjt === fte.id ? null : fte.id)}
-                    className="flex items-center gap-1 text-xs font-bold text-aerojet-blue"
+                    className="text-aerojet-blue flex items-center gap-1 text-xs font-bold"
                   >
                     {expandedOjt === fte.id ? 'Hide' : 'View'} OJT Periods
                   </button>
                 </div>
 
-                {expandedOjt === fte.id && fte.ojtPeriods?.length > 0 && (
+                {expandedOjt === fte.id && fte.ojtPeriods && fte.ojtPeriods.length > 0 && (
                   <div className="space-y-3 p-4">
-                    {fte.ojtPeriods.map((ojt: any) => (
+                    {fte.ojtPeriods.map((ojt: OjtPeriod) => (
                       <div
                         key={ojt.id}
                         className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50"
@@ -349,7 +409,7 @@ function Section({
   children,
 }: {
   title: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   children: React.ReactNode
 }) {
   return (

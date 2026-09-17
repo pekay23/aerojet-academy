@@ -1,7 +1,6 @@
-'use client'
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useFormDirty } from '@/hooks/useFormDirty'
 import {
   Dialog,
   DialogContent,
@@ -35,6 +34,8 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { markDirty, markClean } = useFormDirty()
 
   // Form State
   const [assessmentName, setAssessmentName] = useState('')
@@ -82,6 +83,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
       })
 
       toast.success('Grade recorded successfully')
+      markClean()
       setOpen(false)
       // Reset form
       setAssessmentName('')
@@ -91,8 +93,8 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
       setEssay1Score('')
       setEssay2Score('')
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to record grade')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to record grade')
     } finally {
       setIsSubmitting(false)
     }
@@ -104,7 +106,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
         <Button
           variant="outline"
           size="sm"
-          className="h-8 gap-2 border-[1.5px] border-aerojet-sky/20 bg-aerojet-sky/5 text-xs font-bold text-aerojet-sky hover:bg-aerojet-sky/10 dark:border-aerojet-sky/30 dark:bg-aerojet-sky/10 dark:hover:bg-aerojet-sky/20"
+          className="border-aerojet-sky/20 bg-aerojet-sky/5 text-aerojet-sky hover:bg-aerojet-sky/10 dark:border-aerojet-sky/30 dark:bg-aerojet-sky/10 dark:hover:bg-aerojet-sky/20 h-8 gap-2 border-[1.5px] text-xs font-bold"
         >
           <PlusCircle className="h-3.5 w-3.5" />
           Add Internal Grade
@@ -113,7 +115,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
       <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto rounded-3xl border border-slate-100 p-0 sm:rounded-[2rem] dark:border-slate-800 dark:bg-slate-950">
         <div className="bg-slate-50 p-6 pb-8 dark:bg-slate-900/50">
           <DialogHeader className="mb-2">
-            <DialogTitle className="text-xl font-black text-aerojet-blue dark:text-white">
+            <DialogTitle className="text-aerojet-blue text-xl font-black dark:text-white">
               Record Grade for {courseCode}
             </DialogTitle>
             <DialogDescription className="font-medium text-slate-500">
@@ -126,11 +128,17 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
               <div className="space-y-3">
                 <Label
                   htmlFor="assessmentType"
-                  className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
+                  className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase"
                 >
                   Assessment Type
                 </Label>
-                <Select value={assessmentType} onValueChange={setAssessmentType}>
+                <Select
+                  value={assessmentType}
+                  onValueChange={(v) => {
+                    setAssessmentType(v)
+                    markDirty()
+                  }}
+                >
                   <SelectTrigger className="h-12 rounded-xl border-slate-200 bg-white font-bold dark:border-slate-800 dark:bg-slate-900">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -145,7 +153,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
               <div className="space-y-3">
                 <Label
                   htmlFor="assessmentDate"
-                  className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
+                  className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase"
                 >
                   Assessment Date
                 </Label>
@@ -153,7 +161,10 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
                   id="assessmentDate"
                   type="date"
                   value={assessmentDate}
-                  onChange={(e) => setAssessmentDate(e.target.value)}
+                  onChange={(e) => {
+                    setAssessmentDate(e.target.value)
+                    markDirty()
+                  }}
                   className="h-12 rounded-xl border-slate-200 bg-white font-bold dark:border-slate-800 dark:bg-slate-900"
                   required
                 />
@@ -163,7 +174,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
             <div className="space-y-3">
               <Label
                 htmlFor="assessmentName"
-                className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
+                className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase"
               >
                 Assessment Name
               </Label>
@@ -171,7 +182,10 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
                 id="assessmentName"
                 placeholder="e.g. Midterm Practical, Module 2 Essay"
                 value={assessmentName}
-                onChange={(e) => setAssessmentName(e.target.value)}
+                onChange={(e) => {
+                  setAssessmentName(e.target.value)
+                  markDirty()
+                }}
                 className="h-12 rounded-xl border-slate-200 bg-white font-bold dark:border-slate-800 dark:bg-slate-900"
                 required
               />
@@ -182,7 +196,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
               <div className="space-y-3">
                 <Label
                   htmlFor="score"
-                  className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
+                  className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase"
                 >
                   Total Score
                 </Label>
@@ -191,7 +205,10 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
                   type="number"
                   placeholder="Obtained"
                   value={score}
-                  onChange={(e) => setScore(e.target.value)}
+                  onChange={(e) => {
+                    setScore(e.target.value)
+                    markDirty()
+                  }}
                   className="h-12 rounded-xl border-slate-200 bg-white font-black dark:border-slate-800 dark:bg-slate-900"
                   required
                   min="0"
@@ -201,7 +218,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
               <div className="space-y-3">
                 <Label
                   htmlFor="maxScore"
-                  className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
+                  className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase"
                 >
                   Max Score
                 </Label>
@@ -210,7 +227,10 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
                   type="number"
                   placeholder="Total Possible"
                   value={maxScore}
-                  onChange={(e) => setMaxScore(e.target.value)}
+                  onChange={(e) => {
+                    setMaxScore(e.target.value)
+                    markDirty()
+                  }}
                   className="h-12 rounded-xl border-slate-200 bg-white font-black dark:border-slate-800 dark:bg-slate-900"
                   required
                   min="1"
@@ -221,7 +241,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
 
             {/* Sub-scores Grid (Optional) */}
             <div className="space-y-4 pt-2">
-              <Label className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              <Label className="text-[10px] font-black tracking-widest text-slate-400 uppercase dark:text-slate-300">
                 Granular Scores (Optional)
               </Label>
               <div className="grid grid-cols-3 gap-4">
@@ -229,7 +249,10 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
                   type="number"
                   placeholder="MCQ %"
                   value={mcqScore}
-                  onChange={(e) => setMcqScore(e.target.value)}
+                  onChange={(e) => {
+                    setMcqScore(e.target.value)
+                    markDirty()
+                  }}
                   className="h-12 rounded-xl border-slate-100 bg-white font-black dark:border-slate-800 dark:bg-slate-900"
                   min="0"
                   max="100"
@@ -238,7 +261,10 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
                   type="number"
                   placeholder="Essay 1 %"
                   value={essay1Score}
-                  onChange={(e) => setEssay1Score(e.target.value)}
+                  onChange={(e) => {
+                    setEssay1Score(e.target.value)
+                    markDirty()
+                  }}
                   className="h-12 rounded-xl border-slate-100 bg-white font-black dark:border-slate-800 dark:bg-slate-900"
                   min="0"
                   max="100"
@@ -247,7 +273,10 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
                   type="number"
                   placeholder="Essay 2 %"
                   value={essay2Score}
-                  onChange={(e) => setEssay2Score(e.target.value)}
+                  onChange={(e) => {
+                    setEssay2Score(e.target.value)
+                    markDirty()
+                  }}
                   className="h-12 rounded-xl border-slate-100 bg-white font-black dark:border-slate-800 dark:bg-slate-900"
                   min="0"
                   max="100"
@@ -258,14 +287,17 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
             <div className="space-y-3 pt-2">
               <Label
                 htmlFor="comments"
-                className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
+                className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase"
               >
                 Feedback Comments (Optional)
               </Label>
               <Textarea
                 id="comments"
                 value={comments}
-                onChange={(e) => setComments(e.target.value)}
+                onChange={(e) => {
+                  setComments(e.target.value)
+                  markDirty()
+                }}
                 placeholder="Add private instructor notes or student feedback..."
                 className="min-h-[100px] resize-none rounded-xl border-slate-200 bg-white p-4 font-medium dark:border-slate-800 dark:bg-slate-900"
               />
@@ -283,7 +315,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
               </Button>
               <Button
                 type="submit"
-                className="h-12 rounded-xl bg-gradient-to-r from-aerojet-sky to-aerojet-blue px-8 font-black text-white hover:from-[#3a8bdf] hover:to-[#001f44]"
+                className="from-aerojet-sky to-aerojet-blue h-12 rounded-xl bg-gradient-to-r px-8 font-black text-white hover:from-[#3a8bdf] hover:to-[#001f44]"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Saving...' : 'Save Grade'}

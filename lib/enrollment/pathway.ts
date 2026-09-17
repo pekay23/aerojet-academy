@@ -181,7 +181,7 @@ export function getCatalogVisibility(enrollmentType: EnrollmentType | null) {
  * Checks if a student is allowed to access materials.
  * Per user: Exam-only students CAN access materials after payment, just not classes.
  */
-export function canAccessMaterials(enrollmentType: EnrollmentType) {
+export function canAccessMaterials(_enrollmentType: EnrollmentType) {
   // All pathways can access materials if paid
   return true
 }
@@ -300,7 +300,7 @@ export async function promoteApplicantToStudent(
       data: {
         userId,
         studentId,
-        enrollmentType: enrollmentType as any,
+        enrollmentType: enrollmentType as EnrollmentType,
         enrollmentStatus: 'ENROLLED',
         pathwayId: pathway?.id ?? null,
       },

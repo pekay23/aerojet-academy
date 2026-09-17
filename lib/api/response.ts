@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { serializePrisma } from '@/lib/utils/serialization'
 
+
+// ---------------------------------------------------------------------------
+// ROUTE CONTEXT TYPE
+// ---------------------------------------------------------------------------
+
+export interface RouteContext<TParams extends Record<string, string> = Record<string, string>> {
+  params: Promise<TParams> & TParams
+}
+
 // ---------------------------------------------------------------------------
 // STANDARD RESPONSE TYPES
 // ---------------------------------------------------------------------------
@@ -23,7 +32,9 @@ interface ApiResponse<T = unknown> {
 // ---------------------------------------------------------------------------
 
 export function apiSuccess<T>(data: T, status: number = 200): NextResponse {
-  return NextResponse.json({ success: true, data: serializePrisma(data) } as ApiResponse<T>, { status })
+  return NextResponse.json({ success: true, data: serializePrisma(data) } as ApiResponse<T>, {
+    status,
+  })
 }
 
 export function apiCreated<T>(data: T): NextResponse {
@@ -39,7 +50,7 @@ export function apiPaginated<T>(
   total: number,
   page: number,
   limit: number,
-  extraMeta?: Record<string, any>
+  extraMeta?: Record<string, unknown>
 ): NextResponse {
   return NextResponse.json({
     success: true,
@@ -58,10 +69,13 @@ export function apiPaginated<T>(
 // ERROR RESPONSES
 // ---------------------------------------------------------------------------
 
-export function apiError(error: string, status: number = 400, data?: Record<string, any>): NextResponse {
+export function apiError(
+  error: string,
+  status: number = 400,
+  data?: Record<string, unknown>
+): NextResponse {
   return NextResponse.json({ success: false, error, ...data } as ApiResponse, { status })
 }
-
 
 export function apiUnauthorized(message: string = 'Authentication required'): NextResponse {
   return apiError(message, 401)
@@ -93,19 +107,32 @@ export function apiServerError(message: string = 'Internal server error'): NextR
 // ERROR HANDLER WRAPPER
 // ---------------------------------------------------------------------------
 
-export type RouteHandler = (
+type FrameworkRouteContext = {
+  params?: Promise<Record<string, string | string[]>>
+}
+
+export type RouteHandler<TParams extends Record<string, string> = Record<string, string>> = (
   req: NextRequest,
-  ctx?: any
+  ctx: RouteContext<TParams>
 ) => Promise<NextResponse>
 
-export function withErrorHandler(handler: RouteHandler) {
-  return async (req: NextRequest, ctx: any) => {
+function normalizeRouteParams(params: Record<string, string | string[]>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(params).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value])
+  )
+}
+
+export function withErrorHandler<TParams extends Record<string, string> = Record<string, string>>(
+  handler: RouteHandler<TParams>
+) {
+  return async (req: NextRequest, ctx?: FrameworkRouteContext) => {
     try {
-      // In Next.js 15, we need to await params if it's a promise
       const params = ctx?.params ? await ctx.params : undefined
-      // Pass the resolved params to the handler
-      return await handler(req, ctx ? { ...ctx, params: params || {} } : undefined)
-    } catch (error: any) {
+      const normalizedParams = normalizeRouteParams(params || {}) as TParams
+      return await handler(req, {
+        params: Object.assign(Promise.resolve(normalizedParams), normalizedParams),
+      })
+    } catch (error: unknown) {
       console.error('API Error:', error)
 
       if (error instanceof Error) {
@@ -149,3 +176,6 @@ export function parseSorting(searchParams: URLSearchParams, defaultField: string
 export function parseSearch(searchParams: URLSearchParams) {
   return searchParams.get('search') || undefined
 }
+
+// Re-export validateBody for API routes that import it from here
+export { validateBody } from '@/lib/validation/schemas'

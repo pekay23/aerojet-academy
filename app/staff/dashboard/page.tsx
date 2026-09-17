@@ -2,18 +2,23 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
-import { getSystemSetting } from '@/lib/settings'
 import { DashboardCharts } from '../_components/DashboardCharts'
 import PaymentApprovalCard from '../_components/PaymentApprovalCard'
 import GoNoGoMeter from '../_components/GoNoGoMeter'
 import PipelineAnalytics from '../_components/PipelineAnalytics'
 import PoolsSummaryCard from '../_components/PoolsSummaryCard'
 import TargetRevenueEditor from '../_components/TargetRevenueEditor'
-import ExaminerDashboard from '../_components/ExaminerDashboard'
+
 import AlertsCenter from './_components/AlertsCenter'
 import { getDashboardAlerts } from '@/lib/analytics/dashboard-alerts'
-import { UserStatus, UserRole, PaymentStatus, PoolStatus } from '@/types/enums'
-import { COUNTABLE_MEMBERSHIP_STATUSES, TERMINAL_POOL_STATUSES, UPCOMING_EVENT_STATUSES, LIVE_POOL_STATUSES } from '@/lib/utils/constants'
+import { UserStatus, UserRole, PaymentStatus } from '@/types/enums'
+import type { SerializedPaymentCard } from '@/lib/staff/types'
+import {
+  COUNTABLE_MEMBERSHIP_STATUSES,
+  TERMINAL_POOL_STATUSES,
+  UPCOMING_EVENT_STATUSES,
+  LIVE_POOL_STATUSES,
+} from '@/lib/utils/constants'
 import {
   Users,
   UserCheck,
@@ -24,13 +29,28 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
 
-async function fetchDashboardSettings(tx: Parameters<Parameters<typeof prismaUnfiltered.$transaction>[0]>[0]) {
+async function fetchDashboardSettings(
+  tx: Parameters<Parameters<typeof prismaUnfiltered.$transaction>[0]>[0]
+) {
   const settings = await tx.systemSetting.findMany({
     where: { key: { in: ['course_currency', 'target_monthly_revenue'] } },
   })
-  const map = new Map(settings.map(s => [s.key, s.value]))
+  const map = new Map(settings.map((s) => [s.key, s.value]))
   const currency = map.get('course_currency') || 'EUR'
   const targetMonthlyRevenue = Number(map.get('target_monthly_revenue') || '50000')
   const { getCurrencySymbol } = await import('@/lib/currency')
@@ -38,8 +58,8 @@ async function fetchDashboardSettings(tx: Parameters<Parameters<typeof prismaUnf
 }
 
 function buildRevenueTimeline(
-  approvedPayments: { amount: any; approvedAt: Date | null }[],
-  targetMonthlyRevenue: number,
+  approvedPayments: { amount: number; approvedAt: string | null }[],
+  targetMonthlyRevenue: number
 ) {
   const now = new Date()
   const revenueByMonth: Record<string, number> = {}
@@ -63,26 +83,60 @@ function buildRevenueTimeline(
   }))
 }
 
-function computeUserStats(userStatusCounts: { role: string; status: string; _count: { _all: number } }[]) {
-  const sumBy = (filter: (u: typeof userStatusCounts[number]) => boolean) =>
+function computeUserStats(
+  userStatusCounts: { role: string; status: string; _count: { _all: number } }[]
+) {
+  const sumBy = (filter: (u: (typeof userStatusCounts)[number]) => boolean) =>
     userStatusCounts.filter(filter).reduce((acc, u) => acc + (u._count._all ?? 0), 0)
 
   return {
-    totalUsers: sumBy(u => u.status === UserStatus.ACTIVE),
-    pendingApplicants: sumBy(u => u.role === UserRole.APPLICANT && u.status === UserStatus.PENDING),
-    activeStudents: sumBy(u => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE),
+    totalUsers: sumBy((u) => u.status === UserStatus.ACTIVE),
+    pendingApplicants: sumBy(
+      (u) => u.role === UserRole.APPLICANT && u.status === UserStatus.PENDING
+    ),
+    activeStudents: sumBy((u) => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE),
   }
 }
 
-function computeEventStats(activeEventRaw: any) {
+type EventPoolSummary = {
+  maxCandidates: number
+  _count: { memberships: number }
+}
+
+type EventBookingSummary = {
+  amountPaid: number | string | null
+}
+
+type ActiveEventRaw = {
+  name: string
+  minRevenueTarget: number | string | null
+  paymentDeadline: string | Date | null
+  pools: EventPoolSummary[]
+  examBookings: EventBookingSummary[]
+}
+
+function computeEventStats(activeEventRaw: ActiveEventRaw | null | undefined, now: Date) {
   if (!activeEventRaw) return null
+  const paymentDeadlineTime = activeEventRaw.paymentDeadline
+    ? new Date(activeEventRaw.paymentDeadline).getTime()
+    : null
   return {
     name: activeEventRaw.name,
-    totalSeatsFilled: activeEventRaw.pools.reduce((sum: number, p: any) => sum + p._count.memberships, 0),
-    totalCapacity: activeEventRaw.pools.reduce((sum: number, p: any) => sum + p.maxCandidates, 0),
-    totalConfirmedRevenue: activeEventRaw.examBookings.reduce((sum: number, b: any) => sum + Number(b.amountPaid || 0), 0),
+    totalSeatsFilled: activeEventRaw.pools.reduce(
+      (sum, p) => sum + p._count.memberships,
+      0
+    ),
+    totalCapacity: activeEventRaw.pools.reduce((sum, p) => sum + p.maxCandidates, 0),
+    totalConfirmedRevenue: activeEventRaw.examBookings.reduce(
+      (sum, b) => sum + Number(b.amountPaid || 0),
+      0
+    ),
     targetRevenue: Number(activeEventRaw.minRevenueTarget),
     paymentDeadline: activeEventRaw.paymentDeadline,
+    isNearDeadline:
+      paymentDeadlineTime !== null
+        ? paymentDeadlineTime - now.getTime() < 7 * 24 * 60 * 60 * 1000
+        : false,
   }
 }
 
@@ -204,7 +258,7 @@ async function getDashboardData() {
       ])
 
       const { totalUsers, pendingApplicants, activeStudents } = computeUserStats(
-        userStatusCounts as any
+        userStatusCounts
       )
 
       return {
@@ -213,11 +267,11 @@ async function getDashboardData() {
         activeStudents,
         pendingPayments,
         recentPendingPayments: serializePrisma(recentPendingPaymentsRaw),
-        activeEvent: serializePrisma(computeEventStats(activeEventRaw)),
+        activeEvent: serializePrisma(computeEventStats(serializePrisma(activeEventRaw), now)),
         openPools: serializePrisma(
           openPoolsRaw.map((p) => ({ ...p, currentMemberCount: p._count.memberships }))
         ),
-        revenueData: buildRevenueTimeline(approvedPayments, targetMonthlyRevenue),
+        revenueData: buildRevenueTimeline(serializePrisma(approvedPayments), targetMonthlyRevenue),
         targetMonthlyRevenue,
         currency,
         currSymbol,
@@ -296,7 +350,7 @@ export default async function StaffDashboardPage() {
                   {stat.value}
                   {stat.alert && <AlertTriangle className="h-4 w-4 text-amber-500" />}
                 </p>
-                <p className="truncate text-[11px] font-bold tracking-wider text-slate-400 uppercase dark:text-slate-500">
+                <p className="truncate text-xs font-bold tracking-wider text-slate-400 uppercase dark:text-slate-500">
                   {stat.label}
                 </p>
               </div>
@@ -356,6 +410,7 @@ export default async function StaffDashboardPage() {
               confirmedSeats={data.activeEvent.totalSeatsFilled}
               totalSeats={data.activeEvent.totalCapacity}
               paymentDeadline={data.activeEvent.paymentDeadline}
+              isNearDeadline={data.activeEvent.isNearDeadline}
             />
           ) : (
             <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center dark:border-slate-700 dark:bg-slate-800/50">
@@ -384,11 +439,8 @@ export default async function StaffDashboardPage() {
             </a>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {data.recentPendingPayments.map((payment: any) => (
-              <PaymentApprovalCard
-                key={payment.id}
-                payment={payment}
-              />
+            {data.recentPendingPayments.map((payment: SerializedPaymentCard) => (
+              <PaymentApprovalCard key={payment.id} payment={payment} />
             ))}
           </div>
         </div>
