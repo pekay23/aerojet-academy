@@ -104,7 +104,7 @@ export default async function ShortlistingPage() {
           reasoning: { raw: session.reasoningRawScore, total: session.reasoningTotalQuestions, percentile: session.reasoningPercentile },
           physics: { raw: session.physicsRawScore, total: session.physicsTotalQuestions, percentile: session.physicsPercentile },
         } : null,
-        metadata: app.metadata,
+        metadata: app.metadata as Record<string, unknown> | null,
       }
     })
   )
@@ -116,7 +116,7 @@ export default async function ShortlistingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white">Shortlisting Dashboard</h1>
+          <h1 className="text-2xl font-black text-aerojet-blue uppercase dark:text-white">Shortlisting Dashboard</h1>
           <p className="mt-1 text-sm text-slate-500">
             Review and shortlist candidates using Criteria-style aptitude metrics, sub-scores, and percentile rankings.
           </p>

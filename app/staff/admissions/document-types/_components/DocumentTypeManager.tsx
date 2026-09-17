@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, Pencil, Trash2, GripVertical, Check, X, FileText, Loader2 } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface DocumentType {
   id: string
@@ -43,6 +44,8 @@ export default function DocumentTypeManager() {
     isActive: true,
   })
 
+  const { markDirty, markClean } = useFormDirty()
+
   const fetchTypes = useCallback(async () => {
     try {
       const res = await fetch('/api/staff/admissions/document-types')
@@ -53,20 +56,31 @@ export default function DocumentTypeManager() {
     }
   }, [])
 
-  useEffect(() => { fetchTypes() }, [fetchTypes])
+  useEffect(() => {
+    fetchTypes()
+  }, [fetchTypes])
 
   const autoSlug = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
 
   const resetForm = () => {
     setForm({
-      name: '', slug: '', description: '',
+      name: '',
+      slug: '',
+      description: '',
       fileTypes: 'application/pdf,image/jpeg,image/png',
-      maxSizeMB: 4, isRequired: true,
-      applicableProgrammes: [], sortOrder: docTypes.length, isActive: true,
+      maxSizeMB: 4,
+      isRequired: true,
+      applicableProgrammes: [],
+      sortOrder: docTypes.length,
+      isActive: true,
     })
     setEditingId(null)
     setShowForm(false)
+    markClean()
   }
 
   const handleSave = async () => {
@@ -83,6 +97,7 @@ export default function DocumentTypeManager() {
         body: JSON.stringify(form),
       })
       if (res.ok) {
+        markClean()
         resetForm()
         fetchTypes()
       }
@@ -123,10 +138,10 @@ export default function DocumentTypeManager() {
   }
 
   const toggleProgramme = (prog: string) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       applicableProgrammes: prev.applicableProgrammes.includes(prog)
-        ? prev.applicableProgrammes.filter(p => p !== prog)
+        ? prev.applicableProgrammes.filter((p) => p !== prog)
         : [...prev.applicableProgrammes, prog],
     }))
   }
@@ -134,7 +149,7 @@ export default function DocumentTypeManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-aerojet-blue" />
+        <Loader2 className="text-aerojet-blue h-8 w-8 animate-spin" />
       </div>
     )
   }
@@ -144,7 +159,7 @@ export default function DocumentTypeManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white sm:text-3xl">
+          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
             Document Types
           </h1>
           <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -152,8 +167,11 @@ export default function DocumentTypeManager() {
           </p>
         </div>
         <button
-          onClick={() => { resetForm(); setShowForm(true) }}
-          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-aerojet-blue/20 transition-all hover:shadow-xl hover:shadow-aerojet-blue/30"
+          onClick={() => {
+            resetForm()
+            setShowForm(true)
+          }}
+          className="bg-aerojet-blue shadow-aerojet-blue/20 hover:shadow-aerojet-blue/30 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
         >
           <Plus className="h-4 w-4" /> Add Type
         </button>
@@ -162,49 +180,71 @@ export default function DocumentTypeManager() {
       {/* Form Modal */}
       {showForm && (
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-700 dark:bg-slate-900">
-          <h3 className="mb-4 text-lg font-black text-aerojet-blue dark:text-white">
+          <h3 className="text-aerojet-blue mb-4 text-lg font-black dark:text-white">
             {editingId ? 'Edit Document Type' : 'New Document Type'}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-500">Name *</label>
+              <label className="mb-1 block text-xs font-bold tracking-widest text-slate-500 uppercase">
+                Name *
+              </label>
               <input
                 value={form.name}
-                onChange={e => {
-                  setForm(f => ({ ...f, name: e.target.value, ...(!editingId ? { slug: autoSlug(e.target.value) } : {}) }))
+                onChange={(e) => {
+                  setForm((f) => ({
+                    ...f,
+                    name: e.target.value,
+                    ...(!editingId ? { slug: autoSlug(e.target.value) } : {}),
+                  }))
+                  markDirty()
                 }}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 placeholder="e.g. National ID"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-500">Slug *</label>
+              <label className="mb-1 block text-xs font-bold tracking-widest text-slate-500 uppercase">
+                Slug *
+              </label>
               <input
                 value={form.slug}
-                onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, slug: e.target.value }))
+                  markDirty()
+                }}
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 placeholder="e.g. national-id"
                 disabled={!!editingId}
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-500">Description</label>
+              <label className="mb-1 block text-xs font-bold tracking-widest text-slate-500 uppercase">
+                Description
+              </label>
               <input
                 value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, description: e.target.value }))
+                  markDirty()
+                }}
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 placeholder="Brief description for applicants"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-500">Max Size (MB)</label>
+              <label className="mb-1 block text-xs font-bold tracking-widest text-slate-500 uppercase">
+                Max Size (MB)
+              </label>
               <input
                 type="number"
                 min={1}
                 max={50}
                 value={form.maxSizeMB}
-                onChange={e => setForm(f => ({ ...f, maxSizeMB: parseInt(e.target.value) || 4 }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, maxSizeMB: parseInt(e.target.value) || 4 }))
+                  markDirty()
+                }}
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
             <div className="flex items-end gap-6">
@@ -212,8 +252,11 @@ export default function DocumentTypeManager() {
                 <input
                   type="checkbox"
                   checked={form.isRequired}
-                  onChange={e => setForm(f => ({ ...f, isRequired: e.target.checked }))}
-                  className="h-4 w-4 rounded border-slate-300 text-aerojet-blue"
+                  onChange={(e) => {
+                    setForm((f) => ({ ...f, isRequired: e.target.checked }))
+                    markDirty()
+                  }}
+                  className="text-aerojet-blue h-4 w-4 rounded border-slate-300"
                 />
                 Required
               </label>
@@ -221,19 +264,24 @@ export default function DocumentTypeManager() {
                 <input
                   type="checkbox"
                   checked={form.isActive}
-                  onChange={e => setForm(f => ({ ...f, isActive: e.target.checked }))}
-                  className="h-4 w-4 rounded border-slate-300 text-aerojet-blue"
+                  onChange={(e) => {
+                    setForm((f) => ({ ...f, isActive: e.target.checked }))
+                    markDirty()
+                  }}
+                  className="text-aerojet-blue h-4 w-4 rounded border-slate-300"
                 />
                 Active
               </label>
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-500">
+              <label className="mb-2 block text-xs font-bold tracking-widest text-slate-500 uppercase">
                 Applicable Programmes
-                <span className="ml-2 text-[10px] font-medium normal-case text-slate-400">(empty = all programmes)</span>
+                <span className="ml-2 text-[10px] font-medium text-slate-400 normal-case">
+                  (empty = all programmes)
+                </span>
               </label>
               <div className="flex flex-wrap gap-2">
-                {PROGRAMME_OPTIONS.map(p => (
+                {PROGRAMME_OPTIONS.map((p) => (
                   <button
                     key={p.value}
                     type="button"
@@ -254,9 +302,13 @@ export default function DocumentTypeManager() {
             <button
               onClick={handleSave}
               disabled={saving || !form.name || !form.slug}
-              className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2.5 text-sm font-bold text-white transition-all hover:shadow-lg disabled:opacity-50"
+              className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-all hover:shadow-lg disabled:opacity-50"
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              {saving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
               {editingId ? 'Update' : 'Create'}
             </button>
             <button
@@ -279,7 +331,7 @@ export default function DocumentTypeManager() {
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-slate-50/50 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:bg-slate-800/20">
+            <thead className="bg-slate-50/50 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/20">
               <tr>
                 <th className="px-6 py-4 text-left">Document</th>
                 <th className="px-4 py-4 text-center">Required</th>
@@ -291,13 +343,18 @@ export default function DocumentTypeManager() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {docTypes.map(dt => (
-                <tr key={dt.id} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+              {docTypes.map((dt) => (
+                <tr
+                  key={dt.id}
+                  className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
+                >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <GripVertical className="h-4 w-4 text-slate-300" />
                       <div>
-                        <span className="font-black text-aerojet-blue dark:text-white">{dt.name}</span>
+                        <span className="text-aerojet-blue font-black dark:text-white">
+                          {dt.name}
+                        </span>
                         <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 dark:bg-slate-800">
                           {dt.slug}
                         </span>
@@ -309,12 +366,18 @@ export default function DocumentTypeManager() {
                   </td>
                   <td className="px-4 py-4 text-center">
                     {dt.isRequired ? (
-                      <span className="rounded-lg bg-red-50 px-2 py-1 text-[10px] font-black text-red-600">Required</span>
+                      <span className="rounded-lg bg-red-50 px-2 py-1 text-[10px] font-black text-red-600">
+                        Required
+                      </span>
                     ) : (
-                      <span className="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-400">Optional</span>
+                      <span className="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-400">
+                        Optional
+                      </span>
                     )}
                   </td>
-                  <td className="px-4 py-4 text-center text-xs font-bold text-slate-500">{dt.maxSizeMB} MB</td>
+                  <td className="px-4 py-4 text-center text-xs font-bold text-slate-500">
+                    {dt.maxSizeMB} MB
+                  </td>
                   <td className="px-4 py-4 text-center">
                     {dt.applicableProgrammes.length === 0 ? (
                       <span className="text-[10px] font-bold text-green-600">All</span>
@@ -331,11 +394,13 @@ export default function DocumentTypeManager() {
                   </td>
                   <td className="px-4 py-4 text-center">
                     <button onClick={() => toggleActive(dt)}>
-                      <span className={`rounded-lg px-2 py-1 text-[10px] font-black ${
-                        dt.isActive
-                          ? 'bg-emerald-50 text-emerald-600'
-                          : 'bg-slate-100 text-slate-400'
-                      }`}>
+                      <span
+                        className={`rounded-lg px-2 py-1 text-[10px] font-black ${
+                          dt.isActive
+                            ? 'bg-emerald-50 text-emerald-600'
+                            : 'bg-slate-100 text-slate-400'
+                        }`}
+                      >
                         {dt.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </button>

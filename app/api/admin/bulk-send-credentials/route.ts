@@ -137,8 +137,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         userId: admin.id,
         description: `Bulk sent credentials to ${sendToEmail} for ${firstName} ${lastName}`,
       })
-    } catch (error: any) {
-      results.failed.push({ userId: entry.userId, error: error.message })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
+      results.failed.push({ userId: entry.userId, error: message })
     }
   }
 

@@ -1,21 +1,22 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
-  CheckCircle2,
+  CheckCircle2 as _CheckCircle2,
   RefreshCw,
   Search,
   FileCheck,
   Calendar,
-  User,
+  User as _User,
   ExternalLink,
-  ChevronDown,
+  ChevronDown as _ChevronDown,
   Loader2,
   AlertCircle,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+
 import { toast } from 'sonner'
 import { format } from 'date-fns'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface Payment {
   id: string
@@ -58,6 +59,8 @@ export default function ReconciliationQueue() {
   }, [])
 
   useEffect(() => {
+   
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPayments()
   }, [fetchPayments])
 
@@ -92,19 +95,32 @@ export default function ReconciliationQueue() {
 
   const toggleAll = () => {
     setSelectedIds((prev) =>
-      prev.length === filteredPayments.length ? [] : filteredPayments.map((p) => p.id)
+      prev.length === sortedPayments.length ? [] : sortedPayments.map((p) => p.id)
     )
   }
 
-  const filteredPayments = payments.filter((p) => {
-    const searchLow = search.toLowerCase()
-    const name = p.user.profile ? `${p.user.profile.firstName} ${p.user.profile.lastName}` : ''
-    return (
-      p.user.email.toLowerCase().includes(searchLow) ||
-      name.toLowerCase().includes(searchLow) ||
-      p.referenceCode?.toLowerCase().includes(searchLow)
-    )
-  })
+  const filteredPayments = useMemo(() => {
+    return payments
+      .map((p) => ({
+        ...p,
+        _studentSort: p.user.profile
+          ? `${p.user.profile.firstName} ${p.user.profile.lastName}`.toLowerCase()
+          : '',
+        _amount: Number(p.originalAmount ?? p.amount),
+        _approvalDate: p.approvedAt ? new Date(p.approvedAt).getTime() : 0,
+      }))
+      .filter((p) => {
+        const searchLow = search.toLowerCase()
+        const name = p.user.profile ? `${p.user.profile.firstName} ${p.user.profile.lastName}` : ''
+        return (
+          p.user.email.toLowerCase().includes(searchLow) ||
+          name.toLowerCase().includes(searchLow) ||
+          p.referenceCode?.toLowerCase().includes(searchLow)
+        )
+      })
+  }, [payments, search])
+
+  const { items: sortedPayments, requestSort, sortConfig } = useSort(filteredPayments)
 
   return (
     <div className="space-y-6">
@@ -173,21 +189,15 @@ export default function ReconciliationQueue() {
                     name="select-all-reconcile"
                     type="checkbox"
                     checked={
-                      selectedIds.length === filteredPayments.length && filteredPayments.length > 0
+                      selectedIds.length === sortedPayments.length && sortedPayments.length > 0
                     }
                     onChange={toggleAll}
                     className="h-4 w-4 rounded border-slate-300 transition-all checked:bg-blue-600"
                   />
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Student
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Payment Details
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Approval
-                </th>
+                <SortHeader label="Student" sortKey="_studentSort" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
+                <SortHeader label="Payment Details" sortKey="_amount" currentSort={sortConfig} onSort={requestSort} align="right" className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
+                <SortHeader label="Approval" sortKey="_approvalDate" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
                 <th className="px-6 py-4 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Action
                 </th>
@@ -202,7 +212,7 @@ export default function ReconciliationQueue() {
                     </td>
                   </tr>
                 ))
-              ) : filteredPayments.length === 0 ? (
+              ) : sortedPayments.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-20 text-center">
                     <AlertCircle className="mx-auto mb-4 h-12 w-12 text-slate-200" />
@@ -212,7 +222,7 @@ export default function ReconciliationQueue() {
                   </td>
                 </tr>
               ) : (
-                filteredPayments.map((p) => (
+                sortedPayments.map((p) => (
                   <tr
                     key={p.id}
                     className="group transition-all duration-150 ease-out hover:bg-white/80 hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:hover:bg-slate-800/40"

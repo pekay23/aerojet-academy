@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { apiPaginated, withErrorHandler } from '@/lib/api/response'
+import { buildOrderBy } from '@/lib/utils/build-order-by'
+
+const ALLOWED_SORT_KEYS = {
+  name: 'profile.lastName',
+  code: 'registrationCode',
+  date: 'createdAt',
+  fee: 'registrationPaid',
+} as const
+type SortKey = keyof typeof ALLOWED_SORT_KEYS
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const session = await getAuthSession()
@@ -12,8 +21,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const search = searchParams.get('search') || ''
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '20')
+  const orderBy = buildOrderBy<SortKey>(
+    { sort: searchParams.get('sort'), order: searchParams.get('order') },
+    ALLOWED_SORT_KEYS,
+    { createdAt: 'desc' }
+  )
 
-  const where: any = {
+  const where: Record<string, unknown> = {
     role: 'APPLICANT',
     ...(search && {
       OR: [
@@ -48,7 +62,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
             take: 1,
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         skip: (page - 1) * limit,
         take: limit,
       }),

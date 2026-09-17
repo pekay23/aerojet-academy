@@ -51,9 +51,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, attendance: result.attendance })
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to mark exam attendance' },
+      { success: false, error: error instanceof Error ? error.message : 'Failed to mark exam attendance' },
       { status: 500 }
     )
   }

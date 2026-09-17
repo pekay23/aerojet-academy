@@ -1,16 +1,16 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const staff = await requireStaff()
 
-  let body: any
+  let body: { paymentIds: string[]; notes?: string }
   try {
     body = await req.json()
-  } catch (e) {
+  } catch (_e) {
     return apiError('Invalid request body', 400)
   }
 

@@ -7,8 +7,10 @@ import {
   Clock,
   BookOpen,
   Award,
+  Briefcase as _Briefcase,
   Hammer,
-  ShieldCheck,
+  ShieldCheck as _ShieldCheck,
+  GraduationCap as _GraduationCap,
 } from 'lucide-react'
 
 import ModuleTabs from './ModuleTabs'

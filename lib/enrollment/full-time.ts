@@ -29,7 +29,7 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
     Number(enrollment.programme.totalFee) / enrollment.programme.durationYears
   const totalAmount = Number(feeBase)
 
-  const semesters = (progYear.semesters as any[]) || []
+  const semesters = (progYear.semesters as unknown as Array<{ startDate: string }>) || []
   const sem1Date =
     semesters.length > 0 && semesters[0].startDate ? new Date(semesters[0].startDate) : new Date()
   const sem2Date =

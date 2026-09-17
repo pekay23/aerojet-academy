@@ -33,8 +33,8 @@ export default function UnsubscribePage() {
       }
 
       setStatus('success')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to unsubscribe')
       setStatus('error')
     } finally {
       setLoading(false)

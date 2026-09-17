@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { subMonths, addMonths, startOfMonth, endOfMonth } from 'date-fns'
 import AcademicCalendar, { type UnifiedCalendarEvent } from '@/components/calendar/AcademicCalendar'
 
@@ -22,7 +22,7 @@ export default async function ExaminerSchedulePage({
 
   const [sittings, adminEvents] = await Promise.all([
     // Examiner's assigned sittings
-    prisma.examSitting.findMany({
+    prismaUnfiltered.examSitting.findMany({
       where: {
         examiner: { userId: session.user.id },
         startTime: { gte: rangeStart, lte: rangeEnd },
@@ -34,31 +34,62 @@ export default async function ExaminerSchedulePage({
       orderBy: { startTime: 'asc' },
     }),
 
-    // Admin events visible to examiners (ALL or specific ones)
-    prisma.adminCalendarEvent.findMany({
-      where: { deletedAt: null, visibleTo: { in: ['ALL', 'INSTRUCTORS'] } }, // Examiners usually follow instructor visibility
+    // Admin events visible to examiners (ALL or EXAM_ONLY)
+    prismaUnfiltered.adminCalendarEvent.findMany({
+      where: { deletedAt: null, visibleTo: { in: ['ALL', 'INSTRUCTORS', 'EXAM_ONLY'] } }, // Examiners usually follow instructor visibility
       orderBy: { startDate: 'asc' },
     }),
   ])
 
+  type SittingRow = {
+  id: string
+  startTime: Date
+  endTime: Date | null
+  sessionType: string | null
+  event: { name: string } | null
+  examComponent: { code: string; name: string } | null
+}
+
+type AdminEventRow = {
+  id: string
+  title: string
+  description: string | null
+  startDate: Date
+  endDate: Date | null
+  color: string | null
+}
+
   const events: UnifiedCalendarEvent[] = [
-    ...(sittings as any[]).map((s: any) => ({
-      id: `sitting-${s.id}`, dbId: s.id, title: `Invigilation: ${s.examComponent?.code || 'Module'}`,
+    ...(sittings as SittingRow[]).map((s) => ({
+      id: `sitting-${s.id}`,
+      dbId: s.id,
+      title: `Invigilation: ${s.examComponent?.code || 'Module'}`,
       description: `${s.event?.name} — ${s.sessionType} session`,
-      startDate: s.startTime.toISOString(), endDate: s.endTime?.toISOString() || null,
-      color: '#FF4F33', source: 'exam' as const, editable: false, visibleTo: 'EXAMINER'
+      startDate: s.startTime.toISOString(),
+      endDate: s.endTime?.toISOString() || null,
+      color: '#FF4F33',
+      source: 'exam' as const,
+      editable: false,
+      visibleTo: 'EXAMINER',
     })),
-    ...(adminEvents as any[]).map((evt: any) => ({
-      id: `admin-${evt.id}`, dbId: evt.id, title: evt.title, description: evt.description,
-      startDate: evt.startDate.toISOString(), endDate: evt.endDate?.toISOString() || null,
-      color: evt.color || '#8b5cf6', source: 'admin' as const, editable: false, visibleTo: 'ALL'
+    ...(adminEvents as AdminEventRow[]).map((evt) => ({
+      id: `admin-${evt.id}`,
+      dbId: evt.id,
+      title: evt.title,
+      description: evt.description,
+      startDate: evt.startDate.toISOString(),
+      endDate: evt.endDate?.toISOString() || null,
+      color: evt.color || '#8b5cf6',
+      source: 'admin' as const,
+      editable: false,
+      visibleTo: 'ALL',
     })),
   ]
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-350 space-y-8 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white uppercase">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight uppercase dark:text-white">
           Invigilation Schedule
         </h1>
         <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -66,11 +97,7 @@ export default async function ExaminerSchedulePage({
         </p>
       </div>
 
-      <AcademicCalendar 
-        events={events} 
-        currentUserId={session.user.id}
-        canCreate={false}
-      />
+      <AcademicCalendar events={events} currentUserId={session.user.id} canCreate={false} />
     </div>
   )
 }

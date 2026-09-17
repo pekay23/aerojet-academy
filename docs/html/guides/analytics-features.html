@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Analytics Features Guide · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Guides</p>
+  <h1 class="he-title">Analytics Features Guide</h1>
+  <p class="he-deck">This document maps every analytics, reporting, and monitoring feature in Aerojet Academy and explains how to access and use each one.</p>
+</header>
+<section class="he-section" id="table-of-contents"><div class="he-section__num">01 · Table of Contents</div><h2 class="he-section__title">Table of Contents</h2></section>
+<ol>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#dashboards">Dashboards</a></li>
+<li><a href="#reports">Reports</a></li>
+<li><a href="#api-reference">API Reference</a></li>
+<li><a href="#monitoring--alerts">Monitoring &amp; Alerts</a></li>
+<li><a href="#event-tracking">Event Tracking</a></li>
+<li><a href="#data-models">Data Models</a></li>
+<li><a href="#third-party-integrations">Third-Party Integrations</a></li>
+<li><a href="#quick-reference-how-to-view--monitor">Quick Reference: How to View &amp; Monitor</a></li>
+</ol>
+<hr />
+<section class="he-section" id="overview"><div class="he-section__num">02 · Overview</div><h2 class="he-section__title">Overview</h2></section>
+<p>Aerojet Academy has three distinct analytics surfaces:</p>
+<table>
+<thead>
+<tr><th>Surface</th><th>Route</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Staff Dashboard</strong></td><td><code>/staff/dashboard</code></td><td>Operational snapshot: KPIs, revenue, alerts, Go/No-Go status</td></tr>
+<tr><td><strong>Analytics Dashboard</strong></td><td><code>/staff/analytics</code></td><td>Product/behavioral analytics: funnels, retention, feature adoption, page views, user journeys</td></tr>
+<tr><td><strong>Reports</strong></td><td><code>/staff/reports</code></td><td>Business intelligence: revenue, enrollment, pools, attendance, exams, year-on-year comparisons</td></tr>
+</tbody>
+</table>
+<p>The analytics <strong>portal pages</strong> (<code>/staff/dashboard</code>, <code>/staff/analytics</code>, <code>/staff/reports</code>) require at least <code>STAFF</code> role (enforced in their layouts). <code>ADMIN</code> and <code>SUPER_ADMIN</code> inherit full access. The raw API endpoints below vary by route — see the <code>Auth</code> columns and the auth note above.</p>
+<hr />
+<section class="he-section" id="dashboards"><div class="he-section__num">03 · Dashboards</div><h2 class="he-section__title">Dashboards</h2></section>
+<h3 id="staff-dashboard-staffdashboard">Staff Dashboard (<code>/staff/dashboard</code>)</h3>
+<p>The main operational dashboard. Auto-refreshes every 60 seconds via the <code>AlertsCenter</code> banner.</p>
+<p><strong>What you see:</strong></p>
+<ul>
+<li><strong>Stat Cards</strong> — active users, pending applicants, active students, pending payments</li>
+<li><strong>Revenue Chart</strong> — 6-month revenue area chart with target line overlay</li>
+<li><strong>Go/No-Go Meter</strong> — seat fill percentage and confirmed revenue for the next active exam event</li>
+<li><strong>Pending Payment Approvals</strong> — cards for each unapproved payment with candidate/amount details</li>
+<li><strong>Admissions Pipeline Widget</strong> — stage-by-stage applicant funnel</li>
+</ul>
+<p><strong>Files:</strong></p>
+<ul>
+<li><code>app/staff/dashboard/page.tsx</code> — server component orchestrating all data</li>
+<li><code>app/staff/dashboard/_components/AlertsCenter.tsx</code> — auto-refreshing alert banner</li>
+<li><code>app/staff/dashboard/loading.tsx</code> — Suspense skeleton</li>
+</ul>
+<p><strong>Data source:</strong> Direct <code>prismaUnfiltered</code> queries against <code>User</code>, <code>Payment</code>, <code>Enrollment</code>, <code>ExamPool</code>, <code>ExamEvent</code>.</p>
+<hr />
+<h3 id="analytics-dashboard-staffanalytics">Analytics Dashboard (<code>/staff/analytics</code>)</h3>
+<p>Product and behavioral analytics with six tabs:</p>
+<table>
+<thead>
+<tr><th>Tab</th><th>Route Param</th><th>Component</th><th>What It Shows</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Overview</strong></td><td><code>tab=overview</code></td><td><code>MetricsOverview</code></td><td>Revenue, students, enrollments, pending KPIs + alert counts</td></tr>
+<tr><td><strong>Funnels</strong></td><td><code>tab=funnels</code></td><td><code>FunnelAnalysis</code> + <code>FunnelChart</code></td><td>Registration → enrollment → exam → payment conversion funnels</td></tr>
+<tr><td><strong>Retention</strong></td><td><code>tab=retention</code></td><td><code>RetentionAnalysis</code> + <code>RetentionHeatmap</code></td><td>Cohort retention: D1, D7, D30</td></tr>
+<tr><td><strong>Features</strong></td><td><code>tab=features</code></td><td><code>FeatureAdoption</code> + <code>FeatureChart</code></td><td>Per-feature adoption rates</td></tr>
+<tr><td><strong>Page Views</strong></td><td><code>tab=pageviews</code></td><td><code>PageViews</code> + <code>PageViewsTable</code></td><td>Top paths + unique visitors</td></tr>
+<tr><td><strong>User Journey</strong></td><td><code>tab=journey</code></td><td><code>UserJourney</code> + <code>UserJourneyTimeline</code></td><td>Per-user event timeline</td></tr>
+</tbody>
+</table>
+<p><strong>Files:</strong></p>
+<ul>
+<li><code>app/staff/analytics/page.tsx</code> — server component</li>
+<li><code>app/staff/analytics/AnalyticsDashboardClient.tsx</code> — 6-tab client shell</li>
+<li><code>app/staff/analytics/_components/*</code> — individual tab components</li>
+</ul>
+<p><strong>Data source:</strong> <code>AuditLog</code> rows with <code>entity = 'ANALYTICS'</code> plus <code>User</code>, <code>Payment</code>, <code>Enrollment</code> for metrics. Queries live in <code>lib/analytics/queries.ts</code>.</p>
+<hr />
+<h3 id="reports-staffreports">Reports (<code>/staff/reports</code>)</h3>
+<p>Business intelligence reports with seven tabs and CSV export:</p>
+<table>
+<thead>
+<tr><th>Tab</th><th>Route Param</th><th>Charts</th><th>Data Source</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Overview</strong></td><td><code>tab=overview</code></td><td>Sparkline + summary stats</td><td><code>getDashboardMetrics()</code></td></tr>
+<tr><td><strong>Enrollment</strong></td><td><code>tab=enrollment</code></td><td><code>EnrollmentChart</code></td><td><code>getEnrollmentTrends()</code></td></tr>
+<tr><td><strong>Revenue</strong></td><td><code>tab=revenue</code></td><td><code>RevenueChart</code></td><td><code>getRevenueReport()</code></td></tr>
+<tr><td><strong>Pools</strong></td><td><code>tab=pools</code></td><td><code>PoolFillChart</code></td><td><code>getPoolAnalytics()</code></td></tr>
+<tr><td><strong>Attendance</strong></td><td><code>tab=attendance</code></td><td><code>AttendanceChart</code></td><td><code>getAttendanceReport()</code></td></tr>
+<tr><td><strong>Exams</strong></td><td><code>tab=exams</code></td><td><code>ExamTrendChart</code>, <code>ScoreDistributionChart</code></td><td><code>getExamAnalytics()</code></td></tr>
+<tr><td><strong>Year-on-Year</strong></td><td><code>tab=yoy</code></td><td><code>YoYCharts</code></td><td><code>getYoYComparison()</code></td></tr>
+</tbody>
+</table>
+<p><strong>Features:</strong></p>
+<ul>
+<li><strong>Period Filter</strong> — compare MoM, WoW, YoY, 24h, 4h, 1h, or custom ranges</li>
+<li><strong>CSV Export</strong> — download filtered data as CSV (via <code>PeriodFilter</code> dropdown)</li>
+<li><strong>Lazy-loaded charts</strong> — Recharts components dynamically imported with <code>ssr: false</code></li>
+</ul>
+<p><strong>Files:</strong></p>
+<ul>
+<li><code>app/staff/reports/page.tsx</code> — 1427-line server component with all 7 tabs</li>
+<li><code>app/staff/reports/_components/ReportCharts.tsx</code> — lazy-loaded Recharts wrappers</li>
+<li><code>app/staff/reports/_components/YoYCharts.tsx</code> — year-on-year comparison charts</li>
+<li><code>app/staff/reports/_components/PeriodFilter.tsx</code> — period selector + CSV export</li>
+</ul>
+<hr />
+<section class="he-section" id="reports"><div class="he-section__num">04 · Reports</div><h2 class="he-section__title">Reports</h2></section>
+<h3 id="financial-reports">Financial Reports</h3>
+<table>
+<thead>
+<tr><th>Endpoint</th><th>File</th><th>Returns</th></tr>
+</thead>
+<tbody>
+<tr><td><code>GET /api/staff/reports/revenue</code></td><td><code>app/api/staff/reports/revenue/route.ts</code></td><td>Total/approved/pending payments, revenue by referenceType, wallet balance stats</td></tr>
+</tbody>
+</table>
+<p><strong>Lib functions</strong> in <code>lib/analytics/reports.ts</code>:</p>
+<ul>
+<li><code>getFinanceReportSummary()</code></li>
+<li><code>getRevenueByProgrammeType()</code></li>
+<li><code>getPaymentMethodBreakdown()</code></li>
+<li><code>getMonthlyRevenueData()</code></li>
+<li><code>getPaymentStatusBreakdown()</code></li>
+<li><code>getRevenueReport()</code></li>
+</ul>
+<p><strong>PDF Export:</strong> <code>lib/analytics/pdf-export.ts</code> → <code>generateFinancialPDF()</code> generates a branded jsPDF financial report. Currently library-only; no wired API endpoint or UI trigger exists.</p>
+<hr />
+<h3 id="enrollment-reports">Enrollment Reports</h3>
+<table>
+<thead>
+<tr><th>Endpoint</th><th>File</th><th>Returns</th></tr>
+</thead>
+<tbody>
+<tr><td><code>GET /api/staff/reports/enrollment</code></td><td><code>app/api/staff/reports/enrollment/route.ts</code></td><td>Totals, by status, by course, by month</td></tr>
+</tbody>
+</table>
+<p><strong>Lib:</strong> <code>getEnrollmentTrends()</code> in <code>lib/analytics/reports.ts</code>.</p>
+<hr />
+<h3 id="pool-amp-exam-reports">Pool &amp; Exam Reports</h3>
+<table>
+<thead>
+<tr><th>Endpoint</th><th>File</th><th>Returns</th></tr>
+</thead>
+<tbody>
+<tr><td><code>GET /api/staff/reports/pools</code></td><td><code>app/api/staff/reports/pools/route.ts</code></td><td>Pool counts, status breakdown, avg members, confirmed revenue</td></tr>
+<tr><td><code>GET /api/staff/reports/roster/[poolId]</code></td><td><code>app/api/staff/reports/roster/[poolId]/route.ts</code></td><td><strong>CSV download</strong> of pool roster (candidate name, reg number, module, status). Audit-logged.</td></tr>
+</tbody>
+</table>
+<p><strong>Lib:</strong> <code>getPoolAnalytics()</code>, <code>getExamAnalytics()</code>, <code>getYoYComparison()</code>, <code>getCriticalAlerts()</code> in <code>lib/analytics/reports.ts</code>.</p>
+<hr />
+<h3 id="admissions-pipeline">Admissions Pipeline</h3>
+<table>
+<thead>
+<tr><th>Endpoint</th><th>File</th><th>Returns</th></tr>
+</thead>
+<tbody>
+<tr><td><code>GET /api/staff/admissions/pipeline</code></td><td><code>app/api/staff/admissions/pipeline/route.ts</code></td><td>Stage funnel, programme breakdown, outcomes, 7-day recent activity, active cycles</td></tr>
+</tbody>
+</table>
+<p>Also rendered as a widget on the Staff Dashboard.</p>
+<hr />
+<h3 id="csv-data-exports">CSV Data Exports</h3>
+<table>
+<thead>
+<tr><th>Endpoint</th><th>File</th><th>Returns</th></tr>
+</thead>
+<tbody>
+<tr><td><code>GET /api/staff/export</code></td><td><code>app/api/staff/export/route.ts</code></td><td>Date-bounded CSV exports for <code>students</code>, <code>pools</code>, <code>finances</code>, or <code>audit-logs</code>. 50,000 row cap (audit-logs clamped to 5,000).</td></tr>
+</tbody>
+</table>
+<p>Triggered from the Period Filter dropdown on <code>/staff/reports</code>.</p>
+<hr />
+<h3 id="gdpr-data-export-article-15">GDPR Data Export (Article 15)</h3>
+<table>
+<thead>
+<tr><th>Lib</th><th>File</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>buildUserDataExport()</code></td><td><code>lib/gdpr/export.ts</code></td><td>Deep traversal of 25+ related models producing a user's complete data snapshot</td></tr>
+</tbody>
+</table>
+<p>Used by the DSR workflow at <code>/staff/gdpr</code>.</p>
+<hr />
+<section class="he-section" id="api-reference"><div class="he-section__num">05 · API Reference</div><h2 class="he-section__title">API Reference</h2></section>
+<h3 id="analytics-apis">Analytics APIs</h3>
+<table>
+<thead>
+<tr><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>GET /api/staff/analytics/dashboard</code></td><td>STAFF+</td><td>Alerts + metrics bundle</td></tr>
+<tr><td><code>GET /api/staff/analytics/trends</code></td><td>STAFF+</td><td>Trend directions + anomaly detection</td></tr>
+<tr><td><code>GET /api/staff/analytics/forecast</code></td><td>STAFF+</td><td>6-month revenue forecast</td></tr>
+<tr><td><code>GET /api/staff/analytics/retention</code></td><td>STAFF+</td><td>Cohort retention data</td></tr>
+<tr><td><code>GET /api/staff/analytics/pipeline</code></td><td>STAFF+</td><td>Enrollment pipeline prediction</td></tr>
+<tr><td><code>GET /api/staff/analytics/pageviews</code></td><td>STAFF+</td><td>Page view metrics</td></tr>
+<tr><td><code>GET /api/staff/analytics/funnels</code></td><td>STAFF+</td><td>Funnel conversion data</td></tr>
+<tr><td><code>GET /api/staff/analytics/features</code></td><td>STAFF+</td><td>Feature adoption</td></tr>
+<tr><td><code>GET /api/staff/analytics/journey/[id]</code></td><td>STAFF+</td><td>Per-user event timeline</td></tr>
+</tbody>
+</table>
+<blockquote class="he-pull">
+<p><strong>Auth note:</strong> The active <code>proxy.ts</code> is <strong>images-only</strong> and does <strong>not</strong> gate
+<code>/staff/*</code> routes, so these API endpoints are protected only by whatever their
+own route handler enforces. <code>trends</code>, <code>forecast</code>, <code>pipeline</code>, and <code>journey</code>
+call <code>requireStaff()</code>/<code>getAuthSession()</code>; <code>dashboard</code>, <code>retention</code>,
+<code>pageviews</code>, <code>funnels</code>, and <code>features</code> now call <code>requireStaff()</code> (added to close
+an unauthenticated-access gap). <code>export</code> is guarded via <code>getServerSession</code>.
+The analytics <strong>portal pages</strong> (<code>/staff/dashboard</code>, <code>/staff/analytics</code>,
+<code>/staff/reports</code>) remain staff-gated via their layouts.</p>
+</blockquote>
+<h3 id="report-apis">Report APIs</h3>
+<table>
+<thead>
+<tr><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>GET /api/staff/reports/revenue</code></td><td>STAFF+</td><td>Revenue aggregates</td></tr>
+<tr><td><code>GET /api/staff/reports/enrollment</code></td><td>STAFF+</td><td>Enrollment breakdown</td></tr>
+<tr><td><code>GET /api/staff/reports/pools</code></td><td>STAFF+</td><td>Pool analytics</td></tr>
+<tr><td><code>GET /api/staff/reports/roster/[poolId]</code></td><td>STAFF/ADMIN</td><td>CSV roster download</td></tr>
+<tr><td><code>GET /api/staff/export</code></td><td>STAFF+</td><td>CSV data exports</td></tr>
+<tr><td><code>GET /api/staff/admissions/pipeline</code></td><td>STAFF+</td><td>Admissions funnel</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="monitoring-amp-alerts"><div class="he-section__num">06 · Monitoring &amp;amp; Alerts</div><h2 class="he-section__title">Monitoring &amp; Alerts</h2></section>
+<h3 id="dashboard-alerts-real-time">Dashboard Alerts (Real-Time)</h3>
+<p>The <code>AlertsCenter</code> component on <code>/staff/dashboard</code> polls every 60 seconds. Server-side caching provides a 5-minute TTL via <code>unstable_cache</code>.</p>
+<p><strong>7 alert checks</strong> defined in <code>lib/analytics/dashboard-alerts.ts</code>:</p>
+<table>
+<thead>
+<tr><th>#</th><th>Alert</th><th>Severity</th><th>Threshold</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>Payments pending &gt; 7 days</td><td>WARNING</td><td>CRITICAL if &gt; 10</td></tr>
+<tr><td>2</td><td>GDPR DSRs past 30-day SLA</td><td>CRITICAL</td><td>—</td></tr>
+<tr><td>3</td><td>Referrals with <code>fraudScore &gt;= 50</code> unreviewed</td><td>WARNING</td><td>—</td></tr>
+<tr><td>4</td><td>Exam bundles expiring in 7 days with unused resits</td><td>INFO</td><td>—</td></tr>
+<tr><td>5</td><td>UploadThing files unmirrored &gt; 24h</td><td>INFO</td><td>WARNING if &gt; 100</td></tr>
+<tr><td>6</td><td>Email delivery failures in last 24h</td><td>WARNING</td><td>CRITICAL if &gt;= 10</td></tr>
+<tr><td>7</td><td>Internal exam reports pending review</td><td>INFO</td><td>WARNING if &gt;= 5</td></tr>
+</tbody>
+</table>
+<hr />
+<h3 id="critical-alerts-reports">Critical Alerts (Reports)</h3>
+<p><code>getCriticalAlerts()</code> in <code>lib/analytics/reports.ts</code> surfaces:</p>
+<ul>
+<li>Low-fill pools with approaching deadlines</li>
+<li>Stale payments pending &gt; 48 hours</li>
+</ul>
+<hr />
+<h3 id="cron-jobs-monitoring">Cron Jobs (Monitoring)</h3>
+<table>
+<thead>
+<tr><th>Cron</th><th>Schedule</th><th>File</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>check-pools</code></td><td>Daily 02:00</td><td><code>app/api/cron/check-pools/route.ts</code></td><td>Auto-confirm/fail exam events via Go/No-Go evaluation at payment deadline</td></tr>
+<tr><td><code>check-events</code></td><td>Daily 01:00</td><td><code>app/api/cron/check-events/route.ts</code></td><td>Auto-complete past exam events</td></tr>
+<tr><td><code>sync-check</code></td><td>Mon 04:00</td><td><code>app/api/cron/sync-check/route.ts</code></td><td>Neon ↔ Supabase drift detection (&gt; 0.1% → AuditLog)</td></tr>
+<tr><td><code>supabase-mirror</code></td><td>Daily 04:30</td><td><code>app/api/cron/supabase-mirror/route.ts</code></td><td>Nightly UploadThing → Supabase storage mirror</td></tr>
+<tr><td><code>scheduled-reports</code></td><td>Mon 08:00</td><td><code>app/api/cron/scheduled-reports/route.ts</code></td><td><strong>DISABLED</strong> — would email Board Insights Report</td></tr>
+<tr><td><code>gdpr-retention</code></td><td>Mon 03:00</td><td><code>app/api/cron/gdpr-retention/route.ts</code></td><td>GDPR retention sweep</td></tr>
+</tbody>
+</table>
+<blockquote class="he-pull">
+<p><strong>Note:</strong> The <code>scheduled-reports</code> cron returns early with &quot;Feature disabled&quot;. The full Board Insights Report pipeline (finance summary + YoY + email via Resend) is built but dormant.</p>
+</blockquote>
+<hr />
+<h3 id="email-delivery-log">Email Delivery Log</h3>
+<p>Every outbound email writes an <code>EmailDelivery</code> row with <code>status</code>, <code>attempts</code>, <code>error</code>, and <code>messageId</code>.</p>
+<ul>
+<li><strong>View:</strong> Settings → Email Delivery (filterable, searchable, paginated)</li>
+<li><strong>Model:</strong> <code>EmailDelivery</code> in <code>prisma/schema.prisma</code> (indexed on <code>status+createdAt</code>, <code>recipient</code>, <code>userId</code>)</li>
+<li><strong>Monitoring:</strong> Dashboard alert fires when any send fails in the last 24 hours; CRITICAL at &gt;= 10 failures.</li>
+</ul>
+<hr />
+<section class="he-section" id="event-tracking"><div class="he-section__num">07 · Event Tracking</div><h2 class="he-section__title">Event Tracking</h2></section>
+<h3 id="event-taxonomy">Event Taxonomy</h3>
+<p>16 event types defined in <code>lib/analytics/events.ts</code>:</p>
+<ul>
+<li><code>PAGE_VIEW</code></li>
+<li><code>REGISTRATION_STARTED</code></li>
+<li><code>REGISTRATION_COMPLETED</code></li>
+<li><code>PAYMENT_SUBMITTED</code></li>
+<li><code>PAYMENT_APPROVED</code></li>
+<li><code>ENROLLMENT_CREATED</code></li>
+<li><code>COURSE_ACCESSED</code></li>
+<li><code>EXAM_POOL_JOINED</code></li>
+<li><code>EXAM_COMPLETED</code></li>
+<li><code>FEATURE_USED</code></li>
+<li><code>SEARCH_PERFORMED</code></li>
+<li><code>DOCUMENT_UPLOADED</code></li>
+<li><code>WALLET_TOP_UP</code></li>
+<li><code>REFERRAL_CLICKED</code></li>
+<li><code>TOUR_STARTED</code></li>
+<li><code>TOUR_COMPLETED</code></li>
+</ul>
+<h3 id="where-events-are-emitted">Where Events Are Emitted</h3>
+<table>
+<thead>
+<tr><th>Event</th><th>File</th><th>Trigger</th></tr>
+</thead>
+<tbody>
+<tr><td><code>REGISTRATION_COMPLETED</code></td><td><code>app/api/public/register/route.ts:153</code></td><td>New user registration</td></tr>
+<tr><td><code>PAYMENT_APPROVED</code></td><td><code>app/api/staff/payments/[id]/approve/route.ts:362</code></td><td>Staff approves a payment</td></tr>
+<tr><td><code>ENROLLMENT_CREATED</code></td><td><code>app/api/applicant/courses/[id]/enroll/route.ts:75</code></td><td>Applicant enrolls in a course</td></tr>
+</tbody>
+</table>
+<h3 id="client-side-tracking">Client-Side Tracking</h3>
+<ul>
+<li><strong><code>hooks/useAnalytics.ts</code></strong> — <code>useAnalytics()</code>, <code>useSearchTracking()</code>, <code>useFeatureTracking()</code> hooks for automatic page view + feature tracking in client components</li>
+<li><strong>Note:</strong> The <code>useAnalytics</code> hook is not mounted in the root layout, so client-side page view tracking is only active where the hook is explicitly used.</li>
+</ul>
+<h3 id="storage">Storage</h3>
+<p>All events are written to <code>AuditLog</code> with <code>entity = 'ANALYTICS'</code>:</p>
+<ul>
+<li><code>action</code> field → event name (e.g. <code>PAGE_VIEW</code>, <code>REGISTRATION_COMPLETED</code>)</li>
+<li><code>changes</code> field → structured JSON payload</li>
+<li><code>userId</code> → acting user (null for anonymous)</li>
+<li><code>ipAddress</code>, <code>userAgent</code> → context</li>
+</ul>
+<hr />
+<section class="he-section" id="data-models"><div class="he-section__num">08 · Data Models</div><h2 class="he-section__title">Data Models</h2></section>
+<h3 id="auditlog-central-event-store">AuditLog (Central Event Store)</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Type</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>id</code></td><td>String</td><td>Primary key</td></tr>
+<tr><td><code>userId</code></td><td>String?</td><td>Acting user</td></tr>
+<tr><td><code>action</code></td><td>String</td><td>Event name</td></tr>
+<tr><td><code>entity</code></td><td>String</td><td><code>'ANALYTICS'</code> for tracked events</td></tr>
+<tr><td><code>entityId</code></td><td>String?</td><td>Related record ID</td></tr>
+<tr><td><code>description</code></td><td>String?</td><td>Human-readable summary</td></tr>
+<tr><td><code>changes</code></td><td>Json?</td><td>Structured payload</td></tr>
+<tr><td><code>ipAddress</code></td><td>String?</td><td>Client IP</td></tr>
+<tr><td><code>userAgent</code></td><td>String?</td><td>Client user agent</td></tr>
+<tr><td><code>createdAt</code></td><td>DateTime</td><td>Event timestamp</td></tr>
+</tbody>
+</table>
+<p>Companion: <code>AuditLogArchive</code> for archived rows.</p>
+<h3 id="emaildelivery">EmailDelivery</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Type</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>recipient</code></td><td>String</td><td>Email address</td></tr>
+<tr><td><code>subject</code></td><td>String</td><td>Email subject</td></tr>
+<tr><td><code>template</code></td><td>String?</td><td>Template name (e.g. <code>'welcome'</code>)</td></tr>
+<tr><td><code>status</code></td><td>String</td><td><code>pending</code>, <code>sent</code>, <code>failed</code></td></tr>
+<tr><td><code>messageId</code></td><td>String?</td><td>Provider message ID</td></tr>
+<tr><td><code>error</code></td><td>String?</td><td>Error message if failed</td></tr>
+<tr><td><code>attempts</code></td><td>Int</td><td>Send attempt count</td></tr>
+<tr><td><code>userId</code></td><td>String?</td><td>Recipient user ID</td></tr>
+<tr><td><code>createdAt</code></td><td>DateTime</td><td>Created timestamp</td></tr>
+</tbody>
+</table>
+<h3 id="fileupload-sync-monitoring">FileUpload (Sync Monitoring)</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Type</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>mirroredAt</code></td><td>DateTime?</td><td>When file was mirrored to Supabase</td></tr>
+<tr><td><code>supabasePath</code></td><td>String?</td><td>Supabase storage path</td></tr>
+</tbody>
+</table>
+<p>Used by the dashboard alert to detect UploadThing → Supabase mirror backlog.</p>
+<h3 id="referral-fraud-analytics">Referral (Fraud Analytics)</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Type</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>status</code></td><td>String</td><td>Referral status</td></tr>
+<tr><td><code>fraudScore</code></td><td>Int</td><td>0-100 fraud risk score</td></tr>
+<tr><td><code>fraudReasons</code></td><td>String[]</td><td>Reasons for flagging</td></tr>
+<tr><td><code>reviewedAt</code></td><td>DateTime?</td><td>When reviewed</td></tr>
+<tr><td><code>signupIpHash</code></td><td>String?</td><td>Hashed IP of signup</td></tr>
+</tbody>
+</table>
+<h3 id="supporting-models">Supporting Models</h3>
+<ul>
+<li><code>ExamEvent</code>, <code>ExamPool</code>, <code>PoolMembership</code>, <code>ExamBooking</code>, <code>ExamResult</code> — exam analytics</li>
+<li><code>WalletTransaction</code>, <code>PaymentMilestone</code> — financial analytics</li>
+<li><code>ModularEnrollment</code> — enrollment analytics</li>
+<li><code>SystemSetting</code> — runtime-configurable thresholds</li>
+<li><code>DataSubjectRequest</code> — GDPR SLA tracking</li>
+</ul>
+<hr />
+<section class="he-section" id="third-party-integrations"><div class="he-section__num">09 · Third-Party Integrations</div><h2 class="he-section__title">Third-Party Integrations</h2></section>
+<table>
+<thead>
+<tr><th>Integration</th><th>Type</th><th>Mount Point</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>@vercel/analytics</code></td><td>Product analytics</td><td><code>app/layout.tsx</code> (global)</td><td>Page views, visitors, referrers</td></tr>
+<tr><td><code>@vercel/speed-insights</code></td><td>Performance</td><td><code>app/layout.tsx</code> (global)</td><td>Real Core Web Vitals monitoring</td></tr>
+</tbody>
+</table>
+<p>Both are mounted globally in the root layout for all users. No other third-party analytics (Google Analytics, Mixpanel, Amplitude, Plausible, PostHog, Segment) are integrated.</p>
+<hr />
+<section class="he-section" id="quick-reference-how-to-view-amp-monitor"><div class="he-section__num">10 · Quick Reference: How to View &amp;amp; Monitor</div><h2 class="he-section__title">Quick Reference: How to View &amp; Monitor</h2></section>
+<h3 id="daily-operations">Daily Operations</h3>
+<table>
+<thead>
+<tr><th>Task</th><th>Where to Look</th></tr>
+</thead>
+<tbody>
+<tr><td>Check operational KPIs</td><td><code>/staff/dashboard</code> — stat cards + revenue chart</td></tr>
+<tr><td>Review alerts</td><td><code>/staff/dashboard</code> — <code>AlertsCenter</code> banner (auto-refreshes 60s)</td></tr>
+<tr><td>Approve pending payments</td><td><code>/staff/dashboard</code> — pending payment cards</td></tr>
+<tr><td>Check exam Go/No-Go status</td><td><code>/staff/dashboard</code> — Go/No-Go meter</td></tr>
+</tbody>
+</table>
+<h3 id="weeklymonthly-analysis">Weekly/Monthly Analysis</h3>
+<table>
+<thead>
+<tr><th>Task</th><th>Where to Look</th></tr>
+</thead>
+<tbody>
+<tr><td>Revenue trends</td><td><code>/staff/reports?tab=revenue</code></td></tr>
+<tr><td>Enrollment analysis</td><td><code>/staff/reports?tab=enrollment</code></td></tr>
+<tr><td>Pool fill rates</td><td><code>/staff/reports?tab=pools</code></td></tr>
+<tr><td>Attendance breakdown</td><td><code>/staff/reports?tab=attendance</code></td></tr>
+<tr><td>Exam performance</td><td><code>/staff/reports?tab=exams</code></td></tr>
+<tr><td>Year-on-year comparison</td><td><code>/staff/reports?tab=yoy</code></td></tr>
+<tr><td>Export CSV data</td><td>Period filter dropdown on <code>/staff/reports</code> → download CSV</td></tr>
+</tbody>
+</table>
+<h3 id="product-analytics">Product Analytics</h3>
+<table>
+<thead>
+<tr><th>Task</th><th>Where to Look</th></tr>
+</thead>
+<tbody>
+<tr><td>Conversion funnels</td><td><code>/staff/analytics?tab=funnels</code></td></tr>
+<tr><td>User retention</td><td><code>/staff/analytics?tab=retention</code></td></tr>
+<tr><td>Feature adoption</td><td><code>/staff/analytics?tab=features</code></td></tr>
+<tr><td>Page views</td><td><code>/staff/analytics?tab=pageviews</code></td></tr>
+<tr><td>Individual user journey</td><td><code>/staff/analytics?tab=journey</code> → select user</td></tr>
+<tr><td>Overall metrics</td><td><code>/staff/analytics?tab=overview</code></td></tr>
+</tbody>
+</table>
+<h3 id="monitoring-amp-compliance">Monitoring &amp; Compliance</h3>
+<table>
+<thead>
+<tr><th>Task</th><th>Where to Look</th></tr>
+</thead>
+<tbody>
+<tr><td>Email delivery health</td><td>Settings → Email Delivery</td></tr>
+<tr><td>GDPR DSR queue</td><td><code>/staff/gdpr</code> — 30-day SLA pills</td></tr>
+<tr><td>Sync health (Neon ↔ Supabase)</td><td>AuditLog for drift alerts</td></tr>
+<tr><td>File mirror backlog</td><td><code>AlertsCenter</code> alert #5</td></tr>
+<tr><td>Exam reports pending review</td><td><code>AlertsCenter</code> alert #7</td></tr>
+<tr><td>Fraud referrals</td><td><code>AlertsCenter</code> alert #3 + <code>/staff/reports?tab=overview</code> critical alerts</td></tr>
+</tbody>
+</table>
+<h3 id="raw-data-access">Raw Data Access</h3>
+<table>
+<thead>
+<tr><th>Need</th><th>How</th></tr>
+</thead>
+<tbody>
+<tr><td>Query analytics events directly</td><td><code>AuditLog</code> table where <code>entity = 'ANALYTICS'</code></td></tr>
+<tr><td>Export all analytics events</td><td><code>/api/staff/export?type=audit-logs</code></td></tr>
+<tr><td>View email delivery log</td><td>Settings → Email Delivery UI, or <code>EmailDelivery</code> table</td></tr>
+<tr><td>Check exam pool rosters</td><td><code>/api/staff/reports/roster/[poolId]</code> → CSV</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="key-files-reference"><div class="he-section__num">11 · Key Files Reference</div><h2 class="he-section__title">Key Files Reference</h2></section>
+<table>
+<thead>
+<tr><th>File</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>lib/analytics/events.ts</code></td><td>Event taxonomy + <code>trackEvent()</code></td></tr>
+<tr><td><code>lib/analytics/metrics.ts</code></td><td>Dashboard metrics (users, revenue, growth)</td></tr>
+<tr><td><code>lib/analytics/queries.ts</code></td><td>Behavioral queries (funnels, retention, features, pageviews, journeys)</td></tr>
+<tr><td><code>lib/analytics/forecasting.ts</code></td><td>Revenue forecast + enrollment pipeline prediction</td></tr>
+<tr><td><code>lib/analytics/reports.ts</code></td><td>Business report queries (enrollment, revenue, pools, attendance, exams, YoY)</td></tr>
+<tr><td><code>lib/analytics/dashboard-alerts.ts</code></td><td>7 real-time alert checks</td></tr>
+<tr><td><code>lib/analytics/pdf-export.ts</code></td><td>jsPDF financial report generator (dormant)</td></tr>
+<tr><td><code>hooks/useAnalytics.ts</code></td><td>Client-side tracking hooks</td></tr>
+<tr><td><code>prisma/schema.prisma</code></td><td>AuditLog, EmailDelivery, Referral, and other analytics models</td></tr>
+</tbody>
+</table>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#table-of-contents">Table of Contents</a></li>
+    <li class="he-toc__l2"><a href="#overview">Overview</a></li>
+    <li class="he-toc__l2"><a href="#dashboards">Dashboards</a></li>
+    <li class="he-toc__l3"><a href="#staff-dashboard-staffdashboard">Staff Dashboard (`/staff/dashboard`)</a></li>
+    <li class="he-toc__l3"><a href="#analytics-dashboard-staffanalytics">Analytics Dashboard (`/staff/analytics`)</a></li>
+    <li class="he-toc__l3"><a href="#reports-staffreports">Reports (`/staff/reports`)</a></li>
+    <li class="he-toc__l2"><a href="#reports">Reports</a></li>
+    <li class="he-toc__l3"><a href="#financial-reports">Financial Reports</a></li>
+    <li class="he-toc__l3"><a href="#enrollment-reports">Enrollment Reports</a></li>
+    <li class="he-toc__l3"><a href="#pool-exam-reports">Pool &amp; Exam Reports</a></li>
+    <li class="he-toc__l3"><a href="#admissions-pipeline">Admissions Pipeline</a></li>
+    <li class="he-toc__l3"><a href="#csv-data-exports">CSV Data Exports</a></li>
+    <li class="he-toc__l3"><a href="#gdpr-data-export-article-15">GDPR Data Export (Article 15)</a></li>
+    <li class="he-toc__l2"><a href="#api-reference">API Reference</a></li>
+    <li class="he-toc__l3"><a href="#analytics-apis">Analytics APIs</a></li>
+    <li class="he-toc__l3"><a href="#report-apis">Report APIs</a></li>
+    <li class="he-toc__l2"><a href="#monitoring-alerts">Monitoring &amp; Alerts</a></li>
+    <li class="he-toc__l3"><a href="#dashboard-alerts-real-time">Dashboard Alerts (Real-Time)</a></li>
+    <li class="he-toc__l3"><a href="#critical-alerts-reports">Critical Alerts (Reports)</a></li>
+    <li class="he-toc__l3"><a href="#cron-jobs-monitoring">Cron Jobs (Monitoring)</a></li>
+    <li class="he-toc__l3"><a href="#email-delivery-log">Email Delivery Log</a></li>
+    <li class="he-toc__l2"><a href="#event-tracking">Event Tracking</a></li>
+    <li class="he-toc__l3"><a href="#event-taxonomy">Event Taxonomy</a></li>
+    <li class="he-toc__l3"><a href="#where-events-are-emitted">Where Events Are Emitted</a></li>
+    <li class="he-toc__l3"><a href="#client-side-tracking">Client-Side Tracking</a></li>
+    <li class="he-toc__l3"><a href="#storage">Storage</a></li>
+    <li class="he-toc__l2"><a href="#data-models">Data Models</a></li>
+    <li class="he-toc__l3"><a href="#auditlog-central-event-store">AuditLog (Central Event Store)</a></li>
+    <li class="he-toc__l3"><a href="#emaildelivery">EmailDelivery</a></li>
+    <li class="he-toc__l3"><a href="#fileupload-sync-monitoring">FileUpload (Sync Monitoring)</a></li>
+    <li class="he-toc__l3"><a href="#referral-fraud-analytics">Referral (Fraud Analytics)</a></li>
+    <li class="he-toc__l3"><a href="#supporting-models">Supporting Models</a></li>
+    <li class="he-toc__l2"><a href="#third-party-integrations">Third-Party Integrations</a></li>
+    <li class="he-toc__l2"><a href="#quick-reference-how-to-view-monitor">Quick Reference: How to View &amp; Monitor</a></li>
+    <li class="he-toc__l3"><a href="#daily-operations">Daily Operations</a></li>
+    <li class="he-toc__l3"><a href="#weeklymonthly-analysis">Weekly/Monthly Analysis</a></li>
+    <li class="he-toc__l3"><a href="#product-analytics">Product Analytics</a></li>
+    <li class="he-toc__l3"><a href="#monitoring-compliance">Monitoring &amp; Compliance</a></li>
+    <li class="he-toc__l3"><a href="#raw-data-access">Raw Data Access</a></li>
+    <li class="he-toc__l2"><a href="#key-files-reference">Key Files Reference</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

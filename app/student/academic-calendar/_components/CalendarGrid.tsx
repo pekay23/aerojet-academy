@@ -29,14 +29,9 @@ import {
   addMonths,
   startOfMonth,
   endOfMonth,
-  eachDayOfInterval,
+  startOfWeek,
   addHours,
   subWeeks,
-  getHours,
-  getMinutes,
-  getDay,
-  startOfWeek,
-  endOfWeek,
 } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
@@ -46,6 +41,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 export interface CalendarEvent {
   id: string
@@ -67,8 +63,8 @@ interface CalendarGridProps {
   userId: string
 }
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const EVENT_COLORS = [
+const _WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const _EVENT_COLORS = [
   { value: '#3b82f6', label: 'Blue' },
   { value: '#10b981', label: 'Green' },
   { value: '#f59e0b', label: 'Amber' },
@@ -78,7 +74,7 @@ const EVENT_COLORS = [
   { value: '#06b6d4', label: 'Cyan' },
 ]
 
-const SOURCE_ICONS: Record<string, typeof BookOpen> = {
+const _SOURCE_ICONS: Record<string, typeof BookOpen> = {
   class: BookOpen,
   exam: GraduationCap,
   semester: CalendarDays,
@@ -106,6 +102,7 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
     'exam',
     'semester',
   ])
+  const { markDirty, markClean } = useFormDirty()
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -229,7 +226,7 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
   }
 
   // Get events for selected date
-  const selectedEvents = selectedDate ? eventsByDate[selectedDate] || [] : []
+  const _selectedEvents = selectedDate ? eventsByDate[selectedDate] || [] : []
 
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1))
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1))
@@ -290,6 +287,7 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
         } else {
           toast.success('Event updated!')
           setShowModal(false)
+          markClean()
         }
       } else {
         const res = await createCalendarEvent(eventData)
@@ -298,6 +296,7 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
         } else {
           toast.success('Event added!')
           setShowModal(false)
+          markClean()
         }
       }
     } catch {
@@ -316,6 +315,7 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
         toast.error(res.error)
       } else {
         toast.success('Event deleted!')
+        markClean()
       }
     } catch {
       toast.error('Failed to delete event.')
@@ -831,7 +831,10 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
                   id="calendar-event-title"
                   type="text"
                   value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
+                  onChange={(e) => {
+                    setFormTitle(e.target.value)
+                    markDirty()
+                  }}
                   className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3.5 text-sm font-medium text-slate-900 transition-colors outline-none focus:border-[#FF4F33] focus:bg-white dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:focus:border-[#FF4F33]"
                   placeholder="Study session, meeting..."
                   autoComplete="off"
@@ -845,7 +848,10 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
                 <textarea
                   id="calendar-event-description"
                   value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
+                  onChange={(e) => {
+                    setFormDescription(e.target.value)
+                    markDirty()
+                  }}
                   className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3.5 text-sm font-medium text-slate-900 transition-colors outline-none focus:border-[#FF4F33] focus:bg-white dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:focus:border-[#FF4F33]"
                   rows={2}
                   placeholder="Notes about this event..."
@@ -861,7 +867,10 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
                     id="calendar-event-start"
                     type="datetime-local"
                     value={formStartDate}
-                    onChange={(e) => setFormStartDate(e.target.value)}
+                    onChange={(e) => {
+                      setFormStartDate(e.target.value)
+                      markDirty()
+                    }}
                     className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3.5 text-sm font-medium text-slate-900 transition-colors outline-none focus:border-[#FF4F33] focus:bg-white dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:focus:border-[#FF4F33]"
                   />
                 </div>
@@ -873,7 +882,10 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
                     id="calendar-event-end"
                     type="datetime-local"
                     value={formEndDate}
-                    onChange={(e) => setFormEndDate(e.target.value)}
+                    onChange={(e) => {
+                      setFormEndDate(e.target.value)
+                      markDirty()
+                    }}
                     className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3.5 text-sm font-medium text-slate-900 transition-colors outline-none focus:border-[#FF4F33] focus:bg-white dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:focus:border-[#FF4F33]"
                   />
                 </div>
@@ -886,7 +898,10 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
                 <select
                   id="calendar-event-recurrence"
                   value={formRecurrenceType}
-                  onChange={(e) => setFormRecurrenceType(e.target.value)}
+                  onChange={(e) => {
+                    setFormRecurrenceType(e.target.value)
+                    markDirty()
+                  }}
                   className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3.5 text-sm font-medium text-slate-900 transition-colors outline-none focus:border-[#FF4F33] focus:bg-white dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:focus:border-[#FF4F33]"
                 >
                   <option value="NONE">Does not repeat</option>
@@ -936,8 +951,11 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
                     id="calendar-event-recurrence-until"
                     type="date"
                     value={formRecurrenceUntil}
-                    onChange={(e) => setFormRecurrenceUntil(e.target.value)}
-                    className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3.5 text-sm font-medium text-slate-900 transition-colors outline-none focus:border-[#FF4F33] focus:bg-white dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:focus:border-[#FF4F33]"
+                    onChange={(e) => {
+                      setFormRecurrenceUntil(e.target.value)
+                      markDirty()
+                    }}
+                    className="dark:focus-border-[#FF4F33] w-full rounded-2xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3.5 text-sm font-medium text-slate-900 transition-colors outline-none focus:border-[#FF4F33] focus:bg-white dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                   />
                 </div>
               )}

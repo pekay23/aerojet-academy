@@ -1,26 +1,28 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { FeatureChart } from './FeatureChart'
+import { GitBranch } from 'lucide-react'
+import FeatureChart from './FeatureChart'
+import type { FeatureAdoption } from '@/lib/analytics/queries'
 
 const DEFAULT_FEATURES = [
-  'registration',
-  'payment',
-  'enrollment',
-  'exam_booking',
-  'wallet_topup',
-  'messages',
-  'attendance',
-  'transcript',
+  { key: 'registration', label: 'Registration' },
+  { key: 'payment', label: 'Payment' },
+  { key: 'enrollment', label: 'Enrollment' },
+  { key: 'exam_booking', label: 'Exam Booking' },
+  { key: 'wallet_topup', label: 'Wallet Top-up' },
+  { key: 'messages', label: 'Messages' },
+  { key: 'attendance', label: 'Attendance' },
+  { key: 'transcript', label: 'Transcript' },
 ]
 
-export function FeatureAdoption() {
-  const [features, setFeatures] = useState<string[]>(DEFAULT_FEATURES)
+export default function FeatureAdoption() {
+  const [features] = useState(DEFAULT_FEATURES)
   const [selectedFeature, setSelectedFeature] = useState('')
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<FeatureAdoption | null>(null)
   const [loading, setLoading] = useState(false)
 
   const loadFeature = async (feature: string) => {
@@ -31,8 +33,8 @@ export function FeatureAdoption() {
       if (json.success) {
         setData(json.data)
       }
-    } catch (err) {
-      console.error('Failed to load feature adoption:', err)
+    } catch (_err) {
+      toast.error('Failed to load feature adoption')
     } finally {
       setLoading(false)
     }
@@ -40,6 +42,8 @@ export function FeatureAdoption() {
 
   useEffect(() => {
     if (selectedFeature) {
+   
+  // eslint-disable-next-line react-hooks/set-state-in-effect
       loadFeature(selectedFeature)
     }
   }, [selectedFeature])
@@ -48,26 +52,38 @@ export function FeatureAdoption() {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Feature Adoption</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <GitBranch className="h-5 w-5 text-aerojet-sky" />
+            Feature Adoption
+          </CardTitle>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Select a feature to see adoption metrics
+          </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
             {features.map((feature) => (
               <Button
-                key={feature}
-                variant={selectedFeature === feature ? 'default' : 'outline'}
+                key={feature.key}
+                variant={selectedFeature === feature.key ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedFeature(feature)}
+                onClick={() => setSelectedFeature(feature.key)}
+                className="rounded-lg font-bold"
               >
-                {feature.replace(/_/g, ' ')}
+                {feature.label}
               </Button>
             ))}
           </div>
+          {loading && (
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-aerojet-blue border-t-transparent" />
+              Loading metrics...
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {data && <FeatureChart data={data} />}
+      {data && !loading && <FeatureChart data={data} />}
     </div>
   )
 }
-export default FeatureAdoption;

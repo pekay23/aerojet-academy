@@ -6,7 +6,6 @@ import {
   Calendar,
   Wallet,
   TrendingUp,
-  ArrowRight,
   CheckCircle2,
   Package,
   AlertCircle,
@@ -17,7 +16,7 @@ import {
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import WelcomeBanner from '@/components/WelcomeBanner'
-import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
+import { getStudentStatus } from '@/lib/access-control'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
@@ -92,7 +91,7 @@ export default async function StudentDashboard() {
         }
       },
     }),
-    getWelcomeMessages(prismaUnfiltered, session.user.role),
+    getWelcomeMessages(prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient, session.user.role),
   ])
 
   const profile = userData?.studentProfile
@@ -116,8 +115,8 @@ export default async function StudentDashboard() {
     )
   }
 
-  const { isFullTime, isExamOnly, isModular: isFlexible, enrollmentType, pathwayCode } = await getStudentStatus(userId)
-  const activePathway = profile.pathwayRel
+  const { isFullTime, isExamOnly, isModular: isFlexible, enrollmentType } = await getStudentStatus(userId)
+
 
   // Activity data is already included in the consolidated query above
   const activityData = userData
@@ -127,6 +126,7 @@ export default async function StudentDashboard() {
         where: { studentId: userId },
         include: {
           programme: true,
+          academicYear: true,
           milestones: {
             where: { status: { in: ['DUE', 'OVERDUE'] } },
             orderBy: { dueDate: 'asc' },
@@ -137,7 +137,7 @@ export default async function StudentDashboard() {
     : null
 
   const upcomingExams = activityData?.examBookings || []
-  const poolMemberships = activityData?.poolMemberships || []
+
   const currentPoolsCount = activityData?._count?.poolMemberships || 0
   const ftCourseEnrollmentCount = activityData?._count?.enrollments || 0
   const latestResultRecord = activityData?.examResults?.[0] || null
@@ -148,8 +148,8 @@ export default async function StudentDashboard() {
 
   // Full-Time: milestones are now included in the parallel fetch above — no sequential query needed
   const ftEnrollment = ftEnrollmentRaw
-  const ftMilestones: SerializedPaymentMilestone[] = (ftEnrollment as any)?.milestones
-    ? (ftEnrollment as any).milestones.map(serializePaymentMilestone)
+  const ftMilestones: SerializedPaymentMilestone[] = ftEnrollment?.milestones
+    ? ftEnrollment.milestones.map(serializePaymentMilestone)
     : []
 
   const serializedUpcomingExams = upcomingExams.map(serializeExamBooking)
@@ -172,12 +172,12 @@ export default async function StudentDashboard() {
             <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/30 p-8 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-900/50">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-black text-aerojet-blue dark:text-white">
+                  <h2 className="text-2xl font-black text-blue-800 dark:text-white">
                     Exam Only Pathway
                   </h2>
                   <p className="mt-1 text-slate-500 dark:text-slate-400">Manage your exam bookings and view results.</p>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-aerojet-blue text-white dark:bg-blue-600">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-800 text-white dark:bg-blue-600">
                   <BookOpen className="h-6 w-6" />
                 </div>
               </div>
@@ -240,7 +240,7 @@ export default async function StudentDashboard() {
                         ID: {ftEnrollment.programme.code}
                       </span>
                       <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                        {ftEnrollment.academicYear || ''}
+                         {ftEnrollment.academicYear?.name || ''}
                       </span>
                     </div>
                     <h3 className="text-sm leading-tight font-bold text-slate-900 dark:text-slate-100">
@@ -453,7 +453,7 @@ export default async function StudentDashboard() {
         </div>
         <Link
           href="/student/wallet/top-up"
-          className="bg-aerojet-blue inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
+          className="bg-blue-800 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
         >
           <Wallet className="h-4 w-4" />
           Top Up Wallet

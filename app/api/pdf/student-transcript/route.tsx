@@ -1,10 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { renderToStream } from '@react-pdf/renderer'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getPDFSettings } from '@/lib/pdf-settings'
 import { TranscriptTemplate, TranscriptRecord } from '@/components/pdf/templates/TranscriptTemplate'
-import React from 'react'
+import { createVerificationRecord, generateVerificationQrDataUrl } from '@/lib/document-verification'
+
+async function renderTranscriptPdf(props: {
+  logoUrl: string
+  watermarkUrl?: string
+  watermarkOpacity?: number
+  footerText?: string
+  studentName: string
+  studentId: string
+  programName: string
+  enrollmentDate: string
+  generatedDate: string
+  records: TranscriptRecord[]
+  qrDataUrl?: string
+}) {
+  return renderToStream(
+    <TranscriptTemplate
+      logoUrl={props.logoUrl}
+      watermarkUrl={props.watermarkUrl}
+      footerText={props.footerText}
+      watermarkOpacity={props.watermarkOpacity}
+      studentName={props.studentName}
+      studentId={props.studentId}
+      programName={props.programName}
+      enrollmentDate={props.enrollmentDate}
+      generatedDate={props.generatedDate}
+      records={props.records}
+      qrDataUrl={props.qrDataUrl}
+    />
+  )
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,7 +47,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch student data in parallel
     const [profile, examResults, pdfSettings] = await Promise.all([
-      prisma.studentProfile.findUnique({
+      prismaUnfiltered.studentProfile.findUnique({
         where: { userId },
         select: {
           studentId: true,
@@ -32,7 +62,7 @@ export async function GET(req: NextRequest) {
           pathwayRel: { select: { name: true } },
         },
       }),
-      prisma.examResult.findMany({
+      prismaUnfiltered.examResult.findMany({
         where: { userId },
         select: {
           moduleCode: true,
@@ -46,7 +76,7 @@ export async function GET(req: NextRequest) {
               examDate: true,
               examComponent: {
                 select: {
-                  course: { select: { code: true, name: true, credits: true } },
+                  course: { select: { code: true, name: true } },
                 },
               },
             },
@@ -72,7 +102,7 @@ export async function GET(req: NextRequest) {
     for (const r of examResults) {
       const code = r.exam?.examComponent?.course?.code ?? r.moduleCode ?? '—'
       const courseName = r.exam?.examComponent?.course?.name ?? r.moduleCode ?? '—'
-      const credits = r.exam?.examComponent?.course?.credits ?? 0
+      const credits = 0
 
       const existing = moduleMap.get(code)
       // Prefer passed results, then latest
@@ -81,7 +111,7 @@ export async function GET(req: NextRequest) {
           code,
           courseName,
           credits,
-          grade: r.passed ? 'Pass' : 'Fail',
+          grade: r.percentage != null ? `${r.percentage}%` : (r.passed ? 'Pass' : 'Fail'),
           status: r.passed ? 'Pass' : 'Fail',
         })
       }
@@ -93,43 +123,52 @@ export async function GET(req: NextRequest) {
 
     const now = new Date()
 
-    const stream = await renderToStream(
-      <TranscriptTemplate
-        logoUrl={pdfSettings.logoUrl}
-        watermarkUrl={pdfSettings.watermarkUrl}
-        footerText={pdfSettings.footerText}
-        watermarkOpacity={pdfSettings.watermarkOpacity}
-        studentName={fullName}
-        studentId={profile.studentId ?? '—'}
-        programName={programName}
-        enrollmentDate={
-          profile.enrollmentDate?.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-          }) ?? '—'
-        }
-        generatedDate={now.toLocaleDateString('en-GB', {
+    // Create verification record for transcript QR code
+    const verification = await createVerificationRecord({
+      documentType: 'Transcript',
+      certificateNo: `transcript-${profile.studentId ?? userId}`,
+      recipientName: fullName,
+      issueDate: now,
+      generatedBy: session.user.id,
+    })
+
+    const qrDataUrl = await generateVerificationQrDataUrl(verification.code)
+
+    const stream = await renderTranscriptPdf({
+      logoUrl: pdfSettings.logoUrl,
+      watermarkUrl: pdfSettings.watermarkUrl,
+      footerText: pdfSettings.footerText,
+      watermarkOpacity: pdfSettings.watermarkOpacity,
+      studentName: fullName,
+      studentId: profile.studentId ?? '—',
+      programName,
+      enrollmentDate:
+        profile.enrollmentDate?.toLocaleDateString('en-GB', {
           day: '2-digit',
           month: 'short',
           year: 'numeric',
-        })}
-        records={records}
-      />
-    )
+        }) ?? '—',
+      generatedDate: now.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }),
+      records,
+      qrDataUrl,
+    })
 
     const safeId = (profile.studentId ?? 'student').replace(/[^a-zA-Z0-9-]/g, '_')
 
-    return new NextResponse(stream as any, {
+    return new NextResponse(stream as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="Transcript_${safeId}.pdf"`,
       },
     })
-  } catch (error: any) {
-    console.error('[pdf/student-transcript] Error:', error)
+  } catch (error: unknown) {
+    console.error('[pdf/student-transcript] Error:', error instanceof Error ? error.message : String(error))
     return NextResponse.json(
-      { error: 'Failed to generate transcript', details: error.message },
+      { error: 'Failed to generate transcript', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }

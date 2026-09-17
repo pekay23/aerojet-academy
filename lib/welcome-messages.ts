@@ -56,17 +56,19 @@ export const DEFAULT_ROLE_WELCOME_MESSAGES: Record<string, string[]> = {
   ],
 }
 
+export type WelcomeMessagesPrismaClient = {
+  systemSetting: {
+    findUnique: (args: unknown) => Promise<{ value: string } | null>
+  }
+}
+
 /**
  * Fetches the active welcome messages from the DB (or returns defaults).
  * Call this server-side in dashboard pages.
  */
 export const getWelcomeMessages = cache(
   async (
-    prismaClient: {
-      systemSetting: {
-        findUnique: (args: any) => Promise<{ value: string } | null>
-      }
-    },
+    prismaClient: WelcomeMessagesPrismaClient,
     role: string = 'STUDENT'
   ): Promise<string[]> => {
     // We use unstable_cache for cross-request caching (5 mins) to avoid
@@ -109,11 +111,7 @@ export const getWelcomeMessages = cache(
  * Fetches all welcome messages grouped by role.
  * Primarily for admin settings page.
  */
-export async function getWelcomeMessagesGrouped(prismaClient: {
-  systemSetting: {
-    findUnique: (args: any) => Promise<{ value: string } | null>
-  }
-}): Promise<Record<string, string[]>> {
+export async function getWelcomeMessagesGrouped(prismaClient: WelcomeMessagesPrismaClient): Promise<Record<string, string[]>> {
   const setting = await prismaClient.systemSetting.findUnique({
     where: { key: 'welcome_messages' },
   })

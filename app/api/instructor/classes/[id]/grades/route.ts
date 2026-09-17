@@ -7,6 +7,7 @@ import {
   apiNotFound,
   apiError,
   withErrorHandler,
+  RouteContext
 } from '@/lib/api/response'
 import { enterGradeSchema, validateBody } from '@/lib/validation/schemas'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -14,7 +15,7 @@ import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { UserRole } from '@prisma/client'
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireAuth()
     if (user.role !== UserRole.INSTRUCTOR) return apiForbidden('Instructor access required')
 
@@ -22,7 +23,7 @@ export const GET = withErrorHandler(
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
 
     const classItem = await prisma.class.findUnique({
-      where: { id: ctx?.params?.id },
+      where: { id: (await ctx!.params).id },
       include: { course: true },
     })
     if (!classItem) return apiNotFound('Class not found')
@@ -44,14 +45,14 @@ export const GET = withErrorHandler(
 )
 
 export const POST = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const user = await requireAuth()
     if (user.role !== UserRole.INSTRUCTOR) return apiForbidden('Instructor access required')
 
     const instructorProfile = await getInstructorProfileByUserId(user.id)
     if (!instructorProfile) return apiForbidden('Instructor profile not found')
 
-    const classId = ctx?.params?.id
+    const classId = (await ctx!.params).id
     if (!classId) return apiError('Class ID required')
 
     const classItem = await prisma.class.findUnique({

@@ -1,18 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { env } from '@/lib/env'
-import { getFinanceReportSummary, getYoYComparison } from '@/lib/analytics/reports'
 import { sendEmail } from '@/lib/email/sender'
 import { format } from 'date-fns'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { getBaseUrl } from '@/lib/utils/url'
+import {
+  gatherReportData,
+  generateReportHtml,
+  validateSchedule,
+  validateEmails,
+  isReportingDay,
+} from '@/lib/reports/scheduled-report-service'
 
 /**
  * Cron job to send scheduled financial reports to board/admin
- * Frequency: Weekly (Mondays at 8 AM)
+ * Frequency: Daily at 8 AM (sends weekly on Mondays, monthly on the 1st)
  */
 export async function GET(req: NextRequest) {
-  // Feature hidden for now as per Tier 4 request
-  return NextResponse.json({ success: true, message: 'Feature disabled' })
-
   const authHeader = req.headers.get('authorization')
   const cronSecret = env.CRON_SECRET
 
@@ -32,7 +37,7 @@ export async function GET(req: NextRequest) {
     const vals: Record<string, string> = {}
     for (const s of settings) vals[s.key] = s.value
 
-    const schedule = vals.report_schedule || 'off'
+    const schedule = (vals.report_schedule || 'off') as 'off' | 'weekly' | 'monthly'
     const email = vals.report_email || ''
     const lastSent = vals.report_last_sent ? new Date(vals.report_last_sent) : null
 
@@ -44,21 +49,28 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // 2. Check if it's time to send (simple day-of-week check for weekly)
+    // Validate schedule value against allowed set
+    if (!validateSchedule(schedule)) {
+      return NextResponse.json({
+        success: false,
+        message: `Invalid schedule value: ${schedule}. Expected 'weekly' or 'monthly'.`,
+      })
+    }
+
+    // 2. Check if it's time to send (weekly: Monday, monthly: 1st of month)
     const now = new Date()
-    const isMonday = now.getDay() === 1
-    
-    // For manual testing or if it's actually Monday
-    if (!isMonday && req.nextUrl.searchParams.get('force') !== 'true') {
+
+    // Allow ?force=true for manual testing
+    if (!isReportingDay(schedule, now) && req.nextUrl.searchParams.get('force') !== 'true') {
       return NextResponse.json({
         success: true,
-        message: 'Not a reporting day (Scheduled for Mondays)',
+        message: `Not a reporting day (schedule=${schedule})`,
       })
     }
 
     // Prevent double sending on the same day
     if (lastSent && format(lastSent as Date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd')) {
-       return NextResponse.json({
+      return NextResponse.json({
         success: true,
         message: 'Report already sent today',
       })
@@ -71,96 +83,97 @@ export async function GET(req: NextRequest) {
       })
     }
 
+    // Validate comma-separated email addresses
+    let recipients: string[]
+    try {
+      recipients = validateEmails(email)
+    } catch (err) {
+      return NextResponse.json({
+        success: false,
+        message: (err as Error).message,
+      })
+    }
+
     // 3. Gather Data
-    const [financeSummary, yoyData] = await Promise.all([
-      getFinanceReportSummary({ year: now.getFullYear(), month: now.getMonth() + 1 }),
-      getYoYComparison(now.getFullYear()),
-    ])
+    const reportData = await gatherReportData(now)
+    const baseUrl = await getBaseUrl()
 
-    // 4. Generate Email HTML (Rich Dashboard style)
-    const html = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
-        <div style="background-color: #1e40af; padding: 40px 20px; border-radius: 24px 24px 0 0; text-align: center; color: white;">
-          <h1 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.025em;">Board Insights Report</h1>
-          <p style="margin: 10px 0 0; font-size: 14px; opacity: 0.8;">Aerojet Aviation Training Academy</p>
-        </div>
-        
-        <div style="padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 24px 24px; background-color: #ffffff;">
-          <p style="font-size: 14px; color: #64748b; margin-bottom: 30px;">
-            Weekly performance summary for the period ending <strong>${format(now, 'dd MMMM yyyy')}</strong>.
-          </p>
+    // 4. Generate Email HTML
+    const html = generateReportHtml(reportData, { schedule, recipients, now, baseUrl })
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-            <div style="background-color: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #f1f5f9;">
-              <p style="margin: 0; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Total Revenue (30d)</p>
-              <p style="margin: 5px 0 0; font-size: 20px; font-weight: 900; color: #1e40af;">€${financeSummary.totalRevenue.toLocaleString()}</p>
-            </div>
-            <div style="background-color: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #f1f5f9;">
-              <p style="margin: 0; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Approved Payments</p>
-              <p style="margin: 5px 0 0; font-size: 20px; font-weight: 900; color: #10b981;">${financeSummary.totalCount}</p>
-            </div>
-          </div>
-
-          <h2 style="font-size: 16px; font-weight: 900; color: #1e40af; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.025em;">Year-on-Year Growth</h2>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-            <thead>
-              <tr style="text-align: left; font-size: 10px; color: #94a3b8; text-transform: uppercase;">
-                <th style="padding: 10px 0; border-bottom: 1px solid #f1f5f9;">Metric</th>
-                <th style="padding: 10px 0; border-bottom: 1px solid #f1f5f9;">${yoyData.previousYear}</th>
-                <th style="padding: 10px 0; border-bottom: 1px solid #f1f5f9;">${yoyData.currentYear}</th>
-                <th style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; text-align: right;">Growth</th>
-              </tr>
-            </thead>
-            <tbody style="font-size: 14px;">
-              <tr>
-                <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: 700;">Revenue</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9;">€${yoyData.totals.previous.revenue.toLocaleString()}</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: 900;">€${yoyData.totals.current.revenue.toLocaleString()}</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; text-align: right; color: #10b981; font-weight: 900;">+${Math.round((yoyData.totals.current.revenue / yoyData.totals.previous.revenue - 1) * 100)}%</td>
-              </tr>
-               <tr>
-                <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: 700;">Enrollments</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9;">${yoyData.totals.previous.enrollments}</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: 900;">${yoyData.totals.current.enrollments}</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; text-align: right; color: #10b981; font-weight: 900;">+${Math.round((yoyData.totals.current.enrollments / yoyData.totals.previous.enrollments - 1) * 100)}%</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
-            <a href="${env.NEXTAUTH_URL}/staff/reports" style="display: inline-block; background-color: #1e40af; color: white; padding: 12px 30px; border-radius: 12px; text-decoration: none; font-weight: 900; font-size: 14px;">View Full Dashboard</a>
-          </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 20px;">
-          <p style="font-size: 10px; color: #94a3b8;">
-            You are receiving this because your email is configured as a board recipient in the Academy Portal. 
-            <br/>To unsubscribe or change frequency, visit the <a href="${env.NEXTAUTH_URL}/staff/settings" style="color: #1e40af;">System Settings</a>.
-          </p>
-        </div>
-      </div>
-    `
-
-    // 5. Send Email
-    await sendEmail({
-      to: email.split(',').map(e => e.trim()),
+    // 5. Send email (must succeed before committing the timestamp)
+    const emailResult = await sendEmail({
+      to: recipients,
       subject: `Board Insights Report - ${format(now, 'dd MMM yyyy')}`,
       html,
+      template: 'scheduled-report',
     })
 
-    // 6. Update last run timestamp
+    if (!emailResult.success) {
+      // Record the error so admins can triage; leave report_last_sent unset so
+      // the next scheduled cron run (Monday/weekly or 1st/monthly) will retry.
+      await prisma.systemSetting.upsert({
+        where: { key: 'report_last_error' },
+        update: { value: emailResult.error || 'Unknown error' },
+        create: {
+          key: 'report_last_error',
+          value: emailResult.error || 'Unknown error',
+          type: 'STRING',
+        },
+      })
+
+      await createAuditLog({
+        action: AuditAction.SYSTEM_UPDATE,
+        description: `Scheduled report FAILED (${schedule}) — see report_last_error setting`,
+        changes: {
+          schedule,
+          recipientCount: recipients.length,
+          reportDate: format(now, 'yyyy-MM-dd'),
+          error: emailResult.error,
+        },
+      })
+
+      return NextResponse.json({
+        success: false,
+        message: `Report delivery failed: ${emailResult.error || 'Unknown error'}`,
+      })
+    }
+
+    // 6. Email delivered — commit the timestamp (deduplicates future runs)
     await prisma.systemSetting.upsert({
       where: { key: 'report_last_sent' },
       update: { value: now.toISOString() },
       create: { key: 'report_last_sent', value: now.toISOString(), type: 'STRING' },
     })
 
+    // 7. Clear any prior error and audit-log the success
+    await Promise.all([
+      prisma.systemSetting.upsert({
+        where: { key: 'report_last_error' },
+        update: { value: '' },
+        create: { key: 'report_last_error', value: '', type: 'STRING' },
+      }),
+      createAuditLog({
+        action: AuditAction.SYSTEM_UPDATE,
+        description: `Scheduled report sent (${schedule})`,
+        changes: {
+          schedule,
+          recipientCount: recipients.length,
+          reportDate: format(now, 'yyyy-MM-dd'),
+        },
+      }),
+    ])
+
     return NextResponse.json({
       success: true,
-      message: `Report sent to ${email}`,
+      message: `Report sent to ${recipients.length} recipient(s)`,
     })
-  } catch (error: any) {
-    console.error('[Scheduled Report Error]', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  } catch (error) {
+    const message = error instanceof Error ? (error as Error).message : String(error)
+    console.error('[Scheduled Report Error]', message)
+    return NextResponse.json(
+      { success: false, error: 'Failed to generate scheduled report' },
+      { status: 500 }
+    )
   }
 }

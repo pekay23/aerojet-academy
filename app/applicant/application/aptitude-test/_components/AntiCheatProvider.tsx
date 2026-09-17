@@ -1,8 +1,15 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 
-export default function AntiCheatProvider({ children, sessionId }: { children: React.ReactNode, sessionId: string }) {
+export default function AntiCheatProvider({
+  children,
+  sessionId,
+}: {
+  children: React.ReactNode
+  sessionId: string
+}) {
   const isDev = process.env.NODE_ENV === 'development'
   const isFullscreen = useRef(false)
 
@@ -10,11 +17,19 @@ export default function AntiCheatProvider({ children, sessionId }: { children: R
     if (isDev) return // Don't enforce in dev
 
     const reportViolation = async (type: 'TAB_SWITCH' | 'FULLSCREEN_EXIT') => {
-      await fetch('/api/applicant/aptitude/anti-cheat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, eventType: type })
-      })
+      try {
+        const res = await fetch('/api/applicant/aptitude/anti-cheat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, eventType: type }),
+        })
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        }
+      } catch (err) {
+        console.error('[AntiCheat] Failed to report violation:', err)
+        toast.error('Anti-cheat reporting failed — session may be flagged for review')
+      }
     }
 
     // Tab Switch Listener
@@ -45,7 +60,9 @@ export default function AntiCheatProvider({ children, sessionId }: { children: R
     // Attempt to enter fullscreen initially
     const enterFullscreen = () => {
       if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(e => console.warn(e))
+        document.documentElement.requestFullscreen().catch((err) => {
+          console.error('[AntiCheat] Failed to enter fullscreen:', err)
+        })
       }
     }
     document.addEventListener('click', enterFullscreen, { once: true })

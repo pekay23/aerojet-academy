@@ -2,8 +2,7 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { Calendar, Users, BookOpen, Wallet, CheckCircle2, AlertCircle } from 'lucide-react'
-import { format } from 'date-fns'
+import { Calendar, Wallet } from 'lucide-react'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import RevisionRunCard from './_components/RevisionRunCard'
 
@@ -94,7 +93,7 @@ export default async function StudentRevisionPage() {
     <div className="space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white uppercase">
+          <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white uppercase">
             Revision Support
           </h1>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Extra module support and intensive revision sessions</p>

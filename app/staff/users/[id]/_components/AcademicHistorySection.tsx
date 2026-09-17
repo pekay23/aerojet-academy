@@ -11,14 +11,6 @@ import AddExamRecordDialog from '../../../students/[id]/_components/AddExamRecor
 // TYPES
 // ---------------------------------------------------------------------------
 
-interface EnrollmentData {
-  id: string
-  status: string
-  completedAt: string | null
-  course: { code: string; name: string }
-  academicYear: { name: string } | null
-  semester: { name: string } | null
-}
 
 interface ExamBookingData {
   id: string
@@ -42,11 +34,22 @@ interface StudentProfileData {
   enrollmentType: string | null
 }
 
+interface ExamComponentData {
+  id: string
+  code: string
+  name: string
+}
+
 interface Props {
   studentId: string
   studentName: string
-  examComponents: any[]
-  enrollments: EnrollmentData[]
+  examComponents: ExamComponentData[]
+  enrollments: Array<{
+    id: string
+    status: string
+    completedAt: string | null
+    course: { code: string; name: string }
+  }>
   examBookings: ExamBookingData[]
   studentProfile: StudentProfileData | null
 }
@@ -69,12 +72,26 @@ interface SemesterGroup {
   key: string
   yearName: string
   semesterName: string
-  enrollments: EnrollmentData[]
+  enrollments: Array<{
+    id: string
+    status: string
+    completedAt: string | null
+    course: { code: string; name: string }
+    academicYear?: { name: string } | null
+    semester?: { name: string } | null
+  }>
   examResults: Map<string, ExamBookingData[]> // moduleCode -> bookings
 }
 
 function groupBySemester(
-  enrollments: EnrollmentData[],
+  enrollments: Array<{
+    id: string
+    status: string
+    completedAt: string | null
+    course: { code: string; name: string }
+    academicYear?: { name: string } | null
+    semester?: { name: string } | null
+  }>,
   examBookings: ExamBookingData[]
 ): SemesterGroup[] {
   const groups = new Map<string, SemesterGroup>()
@@ -147,7 +164,7 @@ function ExamOnlyHistory({
   studentProfile: StudentProfileData
   studentId: string
   studentName: string
-  examComponents: any[]
+  examComponents: ExamComponentData[]
 }) {
   const router = useRouter()
   const passed = examBookings.filter((b) => b.result?.toLowerCase() === 'pass').length
@@ -326,7 +343,7 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
   const matchedModules = new Set(semesters.flatMap((s) => s.enrollments.map((e) => e.course.code)))
   const unmatchedExams = examBookings.filter((b) => b.moduleCode && !matchedModules.has(b.moduleCode))
 
-  const totalCourses = enrollments.length
+  const _totalCourses = enrollments.length
   const totalExamsWithResults = examBookings.filter((b) => b.result?.toLowerCase() === 'pass' || b.result?.toLowerCase() === 'fail').length
   const upcomingExamsCount = examBookings.filter((b) => !b.result || !['pass', 'fail', 'absent'].includes(b.result.toLowerCase())).length
   const passedExams = examBookings.filter((b) => b.result?.toLowerCase() === 'pass').length

@@ -15,14 +15,14 @@ export default function InternalExamPageTabs({ activeTab }: Props) {
 
   return (
     <div className="flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-700 dark:bg-slate-800">
-      {tabs.map(tab => (
+      {tabs.map((tab) => (
         <Link
           key={tab.key}
           href={`/staff/exams/internal?tab=${tab.key}`}
           className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold transition-all ${
             activeTab === tab.key
               ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white'
-              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+              : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100'
           }`}
         >
           {tab.icon}

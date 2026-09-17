@@ -1,41 +1,20 @@
 import { NextResponse } from 'next/server'
-import { getAuthSession } from '@/lib/auth/helpers'
+import { requireApplicant } from '@/lib/auth/helpers'
 import { getOrCreateReferralCode, getReferralStats } from '@/lib/referral/operations'
+import { withErrorHandler } from '@/lib/api/response'
 
 /**
  * GET — Return user's referral code and stats
  * POST — Generate referral code if not exists
  */
-export async function GET() {
-  try {
-    const session = await getAuthSession()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+export const GET = withErrorHandler(async () => {
+  const user = await requireApplicant()
+  const stats = await getReferralStats(user.id)
+  return NextResponse.json(stats)
+})
 
-    const userId = session.user.id
-    const stats = await getReferralStats(userId)
-
-    return NextResponse.json(stats)
-  } catch (error) {
-    console.error('Error fetching referral stats:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
-
-export async function POST() {
-  try {
-    const session = await getAuthSession()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const userId = session.user.id
-    const code = await getOrCreateReferralCode(userId)
-
-    return NextResponse.json({ referralCode: code })
-  } catch (error) {
-    console.error('Error generating referral code:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
+export const POST = withErrorHandler(async () => {
+  const user = await requireApplicant()
+  const code = await getOrCreateReferralCode(user.id)
+  return NextResponse.json({ referralCode: code })
+})

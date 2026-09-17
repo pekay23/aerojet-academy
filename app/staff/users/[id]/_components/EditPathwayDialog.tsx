@@ -12,8 +12,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Edit2, Loader2, AlertTriangle } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
-export type PathwayCode = 'FULL_TIME_4Y' | 'FULL_TIME_2Y' | 'MILITARY_1Y' | 'MODULAR' | 'EXAM_ONLY' | null
+export type PathwayCode = string | null
 
 export default function EditPathwayDialog({
   userId,
@@ -21,15 +22,17 @@ export default function EditPathwayDialog({
   isLocked,
 }: {
   userId: string
-  currentPathway: PathwayCode
+  currentPathway: string | null
   isLocked: boolean
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [pathway, setPathway] = useState<PathwayCode>(currentPathway)
+  const [pathway, setPathway] = useState<string | null>(currentPathway)
   const [reason, setReason] = useState('')
   const [error, setError] = useState<string | null>(null)
+
+  const { markDirty, markClean } = useFormDirty()
 
   const handleSave = async () => {
     if (!reason) {
@@ -51,10 +54,11 @@ export default function EditPathwayDialog({
         throw new Error(data.error || 'Failed to update pathway')
       }
 
+      markClean()
       setOpen(false)
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to update pathway')
     } finally {
       setIsSubmitting(false)
     }
@@ -67,7 +71,7 @@ export default function EditPathwayDialog({
           <Edit2 className="h-4 w-4" />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>{isLocked ? 'Override Study Pathway' : 'Assign Study Pathway'}</DialogTitle>
           <DialogDescription className="sr-only">
@@ -88,14 +92,20 @@ export default function EditPathwayDialog({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="pathway-select" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="pathway-select"
+              className="text-sm font-bold text-slate-700 dark:text-slate-300"
+            >
               Select Pathway
             </label>
             <select
               id="pathway-select"
               name="pathway"
               value={pathway || ''}
-              onChange={(e) => setPathway(e.target.value as PathwayCode)}
+              onChange={(e) => {
+                setPathway(e.target.value as PathwayCode)
+                markDirty()
+              }}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
               autoComplete="off"
             >
@@ -111,14 +121,20 @@ export default function EditPathwayDialog({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="pathway-reason" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="pathway-reason"
+              className="text-sm font-bold text-slate-700 dark:text-slate-300"
+            >
               Reason for Change
             </label>
             <textarea
               id="pathway-reason"
               name="reason"
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={(e) => {
+                setReason(e.target.value)
+                markDirty()
+              }}
               placeholder="e.g. Student requested migration from Modular to Full-Time"
               required
               rows={3}

@@ -3,14 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import {
-  Mail,
-  CheckCircle2,
-  AlertOctagon,
-  Clock,
-  RefreshCw,
-  Search,
-} from 'lucide-react'
+import { Mail, CheckCircle2, AlertOctagon, Clock, RefreshCw, Search } from 'lucide-react'
 
 interface Delivery {
   id: string
@@ -43,7 +36,7 @@ const STATUS_ICON: Record<Delivery['status'], React.ComponentType<{ className?: 
 }
 
 export default function EmailDeliveryTab() {
-  const router = useRouter()
+  const _router = useRouter()
   const [page, setPage] = useState<Page | null>(null)
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState<'all' | 'SUCCESS' | 'FAILED' | 'RETRYING'>('FAILED')
@@ -73,6 +66,7 @@ export default function EmailDeliveryTab() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void reload()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, pageNum])
@@ -83,14 +77,14 @@ export default function EmailDeliveryTab() {
     void reload()
   }
 
-  const failedCount = page?.data.filter((d) => d.status === 'FAILED').length ?? 0
+  const _failedCount = page?.data.filter((d) => d.status === 'FAILED').length ?? 0
   const total = page?.meta.total ?? 0
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="flex items-center gap-2 text-lg font-black text-slate-900 dark:text-slate-100">
-          <Mail className="h-5 w-5 text-aerojet-blue" />
+          <Mail className="text-aerojet-blue h-5 w-5" />
           Email delivery
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -109,7 +103,9 @@ export default function EmailDeliveryTab() {
           }`}
         >
           <p className="text-xs font-bold tracking-widest text-slate-500 uppercase">Failed</p>
-          <p className="mt-1 text-2xl font-black text-red-600">{status === 'FAILED' ? total : '—'}</p>
+          <p className="mt-1 text-2xl font-black text-red-600">
+            {status === 'FAILED' ? total : '—'}
+          </p>
         </button>
         <button
           onClick={() => setStatus('SUCCESS')}
@@ -129,18 +125,18 @@ export default function EmailDeliveryTab() {
           className={`rounded-2xl border p-4 text-left transition ${
             status === 'all'
               ? 'border-aerojet-blue bg-aerojet-blue/5 dark:border-aerojet-blue'
-              : 'border-slate-100 bg-white hover:border-aerojet-blue/30 dark:border-slate-800 dark:bg-slate-900'
+              : 'hover:border-aerojet-blue/30 border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900'
           }`}
         >
           <p className="text-xs font-bold tracking-widest text-slate-500 uppercase">All recent</p>
-          <p className="mt-1 text-2xl font-black text-aerojet-blue dark:text-white">
+          <p className="text-aerojet-blue mt-1 text-2xl font-black dark:text-white">
             {status === 'all' ? total : '—'}
           </p>
         </button>
       </div>
 
       <form onSubmit={onSearch} className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[240px]">
+        <div className="relative min-w-[240px] flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             value={search}
@@ -151,7 +147,7 @@ export default function EmailDeliveryTab() {
         </div>
         <button
           type="submit"
-          className="rounded-lg bg-aerojet-blue px-3 py-2 text-sm font-bold text-white hover:bg-aerojet-blue/90"
+          className="bg-aerojet-blue hover:bg-aerojet-blue/90 rounded-lg px-3 py-2 text-sm font-bold text-white"
         >
           Apply
         </button>
@@ -202,9 +198,7 @@ export default function EmailDeliveryTab() {
                     <td className="px-3 py-2">
                       <p className="text-sm">{row.subject}</p>
                       {row.error && (
-                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                          {row.error}
-                        </p>
+                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">{row.error}</p>
                       )}
                     </td>
                     <td className="px-3 py-2 text-xs text-slate-500">{row.template ?? '—'}</td>
@@ -218,7 +212,8 @@ export default function EmailDeliveryTab() {
               {page.data.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-3 py-8 text-center text-sm text-slate-400">
-                    No deliveries match this filter. {status === 'FAILED' && '— that\'s a good thing.'}
+                    No deliveries match this filter.{' '}
+                    {status === 'FAILED' && "— that's a good thing."}
                   </td>
                 </tr>
               )}

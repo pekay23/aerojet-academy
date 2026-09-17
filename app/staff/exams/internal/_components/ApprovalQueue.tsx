@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Check, X, Loader2, AlertCircle } from 'lucide-react'
+import { Check, X, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface Question {
   id: string
@@ -20,17 +21,21 @@ export default function ApprovalQueue({ bankId }: { bankId: string }) {
 
   const fetchPending = useCallback(async () => {
     try {
-      const res = await fetch(`/api/staff/exams/internal/banks/${bankId}/questions?status=PENDING_APPROVAL`)
+      const res = await fetch(
+        `/api/staff/exams/internal/banks/${bankId}/questions?status=PENDING_APPROVAL`
+      )
       const json = await res.json()
       if (json.data) setQuestions(json.data)
-    } catch {
-      // silent
+    } catch (err) {
+      console.error('[ApprovalQueue] Failed to fetch pending questions:', err)
+      toast.error('Failed to load pending questions')
     } finally {
       setLoading(false)
     }
   }, [bankId])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPending()
   }, [fetchPending])
 
@@ -40,13 +45,13 @@ export default function ApprovalQueue({ bankId }: { bankId: string }) {
       const res = await fetch(`/api/staff/exams/internal/questions/${questionId}/review`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          status, 
-          reviewNote: status === 'REJECTED' ? rejectionNotes[questionId] : undefined 
+        body: JSON.stringify({
+          status,
+          reviewNote: status === 'REJECTED' ? rejectionNotes[questionId] : undefined,
         }),
       })
       if (res.ok) {
-        setQuestions(prev => prev.filter(q => q.id !== questionId))
+        setQuestions((prev) => prev.filter((q) => q.id !== questionId))
       }
     } catch {
       // Handle error gracefully
@@ -58,7 +63,7 @@ export default function ApprovalQueue({ bankId }: { bankId: string }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-6">
-        <Loader2 className="h-5 w-5 animate-spin text-aerojet-blue" />
+        <Loader2 className="text-aerojet-blue h-5 w-5 animate-spin" />
       </div>
     )
   }
@@ -74,7 +79,10 @@ export default function ApprovalQueue({ bankId }: { bankId: string }) {
   return (
     <div className="space-y-4">
       {questions.map((q) => (
-        <div key={q.id} className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+        <div
+          key={q.id}
+          className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
+        >
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-300">
@@ -90,18 +98,22 @@ export default function ApprovalQueue({ bankId }: { bankId: string }) {
                 disabled={processingId === q.id}
                 className="inline-flex items-center gap-1 rounded bg-green-100 px-3 py-1.5 text-xs font-bold text-green-700 hover:bg-green-200 disabled:opacity-50 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50"
               >
-                {processingId === q.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                {processingId === q.id ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Check className="h-3.5 w-3.5" />
+                )}
                 Approve
               </button>
             </div>
           </div>
-          
+
           <p className="mb-3 text-sm font-medium text-slate-900 dark:text-white">{q.text}</p>
-          
+
           <div className="mb-4 space-y-1">
             {q.options.map((opt, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className={`rounded px-3 py-1.5 text-sm ${opt === q.correctAnswer ? 'bg-green-50 font-medium text-green-800 dark:bg-green-900/20 dark:text-green-200' : 'bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
               >
                 {String.fromCharCode(65 + i)}. {opt}
@@ -111,11 +123,11 @@ export default function ApprovalQueue({ bankId }: { bankId: string }) {
           </div>
 
           <div className="flex gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
-            <input 
-              type="text" 
-              placeholder="Rejection reason (optional)" 
+            <input
+              type="text"
+              placeholder="Rejection reason (optional)"
               value={rejectionNotes[q.id] || ''}
-              onChange={(e) => setRejectionNotes(prev => ({ ...prev, [q.id]: e.target.value }))}
+              onChange={(e) => setRejectionNotes((prev) => ({ ...prev, [q.id]: e.target.value }))}
               className="flex-1 rounded-md border border-slate-200 px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
             />
             <button
@@ -123,7 +135,11 @@ export default function ApprovalQueue({ bankId }: { bankId: string }) {
               disabled={processingId === q.id}
               className="inline-flex items-center gap-1 rounded bg-red-100 px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-200 disabled:opacity-50 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
             >
-              {processingId === q.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+              {processingId === q.id ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <X className="h-3.5 w-3.5" />
+              )}
               Reject
             </button>
           </div>

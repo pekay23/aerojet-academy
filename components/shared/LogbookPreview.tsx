@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import type React from 'react'
+import Image from 'next/image'
 import { BookOpen, ChevronLeft, ChevronRight, Printer, ShieldCheck } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -261,9 +262,11 @@ function CoverPage({ logbook }: { logbook: LogbookPreviewData }) {
             EASA Part-66 digital experience record
           </p>
         </div>
-        <img
+        <Image
           src="/favicon-aeroaviation.webp"
           alt=""
+          width={64}
+          height={64}
           className="size-16 object-contain opacity-80"
         />
       </div>

@@ -113,8 +113,8 @@ export async function GET(req: NextRequest) {
           })
 
           results.remindersSent++
-        } catch (err: any) {
-          results.errors.push(`Reminder for booking ${booking.id}: ${err.message}`)
+        } catch (err: unknown) {
+          results.errors.push(`Reminder for booking ${booking.id}: ${err instanceof Error ? err.message : String(err)}`)
         }
       }
     }
@@ -179,8 +179,8 @@ export async function GET(req: NextRequest) {
           })
 
           results.forfeited++
-        } catch (err: any) {
-          results.errors.push(`Forfeiting booking ${booking.id}: ${err.message}`)
+        } catch (err: unknown) {
+          results.errors.push(`Forfeiting booking ${booking.id}: ${err instanceof Error ? err.message : String(err)}`)
         }
       }
     }
@@ -191,8 +191,8 @@ export async function GET(req: NextRequest) {
       results,
       timestamp: now.toISOString(),
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Cron payment-deadlines error:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

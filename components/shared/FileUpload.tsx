@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import { Upload, X, FileIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 interface FileUploadProps {
   accept?: string

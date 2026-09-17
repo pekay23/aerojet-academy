@@ -26,6 +26,12 @@ export const ADDITIONAL_PERMISSION_KEYS = {
   MANAGE_GDPR: 'MANAGE_GDPR',
   MANAGE_RBAC: 'MANAGE_RBAC',
   VIEW_REPLICATION: 'VIEW_REPLICATION',
+  EXAM_BANK_EDIT: 'EXAM_BANK_EDIT',
+  EXAM_BANK_REVIEW: 'EXAM_BANK_REVIEW',
+  EXAM_SESSION_MONITOR: 'EXAM_SESSION_MONITOR',
+  EXAM_RESULTS_PUBLISH: 'EXAM_RESULTS_PUBLISH',
+  EXAM_SESSION_EXTEND: 'EXAM_SESSION_EXTEND',
+  EXAM_VIOLATION_REVIEW: 'EXAM_VIOLATION_REVIEW',
 } as const
 
 /** All known seedable keys with their metadata. */
@@ -46,6 +52,14 @@ export const SEED_PERMISSIONS: Array<{
   { key: ADDITIONAL_PERMISSION_KEYS.MANAGE_GDPR, label: 'Manage data protection', description: 'Process data-subject requests, edit retention policies', category: 'GOVERNANCE' },
   { key: ADDITIONAL_PERMISSION_KEYS.MANAGE_RBAC, label: 'Manage RBAC', description: 'Grant/revoke permissions to roles and users', category: 'GOVERNANCE' },
   { key: ADDITIONAL_PERMISSION_KEYS.VIEW_REPLICATION, label: 'View replication health', description: 'Inspect Neon↔Supabase sync status', category: 'GOVERNANCE' },
+
+  // Internal exam system
+  { key: ADDITIONAL_PERMISSION_KEYS.EXAM_BANK_EDIT, label: 'Edit exam bank questions', description: 'Create, edit, and manage exam bank questions', category: 'EXAMS' },
+  { key: ADDITIONAL_PERMISSION_KEYS.EXAM_BANK_REVIEW, label: 'Review/approve exam questions', description: 'Review and approve exam questions for publication', category: 'EXAMS' },
+  { key: ADDITIONAL_PERMISSION_KEYS.EXAM_SESSION_MONITOR, label: 'Monitor live exam sessions', description: 'Monitor live exam sessions in real time', category: 'EXAMS' },
+  { key: ADDITIONAL_PERMISSION_KEYS.EXAM_RESULTS_PUBLISH, label: 'Publish exam results', description: 'Publish and unpublish exam results', category: 'EXAMS' },
+  { key: ADDITIONAL_PERMISSION_KEYS.EXAM_SESSION_EXTEND, label: 'Extend exam time / force-submit', description: 'Extend exam time and force-submit active exam sessions', category: 'EXAMS' },
+  { key: ADDITIONAL_PERMISSION_KEYS.EXAM_VIOLATION_REVIEW, label: 'Review exam violations', description: 'Review and resolve exam violations', category: 'EXAMS' },
 ]
 
 /** Seed the Permission table with the canonical keys. Idempotent. */

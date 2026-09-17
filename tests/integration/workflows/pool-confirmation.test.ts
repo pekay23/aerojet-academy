@@ -15,6 +15,7 @@ vi.mock('@/lib/audit/logger', () => ({
 vi.mock('@/lib/email/service', () => ({
   sendPoolConfirmedEmail: vi.fn().mockResolvedValue(undefined),
   sendPoolFailedEmail: vi.fn().mockResolvedValue(undefined),
+  createNotification: vi.fn().mockResolvedValue(undefined),
 }))
 
 import { confirmPoolInternal, failPool } from '@/lib/pools/confirm'

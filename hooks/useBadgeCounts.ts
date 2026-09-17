@@ -47,6 +47,9 @@ export function useBadgeCounts(
 
   useEffect(() => {
     // Fetch immediately on mount
+   
+   
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCounts()
 
     // Set up polling

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
-import { updateUserSchema, validateBody } from '@/lib/validation/schemas'
+import { updateUserSchema } from '@/lib/validation/schemas'
 import { createAuditLog } from '@/lib/audit/logger'
 import { UserStatus } from '@prisma/client'
 import { evictInactiveUserFromExams } from '@/lib/users/eviction'
@@ -32,7 +32,7 @@ export const GET = withErrorHandler(
 
     if (!user) return apiNotFound('User not found')
 
-    const { password, ...safeUser } = user
+    const { password: _password, ...safeUser } = user
     return apiSuccess(safeUser)
   }
 )
@@ -172,7 +172,7 @@ export const PATCH = withErrorHandler(
           },
         })
       } else if (['ADMIN', 'STAFF', 'SUPER_ADMIN'].includes(user.role)) {
-        const staffData: any = {}
+        const staffData: Record<string, unknown> = {}
         if (employeeId) staffData.employeeId = employeeId
         if (department !== undefined) staffData.department = department
         if (position !== undefined) staffData.position = position

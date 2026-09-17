@@ -1,12 +1,7 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import {
-  hashPassword,
-  generateRegistrationCode,
-  generateToken,
-  checkRateLimit,
-  getClientIp,
-} from '@/lib/auth/helpers'
+  hashPassword as _hashPassword, generateRegistrationCode, generateToken, checkRateLimit, getClientIp, } from '@/lib/auth/helpers'
 import { registerSchema, validateBody } from '@/lib/validation/schemas'
 import { apiCreated, apiError, apiTooManyRequests, withErrorHandler } from '@/lib/api/response'
 import { sendEmailVerificationEmail } from '@/lib/email/service'
@@ -14,7 +9,7 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { getRegistrationConfig } from '@/lib/settings'
 import { isPipelineEnabled, transitionApplication } from '@/lib/admissions/state-machine'
 import { ApplicationStage } from '@prisma/client'
-import { trackRegistration } from '@/lib/analytics/events'
+import { trackRegistration, trackReferralClick } from '@/lib/analytics/events'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const config = await getRegistrationConfig()
@@ -120,12 +115,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       select: { id: true },
     })
     if (application) {
-      transitionApplication(
-        application.id,
-        ApplicationStage.PAYMENT_PENDING,
-        user.id,
-        { metadata: { trigger: 'registration' } }
-      ).catch(console.error)
+      transitionApplication(application.id, ApplicationStage.PAYMENT_PENDING, user.id, {
+        metadata: { trigger: 'registration' },
+      }).catch(console.error)
     }
   }
 
@@ -133,6 +125,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (referralCode) {
     import('@/lib/referral/operations')
       .then(({ recordReferral }) => recordReferral(referralCode, user.id))
+      .then(() => trackReferralClick(referralCode, '/register', user.id).catch(() => {}))
       .catch(console.error)
   }
 

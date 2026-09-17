@@ -9,6 +9,8 @@ import ApplicantsQueue from './ApplicantsQueue'
 import StudentsTable from './StudentsTable'
 import InstructorsTable from './InstructorsTable'
 import ExaminersTable from './ExaminersTable'
+import type { ApplicantSummary, ApplicantCounts } from '@/lib/types/staff'
+import { toast } from 'sonner'
 
 const TAB_DEFS = [
   { key: 'all', label: 'All Users', icon: Users },
@@ -44,11 +46,17 @@ const DEFAULT_COUNTS: Counts = {
   examinerAll: 0,
 }
 
-interface PeopleTabsProps {
+export default function PeopleTabs({
+  initialTab,
+  _initialApplicants,
+  _initialTotal,
+  initialApplicantCounts,
+}: {
   initialTab?: string
-}
-
-export default function PeopleTabs({ initialTab }: PeopleTabsProps) {
+  _initialApplicants?: ApplicantSummary[]
+  _initialTotal?: number
+  initialApplicantCounts?: ApplicantCounts
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentTab = (searchParams.get('tab') as TabKey) || initialTab || 'all'
@@ -60,22 +68,21 @@ export default function PeopleTabs({ initialTab }: PeopleTabsProps) {
       .then((data) => {
         if (data.success && data.data) setCounts(data.data)
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error('[PeopleTabs] Failed to fetch user counts:', err)
+        toast.error('Failed to load user counts')
+      })
   }, [])
 
   const tabs = TAB_DEFS.map((t) => ({
     ...t,
     badge:
-      t.key === 'applicants' ? counts.applicantAll :
-      t.key === 'examiners' ? counts.examinerAll :
-      undefined,
+      t.key === 'applicants'
+        ? counts.applicantAll
+        : t.key === 'examiners'
+          ? counts.examinerAll
+          : undefined,
   }))
-
-  const applicantCounts = {
-    all: counts.applicantAll,
-    pending_payment: counts.applicantPendingPayment,
-    pending_approval: counts.applicantPendingApproval,
-  }
 
   const studentCounts = {
     all: counts.studentAll,
@@ -87,7 +94,7 @@ export default function PeopleTabs({ initialTab }: PeopleTabsProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
+        <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
           People
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -105,7 +112,13 @@ export default function PeopleTabs({ initialTab }: PeopleTabsProps) {
 
       <div>
         {currentTab === 'all' && <UsersTable initialTotal={counts.total} />}
-        {currentTab === 'applicants' && <ApplicantsQueue initialCounts={applicantCounts} />}
+        {currentTab === 'applicants' && (
+          <ApplicantsQueue
+            initialCounts={
+              initialApplicantCounts ?? { all: 0, pending_payment: 0, pending_approval: 0 }
+            }
+          />
+        )}
         {currentTab === 'students' && <StudentsTable initialCounts={studentCounts} />}
         {currentTab === 'instructors' && <InstructorsTable />}
         {currentTab === 'examiners' && <ExaminersTable />}

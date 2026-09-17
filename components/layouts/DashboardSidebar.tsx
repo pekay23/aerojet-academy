@@ -9,7 +9,6 @@ import { signOut } from 'next-auth/react'
 import { useTheme } from '@/components/shared/theme-provider'
 import {
   ChevronDown,
-  ChevronRight,
   LogOut,
   Menu,
   X,
@@ -30,7 +29,9 @@ export type SidebarLinkItem = {
   href: string
   icon?: ElementType
   badge?: number
-  children?: { label: string; href: string }[]
+  /** Stable selector for the onboarding tour (`[data-tour-id=...]`). */
+  tourId?: string
+  children?: { label: string; href: string; badge?: number }[]
 }
 
 export type SidebarLinkHeader = {
@@ -116,12 +117,12 @@ function MobileTopBar({
 
             return (
               <span key={i} className="flex shrink-0 items-center gap-1.5">
-                {i > 0 && <span className="text-xs text-slate-300 dark:text-slate-600">/</span>}
+                {i > 0 && <span className="text-xs text-slate-500 dark:text-slate-500">/</span>}
                 <span
                   className={`max-w-30 truncate text-xs ${
                     isLast
                       ? 'font-bold text-slate-800 dark:text-slate-100'
-                      : 'font-medium text-slate-400 dark:text-slate-500'
+                      : 'font-medium text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   {label}
@@ -133,7 +134,7 @@ function MobileTopBar({
       </nav>
 
       {/* Portal label - pushed to end */}
-      <span className="ml-auto text-[9px] font-black tracking-widest text-slate-300 uppercase dark:text-slate-600">
+      <span className="ml-auto text-[9px] font-black tracking-widest text-slate-500 uppercase dark:text-slate-400">
         {portalLabel.replace(' Portal', '')}
       </span>
     </div>
@@ -151,6 +152,7 @@ function NavItem({
   setMobileOpen,
   hoveredItem,
   setHoveredItem,
+  tourId,
 }: {
   href: string
   icon?: ElementType
@@ -162,6 +164,7 @@ function NavItem({
   setMobileOpen: (open: boolean) => void
   hoveredItem: string | null
   setHoveredItem: (key: string | null) => void
+  tourId?: string
 }) {
   const itemKey = `nav-${href}`
   const isHovered = hoveredItem === itemKey && !active && !collapsed
@@ -172,6 +175,7 @@ function NavItem({
       onClick={() => setMobileOpen(false)}
       onMouseEnter={() => !collapsed && setHoveredItem(itemKey)}
       onMouseLeave={() => setHoveredItem(null)}
+      data-tour-id={tourId}
       className={`relative flex items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-out ${
         collapsed ? 'mx-auto h-10 w-10 justify-center p-0' : 'gap-3'
       } ${
@@ -252,6 +256,7 @@ function GroupItem({
       onClick={() => toggleGroup(link.label)}
       onMouseEnter={() => !collapsed && setHoveredItem(groupKey)}
       onMouseLeave={() => setHoveredItem(null)}
+      data-tour-id={link.tourId}
       className={`relative flex w-full items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-out ${
         collapsed ? 'mx-auto h-10 w-10 justify-center p-0' : 'gap-3'
       } ${
@@ -313,7 +318,7 @@ function GroupItem({
                 onClick={() => setMobileOpen(false)}
                 onMouseEnter={() => setHoveredItem(childKey)}
                 onMouseLeave={() => setHoveredItem(null)}
-                className={`relative block rounded-xl px-3 py-2 text-[13px] font-medium transition-all ${
+                className={`relative flex items-center rounded-xl px-3 py-2 text-[13px] font-medium transition-all ${
                   childActive
                     ? 'bg-sidebar-accent text-sidebar-foreground font-semibold'
                     : 'text-sidebar-foreground/60 hover:text-sidebar-foreground'
@@ -327,7 +332,12 @@ function GroupItem({
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
                   />
                 )}
-                <span className="relative z-10">{child.label}</span>
+                <span className="relative z-10 flex-1">{child.label}</span>
+                {child.badge ? (
+                  <span className="relative z-10 min-w-4.5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
+                    {child.badge}
+                  </span>
+                ) : null}
               </Link>
             )
           })}
@@ -644,7 +654,7 @@ function renderSidebarContent({
               </span>
             </div>
             {appVersion && (
-              <span className="bg-sidebar-foreground/5 text-sidebar-foreground/40 rounded-md px-1.5 py-0.5 text-[9px] font-black">
+              <span className="bg-sidebar-foreground/10 text-sidebar-foreground/70 rounded-md px-1.5 py-0.5 text-[9px] font-black">
                 v{appVersion}
               </span>
             )}
@@ -730,6 +740,7 @@ function renderSidebarContent({
               setMobileOpen={setMobileOpen}
               hoveredItem={hoveredItem}
               setHoveredItem={setHoveredItem}
+              tourId={link.tourId}
             />
           )
         })}
@@ -769,13 +780,14 @@ export default function DashboardSidebar({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const [_mounted, setMounted] = useState(false)
   const [openGroups, setOpenGroups] = useState<string[]>([])
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 
@@ -797,7 +809,7 @@ export default function DashboardSidebar({
     )
   }
 
-  const getComparableUrl = (href: string) => {
+  const _getComparableUrl = (href: string) => {
     if (!href.includes('?')) return basePath + href
     return basePath + href
   }

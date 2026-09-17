@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Exam Notification &amp; Audit-Trail Audit — 2026-09-11 · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Exam Notification &amp; Audit-Trail Audit — 2026-09-11</h1>
+  <p class="he-deck"><strong>Scope</strong>: Exam event lifecycle — Go/No-Go/Postponement decisions, pool confirmation, internal exam result publication, and the pre-push test pipeline on Windows.</p>
+</header>
+<p><strong>Objective</strong>: Close audit and student-notification gaps across the exam-events domain. Every privileged mutation now writes an <code>AuditLog</code> row; every lifecycle transition that affects a student now creates an in-app <code>Notification</code> and (where an email helper exists) sends a transactional email.</p>
+<hr />
+<section class="he-section" id="verification"><div class="he-section__num">01 · Verification</div><h2 class="he-section__title">Verification</h2></section>
+<table>
+<thead>
+<tr><th>Check</th><th>Result</th></tr>
+</thead>
+<tbody>
+<tr><td><code>bun run type-check</code></td><td>✅ 0 errors (<code>bun x tsc --noEmit</code>)</td></tr>
+<tr><td><code>bun run test --run</code></td><td>✅ 142 files / <strong>683 tests</strong> pass (<code>--no-file-parallelism --no-color</code>)</td></tr>
+<tr><td>Lint</td><td>N/A locally (ESLint v10/mjs-config mismatch). ESLint is non-functional in this Windows env — see known-issues.md.</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="changes"><div class="he-section__num">02 · Changes</div><h2 class="he-section__title">Changes</h2></section>
+<h3 id="phase-1-audit-logging-libeventsgo-no-gots-libpoolsconfirmts">Phase 1 — Audit Logging (<code>lib/events/go-no-go.ts</code>, <code>lib/pools/confirm.ts</code>)</h3>
+<table>
+<thead>
+<tr><th>Function / Endpoint</th><th>Action</th><th>Entity</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><code>executeGo</code></td><td><code>UPDATE</code></td><td><code>ExamEvent</code></td><td>Logs the Go decision with pool-confirmation count. Previously had zero audit trail.</td></tr>
+<tr><td><code>executeNoGo</code></td><td><code>UPDATE</code></td><td><code>ExamEvent</code></td><td>Logs cancellation with pools-affected + roll-forward/deferred counts.</td></tr>
+<tr><td><code>executePostponement</code></td><td><code>UPDATE</code></td><td><code>ExamEvent</code></td><td>Logs new/old date window. Destructured <code>event.startDate</code>/<code>event.endDate</code> to satisfy TS strict-null narrowing across the <code>$transaction</code> callback boundary.</td></tr>
+<tr><td><code>confirmPoolInternal</code></td><td><code>POOL_CONFIRM</code></td><td><code>ExamPool</code></td><td>Already had <code>logAuditEvent</code>; confirmed it flows through the transaction.</td></tr>
+<tr><td><code>publish</code> route</td><td><code>UPDATE</code></td><td><code>InternalExamSession</code></td><td>Already had <code>createAuditLog</code>; confirmed unchanged.</td></tr>
+</tbody>
+</table>
+<h3 id="phase-2-student-notifications">Phase 2 — Student Notifications</h3>
+<table>
+<thead>
+<tr><th>Trigger</th><th>Notification type</th><th>Link</th><th>Method</th></tr>
+</thead>
+<tbody>
+<tr><td>Event confirmed (<code>executeGo</code>)</td><td><code>POOL_UPDATE</code></td><td><code>/student/exams</code></td><td><code>createNotification</code> (parallelised with <code>Promise.allSettled</code>)</td></tr>
+<tr><td>Event cancelled (<code>executeNoGo</code>)</td><td><code>POOL_UPDATE</code></td><td><code>/student/exams</code></td><td>in-app (email already sent)</td></tr>
+<tr><td>Event postponed (<code>executePostponement</code>)</td><td><code>POOL_UPDATE</code></td><td><code>/student/exams</code></td><td>in-app (email already sent)</td></tr>
+<tr><td>Pool confirmed (<code>confirmPoolInternal</code>)</td><td><code>POOL_UPDATE</code></td><td><code>/student/exams</code></td><td><code>createNotification</code> inside tx; email already sent</td></tr>
+<tr><td>Results published (<code>publish</code> route)</td><td><code>SUCCESS</code></td><td><code>/student/exams/internal</code></td><td><code>createNotification</code> (parallelised)</td></tr>
+</tbody>
+</table>
+<p>Notification UX was pre-existing: <code>&lt;StudentTopbarActions&gt;</code> (bell dropdown) reads from <code>/api/student/topbar-items</code>; <code>/student/notifications</code> page lists all. <code>MyBookingsTab</code> already renders visual status badges (CONFIRMED / ROLLING-FORWARD / POSTPONED / CANCELLED). No new UI components required.</p>
+<h3 id="phase-4-maintainability-performance">Phase 4 — Maintainability / Performance</h3>
+<ul>
+<li><strong>Parallelised dispatch</strong>: All <code>createNotification</code> + email calls inside loops in <code>executeGo</code>, <code>executeNoGo</code>, <code>executePostponement</code>, <code>confirmPoolInternal</code>, and the publish route now fire via <code>Promise.allSettled</code> instead of sequential <code>await</code> — per the project's &quot;never write sequential await calls for independent queries&quot; convention.</li>
+<li><strong><code>executePostponement</code> user fetch</strong>: Replaced N+1 <code>prisma.user.findUnique</code> calls with a single <code>prisma.user.findMany</code> batch fetch.</li>
+<li><strong>Pre-push hook</strong>: <code>.husky/pre-push</code> now passes <code>--no-file-parallelism --no-color</code> to <code>bun run test --run</code>, resolving the Vitest worker-pool crashes on Windows (47 unhandled <code>ChildProcess.kill</code> errors). Verified: pre-push hook runs clean locally.</li>
+</ul>
+<hr />
+<section class="he-section" id="llm-council-review-pass-2"><div class="he-section__num">03 · LLM Council Review (Pass 2)</div><h2 class="he-section__title">LLM Council Review (Pass 2)</h2></section>
+<table>
+<thead>
+<tr><th>Persona</th><th>Finding</th><th>Action taken</th></tr>
+</thead>
+<tbody>
+<tr><td>Performance Guru</td><td>Sequential <code>await</code> on independent notification/email sends inside loops</td><td>Parallelised with <code>Promise.allSettled</code></td></tr>
+<tr><td>Security Auditor</td><td><code>requireStaff</code> gate present on publish route; no auth bypass</td><td>No action needed</td></tr>
+<tr><td>Accessibility Advocate</td><td>No UI changes — backend only</td><td>N/A</td></tr>
+<tr><td>UX/UI Designer</td><td>Notification messages clear; link targets valid; existing toast/badge UI consumed them</td><td>No action needed</td></tr>
+<tr><td>Architecture Lead</td><td><code>createAuditLog</code>/<code>createNotification</code> imports consistent; <code>logAuditEvent</code> already wired in <code>confirmPoolInternal</code></td><td>No action needed</td></tr>
+</tbody>
+</table>
+<p><strong>Council Pass 2 result: 0 issues.</strong></p>
+<hr />
+<section class="he-section" id="files-changed-this-session"><div class="he-section__num">04 · Files changed (this session)</div><h2 class="he-section__title">Files changed (this session)</h2></section>
+<table>
+<thead>
+<tr><th>File</th><th>Change</th></tr>
+</thead>
+<tbody>
+<tr><td><code>lib/events/go-no-go.ts</code></td><td>Audit logs in <code>executeGo</code>/<code>executeNoGo</code>/<code>executePostponement</code>; in-app notifications in all three; <code>eventStartDate</code>/<code>eventEndDate</code> destructure; parallelised dispatch; batch user fetch in postponement</td></tr>
+<tr><td><code>lib/pools/confirm.ts</code></td><td>In-app notification for confirmed memberships (parallelised)</td></tr>
+<tr><td><code>app/api/staff/exams/internal/operations/publish/route.ts</code></td><td>In-app notification for published results (parallelised)</td></tr>
+<tr><td><code>tests/integration/workflows/pool-confirmation.test.ts</code></td><td>Added <code>createNotification</code> to the <code>@/lib/email/service</code> mock</td></tr>
+<tr><td><code>.husky/pre-push</code></td><td>Added <code>--no-file-parallelism --no-color</code> flags</td></tr>
+</tbody>
+</table>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#verification">Verification</a></li>
+    <li class="he-toc__l2"><a href="#changes">Changes</a></li>
+    <li class="he-toc__l3"><a href="#phase-1-audit-logging-libeventsgo-no-gots-libpoolsconfirmts">Phase 1 — Audit Logging (`lib/events/go-no-go.ts`, `lib/pools/confirm.ts`)</a></li>
+    <li class="he-toc__l3"><a href="#phase-2-student-notifications">Phase 2 — Student Notifications</a></li>
+    <li class="he-toc__l3"><a href="#phase-4-maintainability-performance">Phase 4 — Maintainability / Performance</a></li>
+    <li class="he-toc__l2"><a href="#llm-council-review-pass-2">LLM Council Review (Pass 2)</a></li>
+    <li class="he-toc__l2"><a href="#files-changed-this-session">Files changed (this session)</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

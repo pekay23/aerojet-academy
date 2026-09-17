@@ -1,20 +1,20 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+
 import {
   Search,
   Users,
-  Shield,
-  Clock,
+  Shield as _Shield,
+  Clock as _Clock,
   AlertTriangle,
   CheckCircle2,
   XCircle,
   ChevronRight,
   Award,
   Loader2,
-  BookOpen,
-  Plus,
+  BookOpen as _BookOpen,
+  Plus as _Plus,
 } from 'lucide-react'
 
 interface Qualification {

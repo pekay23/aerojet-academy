@@ -7,8 +7,12 @@ import {
   Calendar,
   Users,
   ClipboardCheck,
+  ClipboardList,
   FolderOpen,
   User,
+  TrendingUp,
+  CheckCircle,
+  BookOpen,
 } from 'lucide-react'
 import { useBadgeCounts } from '@/hooks/useBadgeCounts'
 
@@ -28,13 +32,14 @@ export default function InstructorSidebar({
   const links: SidebarLink[] = [
     { label: 'Dashboard', href: '/instructor/dashboard', icon: LayoutDashboard },
     { label: 'Schedule', href: '/instructor/schedule', icon: Calendar },
-    { label: 'Availability', href: '/instructor/availability', icon: Calendar },
+    { label: 'Availability', href: '/instructor/availability', icon: CheckCircle },
     { type: 'header', label: 'Course Management' },
-    { label: 'Courses', href: '/instructor/classes', icon: School },
+    { label: 'Classes', href: '/instructor/classes', icon: School, tourId: 'nav-courses' },
     { label: 'Resources', href: '/instructor/resources', icon: FolderOpen },
-    { label: 'Teaching Materials', href: '/instructor/materials', icon: FolderOpen },
+    { label: 'Teaching Materials', href: '/instructor/materials', icon: BookOpen },
     { label: 'Students', href: '/instructor/students', icon: Users },
-    { label: 'My Metrics', href: '/instructor/metrics', icon: LayoutDashboard },
+    { label: 'Exams', href: '/instructor/exams', icon: ClipboardList },
+    { label: 'My Metrics', href: '/instructor/metrics', icon: TrendingUp },
     {
       label: 'Grading',
       href: '/instructor/grading',
@@ -51,9 +56,7 @@ export default function InstructorSidebar({
       userName={userName}
       userRole={userRole}
       userImage={userImage}
-      userMenuItems={[
-        { label: 'Profile', href: '/instructor/profile', icon: User },
-      ]}
+      userMenuItems={[{ label: 'Profile', href: '/instructor/profile', icon: User }]}
     />
   )
 }

@@ -23,12 +23,12 @@ interface WR {
 }
 
 const STATUS_STYLE: Record<string, string> = {
-  REQUESTED: 'bg-amber-100 text-amber-700',
-  STAFF_CONFIRMED: 'bg-blue-100 text-blue-700',
-  ADMIN_APPROVED: 'bg-indigo-100 text-indigo-700',
-  COMPLETED: 'bg-emerald-100 text-emerald-700',
-  REJECTED: 'bg-red-100 text-red-700',
-  CANCELLED: 'bg-slate-100 text-slate-500',
+  REQUESTED: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  STAFF_CONFIRMED: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  ADMIN_APPROVED: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+  COMPLETED: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  REJECTED: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  CANCELLED: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
 }
 
 export default function WithdrawalsManager({

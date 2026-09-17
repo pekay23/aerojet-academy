@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
-import { withErrorHandler, apiSuccess, apiError } from '@/lib/api/response'
+import { withErrorHandler, apiSuccess, apiError , RouteContext } from '@/lib/api/response'
 import { requirePermission } from '@/lib/auth/permissions'
 import { ADDITIONAL_PERMISSION_KEYS } from '@/lib/auth/permission-registry'
 import { prismaUnfiltered } from '@/lib/prisma/client'
@@ -15,11 +15,9 @@ const schema = z.object({
 })
 
 export const PATCH = withErrorHandler(async (
-  req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
-) => {
+  req: NextRequest, ctx?: RouteContext) => {
   const actor = await requirePermission(ADDITIONAL_PERMISSION_KEYS.MANAGE_GDPR)
-  const { id } = await ctx.params
+  const { id } = (await ctx!.params) as { id: string }
   const body = schema.parse(await req.json())
 
   const existing = await prismaUnfiltered.dataSubjectRequest.findUnique({ where: { id } })

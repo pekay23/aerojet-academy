@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
 import PathwayPaymentForm from './_components/PathwayPaymentForm'
 import MilestoneTracker from './_components/MilestoneTracker'
 import { AlertCircle, FileText, Info, CheckCircle2, Wallet, ArrowRight } from 'lucide-react'
@@ -10,7 +10,10 @@ import Link from 'next/link'
 export const metadata: Metadata = { title: 'Complete Enrollment | Applicant Portal' }
 export const dynamic = 'force-dynamic'
 
-const PRICING: Record<string, { year1: number; total: number; name: string; years: number }> = {
+const PATHWAY_PRICING: Record<
+  string,
+  { year1: number; total: number; name: string; years: number }
+> = {
   FULL_TIME_4YEAR: {
     year1: 8500,
     total: 32000,
@@ -34,13 +37,13 @@ export default async function PathwayPage() {
 
   const [applicant, enrollment, currencySettings, wallet, pendingTuitionPayment, bankSettings] =
     await Promise.all([
-      prisma.user.findUnique({
+      prismaUnfiltered.user.findUnique({
         where: { id: userId },
         select: { registrationPaid: true, programmeChoice: true, role: true },
       }),
-      prisma.fullTimeEnrollment.findFirst({
+      prismaUnfiltered.fullTimeEnrollment.findFirst({
         where: { studentId: userId },
-        include: { programme: true, milestones: { orderBy: { yearNumber: 'asc' } } },
+        include: { programme: true, academicYear: true, milestones: { orderBy: { yearNumber: 'asc' } } },
       }),
       prisma.systemSetting.findMany({ where: { key: 'course_currency' } }),
       prisma.wallet.findUnique({ where: { userId } }),
@@ -81,7 +84,7 @@ export default async function PathwayPage() {
   }
 
   const choice = applicant.programmeChoice
-  if (!choice || !PRICING[choice]) {
+  if (!choice || !PATHWAY_PRICING[choice as keyof typeof PATHWAY_PRICING]) {
     return (
       <div className="rounded-2xl border border-orange-200 bg-orange-50 p-6 text-center">
         <AlertCircle className="mx-auto mb-2 h-10 w-10 text-orange-500" />
@@ -93,12 +96,14 @@ export default async function PathwayPage() {
     )
   }
 
-  const pricing = PRICING[choice]
+  const pricing = PATHWAY_PRICING[choice as keyof typeof PATHWAY_PRICING]
   const currency = currencySettings[0]?.value || 'EUR'
 
   // If enrollment exists and seat is confirmed, show milestone tracker
   if (enrollment) {
-    const seatMilestone = enrollment.milestones.find((m) => m.milestoneType === 'SEAT_CONFIRMATION')
+    const seatMilestone = enrollment.milestones.find(
+      (m: (typeof enrollment.milestones)[number]) => m.milestoneType === 'SEAT_CONFIRMATION'
+    )
     const seatPaid = seatMilestone?.status === 'PAID'
 
     if (seatPaid) {
@@ -123,8 +128,8 @@ export default async function PathwayPage() {
                   Seat Confirmed
                 </h2>
                 <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
-                  Your place in <strong>{enrollment.programme.name}</strong> is secured. Year{' '}
-                  {enrollment.currentYearNumber} — {enrollment.academicYear || '2026/2027'}
+                   Your place in <strong>{enrollment.programme.name}</strong> is secured. Year{' '}
+                   {enrollment.currentYearNumber} — {enrollment.academicYear?.name || '2026/2027'}
                 </p>
               </div>
             </div>
@@ -132,7 +137,8 @@ export default async function PathwayPage() {
 
           {/* Next Step Alert */}
           {enrollment.milestones.some(
-            (m) => m.milestoneType === 'SEM1_DUE' && m.status === 'DUE'
+            (m: (typeof enrollment.milestones)[number]) =>
+              m.milestoneType === 'SEM1_DUE' && m.status === 'DUE'
           ) && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-900/30 dark:bg-amber-900/10">
               <div className="flex items-start gap-4">
@@ -148,8 +154,10 @@ export default async function PathwayPage() {
                   <p className="mt-2 text-sm font-bold text-amber-800 dark:text-amber-300">
                     Amount due: {currency}{' '}
                     {Number(
-                      enrollment.milestones.find((m) => m.milestoneType === 'SEM1_DUE')
-                        ?.amountDue ?? 0
+                      enrollment.milestones.find(
+                        (m: (typeof enrollment.milestones)[number]) =>
+                          m.milestoneType === 'SEM1_DUE'
+                      )?.amountDue ?? 0
                     ).toLocaleString()}
                   </p>
                 </div>
@@ -185,7 +193,7 @@ export default async function PathwayPage() {
 
           {/* Milestone Tracker */}
           <MilestoneTracker
-            milestones={enrollment.milestones.map((m) => ({
+            milestones={enrollment.milestones.map((m: (typeof enrollment.milestones)[number]) => ({
               id: m.id,
               milestoneType: m.milestoneType,
               yearNumber: m.yearNumber,

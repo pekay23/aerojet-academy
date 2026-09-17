@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       studyPathway,
       message: 'Pathway locked and auto-enrollment triggered.',
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Pathway selection error:', error)
     return NextResponse.json({ error: 'Failed to process pathway selection' }, { status: 500 })
   }

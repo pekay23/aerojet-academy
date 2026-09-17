@@ -4,9 +4,21 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { apiSuccess, apiUnauthorized } from '@/lib/api/response'
 import { unstable_cache } from 'next/cache'
 
+interface UserCounts {
+  total: number
+  applicantAll: number
+  applicantPendingPayment: number
+  applicantPendingApproval: number
+  studentAll: number
+  studentActive: number
+  studentSuspended: number
+  studentArchived: number
+  examinerAll: number
+}
+
 const getCachedCounts = unstable_cache(
   async () => {
-    const queryResult: any[] = await prismaUnfiltered.$queryRaw`
+    const queryResult: UserCounts[] = await prismaUnfiltered.$queryRaw`
       SELECT
         COUNT(*)::int as "total",
         COUNT(*) FILTER (WHERE "role"::text = 'APPLICANT' AND "status"::text = 'PENDING')::int as "applicantAll",
@@ -36,7 +48,7 @@ const getCachedCounts = unstable_cache(
   { revalidate: 60 }
 )
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const session = await getAuthSession()
   if (!session) return apiUnauthorized()
 

@@ -60,14 +60,14 @@ export default function BreadcrumbNav({ className }: { className?: string }) {
   return (
     <nav
       className={cn(
-        'hidden items-center gap-1.5 text-[13px] text-muted-foreground lg:flex',
+        'hidden items-center gap-1.5 text-xs text-slate-500 lg:flex dark:text-slate-400',
         className
       )}
       aria-label="Breadcrumb"
     >
       <Link
         href={`/${portal}`}
-        className="shrink-0 transition-colors hover:text-foreground"
+        className="shrink-0 transition-colors hover:text-slate-800 dark:hover:text-slate-100"
       >
         {portalDashboardLabel}
       </Link>
@@ -78,15 +78,15 @@ export default function BreadcrumbNav({ className }: { className?: string }) {
 
         return (
           <span key={href} className="flex shrink-0 items-center gap-1.5">
-            <span className="text-muted-foreground/40">/</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">/</span>
             {isLast ? (
-              <span className="max-w-[240px] truncate font-medium text-foreground">
+              <span className="max-w-30 truncate font-bold text-slate-800 dark:text-slate-100">
                 {label}
               </span>
             ) : (
               <Link
                 href={href}
-                className="max-w-[150px] truncate transition-colors hover:text-foreground"
+                className="max-w-30 truncate font-medium transition-colors hover:text-slate-800 dark:hover:text-slate-100"
               >
                 {label}
               </Link>

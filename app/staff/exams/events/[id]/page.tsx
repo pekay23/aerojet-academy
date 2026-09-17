@@ -2,7 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
 export const dynamic = 'force-dynamic'
 import Link from 'next/link'
-import { sanitizeHtml } from '@/lib/utils/sanitize'
+
 import {
   Calendar,
   Clock,
@@ -70,7 +70,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
     })
   )
 
-  const [evaluation, demandSnapshot] = await Promise.all([
+  const [_evaluation, demandSnapshot] = await Promise.all([
     evaluateGoNoGo(id, { unfiltered: true }).catch(() => null),
     getEventDemandSnapshot(id),
   ])

@@ -13,14 +13,16 @@
 
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
+import { calculateMinimumPoolSize } from '@/lib/easa/module-requirements'
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 
 // ---------------------------------------------------------------------------
 // EASA DEFAULT RULES
 // ---------------------------------------------------------------------------
 
 export const EASA_DEFAULTS = {
-  passMarkPct: 75,
-  timePerQuestionSecs: 75,
+  passMarkPct: ACADEMIC_RULES.EASA_PASS_MARK,
+  timePerQuestionSecs: ACADEMIC_RULES.TIME_PER_QUESTION_SECS,
   retakeWaitDays: 90,
   maxRetakes: 3,
   banDurationMonths: 12,
@@ -62,7 +64,7 @@ export type PoolHealth = 'GREEN' | 'AMBER' | 'RED'
 export async function getPoolHealth(bankId: string): Promise<{ health: PoolHealth; questionCount: number; requiredMinimum: number }> {
   const bank = await prismaUnfiltered.internalExamBank.findUnique({
     where: { id: bankId },
-    select: { mcqCount: true, minimumPoolSize: true },
+    select: { mcqCount: true, minimumPoolSize: true, moduleCode: true, categoryCode: true },
   })
   if (!bank) return { health: 'RED', questionCount: 0, requiredMinimum: 0 }
 
@@ -70,7 +72,8 @@ export async function getPoolHealth(bankId: string): Promise<{ health: PoolHealt
     where: { bankId, isActive: true, status: 'APPROVED' },
   })
 
-  const requiredMinimum = bank.minimumPoolSize ?? bank.mcqCount * 5
+  const easaMinimum = bank.moduleCode ? calculateMinimumPoolSize(bank.moduleCode, bank.categoryCode) : null
+  const requiredMinimum = easaMinimum ?? bank.minimumPoolSize ?? bank.mcqCount * 5
   const ratio = questionCount / requiredMinimum
 
   let health: PoolHealth = 'RED'
@@ -162,8 +165,8 @@ export async function selectInternalExamQuestions(bankId: string, count: number)
 // ---------------------------------------------------------------------------
 
 export async function checkEligibility(studentId: string, bankId: string) {
-  const rules = await getBankRules(bankId)
-  const now = new Date()
+  const _rules = await getBankRules(bankId)
+  const _now = new Date()
 
   // Get previous sessions for this student + bank (exclude VOIDED)
   const sessions = await prismaUnfiltered.internalExamSession.findMany({
@@ -196,5 +199,40 @@ export async function checkEligibility(studentId: string, bankId: string) {
     eligible: true,
     attemptNumber: 1,
     totalAttempts: sessions.length,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Build randomised paper (shuffled question order + shuffled options)
+// ---------------------------------------------------------------------------
+
+export interface RandomizedPaper {
+  paper: {
+    id: string
+    text: string
+    options: string[]
+    points: number
+    subTopic?: string | null
+    syllabusRef?: string | null
+  }[]
+  questionOrder: string[]
+}
+
+export async function buildRandomizedPaper(
+  rawQuestions: Array<{
+    id: string
+    text: string
+    options: string[]
+    points: number
+    subTopic?: string | null
+    syllabusRef?: string | null
+  }>,
+): Promise<RandomizedPaper> {
+  const shuffledQuestions = shuffle(rawQuestions.map(q => ({ ...q, options: shuffle(q.options) })))
+  const questionOrder = shuffledQuestions.map(q => q.id)
+
+  return {
+    paper: shuffledQuestions,
+    questionOrder,
   }
 }

@@ -91,8 +91,9 @@ export async function GET(req: NextRequest) {
       message: `Sent ${sent} modular deadline warnings`,
       timestamp: now.toISOString(),
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Cron] Modular deadline warnings failed:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

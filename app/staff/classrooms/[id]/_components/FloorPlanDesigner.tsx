@@ -26,7 +26,7 @@ interface Cell {
   label: string | null
 }
 
-interface LayoutData {
+export interface LayoutData {
   rows: number
   cols: number
   cells: Cell[]
@@ -150,8 +150,9 @@ export default function FloorPlanDesigner({
       toast.success('Floor plan saved', {
         description: `${deskCount} desks configured for ${classroomName}`,
       })
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to save layout')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save layout'
+      toast.error(message)
     } finally {
       setSaving(false)
     }
@@ -278,7 +279,7 @@ export default function FloorPlanDesigner({
       </div>
 
       {/* Grid */}
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
         <div className="flex justify-center">
           {/* Instructor area label */}
           <div className="space-y-2">

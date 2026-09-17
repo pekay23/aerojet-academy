@@ -1,6 +1,8 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState, useEffect, useCallback, useRef } from 'react'
+import Link from 'next/link'
 import {
   Clock,
   ChevronLeft,
@@ -18,10 +20,15 @@ import {
   ShieldAlert,
 } from 'lucide-react'
 
+function getPlatform(nav: Navigator): string | undefined {
+  const navWithPlatform = nav as Navigator & { platform?: string }
+  return navWithPlatform.platform
+}
+
 interface Question {
   id: string
   text: string
-  options: any // JSON array of option strings
+  options: string[] // JSON array of option strings
   points: number
   // `subTopic` is intentionally not rendered to students — the question
   // text + module code is enough context, and topic labels can give away
@@ -32,6 +39,7 @@ interface Question {
 
 interface ExamData {
   sessionId: string
+  status: string
   questions: Question[]
   savedAnswers: { questionId: string; selectedAnswer: string | null }[]
   totalTimeSecs: number
@@ -72,7 +80,38 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [tabSwitchCount, setTabSwitchCount] = useState(0)
   const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const eventSourceRef = useRef<EventSource | null>(null)
+
+  const logViolation = useCallback(
+    async (
+      type: string,
+      detail?: string,
+      opts?: { severity?: 'WARNING' | 'NOTICE' | 'CRITICAL' }
+    ) => {
+      void fetch('/api/student/exams/internal/violation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({
+          sessionId,
+          type,
+          detail,
+          deviceInfo: {
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+            platform: typeof navigator !== 'undefined' ? getPlatform(navigator) : undefined,
+            language: typeof navigator !== 'undefined' ? navigator.language : undefined,
+          },
+          ...(opts?.severity ? { severity: opts.severity } : {}),
+        }),
+      })
+      toast.warning(`Violation logged: ${type}`, {
+        duration: 4000,
+        position: 'bottom-right',
+        dismissible: true,
+      })
+    },
+    [sessionId]
+  )
 
   // Load or resume session
   useEffect(() => {
@@ -119,35 +158,43 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   useEffect(() => {
     if (!data || result) return
     // Show a prompt first — browsers require a user gesture for fullscreen
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowFullscreenPrompt(true)
   }, [data, result])
 
   // Track fullscreen exits
   useEffect(() => {
-    if (!data || result) return
+    if (!data || result || data.status !== 'IN_PROGRESS') return
     const onFullscreenChange = () => {
       const inFS = !!document.fullscreenElement
       setIsFullscreen(inFS)
       if (!inFS && !result) {
-        // Student exited fullscreen during exam
         setShowFullscreenPrompt(true)
+        void logViolation('FULLSCREEN_EXIT', 'Student exited fullscreen mode during exam')
       }
     }
     document.addEventListener('fullscreenchange', onFullscreenChange)
     return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
-  }, [data, result])
+  }, [data, result, logViolation])
 
   // Track tab visibility changes (alt-tab / tab switching)
   useEffect(() => {
-    if (!data || result) return
+    if (!data || result || data.status !== 'IN_PROGRESS') return
+    let warned = false
     const onVisibilityChange = () => {
       if (document.hidden) {
-        setTabSwitchCount(prev => prev + 1)
+        setTabSwitchCount((prev) => prev + 1)
+        if (!warned) {
+          warned = true
+          void logViolation('TAB_SWITCH', 'Student navigated away from exam tab')
+        }
+      } else {
+        warned = false
       }
     }
     document.addEventListener('visibilitychange', onVisibilityChange)
     return () => document.removeEventListener('visibilitychange', onVisibilityChange)
-  }, [data, result])
+  }, [data, result, logViolation])
 
   // Cleanup: remove lockdown class when leaving
   useEffect(() => {
@@ -159,69 +206,163 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     }
   }, [])
 
-  // Timer countdown
+  // Block clipboard events (copy/cut/paste) during active exam
   useEffect(() => {
-    if (!data || result) return
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          // Auto-submit on expiry
-          clearInterval(timerRef.current!)
-          handleSubmit(true)
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [data, result])
+    if (!data || result || data.status !== 'IN_PROGRESS') return
 
-  // Autosave answer
-  const saveAnswer = useCallback(async (questionId: string, selectedAnswer: string) => {
-    try {
-      await fetch('/api/student/exams/internal/answer', {
+    const onClipboard = (event: ClipboardEvent) => {
+      event.preventDefault()
+      void logViolation('KEYBOARD_SHORTCUT', `Clipboard event blocked: ${event.type}`)
+    }
+
+    document.addEventListener('copy', onClipboard)
+    document.addEventListener('cut', onClipboard)
+    document.addEventListener('paste', onClipboard)
+    return () => {
+      document.removeEventListener('copy', onClipboard)
+      document.removeEventListener('cut', onClipboard)
+      document.removeEventListener('paste', onClipboard)
+    }
+  }, [data, result, logViolation])
+
+  // Network disconnect/reconnect detection
+  useEffect(() => {
+    if (!data || result || data.status !== 'IN_PROGRESS') return
+
+    const onNetworkChange = (_event: Event) => {
+      const online = navigator.onLine
+      void logViolation('NETWORK_DISCONNECT', `Network ${online ? 'restored' : 'lost'} during exam`)
+    }
+
+    window.addEventListener('online', onNetworkChange)
+    window.addEventListener('offline', onNetworkChange)
+    return () => {
+      window.removeEventListener('online', onNetworkChange)
+      window.removeEventListener('offline', onNetworkChange)
+    }
+  }, [data, result, logViolation])
+
+  // Page unload — log that the exam interface was exited abnormally
+  useEffect(() => {
+    if (!data || result || data.status !== 'IN_PROGRESS') return
+
+    const onUnload = () => {
+      void fetch('/api/student/exams/internal/violation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, questionId, selectedAnswer }),
-      })
-    } catch { /* silent — answers are also submitted at final submit */ }
-  }, [sessionId])
-
-  const selectAnswer = (questionId: string, answer: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: answer }))
-    saveAnswer(questionId, answer)
-  }
-
-  const handleSubmit = async (auto = false) => {
-    if (submitting) return
-    setSubmitting(true)
-    if (timerRef.current) clearInterval(timerRef.current)
-
-    try {
-      const res = await fetch('/api/student/exams/internal/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        keepalive: true,
         body: JSON.stringify({
           sessionId,
-          answers: Object.entries(answers).map(([questionId, selectedAnswer]) => ({
-            questionId,
-            selectedAnswer,
-          })),
-          autoSubmitted: auto,
+          type: 'EXAM_INTERFACE_UNLOAD',
+          detail: 'Student navigated away or closed the exam interface during an active session',
+          deviceInfo: {
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+            platform: typeof navigator !== 'undefined' ? getPlatform(navigator) : undefined,
+          },
         }),
       })
-      const json = await res.json()
-      if (json.success && json.data) {
-        setResult(json.data)
-      } else {
-        setError(json.error || 'Failed to submit')
-      }
-    } catch {
-      setError('An error occurred during submission')
-    } finally {
-      setSubmitting(false)
-      setShowConfirm(false)
     }
+
+    document.addEventListener('beforeunload', onUnload)
+    document.addEventListener('pagehide', onUnload)
+    return () => {
+      document.removeEventListener('beforeunload', onUnload)
+      document.removeEventListener('pagehide', onUnload)
+    }
+  }, [data, result, sessionId])
+
+  const handleSubmit = useCallback(
+    async (auto = false) => {
+      if (submitting) return
+      setSubmitting(true)
+
+      try {
+        const res = await fetch('/api/student/exams/internal/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            answers: Object.entries(answers).map(([questionId, selectedAnswer]) => ({
+              questionId,
+              selectedAnswer,
+            })),
+            autoSubmitted: auto,
+          }),
+        })
+        const json = await res.json()
+        if (json.success && json.data) {
+          setResult(json.data)
+        } else {
+          setError(json.error || 'Failed to submit')
+        }
+      } catch {
+        setError('An error occurred during submission')
+      } finally {
+        setSubmitting(false)
+        setShowConfirm(false)
+      }
+    },
+    [submitting, answers, sessionId]
+  )
+
+  // SSE timer from server-authoritative clock
+  useEffect(() => {
+    if (!data || result || !sessionId) return
+
+    const url = `/api/student/exams/internal/session/${sessionId}/events`
+    const eventSource = new EventSource(url)
+    eventSourceRef.current = eventSource
+
+    eventSource.addEventListener('tick', (e: MessageEvent) => {
+      try {
+        const parsed = JSON.parse(e.data)
+        if (typeof parsed.timeRemaining === 'number') {
+          setTimeLeft(parsed.timeRemaining)
+        }
+      } catch {
+        // ignore malformed tick
+      }
+    })
+
+    eventSource.addEventListener('close', () => {
+      eventSource.close()
+      eventSourceRef.current = null
+      if (data.status === 'IN_PROGRESS' && !result && !submitting) {
+        void handleSubmit(true)
+      }
+    })
+
+    eventSource.onerror = () => {
+      eventSource.close()
+      eventSourceRef.current = null
+    }
+
+    return () => {
+      eventSource.close()
+      eventSourceRef.current = null
+    }
+  }, [data, result, sessionId, submitting, handleSubmit])
+
+  // Autosave answer
+  const saveAnswer = useCallback(
+    async (questionId: string, selectedAnswer: string) => {
+      try {
+        await fetch('/api/student/exams/internal/answer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, questionId, selectedAnswer }),
+        })
+      } catch {
+        /* silent — answers are also submitted at final submit */
+      }
+    },
+    [sessionId]
+  )
+
+  const selectAnswer = (questionId: string, answer: string) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: answer }))
+    saveAnswer(questionId, answer)
   }
 
   useEffect(() => {
@@ -237,7 +378,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [data?.rules.allowKeyboardAutoSubmit, result, submitting, showConfirm, answers])
+  }, [data?.rules.allowKeyboardAutoSubmit, result, submitting, showConfirm, answers, handleSubmit])
 
   const handleSubmitReport = async () => {
     if (!reportReason.trim() || reportSubmitting) return
@@ -253,8 +394,11 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
         setReportSubmitted(true)
         setReportReason('')
       }
-    } catch { /* silent */ }
-    finally { setReportSubmitting(false) }
+    } catch {
+      /* silent */
+    } finally {
+      setReportSubmitting(false)
+    }
   }
 
   const handleSubmitQuestionReport = async () => {
@@ -272,12 +416,15 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
       })
       const json = await res.json()
       if (json.success) {
-        setReportedQuestions(prev => new Set([...prev, showQuestionReport]))
+        setReportedQuestions((prev) => new Set([...prev, showQuestionReport]))
         setShowQuestionReport(null)
         setQuestionReportReason('')
       }
-    } catch { /* silent */ }
-    finally { setQuestionReportSubmitting(false) }
+    } catch {
+      /* silent */
+    } finally {
+      setQuestionReportSubmitting(false)
+    }
   }
 
   // Format timer
@@ -290,7 +437,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-aerojet-blue" />
+        <Loader2 className="text-aerojet-blue h-10 w-10 animate-spin" />
       </div>
     )
   }
@@ -300,9 +447,12 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
         <XCircle className="mb-4 h-12 w-12 text-red-500" />
         <p className="text-lg font-bold text-slate-900 dark:text-white">{error}</p>
-        <a href="/student/exams/internal" className="mt-4 text-sm font-medium text-aerojet-blue hover:underline">
+        <Link
+          href="/student/exams/internal"
+          className="text-aerojet-blue mt-4 text-sm font-medium hover:underline"
+        >
           Back to Exams
-        </a>
+        </Link>
       </div>
     )
   }
@@ -317,13 +467,16 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
             {result.timedOut ? 'Time Expired — Exam Submitted' : 'Exam Submitted Successfully'}
           </h2>
           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            Your answers have been recorded. Results are pending admin review and will be published to your profile once confirmed.
+            Your answers have been recorded. Results are pending admin review and will be published
+            to your profile once confirmed.
           </p>
 
           <div className="mx-auto mt-6 max-w-xs rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/10">
             <div className="flex items-center justify-center gap-2">
               <Clock className="h-4 w-4 text-amber-600" />
-              <span className="text-sm font-bold text-amber-800 dark:text-amber-200">Pending Admin Review</span>
+              <span className="text-sm font-bold text-amber-800 dark:text-amber-200">
+                Pending Admin Review
+              </span>
             </div>
             <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
               You will be able to view your results in your exam records once they are published.
@@ -347,12 +500,12 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
           )}
 
           <div className="mt-6">
-            <a
+            <Link
               href="/student/exams/internal"
-              className="inline-block rounded-xl bg-aerojet-blue px-6 py-2.5 text-sm font-bold text-white hover:bg-aerojet-blue/90"
+              className="bg-aerojet-blue hover:bg-aerojet-blue/90 inline-block rounded-xl px-6 py-2.5 text-sm font-bold text-white"
             >
               Back to Exams
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -362,16 +515,19 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
             <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
               <h3 className="text-lg font-black text-slate-900 dark:text-white">Report an Issue</h3>
               <p className="mt-1 text-xs text-slate-500">
-                Describe the issue you experienced. Admin will review and may reset your exam session if warranted.
+                Describe the issue you experienced. Admin will review and may reset your exam
+                session if warranted.
               </p>
               <textarea
                 value={reportReason}
                 onChange={(e) => setReportReason(e.target.value)}
                 placeholder="Describe what happened (e.g. accidental start, technical issue, unclear question)..."
-                className="mt-4 h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-aerojet-blue focus:outline-none focus:ring-1 focus:ring-aerojet-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue mt-4 h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 maxLength={1000}
               />
-              <div className="mt-1 text-right text-[10px] text-slate-400">{reportReason.length}/1000</div>
+              <div className="mt-1 text-right text-[10px] text-slate-400">
+                {reportReason.length}/1000
+              </div>
               <div className="mt-4 flex gap-3">
                 <button
                   onClick={() => setShowReport(false)}
@@ -382,9 +538,13 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
                 <button
                   onClick={handleSubmitReport}
                   disabled={!reportReason.trim() || reportSubmitting}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
+                  className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
                 >
-                  {reportSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Submit Report'}
+                  {reportSubmitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Submit Report'
+                  )}
                 </button>
               </div>
             </div>
@@ -407,25 +567,34 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
       {/* Fullscreen Prompt Overlay */}
       {showFullscreenPrompt && !result && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md animate-in zoom-in-95 rounded-2xl border border-slate-200 bg-white p-8 shadow-2xl dark:border-slate-800 dark:bg-slate-900 text-center">
+          <div className="animate-in zoom-in-95 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-2xl dark:border-slate-800 dark:bg-slate-900">
             <ShieldAlert className="mx-auto mb-4 h-16 w-16 text-amber-500" />
             <h2 className="text-xl font-black text-slate-900 dark:text-white">
               {isFullscreen ? 'Fullscreen Required' : 'Enter Exam Mode'}
             </h2>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              This exam must be taken in fullscreen mode to prevent unauthorized access to other resources.
-              Your screen activity is monitored.
+              This exam must be taken in fullscreen mode to prevent unauthorized access to other
+              resources. Leaving fullscreen or switching tabs is logged and may be reviewed by your
+              instructor.
+            </p>
+            <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+              If you need to step away or experience technical issues, contact your instructor
+              immediately.
+            </p>
+            <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+              If you need to step away or experience technical issues, contact your instructor
+              immediately.
             </p>
             {tabSwitchCount > 0 && (
               <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
                 <p className="text-xs font-bold text-red-700 dark:text-red-300">
-                  ⚠ Tab switches detected: {tabSwitchCount}. This activity is logged.
+                  ⚠  Tab switches detected: {tabSwitchCount}. This activity is logged.
                 </p>
               </div>
             )}
             <button
               onClick={enterFullscreen}
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-8 py-3 text-sm font-bold text-white shadow-lg shadow-aerojet-blue/20 transition-all hover:bg-[#003a7c] active:scale-95"
+              className="bg-aerojet-blue shadow-aerojet-blue/20 mt-6 inline-flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#003a7c] active:scale-95"
             >
               <Maximize className="h-4 w-4" />
               {isFullscreen ? 'Re-enter Fullscreen' : 'Enter Fullscreen & Start'}
@@ -434,327 +603,374 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
         </div>
       )}
 
-    <div className="flex h-screen w-screen flex-col bg-slate-50 dark:bg-slate-950 lg:flex-row overflow-hidden">
-      {/* Mobile Top Bar */}
-      <div className="flex items-center justify-between border-b border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:hidden">
-        <button
-          onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
-          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
-        <span className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold ${
-          timeLeft < 120 ? 'bg-red-100 text-red-700 animate-pulse'
-          : timeLeft < 300 ? 'bg-amber-100 text-amber-700'
-          : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-        }`}>
-          <Clock className="h-4 w-4" />
-          {formatTime(timeLeft)}
-        </span>
-      </div>
-
-      {/* Left Panel: Question Navigator */}
-      <div className={`fixed inset-y-0 left-0 z-40 w-64 transform flex-col border-r border-slate-200 bg-white transition-transform duration-200 ease-in-out dark:border-slate-800 dark:bg-slate-900 lg:static lg:flex lg:translate-x-0 ${isLeftPanelOpen ? 'translate-x-0' : '-translate-x-full'} ${isLeftPanelOpen ? 'flex' : 'hidden lg:flex'}`}>
-        <div className="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-800">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Navigator</h2>
-          <button className="lg:hidden" onClick={() => setIsLeftPanelOpen(false)}>
-            <X className="h-5 w-5 text-slate-500" />
+      <div className="flex h-screen w-screen flex-col overflow-hidden bg-slate-50 lg:flex-row dark:bg-slate-950">
+        {/* Mobile Top Bar */}
+        <div className="flex items-center justify-between border-b border-slate-200 bg-white p-4 shadow-sm lg:hidden dark:border-slate-800 dark:bg-slate-900">
+          <button
+            onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <Menu className="h-5 w-5" />
           </button>
+          <span
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold ${
+              timeLeft < 120
+                ? 'animate-pulse bg-red-100 text-red-700'
+                : timeLeft < 300
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+            }`}
+          >
+            <Clock className="h-4 w-4" />
+            {formatTime(timeLeft)}
+          </span>
         </div>
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="grid grid-cols-4 gap-2">
-            {questions.map((q, i) => {
-              const answered = !!answers[q.id]
-              const isCurrent = i === currentIdx
-              return (
-                <button
-                  key={q.id}
-                  onClick={() => {
-                    setCurrentIdx(i)
-                    if (window.innerWidth < 1024) setIsLeftPanelOpen(false)
-                  }}
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold transition-all ${
-                    isCurrent
-                      ? 'bg-aerojet-blue text-white shadow-md'
-                      : answered
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
-                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              )
-            })}
+
+        {/* Left Panel: Question Navigator */}
+        <div
+          className={`fixed inset-y-0 left-0 z-40 w-64 transform flex-col border-r border-slate-200 bg-white transition-transform duration-200 ease-in-out lg:static lg:flex lg:translate-x-0 dark:border-slate-800 dark:bg-slate-900 ${isLeftPanelOpen ? 'translate-x-0' : '-translate-x-full'} ${isLeftPanelOpen ? 'flex' : 'hidden lg:flex'}`}
+        >
+          <div className="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-800">
+            <h2 className="text-sm font-bold tracking-widest text-slate-500 uppercase">
+              Navigator
+            </h2>
+            <button className="lg:hidden" onClick={() => setIsLeftPanelOpen(false)}>
+              <X className="h-5 w-5 text-slate-500" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="grid grid-cols-4 gap-2">
+              {questions.map((q, i) => {
+                const answered = !!answers[q.id]
+                const isCurrent = i === currentIdx
+                return (
+                  <button
+                    key={q.id}
+                    onClick={() => {
+                      setCurrentIdx(i)
+                      if (window.innerWidth < 1024) setIsLeftPanelOpen(false)
+                    }}
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold transition-all ${
+                      isCurrent
+                        ? 'bg-aerojet-blue text-white shadow-md'
+                        : answered
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Middle Panel: Main Question Area */}
-      <div className="flex flex-1 flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
-        <div className="flex-1 overflow-y-auto p-4 lg:p-8">
-          <div className="mx-auto max-w-3xl">
-            {/* Question Card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:p-10">
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-slate-800">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-lg font-black text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                    {currentIdx + 1}
-                  </span>
-                  <div>
-                    <div className="text-xs font-bold uppercase text-slate-400">Question</div>
-                    <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      of {questions.length}
+        {/* Middle Panel: Main Question Area */}
+        <div className="flex flex-1 flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
+          <div className="flex-1 overflow-y-auto p-4 lg:p-8">
+            <div className="mx-auto max-w-3xl">
+              {/* Question Card */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:p-10 dark:border-slate-800 dark:bg-slate-900">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-lg font-black text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                      {currentIdx + 1}
+                    </span>
+                    <div>
+                      <div className="text-xs font-bold text-slate-400 uppercase">Question</div>
+                      <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        of {questions.length}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-2">
+                    {currentQ.syllabusRef && (
+                      <div className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                        {currentQ.syllabusRef}
+                      </div>
+                    )}
+                    {reportedQuestions.has(currentQ.id) ? (
+                      <div className="flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[10px] font-bold text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+                        <Flag className="h-3 w-3" />
+                        Reported
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowQuestionReport(currentQ.id)}
+                        className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-[10px] font-bold text-slate-400 transition-colors hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600 dark:border-slate-700 dark:hover:border-amber-700 dark:hover:bg-amber-900/20 dark:hover:text-amber-400"
+                        title="Report this question"
+                      >
+                        <Flag className="h-3 w-3" />
+                        Report
+                      </button>
+                    )}
+                  </div>
                 </div>
+
+                <div className="prose prose-slate dark:prose-invert max-w-none">
+                  <p className="text-lg leading-relaxed font-medium text-slate-900 dark:text-slate-100">
+                    {currentQ.text}
+                  </p>
+                </div>
+
+                <div className="mt-8 space-y-3">
+                  {options.map((opt, i) => {
+                    const selected = answers[currentQ.id] === opt
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => selectAnswer(currentQ.id, opt)}
+                        className={`group flex w-full items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
+                          selected
+                            ? 'border-aerojet-blue dark:border-aerojet-sky bg-blue-50 dark:bg-blue-900/20'
+                            : 'hover:border-aerojet-blue/30 dark:hover:border-aerojet-sky/30 border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'
+                        }`}
+                      >
+                        <span
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold transition-colors ${
+                            selected
+                              ? 'bg-aerojet-blue dark:bg-aerojet-sky text-white'
+                              : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+                          }`}
+                        >
+                          {optionLabels[i]}
+                        </span>
+                        <span
+                          className={`text-base font-medium ${selected ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}
+                        >
+                          {opt}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Navigation Controls */}
+              <div className="mt-6 flex items-center justify-between">
+                <button
+                  onClick={() => setCurrentIdx(Math.max(0, currentIdx - 1))}
+                  disabled={currentIdx === 0}
+                  className="flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 disabled:opacity-40 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </button>
+
+                {currentIdx < questions.length - 1 ? (
+                  <button
+                    onClick={() => setCurrentIdx(currentIdx + 1)}
+                    className="bg-aerojet-blue hover:bg-aerojet-blue/90 dark:bg-aerojet-sky dark:hover:bg-aerojet-sky/90 flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white shadow-sm transition-all dark:text-slate-900"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowConfirm(true)}
+                    disabled={submitting}
+                    className="flex items-center gap-2 rounded-xl bg-green-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-green-700 disabled:opacity-50"
+                  >
+                    <Send className="h-4 w-4" />
+                    Submit Exam
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel: Status & Progress */}
+        <div className="hidden w-72 flex-col border-l border-slate-200 bg-white lg:flex dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-col items-center justify-center border-b border-slate-200 p-6 dark:border-slate-800">
+            <Clock
+              className={`mb-2 h-8 w-8 ${timeLeft < 120 ? 'animate-pulse text-red-500' : timeLeft < 300 ? 'text-amber-500' : 'text-slate-400'}`}
+            />
+            <div
+              className={`text-3xl font-black tabular-nums ${timeLeft < 120 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}
+            >
+              {formatTime(timeLeft)}
+            </div>
+            <div className="mt-1 text-xs font-bold tracking-widest text-slate-400 uppercase">
+              Time Remaining
+            </div>
+          </div>
+
+          <div className="p-6">
+            <h3 className="mb-4 text-sm font-bold tracking-widest text-slate-500 uppercase">
+              Exam Status
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <div className="mb-1 flex justify-between text-sm font-medium">
+                  <span className="text-slate-500">Progress</span>
+                  <span className="text-slate-900 dark:text-white">
+                    {Math.round((answeredCount / questions.length) * 100)}%
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div
+                    className="bg-aerojet-blue dark:bg-aerojet-sky h-full transition-all"
+                    style={{ width: `${(answeredCount / questions.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3 dark:border-slate-700">
                 <div className="flex items-center gap-2">
-                  {currentQ.syllabusRef && (
-                    <div className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                      {currentQ.syllabusRef}
-                    </div>
-                  )}
-                  {reportedQuestions.has(currentQ.id) ? (
-                    <div className="flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[10px] font-bold text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
-                      <Flag className="h-3 w-3" />
-                      Reported
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowQuestionReport(currentQ.id)}
-                      className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-[10px] font-bold text-slate-400 transition-colors hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600 dark:border-slate-700 dark:hover:border-amber-700 dark:hover:bg-amber-900/20 dark:hover:text-amber-400"
-                      title="Report this question"
-                    >
-                      <Flag className="h-3 w-3" />
-                      Report
-                    </button>
-                  )}
+                  <div className="h-3 w-3 rounded-full bg-green-500" />
+                  <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                    Answered
+                  </span>
                 </div>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">
+                  {answeredCount}
+                </span>
               </div>
 
-              <div className="prose prose-slate dark:prose-invert max-w-none">
-                <p className="text-lg font-medium leading-relaxed text-slate-900 dark:text-slate-100">
-                  {currentQ.text}
-                </p>
-              </div>
-
-              <div className="mt-8 space-y-3">
-                {options.map((opt, i) => {
-                  const selected = answers[currentQ.id] === opt
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => selectAnswer(currentQ.id, opt)}
-                      className={`group flex w-full items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
-                        selected
-                          ? 'border-aerojet-blue bg-blue-50 dark:border-aerojet-sky dark:bg-blue-900/20'
-                          : 'border-slate-200 bg-white hover:border-aerojet-blue/30 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-aerojet-sky/30'
-                      }`}
-                    >
-                      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold transition-colors ${
-                        selected
-                          ? 'bg-aerojet-blue text-white dark:bg-aerojet-sky'
-                          : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
-                      }`}>
-                        {optionLabels[i]}
-                      </span>
-                      <span className={`text-base font-medium ${selected ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
-                        {opt}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Navigation Controls */}
-            <div className="mt-6 flex items-center justify-between">
-              <button
-                onClick={() => setCurrentIdx(Math.max(0, currentIdx - 1))}
-                disabled={currentIdx === 0}
-                className="flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 disabled:opacity-40 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous
-              </button>
-
-              {currentIdx < questions.length - 1 ? (
-                <button
-                  onClick={() => setCurrentIdx(currentIdx + 1)}
-                  className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-aerojet-blue/90 dark:bg-aerojet-sky dark:text-slate-900 dark:hover:bg-aerojet-sky/90"
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowConfirm(true)}
-                  disabled={submitting}
-                  className="flex items-center gap-2 rounded-xl bg-green-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-green-700 disabled:opacity-50"
-                >
-                  <Send className="h-4 w-4" />
-                  Submit Exam
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel: Status & Progress */}
-      <div className="hidden w-72 flex-col border-l border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 lg:flex">
-        <div className="flex flex-col items-center justify-center border-b border-slate-200 p-6 dark:border-slate-800">
-          <Clock className={`mb-2 h-8 w-8 ${timeLeft < 120 ? 'text-red-500 animate-pulse' : timeLeft < 300 ? 'text-amber-500' : 'text-slate-400'}`} />
-          <div className={`text-3xl font-black tabular-nums ${timeLeft < 120 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}>
-            {formatTime(timeLeft)}
-          </div>
-          <div className="mt-1 text-xs font-bold uppercase tracking-widest text-slate-400">Time Remaining</div>
-        </div>
-        
-        <div className="p-6">
-          <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-500">Exam Status</h3>
-          
-          <div className="space-y-4">
-            <div>
-              <div className="mb-1 flex justify-between text-sm font-medium">
-                <span className="text-slate-500">Progress</span>
-                <span className="text-slate-900 dark:text-white">{Math.round((answeredCount / questions.length) * 100)}%</span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                <div 
-                  className="h-full bg-aerojet-blue transition-all dark:bg-aerojet-sky"
-                  style={{ width: `${(answeredCount / questions.length) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-green-500" />
-                <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Answered</span>
-              </div>
-              <span className="text-sm font-bold text-slate-900 dark:text-white">{answeredCount}</span>
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-slate-300 dark:bg-slate-600" />
-                <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Unanswered</span>
-              </div>
-              <span className="text-sm font-bold text-slate-900 dark:text-white">{unansweredCount}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-auto p-6">
-          <button
-            onClick={() => setShowConfirm(true)}
-            disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-green-700 disabled:opacity-50"
-          >
-            <Send className="h-4 w-4" />
-            Finish & Submit
-          </button>
-        </div>
-      </div>
-
-      {/* Submit Confirmation Modal */}
-      {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md animate-in zoom-in-95 rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-amber-500" />
-            <h3 className="text-center text-xl font-black text-slate-900 dark:text-white">Submit Examination?</h3>
-            
-            <div className="my-6 space-y-3 rounded-xl bg-slate-50 p-4 text-sm dark:bg-slate-800/50">
-              <div className="flex justify-between border-b border-slate-200 pb-2 dark:border-slate-700">
-                <span className="text-slate-500">Answered Questions</span>
-                <span className="font-bold text-green-600">{answeredCount}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Unanswered Questions</span>
-                <span className={`font-bold ${unansweredCount > 0 ? 'text-red-600' : 'text-slate-900 dark:text-white'}`}>
+              <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-slate-300 dark:bg-slate-600" />
+                  <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                    Unanswered
+                  </span>
+                </div>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">
                   {unansweredCount}
                 </span>
               </div>
             </div>
+          </div>
 
-            {unansweredCount > 0 && (
-              <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-center text-sm font-medium text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
-                You have {unansweredCount} unanswered question{unansweredCount !== 1 ? 's' : ''}.<br/>
-                They will be marked as incorrect.
+          <div className="mt-auto p-6">
+            <button
+              onClick={() => setShowConfirm(true)}
+              disabled={submitting}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-green-700 disabled:opacity-50"
+            >
+              <Send className="h-4 w-4" />
+              Finish & Submit
+            </button>
+          </div>
+        </div>
+
+        {/* Submit Confirmation Modal */}
+        {showConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+            <div className="animate-in zoom-in-95 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+              <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-amber-500" />
+              <h3 className="text-center text-xl font-black text-slate-900 dark:text-white">
+                Submit Examination?
+              </h3>
+
+              <div className="my-6 space-y-3 rounded-xl bg-slate-50 p-4 text-sm dark:bg-slate-800/50">
+                <div className="flex justify-between border-b border-slate-200 pb-2 dark:border-slate-700">
+                  <span className="text-slate-500">Answered Questions</span>
+                  <span className="font-bold text-green-600">{answeredCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Unanswered Questions</span>
+                  <span
+                    className={`font-bold ${unansweredCount > 0 ? 'text-red-600' : 'text-slate-900 dark:text-white'}`}
+                  >
+                    {unansweredCount}
+                  </span>
+                </div>
               </div>
-            )}
 
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-center text-xs text-blue-700 dark:border-blue-900/50 dark:bg-blue-900/20 dark:text-blue-300 mb-6">
-              Results will be reviewed by admin before being published to your profile.
-            </div>
-            
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-              >
-                Review Answers
-              </button>
-              <button
-                onClick={() => handleSubmit(false)}
-                disabled={submitting}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50"
-              >
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Submit'}
-              </button>
+              {unansweredCount > 0 && (
+                <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-center text-sm font-medium text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
+                  You have {unansweredCount} unanswered question{unansweredCount !== 1 ? 's' : ''}.
+                  <br />
+                  They will be marked as incorrect.
+                </div>
+              )}
+
+              <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-3 text-center text-xs text-blue-700 dark:border-blue-900/50 dark:bg-blue-900/20 dark:text-blue-300">
+                Results will be reviewed by admin before being published to your profile.
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                >
+                  Review Answers
+                </button>
+                <button
+                  onClick={() => handleSubmit(false)}
+                  disabled={submitting}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50"
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Submit'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Per-Question Report Modal */}
-      {showQuestionReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <div className="mb-1 flex items-center gap-2">
-              <Flag className="h-5 w-5 text-amber-500" />
-              <h3 className="text-lg font-black text-slate-900 dark:text-white">Report Question</h3>
-            </div>
-            <p className="text-xs text-slate-500">
-              Flag this question for admin review. If the question is found to be incorrect, admin can adjust grading.
-            </p>
-            <textarea
-              value={questionReportReason}
-              onChange={(e) => setQuestionReportReason(e.target.value)}
-              placeholder="What's wrong with this question? (e.g. unclear wording, wrong answer options, missing information...)"
-              className="mt-4 h-28 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-aerojet-blue focus:outline-none focus:ring-1 focus:ring-aerojet-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              maxLength={1000}
-            />
-            <div className="mt-1 text-right text-[10px] text-slate-400">{questionReportReason.length}/1000</div>
-            <div className="mt-4 flex gap-3">
-              <button
-                onClick={() => { setShowQuestionReport(null); setQuestionReportReason('') }}
-                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmitQuestionReport}
-                disabled={!questionReportReason.trim() || questionReportSubmitting}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-amber-600 disabled:opacity-50"
-              >
-                {questionReportSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Submit Report'}
-              </button>
+        {/* Per-Question Report Modal */}
+        {showQuestionReport && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+              <div className="mb-1 flex items-center gap-2">
+                <Flag className="h-5 w-5 text-amber-500" />
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                  Report Question
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500">
+                Flag this question for admin review. If the question is found to be incorrect, admin
+                can adjust grading.
+              </p>
+              <textarea
+                value={questionReportReason}
+                onChange={(e) => setQuestionReportReason(e.target.value)}
+                placeholder="What's wrong with this question? (e.g. unclear wording, wrong answer options, missing information...)"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue mt-4 h-28 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                maxLength={1000}
+              />
+              <div className="mt-1 text-right text-[10px] text-slate-400">
+                {questionReportReason.length}/1000
+              </div>
+              <div className="mt-4 flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowQuestionReport(null)
+                    setQuestionReportReason('')
+                  }}
+                  className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitQuestionReport}
+                  disabled={!questionReportReason.trim() || questionReportSubmitting}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-amber-600 disabled:opacity-50"
+                >
+                  {questionReportSubmitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Submit Report'
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Tab-switch warning toast */}
-      {tabSwitchCount > 0 && !result && (
-        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 shadow-lg dark:border-red-800 dark:bg-red-900/30">
-          <ShieldAlert className="h-4 w-4 text-red-500" />
-          <span className="text-xs font-bold text-red-700 dark:text-red-300">
-            Tab switches: {tabSwitchCount} — activity logged
-          </span>
-        </div>
-      )}
-    </div>
-    </>  
+        {/* Tab-switch warning toast */}
+        {tabSwitchCount > 0 && !result && (
+          <div className="fixed right-4 bottom-4 z-50 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 shadow-lg dark:border-red-800 dark:bg-red-900/30">
+            <ShieldAlert className="h-4 w-4 text-red-500" />
+            <span className="text-xs font-bold text-red-700 dark:text-red-300">
+              Tab switches: {tabSwitchCount} — activity logged
+            </span>
+          </div>
+        )}
+      </div>
+    </>
   )
 }

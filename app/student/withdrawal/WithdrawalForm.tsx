@@ -37,7 +37,7 @@ export default function WithdrawalForm() {
         onChange={(e) => setReason(e.target.value)}
         rows={5}
         placeholder="Reason for withdrawal…"
-        className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm outline-none focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800/50"
+        className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-800/50"
       />
       <label className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
         <input

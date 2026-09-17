@@ -19,6 +19,7 @@ import {
   KeyRound,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 interface Applicant {
   id: string
@@ -128,8 +129,9 @@ export default function ApplicantDetailDrawer({
         throw new Error(data.error || 'Failed to resend')
       }
       toast.success('Payment details email resent')
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to resend email')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to resend email'
+      toast.error(message)
     } finally {
       setLoading(null)
     }
@@ -145,7 +147,7 @@ export default function ApplicantDetailDrawer({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
           <div>
-            <h2 className="text-base font-black tracking-tight text-aerojet-blue uppercase">
+            <h2 className="text-aerojet-blue text-base font-black tracking-tight uppercase">
               Applicant Review
             </h2>
             {applicant.registrationCode && (
@@ -179,7 +181,7 @@ export default function ApplicantDetailDrawer({
               {/* Connector line */}
               <div className="absolute top-4 right-0 left-0 h-0.5 bg-slate-200 dark:bg-slate-800" />
               <div
-                className="absolute top-4 left-0 h-0.5 bg-aerojet-sky transition-all duration-500"
+                className="bg-aerojet-sky absolute top-4 left-0 h-0.5 transition-all duration-500"
                 style={{
                   width: applicant.registrationPaid ? '100%' : '50%',
                 }}
@@ -201,7 +203,7 @@ export default function ApplicantDetailDrawer({
                   done: false,
                   icon: ShieldCheck,
                 },
-              ].map((step, idx) => (
+              ].map((step, _idx) => (
                 <div key={step.label} className="relative z-10 flex flex-col items-center">
                   <div
                     className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
@@ -226,12 +228,14 @@ export default function ApplicantDetailDrawer({
 
           {/* Profile Header */}
           <div className="flex items-center gap-4 border-b border-slate-100 px-6 py-6 dark:border-slate-800">
-            <div className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-aerojet-blue shadow-lg">
+            <div className="group bg-aerojet-blue relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl shadow-lg">
               {applicant.profile?.profilePhotoUrl ? (
-                <img
+                <Image
                   src={applicant.profile.profilePhotoUrl}
                   alt={fullName}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  fill
+                  sizes="64px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-xl font-black text-white">
@@ -250,7 +254,7 @@ export default function ApplicantDetailDrawer({
                 <button
                   onClick={handleResendEmail}
                   disabled={loading === 'resend'}
-                  className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:text-aerojet-sky hover:shadow-md disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
+                  className="hover:text-aerojet-sky mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-md disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
                   {loading === 'resend' ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -280,7 +284,7 @@ export default function ApplicantDetailDrawer({
                     }
                   }}
                   disabled={loading === 'resend'}
-                  className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:text-aerojet-sky hover:shadow-md disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
+                  className="hover:text-aerojet-sky mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-md disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
                   {loading === 'resend' ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -303,7 +307,7 @@ export default function ApplicantDetailDrawer({
               {/* Direct Proof Fallback */}
               {!latestPayment && applicant.paymentProofUrl && (
                 <div className="mb-6">
-                  <h4 className="mb-3 text-[10px] font-black tracking-widest text-aerojet-blue/40 uppercase dark:text-slate-500">
+                  <h4 className="text-aerojet-blue/40 mb-3 text-[10px] font-black tracking-widest uppercase dark:text-slate-500">
                     Registration Proof (Manual)
                   </h4>
                   <a
@@ -314,7 +318,7 @@ export default function ApplicantDetailDrawer({
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm dark:bg-slate-900">
-                        <CreditCard className="h-5 w-5 text-aerojet-sky" />
+                        <CreditCard className="text-aerojet-sky h-5 w-5" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
@@ -323,13 +327,13 @@ export default function ApplicantDetailDrawer({
                         <p className="text-[10px] text-slate-400">View proof of registration fee</p>
                       </div>
                     </div>
-                    <ExternalLink className="h-4 w-4 text-slate-300 transition-colors group-hover:text-aerojet-sky" />
+                    <ExternalLink className="group-hover:text-aerojet-sky h-4 w-4 text-slate-300 transition-colors" />
                   </a>
                 </div>
               )}
 
               {/* Personal Info */}
-              <h4 className="mb-4 text-[10px] font-black tracking-widest text-aerojet-blue/40 uppercase dark:text-slate-500">
+              <h4 className="text-aerojet-blue/40 mb-4 text-[10px] font-black tracking-widest uppercase dark:text-slate-500">
                 Personal Information
               </h4>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -376,17 +380,17 @@ export default function ApplicantDetailDrawer({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <h4 className="mb-4 text-[10px] font-black tracking-widest text-aerojet-blue/40 uppercase dark:text-slate-500">
+                <h4 className="text-aerojet-blue/40 mb-4 text-[10px] font-black tracking-widest uppercase dark:text-slate-500">
                   Registration Payment
                 </h4>
                 <div className="overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
                   <div className="flex flex-col gap-3 p-5">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                       <div className="flex items-center gap-2">
-                        <CreditCard className="h-4 w-4 text-aerojet-sky" />
+                        <CreditCard className="text-aerojet-sky h-4 w-4" />
                         <span className="text-xs font-bold text-slate-500">Registration Fee</span>
                       </div>
-                      <span className="text-sm font-black text-aerojet-blue dark:text-aerojet-sky">
+                      <span className="text-aerojet-blue dark:text-aerojet-sky text-sm font-black">
                         {latestPayment.currency} {Number(latestPayment.amount).toFixed(2)}
                       </span>
                     </div>
@@ -422,7 +426,7 @@ export default function ApplicantDetailDrawer({
                         href={latestPayment.proofUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-3 text-xs font-black tracking-widest text-aerojet-blue uppercase shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/50 dark:text-aerojet-sky dark:hover:border-slate-600"
+                        className="text-aerojet-blue dark:text-aerojet-sky mt-2 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-3 text-xs font-black tracking-widest uppercase shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-slate-600"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
                         Verify Payment Proof
@@ -440,7 +444,7 @@ export default function ApplicantDetailDrawer({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <h4 className="mb-4 text-[10px] font-black tracking-widest text-aerojet-blue/40 uppercase dark:text-slate-500">
+                <h4 className="text-aerojet-blue/40 mb-4 text-[10px] font-black tracking-widest uppercase dark:text-slate-500">
                   Identification
                 </h4>
                 <a
@@ -451,7 +455,7 @@ export default function ApplicantDetailDrawer({
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm dark:bg-slate-950">
-                      <FileText className="h-5 w-5 text-slate-400 group-hover:text-aerojet-sky" />
+                      <FileText className="group-hover:text-aerojet-sky h-5 w-5 text-slate-400" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
@@ -460,7 +464,7 @@ export default function ApplicantDetailDrawer({
                       <p className="text-[10px] text-slate-400">Passport / National ID Card</p>
                     </div>
                   </div>
-                  <ExternalLink className="h-4 w-4 text-slate-300 transition-colors group-hover:text-aerojet-sky" />
+                  <ExternalLink className="group-hover:text-aerojet-sky h-4 w-4 text-slate-300 transition-colors" />
                 </a>
               </motion.div>
             )}
@@ -517,7 +521,7 @@ export default function ApplicantDetailDrawer({
               <button
                 onClick={handleApprove}
                 disabled={!!loading}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-3 text-xs font-black text-white transition-all hover:bg-aerojet-sky disabled:opacity-50"
+                className="bg-aerojet-blue hover:bg-aerojet-sky flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-xs font-black text-white transition-all disabled:opacity-50"
               >
                 {loading === 'approve' ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

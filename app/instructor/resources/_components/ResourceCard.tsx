@@ -5,6 +5,8 @@ import { FileText, FileCode, Archive, ExternalLink, Download, Clock } from 'luci
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
+const MotionDiv = motion.div
+
 interface Resource {
   id: string
   name: string
@@ -37,19 +39,30 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
 
   const getCategoryColor = (category: string) => {
     switch (category.toUpperCase()) {
+      case 'STUDENT_GUIDE':
+        return 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'
       case 'ACADEMIC':
         return 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
       case 'ADMINISTRATIVE':
         return 'bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800'
       case 'EXAMINATION':
         return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800'
+      case 'INSTITUTIONAL':
+        return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
       default:
-        return 'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+        return 'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:text-slate-300 dark:border-slate-700'
     }
   }
 
+  const humanCategory = (category: string) =>
+    category
+      .toLowerCase()
+      .split('_')
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(' ')
+
   return (
-    <motion.div
+    <MotionDiv
       whileHover={{ y: -4 }}
       className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white transition-all hover:border-blue-100 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-900/30"
     >
@@ -61,18 +74,18 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
           </div>
           <span
             className={cn(
-              'rounded-lg border px-2 py-0.5 text-[9px] font-black tracking-widest uppercase',
+              'rounded-lg border px-2 py-0.5 text-xs font-black tracking-widest uppercase',
               getCategoryColor(resource.category)
             )}
           >
-            {resource.category}
+            {humanCategory(resource.category)}
           </span>
         </div>
 
         {/* Title */}
         <div className="mb-4 flex-1">
           {resource.courseCode && (
-            <span className="mb-1 text-[10px] font-black text-aerojet-sky uppercase">
+            <span className="text-aerojet-sky mb-1 text-[10px] font-black uppercase">
               {resource.courseCode}
             </span>
           )}
@@ -106,6 +119,6 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
           </a>
         </div>
       </div>
-    </motion.div>
+    </MotionDiv>
   )
 }

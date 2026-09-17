@@ -57,7 +57,9 @@ export default function FileField({
   return (
     <div className="space-y-2">
       {label && (
-        <label className="text-xs font-bold tracking-widest text-slate-500 uppercase">{label}</label>
+        <label className="text-xs font-bold tracking-widest text-slate-500 uppercase">
+          {label}
+        </label>
       )}
 
       {hasFile ? (
@@ -106,31 +108,33 @@ export default function FileField({
           ) : (
             <div className="flex flex-wrap items-center gap-3">
               <FileUp className="h-4 w-4 shrink-0 text-slate-400" />
-              <UploadButton
-                endpoint={route as never}
-                input={undefined as never}
-                disabled={disabled}
-                onUploadBegin={() => setUploading(true)}
-                onClientUploadComplete={(res) => {
-                  setUploading(false)
-                  const url = res?.[0]?.ufsUrl
-                  if (url) {
-                    onChange(url)
-                    toast.success(successMessage)
-                  } else {
-                    toast.error('Upload finished but no URL was returned')
-                  }
-                }}
-                onUploadError={(e) => {
-                  setUploading(false)
-                  toast.error(e.message || 'Upload failed')
-                }}
-                appearance={{
-                  button:
-                    'ut-uploading:!cursor-wait ut-uploading:!bg-blue-500 !bg-aerojet-blue hover:!bg-aerojet-sky !text-white !text-xs !font-bold !tracking-widest !uppercase !h-9 !px-4 !rounded-lg !transition-colors',
-                  allowedContent: 'hidden',
-                }}
-              />
+              <div data-testid="upload-thing-button">
+                <UploadButton
+                  endpoint={route as never}
+                  input={undefined as never}
+                  disabled={disabled}
+                  onUploadBegin={() => setUploading(true)}
+                  onClientUploadComplete={(res) => {
+                    setUploading(false)
+                    const url = res?.[0]?.ufsUrl
+                    if (url) {
+                      onChange(url)
+                      toast.success(successMessage)
+                    } else {
+                      toast.error('Upload finished but no URL was returned')
+                    }
+                  }}
+                  onUploadError={(e) => {
+                    setUploading(false)
+                    toast.error(e.message || 'Upload failed')
+                  }}
+                  appearance={{
+                    button:
+                      'ut-uploading:!cursor-wait ut-uploading:!bg-blue-500 !bg-aerojet-blue hover:!bg-aerojet-sky !text-white !text-xs !font-bold !tracking-widest !uppercase !h-9 !px-4 !rounded-lg !transition-colors',
+                    allowedContent: 'hidden',
+                  }}
+                />
+              </div>
               {hint && <span className="text-xs text-slate-500">{hint}</span>}
             </div>
           )}

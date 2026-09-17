@@ -5,6 +5,7 @@ import { CheckSquare, Square } from 'lucide-react'
 import UserActionsMenu from '../UserActionsMenu'
 import type { User } from './types'
 import { ROLE_STYLE, STATUS_STYLE } from './types'
+import Image from 'next/image'
 
 export default function UsersTableRow({
   user,
@@ -37,7 +38,7 @@ export default function UsersTableRow({
             : `/staff/users/${user.id}`
         )
       }
-      className={`cursor-pointer transition-all duration-150 ease-out hover:bg-accent hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:hover:bg-accent ${isSelected ? 'bg-aerojet-blue/5' : ''}`}
+      className={`hover:bg-accent dark:hover:bg-accent cursor-pointer transition-all duration-150 ease-out hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] ${isSelected ? 'bg-aerojet-blue/5' : ''}`}
     >
       <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
         <button
@@ -56,10 +57,12 @@ export default function UsersTableRow({
         <div className="flex items-center gap-3">
           <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
             {user.profile?.profilePhotoUrl ? (
-              <img
+              <Image
                 src={user.profile.profilePhotoUrl}
                 alt={fullName}
-                className="h-full w-full object-cover"
+                fill
+                sizes="32px"
+                className="object-cover"
               />
             ) : (
               initials
@@ -73,14 +76,14 @@ export default function UsersTableRow({
       </td>
       <td className="px-5 py-3.5">
         <span
-          className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${ROLE_STYLE[user.role] ?? 'bg-slate-100 text-slate-500'}`}
+          className={`rounded-full px-2 py-0.5 text-xs font-black uppercase ${ROLE_STYLE[user.role] ?? 'bg-slate-100 text-slate-500'}`}
         >
           {user.role}
         </span>
       </td>
       <td className="px-5 py-3.5">
         <span
-          className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${STATUS_STYLE[user.status] ?? 'bg-slate-100 text-slate-500'}`}
+          className={`rounded-full px-2 py-0.5 text-xs font-black uppercase ${STATUS_STYLE[user.status] ?? 'bg-slate-100 text-slate-500'}`}
         >
           {user.status}
         </span>

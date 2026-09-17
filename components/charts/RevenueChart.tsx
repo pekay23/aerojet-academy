@@ -1,25 +1,26 @@
 'use client'
 
 import * as React from 'react'
-import {
-  Area,
-  AreaChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from 'recharts'
-import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
+import { Area, AreaChart, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 interface RevenueChartProps {
   data: { name: string; total: number }[]
   title?: string
 }
 
+const revenueConfig = {
+  total: {
+    label: 'Revenue',
+    color: '#D97706',
+  },
+} as const
+
 export function RevenueChart({ data, title = 'Revenue History' }: RevenueChartProps) {
   const [mounted, setMounted] = React.useState(false)
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
   return (
@@ -27,9 +28,9 @@ export function RevenueChart({ data, title = 'Revenue History' }: RevenueChartPr
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="h-[350px] w-full">
+      <CardContent className="h-87.5 w-full">
         {mounted ? (
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+          <ChartContainer config={revenueConfig} className="h-full w-full">
             <AreaChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -52,14 +53,16 @@ export function RevenueChart({ data, title = 'Revenue History' }: RevenueChartPr
                 tick={{ fill: '#64748B' }}
                 tickFormatter={(value) => `€${value / 1000}k`}
               />
-              <Tooltip
-                cursor={{ stroke: '#F59E0B', strokeWidth: 2 }}
-                contentStyle={{
-                  borderRadius: '8px',
-                  border: 'none',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                }}
-                formatter={((value: any) => [`€${typeof value === 'number' ? value.toLocaleString() : value}`, 'Revenue']) as any}
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    formatter={(value) => [
+                      `€${typeof value === 'number' ? value.toLocaleString() : value}`,
+                      'Revenue',
+                    ]}
+                  />
+                }
               />
               <Area
                 type="monotone"
@@ -70,7 +73,7 @@ export function RevenueChart({ data, title = 'Revenue History' }: RevenueChartPr
                 strokeWidth={2}
               />
             </AreaChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-slate-50/50" />
         )}

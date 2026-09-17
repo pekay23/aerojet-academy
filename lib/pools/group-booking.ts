@@ -1,5 +1,4 @@
 import prisma from '@/lib/prisma/client'
-import { Prisma } from '@prisma/client'
 import { chargeWallet } from '@/lib/wallet/operations'
 import { getExamPricingConfig } from './pricing-config'
 import { logAuditEvent } from '@/lib/audit/logger'

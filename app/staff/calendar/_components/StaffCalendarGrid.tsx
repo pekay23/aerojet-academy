@@ -21,7 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  Filter,
+  Filter as _Filter,
   BookOpen,
   GraduationCap,
   CalendarDays,
@@ -82,7 +82,7 @@ const AUDIENCE_OPTIONS = [
 
 const COLOR_OPTIONS = ['#4A72E8', '#FF4F33', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4']
 
-function getEventStyles(source: string, color: string) {
+function getEventStyles(source: string, _color: string) {
   if (source === 'exam') return 'bg-[#FF4F33] text-white'
   if (source === 'class') return 'bg-[#EBF1FF] text-[#4A72E8]'
   return 'text-white'
@@ -132,7 +132,7 @@ function AudienceBadge({ visibleTo }: { visibleTo: string }) {
   )
 }
 
-export default function StaffCalendarGrid({ events, initialDate, currentUserId }: Props) {
+export default function StaffCalendarGrid({ events, initialDate, currentUserId: _currentUserId }: Props) {
   const [currentDate, setCurrentDate] = useState(initialDate || new Date())
   const [viewMode, setViewMode] = useState<'Month' | 'Week' | 'Day'>('Week')
   const [popupEvent, setPopupEvent] = useState<StaffCalendarEvent | null>(null)
@@ -213,7 +213,7 @@ export default function StaffCalendarGrid({ events, initialDate, currentUserId }
     setFormStart(evt.startDate.slice(0, 16))
     setFormEnd(evt.endDate?.slice(0, 16) || '')
     setFormColor(evt.color)
-    setFormAudience(evt.visibleTo as any)
+    setFormAudience(evt.visibleTo as 'ALL' | 'STUDENTS' | 'INSTRUCTORS' | 'EXAM_ONLY' | 'MODULAR' | 'FULL_TIME' | 'SPECIFIC_USER')
     setFormTargetUserId(evt.targetUserId || '')
     setFormRecurrence(evt.recurrenceType || 'NONE')
     setPopupEvent(null)
@@ -794,7 +794,7 @@ export default function StaffCalendarGrid({ events, initialDate, currentUserId }
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setFormAudience(opt.value as any)}
+                      onClick={() => setFormAudience(opt.value as 'ALL' | 'STUDENTS' | 'INSTRUCTORS' | 'EXAM_ONLY' | 'MODULAR' | 'FULL_TIME' | 'SPECIFIC_USER')}
                       className={cn(
                         'flex flex-col items-center justify-center gap-1 rounded-2xl border-2 p-2 text-center text-xs font-bold transition-all',
                         formAudience === opt.value

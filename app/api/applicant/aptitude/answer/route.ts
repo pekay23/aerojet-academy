@@ -37,7 +37,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Update answer
-  const updatedAnswer = await prismaUnfiltered.aptitudeAnswer.update({
+  const _updatedAnswer = await prismaUnfiltered.aptitudeAnswer.update({
     where: { sessionId_questionId: { sessionId, questionId } },
     data: { 
       selectedAnswer: answer,

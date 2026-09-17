@@ -62,7 +62,7 @@ export async function triggerSittingGeneration(eventId: string) {
       success: true,
       message: `Generated ${result.generatedSittings} sitting slot(s). Preserved ${result.preservedAssignments} occupied slot(s).`,
     }
-  } catch (error: any) {
-    return { success: false, error: error.message || 'Failed to generate sittings' }
+  } catch (error: unknown) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to generate sittings' }
   }
 }

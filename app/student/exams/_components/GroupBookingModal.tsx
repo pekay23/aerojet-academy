@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { createStudentPoolAction } from '@/app/student/actions'
 import { toast } from 'sonner'
-import { Loader2, ArrowRight, Users, Wallet, Calendar, Clock, X, Info, BookOpen } from 'lucide-react'
+import { Loader2, ArrowRight, Users, Wallet, Calendar, X, Info } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
 
 const MAX_MODULES = 4
@@ -109,7 +109,7 @@ export default function GroupBookingModal({
           setOpen(false)
           resetForm()
         }
-      } catch (err) {
+      } catch (_err) {
         toast.error('Something went wrong. Please try again.')
       }
     })
@@ -132,7 +132,7 @@ export default function GroupBookingModal({
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-[#003a7c] active:scale-95"
+          className="flex items-center gap-2 rounded-xl bg-blue-800 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-[#003a7c] active:scale-95"
         >
           <Users className="h-4 w-4" />
           Start New Group Booking
@@ -156,7 +156,7 @@ export default function GroupBookingModal({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
               <div>
-                <h2 id="group-booking-title" className="text-xl font-black tracking-tight text-aerojet-blue dark:text-white">
+                <h2 id="group-booking-title" className="text-xl font-black tracking-tight text-blue-800 dark:text-white">
                   Group Charter Booking
                 </h2>
                 <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -190,7 +190,7 @@ export default function GroupBookingModal({
                   <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                     Total Cost
                   </p>
-                  <p className="mt-1 text-xl font-black text-aerojet-blue dark:text-blue-300">
+                  <p className="mt-1 text-xl font-black text-blue-800 dark:text-blue-300">
                     {currencySymbol}{groupCharterFee.toFixed(2)}
                   </p>
                 </div>
@@ -325,7 +325,7 @@ export default function GroupBookingModal({
                       onClick={() => setExamTimeSlot('MORNING')}
                       className={`flex flex-col items-center justify-center gap-1 rounded-2xl border px-3 py-2.5 transition-all ${
                         examTimeSlot === 'MORNING'
-                          ? 'border-aerojet-blue bg-blue-50/50 text-aerojet-blue dark:bg-blue-900/20 dark:text-blue-300'
+                          ? 'border-blue-800 bg-blue-50/50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
                           : 'border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50'
                       }`}
                     >
@@ -337,7 +337,7 @@ export default function GroupBookingModal({
                       onClick={() => setExamTimeSlot('AFTERNOON')}
                       className={`flex flex-col items-center justify-center gap-1 rounded-2xl border px-3 py-2.5 transition-all ${
                         examTimeSlot === 'AFTERNOON'
-                          ? 'border-aerojet-blue bg-blue-50/50 text-aerojet-blue dark:bg-blue-900/20 dark:text-blue-300'
+                          ? 'border-blue-800 bg-blue-50/50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
                           : 'border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50'
                       }`}
                     >
@@ -396,7 +396,7 @@ export default function GroupBookingModal({
                   type="button"
                   onClick={handleSubmit}
                   disabled={isPending || !canAfford || !isFormValid}
-                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-aerojet-blue py-4 text-sm font-black text-white shadow-lg shadow-aerojet-blue/20 transition-all hover:bg-[#003a7c] hover:shadow-xl active:scale-95 disabled:opacity-50"
+                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-blue-800 py-4 text-sm font-black text-white shadow-lg shadow-blue-800/20 transition-all hover:bg-[#003a7c] hover:shadow-xl active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? (
                     <>

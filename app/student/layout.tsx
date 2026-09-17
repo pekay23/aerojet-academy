@@ -5,15 +5,14 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AlertTriangle } from 'lucide-react'
 import StudentSidebar from './_components/StudentSidebar'
 import Heartbeat from '@/components/shared/Heartbeat'
-import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
-import PortalHeader from '@/components/layouts/PortalHeader'
+import PortalTopbar from '@/components/layouts/PortalTopbar'
 import WelcomeBanner from '@/components/WelcomeBanner'
-import StudentTopbarActions from './_components/StudentTopbarActions'
 import ForcePasswordChange from '../applicant/_components/ForcePasswordChange'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import { getStudentPaymentAccessLevel, getEnrollmentMilestoneStatus } from '@/lib/access-control'
 import { resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
 import AppTour from '@/components/Tour/AppTour'
+import TourTrigger from '@/components/Tour/TourTrigger'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { shouldShowRevisionSupport } from '@/lib/revision/visibility'
 
@@ -81,7 +80,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   })
   const ftEnrollment = dbUser.fullTimeEnrollments?.[0] || null
   const preFetchedData = {
-    profile: studentProfile,
+    profile: studentProfile || undefined,
     enrollment: ftEnrollment,
   }
 
@@ -98,7 +97,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       prismaUnfiltered.message.count({ where: { recipientId: user.id, isRead: false } }),
       getStudentPaymentAccessLevel(user.id, preFetchedData),
       getEnrollmentMilestoneStatus(user.id, preFetchedData),
-      getWelcomeMessages(prismaUnfiltered, session.user.role),
+      getWelcomeMessages(prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient, session.user.role),
       isInternalExamSystemEnabled(),
       shouldShowRevisionSupport(user.id),
     ])
@@ -109,7 +108,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   const milestoneStatusJson = {
     ...milestoneStatus,
-    milestones: milestoneStatus.milestones.map((m: any) => ({
+    milestones: milestoneStatus.milestones.map((m: { id: string; type: string; yearNumber: number; amountDue: number; status: string; dueDate: Date; paidAt: Date | null }) => ({
       ...m,
       dueDate: m.dueDate.toISOString(),
       paidAt: m.paidAt?.toISOString() ?? null,
@@ -132,8 +131,18 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white">
+        Skip to main content
+      </a>
       <Heartbeat />
-      <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
+      <AppTour
+        hasCompletedTour={dbUser.hasCompletedTour}
+        userRole={userRole}
+        data={{
+          walletBalance: dbUser.wallet ? walletBalance : undefined,
+          unreadNotifications,
+        }}
+      />
       <StudentSidebar
         userName={userName}
         userRole={userRole}
@@ -146,16 +155,16 @@ export default async function StudentLayout({ children }: { children: React.Reac
         showRevisionSupport={showRevision}
         hasWallet={!!dbUser.wallet}
       />
-      <main id="main-content" className="relative pt-16 lg:pt-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="sticky top-0 z-30 border-b border-slate-100 bg-slate-50/80 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/80">
-          <div className="mx-auto max-w-[1920px] px-4 py-3 sm:px-8 lg:px-8">
-            <PortalHeader
-              actions={<StudentTopbarActions />}
-            >
-              <BreadcrumbNav />
-            </PortalHeader>
-          </div>
-        </div>
+      <main id="main-content" className="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden pt-16 lg:pt-0">
+        <PortalTopbar
+          itemsEndpoint="/api/student/topbar-items"
+          notificationsHref="/student/notifications"
+          messagesHref="/student/messages"
+          composeHref="/student/messages?compose=true"
+          welcomeMessage={welcomeMessages[0] ?? null}
+          userName={firstName}
+          actions={<TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />}
+        />
         {!dbUser.registrationPaid && (
           <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-900/20">
             <div className="mx-auto flex max-w-[1920px] items-center gap-3">

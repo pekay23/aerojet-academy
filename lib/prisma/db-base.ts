@@ -61,7 +61,10 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import 'server-only'
+import { createRequire } from 'module'
 import { PrismaClient } from '@prisma/client'
+
+const require = createRequire(import.meta.url)
 
 /**
  * DATABASE BASE LAYER (Raw Client)
@@ -74,7 +77,9 @@ import { PrismaClient } from '@prisma/client'
  * - During production (Vercel), uses DATABASE_URL from Vercel env vars
  *
  * === ADAPTER SELECTION ===
- * - If connection string hostname ends with .neon.tech → uses @prisma/adapter-neon
+ * - If connection string hostname ends with .neon.tech → uses @prisma/adapter-neon (WebSocket)
+ *   BUT in development mode, the pg TCP adapter is used instead for stability on local
+ *   Windows/macOS environments (Neon pooler URLs work with standard TCP connections)
  * - Otherwise → uses @prisma/adapter-pg with pg Pool
  *
  * === CONNECTION POOL ===
@@ -118,28 +123,36 @@ function isNeonConnection(connectionString: string): boolean {
 
 function createAdapter(connectionString: string) {
   const isNeon = isNeonConnection(connectionString)
-  const timeout = Number(process.env.DB_CONNECT_TIMEOUT_MS) || 10_000
+  const isDev = process.env.NODE_ENV === 'development'
+  const timeout = Number(process.env.DB_CONNECT_TIMEOUT_MS) || 30_000
 
-  if (isNeon) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // In development, prefer the TCP-based pg adapter over the Neon WebSocket
+  // adapter for more stable connections on local Windows/macOS environments.
+  // The Neon pooler URL works perfectly with standard pg TCP connections,
+  // avoiding the WebSocket instability that causes "prisma:error undefined".
+  if (isNeon && !isDev) {
     const { PrismaNeon } = require('@prisma/adapter-neon')
     return new PrismaNeon({ connectionString })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { PrismaPg } = require('@prisma/adapter-pg')
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { Pool } = require('pg')
 
   const pool = new Pool({
     connectionString,
-    max: 8,
+    max: isDev ? 16 : 8,
     connectionTimeoutMillis: timeout,
     idleTimeoutMillis: 30_000,
+    ssl: isDev ? { rejectUnauthorized: false } : undefined,
   })
 
+  // Log full error objects, not just .message (which can be undefined)
   pool.on('error', (err: Error) => {
-    console.error('[DB_BASE] Unexpected error on idle client:', err.message)
+    if (err instanceof Error) {
+      console.error('[DB_BASE] Unexpected error on idle client:', err.stack || err.message)
+    } else {
+      console.error('[DB_BASE] Unexpected error on idle client (non-Error):', JSON.stringify(err))
+    }
   })
 
   return new PrismaPg(pool)
@@ -247,10 +260,23 @@ function getClient(): PrismaClient {
   const adapter = createAdapter(connectionString)
   const isDev = process.env.NODE_ENV === 'development'
 
-  return new PrismaClient({
+  const client = new PrismaClient({
     adapter,
     log: isDev ? ['error', 'warn'] : ['error'],
   })
+
+  // Improve Prisma error logging: Prisma's default "prisma:error undefined"
+  // output is unhelpful when the error object lacks a .message property.
+  // This handler logs the full error context for diagnostics.
+  client.$on('error', (e: any) => {
+    const msg = e?.message ?? '[No message in Prisma error event]'
+    const code = e?.code ? ` (code: ${e.code})` : ''
+    const target = e?.target ? ` (model: ${e.target})` : ''
+    const meta = e?.meta ? ` meta: ${JSON.stringify(e.meta)}` : ''
+    console.error(`[DB_BASE] Prisma error:${code}${target} ${msg}${meta}`)
+  })
+
+  return client
 }
 
 let _client: PrismaClient | undefined

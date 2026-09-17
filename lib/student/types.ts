@@ -1,4 +1,4 @@
-import { Enrollment, Course, ExamBooking, Exam, ExamComponent, PoolMembership, ExamPool, PaymentMilestone, FullTimeEnrollment, FullTimeProgramme, ExamResult } from '@prisma/client'
+import { Enrollment, Course, ExamBooking, PaymentMilestone, FullTimeEnrollment, FullTimeProgramme } from '@prisma/client'
 
 /**
  * Serialized version of Prisma models for Client Components
@@ -35,7 +35,6 @@ export interface SerializedExamBooking extends Omit<ExamBooking, 'createdAt' | '
   } | null
   examDate: string
 }
-
 
 export interface SerializedPaymentMilestone extends Omit<PaymentMilestone, 'dueDate' | 'paidAt' | 'amountDue' | 'percentOfYearFee'> {
   amountDue: number
@@ -90,7 +89,7 @@ export interface SerializedUserProfile {
     pathwayName?: string | null
     enrollmentDate?: string | null
   } | null
-  settings?: any
+  settings?: Record<string, unknown>
 }
 
 export interface UnifiedExamRecord {

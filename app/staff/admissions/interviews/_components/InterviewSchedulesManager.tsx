@@ -4,19 +4,50 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Calendar, Clock, MapPin, Users, ChevronDown, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
-export default function InterviewSchedulesManager({ initialSchedules }: { initialSchedules: any[] }) {
+export interface InterviewSlot {
+  id: string
+  date: string
+  startTime: string
+  endTime: string
+  capacity: number
+  location: string | null
+  bookedCount: number
+}
+
+export interface InterviewSchedule {
+  id: string
+  name: string
+  startDate: string
+  endDate: string
+  slots: InterviewSlot[]
+}
+
+export default function InterviewSchedulesManager({
+  initialSchedules,
+}: {
+  initialSchedules: InterviewSchedule[]
+}) {
   const router = useRouter()
-  const [schedules, setSchedules] = useState(initialSchedules)
+  const [schedules, _setSchedules] = useState(initialSchedules)
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  
+
   // New Schedule State
   const [showNewSchedule, setShowNewSchedule] = useState(false)
   const [newSchedule, setNewSchedule] = useState({ name: '', startDate: '', endDate: '' })
 
   // New Slot State
   const [addingSlotTo, setAddingSlotTo] = useState<string | null>(null)
-  const [newSlot, setNewSlot] = useState({ date: '', startTime: '', endTime: '', capacity: 1, location: '' })
+  const [newSlot, setNewSlot] = useState({
+    date: '',
+    startTime: '',
+    endTime: '',
+    capacity: 1,
+    location: '',
+  })
+
+  const { markDirty, markClean } = useFormDirty()
 
   const handleCreateSchedule = async () => {
     try {
@@ -27,11 +58,12 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
           name: newSchedule.name,
           startDate: new Date(newSchedule.startDate).toISOString(),
           endDate: new Date(newSchedule.endDate).toISOString(),
-        })
+        }),
       })
       if (res.ok) {
         setShowNewSchedule(false)
         setNewSchedule({ name: '', startDate: '', endDate: '' })
+        markClean()
         router.refresh()
       } else {
         alert('Failed to create schedule')
@@ -55,11 +87,12 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
           endTime: endDateTime.toISOString(),
           capacity: Number(newSlot.capacity),
           location: newSlot.location,
-        })
+        }),
       })
       if (res.ok) {
         setAddingSlotTo(null)
         setNewSlot({ date: '', startTime: '', endTime: '', capacity: 1, location: '' })
+        markClean()
         router.refresh()
       } else {
         alert('Failed to create slot')
@@ -70,12 +103,12 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
       <div className="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-800">
         <h3 className="font-bold text-slate-900 dark:text-white">Interview Schedules</h3>
         <button
           onClick={() => setShowNewSchedule(!showNewSchedule)}
-          className="flex items-center gap-2 rounded-lg bg-aerojet-blue px-3 py-1.5 text-sm font-medium text-white hover:bg-aerojet-blue/90"
+          className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-white"
         >
           <Plus className="h-4 w-4" />
           New Schedule
@@ -92,7 +125,10 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
                 className="w-48 rounded-lg border border-slate-200 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
                 placeholder="e.g., Spring 2027 Interviews"
                 value={newSchedule.name}
-                onChange={(e) => setNewSchedule({ ...newSchedule, name: e.target.value })}
+                onChange={(e) => {
+                  setNewSchedule({ ...newSchedule, name: e.target.value })
+                  markDirty()
+                }}
               />
             </div>
             <div>
@@ -101,7 +137,10 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
                 type="date"
                 className="w-40 rounded-lg border border-slate-200 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
                 value={newSchedule.startDate}
-                onChange={(e) => setNewSchedule({ ...newSchedule, startDate: e.target.value })}
+                onChange={(e) => {
+                  setNewSchedule({ ...newSchedule, startDate: e.target.value })
+                  markDirty()
+                }}
               />
             </div>
             <div>
@@ -110,7 +149,10 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
                 type="date"
                 className="w-40 rounded-lg border border-slate-200 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
                 value={newSchedule.endDate}
-                onChange={(e) => setNewSchedule({ ...newSchedule, endDate: e.target.value })}
+                onChange={(e) => {
+                  setNewSchedule({ ...newSchedule, endDate: e.target.value })
+                  markDirty()
+                }}
               />
             </div>
             <div className="flex gap-2">
@@ -150,7 +192,8 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
                   <div>
                     <h4 className="font-bold text-slate-900 dark:text-white">{schedule.name}</h4>
                     <p className="text-xs text-slate-500">
-                      {format(new Date(schedule.startDate), 'MMM d, yyyy')} - {format(new Date(schedule.endDate), 'MMM d, yyyy')}
+                      {format(new Date(schedule.startDate), 'MMM d, yyyy')} -{' '}
+                      {format(new Date(schedule.endDate), 'MMM d, yyyy')}
                     </p>
                   </div>
                 </div>
@@ -162,17 +205,25 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
               {expandedId === schedule.id && (
                 <div className="bg-slate-50 p-4 dark:bg-slate-800/30">
                   <div className="mb-4 flex items-center justify-between">
-                    <h5 className="text-sm font-bold text-slate-700 dark:text-slate-300">Time Slots</h5>
+                    <h5 className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      Time Slots
+                    </h5>
                     <div className="flex items-center gap-4">
                       <button
-                        onClick={() => setAddingSlotTo(addingSlotTo === schedule.id + '-bulk' ? null : schedule.id + '-bulk')}
-                        className="flex items-center gap-1 text-xs font-medium text-aerojet-blue hover:underline"
+                        onClick={() =>
+                          setAddingSlotTo(
+                            addingSlotTo === schedule.id + '-bulk' ? null : schedule.id + '-bulk'
+                          )
+                        }
+                        className="text-aerojet-blue flex items-center gap-1 text-xs font-medium hover:underline"
                       >
                         <Calendar className="h-3 w-3" /> Bulk Generate
                       </button>
                       <button
-                        onClick={() => setAddingSlotTo(addingSlotTo === schedule.id ? null : schedule.id)}
-                        className="flex items-center gap-1 text-xs font-medium text-aerojet-blue hover:underline"
+                        onClick={() =>
+                          setAddingSlotTo(addingSlotTo === schedule.id ? null : schedule.id)
+                        }
+                        className="text-aerojet-blue flex items-center gap-1 text-xs font-medium hover:underline"
                       >
                         <Plus className="h-3 w-3" /> Add Single Slot
                       </button>
@@ -180,67 +231,149 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
                   </div>
 
                   {addingSlotTo === schedule.id + '-bulk' && (
-                    <div className="mb-4 rounded-lg border border-aerojet-blue/30 bg-aerojet-blue/5 p-4 dark:border-aerojet-sky/30 dark:bg-aerojet-sky/5">
-                      <h6 className="mb-3 text-xs font-bold text-aerojet-blue dark:text-aerojet-sky">Bulk Generate Slots</h6>
+                    <div className="border-aerojet-blue/30 bg-aerojet-blue/5 dark:border-aerojet-sky/30 dark:bg-aerojet-sky/5 mb-4 rounded-lg border p-4">
+                      <h6 className="text-aerojet-blue dark:text-aerojet-sky mb-3 text-xs font-bold">
+                        Bulk Generate Slots
+                      </h6>
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <div>
-                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">Start Date</label>
-                          <input type="date" className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900" 
-                            id={`bulk-start-${schedule.id}`} defaultValue={format(new Date(schedule.startDate), 'yyyy-MM-dd')} />
+                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                            Date
+                          </label>
+                          <input
+                            type="date"
+                            className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+                            id={`bulk-start-${schedule.id}`}
+                            defaultValue={format(new Date(schedule.startDate), 'yyyy-MM-dd')}
+                          />
                         </div>
                         <div>
-                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">End Date</label>
-                          <input type="date" className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900" 
-                            id={`bulk-end-${schedule.id}`} defaultValue={format(new Date(schedule.endDate), 'yyyy-MM-dd')} />
+                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                            End Date
+                          </label>
+                          <input
+                            type="date"
+                            className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+                            id={`bulk-end-${schedule.id}`}
+                            defaultValue={format(new Date(schedule.endDate), 'yyyy-MM-dd')}
+                          />
                         </div>
                         <div className="sm:col-span-2">
-                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">Days of Week (0=Sun, 6=Sat)</label>
-                          <input type="text" className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900" 
-                            id={`bulk-days-${schedule.id}`} defaultValue="1,2,3,4,5" placeholder="e.g. 1,2,3,4,5" />
+                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                            Days of Week (0=Sun, 6=Sat)
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+                            id={`bulk-days-${schedule.id}`}
+                            defaultValue="1,2,3,4,5"
+                            placeholder="e.g. 1,2,3,4,5"
+                          />
                         </div>
                         <div>
-                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">Time Block 1 Start</label>
-                          <input type="time" className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900" 
-                            id={`bulk-t1-start-${schedule.id}`} defaultValue="09:00" />
+                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                            Time Block 1 Start
+                          </label>
+                          <input
+                            type="time"
+                            className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+                            id={`bulk-t1-start-${schedule.id}`}
+                            defaultValue="09:00"
+                          />
                         </div>
                         <div>
-                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">Time Block 1 End</label>
-                          <input type="time" className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900" 
-                            id={`bulk-t1-end-${schedule.id}`} defaultValue="10:00" />
+                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                            Time Block 1 End
+                          </label>
+                          <input
+                            type="time"
+                            className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+                            id={`bulk-t1-end-${schedule.id}`}
+                            defaultValue="10:00"
+                          />
                         </div>
                         <div>
-                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">Capacity per Slot</label>
-                          <input type="number" className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900" 
-                            id={`bulk-capacity-${schedule.id}`} defaultValue="1" min="1" />
+                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                            Capacity per Slot
+                          </label>
+                          <input
+                            type="number"
+                            className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+                            id={`bulk-capacity-${schedule.id}`}
+                            defaultValue="1"
+                            min="1"
+                          />
                         </div>
                         <div>
-                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">Location</label>
-                          <input type="text" className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900" 
-                            id={`bulk-location-${schedule.id}`} placeholder="e.g. Zoom" />
+                          <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                            Location
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full rounded border px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+                            id={`bulk-location-${schedule.id}`}
+                            placeholder="e.g. Zoom"
+                          />
                         </div>
                       </div>
                       <div className="mt-4 flex gap-2">
                         <button
                           onClick={async () => {
-                            const start = (document.getElementById(`bulk-start-${schedule.id}`) as HTMLInputElement).value
-                            const end = (document.getElementById(`bulk-end-${schedule.id}`) as HTMLInputElement).value
-                            const days = (document.getElementById(`bulk-days-${schedule.id}`) as HTMLInputElement).value.split(',').map(d => parseInt(d.trim(), 10))
-                            const t1s = (document.getElementById(`bulk-t1-start-${schedule.id}`) as HTMLInputElement).value
-                            const t1e = (document.getElementById(`bulk-t1-end-${schedule.id}`) as HTMLInputElement).value
-                            const cap = parseInt((document.getElementById(`bulk-capacity-${schedule.id}`) as HTMLInputElement).value, 10)
-                            const loc = (document.getElementById(`bulk-location-${schedule.id}`) as HTMLInputElement).value
+                            const start = (
+                              document.getElementById(
+                                `bulk-start-${schedule.id}`
+                              ) as HTMLInputElement
+                            ).value
+                            const end = (
+                              document.getElementById(`bulk-end-${schedule.id}`) as HTMLInputElement
+                            ).value
+                            const days = (
+                              document.getElementById(
+                                `bulk-days-${schedule.id}`
+                              ) as HTMLInputElement
+                            ).value
+                              .split(',')
+                              .map((d) => parseInt(d.trim(), 10))
+                            const t1s = (
+                              document.getElementById(
+                                `bulk-t1-start-${schedule.id}`
+                              ) as HTMLInputElement
+                            ).value
+                            const t1e = (
+                              document.getElementById(
+                                `bulk-t1-end-${schedule.id}`
+                              ) as HTMLInputElement
+                            ).value
+                            const cap = parseInt(
+                              (
+                                document.getElementById(
+                                  `bulk-capacity-${schedule.id}`
+                                ) as HTMLInputElement
+                              ).value,
+                              10
+                            )
+                            const loc = (
+                              document.getElementById(
+                                `bulk-location-${schedule.id}`
+                              ) as HTMLInputElement
+                            ).value
 
                             try {
-                              const res = await fetch(`/api/staff/admissions/interviews/schedules/${schedule.id}/slots/generate`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                  dateStart: new Date(start).toISOString(),
-                                  dateEnd: new Date(end).toISOString(),
-                                  daysOfWeek: days,
-                                  timeBlocks: [{ start: t1s, end: t1e, capacity: cap, location: loc }]
-                                })
-                              })
+                              const res = await fetch(
+                                `/api/staff/admissions/interviews/schedules/${schedule.id}/slots/generate`,
+                                {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    dateStart: new Date(start).toISOString(),
+                                    dateEnd: new Date(end).toISOString(),
+                                    daysOfWeek: days,
+                                    timeBlocks: [
+                                      { start: t1s, end: t1e, capacity: cap, location: loc },
+                                    ],
+                                  }),
+                                }
+                              )
                               if (res.ok) {
                                 setAddingSlotTo(null)
                                 router.refresh()
@@ -251,7 +384,7 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
                               console.error(e)
                             }
                           }}
-                          className="rounded bg-aerojet-blue px-4 py-1.5 text-sm font-medium text-white hover:bg-aerojet-blue/90"
+                          className="bg-aerojet-blue hover:bg-aerojet-blue/90 rounded px-4 py-1.5 text-sm font-medium text-white"
                         >
                           Generate Slots
                         </button>
@@ -268,50 +401,75 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
                   {addingSlotTo === schedule.id && (
                     <div className="mb-4 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800">
                       <div>
-                        <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">Date</label>
+                        <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                          Date
+                        </label>
                         <input
                           type="date"
                           className="w-32 rounded border px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-900"
                           value={newSlot.date}
-                          onChange={(e) => setNewSlot({ ...newSlot, date: e.target.value })}
+                          onChange={(e) => {
+                            setNewSlot({ ...newSlot, date: e.target.value })
+                            markDirty()
+                          }}
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">Start Time</label>
+                        <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                          Start Time
+                        </label>
                         <input
                           type="time"
                           className="w-24 rounded border px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-900"
                           value={newSlot.startTime}
-                          onChange={(e) => setNewSlot({ ...newSlot, startTime: e.target.value })}
+                          onChange={(e) => {
+                            setNewSlot({ ...newSlot, startTime: e.target.value })
+                            markDirty()
+                          }}
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">End Time</label>
+                        <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                          End Time
+                        </label>
                         <input
                           type="time"
                           className="w-24 rounded border px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-900"
                           value={newSlot.endTime}
-                          onChange={(e) => setNewSlot({ ...newSlot, endTime: e.target.value })}
+                          onChange={(e) => {
+                            setNewSlot({ ...newSlot, endTime: e.target.value })
+                            markDirty()
+                          }}
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">Capacity</label>
+                        <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                          Capacity
+                        </label>
                         <input
                           type="number"
                           min="1"
                           className="w-16 rounded border px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-900"
                           value={newSlot.capacity}
-                          onChange={(e) => setNewSlot({ ...newSlot, capacity: parseInt(e.target.value) })}
+                          onChange={(e) => {
+                            setNewSlot({ ...newSlot, capacity: parseInt(e.target.value) })
+                            markDirty()
+                          }}
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">Location/Link</label>
+                        <label className="mb-1 block text-[10px] font-medium text-slate-500 uppercase">
+                          Location/Link
+                        </label>
                         <input
                           type="text"
                           className="w-40 rounded border px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-900"
                           placeholder="Room 101 or Zoom link"
                           value={newSlot.location}
-                          onChange={(e) => setNewSlot({ ...newSlot, location: e.target.value })}
+                          onChange={(e) => {
+                            setNewSlot({ ...newSlot, location: e.target.value })
+                            markDirty()
+                          }}
                         />
                       </div>
                       <div className="flex gap-2">
@@ -332,18 +490,24 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
                   )}
 
                   {schedule.slots.length === 0 ? (
-                    <div className="text-sm text-slate-500">No slots defined for this schedule.</div>
+                    <div className="text-sm text-slate-500">
+                      No slots defined for this schedule.
+                    </div>
                   ) : (
                     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                      {schedule.slots.map((slot: any) => (
-                        <div key={slot.id} className="flex flex-col justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-xs dark:border-slate-700 dark:bg-slate-900">
+                      {schedule.slots.map((slot) => (
+                        <div
+                          key={slot.id}
+                          className="flex flex-col justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-xs dark:border-slate-700 dark:bg-slate-900"
+                        >
                           <div className="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-white">
                             <Calendar className="h-4 w-4 text-slate-400" />
                             {format(new Date(slot.date), 'MMM d, yyyy')}
                           </div>
                           <div className="mt-1 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
                             <Clock className="h-3.5 w-3.5 text-slate-400" />
-                            {format(new Date(slot.startTime), 'h:mm a')} - {format(new Date(slot.endTime), 'h:mm a')}
+                            {format(new Date(slot.startTime), 'h:mm a')} -{' '}
+                            {format(new Date(slot.endTime), 'h:mm a')}
                           </div>
                           {slot.location && (
                             <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
@@ -356,7 +520,9 @@ export default function InterviewSchedulesManager({ initialSchedules }: { initia
                               <Users className="h-3.5 w-3.5" />
                               {slot.bookedCount} / {slot.capacity} Booked
                             </div>
-                            <span className={`text-[10px] font-bold uppercase ${slot.bookedCount >= slot.capacity ? 'text-red-500' : 'text-green-500'}`}>
+                            <span
+                              className={`text-[10px] font-bold uppercase ${slot.bookedCount >= slot.capacity ? 'text-red-500' : 'text-green-500'}`}
+                            >
                               {slot.bookedCount >= slot.capacity ? 'Full' : 'Available'}
                             </span>
                           </div>

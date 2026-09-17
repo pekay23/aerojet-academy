@@ -4,21 +4,15 @@ import { Metadata } from 'next'
 import { UserAvatar } from '@/components/shared/UserAvatar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Mail,
-  Phone,
-  User as UserIcon,
-  Calendar,
-  BookOpen,
-  GraduationCap,
-  ArrowLeft,
-} from 'lucide-react'
+import { Mail, Phone, Calendar, GraduationCap, ArrowLeft, BookOpen } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import StudentEnrollmentsView from './_components/StudentEnrollmentsView'
 
 export const metadata: Metadata = {
   title: 'Student Profile | Instructor Portal',
 }
+export const dynamic = 'force-dynamic'
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -32,13 +26,13 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const studentProfile = student.studentProfile
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-5xl space-y-8 pb-20 duration-700">
       {/* Back Link */}
       <Link
         href="/instructor/students"
-        className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-aerojet-sky"
+        className="group hover:text-aerojet-sky flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors"
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-100 bg-white transition-all group-hover:border-aerojet-sky/50 group-hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900">
+        <div className="group-hover:border-aerojet-sky/50 flex h-8 w-8 items-center justify-center rounded-xl border border-slate-100 bg-white transition-all group-hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900">
           <ArrowLeft className="h-4 w-4" />
         </div>
         Back to Students
@@ -58,17 +52,17 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
           <div className="flex-1 space-y-2">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+              <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
                 {profile?.firstName} {profile?.lastName}
               </h1>
               <Badge
                 variant="outline"
-                className="rounded-full border-aerojet-sky bg-blue-50 px-4 py-1.5 text-xs font-black text-aerojet-sky uppercase dark:bg-blue-900/20"
+                className="border-aerojet-sky text-aerojet-sky rounded-full bg-blue-50 px-4 py-1.5 text-xs font-black uppercase dark:bg-blue-900/20"
               >
                 Active Student
               </Badge>
             </div>
-            <p className="text-lg font-medium text-slate-400">
+            <p className="text-lg font-medium text-slate-400 dark:text-slate-300">
               Student ID:{' '}
               <span className="text-slate-900 dark:text-slate-100">
                 {studentProfile?.studentId || 'N/A'}
@@ -96,72 +90,13 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <div className="space-y-8 lg:col-span-2">
           <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
             <CardHeader className="border-b border-slate-50 dark:border-slate-800/50">
-              <CardTitle className="flex items-center gap-3 text-xl font-black text-aerojet-blue dark:text-white">
-                <BookOpen className="h-5 w-5 text-aerojet-sky" />
+              <CardTitle className="text-aerojet-blue flex items-center gap-3 text-xl font-black dark:text-white">
+                <BookOpen className="text-aerojet-sky h-5 w-5" />
                 Enrolled Modules (Your Classes)
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              {student.enrollments.length > 0 ? (
-                <div className="divide-y divide-slate-50 dark:divide-slate-800">
-                  {student.enrollments.map((enr: any) => (
-                    <div
-                      key={enr.id}
-                      className="p-6 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <h4 className="font-black text-slate-900 dark:text-white">
-                            {enr.course.name}
-                          </h4>
-                          <p className="text-sm font-bold tracking-widest text-aerojet-sky uppercase">
-                            {enr.course.code}
-                          </p>
-                        </div>
-                        <Badge className="bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400">
-                          {enr.status}
-                        </Badge>
-                      </div>
-
-                      <div className="mt-6 space-y-4">
-                        <h5 className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                          Recent Grades in this Module
-                        </h5>
-                        {enr.grades.length > 0 ? (
-                          <div className="grid gap-3 sm:grid-cols-2">
-                            {enr.grades.map((grade: any) => (
-                              <div
-                                key={grade.id}
-                                className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/50"
-                              >
-                                <div>
-                                  <p className="text-xs font-bold text-slate-900 dark:text-white">
-                                    {grade.assessmentName}
-                                  </p>
-                                  <p className="text-[10px] text-slate-400">
-                                    {format(new Date(grade.assessmentDate), 'MMM d, yyyy')}
-                                  </p>
-                                </div>
-                                <span className="text-sm font-black text-aerojet-sky">
-                                  {grade.score}%
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-slate-400 italic">
-                            No grades recorded by you for this module.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-20 text-center">
-                  <p className="font-medium text-slate-400">No shared modules found.</p>
-                </div>
-              )}
+              <StudentEnrollmentsView enrollments={student.enrollments} />
             </CardContent>
           </Card>
         </div>
@@ -170,7 +105,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <div className="space-y-8">
           <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
             <CardHeader>
-              <CardTitle className="text-lg font-black text-aerojet-blue dark:text-white">
+              <CardTitle className="text-aerojet-blue text-lg font-black dark:text-white">
                 Student Info
               </CardTitle>
             </CardHeader>
@@ -180,7 +115,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase dark:text-slate-300">
                     Enrolled Since
                   </p>
                   <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -196,7 +131,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                   <GraduationCap className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase dark:text-slate-300">
                     Enrollment Type
                   </p>
                   <p className="text-sm font-bold text-slate-900 dark:text-slate-100">

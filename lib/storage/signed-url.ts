@@ -35,9 +35,11 @@
  * @param scope    - Optional access scope ("students", "resources", "staff", "profile-photos")
  * @param options  - Optional width and quality for server-side resize
  */
+export type ProxyScope = 'students' | 'resources' | 'staff' | 'profile-photos'
+
 export function proxyImageUrl(
   imageUrl: string,
-  scope?: string,
+  scope?: ProxyScope,
   options?: { width?: number; quality?: number }
 ): string {
   const params = new URLSearchParams({ url: imageUrl })

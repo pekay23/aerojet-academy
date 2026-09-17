@@ -31,7 +31,7 @@ import {
 } from '@/lib/documents/actions'
 
 const DOCUMENT_TYPES = ['ID', 'MEDICAL', 'QUALIFICATION', 'CERTIFICATE', 'CONTRACT', 'OTHER']
-const STORAGE_PROVIDERS = ['UPLOADTHING', 'SUPABASE'] as const
+const _STORAGE_PROVIDERS = ['UPLOADTHING', 'SUPABASE'] as const
 
 interface Doc {
   id: string
@@ -49,7 +49,7 @@ interface Doc {
   }
 }
 
-type StorageProvider = (typeof STORAGE_PROVIDERS)[number]
+type StorageProvider = (typeof _STORAGE_PROVIDERS)[number]
 
 export default function DocumentsManager({ documents }: { documents: Doc[] }) {
   const [isPending, startTransition] = useTransition()
@@ -477,15 +477,6 @@ export default function DocumentsManager({ documents }: { documents: Doc[] }) {
                   <div className="mx-auto flex max-w-sm flex-col items-center gap-3 text-sm text-slate-500">
                     <Link2 className="size-8 text-slate-300" />
                     <span>No documents.</span>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => setIsUploadOpen(true)}
-                      className="bg-aerojet-blue hover:bg-aerojet-blue/90 text-white"
-                    >
-                      <Upload className="size-4" />
-                      Upload files
-                    </Button>
                   </div>
                 </td>
               </tr>

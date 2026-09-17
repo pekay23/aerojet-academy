@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStudent } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler, parsePagination } from '@/lib/api/response'
 
@@ -11,18 +11,18 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const where = { userId: user.id }
 
   const [records, total] = await Promise.all([
-    prisma.attendanceRecord.findMany({
+    prismaUnfiltered.attendanceRecord.findMany({
       where,
       include: { class: { include: { course: { select: { code: true, name: true } } } } },
       orderBy: { date: 'desc' },
       skip,
       take: limit,
     }),
-    prisma.attendanceRecord.count({ where }),
+    prismaUnfiltered.attendanceRecord.count({ where }),
   ])
 
   // Summary across ALL records (not just current page)
-  const allStatuses = await prisma.attendanceRecord.groupBy({
+  const allStatuses = await prismaUnfiltered.attendanceRecord.groupBy({
     by: ['status'],
     where,
     _count: true,

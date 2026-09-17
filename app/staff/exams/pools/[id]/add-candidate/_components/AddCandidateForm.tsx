@@ -3,10 +3,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import Link from 'next/link'
+
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Loader2, Search, User, Check, X } from 'lucide-react'
+import { Loader2, Search, User, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -15,7 +15,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
+  FormDescription as _FormDescription,
 } from '@/components/ui/form'
 import {
   Select,
@@ -25,13 +25,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { toast } from '@/hooks/use-toast'
-import { ExamPool } from '@prisma/client'
+import { toast } from 'sonner'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface AddCandidateFormProps {
-  pool: any // Using any to key into complex include if needed. Wait, passing standard type + explicit props is better.
-  // Actually, I fetched pool with details, so it has allowedModules.
-  // Let's use `ExamPool` type and assume it's augmented or just use `any` temporarily for flexibility with Prisma includes.
+  pool: {
+    id: string
+    allowedModules: string[]
+  }
 }
 
 const addCandidateSchema = z.object({
@@ -45,8 +46,14 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<any[]>([])
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [searchResults, setSearchResults] = useState<
+    { id: string; profile: { firstName: string; lastName: string }; email: string }[]
+  >([])
+  const [selectedUser, setSelectedUser] = useState<{
+    id: string
+    profile: { firstName: string; lastName: string }
+    email: string
+  } | null>(null)
 
   const form = useForm<AddCandidateFormValues>({
     resolver: zodResolver(addCandidateSchema),
@@ -54,6 +61,14 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
       userId: '',
       selectedModule: '',
     },
+  })
+
+  const { markDirty, markClean } = useFormDirty()
+
+  // Track form changes for unsaved changes warning
+  useEffect(() => {
+    const subscription = form.watch(() => markDirty())
+    return () => subscription.unsubscribe()
   })
 
   // Debounce search
@@ -66,8 +81,8 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
           if (res.ok) {
             setSearchResults(data)
           }
-        } catch (error) {
-          console.error('Search failed', error)
+        } catch (_error) {
+          toast.error('Search failed')
         }
       } else {
         setSearchResults([])
@@ -77,7 +92,11 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  const handleSelectUser = (user: any) => {
+  const handleSelectUser = (user: {
+    id: string
+    profile: { firstName: string; lastName: string }
+    email: string
+  }) => {
     setSelectedUser(user)
     form.setValue('userId', user.id)
     setSearchQuery('')
@@ -106,10 +125,12 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
       }
 
       toast.success('Candidate added successfully')
+      markClean()
       router.push(`/staff/exams/pools/${pool.id}`)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to add candidate')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to add candidate'
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }
@@ -123,16 +144,18 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
           <FormLabel>Student</FormLabel>
 
           {selectedUser ? (
-            <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3">
+            <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-slate-900 font-bold text-aerojet-blue shadow-sm">
+                <div className="text-aerojet-blue flex h-10 w-10 items-center justify-center rounded-full bg-white font-bold shadow-sm dark:bg-slate-900">
                   <User className="h-5 w-5" />
                 </div>
                 <div>
                   <div className="font-bold text-slate-900 dark:text-slate-100">
                     {selectedUser.profile?.firstName} {selectedUser.profile?.lastName}
                   </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">{selectedUser.email}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                    {selectedUser.email}
+                  </div>
                 </div>
               </div>
               <Button type="button" variant="ghost" size="sm" onClick={handleClearUser}>
@@ -141,7 +164,7 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
             </div>
           ) : (
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 id="candidate-search"
                 placeholder="Search by name or email..."
@@ -152,7 +175,7 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
               />
 
               {searchResults.length > 0 && (
-                <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg">
+                <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-slate-100 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900">
                   {searchResults.map((user) => (
                     <button
                       key={user.id}
@@ -168,7 +191,9 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
                         <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
                           {user.profile?.firstName} {user.profile?.lastName}
                         </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">{user.email}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                          {user.email}
+                        </div>
                       </div>
                     </button>
                   ))}
@@ -220,7 +245,7 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
           </Button>
           <Button
             type="submit"
-            className="bg-aerojet-blue px-8 hover:bg-aerojet-blue/90"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 px-8"
             disabled={isLoading || !selectedUser}
           >
             {isLoading ? (

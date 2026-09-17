@@ -6,13 +6,14 @@ import {
   BookOpen,
   CheckCircle2,
   XCircle,
-  Clock,
   Loader2,
   AlertTriangle,
   ArrowRight,
   Trophy,
   Hourglass,
+  Download,
 } from 'lucide-react'
+import ConfirmModal from '@/app/staff/exams/internal/_components/ConfirmModal'
 
 interface BankProgress {
   bankId: string
@@ -65,6 +66,7 @@ export default function InternalExamDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [confirmedDetails, setConfirmedDetails] = useState<Record<string, boolean>>({})
   const [selectedCategories, setSelectedCategories] = useState<Record<string, string>>({})
+  const [confirmStartBank, setConfirmStartBank] = useState<string | null>(null)
 
   const fetchProgress = useCallback(async () => {
     setError(null)
@@ -83,11 +85,13 @@ export default function InternalExamDashboard() {
     }
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchProgress() }, [fetchProgress])
 
   useEffect(() => {
     const bankId = searchParams.get('bankId')
     if (!bankId || !data?.bankProgress.some(bank => bank.bankId === bankId)) return
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowLobby(bankId)
   }, [data?.bankProgress, searchParams])
 
@@ -98,6 +102,17 @@ export default function InternalExamDashboard() {
       setError('Select the licence category for this internal exam attempt.')
       return
     }
+
+    setConfirmStartBank(bankId)
+  }
+
+  const handleConfirmStart = async () => {
+    const bankId = confirmStartBank
+    if (!bankId) return
+    setConfirmStartBank(null)
+
+    const bank = data?.bankProgress.find((item) => item.bankId === bankId)
+    const categoryCode = bank?.categoryCode || selectedCategories[bankId] || ''
 
     setStarting(bankId)
     setError(null)
@@ -124,12 +139,12 @@ export default function InternalExamDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-8 w-8 animate-spin text-aerojet-blue" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-800" />
       </div>
     )
   }
 
-  const now = new Date()
+  const _now = new Date()
   const dateFormatter = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
   const formatOptionalDate = (value: string | null) => value ? dateFormatter.format(new Date(value)) : 'Not recorded'
 
@@ -162,7 +177,7 @@ export default function InternalExamDashboard() {
               className={`h-full rounded-full transition-all ${
                 data.completionWindow.percentElapsed > 80 ? 'bg-red-500'
                 : data.completionWindow.percentElapsed > 60 ? 'bg-amber-500'
-                : 'bg-aerojet-blue'
+                : 'bg-blue-800'
               }`}
               style={{ width: `${data.completionWindow.percentElapsed}%` }}
             />
@@ -194,8 +209,8 @@ export default function InternalExamDashboard() {
           <p className="mt-1 text-2xl font-bold text-green-800 dark:text-green-200">{data.summary.passedModules}</p>
           <p className="text-xs text-green-600">Passed</p>
         </div>
-        <div className="rounded-xl border border-aerojet-blue/20 bg-blue-50 p-4 text-center dark:border-blue-800/50 dark:bg-blue-900/10">
-          <CheckCircle2 className="mx-auto h-5 w-5 text-aerojet-blue" />
+        <div className="rounded-xl border border-blue-800/20 bg-blue-50 p-4 text-center dark:border-blue-800/50 dark:bg-blue-900/10">
+          <CheckCircle2 className="mx-auto h-5 w-5 text-blue-800" />
           <p className="mt-1 text-2xl font-bold text-aerojet-blue">{data.summary.progressPercent}%</p>
           <p className="text-xs text-slate-500">Complete</p>
         </div>
@@ -246,7 +261,7 @@ export default function InternalExamDashboard() {
                     <button
                       onClick={() => setShowLobby(bank.bankId)}
                       disabled={starting === bank.bankId}
-                      className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50 dark:bg-aerojet-sky"
+                      className="flex items-center gap-1.5 rounded-lg bg-blue-800 px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50 dark:bg-sky-400"
                     >
                       {starting === bank.bankId ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -258,6 +273,14 @@ export default function InternalExamDashboard() {
                       )}
                     </button>
                   )}
+                  <a
+                    href={`/api/student/exams/internal/banks/${bank.bankId}/seb-config`}
+                    download
+                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download SEB Config
+                  </a>
                 </div>
               </div>
 
@@ -282,7 +305,7 @@ export default function InternalExamDashboard() {
                           type="checkbox"
                           checked={!!confirmedDetails[bank.bankId]}
                           onChange={(event) => setConfirmedDetails(prev => ({ ...prev, [bank.bankId]: event.target.checked }))}
-                          className="mt-0.5 h-4 w-4 rounded border-slate-300 text-aerojet-blue focus:ring-aerojet-blue"
+                          className="mt-0.5 h-4 w-4 rounded border-slate-300 text-aerojet-blue focus:ring-blue-800"
                         />
                         <span>I confirm these details are correct for this exam attempt.</span>
                       </label>
@@ -357,6 +380,17 @@ export default function InternalExamDashboard() {
           )
         })}
       </div>
+      <ConfirmModal
+        open={confirmStartBank !== null}
+        title="Confirm Exam Start"
+        description="Once you begin, the timer starts immediately and cannot be paused. Ensure you are ready to complete the exam in one sitting."
+        confirmLabel="Yes, Start Exam"
+        cancelLabel="Cancel"
+        variant="warning"
+        loading={starting !== null}
+        onConfirm={handleConfirmStart}
+        onCancel={() => setConfirmStartBank(null)}
+      />
     </div>
   )
 }

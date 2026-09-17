@@ -1,51 +1,78 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Plus, Calendar, Users, MoreVertical, BookOpen } from 'lucide-react'
+import { Plus, Calendar, BookOpen } from 'lucide-react'
 import ClassActionsMenu from '../_components/ClassActionsMenu'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
+import ClassesPagination from '../_components/ClassesPagination'
 
 export const metadata: Metadata = { title: 'Classes | Staff Portal' }
+export const dynamic = 'force-dynamic'
 
-export default async function ClassesPage() {
+export default async function ClassesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; limit?: string; query?: string }>
+}) {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const classes = await prismaUnfiltered.class.findMany({
-    select: {
-      id: true,
-      name: true,
-      startDate: true,
-      endDate: true,
-      maxStudents: true,
-      currentStudents: true,
-      course: {
-        select: {
-          id: true,
-          code: true,
-          name: true,
+  const params = await searchParams
+  const page = Math.max(1, parseInt(params.page || '1', 10) || 1)
+  const limit = Math.min(100, Math.max(1, parseInt(params.limit || '25', 10) || 25))
+  const query = params.query?.trim() || undefined
+  const skip = (page - 1) * limit
+
+  const where = query
+    ? {
+        OR: [
+          { name: { contains: query, mode: 'insensitive' as const } },
+          { course: { code: { contains: query, mode: 'insensitive' as const } } },
+        ],
+      }
+    : undefined
+
+  const [classes, total] = await Promise.all([
+    prismaUnfiltered.class.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        startDate: true,
+        endDate: true,
+        maxStudents: true,
+        currentStudents: true,
+        course: {
+          select: {
+            id: true,
+            code: true,
+            name: true,
+          },
         },
-      },
-      instructor: {
-        select: {
-          id: true,
-          user: {
-            select: {
-              profile: {
-                select: {
-                  firstName: true,
-                  lastName: true,
+        instructor: {
+          select: {
+            id: true,
+            user: {
+              select: {
+                profile: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                  },
                 },
               },
             },
           },
         },
       },
-    },
-    orderBy: { startDate: 'desc' },
-  })
+      orderBy: { startDate: 'desc' },
+      take: limit,
+      skip,
+    }),
+    prismaUnfiltered.class.count({ where }),
+  ])
 
   return (
     <div className="mx-auto max-w-[1800px]">
@@ -149,6 +176,7 @@ export default async function ClassesPage() {
             </tbody>
           </table>
         </div>
+        <ClassesPagination page={page} perPage={limit} total={total} query={query} />
       </div>
     </div>
   )

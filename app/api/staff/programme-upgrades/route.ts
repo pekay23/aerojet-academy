@@ -3,15 +3,18 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
+import type { Prisma } from '@prisma/client'
+
+type RouteContext = { params: Promise<Record<string, string>> }
 
 // GET — list upgrade requests
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext) => {
   await requireStaff()
   const url = new URL(req.url)
   const status = url.searchParams.get('status')
 
-  const where: any = {}
-  if (status) where.status = status
+  const where: Prisma.ProgrammeUpgradeRequestWhereInput = {}
+  if (status) where.status = status as Prisma.ProgrammeUpgradeRequestWhereInput['status']
 
   const requests = await prismaUnfiltered.programmeUpgradeRequest.findMany({
     where,
@@ -40,7 +43,7 @@ const createSchema = z.object({
   paymentDifference: z.number().optional(),
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, _ctx: RouteContext) => {
   const staff = await requireStaff()
   const body = await req.json()
   const parsed = createSchema.safeParse(body)
@@ -50,8 +53,8 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
     data: {
       applicationId: parsed.data.applicationId,
       studentProfileId: parsed.data.studentProfileId,
-      fromProgramme: parsed.data.fromProgramme as any,
-      toProgramme: parsed.data.toProgramme as any,
+      fromProgramme: parsed.data.fromProgramme as Prisma.ProgrammeUpgradeRequestCreateInput['fromProgramme'],
+      toProgramme: parsed.data.toProgramme as Prisma.ProgrammeUpgradeRequestCreateInput['toProgramme'],
       initiatedBy: staff.id,
       reason: parsed.data.reason || null,
       paymentDifference: parsed.data.paymentDifference || null,

@@ -102,8 +102,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     })
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
-    console.error('Approve top-up err:', error)
+  } catch (error: unknown) {
+    console.error('Approve top-up err:', error instanceof Error ? error : 'Unknown error')
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

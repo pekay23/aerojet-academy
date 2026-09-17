@@ -23,10 +23,6 @@ export function ReferralPanel() {
   const [isLoading, setIsLoading] = useState(true)
   const [copied, setCopied] = useState(false)
 
-  useEffect(() => {
-    fetchReferralInfo()
-  }, [])
-
   const fetchReferralInfo = async () => {
     try {
       const res = await fetch('/api/applicant/exam-only/referrals')
@@ -39,6 +35,11 @@ export function ReferralPanel() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchReferralInfo()
+  }, [])
 
   const generateCode = async () => {
     const res = await fetch('/api/applicant/exam-only/referrals', { method: 'POST' })

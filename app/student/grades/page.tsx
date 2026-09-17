@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { GraduationCap, Award, FileText, TrendingUp, AlertCircle } from 'lucide-react'
+import { Award, FileText, TrendingUp } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
@@ -22,7 +22,7 @@ export default async function GradesPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
+  const { isFullTime, isExamOnly } = await getStudentStatus(session.user.id)
 
   // Exam-only students have no enrollment grades — redirect to transcript
   if (isExamOnly) {
@@ -50,7 +50,7 @@ export default async function GradesPage() {
     return (
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             My Grades
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -105,7 +105,7 @@ export default async function GradesPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
           My Grades
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

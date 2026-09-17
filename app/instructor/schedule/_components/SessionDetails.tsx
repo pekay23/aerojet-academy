@@ -1,10 +1,31 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Video, MapPin, Clock, BookOpen, Users, FileText, Trash2, Edit } from 'lucide-react'
+import { X, Video, MapPin, BookOpen, Users, FileText, Edit } from 'lucide-react'
+
+const MotionDiv = motion.div
+const MotionAside = motion.aside
+
+interface SessionCourse {
+  code: string
+  name: string
+  _count?: {
+    enrollments?: number
+  }
+}
+
+interface SessionRoom {
+  name?: string
+}
 
 interface SessionDetailsProps {
-  session: any
+  session: {
+    course: SessionCourse
+    locationType?: string | null
+    room?: SessionRoom | null
+    name?: string
+    description?: string | null
+  } | null
   isOpen: boolean
   onClose: () => void
 }
@@ -17,7 +38,7 @@ export default function SessionDetails({ session, isOpen, onClose }: SessionDeta
       {isOpen && (
         <>
           {/* Backdrop */}
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -26,7 +47,7 @@ export default function SessionDetails({ session, isOpen, onClose }: SessionDeta
           />
 
           {/* Slide-over */}
-          <motion.aside
+          <MotionAside
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -45,7 +66,7 @@ export default function SessionDetails({ session, isOpen, onClose }: SessionDeta
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
                     </span>
-                    <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                    <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-300">
                       Live Logic Pending
                     </span>
                   </div>
@@ -148,7 +169,7 @@ export default function SessionDetails({ session, isOpen, onClose }: SessionDeta
                 Cancel Session
               </button>
             </div>
-          </motion.aside>
+          </MotionAside>
         </>
       )}
     </AnimatePresence>

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 import { UploadDropzone } from '@/lib/uploads/uploadthing'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, FileImage, RefreshCw } from 'lucide-react'
+import { CheckCircle2, RefreshCw } from 'lucide-react'
 
 interface Props {
   courseId: string
@@ -15,6 +16,7 @@ export default function CoursePaymentUploadForm({ courseId, courseName }: Props)
   const [uploading, setUploading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
+  const { markDirty, markClean } = useFormDirty()
 
   if (submitted) {
     return (
@@ -45,7 +47,11 @@ export default function CoursePaymentUploadForm({ courseId, courseName }: Props)
 
       <UploadDropzone
         endpoint="paymentProof"
-        onUploadBegin={() => setUploading(true)}
+        onUploadBegin={() => {
+          setUploading(true)
+          // Warn user before closing/refreshing while file is being uploaded
+          markDirty()
+        }}
         onClientUploadComplete={async (res) => {
           setUploading(false)
           if (!res?.[0]?.url) {
@@ -67,6 +73,7 @@ export default function CoursePaymentUploadForm({ courseId, courseName }: Props)
             toast.success('Enrollment submitted for review!')
             setSubmitted(true)
             router.refresh()
+            markClean()
           } catch {
             toast.error('Network error while saving enrollment proof.')
           }

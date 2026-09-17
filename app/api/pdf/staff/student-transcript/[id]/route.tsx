@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { renderToStream } from '@react-pdf/renderer'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getPDFSettings } from '@/lib/pdf-settings'
 import { TranscriptTemplate, TranscriptRecord } from '@/components/pdf/templates/TranscriptTemplate'
+import { createVerificationRecord, generateVerificationQrDataUrl } from '@/lib/document-verification'
 import React from 'react'
 
 const STAFF_ROLES = ['ADMIN', 'SUPER_ADMIN', 'STAFF']
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // Fetch student data in parallel
     const [profile, examResults, pdfSettings] = await Promise.all([
-      prisma.studentProfile.findUnique({
+      prismaUnfiltered.studentProfile.findUnique({
         where: { userId: studentUserId },
         select: {
           studentId: true,
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           pathwayRel: { select: { name: true } },
         },
       }),
-      prisma.examResult.findMany({
+      prismaUnfiltered.examResult.findMany({
         where: { userId: studentUserId },
         select: {
           moduleCode: true,
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
               examDate: true,
               examComponent: {
                 select: {
-                  course: { select: { code: true, name: true, credits: true } },
+                  course: { select: { code: true, name: true } },
                 },
               },
             },
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     for (const r of examResults) {
       const code = r.exam?.examComponent?.course?.code ?? r.moduleCode ?? '—'
       const courseName = r.exam?.examComponent?.course?.name ?? r.moduleCode ?? '—'
-      const credits = r.exam?.examComponent?.course?.credits ?? 0
+      const credits = 0
 
       const existing = moduleMap.get(code)
       if (!existing || (r.passed && !existing.status.includes('Pass'))) {
@@ -82,7 +83,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           code,
           courseName,
           credits,
-          grade: r.passed ? 'Pass' : 'Fail',
+          grade: r.percentage != null ? `${r.percentage}%` : (r.passed ? 'Pass' : 'Fail'),
           status: r.passed ? 'Pass' : 'Fail',
         })
       }
@@ -93,6 +94,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     )
 
     const now = new Date()
+
+    // Create verification record for transcript QR code
+    const verification = await createVerificationRecord({
+      documentType: 'Transcript',
+      certificateNo: `transcript-${profile.studentId ?? studentUserId}`,
+      recipientName: fullName,
+      issueDate: now,
+      generatedBy: session.user.id,
+    })
+
+    const qrDataUrl = await generateVerificationQrDataUrl(verification.code)
 
     const stream = await renderToStream(
       <TranscriptTemplate
@@ -116,21 +128,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           year: 'numeric',
         })}
         records={records}
+        qrDataUrl={qrDataUrl}
       />
     )
 
     const safeId = (profile.studentId ?? 'student').replace(/[^a-zA-Z0-9-]/g, '_')
 
-    return new NextResponse(stream as any, {
+    return new NextResponse(stream as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="Transcript_${safeId}.pdf"`,
       },
     })
-  } catch (error: any) {
-    console.error('[pdf/staff/student-transcript] Error:', error)
+    } catch (error: unknown) {
+    console.error('[pdf/staff/student-transcript] Error:', error instanceof Error ? error.message : String(error))
     return NextResponse.json(
-      { error: 'Failed to generate transcript', details: error.message },
+      { error: 'Failed to generate transcript', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }

@@ -3,7 +3,6 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog } from '@/lib/audit/logger'
-import { UserRole } from '@prisma/client'
 import { evictInactiveUserFromExams } from '@/lib/users/eviction'
 
 export const POST = withErrorHandler(

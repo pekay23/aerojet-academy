@@ -1,2 +1,2 @@
 bun run type-check
-bun run test --run
+bun run test --run --no-file-parallelism --no-color

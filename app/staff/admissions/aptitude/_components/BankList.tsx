@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Pencil, Trash2, Database, Loader2, ArrowRight } from 'lucide-react'
+import { Plus, Trash2, Database, Loader2, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 interface Bank {

@@ -1,14 +1,14 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireAuth } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, withErrorHandler } from '@/lib/api/response'
 
 // GET /api/applicant/aptitude/session
-export const GET = withErrorHandler(async (req: NextRequest) => {
+export const GET = withErrorHandler(async (_req: NextRequest) => {
   const user = await requireAuth()
 
   // Find active session
-  let session = await prisma.aptitudeTestSession.findFirst({
+  const session = await prisma.aptitudeTestSession.findFirst({
     where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
     include: {
@@ -30,6 +30,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     text: a.question.text,
     options: a.question.options,
     selectedAnswer: a.selectedAnswer,
+  } as {
+    questionId: string
+    category: string | null
+    questionType: string | null
+    text: string
+    options: unknown
+    selectedAnswer: string | null
   }))
 
   return apiSuccess({

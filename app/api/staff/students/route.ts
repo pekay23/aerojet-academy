@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { apiPaginated } from '@/lib/api/response'
+import { Prisma } from '@prisma/client'
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession()
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '20')
 
-  const where: any = { role: 'STUDENT' }
+  const where: Prisma.UserWhereInput = { role: 'STUDENT' }
 
   if (status === 'all') {
     where.status = { notIn: ['ARCHIVED', 'DELETED'] }

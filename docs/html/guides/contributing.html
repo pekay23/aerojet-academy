@@ -14,11 +14,13 @@
   <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
     <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -28,8 +30,50 @@
   <h1 class="he-title">Contributing to Aerojet Academy</h1>
   
 </header>
-<section class="he-section" id="branch-strategy"><div class="he-section__num">01 · 🌿 Branch Strategy</div><h2 class="he-section__title">🌿 Branch Strategy</h2><code>main</code> — Production-ready code.<code>staging</code> — Pre-production validation.<code>develop</code> — Integration branch for features.<code>feature/*</code> — Individual feature development.<section class="he-section" id="commit-messages-versioning"><div class="he-section__num">02 · 🔄 Commit Messages &amp; Versioning</div><h2 class="he-section__title">🔄 Commit Messages & Versioning</h2>We use Conventional Commits to automate versioning and changelogs.feat: A new feature (bumps minor version).fix: A bug fix (bumps patch version).docs: Documentation changes.refactor: Code change that neither fixes a bug nor adds a feature.break: A breaking change (bumps major version).<h3 id="automation">Automation</h3>The <code>pre-commit</code> hook automatically bumps the version and updates <code>docs/CHANGELOG.md</code>. 
-To specify a bump type, use the <code>BUMP_TYPE</code> environment variable:PowerShell: <code>$env:BUMP_TYPE="minor"; git commit -m "..."</code>Bash: <code>BUMP_TYPE=minor git commit -m "..."</code><section class="he-section" id="development-workflow"><div class="he-section__num">03 · 🧪 Development Workflow</div><h2 class="he-section__title">🧪 Development Workflow</h2>Branch from <code>develop</code>.Sync your local database: <code>bun run db:push</code>.Make changes and verify with <code>bun run type-check</code>.Submit a PR to <code>develop</code>.<section class="he-section" id="database-management"><div class="he-section__num">04 · 🗄️ Database Management</div><h2 class="he-section__title">🗄️ Database Management</h2>Primary: Neon (Serverless PostgreSQL).Backup/Redundant: Supabase.Migrations: Always use <code>bun x prisma migrate dev</code> to generate migration files. Ensure both environments are synced if schema changes are made.<section class="he-section" id="coding-standards"><div class="he-section__num">05 · 🎨 Coding Standards</div><h2 class="he-section__title">🎨 Coding Standards</h2>Strict TypeScript: No <code>any</code> types; all interfaces must be documented.Branding: Use <code>text-aerojet-blue</code> for primary UI elements.Components: Use Shadcn UI primitives where possible.Accessibility: All interactive elements must have unique <code>id</code> and descriptive labels.
+<section class="he-section" id="branch-strategy"><div class="he-section__num">01 · 🌿 Branch Strategy</div><h2 class="he-section__title">🌿 Branch Strategy</h2></section>
+<ul>
+<li><code>main</code> — Production-ready code.</li>
+<li><code>staging</code> — Pre-production validation.</li>
+<li><code>dev</code> — Integration branch for features.</li>
+<li><code>feature/*</code> — Individual feature development.</li>
+</ul>
+<section class="he-section" id="commit-messages-amp-versioning"><div class="he-section__num">02 · 🔄 Commit Messages &amp;amp; Versioning</div><h2 class="he-section__title">🔄 Commit Messages &amp; Versioning</h2></section>
+<p>We use <strong>Conventional Commits</strong> to automate versioning and changelogs.</p>
+<ul>
+<li><strong>feat</strong>: A new feature (bumps minor version).</li>
+<li><strong>fix</strong>: A bug fix (bumps patch version).</li>
+<li><strong>docs</strong>: Documentation changes.</li>
+<li><strong>refactor</strong>: Code change that neither fixes a bug nor adds a feature.</li>
+<li><strong>break</strong>: A breaking change (bumps major version).</li>
+</ul>
+<h3 id="automation">Automation</h3>
+<p>The <code>pre-commit</code> hook automatically bumps the version and updates <code>docs/CHANGELOG.md</code>. 
+To specify a bump type, use the <code>BUMP_TYPE</code> environment variable:</p>
+<ul>
+<li><strong>PowerShell</strong>: <code>$env:BUMP_TYPE=&quot;minor&quot;; git commit -m &quot;...&quot;</code></li>
+<li><strong>Bash</strong>: <code>BUMP_TYPE=minor git commit -m &quot;...&quot;</code></li>
+</ul>
+<section class="he-section" id="development-workflow"><div class="he-section__num">03 · 🧪 Development Workflow</div><h2 class="he-section__title">🧪 Development Workflow</h2></section>
+<ol>
+<li>Branch from <code>dev</code>.</li>
+<li>Sync your local database: <code>bun run db:push</code>.</li>
+<li>Make changes and verify with <code>bun run type-check</code>.</li>
+<li>Submit a PR to <code>dev</code>.</li>
+</ol>
+<section class="he-section" id="database-management"><div class="he-section__num">04 · 🗄️ Database Management</div><h2 class="he-section__title">🗄️ Database Management</h2></section>
+<ul>
+<li><strong>Primary</strong>: Neon (Serverless PostgreSQL).</li>
+<li><strong>Backup/Redundant</strong>: Supabase.</li>
+<li><strong>Schema changes</strong>: Run <code>bun run db:push</code> (this project has no Prisma migration history, so <code>db:push</code> is the workflow). <code>postdb:push</code> mirrors the schema to Supabase automatically, so ensure both environments stay in sync after any schema change.</li>
+</ul>
+<section class="he-section" id="coding-standards"><div class="he-section__num">05 · 🎨 Coding Standards</div><h2 class="he-section__title">🎨 Coding Standards</h2></section>
+<ul>
+<li><strong>Strict TypeScript</strong>: No <code>any</code> types; all interfaces must be documented.</li>
+<li><strong>Branding</strong>: Use <code>text-aerojet-blue</code> for primary UI elements.</li>
+<li><strong>Components</strong>: Use Shadcn UI primitives where possible.</li>
+<li><strong>Accessibility</strong>: All interactive elements must have unique <code>id</code> and descriptive labels.</li>
+</ul>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -45,7 +89,7 @@ To specify a bump type, use the <code>BUMP_TYPE</code> environment variable:Powe
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma/client'
 import { categoryMatchesTarget } from '@/lib/easa/category-selection'
-import { EASA_PASSING_GRADE } from '@/lib/utils/grading'
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 import type { BookingType } from '@prisma/client'
 
 function generateCombinedGroupRef(): string {
@@ -34,13 +34,16 @@ export async function getCombinedComponents(courseId: string, categoryCode?: str
   if (!course || !course.hasCombinedExam) return null
 
   const compatible = categoryCode
-    ? course.examComponents.filter((component) => categoryMatchesTarget(component.categoryCode, [categoryCode]))
+    ? course.examComponents.filter((component) =>
+        categoryMatchesTarget(component.categoryCode, [categoryCode])
+      )
     : course.examComponents
 
   const mcq = compatible.find((component) => component.type === 'MCQ')
   const essay =
-    compatible.find((component) => component.type === 'ESSAY' && component.categoryCode === mcq?.categoryCode) ??
-    compatible.find((component) => component.type === 'ESSAY')
+    compatible.find(
+      (component) => component.type === 'ESSAY' && component.categoryCode === mcq?.categoryCode
+    ) ?? compatible.find((component) => component.type === 'ESSAY')
 
   if (!mcq || !essay) return null
 
@@ -132,7 +135,9 @@ export async function evaluateCombinedResult(combinedGroupRef: string) {
   })
 
   if (bookings.length !== 2) {
-    throw new Error(`Expected 2 bookings for combined group ${combinedGroupRef}, found ${bookings.length}.`)
+    throw new Error(
+      `Expected 2 bookings for combined group ${combinedGroupRef}, found ${bookings.length}.`
+    )
   }
 
   const mcqBooking = bookings.find((b) => b.examComponent?.type === 'MCQ')
@@ -143,8 +148,14 @@ export async function evaluateCombinedResult(combinedGroupRef: string) {
   }
 
   const [mcqResult, essayResult] = await Promise.all([
-    prisma.examResult.findFirst({ where: { examId: mcqBooking.examId ?? undefined }, orderBy: { createdAt: 'desc' } }),
-    prisma.examResult.findFirst({ where: { examId: essayBooking.examId ?? undefined }, orderBy: { createdAt: 'desc' } }),
+    prisma.examResult.findFirst({
+      where: { examId: mcqBooking.examId ?? undefined },
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.examResult.findFirst({
+      where: { examId: essayBooking.examId ?? undefined },
+      orderBy: { createdAt: 'desc' },
+    }),
   ])
 
   const mcqPercentage = mcqResult?.percentage != null ? Number(mcqResult.percentage) : null
@@ -156,16 +167,17 @@ export async function evaluateCombinedResult(combinedGroupRef: string) {
       mcqPercentage,
       essayPercentage,
       passed: null,
-      mcqPassed: mcqPercentage != null ? mcqPercentage >= EASA_PASSING_GRADE : null,
-      essayPassed: essayPercentage != null ? essayPercentage >= EASA_PASSING_GRADE : null,
+      mcqPassed: mcqPercentage != null ? mcqPercentage >= ACADEMIC_RULES.EASA_PASS_MARK : null,
+      essayPassed:
+        essayPercentage != null ? essayPercentage >= ACADEMIC_RULES.EASA_PASS_MARK : null,
       requiresResit: null,
       mcqBookingId: mcqBooking.id,
       essayBookingId: essayBooking.id,
     }
   }
 
-  const mcqPassed = mcqPercentage >= EASA_PASSING_GRADE
-  const essayPassed = essayPercentage >= EASA_PASSING_GRADE
+  const mcqPassed = mcqPercentage >= ACADEMIC_RULES.EASA_PASS_MARK
+  const essayPassed = essayPercentage >= ACADEMIC_RULES.EASA_PASS_MARK
   const passed = mcqPassed && essayPassed
 
   return {

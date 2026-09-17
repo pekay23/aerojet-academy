@@ -35,7 +35,7 @@ export default function ChangeModuleModal({ bookingId, currentModuleCode, hasFre
           toast.success(`Module successfully changed to ${newModuleCode}.`)
           setOpen(false)
         }
-      } catch (err) {
+      } catch (_err) {
         toast.error('Something went wrong. Please try again.')
       }
     })
@@ -117,7 +117,7 @@ export default function ChangeModuleModal({ bookingId, currentModuleCode, hasFre
                   type="button"
                   onClick={handleSubmit}
                   disabled={isPending || !newModuleCode}
-                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#003a7c] active:scale-95 disabled:opacity-50"
+                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-blue-800 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#003a7c] active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Change'}
                 </button>

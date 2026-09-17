@@ -1,6 +1,5 @@
 import prisma from '@/lib/prisma/client'
-import { Prisma, PoolStatus, PaymentStatus } from '@prisma/client'
-import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { Prisma } from '@prisma/client'
 import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 /**

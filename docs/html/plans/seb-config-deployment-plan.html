@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SEB Config Deployment Plan · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Plans</p>
+  <h1 class="he-title">SEB Config Deployment Plan</h1>
+  
+</header>
+<section class="he-section" id="objective"><div class="he-section__num">01 · Objective</div><h2 class="he-section__title">Objective</h2></section>
+<p>Complete the Safe Exam Browser (SEB) integration so internal exams can be delivered in a fully locked-down environment with cryptographic request verification.</p>
+<section class="he-section" id="current-state"><div class="he-section__num">02 · Current State</div><h2 class="he-section__title">Current State</h2></section>
+<ul>
+<li><code>lib/internal-exam/seb-config.ts</code> generates BEK pairs and <code>.seb</code> ZIP configs</li>
+<li><code>app/api/staff/exams/internal/sessions/[id]/seb-config/route.ts</code> serves the <code>.seb</code> file</li>
+<li><code>lib/middleware/seb-detection.ts</code> detects SEB requests</li>
+<li><code>InternalExamSession</code> has <code>sebKeys</code> JSON field for BEK storage</li>
+<li><code>InternalExamClassSchedule</code> has <code>sebRequired</code> boolean</li>
+</ul>
+<section class="he-section" id="gaps"><div class="he-section__num">03 · Gaps</div><h2 class="he-section__title">Gaps</h2></section>
+<ol>
+<li>No server-side enforcement that requests come from SEB</li>
+<li>No admin UI to configure SEB settings per bank/class</li>
+<li>No BEK rotation or expiry</li>
+<li>SEB config lacks comprehensive lockdown defaults</li>
+<li>No audit trail for SEB config downloads</li>
+</ol>
+<section class="he-section" id="implementation-steps"><div class="he-section__num">04 · Implementation Steps</div><h2 class="he-section__title">Implementation Steps</h2></section>
+<h3 id="step-1-add-seb-request-validation-middleware">Step 1: Add SEB request validation middleware</h3>
+<ul>
+<li>Create <code>lib/middleware/seb-validation.ts</code></li>
+<li>Validate <code>X-SafeExamBrowser-RequestHash</code> header against stored BEK</li>
+<li>Return 403 if hash mismatch or SEB required but not detected</li>
+<li>Apply to: <code>/api/student/exams/internal/start</code>, <code>/api/student/exams/internal/session</code>, <code>/api/student/exams/internal/access-code/validate</code></li>
+</ul>
+<h3 id="step-2-admin-seb-settings-ui">Step 2: Admin SEB settings UI</h3>
+<ul>
+<li>Add SEB configuration section to <code>/staff/exams/internal/banks/[bankId]/schedule</code></li>
+<li>Allow per-bank SEB settings: lockdown level, allowed apps, exit sequencer, print screen, clipboard</li>
+<li>Store settings in <code>InternalExamBank.sebConfig</code> JSON field (add to schema)</li>
+</ul>
+<h3 id="step-3-enhanced-seb-config-generation">Step 3: Enhanced SEB config generation</h3>
+<ul>
+<li>Update <code>generateSebConfig()</code> to include bank-level settings</li>
+<li>Add <code>permissions</code>, <code>user_interface</code>, <code>exam_cookies</code> sections</li>
+<li>Include <code>browserExamKey</code> public key for hash verification</li>
+</ul>
+<h3 id="step-4-bek-lifecycle-management">Step 4: BEK lifecycle management</h3>
+<ul>
+<li>Add <code>bekExpiresAt</code> to <code>InternalExamSession</code> for automatic rotation</li>
+<li>Cron job to rotate BEKs for active sessions</li>
+<li>Audit log for BEK generation and validation failures</li>
+</ul>
+<h3 id="step-5-student-seb-download-ui">Step 5: Student SEB download UI</h3>
+<ul>
+<li>Add &quot;Download SEB Config&quot; button to student exam dashboard</li>
+<li>Only visible when <code>sebRequired</code> is true for the class schedule</li>
+<li>Verify student eligibility before serving config</li>
+</ul>
+<section class="he-section" id="files-to-modify"><div class="he-section__num">05 · Files to Modify</div><h2 class="he-section__title">Files to Modify</h2></section>
+<ul>
+<li><code>lib/middleware/seb-validation.ts</code> (new)</li>
+<li><code>app/api/student/exams/internal/start/route.ts</code></li>
+<li><code>app/api/student/exams/internal/session/route.ts</code></li>
+<li><code>app/api/student/exams/internal/access-code/validate/route.ts</code></li>
+<li><code>prisma/schema.prisma</code> (add <code>sebConfig</code> to <code>InternalExamBank</code>)</li>
+<li><code>app/staff/exams/internal/banks/[bankId]/schedule/_components/ClassSchedulePage.tsx</code></li>
+<li><code>app/student/exams/internal/_components/InternalExamDashboard.tsx</code></li>
+<li><code>lib/internal-exam/seb-config.ts</code></li>
+</ul>
+<section class="he-section" id="acceptance-criteria"><div class="he-section__num">06 · Acceptance Criteria</div><h2 class="he-section__title">Acceptance Criteria</h2></section>
+<ul>
+<li>Requests without valid SEB hash are rejected when SEB is required</li>
+<li>Admin can configure SEB settings per bank</li>
+<li><code>.seb</code> files include comprehensive lockdown settings</li>
+<li>BEKs expire and rotate automatically</li>
+<li>All SEB config downloads are audit-logged</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#objective">Objective</a></li>
+    <li class="he-toc__l2"><a href="#current-state">Current State</a></li>
+    <li class="he-toc__l2"><a href="#gaps">Gaps</a></li>
+    <li class="he-toc__l2"><a href="#implementation-steps">Implementation Steps</a></li>
+    <li class="he-toc__l3"><a href="#step-1-add-seb-request-validation-middleware">Step 1: Add SEB request validation middleware</a></li>
+    <li class="he-toc__l3"><a href="#step-2-admin-seb-settings-ui">Step 2: Admin SEB settings UI</a></li>
+    <li class="he-toc__l3"><a href="#step-3-enhanced-seb-config-generation">Step 3: Enhanced SEB config generation</a></li>
+    <li class="he-toc__l3"><a href="#step-4-bek-lifecycle-management">Step 4: BEK lifecycle management</a></li>
+    <li class="he-toc__l3"><a href="#step-5-student-seb-download-ui">Step 5: Student SEB download UI</a></li>
+    <li class="he-toc__l2"><a href="#files-to-modify">Files to Modify</a></li>
+    <li class="he-toc__l2"><a href="#acceptance-criteria">Acceptance Criteria</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

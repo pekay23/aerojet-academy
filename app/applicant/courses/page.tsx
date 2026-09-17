@@ -8,7 +8,8 @@ import TrackedCourseLink from '@/components/shared/TrackedCourseLink'
 import TrackedImpression from '@/components/shared/TrackedImpression'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { getCatalogVisibility, resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
+import { PageTransition } from '@/components/shared/PageTransition'
 
 export const metadata: Metadata = { title: 'Browse Courses | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -22,9 +23,16 @@ const categoryColor: Record<string, string> = {
   REVISION: 'bg-slate-50 text-slate-700 border-slate-200',
 }
 
-
-function slugify(text: string) {
-  return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+function _slugify(text: string) {
+  return (
+    text
+      ?.toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-') || ''
+  )
 }
 
 export default async function CoursesPage({
@@ -37,7 +45,7 @@ export default async function CoursesPage({
   if (!session) redirect('/login')
 
   const [portalState, allCategories] = await Promise.all([
-    prisma.user.findUnique({
+    prismaUnfiltered.user.findUnique({
       where: { id: session.user.id },
       select: {
         programmeChoice: true,
@@ -49,7 +57,7 @@ export default async function CoursesPage({
         },
       },
     }),
-    prisma.courseCategory.findMany({
+    prismaUnfiltered.courseCategory.findMany({
       orderBy: { name: 'asc' },
     }),
   ])
@@ -64,16 +72,16 @@ export default async function CoursesPage({
   const visibility = getCatalogVisibility(effectiveEnrollmentType)
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <PageTransition className="space-y-10">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-aerojet-blue/5 px-3 py-1 dark:bg-blue-500/10">
-            <Globe className="h-3.5 w-3.5 text-aerojet-sky" />
-            <span className="text-[10px] font-black tracking-widest text-aerojet-blue uppercase dark:text-blue-400">
+          <div className="bg-aerojet-blue/5 inline-flex items-center gap-2 rounded-full px-3 py-1 dark:bg-blue-500/10">
+            <Globe className="text-aerojet-sky h-3.5 w-3.5" />
+            <span className="text-aerojet-blue text-[10px] font-black tracking-widest uppercase dark:text-blue-400">
               EASA Part-66 Certified
             </span>
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue uppercase sm:text-4xl dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight uppercase sm:text-4xl dark:text-white">
             Course Catalogue
           </h1>
           <p className="max-w-xl text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -114,7 +122,7 @@ export default async function CoursesPage({
           visibility={visibility}
         />
       </Suspense>
-    </div>
+    </PageTransition>
   )
 }
 
@@ -153,7 +161,7 @@ async function CourseList({
     orderBy: [{ category: { name: 'asc' } }, { code: 'asc' }],
   })
 
-  const courses = coursesRaw.sort((a, b) =>
+  const courses = coursesRaw.sort((a: { code: string }, b: { code: string }) =>
     a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
   )
 
@@ -189,7 +197,7 @@ async function CourseList({
       {Object.entries(grouped).map(([cat, items]) => (
         <div key={cat} className="space-y-8">
           <div className="flex items-center gap-4">
-            <h2 className="text-[10px] font-black tracking-[0.3em] text-blue-500 uppercase dark:text-aerojet-sky">
+            <h2 className="dark:text-aerojet-sky text-[10px] font-black tracking-[0.3em] text-blue-500 uppercase">
               {cat.replace(/_/g, ' ')}
             </h2>
             <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800/50" />
@@ -205,7 +213,9 @@ async function CourseList({
                   ? Math.min(...poolPrices)
                   : null
                 : Number(course.price)
-              const ctaHref = isDirectPurchasePath ? `/applicant/courses/${course.id}` : '/applicant/pathway'
+              const ctaHref = isDirectPurchasePath
+                ? `/applicant/courses/${course.id}`
+                : '/applicant/pathway'
               const ctaLabel = isExamOnly
                 ? displayPrice
                   ? 'Book Exam'
@@ -217,7 +227,7 @@ async function CourseList({
               return (
                 <div
                   key={course.id}
-                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-aerojet-sky/30 hover:shadow-xl hover:shadow-aerojet-blue/5 dark:border-slate-800 dark:bg-slate-900"
+                  className="group hover:border-aerojet-sky/30 hover:shadow-aerojet-blue/5 relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
                 >
                   <TrackedImpression courseId={course.id} />
                   <div
@@ -228,19 +238,19 @@ async function CourseList({
 
                   <div className="flex flex-1 flex-col p-7">
                     <div className="mb-4 flex items-start justify-between gap-3">
-                      <span className="rounded-lg bg-slate-50 px-2.5 py-1 font-mono text-[10px] font-black tracking-widest text-aerojet-sky uppercase transition-colors group-hover:bg-aerojet-sky/10 dark:bg-slate-800">
+                      <span className="text-aerojet-sky group-hover:bg-aerojet-sky/10 rounded-lg bg-slate-50 px-2.5 py-1 font-mono text-[10px] font-black tracking-widest uppercase transition-colors dark:bg-slate-800">
                         {course.code}
                       </span>
                       <span
                         className={`rounded-full border px-2.5 py-1 text-[10px] font-black tracking-wide uppercase ${
-                          categoryColor[cat] || 'bg-slate-50 text-slate-700 border-slate-200'
+                          categoryColor[cat] || 'border-slate-200 bg-slate-50 text-slate-700'
                         }`}
                       >
                         {cat.replace(/_/g, ' ')}
                       </span>
                     </div>
 
-                    <h3 className="text-xl leading-tight font-black text-aerojet-blue transition-colors group-hover:text-aerojet-sky dark:text-white dark:group-hover:text-blue-400">
+                    <h3 className="text-aerojet-blue group-hover:text-aerojet-sky text-xl leading-tight font-black transition-colors dark:text-white dark:group-hover:text-blue-400">
                       {course.name}
                     </h3>
 
@@ -253,7 +263,7 @@ async function CourseList({
                     <div className="mt-6 flex flex-wrap gap-4 text-[11px] font-bold text-slate-400">
                       {course.duration && (
                         <div className="flex items-center gap-1.5 rounded-lg border border-slate-50 bg-slate-50/50 px-2 py-1 dark:border-slate-800 dark:bg-slate-800/30">
-                          <Clock className="h-3.5 w-3.5 text-aerojet-sky" />
+                          <Clock className="text-aerojet-sky h-3.5 w-3.5" />
                           <span className="text-slate-600 dark:text-slate-300">
                             {course.duration.toLocaleString()} Hours
                           </span>
@@ -274,7 +284,7 @@ async function CourseList({
                               ? 'Tuition'
                               : 'Programme access'}
                         </p>
-                        <p className="truncate text-2xl font-black text-aerojet-blue dark:text-white">
+                        <p className="text-aerojet-blue truncate text-2xl font-black dark:text-white">
                           {displayPrice !== null
                             ? `${course.currency} ${displayPrice.toLocaleString()}`
                             : 'By module'}
@@ -284,7 +294,7 @@ async function CourseList({
                         <TrackedCourseLink
                           courseId={course.id}
                           href={ctaHref}
-                          className="inline-flex h-11 items-center justify-center rounded-xl bg-aerojet-blue px-6 text-xs font-black tracking-widest text-white uppercase ring-offset-white transition-all hover:bg-[#003875] hover:shadow-lg active:scale-95 sm:px-8 dark:bg-blue-600 dark:hover:bg-blue-500"
+                          className="bg-aerojet-blue inline-flex h-11 items-center justify-center rounded-xl px-6 text-xs font-black tracking-widest text-white uppercase ring-offset-white transition-all hover:bg-[#003875] hover:shadow-lg active:scale-95 sm:px-8 dark:bg-blue-600 dark:hover:bg-blue-500"
                         >
                           {ctaLabel}
                         </TrackedCourseLink>

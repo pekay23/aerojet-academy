@@ -178,8 +178,8 @@ END:VEVENT`)
     })
 
     // 4. Class schedules via enrollments
-    enrollments.forEach((enrollment: any) => {
-      enrollment.course?.classes?.forEach((cls: any) => {
+    enrollments.forEach((enrollment) => {
+      enrollment.course?.classes?.forEach((cls) => {
         if (cls.startDate) {
           const start = new Date(cls.startDate)
           const end = cls.endDate ? new Date(cls.endDate) : addHours(start, 2)
@@ -188,7 +188,7 @@ UID:class-${cls.id}@aerojet-academy.com
 DTSTAMP:${formatDateToiCal(new Date())}
 DTSTART:${formatDateToiCal(start)}
 DTEND:${formatDateToiCal(end)}
-SUMMARY:${escapeString(cls.name || `Class: ${enrollment.course.code}`)}
+SUMMARY:${escapeString(cls.name || `Class: ${enrollment.course?.code}`)}
 DESCRIPTION:Course Class Schedule
 END:VEVENT`)
         }
@@ -196,7 +196,7 @@ END:VEVENT`)
     })
 
     // 5. Admin events
-    adminEvents.forEach((evt: any) => {
+    adminEvents.forEach((evt) => {
       if (evt.visibleTo === 'EXAM_ONLY' && enrollmentType !== 'EXAM_ONLY') return
       if (evt.visibleTo === 'MODULAR' && enrollmentType !== 'MODULAR') return
       if (evt.visibleTo === 'FULL_TIME' && enrollmentType !== 'FULL_TIME') return
@@ -215,7 +215,7 @@ END:VEVENT`)
     })
 
     // 6. Exam sitting assignments
-    sittingAssignments.forEach((assignment: any) => {
+    sittingAssignments.forEach((assignment) => {
       const sitting = assignment.sitting
       if (sitting?.startTime) {
         const start = sitting.startTime
@@ -232,7 +232,7 @@ END:VEVENT`)
     })
 
     // 7. Tuition runs
-    tuitionRuns.forEach((run: any) => {
+    tuitionRuns.forEach((run) => {
       if (run.startDatetime) {
         const start = run.startDatetime
         const end = run.endDatetime || addHours(start, 2)
@@ -248,7 +248,7 @@ END:VEVENT`)
     })
 
     // 8. Exam Event deadlines
-    examEvents.forEach((evt: any) => {
+    examEvents.forEach((evt) => {
       if (evt.joinDeadline) {
         const start = evt.joinDeadline
         icsEvents.push(`BEGIN:VEVENT
@@ -275,7 +275,7 @@ END:VEVENT`)
     })
 
     // 9. Exam pools
-    examPools.forEach((pool: any) => {
+    examPools.forEach((pool) => {
       if (pool.examStartTime) {
         const start = pool.examStartTime
         const end = pool.examEndTime || addHours(start, 2)

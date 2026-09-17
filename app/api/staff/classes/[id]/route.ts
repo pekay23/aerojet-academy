@@ -1,15 +1,15 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
 import { updateClassSchema, validateBody } from '@/lib/validation/schemas'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     await requireStaff()
     const cls = await prismaUnfiltered.class.findUnique({
-      where: { id: ctx?.params?.id },
+      where: { id: (await ctx!.params).id },
       include: {
         course: true,
         instructor: { include: { user: { include: { profile: true } } } },
@@ -22,12 +22,12 @@ export const GET = withErrorHandler(
 )
 
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  async (req: NextRequest, ctx?: RouteContext) => {
     const staff = await requireStaff()
     const body = await req.json()
     const validation = validateBody(updateClassSchema, body)
     if (!validation.success) return apiError(validation.error)
-    const id = ctx?.params?.id
+    const id = (await ctx!.params).id
     const updated = await prismaUnfiltered.class.update({ where: { id }, data: validation.data })
     await createAuditLog({
       action: AuditAction.UPDATE,

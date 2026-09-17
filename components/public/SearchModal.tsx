@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Search,
@@ -59,7 +59,6 @@ export default function SearchModal() {
   const [loading, setLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
-  const triggerRef = useRef<HTMLButtonElement>(null)
   const router = useRouter()
 
   // Cmd+K / Ctrl+K shortcut
@@ -76,13 +75,6 @@ export default function SearchModal() {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
-
-  // Focus input when modal opens and return focus to trigger when closed
-  useEffect(() => {
-    if (!open) {
-      triggerRef.current?.focus()
-    }
-  }, [open])
 
   // Focus input when modal opens
   useEffect(() => {
@@ -104,27 +96,21 @@ export default function SearchModal() {
       return
     }
 
-    const controller = new AbortController()
     const timer = setTimeout(async () => {
       setLoading(true)
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal })
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
         const data = await res.json()
         setResults(data.results || [])
         setSelectedIndex(0)
-      } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          setResults([])
-        }
+      } catch {
+        setResults([])
       } finally {
         setLoading(false)
       }
     }, 250)
 
-    return () => {
-      controller.abort()
-      clearTimeout(timer)
-    }
+    return () => clearTimeout(timer)
   }, [query])
 
   const navigateToResult = useCallback(
@@ -149,11 +135,11 @@ export default function SearchModal() {
   }
 
   // Group results by category
-  const grouped = useMemo(() => results.reduce<Record<string, SearchResult[]>>((acc, r) => {
+  const grouped = results.reduce<Record<string, SearchResult[]>>((acc, r) => {
     if (!acc[r.category]) acc[r.category] = []
     acc[r.category].push(r)
     return acc
-  }, {}), [results])
+  }, {})
 
   let flatIndex = -1
 
@@ -169,10 +155,9 @@ export default function SearchModal() {
     <>
       {/* Search trigger — icon only */}
       <button
-        ref={triggerRef}
         onClick={() => setOpen(true)}
         className="group flex items-center gap-2 rounded-lg px-3 py-2 transition-all"
-        aria-label="Search courses, exams, pages and more"
+        aria-label="Search"
       >
         <Search className="h-4 w-4" />
       </button>
@@ -181,9 +166,6 @@ export default function SearchModal() {
       <AnimatePresence>
         {open && (
           <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Search"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -340,11 +322,11 @@ export default function SearchModal() {
                     Navigate
                   </span>
                   <span className="flex items-center gap-1.5">
-                  <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[9px] dark:border-slate-700 dark:bg-slate-800">
-                    Enter
-                  </kbd>
-                  Open
-                </span>
+                    <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[9px] dark:border-slate-700 dark:bg-slate-800">
+                      ↕
+                    </kbd>
+                    Open
+                  </span>
                   <span className="flex items-center gap-1.5">
                     <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[9px] dark:border-slate-700 dark:bg-slate-800">
                       Esc

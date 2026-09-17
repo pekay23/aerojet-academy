@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useTransition } from 'react'
+import { useFormDirty } from '@/hooks/useFormDirty'
 import { Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { updateApplicantProfile } from '../../actions'
@@ -34,6 +35,7 @@ function Field({
   defaultValue,
   required,
   placeholder,
+  onChange,
 }: {
   label: string
   name: string
@@ -41,10 +43,11 @@ function Field({
   defaultValue?: string | null
   required?: boolean
   placeholder?: string
+  onChange?: (value: string) => void
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+      <label className="mb-1.5 block text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
@@ -53,7 +56,8 @@ function Field({
         defaultValue={defaultValue ?? ''}
         required={required}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 transition-shadow placeholder:text-slate-300 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-aerojet-blue"
+        onChange={(e) => onChange?.(e.target.value)}
+        className="focus:ring-aerojet-blue w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 transition-shadow placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:outline-none dark:border-slate-700 dark:text-slate-200"
       />
     </div>
   )
@@ -64,21 +68,24 @@ function SelectField({
   name,
   defaultValue,
   options,
+  onChange,
 }: {
   label: string
   name: string
   defaultValue?: string | null
   options: { value: string; label: string }[]
+  onChange?: (value: string) => void
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+      <label className="mb-1.5 block text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
         {label}
       </label>
       <select
         name={name}
         defaultValue={defaultValue ?? ''}
-        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 transition-shadow focus:border-transparent focus:outline-none focus:ring-2 focus:ring-aerojet-blue"
+        onChange={(e) => onChange?.(e.target.value)}
+        className="focus:ring-aerojet-blue w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 transition-shadow focus:border-transparent focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
       >
         <option value="">— Select —</option>
         {options.map(({ value, label }) => (
@@ -93,6 +100,7 @@ function SelectField({
 
 export default function ProfileForm({ profile }: Props) {
   const [isPending, startTransition] = useTransition()
+  const { markDirty, markClean } = useFormDirty()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -103,6 +111,7 @@ export default function ProfileForm({ profile }: Props) {
         toast.error(result.error)
       } else {
         toast.success('Profile saved successfully.')
+        markClean()
       }
     })
   }
@@ -112,13 +121,25 @@ export default function ProfileForm({ profile }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Personal Info */}
-      <div className="space-y-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">
+      <div className="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="text-sm font-bold tracking-widest text-slate-900 uppercase dark:text-slate-100">
           Personal Information
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="First Name" name="firstName" defaultValue={profile?.firstName} required />
-          <Field label="Last Name" name="lastName" defaultValue={profile?.lastName} required />
+          <Field
+            label="First Name"
+            name="firstName"
+            defaultValue={profile?.firstName}
+            required
+            onChange={markDirty}
+          />
+          <Field
+            label="Last Name"
+            name="lastName"
+            defaultValue={profile?.lastName}
+            required
+            onChange={markDirty}
+          />
           <SelectField
             label="Gender"
             name="gender"
@@ -128,20 +149,28 @@ export default function ProfileForm({ profile }: Props) {
               { value: 'FEMALE', label: 'Female' },
               { value: 'OTHER', label: 'Other / Prefer not to say' },
             ]}
+            onChange={markDirty}
           />
-          <Field label="Date of Birth" name="dateOfBirth" type="date" defaultValue={dob} />
+          <Field
+            label="Date of Birth"
+            name="dateOfBirth"
+            type="date"
+            defaultValue={dob}
+            onChange={markDirty}
+          />
           <Field
             label="Nationality"
             name="nationality"
             defaultValue={profile?.nationality}
             placeholder="e.g. Ghanaian"
+            onChange={markDirty}
           />
         </div>
       </div>
 
       {/* Contact */}
-      <div className="space-y-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">
+      <div className="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="text-sm font-bold tracking-widest text-slate-900 uppercase dark:text-slate-100">
           Contact Details
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -151,29 +180,47 @@ export default function ProfileForm({ profile }: Props) {
             type="tel"
             defaultValue={profile?.phone}
             placeholder="+233 20 000 0000"
+            onChange={markDirty}
           />
           <Field
             label="Alternate Phone"
             name="alternatePhone"
             type="tel"
             defaultValue={profile?.alternatePhone}
+            onChange={markDirty}
           />
-          <Field label="Address" name="address" defaultValue={profile?.address} />
-          <Field label="City" name="city" defaultValue={profile?.city} />
-          <Field label="State / Region" name="state" defaultValue={profile?.state} />
+          <Field
+            label="Address"
+            name="address"
+            defaultValue={profile?.address}
+            onChange={markDirty}
+          />
+          <Field label="City" name="city" defaultValue={profile?.city} onChange={markDirty} />
+          <Field
+            label="State / Region"
+            name="state"
+            defaultValue={profile?.state}
+            onChange={markDirty}
+          />
           <Field
             label="Country"
             name="country"
             defaultValue={profile?.country}
             placeholder="e.g. Ghana"
+            onChange={markDirty}
           />
-          <Field label="Postal Code" name="postalCode" defaultValue={profile?.postalCode} />
+          <Field
+            label="Postal Code"
+            name="postalCode"
+            defaultValue={profile?.postalCode}
+            onChange={markDirty}
+          />
         </div>
       </div>
 
       {/* Emergency Contact */}
-      <div className="space-y-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">
+      <div className="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="text-sm font-bold tracking-widest text-slate-900 uppercase dark:text-slate-100">
           Emergency Contact
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -181,18 +228,21 @@ export default function ProfileForm({ profile }: Props) {
             label="Full Name"
             name="emergencyContactName"
             defaultValue={profile?.emergencyContactName}
+            onChange={markDirty}
           />
           <Field
             label="Phone"
             name="emergencyContactPhone"
             type="tel"
             defaultValue={profile?.emergencyContactPhone}
+            onChange={markDirty}
           />
           <Field
             label="Relationship"
             name="emergencyContactRelation"
             defaultValue={profile?.emergencyContactRelation}
             placeholder="e.g. Mother, Spouse"
+            onChange={markDirty}
           />
         </div>
       </div>
@@ -202,7 +252,7 @@ export default function ProfileForm({ profile }: Props) {
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-7 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#003875] disabled:cursor-not-allowed disabled:opacity-60"
+          className="bg-aerojet-blue inline-flex items-center gap-2 rounded-xl px-7 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#003875] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isPending ? 'Saving…' : 'Save Profile'}

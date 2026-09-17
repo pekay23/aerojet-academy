@@ -50,6 +50,7 @@ export function canGoNoGo(role: string): boolean {
 
 import prisma from '@/lib/prisma/client'
 import { getAuthSession } from './auth-options'
+import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 
 export const PERMISSIONS = {
   APPROVE_PAYMENTS: 'APPROVE_PAYMENTS',
@@ -59,6 +60,7 @@ export const PERMISSIONS = {
   MANAGE_ENROLLMENTS: 'MANAGE_ENROLLMENTS',
   VIEW_AUDIT_LOGS: 'VIEW_AUDIT_LOGS',
   MANAGE_SETTINGS: 'MANAGE_SETTINGS',
+  EXAM_SESSION_SUPERVISE: 'EXAM_SESSION_SUPERVISE',
 } as const
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
@@ -99,7 +101,7 @@ export async function requirePermission(
   const session = await getAuthSession()
   if (!session) throw new Error('Unauthorized')
 
-  const user = session.user as any
+  const user = session.user as { id: string; role: string }
   if (!['STAFF', 'ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
     throw new Error('Staff access required')
   }
@@ -107,6 +109,50 @@ export async function requirePermission(
   const allowed = await hasPermission(user.id, user.role, permission)
   if (!allowed) {
     throw new Error(`Permission denied: ${permission}`)
+  }
+
+  return { id: user.id, role: user.role }
+}
+
+export type BankCapability = 'canEdit' | 'canReview' | 'canMonitor' | 'canPublish'
+
+export async function requireBankAccess(
+  bankId: string,
+  capability: BankCapability
+): Promise<{ id: string; role: string }> {
+  const session = await getAuthSession()
+  if (!session) throw new Error('Unauthorized')
+
+  const user = session.user as { id: string; role: string }
+
+  if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+    return { id: user.id, role: user.role }
+  }
+
+  const profile = await getInstructorProfileByUserId(user.id)
+  if (!profile) {
+    throw new Error('Instructor profile not found')
+  }
+
+  const grant = await prisma.internalExamBankInstructor.findUnique({
+    where: { bankId_instructorId: { bankId, instructorId: profile.id } },
+    select: { [capability]: true },
+  })
+
+  if (grant?.[capability]) {
+    return { id: user.id, role: user.role }
+  }
+
+  const permMap: Record<BankCapability, string> = {
+    canEdit: 'EXAM_BANK_EDIT',
+    canReview: 'EXAM_BANK_REVIEW',
+    canMonitor: 'EXAM_SESSION_MONITOR',
+    canPublish: 'EXAM_RESULTS_PUBLISH',
+  }
+
+  const allowed = await hasPermission(user.id, user.role, permMap[capability])
+  if (!allowed) {
+    throw new Error(`Bank access denied: ${capability}`)
   }
 
   return { id: user.id, role: user.role }

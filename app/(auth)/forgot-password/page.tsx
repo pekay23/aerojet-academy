@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Metadata } from 'next'
 import { Loader2, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react'
 
 // Metadata exported via layout — client components cannot export metadata directly
@@ -31,8 +30,8 @@ export default function ForgotPasswordPage() {
       }
 
       setSent(true)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send reset email')
     } finally {
       setLoading(false)
     }

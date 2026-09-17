@@ -1,30 +1,22 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { BrainCircuit, Play, FileCheck, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react'
 import TestWarningModal from './_components/TestWarningModal'
+import { useFetch } from '@/lib/hooks/useFetch'
+
+interface AptitudeSession {
+  status: string
+  [key: string]: unknown
+}
 
 export default function AptitudeTestLanding() {
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
-  const [sessionInfo, setSessionInfo] = useState<any>(null)
   const [starting, setStarting] = useState(false)
-
-  const fetchSession = useCallback(async () => {
-    try {
-      const res = await fetch('/api/applicant/aptitude/session')
-      const json = await res.json()
-      setSessionInfo(json.data)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchSession()
-  }, [fetchSession])
+  const { data: sessionInfo, loading, error: _error, refetch: _refetch } = useFetch<AptitudeSession>('/api/applicant/aptitude/session')
 
   const handleStart = async () => {
     setStarting(true)
@@ -32,14 +24,13 @@ export default function AptitudeTestLanding() {
       const res = await fetch('/api/applicant/aptitude/start', { method: 'POST' })
       const json = await res.json()
       if (res.ok) {
-        // Force refresh to start interface
-        window.location.reload()
+        router.refresh()
       } else {
-        alert(json.error || 'Failed to start test')
+        toast.error(json.error || 'Failed to start test')
         setStarting(false)
       }
-    } catch (e) {
-      alert('An error occurred')
+    } catch (_e) {
+      toast.error('An error occurred')
       setStarting(false)
     }
   }

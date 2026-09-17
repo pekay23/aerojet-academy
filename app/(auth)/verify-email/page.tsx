@@ -17,6 +17,7 @@ export default function VerifyEmailPage() {
 
   useEffect(() => {
     if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus('error')
       setMessage('Invalid verification link.')
       return
@@ -65,9 +66,11 @@ export default function VerifyEmailPage() {
             router.push('/student')
           }, 1500)
         }
-      } catch (err: any) {
+      } catch (err) {
         setStatus('error')
-        setMessage(err.message || 'Verification failed. The link may have expired.')
+        setMessage(
+          err instanceof Error ? err.message : 'Verification failed. The link may have expired.'
+        )
       }
     }
 
@@ -79,7 +82,7 @@ export default function VerifyEmailPage() {
       <div className="text-center">
         {status === 'loading' && (
           <>
-            <Loader2 className="mx-auto mb-6 h-12 w-12 animate-spin text-aerojet-sky" />
+            <Loader2 className="text-aerojet-sky mx-auto mb-6 h-12 w-12 animate-spin" />
             <h2 className="mb-3 text-2xl font-black tracking-tight text-slate-800 uppercase">
               {type === 'registration' ? 'Verifying Email' : 'Logging You In'}
             </h2>
@@ -116,16 +119,16 @@ export default function VerifyEmailPage() {
                   window.close()
                   // Fallback: If window.close() is blocked, redirect after a short delay
                   setTimeout(() => {
-                    window.location.href = '/'
+                    router.push('/')
                   }, 1000)
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-aerojet-sky"
+                className="bg-aerojet-blue hover:bg-aerojet-sky inline-flex items-center gap-2 rounded-xl px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all"
               >
                 Close Page
               </button>
               <Link
                 href="/"
-                className="text-xs font-bold text-slate-400 hover:text-aerojet-sky hover:underline"
+                className="hover:text-aerojet-sky text-xs font-bold text-slate-400 hover:underline"
               >
                 Return to Homepage
               </Link>
@@ -207,18 +210,18 @@ export default function VerifyEmailPage() {
                   type="email"
                   placeholder="Enter your email address"
                   required
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-aerojet-sky focus:outline-none"
+                  className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-aerojet-blue px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-aerojet-sky disabled:opacity-50"
+                  className="bg-aerojet-blue hover:bg-aerojet-sky w-full rounded-xl px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all disabled:opacity-50"
                 >
                   Resend Verification Link
                 </button>
               </form>
 
               <div className="pt-4">
-                <Link href="/login" className="text-sm font-bold text-aerojet-sky hover:underline">
+                <Link href="/login" className="text-aerojet-sky text-sm font-bold hover:underline">
                   Return to Login
                 </Link>
               </div>

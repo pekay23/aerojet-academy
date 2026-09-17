@@ -49,7 +49,7 @@ export default function CreateRevisionRunDialog() {
       } else {
         toast.error(res.error || 'Failed to create revision run')
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('An unexpected error occurred')
     } finally {
       setLoading(false)

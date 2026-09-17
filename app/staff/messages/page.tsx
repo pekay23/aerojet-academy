@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { Mail, Send, Inbox, Sparkles } from 'lucide-react'
+import { Mail, Sparkles } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
@@ -93,7 +93,7 @@ export default async function StaffMessagesPage() {
           <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-slate-100">
             Messages
             {totalUnread > 0 && (
-              <span className="flex h-7 min-w-[28px] items-center justify-center rounded-full bg-red-500 px-2 text-xs font-black text-white shadow-lg ring-4 ring-white dark:ring-slate-900">
+              <span className="flex h-7 min-w-[28px] items-center justify-center rounded-full bg-red-100 px-2 text-xs font-black text-red-700 shadow-lg ring-4 ring-white dark:bg-red-900/30 dark:text-red-400 dark:ring-slate-900">
                 {totalUnread}
               </span>
             )}

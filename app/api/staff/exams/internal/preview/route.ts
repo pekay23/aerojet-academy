@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 
 /**
  * GET /api/staff/exams/internal/preview?bankId=xxx
@@ -45,8 +46,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const selected = shuffled.slice(0, bank.mcqCount)
 
   const rules = bank.ruleOverride
-  const timePerQ = rules?.timePerQuestionSecs ?? 75
-  const passMarkPct = rules?.passMarkPct ?? 75
+  const timePerQ = rules?.timePerQuestionSecs ?? ACADEMIC_RULES.TIME_PER_QUESTION_SECS
+  const passMarkPct = rules?.passMarkPct ?? ACADEMIC_RULES.EASA_PASS_MARK
 
   // Sub-topic stats
   const subTopics = new Map<string, number>()

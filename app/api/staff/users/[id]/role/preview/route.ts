@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
-import { withErrorHandler, apiSuccess, apiError } from '@/lib/api/response'
+import { withErrorHandler, apiSuccess, apiError , RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 
@@ -16,11 +16,9 @@ const schema = z.object({
  * what will happen before they click commit.
  */
 export const POST = withErrorHandler(async (
-  req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
-) => {
+  req: NextRequest, ctx?: RouteContext) => {
   await requirePermission(PERMISSIONS.MANAGE_ROLES)
-  const { id: userId } = await ctx.params
+  const { id: userId } = (await ctx!.params) as { id: string }
   const body = schema.parse(await req.json())
   const { role: newRole } = body
 

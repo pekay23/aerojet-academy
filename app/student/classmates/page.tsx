@@ -2,10 +2,11 @@ import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { Users, GraduationCap, BookOpen, Sparkles, Calendar, Route } from 'lucide-react'
+import { Users, GraduationCap, BookOpen, Sparkles, Calendar } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import Link from 'next/link'
+import { Prisma } from '@prisma/client'
+
 import ClassmatesFilters from './_components/ClassmatesFilters'
 
 export const metadata: Metadata = {
@@ -124,7 +125,7 @@ export default async function ClassmatesPage({
   }
 
   // Build peer query conditions
-  const peerWhere: any = {
+  const peerWhere: Prisma.StudentProfileWhereInput = {
     userId: userIdFilter !== undefined ? { in: userIdFilter } : { not: session.user.id },
     user: q
       ? {
@@ -184,13 +185,13 @@ export default async function ClassmatesPage({
     <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-blue-800 sm:text-4xl dark:text-white">
             Classmate Directory
           </h1>
           <p className="flex items-center gap-2 text-base font-medium text-slate-500 dark:text-slate-400">
-            <Sparkles className="h-5 w-5 text-aerojet-sky" />
+            <Sparkles className="h-5 w-5 text-sky-400" />
             Connect with your peers from{' '}
-            <span className="font-bold text-aerojet-blue dark:text-aerojet-sky">
+            <span className="font-bold text-blue-800 dark:text-sky-400">
               {batchName}
             </span>
             .
@@ -251,18 +252,18 @@ export default async function ClassmatesPage({
                 className="group relative flex flex-col items-center rounded-3xl border border-slate-100 bg-white p-6 text-center shadow-sm transition-all hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="relative mb-4">
-                  <div className="absolute -inset-1 rounded-full bg-linear-to-tr from-aerojet-blue to-aerojet-sky opacity-0 blur transition-opacity group-hover:opacity-20" />
+                  <div className="absolute -inset-1 rounded-full bg-linear-to-tr from-blue-800 to-sky-400 opacity-0 blur transition-opacity group-hover:opacity-20" />
                   <Avatar className="h-20 w-20 border-4 border-white shadow-md dark:border-slate-800">
                     <AvatarImage
                       src={peer.user.profile?.profilePhotoUrl || undefined}
                     />
-                    <AvatarFallback className="bg-slate-100 text-lg font-black text-aerojet-blue dark:bg-slate-800 dark:text-slate-400">
+                    <AvatarFallback className="bg-slate-100 text-lg font-black text-blue-800 dark:bg-slate-800 dark:text-slate-400">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                 </div>
 
-                <h3 className="text-lg font-black text-aerojet-blue dark:text-white line-clamp-1">
+                <h3 className="text-lg font-black text-blue-800 dark:text-white line-clamp-1">
                   {name}
                 </h3>
                 <p className="mt-1 text-xs font-bold text-slate-400 uppercase tracking-widest">

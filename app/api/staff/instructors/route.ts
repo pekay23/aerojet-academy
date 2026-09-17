@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { Prisma } from '@prisma/client'
 
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext) => {
   await requireStaff()
 
   const url = new URL(req.url)
@@ -11,8 +12,8 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
   const limit = parseInt(url.searchParams.get('limit') || '20')
   const search = url.searchParams.get('search') || ''
 
-  const where: any = {
-    user: { role: 'INSTRUCTOR' },
+  const where: Prisma.InstructorProfileWhereInput = {
+    user: { role: 'INSTRUCTOR' }
   }
 
   if (search) {

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>architecture · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell ">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+
+<main>
+<header>
+  <p class="he-eyebrow">Docs</p>
+  <h1 class="he-title">architecture</h1>
+  <p class="he-deck">10 documents in this folder</p>
+</header>
+
+<nav class="he-bc" aria-label="Breadcrumb">
+  <a class="he-bc__item" href="../index.html">Docs</a><span class="he-bc__sep">/</span><span class="he-bc__item">architecture</span>
+</nav>
+
+<div class="he-folder-controls">
+  <label for="sort-select">Sort by</label>
+  <select id="sort-select" onchange="sortDocs(this.value)" class="he-sort-select">
+    <option value="newest">Newest first</option>
+    <option value="oldest">Oldest first</option>
+    <option value="az">A → Z</option>
+    <option value="za">Z → A</option>
+  </select>
+</div>
+<table class="he-docs-table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Date</th>
+      <th>Description</th>
+      <th>Source</th>
+    </tr>
+  </thead>
+  <tbody id="docs-table-body">
+    
+    <tr data-date="2026-09-07" data-title="Database &amp; Security Deep-Dive">
+      <td><a href="database-detail.html">Database &amp; Security Deep-Dive</a></td>
+      <td>2026-09-07</td>
+      <td>This document details the database schema, relational patterns, and Row Level Security (RLS) implementation.</td>
+      <td><code>docs/architecture/database-detail.md</code></td>
+    </tr>
+    <tr data-date="2026-09-07" data-title="Security Model">
+      <td><a href="security-model.html">Security Model</a></td>
+      <td>2026-09-07</td>
+      <td>A missed check in any one layer is caught by the next.</td>
+      <td><code>docs/architecture/security-model.md</code></td>
+    </tr>
+    <tr data-date="2026-09-07" data-title="System Architecture Overview">
+      <td><a href="system-overview.html">System Architecture Overview</a></td>
+      <td>2026-09-07</td>
+      <td>Route groups handle public + auth flows; each role-portal is a top-level segment.</td>
+      <td><code>docs/architecture/system-overview.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Applicant Portal — Route Map">
+      <td><a href="applicant-portal.html">Applicant Portal — Route Map</a></td>
+      <td>2026-09-04</td>
+      <td>Last updated: 2026-08-28…</td>
+      <td><code>docs/architecture/applicant-portal.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Architecture &amp; Problem Solving Strategies">
+      <td><a href="strategies.html">Architecture &amp; Problem Solving Strategies</a></td>
+      <td>2026-09-04</td>
+      <td>This document explains the &quot;Why&quot; behind our implementation choices and the strategies used to fix common issues.</td>
+      <td><code>docs/architecture/strategies.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Data Flow">
+      <td><a href="data-flow.html">Data Flow</a></td>
+      <td>2026-09-04</td>
+      <td></td>
+      <td><code>docs/architecture/data-flow.md</code></td>
+    </tr>
+    <tr data-date="2026-09-04" data-title="Database Schema">
+      <td><a href="database.html">Database Schema</a></td>
+      <td>2026-09-04</td>
+      <td></td>
+      <td><code>docs/architecture/database.md</code></td>
+    </tr>
+    <tr data-date="2026-09-01" data-title="API Reference">
+      <td><a href="api.html">API Reference</a></td>
+      <td>2026-09-01</td>
+      <td>Base URL: `/api` — all routes are Next.js App Router route handlers under `app/api/**/route.ts`. Server Actions (in `app</td>
+      <td><code>docs/architecture/api.md</code></td>
+    </tr>
+    <tr data-date="2026-09-01" data-title="Image Proxy &amp; Storage Adapter">
+      <td><a href="image-proxy.html">Image Proxy &amp; Storage Adapter</a></td>
+      <td>2026-09-01</td>
+      <td>The image proxy system provides auth-gated, role-scoped access to protected images (UploadThing uploads, student documen</td>
+      <td><code>docs/architecture/image-proxy.md</code></td>
+    </tr>
+    <tr data-date="2026-09-01" data-title="Security Guidelines">
+      <td><a href="security.html">Security Guidelines</a></td>
+      <td>2026-09-01</td>
+      <td>The following P3 gaps identified in the May 2026 audits have been resolved…</td>
+      <td><code>docs/architecture/security.md</code></td>
+    </tr>
+  </tbody>
+</table>
+<script>
+function sortDocs(criteria) {
+  const tbody = document.getElementById('docs-table-body');
+  if (!tbody) return;
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a, b) => {
+    const aDate = a.dataset.date || '';
+    const bDate = b.dataset.date || '';
+    const aTitle = a.dataset.title || '';
+    const bTitle = b.dataset.title || '';
+    switch (criteria) {
+      case 'newest': return bDate.localeCompare(aDate) || aTitle.localeCompare(bTitle);
+      case 'oldest': return aDate.localeCompare(bDate) || aTitle.localeCompare(bTitle);
+      case 'az': return aTitle.localeCompare(bTitle);
+      case 'za': return bTitle.localeCompare(aTitle);
+      default: return 0;
+    }
+  });
+  tbody.innerHTML = '';
+  rows.forEach(row => tbody.appendChild(row));
+}
+</script>
+
+</main>
+
+
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

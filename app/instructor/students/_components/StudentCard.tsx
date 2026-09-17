@@ -1,11 +1,13 @@
 'use client'
 
 import React from 'react'
-import { User, Mail, Phone, BookOpen, ChevronRight } from 'lucide-react'
+import { Mail, Phone, BookOpen, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { UserAvatar } from '@/components/shared/UserAvatar'
 import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
+
+const MotionDiv = motion.div
 
 interface Student {
   id: string
@@ -26,9 +28,9 @@ export default function StudentCard({ student }: { student: Student }) {
 
   return (
     <Link href={`/instructor/students/${student.id}`}>
-      <motion.div
+      <MotionDiv
         whileHover={{ y: -4 }}
-        className="group relative flex flex-col items-center overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:border-aerojet-sky/30 hover:shadow-xl hover:shadow-blue-500/10 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-sky/30"
+        className="group hover:border-aerojet-sky/30 dark:hover:border-aerojet-sky/30 relative flex flex-col items-center overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl hover:shadow-blue-500/10 dark:border-slate-800 dark:bg-slate-900"
       >
         {/* Background Accent */}
         <div className="absolute top-0 right-0 -mt-8 -mr-8 h-24 w-24 rounded-full bg-blue-50/50 transition-all group-hover:bg-blue-100/50 dark:bg-blue-900/10 dark:group-hover:bg-blue-900/20" />
@@ -46,10 +48,10 @@ export default function StudentCard({ student }: { student: Student }) {
         </div>
 
         <div className="text-center">
-          <h3 className="line-clamp-1 text-lg font-black text-slate-900 transition-colors group-hover:text-aerojet-sky dark:text-white">
+          <h3 className="group-hover:text-aerojet-sky line-clamp-1 text-lg font-black text-slate-900 transition-colors dark:text-white">
             {student.name}
           </h3>
-          <p className="mt-1 text-xs font-bold tracking-wider text-slate-400 uppercase">
+          <p className="mt-1 text-xs font-bold tracking-wider text-slate-400 uppercase dark:text-slate-300">
             {student.studentId || 'No Student ID'}
           </p>
         </div>
@@ -82,12 +84,12 @@ export default function StudentCard({ student }: { student: Student }) {
         </div>
 
         <div className="mt-6 flex w-full items-center justify-between border-t border-slate-50 pt-4 dark:border-slate-800/50">
-          <span className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase">
+          <span className="text-aerojet-sky text-[10px] font-black tracking-widest uppercase">
             View Profile
           </span>
-          <ChevronRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-aerojet-sky" />
+          <ChevronRight className="group-hover:text-aerojet-sky h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1" />
         </div>
-      </motion.div>
+      </MotionDiv>
     </Link>
   )
 }

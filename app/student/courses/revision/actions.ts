@@ -1,7 +1,7 @@
 'use server'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { chargeWallet } from '@/lib/wallet/operations'
 import { revalidatePath } from 'next/cache'
 
@@ -75,8 +75,9 @@ export async function bookRevisionRun(runId: string) {
     revalidatePath('/student/courses/revision')
     revalidatePath('/staff/revision-runs')
     return { success: true, booking: result }
-  } catch (error: any) {
-    console.error('Book revision run error:', error)
-    return { error: error.message || 'Failed to book revision run' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to book revision run'
+    console.error('Book revision run error:', message)
+    return { error: message }
   }
 }

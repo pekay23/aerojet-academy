@@ -98,8 +98,8 @@ export async function runRetentionSweep(): Promise<Array<{ entity: string; affec
     try {
       const affected = await applyPolicy(p.entity, p.retentionDays, p.anchor as PolicyDefault['anchor'])
       results.push({ entity: p.entity, affected })
-    } catch (err: any) {
-      results.push({ entity: p.entity, affected: 0, error: err.message })
+    } catch (err: unknown) {
+      results.push({ entity: p.entity, affected: 0, error: err instanceof Error ? err.message : String(err) })
     }
   }
   return results
@@ -114,7 +114,7 @@ async function applyPolicy(
 
   // Lowercase first char to map to Prisma client property
   const modelKey = entity[0].toLowerCase() + entity.slice(1)
-  const model = (prismaUnfiltered as any)[modelKey]
+  const model = (prismaUnfiltered as unknown as Record<string, PrismaModelDelegate>)[modelKey]
   if (!model) throw new Error(`Unknown entity "${entity}" — no Prisma model found`)
 
   const isSoftDeletable = SOFT_DELETABLE_MODELS.has(entity)
@@ -140,7 +140,7 @@ async function applyPolicy(
   if (isSoftDeletable) {
     // Soft-delete: set deletedAt on rows past retention, only if not already deleted
     const r = await model.updateMany({
-      where: { [field]: { lt: cutoff }, deletedAt: null } as any,
+      where: { [field]: { lt: cutoff }, deletedAt: null } as unknown as Record<string, unknown>,
       data: { deletedAt: new Date() },
     })
     return r.count
@@ -158,8 +158,13 @@ async function applyPolicy(
  * more than `retentionDays` ago. Students who haven't graduated are never
  * swept.
  */
+type PrismaModelDelegate = {
+  updateMany: (args: { where: Record<string, unknown>; data: Record<string, unknown> }) => Promise<{ count: number }>
+  deleteMany: (args: { where: Record<string, unknown> }) => Promise<{ count: number }>
+}
+
 async function applyGraduationPolicy(
-  model: any,
+  model: PrismaModelDelegate,
   entity: string,
   cutoff: Date,
   isSoftDeletable: boolean
@@ -182,7 +187,7 @@ async function applyGraduationPolicy(
       where: {
         userId: { in: graduatedUserIds },
         deletedAt: null,
-      } as any,
+      } as unknown as Record<string, unknown>,
       data: { deletedAt: new Date() },
     })
     return r.count

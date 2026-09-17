@@ -14,7 +14,7 @@
  * - Batch processing for large datasets
  */
 
-import { prisma } from '@/lib/prisma/client';
+import { prismaUnfiltered } from '@/lib/prisma/client';
 import { getSupabaseAdmin, isBackupEnabled } from './client';
 import { transformForSupabase } from './dual-write';
 import { BackupData } from '@/lib/backup';
@@ -34,7 +34,7 @@ const BACKUP_MODELS = [
   'tuitionRun', 'tuitionBooking', 'emailTemplate', 'referral', 'adminNote'
 ] as const;
 
-type BackupModelKey = typeof BACKUP_MODELS[number];
+type _BackupModelKey = typeof BACKUP_MODELS[number];
 
 /**
  * Get a Prisma client connected to Supabase
@@ -82,10 +82,10 @@ async function exportAllFromNeon(): Promise<BackupData> {
   for (const model of BACKUP_MODELS) {
     try {
       // @ts-expect-error - dynamic model access
-      const records = await prisma[model].findMany();
+      const records = await prismaUnfiltered[model].findMany();
       backup[model] = records;
-    } catch (err: any) {
-      const error = err as Error;
+    } catch (err: unknown) {
+      const error = err as Error
       console.warn(`[SupabaseBackup] Skipping model "${model}": ${error.message}`);
       backup[model] = [];
     }
@@ -226,12 +226,11 @@ async function backupToSupabaseDatabase(backupData: BackupData): Promise<{ succe
       console.log(`[SupabaseBackup] Backing up ${model}: ${records.length} records`);
       
       // Upsert each record - requires primary key to be set
-      for (const record of records) {
+      for (const record of records as unknown as Array<Record<string, unknown>>) {
         if (record.id) {
           try {
             const transformed = transformForSupabase(record);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (supabasePrisma as any)[model].upsert({
+            await (supabasePrisma as unknown as Record<string, { upsert: (args: unknown) => Promise<unknown> }>)[model].upsert({
               where: { id: record.id },
               create: transformed,
               update: transformed,

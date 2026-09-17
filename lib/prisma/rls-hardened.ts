@@ -1,13 +1,21 @@
 import 'server-only'
-import { Prisma } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { AsyncLocalStorage } from 'async_hooks'
 
 const rlsBypassStorage = new AsyncLocalStorage<boolean>()
 
+type RlsModelKey = string
+
+// Prisma's dynamic transaction argument shapes are intentionally loose; the real type
+// guarantees come from the model/operation pair at runtime. Using `unknown` here forces
+// every consumer to narrow before use, which is what we want at this extension boundary.
+type TransactionArgs = unknown
+type TransactionOptions = { maxWait?: number; timeout?: number; isolationLevel?: Prisma.TransactionIsolationLevel }
+
 // Request-scoped RLS transaction context.
 // When set, queries reuse the existing transaction instead of opening a new one per query.
 interface RlsTxContext {
-  tx: any
+  tx: Prisma.TransactionClient
   userId: string
   userRole?: string
 }
@@ -50,7 +58,7 @@ async function getSession() {
 }
 
 async function applyRlsContext(
-  client: { $executeRaw: (...args: any[]) => Promise<unknown> },
+  client: Prisma.TransactionClient,
   userId: string,
   userRole?: string
 ) {
@@ -58,50 +66,52 @@ async function applyRlsContext(
   // and reduce round-trips. We use a single $executeRaw with multiple set_config calls.
   if (userRole) {
     await client.$executeRaw(Prisma.sql`
-      SELECT 
+      SELECT
         set_config('role', 'app_user', true),
         set_config('aerojet.user_id', ${userId}, true),
         set_config('aerojet.user_role', ${userRole}, true)
     `)
   } else {
     await client.$executeRaw(Prisma.sql`
-      SELECT 
+      SELECT
         set_config('role', 'app_user', true),
         set_config('aerojet.user_id', ${userId}, true)
     `)
   }
 }
 
-export const rlsExtension = (baseClient: any) =>
+export const rlsExtension = (baseClient: PrismaClient) =>
   Prisma.defineExtension({
     name: 'rlsExtensionHardened',
 
     client: {
-      async $transaction<T>(this: T, args: any, options?: any) {
+      async $transaction<T>(this: T, args: TransactionArgs, options?: TransactionOptions) {
         const session = await getSession()
         const userId = session?.user?.id
-        const userRole = (session as any)?.user?.role
+        const userRole = session?.user?.role
 
-        if (!userId) return (baseClient as any).$transaction(args, options)
+        if (!userId) return baseClient.$transaction(args as never, options) as unknown as T
 
         if (typeof args === 'function') {
-          const originalBlock = args
-          return (baseClient as any).$transaction(async (tx: any) => {
+          const originalBlock = args as (tx: Prisma.TransactionClient) => Promise<T>
+          return baseClient.$transaction(async (tx) => {
             await applyRlsContext(tx, userId, userRole)
             return originalBlock(tx)
-          }, options)
+          }, options) as unknown as T
         }
 
         // For array-based transactions, we must wrap them in a callback-based transaction
         // to ensure RLS context is applied to the same connection before any other queries run.
-        return (baseClient as any).$transaction(async (tx: any) => {
+        const arrayArgs = args as Array<{ model: string; operation: string; args: unknown }>
+        return baseClient.$transaction(async (tx) => {
           await applyRlsContext(tx, userId, userRole)
-          const results = []
-          for (const query of args) {
-            results.push(await (tx as any)[query.model][query.operation](query.args))
+          const results: unknown[] = []
+          for (const query of arrayArgs) {
+            const modelAccessor = (tx as unknown as Record<RlsModelKey, Record<string, (a: unknown) => Promise<unknown>>>)[query.model]
+            results.push(await modelAccessor[query.operation](query.args))
           }
-          return results
-        }, options)
+          return results as unknown as T
+        }, options) as unknown as T
       },
     },
 
@@ -151,7 +161,7 @@ export const rlsExtension = (baseClient: any) =>
           const userId = session?.user?.id
           if (!userId) return query(sanitizedArgs)
 
-          const userRole = (session as any)?.user?.role
+          const userRole = session?.user?.role
           if (
             userRole &&
             ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(userRole)
@@ -168,14 +178,16 @@ export const rlsExtension = (baseClient: any) =>
           // Reuse an existing request-scoped RLS transaction if available
           const existingCtx = rlsTxStorage.getStore()
           if (existingCtx) {
-            return existingCtx.tx[modelKey][operation](sanitizedArgs)
+            const existingTx = existingCtx.tx as unknown as Record<string, Record<string, (a: unknown) => Promise<unknown>>>
+            return existingTx[modelKey][operation](sanitizedArgs)
           }
 
           return rlsBypassStorage.run(true, () =>
             baseClient.$transaction(
-              async (tx: any) => {
+              async (tx) => {
                 await applyRlsContext(tx, userId, userRole)
-                return tx[modelKey][operation](sanitizedArgs)
+                const bypassTx = tx as unknown as Record<string, Record<string, (a: unknown) => Promise<unknown>>>
+                return bypassTx[modelKey][operation](sanitizedArgs)
               },
               {
                 maxWait: 30000,
@@ -191,7 +203,7 @@ export const rlsExtension = (baseClient: any) =>
         const session = await getSession()
         if (!session?.user?.id) return query(sanitizedArgs)
 
-        const userRole = (session as any)?.user?.role
+        const userRole = session?.user?.role
         if (
           userRole &&
           ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(userRole)
@@ -200,7 +212,7 @@ export const rlsExtension = (baseClient: any) =>
         }
 
         return baseClient.$transaction(
-          async (tx: any) => {
+          async (tx) => {
             await applyRlsContext(tx, session.user.id, userRole)
             return query(sanitizedArgs)
           },
@@ -231,7 +243,7 @@ export async function withRlsBatch<T>(fn: () => Promise<T>): Promise<T> {
   const userId = session?.user?.id
   if (!userId) return fn()
 
-  const userRole = (session as any)?.user?.role
+  const userRole = session?.user?.role
   if (userRole && ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(userRole)) {
     return fn()
   }
@@ -239,7 +251,7 @@ export async function withRlsBatch<T>(fn: () => Promise<T>): Promise<T> {
   const { prismaBase } = await import('./db-base')
 
   return prismaBase.$transaction(
-    async (tx: any) => {
+    async (tx) => {
       await applyRlsContext(tx, userId, userRole)
       const ctx: RlsTxContext = { tx, userId, userRole }
       return rlsTxStorage.run(ctx, fn)

@@ -14,11 +14,13 @@
   <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
     <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +28,124 @@
 <header>
   <p class="he-eyebrow">Architecture</p>
   <h1 class="he-title">Database &amp; Security Deep-Dive</h1>
-  <p class="he-deck"><p>This document details the database schema, relational patterns, and Row Level Security (RLS) implementation.</p>
-</p>
+  <p class="he-deck">This document details the database schema, relational patterns, and Row Level Security (RLS) implementation.</p>
 </header>
-<section class="he-section" id="database-schema-prisma"><div class="he-section__num">01 · 🗄️ Database Schema (Prisma)</div><h2 class="he-section__title">🗄️ Database Schema (Prisma)</h2>The schema is built around five core domains:<h3 id="1-user-profiles">1. User & Profiles</h3>User: The central identity. Roles include <code>APPLICANT</code>, <code>STUDENT</code>, <code>INSTRUCTOR</code>, <code>STAFF</code>, <code>ADMIN</code>, and <code>SUPER_ADMIN</code>.Profiles: Split into <code>StudentProfile</code>, <code>InstructorProfile</code>, and <code>StaffProfile</code> to keep the main <code>User</code> table clean and optimized.Registration: Handles applicant-to-student transition via <code>registrationCode</code> and <code>registrationFee</code>.<h3 id="2-academic-core">2. Academic Core</h3>Course: Represents modules (e.g., M1, M2) or full programmes.Enrollment: Links users to courses. Tracks <code>amountPaid</code> and <code>status</code> (PENDING, ACTIVE, COMPLETED).StudyPathway: Defines the sequence of courses for specific license targets (e.g., B1.1 vs B2).<h3 id="3-exam-evaluation">3. Exam & Evaluation</h3>ExamEvent: High-level event container (e.g., "June 2024 Session").ExamPool: A slot within an event. Managed using a "fill-rate" logic with configurable <code>minCandidates</code> and <code>maxCandidates</code> per-pool (defaulting to 25-28) to ensure instructor cost-efficiency.PoolMembership: The join record between a student and a pool.InternalExamBank / InternalExamQuestion: Course-linked internal assessment banks. Banks carry rule-set metadata and question-pool sizing so staff can monitor whether enough active questions exist before students sit an exam.InternalExamSession / InternalExamAnswer: Per-student internal exam attempts and selected answers. Sessions track <code>expiresAt</code>, <code>autoSubmitted</code>, <code>keyboardEvents</code>, score, pass/fail, retake eligibility, and ban state. Answers are autosaved during the exam and graded on submit.<h3 id="4-financial-system">4. Financial System</h3>Wallet: A virtual balance for each student. Total Balance = Available + Reserved.WalletTransaction: Immutable ledger of all movements. Includes <code>RESERVE</code> (for pending exam joins) and <code>DEBIT</code>/<code>PAYMENT</code>.Integrity Rule: No booking or pool membership can exist without corresponding funds being either <code>RESERVED</code> (for flexible pools) or <code>DEBITED</code> (for fixed bookings).Payment: Tracks external proof-of-payments (manual bank transfers) which are later reconciled by Staff.<h3 id="5-academic-management">5. Academic Management</h3>Class: A specific instance of a course with an instructor and schedule.AttendanceRecord: Daily tracking for compliance with EASA training requirements.<h3 id="5a-facilities-seating">5a. Facilities & Seating</h3>Classroom: Physical rooms with <code>layout</code> (Json) storing a grid definition: <code>{ rows, cols, cells: [{ row, col, type, label }] }</code>. Cell types: <code>DESK</code>, <code>AISLE</code>, <code>OBSTACLE</code>.Seat: Auto-created from layout desk cells. <code>@@unique([classroomId, row, col])</code>. Labels auto-generated (A1, A2, B1…).Class Seating: Stored in <code>SystemSetting</code> as <code>class_seating_{classId}</code> → JSON map of <code>{ seatId: userId }</code>.Exam Seating: Stored directly on <code>ExamSittingAssignment.seatId</code> (FK to <code>Seat</code>).Student View: <code>/student/seating</code> aggregates both sources to show mini floor plans with the student's seat highlighted.<h3 id="6-communication-calendar">6. Communication & Calendar</h3>AdminCalendarEvent: Broadcasted events with audience targeting (<code>ALL</code>, <code>STUDENTS</code>, <code>INSTRUCTORS</code>, <code>SPECIFIC_USER</code>, or pathway-specific).StudentCalendarEvent: Personalized calendar entries synced from admin broadcasts or personal student schedules.Message: Internal staff-to-user messaging system.<section class="he-section" id="row-level-security-rls-strategy"><div class="he-section__num">02 · 🛡️ Row Level Security (RLS) Strategy</div><h2 class="he-section__title">🛡️ Row Level Security (RLS) Strategy</h2>The system uses a hybrid security model:<h3 id="nextjs-middleware">Next.js Middleware</h3>Routes are protected at the edge via <code>middleware.ts</code>, verifying roles before the request even hits the server action.<h3 id="database-level-rls">Database-Level RLS</h3>For direct database access (e.g., via the Neon Console, Supabase Dashboard, or external BI tools), RLS policies are active.Policies:<code>Students can only view their own Wallet and Enrollments.</code><code>Instructors can view classes they are assigned to.</code><code>Staff have bypass permissions for administrative tables.</code>Implementation: Policies use the <code>auth.uid()</code> function. In the Next.js app, we inject the user's ID into the session using a custom Prisma extension located in <code>lib/prisma/rls.ts</code>. This applies to both the primary Neon database and the redundant Supabase instance.<section class="he-section" id="common-query-patterns"><div class="he-section__num">03 · 🚦 Common Query Patterns</div><h2 class="he-section__title">🚦 Common Query Patterns</h2><h3 id="the-dashboard-bottleneck">The "Dashboard Bottleneck"</h3>The Reports dashboard executes ~20 concurrent queries.Pattern: Use <code>Promise.all</code> in the Server Component.Bottleneck: Prisma's connection pool can become saturated in dev.Solution: Indexed columns on <code>status</code>, <code>createdAt</code>, and <code>userId</code> are critical. Ensure any new analytic query includes these in the <code>where</code> clause.<h3 id="atomicity-in-exams">Atomicity in Exams</h3>Joining a pool uses <code>SELECT FOR UPDATE</code> (simulated via Prisma transactions) to prevent over-filling pools beyond the <code>maxCandidates</code> limit.
+<section class="he-section" id="database-schema-prisma"><div class="he-section__num">01 · 🗄️ Database Schema (Prisma)</div><h2 class="he-section__title">🗄️ Database Schema (Prisma)</h2></section>
+<p>The schema is built around five core domains:</p>
+<h3 id="1-user-amp-profiles">1. User &amp; Profiles</h3>
+<ul>
+<li><strong>User</strong>: The central identity. Roles include <code>APPLICANT</code>, <code>STUDENT</code>, <code>INSTRUCTOR</code>, <code>EXAMINER</code>, <code>STAFF</code>, <code>ADMIN</code>, and <code>SUPER_ADMIN</code>.</li>
+<li><strong>Profiles</strong>: Split into <code>StudentProfile</code>, <code>InstructorProfile</code>, and <code>StaffProfile</code> to keep the main <code>User</code> table clean and optimized.</li>
+<li><strong>Registration</strong>: Handles applicant-to-student transition via <code>registrationCode</code> and <code>registrationFee</code>.</li>
+<li><strong>CourseCategory</strong>: Categorization of courses (e.g., theory, practical, exam), used to group programmes and filter catalog views.</li>
+</ul>
+<h3 id="2-academic-core">2. Academic Core</h3>
+<ul>
+<li><strong>Course</strong>: Represents modules (e.g., M1, M2) or full programmes.</li>
+<li><strong>Enrollment</strong>: Links users to courses. Tracks <code>amountPaid</code> and <code>status</code> (PENDING, ACTIVE, COMPLETED).</li>
+<li><strong>StudyPathwayModel</strong>: Defines the sequence of courses for specific license targets (e.g., B1.1 vs B2).</li>
+</ul>
+<h3 id="3-exam-amp-evaluation">3. Exam &amp; Evaluation</h3>
+<ul>
+<li><strong>ExamEvent</strong>: High-level event container (e.g., &quot;June 2024 Session&quot;).</li>
+<li><strong>ExamComponent</strong>: Sub-components of an exam (e.g., written, oral, practical), each with pass-mark and grading rules.</li>
+<li><strong>ExamPool</strong>: A slot within an event. Managed using a &quot;fill-rate&quot; logic with configurable <code>minCandidates</code> and <code>maxCandidates</code> per-pool (defaulting to 25-28) to ensure instructor cost-efficiency.</li>
+<li><strong>PoolMembership</strong>: The join record between a student and a pool.</li>
+<li><strong>InternalExamBank / InternalExamQuestion</strong>: Course-linked internal assessment banks. Banks carry rule-set metadata and question-pool sizing so staff can monitor whether enough active questions exist before students sit an exam.</li>
+<li><strong>InternalExamQuestionVersion</strong>: Versioned history of internal exam questions, tracking the <code>changedBy</code> relation to <code>User</code> (the staff member who last modified the question). Superseded on each edit, preserving audit trail.</li>
+<li><strong>InternalExamSession / InternalExamAnswer</strong>: Per-student internal exam attempts and selected answers. Sessions track <code>expiresAt</code>, <code>autoSubmitted</code>, <code>keyboardEvents</code>, score, pass/fail, retake eligibility, and ban state. Answers are autosaved during the exam and graded on submit.</li>
+</ul>
+<h3 id="4-financial-system">4. Financial System</h3>
+<ul>
+<li><strong>Wallet</strong>: A virtual balance for each student. Total Balance = Available + Reserved.</li>
+<li><strong>WalletTransaction</strong>: Immutable ledger of all movements. Includes <code>RESERVE</code> (for pending exam joins) and <code>DEBIT</code>/<code>PAYMENT</code>.
+<ul>
+<li><strong>Integrity Rule</strong>: No booking or pool membership can exist without corresponding funds being either <code>RESERVED</code> (for flexible pools) or <code>DEBITED</code> (for fixed bookings).</li>
+</ul>
+</li>
+<li><strong>Payment</strong>: Tracks external proof-of-payments (manual bank transfers) which are later reconciled by Staff.</li>
+<li><strong>PaymentMilestone</strong>: Milestone-based payment schedule entries (e.g., registration fee, module fees), linked to <code>Payment</code> and <code>Invoice</code>.</li>
+<li><strong>Invoice</strong>: Generated invoices for student financial obligations, linked to <code>PaymentMilestone</code> and <code>WalletTransaction</code>.</li>
+<li><strong>PaymentMilestone</strong>: Milestone-based payment schedule entries (e.g., registration fee, module fees), linked to <code>Payment</code> and <code>Invoice</code>.</li>
+<li><strong>Invoice</strong>: Generated invoices for student financial obligations, linked to <code>PaymentMilestone</code> and <code>WalletTransaction</code>.</li>
+</ul>
+<h3 id="5-academic-management">5. Academic Management</h3>
+<ul>
+<li><strong>Class</strong>: A specific instance of a course with an instructor and schedule.</li>
+<li><strong>ClassSession</strong>: Recurring session instances derived from a <code>Class</code>'s recurrence rules (type, days, until), with individual overrides and attendance tracking.</li>
+<li><strong>AttendanceRecord</strong>: Daily tracking for compliance with EASA training requirements.</li>
+</ul>
+<h3 id="5a-facilities-amp-seating">5a. Facilities &amp; Seating</h3>
+<ul>
+<li><strong>Classroom</strong>: Physical rooms with <code>layout</code> (Json) storing a grid definition: <code>{ rows, cols, cells: [{ row, col, type, label }] }</code>. Cell types: <code>DESK</code>, <code>AISLE</code>, <code>OBSTACLE</code>.</li>
+<li><strong>Seat</strong>: Auto-created from layout desk cells. <code>@@unique([classroomId, row, col])</code>. Labels auto-generated (A1, A2, B1…).</li>
+<li><strong>Class Seating</strong>: Stored in <code>SystemSetting</code> as <code>class_seating_{classId}</code> → JSON map of <code>{ seatId: userId }</code>.</li>
+<li><strong>Exam Seating</strong>: Stored directly on <code>ExamSittingAssignment.seatId</code> (FK to <code>Seat</code>).</li>
+<li><strong>Student View</strong>: <code>/student/seating</code> aggregates both sources to show mini floor plans with the student's seat highlighted.</li>
+</ul>
+<h3 id="6-communication-amp-calendar">6. Communication &amp; Calendar</h3>
+<ul>
+<li><strong>AdminCalendarEvent</strong>: Broadcasted events with audience targeting (<code>ALL</code>, <code>STUDENTS</code>, <code>INSTRUCTORS</code>, <code>SPECIFIC_USER</code>, or pathway-specific).</li>
+<li><strong>StudentCalendarEvent</strong>: Personalized calendar entries synced from admin broadcasts or personal student schedules.</li>
+<li><strong>Message</strong>: Internal staff-to-user messaging system.</li>
+</ul>
+<h3 id="7-system-amp-infrastructure">7. System &amp; Infrastructure</h3>
+<ul>
+<li><strong>Notification</strong>: In-app notifications.</li>
+<li><strong>AuditLog</strong>: All system actions.</li>
+<li><strong>AuditLogArchive</strong>: Time-partitioned archive of <code>AuditLog</code> rows beyond the retention sweep window (kept for compliance; not queried by the live app).</li>
+<li><strong>FileUpload</strong>: Uploaded files tracking.</li>
+<li><strong>SystemSetting</strong>: Key-value admin-editable settings (registration fees, exam pricing, payment splits, email config, class seating assignments as <code>class_seating_{classId}</code> keys).</li>
+<li><strong>PaymentMethod</strong>: Bank transfer details (account name, number, SWIFT, branch).</li>
+<li><strong>EmailDelivery</strong>: Every <code>sendEmail()</code> call logged with <code>recipient</code>, <code>subject</code>, <code>template</code>, <code>status</code>, <code>attempts</code>, <code>error</code>, <code>messageId</code>.</li>
+</ul>
+<h3 id="7-system-amp-infrastructure">7. System &amp; Infrastructure</h3>
+<ul>
+<li><strong>Notification</strong>: In-app notifications.</li>
+<li><strong>AuditLog</strong>: All system actions.</li>
+<li><strong>AuditLogArchive</strong>: Time-partitioned archive of <code>AuditLog</code> rows beyond the retention sweep window (kept for compliance; not queried by the live app).</li>
+<li><strong>FileUpload</strong>: Uploaded files tracking.</li>
+<li><strong>SystemSetting</strong>: Key-value admin-editable settings (registration fees, exam pricing, payment splits, email config, class seating assignments as <code>class_seating_{classId}</code> keys).</li>
+<li><strong>PaymentMethod</strong>: Bank transfer details (account name, number, SWIFT, branch).</li>
+<li><strong>EmailDelivery</strong>: Every <code>sendEmail()</code> call logged with <code>recipient</code>, <code>subject</code>, <code>template</code>, <code>status</code>, <code>attempts</code>, <code>error</code>, <code>messageId</code>.</li>
+</ul>
+<hr />
+<section class="he-section" id="row-level-security-rls-strategy"><div class="he-section__num">02 · 🛡️ Row Level Security (RLS) Strategy</div><h2 class="he-section__title">🛡️ Row Level Security (RLS) Strategy</h2></section>
+<p>The system uses a hybrid security model:</p>
+<h3 id="route-protection-layered">Route Protection (Layered)</h3>
+<p>Route protection is enforced in three layers:</p>
+<ol>
+<li><strong>Edge proxy</strong> (<code>proxy.ts</code>) — images-only; gates <code>/api/images/*</code> (auth +
+hotlink/header protection). Does <strong>not</strong> gate portal routes.</li>
+<li><strong>Portal layouts</strong> — each portal's <code>layout.tsx</code> calls <code>requireStaff</code>/
+<code>requireInstructor</code>/<code>requireStudent</code>/etc. from <code>lib/auth/helpers.ts</code> as
+the primary gate.</li>
+<li><strong>Route handlers / server actions</strong> — call <code>requireAdmin()</code>/<code>requireAuth()</code>
+/<code>requireStaff()</code>/<code>requirePermission()</code> directly.</li>
+</ol>
+<p><code>middleware.ts</code> was renamed to <code>proxy.ts</code> per Next.js 16 naming conventions,
+but its scope is limited to image proxy — not portal route protection.</p>
+<h3 id="database-level-rls">Database-Level RLS</h3>
+<p>For direct database access (e.g., via the Neon Console, Supabase Dashboard, or
+external BI tools), RLS policies are defined. The codebase also uses a dual
+Prisma client pattern: <code>prismaUnfiltered</code> (raw client, no RLS overhead) for
+portal code that is already auth-gated at the layout/handler layers, and the
+<code>prisma</code> default export (extended with soft-delete + RLS session variables)
+for defense-in-depth. Neon connections use the pooler (<code>*.pooler.region...</code>)
+in production; <code>@prisma/adapter-pg</code> with the standard <code>pg</code> driver is used on
+Vercel.</p>
+<hr />
+<section class="he-section" id="common-query-patterns"><div class="he-section__num">03 · 🚦 Common Query Patterns</div><h2 class="he-section__title">🚦 Common Query Patterns</h2></section>
+<h3 id="the-quotdashboard-bottleneckquot">The &quot;Dashboard Bottleneck&quot;</h3>
+<p>The Reports dashboard executes ~20 concurrent queries.</p>
+<ul>
+<li><strong>Pattern</strong>: Use <code>Promise.all</code> in the Server Component.</li>
+<li><strong>Bottleneck</strong>: Prisma's connection pool can become saturated in dev.</li>
+<li><strong>Solution</strong>: Indexed columns on <code>status</code>, <code>createdAt</code>, and <code>userId</code> are critical. Ensure any new analytic query includes these in the <code>where</code> clause.</li>
+</ul>
+<h3 id="atomicity-in-exams">Atomicity in Exams</h3>
+<p>Joining a pool uses <code>SELECT FOR UPDATE</code> (simulated via Prisma transactions) to prevent over-filling pools beyond the <code>maxCandidates</code> limit.</p>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -43,8 +159,10 @@
     <li class="he-toc__l3"><a href="#5-academic-management">5. Academic Management</a></li>
     <li class="he-toc__l3"><a href="#5a-facilities-seating">5a. Facilities &amp; Seating</a></li>
     <li class="he-toc__l3"><a href="#6-communication-calendar">6. Communication &amp; Calendar</a></li>
+    <li class="he-toc__l3"><a href="#7-system-infrastructure">7. System &amp; Infrastructure</a></li>
+    <li class="he-toc__l3"><a href="#7-system-infrastructure">7. System &amp; Infrastructure</a></li>
     <li class="he-toc__l2"><a href="#row-level-security-rls-strategy">🛡️ Row Level Security (RLS) Strategy</a></li>
-    <li class="he-toc__l3"><a href="#nextjs-middleware">Next.js Middleware</a></li>
+    <li class="he-toc__l3"><a href="#route-protection-layered">Route Protection (Layered)</a></li>
     <li class="he-toc__l3"><a href="#database-level-rls">Database-Level RLS</a></li>
     <li class="he-toc__l2"><a href="#common-query-patterns">🚦 Common Query Patterns</a></li>
     <li class="he-toc__l3"><a href="#the-dashboard-bottleneck">The &quot;Dashboard Bottleneck&quot;</a></li>
@@ -53,7 +171,7 @@
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

@@ -15,6 +15,7 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 interface Bank {
   id: string
@@ -63,6 +64,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({})
   const [showAnswers, setShowAnswers] = useState(true)
   const [mode, setMode] = useState<'select' | 'preview'>('select')
+  const { markDirty, markClean } = useFormDirty()
 
   const loadPreview = async () => {
     if (!selectedBankId) return
@@ -75,6 +77,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
         setCurrentIndex(0)
         setSelectedAnswers({})
         setMode('preview')
+        markClean()
       }
     } finally {
       setLoading(false)
@@ -82,6 +85,8 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
   }
 
   const handleAnswer = (questionId: string, answer: string) => {
+    // Warn user before closing/refreshing if they have unsaved preview answers
+    markDirty()
     setSelectedAnswers((prev) => ({ ...prev, [questionId]: answer }))
   }
 
@@ -90,7 +95,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
       <div className="mx-auto max-w-2xl">
         <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-aerojet-blue dark:bg-blue-900/20">
+            <div className="text-aerojet-blue flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20">
               <Eye className="h-6 w-6" />
             </div>
             <div>
@@ -107,7 +112,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
               <select
                 value={selectedBankId}
                 onChange={(e) => setSelectedBankId(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 {banks.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -120,13 +125,9 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
             <button
               onClick={loadPreview}
               disabled={loading || !selectedBankId}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 font-bold text-white shadow-lg shadow-aerojet-blue/20 transition-all hover:shadow-xl disabled:opacity-50"
+              className="bg-aerojet-blue shadow-aerojet-blue/20 flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50"
             >
-              {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Eye className="h-5 w-5" />}
               {loading ? 'Generating Preview...' : 'Generate Preview'}
             </button>
           </div>
@@ -150,7 +151,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
         <div className="flex items-center gap-4">
           <button
             onClick={() => setMode('select')}
-            className="flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-aerojet-blue"
+            className="hover:text-aerojet-blue flex items-center gap-1 text-sm font-semibold text-slate-500"
           >
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
@@ -199,7 +200,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
             key={s.category}
             className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900"
           >
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <div className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
               {s.category.replace('_', ' ')}
             </div>
             <div className="mt-1 text-sm font-black text-slate-800 dark:text-white">
@@ -230,11 +231,13 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
                 {q.difficulty}
               </span>
             </div>
-            <span className="text-xs text-slate-400">{q.points} pt{q.points > 1 ? 's' : ''}</span>
+            <span className="text-xs text-slate-400">
+              {q.points} pt{q.points > 1 ? 's' : ''}
+            </span>
           </div>
 
           {/* Question text */}
-          <h2 className="mb-6 text-lg font-medium leading-relaxed text-slate-800 dark:text-slate-200">
+          <h2 className="mb-6 text-lg leading-relaxed font-medium text-slate-800 dark:text-slate-200">
             {q.text}
           </h2>
 
@@ -302,9 +305,11 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
                     ? 'border-green-400 bg-green-50 dark:border-green-600 dark:bg-green-900/20'
                     : 'border-red-400 bg-red-50 dark:border-red-600 dark:bg-red-900/20'
                 } else if (isSelected) {
-                  borderClass = 'border-aerojet-blue bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/20'
+                  borderClass =
+                    'border-aerojet-blue bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/20'
                 } else if (showAnswers && isAnswer) {
-                  borderClass = 'border-green-300 bg-green-50/50 dark:border-green-700 dark:bg-green-900/10'
+                  borderClass =
+                    'border-green-300 bg-green-50/50 dark:border-green-700 dark:bg-green-900/10'
                 }
 
                 return (
@@ -324,7 +329,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
                   type="number"
                   value={answered || ''}
                   onChange={(e) => handleAnswer(q.questionId, e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 p-4 text-lg font-medium shadow-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                  className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 p-4 text-lg font-medium shadow-sm focus:ring-2 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                   placeholder="Enter exact number..."
                 />
                 {showAnswers && (
@@ -339,7 +344,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
           {/* Explanation */}
           {showAnswers && q.explanation && (
             <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/50 dark:bg-blue-900/10">
-              <div className="text-xs font-bold uppercase tracking-wider text-blue-500">
+              <div className="text-xs font-bold tracking-wider text-blue-500 uppercase">
                 Explanation
               </div>
               <p className="mt-1 text-sm text-blue-800 dark:text-blue-300">{q.explanation}</p>
@@ -363,7 +368,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
                   onClick={() => setCurrentIndex(i)}
                   className={`h-2.5 w-2.5 rounded-full transition-all ${
                     currentIndex === i
-                      ? 'scale-125 bg-aerojet-blue'
+                      ? 'bg-aerojet-blue scale-125'
                       : selectedAnswers[qu.questionId]
                         ? selectedAnswers[qu.questionId] === qu.correctAnswer && showAnswers
                           ? 'bg-green-400'
@@ -378,11 +383,9 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
             </div>
 
             <button
-              onClick={() =>
-                setCurrentIndex((p) => Math.min(data.questions.length - 1, p + 1))
-              }
+              onClick={() => setCurrentIndex((p) => Math.min(data.questions.length - 1, p + 1))}
               disabled={currentIndex === data.questions.length - 1}
-              className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2.5 font-bold text-white shadow-md transition-all hover:bg-blue-700 disabled:opacity-30"
+              className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold text-white shadow-md transition-all hover:bg-blue-700 disabled:opacity-30"
             >
               Next <ChevronRight className="h-5 w-5" />
             </button>
@@ -392,7 +395,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
         {/* Sidebar — question grid + legend */}
         <div className="space-y-3">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <h3 className="mb-3 text-xs font-bold tracking-wider text-slate-400 uppercase">
               Question Navigator
             </h3>
             <div className="grid grid-cols-5 gap-1.5">
@@ -425,7 +428,7 @@ export default function PreviewClient({ banks }: { banks: Bank[] }) {
 
           {/* Category breakdown */}
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <h3 className="mb-3 text-xs font-bold tracking-wider text-slate-400 uppercase">
               Category Breakdown
             </h3>
             <div className="space-y-2">

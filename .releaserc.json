@@ -1,0 +1,38 @@
+{
+  "git": {
+    "commitMessage": "chore(release): ${version}",
+    "tagName": "v${version}",
+    "push": true,
+    "requireCleanWorkingDir": false
+  },
+  "github": {
+    "release": false
+  },
+  "npm": {
+    "publish": false
+  },
+  "hooks": {
+    "before:init": ["bun run type-check", "bun run test --run --no-file-parallelism --no-color"]
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "infile": "docs/CHANGELOG.md",
+      "preset": {
+        "name": "conventionalcommits",
+        "types": [
+          { "type": "feat", "section": "Features", "hidden": false },
+          { "type": "fix", "section": "Bug Fixes", "hidden": false },
+          { "type": "perf", "section": "Performance Improvements", "hidden": false },
+          { "type": "revert", "section": "Reverts", "hidden": false },
+          { "type": "docs", "section": "Documentation", "hidden": false },
+          { "type": "style", "section": "Styles", "hidden": true },
+          { "type": "chore", "section": "Maintenance", "hidden": false },
+          { "type": "refactor", "section": "Code Refactoring", "hidden": true },
+          { "type": "test", "section": "Tests", "hidden": true },
+          { "type": "build", "section": "Build System", "hidden": true },
+          { "type": "ci", "section": "CI/CD", "hidden": true }
+        ]
+      }
+    }
+  }
+}

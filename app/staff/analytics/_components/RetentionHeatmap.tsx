@@ -1,7 +1,8 @@
-﻿'use client'
+'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 interface RetentionHeatmapProps {
   data: {
@@ -15,7 +16,38 @@ interface RetentionHeatmapProps {
   }
 }
 
-export function RetentionHeatmap({ data }: RetentionHeatmapProps) {
+const retentionConfig = {
+  d1: {
+    label: 'D1',
+    color: '#002a5c',
+  },
+  d7: {
+    label: 'D7',
+    color: '#10b981',
+  },
+  d30: {
+    label: 'D30',
+    color: '#f59e0b',
+  },
+} as const
+
+const cohortConfig = {
+  cohortSize: {
+    label: 'Cohort Size',
+    color: '#002a5c',
+  },
+} as const
+
+const retentionFormatter = (value: unknown, _name: unknown): React.ReactNode => {
+  const numValue = Number(value ?? 0)
+  return numValue !== 0 ? `${numValue}%` : '0%'
+}
+
+const cohortSizeFormatter = (value: unknown): React.ReactNode => {
+  return Number(value ?? 0).toLocaleString()
+}
+
+export default function RetentionHeatmap({ data }: RetentionHeatmapProps) {
   const chartData = data.cohorts.map((cohort) => {
     const date = new Date(cohort.cohortDate)
     const label = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
@@ -32,40 +64,43 @@ export function RetentionHeatmap({ data }: RetentionHeatmapProps) {
     <div className="grid gap-4 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>Retention Rates (%)</CardTitle>
+          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Retention Rates (%)
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+          <ChartContainer config={retentionConfig} className="h-75 w-full">
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} />
-              <Tooltip formatter={(value: any) => [`${value}%`, 'Retention']} />
-              <Bar dataKey="d1" fill="#3b82f6" radius={[4, 4, 0, 0]} name="D1" />
-              <Bar dataKey="d7" fill="#10b981" radius={[4, 4, 0, 0]} name="D7" />
-              <Bar dataKey="d30" fill="#f59e0b" radius={[4, 4, 0, 0]} name="D30" />
+              <ChartTooltip content={<ChartTooltipContent indicator="dot" formatter={retentionFormatter} />} />
+              <Bar dataKey="d1" fill="var(--color-d1)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="d7" fill="var(--color-d7)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="d30" fill="var(--color-d30)" radius={[4, 4, 0, 0]} />
             </BarChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Cohort Sizes</CardTitle>
+          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Cohort Sizes
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+          <ChartContainer config={cohortConfig} className="h-75 w-full">
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-slate-700" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(value: any) => [value.toLocaleString(), 'Users']} />
-              <Bar dataKey="cohortSize" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              <ChartTooltip content={<ChartTooltipContent indicator="dot" formatter={cohortSizeFormatter} />} />
+              <Bar dataKey="cohortSize" fill="var(--color-cohortSize)" radius={[4, 4, 0, 0]} />
             </BarChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </CardContent>
       </Card>
     </div>
   )
 }
-export default RetentionHeatmap;

@@ -19,9 +19,9 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { EnrollmentStatus } from '@/types/enums'
-import { Enrollment, Course, User, Profile } from '@prisma/client'
+import { SortableTh } from '@/components/ui/sortable-th'
 
-type EnrollmentWithDetails = {
+export type EnrollmentWithDetails = {
   id: string
   status: string
   amountPaid: number | null
@@ -119,7 +119,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
               confirmTitle: 'Cancel Enrollments',
               confirmMessage: `Are you sure you want to cancel ${selectedIds.length} selected enrollments?`,
               onClick: async (ids) => {
-                const res = await bulkUpdateEnrollmentStatus(ids, 'CANCELLED' as any)
+                const res = await bulkUpdateEnrollmentStatus(ids, EnrollmentStatus.WITHDRAWN)
                 if (res.success) {
                   toast.success(`Cancelled ${ids.length} enrollments`)
                   router.refresh()
@@ -164,11 +164,11 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                   )}
                 </button>
               </TableHead>
-              <TableHead>Student</TableHead>
-              <TableHead>Course</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Enrolled Date</TableHead>
-              <TableHead>Amount Paid</TableHead>
+              <SortableTh sortKey="student" label="Student" />
+              <SortableTh sortKey="course" label="Course" />
+              <SortableTh sortKey="status" label="Status" />
+              <SortableTh sortKey="enrolledAt" label="Enrolled Date" />
+              <SortableTh sortKey="amount" label="Amount Paid" align="right" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -206,7 +206,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col text-sm">
-                      <span className="font-bold text-aerojet-blue dark:text-white">
+                      <span className="text-aerojet-blue font-bold dark:text-white">
                         {enrollment.user.profile
                           ? [
                               enrollment.user.profile.firstName,

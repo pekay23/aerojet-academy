@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   User as UserIcon,
   Mail,
@@ -17,7 +17,7 @@ import {
   Clock,
   ChevronRight,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -59,7 +59,11 @@ interface ProfileData {
     qualifications?: string | null
     hireDate?: string | null
     modulesQualified: string[]
-    classesInstructed: any[]
+    classesInstructed: Array<{
+      id: string
+      course: { code: string }
+      name: string
+    }>
   }
 }
 
@@ -68,29 +72,41 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState(initialData)
 
+  // Warn before closing the tab / navigating away with unsaved edits.
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData)
+  useEffect(() => {
+    if (!isDirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
+
   const handleUpdate = async () => {
     setIsSubmitting(true)
     try {
       const result = await updateInstructorProfile({
         personal: {
           firstName: formData.profile.firstName,
-          middleName: formData.profile.middleName,
+          middleName: formData.profile.middleName ?? null,
           lastName: formData.profile.lastName,
-          phone: formData.profile.phone,
-          alternatePhone: formData.profile.alternatePhone,
-          address: formData.profile.address,
-          city: formData.profile.city,
-          state: formData.profile.state,
-          country: formData.profile.country,
-          postalCode: formData.profile.postalCode,
-          gender: formData.profile.gender,
-          dateOfBirth: formData.profile.dateOfBirth,
-          nationality: formData.profile.nationality,
+          phone: formData.profile.phone ?? null,
+          alternatePhone: formData.profile.alternatePhone ?? null,
+          address: formData.profile.address ?? null,
+          city: formData.profile.city ?? null,
+          state: formData.profile.state ?? null,
+          country: formData.profile.country ?? null,
+          postalCode: formData.profile.postalCode ?? null,
+          gender: formData.profile.gender ?? null,
+          dateOfBirth: formData.profile.dateOfBirth ?? null,
+          nationality: formData.profile.nationality ?? null,
         },
         emergency: {
-          name: formData.profile.emergencyContactName,
-          phone: formData.profile.emergencyContactPhone,
-          relation: formData.profile.emergencyContactRelation,
+          name: formData.profile.emergencyContactName || '',
+          phone: formData.profile.emergencyContactPhone || '',
+          relation: formData.profile.emergencyContactRelation || '',
         },
       })
 
@@ -98,14 +114,15 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
         toast.success('Profile updated successfully')
         setIsEditing(false)
       }
-    } catch (error) {
+    } catch (err) {
+      console.error('[InstructorProfileView] Failed to update profile:', err)
       toast.error('Failed to update profile')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleProfileChange = (field: string, value: any) => {
+  const handleProfileChange = (field: string, value: string | number | boolean | null) => {
     setFormData((prev) => ({
       ...prev,
       profile: {
@@ -121,7 +138,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-4xl bg-aerojet-blue p-8 text-white shadow-2xl dark:bg-slate-900"
+        className="bg-aerojet-blue relative overflow-hidden rounded-4xl p-8 text-white shadow-2xl dark:bg-slate-900"
       >
         <div className="absolute top-0 right-0 h-64 w-64 translate-x-12 translate-y-[-12] rounded-full bg-blue-500/10 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-48 w-48 translate-x-[-12] translate-y-12 rounded-full bg-blue-400/5 blur-3xl" />
@@ -167,7 +184,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
             {!isEditing ? (
               <Button
                 onClick={() => setIsEditing(true)}
-                className="rounded-2xl bg-white text-sm font-black text-aerojet-blue hover:bg-blue-50"
+                className="text-aerojet-blue rounded-2xl bg-white text-sm font-black hover:bg-blue-50"
               >
                 Edit Profile
               </Button>
@@ -218,14 +235,16 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
             <div className="grid gap-6 md:grid-cols-2">
               <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
                 <CardContent className="p-8">
-                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-aerojet-sky uppercase">
+                  <h3 className="text-aerojet-sky mb-6 flex items-center gap-2 text-sm font-black tracking-widest uppercase">
                     <UserIcon className="h-4 w-4" />
                     Basic Information
                   </h3>
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold text-slate-400">First Name</Label>
+                        <Label className="text-xs font-bold text-slate-400 dark:text-slate-300">
+                          First Name
+                        </Label>
                         <Input
                           disabled={!isEditing}
                           value={formData.profile.firstName}
@@ -291,7 +310,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
 
               <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
                 <CardContent className="p-8">
-                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-aerojet-sky uppercase">
+                  <h3 className="text-aerojet-sky mb-6 flex items-center gap-2 text-sm font-black tracking-widest uppercase">
                     <Phone className="h-4 w-4" />
                     Contact & Address
                   </h3>
@@ -390,7 +409,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
             <div className="grid gap-6 md:grid-cols-2">
               <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
                 <CardContent className="p-8">
-                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-aerojet-sky uppercase">
+                  <h3 className="text-aerojet-sky mb-6 flex items-center gap-2 text-sm font-black tracking-widest uppercase">
                     <BadgeCheck className="h-4 w-4" />
                     Qualifications
                   </h3>
@@ -429,7 +448,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
 
               <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
                 <CardContent className="p-8">
-                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-aerojet-sky uppercase">
+                  <h3 className="text-aerojet-sky mb-6 flex items-center gap-2 text-sm font-black tracking-widest uppercase">
                     <Clock className="h-4 w-4" />
                     Employment History
                   </h3>
@@ -451,22 +470,24 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
                     <div className="space-y-4">
                       <Label className="text-xs font-bold text-slate-400">Recent Assignments</Label>
                       <div className="space-y-3">
-                        {formData.instructorProfile.classesInstructed.slice(0, 3).map((c: any) => (
-                          <div
-                            key={c.id}
-                            className="flex items-center justify-between rounded-xl border border-slate-100 p-3 dark:border-slate-800"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-[10px] font-black text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
-                                {c.course.code}
+                        {formData.instructorProfile.classesInstructed
+                          .slice(0, 3)
+                          .map((c: { id: string; course: { code: string }; name: string }) => (
+                            <div
+                              key={c.id}
+                              className="flex items-center justify-between rounded-xl border border-slate-100 p-3 dark:border-slate-800"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-[10px] font-black text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                                  {c.course.code}
+                                </div>
+                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                  {c.name}
+                                </span>
                               </div>
-                              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                {c.name}
-                              </span>
+                              <ChevronRight className="h-4 w-4 text-slate-300" />
                             </div>
-                            <ChevronRight className="h-4 w-4 text-slate-300" />
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     </div>
                   </div>

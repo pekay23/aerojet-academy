@@ -5,6 +5,51 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import StaffCalendarGrid from './_components/StaffCalendarGrid'
 import { subMonths, addMonths, startOfMonth, endOfMonth } from 'date-fns'
 
+interface CalendarClass {
+  id: string
+  name: string
+  startDate: Date
+  endDate: Date
+  recurrenceType: string | null
+  recurrenceDays: string | null
+  recurrenceUntil: Date | null
+  course: { code: string; name: string }
+  instructor?: {
+    user?: {
+      profile?: { firstName: string; lastName: string } | null
+    } | null
+  } | null
+}
+
+interface CalendarAdminEvent {
+  id: string
+  title: string
+  description: string | null
+  startDate: Date
+  endDate: Date | null
+  color: string | null
+  visibleTo: string
+  recurrenceType: string
+  recurrenceDays: string | null
+  recurrenceUntil: Date | null
+}
+
+interface UnifiedEvent {
+  id: string
+  dbId: string
+  title: string
+  description: string | null
+  startDate: string
+  endDate: string | null
+  color: string
+  source: 'class' | 'exam' | 'admin'
+  editable: boolean
+  visibleTo: 'ALL' | 'STUDENTS' | 'INSTRUCTORS'
+  recurrenceType: string | null
+  recurrenceDays: string | null
+  recurrenceUntil: string | null
+}
+
 export const metadata: Metadata = {
   title: 'Academic Calendar | Staff Portal',
   description: 'Manage and broadcast institutional events, class schedules, and exam dates.',
@@ -69,8 +114,8 @@ export default async function StaffCalendarPage({
   ])
 
   // Map to unified event format
-  const events = [
-    ...classes.map((cls: any) => ({
+  const events: UnifiedEvent[] = [
+    ...classes.map((cls: CalendarClass) => ({
       id: `class-${cls.id}`,
       dbId: cls.id,
       title: `${cls.course.code} — ${cls.name}`,
@@ -87,7 +132,7 @@ export default async function StaffCalendarPage({
       recurrenceDays: cls.recurrenceDays,
       recurrenceUntil: cls.recurrenceUntil?.toISOString() || null,
     })),
-    ...examEvents.map((evt: any) => ({
+    ...examEvents.map((evt) => ({
       id: `exam-${evt.id}`,
       dbId: evt.id,
       title: evt.name,
@@ -102,7 +147,7 @@ export default async function StaffCalendarPage({
       recurrenceDays: null,
       recurrenceUntil: null,
     })),
-    ...adminEvents.map((evt: any) => ({
+    ...adminEvents.map((evt: CalendarAdminEvent) => ({
       id: `admin-${evt.id}`,
       dbId: evt.id,
       title: evt.title,

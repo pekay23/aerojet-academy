@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     revalidateTag('semesters', 'max')
     return NextResponse.json(semester, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to create semester:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }

@@ -60,8 +60,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     revalidateTag('academic-years', 'max')
     return NextResponse.json(academicYear)
-  } catch (error: any) {
-    console.error('Failed to update academic year:', error)
+  } catch (error: unknown) {
+    console.error('Failed to update academic year:', error instanceof Error ? error : 'Unknown error')
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
@@ -103,8 +103,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     revalidateTag('academic-years', 'max')
     return NextResponse.json({ success: true })
-  } catch (error: any) {
-    console.error('Failed to delete academic year:', error)
+  } catch (error: unknown) {
+    console.error('Failed to delete academic year:', error instanceof Error ? error : 'Unknown error')
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

@@ -13,7 +13,7 @@
 import prisma from '../lib/prisma/client'
 
 // Student names to search for
-const STUDENTS = [
+const _STUDENTS = [
   'David Archer',
   'Abdul Wahab Adam',
   'Dzator Stanley Korku',
@@ -127,7 +127,7 @@ async function addAdminNote(userId: string, note: string) {
         // For now, we'll log it
       },
     })
-  } catch (e) {
+  } catch (_e) {
     // Schema might not have notes field, just log
   }
 

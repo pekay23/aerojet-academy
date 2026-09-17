@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2026-09-05 TypeScript and ESLint Verification · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">2026-09-05 TypeScript and ESLint Verification</h1>
+  <p class="he-deck">Independent verification was run against the current working tree on 2026-09-05.</p>
+</header>
+<section class="he-section" id="summary"><div class="he-section__num">01 · Summary</div><h2 class="he-section__title">Summary</h2></section>
+<p>Independent verification was run against the current working tree on 2026-09-05.</p>
+<ul>
+<li>TypeScript type-check status: PASS</li>
+<li>TypeScript error count: 0</li>
+<li>ESLint status: PASS for errors after toolchain fix</li>
+<li>ESLint error count: 0</li>
+<li>ESLint warning count: 1111</li>
+</ul>
+<section class="he-section" id="commands-run"><div class="he-section__num">02 · Commands Run</div><h2 class="he-section__title">Commands Run</h2></section>
+<pre><code class="language-bash">bun run type-check --pretty false
+</code></pre>
+<p>Result:</p>
+<pre><code class="language-text">$ tsc --noEmit --pretty false
+exit code: 0
+</code></pre>
+<pre><code class="language-bash">bun run lint
+</code></pre>
+<p>Result:</p>
+<pre><code class="language-text">$ eslint .
+exit code: 0
+</code></pre>
+<p>The final warning inventory was captured with:</p>
+<pre><code class="language-bash">bunx eslint . --format json --output-file tmp\eslint-results-final.json
+</code></pre>
+<p>Result:</p>
+<pre><code class="language-text">exit code: 0
+errors: 0
+warnings: 1111
+</code></pre>
+<section class="he-section" id="current-findings"><div class="he-section__num">03 · Current Findings</div><h2 class="he-section__title">Current Findings</h2></section>
+<h3 id="typescript">TypeScript</h3>
+<p>No current TypeScript errors were reported by <code>bun run type-check --pretty false</code>.</p>
+<p>This verifies that the previously observed type errors around route handlers, Prisma enums, serialized staff/student DTOs, exam booking DTOs, OJT logbooks, resources, scheduling, charts, and wallet/image imports are no longer compiler-visible in the current tree.</p>
+<h3 id="eslint">ESLint</h3>
+<p>ESLint now reaches project lint rules and exits successfully.</p>
+<p>The original blocker was toolchain compatibility:</p>
+<ul>
+<li><code>package.json</code> used <code>typescript: ^7.0.2</code>.</li>
+<li><code>package.json</code> currently uses <code>@typescript-eslint/eslint-plugin: 8.68.0</code> and <code>@typescript-eslint/parser: 8.68.0</code>.</li>
+<li><code>bun run lint</code> aborted because <code>typescript-eslint</code> does not support TypeScript 7.0 in that installed configuration.</li>
+</ul>
+<p>Microsoft's TypeScript 7.0 release notes state that TypeScript 7.0 does not ship the old compiler API and recommends running TypeScript 6 side by side for tooling such as <code>typescript-eslint</code>: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6-0</p>
+<p>Implemented fix:</p>
+<ul>
+<li><code>typescript</code> now resolves to the TypeScript 6 API package for ESLint and other tools that import <code>typescript</code>.</li>
+<li><code>@typescript/native</code> is installed as the TypeScript 7 package so <code>tsc</code> remains available as TypeScript 7.</li>
+<li><code>bun install</code> regenerated the lockfile and Prisma client.</li>
+<li>Generated/vendor output paths were added to ESLint ignores:
+<ul>
+<li><code>tools/flipbook-app/dist/**</code></li>
+<li><code>tools/flipbook-app/src-tauri/target/**</code></li>
+<li><code>tools/flipbook-wpf-app/bin/**</code></li>
+<li><code>tools/flipbook-wpf-app/obj/**</code></li>
+<li><code>scripts/_tmp_*.cjs</code></li>
+</ul>
+</li>
+<li>ESLint autofix removed unused <code>eslint-disable</code> comments.</li>
+<li>Remaining lint errors were fixed in app code and utility scripts.</li>
+</ul>
+<section class="he-section" id="remaining-eslint-warnings"><div class="he-section__num">04 · Remaining ESLint Warnings</div><h2 class="he-section__title">Remaining ESLint Warnings</h2></section>
+<p>ESLint currently exits successfully, but reports 1111 warning-level findings. These do not fail <code>bun run lint</code> with the current config.</p>
+<p>Warning count by rule:</p>
+<ul>
+<li><code>@typescript-eslint/no-explicit-any</code>: 776</li>
+<li><code>@typescript-eslint/no-unused-vars</code>: 313</li>
+<li><code>@next/next/no-img-element</code>: 12</li>
+<li><code>react-hooks/incompatible-library</code>: 5</li>
+<li><code>@typescript-eslint/no-unused-expressions</code>: 3</li>
+<li><code>jsx-a11y/alt-text</code>: 1</li>
+<li><code>jsx-a11y/role-has-required-aria-props</code>: 1</li>
+</ul>
+<p>Top warning files:</p>
+<ul>
+<li><code>tools/flipbook-scraper/scraper.ts</code>: 57</li>
+<li><code>tests/integration/workflows/pool-confirmation.test.ts</code>: 37</li>
+<li><code>lib/prisma/rls-hardened.ts</code>: 17</li>
+<li><code>tests/components/ui/dropdown-menu.test.tsx</code>: 15</li>
+<li><code>skills/algorithmic-art/templates/generator_template.js</code>: 14</li>
+<li><code>tests/components/layouts/PublicNav.test.tsx</code>: 14</li>
+<li><code>tests/components/ui/select.test.tsx</code>: 13</li>
+<li><code>tests/components/charts/AttendanceChart.test.tsx</code>: 11</li>
+<li><code>tests/components/ui/alert-dialog.test.tsx</code>: 11</li>
+<li><code>app/staff/students/[id]/_components/WalletTab.tsx</code>: 10</li>
+</ul>
+<section class="he-section" id="audit-of-previously-active-work"><div class="he-section__num">05 · Audit of Previously Active Work</div><h2 class="he-section__title">Audit of Previously Active Work</h2></section>
+<p>The following areas were part of the previous type-fix pass and are now covered by the clean type-check result:</p>
+<ul>
+<li><code>lib/api/response.ts</code>: route handler context compatibility for Next.js async <code>params</code>.</li>
+<li>API routes: Prisma enum imports and query filter validation for staff enrollments, exam events, payments, users, practical training, and instructor recency.</li>
+<li>Exam routes: dynamic route params and handler context fixes across exams, sessions, exam pools, and supervise routes.</li>
+<li><code>lib/types/staff.ts</code>: serialized staff DTO updates for practical records, transactions, wallets, exam bookings, exam results, exam components, student profiles, and related nullable API payloads.</li>
+<li>Staff student UI: <code>StudentDetailPanel</code>, <code>ExamsTab</code>, <code>ProfileTab</code>, <code>StudentDetailTabs</code>, and <code>WalletTab</code> type alignment with serialized API data.</li>
+<li>Staff finance UI: <code>TransactionsTable</code> payment/currency DTO corrections.</li>
+<li>Applicant document/import UI: typed document upload data and CSV parsing boundaries.</li>
+<li>Staff analytics/reports UI: Recharts formatter typing and exported revenue data point typing.</li>
+<li>Staff admissions UI: interview slot nullability and shortlisting metadata handling.</li>
+<li>Staff dashboard/exams UI: nullable event deadlines and exam booking/result serialization.</li>
+<li>Staff resources/scheduling UI: nullable course/pathway arrays and derived academic term display names.</li>
+<li>Staff OJT pages: logbook <code>licenceCategoryId</code> relation usage and serialized licence category display.</li>
+<li>Staff settings/newsroom/internal exam UI: unknown catch narrowing, upload error variable fix, <code>useCallback</code> import, and saved-answer item typing.</li>
+<li>Full-time enrollment creation paths: <code>academicYearId</code> now included where required by Prisma.</li>
+</ul>
+<section class="he-section" id="remaining-work"><div class="he-section__num">06 · Remaining Work</div><h2 class="he-section__title">Remaining Work</h2></section>
+<ol>
+<li>Reduce or intentionally suppress the 1111 warning-level findings.</li>
+<li>Decide whether warning rules should continue to be non-blocking or whether CI should use <code>eslint --max-warnings=0</code>.</li>
+<li>Consider adding more generated/tooling folders to ESLint ignores if <code>tools/</code> and <code>skills/</code> are not intended to be lint-gated application source.</li>
+</ol>
+<p>Recommended compatibility path:</p>
+<ul>
+<li>First remove warnings from authored app/lib code where the fix is straightforward.</li>
+<li>Then handle tests and scripts separately; many warnings are <code>any</code> in tests or tooling where stronger local helper types may be more efficient than one-off edits.</li>
+<li>Finally decide whether <code>tools/flipbook-scraper</code> and <code>skills/algorithmic-art/templates</code> should be linted at all.</li>
+</ul>
+<section class="he-section" id="delegation-notes"><div class="he-section__num">07 · Delegation Notes</div><h2 class="he-section__title">Delegation Notes</h2></section>
+<p>The next agent should not spend time fixing TypeScript errors first; the current source-of-truth type-check is already clean.</p>
+<p>The next useful delegation target is warning reduction. Work from <code>tmp/eslint-results-final.json</code> or rerun <code>bunx eslint . --format json --output-file tmp\eslint-results-final.json</code> for fresh data.</p>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#summary">Summary</a></li>
+    <li class="he-toc__l2"><a href="#commands-run">Commands Run</a></li>
+    <li class="he-toc__l2"><a href="#current-findings">Current Findings</a></li>
+    <li class="he-toc__l3"><a href="#typescript">TypeScript</a></li>
+    <li class="he-toc__l3"><a href="#eslint">ESLint</a></li>
+    <li class="he-toc__l2"><a href="#remaining-eslint-warnings">Remaining ESLint Warnings</a></li>
+    <li class="he-toc__l2"><a href="#audit-of-previously-active-work">Audit of Previously Active Work</a></li>
+    <li class="he-toc__l2"><a href="#remaining-work">Remaining Work</a></li>
+    <li class="he-toc__l2"><a href="#delegation-notes">Delegation Notes</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>
