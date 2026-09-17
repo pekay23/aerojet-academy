@@ -7,7 +7,9 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: unknown) => {
   await requireStaff()
   const url = new URL(req.url)
   const funnelRaw = url.searchParams.get('funnel')
-  const isValidFunnel = (f: string | null): f is 'registration' | 'enrollment' | 'exam' | 'payment' =>
+  const isValidFunnel = (
+    f: string | null
+  ): f is 'registration' | 'enrollment' | 'exam' | 'payment' =>
     f !== null && ['registration', 'enrollment', 'exam', 'payment'].includes(f)
 
   if (!isValidFunnel(funnelRaw)) {
@@ -16,6 +18,13 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: unknown) => {
 
   const from = url.searchParams.get('from') ? new Date(url.searchParams.get('from')!) : undefined
   const to = url.searchParams.get('to') ? new Date(url.searchParams.get('to')!) : undefined
+
+  if (from && Number.isNaN(from.getTime())) {
+    return apiError('Invalid "from" date format', 400)
+  }
+  if (to && Number.isNaN(to.getTime())) {
+    return apiError('Invalid "to" date format', 400)
+  }
 
   const funnel = funnelRaw
   const metrics = await getFunnelMetrics(funnel, from, to)
