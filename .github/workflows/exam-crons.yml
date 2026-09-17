@@ -1,0 +1,39 @@
+# GitHub Actions scheduler for exam cron jobs.
+#
+# Vercel Hobby plan limits cron jobs to once per day, so these high-frequency
+# exam processing jobs are moved here. The API routes remain protected by
+# CRON_SECRET (Authorization: Bearer header) and are idempotent.
+name: Process exam cron jobs
+
+on:
+  schedule:
+    # Runs every 5 minutes to match the previous Vercel schedule
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  process-exams:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run exam timeout processing
+        env:
+          CRON_URL: ${{ secrets.PRODUCTION_URL }}/api/cron/exam-timeout
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body \
+            --retry 3 \
+            -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${CRON_URL}"
+
+      - name: Run exam recovery processing
+        env:
+          CRON_URL: ${{ secrets.PRODUCTION_URL }}/api/cron/recover-exams
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body \
+            --retry 3 \
+            -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${CRON_URL}"
