@@ -1,6 +1,14 @@
 import { NextRequest } from 'next/server'
-import { trackSearch, trackDocumentUpload, trackPageView, trackFeatureUsage, trackReferralClick, trackEvent } from '@/lib/analytics/events'
+import {
+  trackSearch,
+  trackDocumentUpload,
+  trackPageView,
+  trackFeatureUsage,
+  trackReferralClick,
+  trackEvent,
+} from '@/lib/analytics/events'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { getAuthSession } from '@/lib/auth/helpers'
 import { z } from 'zod'
 
 const trackSchema = z.object({
@@ -16,15 +24,21 @@ const trackSchema = z.object({
     'COURSE_ACCESSED',
   ]),
   data: z.record(z.string(), z.any()),
-  userId: z.string().optional(),
 })
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  const body = await req.json()
+  const session = await getAuthSession()
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return apiError('Invalid JSON body', 400)
+  }
   const parsed = trackSchema.safeParse(body)
   if (!parsed.success) return apiError(parsed.error.issues[0].message)
 
-  const { event, data, userId } = parsed.data
+  const { event, data } = parsed.data
+  const userId = session?.user?.id
 
   switch (event) {
     case 'PAGE_VIEW':

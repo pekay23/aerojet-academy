@@ -28,7 +28,12 @@ export default function FeatureAdoption() {
   const loadFeature = async (feature: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/staff/analytics/features?feature=${encodeURIComponent(feature)}`)
+      const res = await fetch(
+        `/api/staff/analytics/features?feature=${encodeURIComponent(feature)}`
+      )
+      if (!res.ok) {
+        throw new Error(`Request failed with status ${res.status}`)
+      }
       const json = await res.json()
       if (json.success) {
         setData(json.data)
@@ -42,8 +47,7 @@ export default function FeatureAdoption() {
 
   useEffect(() => {
     if (selectedFeature) {
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadFeature(selectedFeature)
     }
   }, [selectedFeature])
@@ -53,7 +57,7 @@ export default function FeatureAdoption() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <GitBranch className="h-5 w-5 text-aerojet-sky" />
+            <GitBranch className="text-aerojet-sky h-5 w-5" />
             Feature Adoption
           </CardTitle>
           <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -76,7 +80,7 @@ export default function FeatureAdoption() {
           </div>
           {loading && (
             <div className="flex items-center gap-2 text-xs text-slate-500">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-aerojet-blue border-t-transparent" />
+              <div className="border-aerojet-blue h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
               Loading metrics...
             </div>
           )}
