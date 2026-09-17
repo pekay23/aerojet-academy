@@ -76,14 +76,6 @@
       "schedule": "0 6 * * *"
     },
     {
-      "path": "/api/cron/exam-timeout",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron/recover-exams",
-      "schedule": "*/1 * * * *"
-    },
-    {
       "path": "/api/cron/exam-reconciliation",
       "schedule": "0 4 * * *"
     }

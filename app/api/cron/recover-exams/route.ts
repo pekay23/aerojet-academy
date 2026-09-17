@@ -3,6 +3,7 @@ import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { transitionExamSession } from '@/lib/internal-exam/state-machine'
+import { env } from '@/lib/env'
 
 /**
  * POST /api/cron/recover-exams
@@ -12,8 +13,9 @@ import { transitionExamSession } from '@/lib/internal-exam/state-machine'
  * Gates on CRON_SECRET to prevent unauthorised access.
  */
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  const secret = req.headers.get('x-cron-secret')
-  if (secret !== process.env.CRON_SECRET) {
+  const authHeader = req.headers.get('authorization')
+  const cronSecret = env.CRON_SECRET
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return apiError('Unauthorized', 401)
   }
 
