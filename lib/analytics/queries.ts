@@ -136,8 +136,6 @@ function formatEventLabel(event: string): string {
 // ============================================================================
 
 export async function getCohortRetention(cohortDate?: Date): Promise<RetentionCohort[]> {
-  const _cohortRetention: Array<Record<string, unknown>> = []
-
   // Get users who registered in the specified month
   const targetMonth = cohortDate
     ? new Date(cohortDate.getFullYear(), cohortDate.getMonth(), 1)
@@ -252,10 +250,11 @@ export async function getFeatureAdoption(
         entity: 'ANALYTICS',
         changes: { path: ['feature'], equals: feature },
         createdAt: { gte: start, lt: end },
+        userId: { not: null },
       },
       select: { userId: true, createdAt: true },
       distinct: ['userId'],
-    }),
+    }) as unknown as Array<{ userId: string; createdAt: Date }>,
   ])
 
   if (totalUsers === 0) return null
@@ -281,7 +280,8 @@ export async function getFeatureAdoption(
       ? Math.round(
           adopters.reduce((sum: number, e: { userId: string | null; createdAt: Date }) => {
             if (!e.userId) return sum
-            const userCreated = userCreatedAt.get(e.userId) ?? new Date(e.createdAt)
+            const userCreated = userCreatedAt.get(e.userId)
+            if (!userCreated) return sum
             const adoptDate = new Date(e.createdAt)
             const days = (adoptDate.getTime() - userCreated.getTime()) / (1000 * 60 * 60 * 24)
             return sum + days
@@ -312,6 +312,7 @@ export async function getPageViews(from?: Date, to?: Date, limit = 20): Promise<
     where: {
       action: 'PAGE_VIEW',
       entity: 'ANALYTICS',
+      entityId: { not: null },
       createdAt: { gte: start, lt: end },
     },
     _count: { id: true },
@@ -319,31 +320,43 @@ export async function getPageViews(from?: Date, to?: Date, limit = 20): Promise<
     take: limit,
   })
 
-  // Get unique visitors per page
-  const uniqueVisitorsPromises = pageViews.map((pv) =>
-    prisma.auditLog.findMany({
+  // Get unique visitors per page — batch into a single query instead of N+1
+  const pageViewEntityIds = pageViews
+    .map((pv) => pv.entityId)
+    .filter((id): id is string => id !== null)
+  const uniqueVisitorsByEntityId = new Map<string, number>()
+
+  if (pageViewEntityIds.length > 0) {
+    const uniqueVisitorGroups = await prisma.auditLog.groupBy({
+      by: ['entityId', 'userId'],
       where: {
         action: 'PAGE_VIEW',
         entity: 'ANALYTICS',
-        entityId: pv.entityId,
+        entityId: { in: pageViewEntityIds },
         createdAt: { gte: start, lt: end },
       },
-      select: { userId: true },
-      distinct: ['userId'],
+      _count: { id: true },
     })
-  )
 
-  const uniqueVisitorsLists = await Promise.all(uniqueVisitorsPromises)
+    for (const group of uniqueVisitorGroups) {
+      const entityId = group.entityId
+      if (!entityId) continue
+      const count = uniqueVisitorsByEntityId.get(entityId) ?? 0
+      uniqueVisitorsByEntityId.set(entityId, count + 1)
+    }
+  }
 
-  return pageViews.map((pv, i) => ({
-    path: pv.entityId ?? '',
-    views: pv._count.id,
-    uniqueVisitors: uniqueVisitorsLists[i].length,
-    avgViewsPerVisitor:
-      uniqueVisitorsLists[i].length > 0
-        ? Number((pv._count.id / uniqueVisitorsLists[i].length).toFixed(1))
-        : 0,
-  }))
+  return pageViews.map((pv) => {
+    const entityId = pv.entityId
+    const uniqueVisitors = entityId ? (uniqueVisitorsByEntityId.get(entityId) ?? 0) : 0
+    return {
+      path: entityId ?? '',
+      views: pv._count.id,
+      uniqueVisitors,
+      avgViewsPerVisitor:
+        uniqueVisitors > 0 ? Number((pv._count.id / uniqueVisitors).toFixed(1)) : 0,
+    }
+  })
 }
 
 // ============================================================================
@@ -384,7 +397,7 @@ export async function getEventVolume(
   from?: Date,
   to?: Date,
   groupBy: 'day' | 'week' | 'month' = 'day'
-) {
+): Promise<Array<Record<string, string | number>>> {
   const now = new Date()
   const start = from ?? subDays(now, 30)
   const end = to ?? now
