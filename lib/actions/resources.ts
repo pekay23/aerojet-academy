@@ -4,6 +4,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff, requireAuth } from '@/lib/auth/helpers'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { revalidatePath } from 'next/cache'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export async function getAdminResources() {
   await requireStaff()
@@ -44,39 +45,39 @@ export async function getStudentResources() {
   // 1. Get student status and pathway
   const profile = await prismaUnfiltered.studentProfile.findUnique({
     where: { userId },
-    select: { pathwayId: true }
+    select: { pathwayId: true },
   })
 
   // 2. Get all "bought" or enrolled courses for the student
   // This includes full-time enrollments and modular ones
   const [ftEnrollments, modularEnrollments] = await Promise.all([
     prismaUnfiltered.enrollment.findMany({
-      where: { 
-        userId, 
-        status: { in: ['ENROLLED', 'APPROVED', 'ACTIVE'] } 
+      where: {
+        userId,
+        status: { in: ['ENROLLED', 'APPROVED', 'ACTIVE'] },
       },
-      select: { courseId: true }
+      select: { courseId: true },
     }),
     prismaUnfiltered.modularEnrollment.findMany({
-      where: { 
-        studentId: userId, 
-        status: { in: ['ENROLLED', 'APPROVED', 'ACTIVE'] } 
+      where: {
+        studentId: userId,
+        status: { in: ['ENROLLED', 'APPROVED', 'ACTIVE'] },
       },
-      include: { package: true }
-    })
+      include: { package: true },
+    }),
   ])
 
-  const enrolledCourseIds = new Set(ftEnrollments.map(e => e.courseId))
-  
+  const enrolledCourseIds = new Set(ftEnrollments.map((e) => e.courseId))
+
   // Add modular course IDs (ModularPackage has modulesIncluded as codes, we need IDs)
   // We'll fetch course IDs for those codes
-  const allModularCodes = modularEnrollments.flatMap(e => e.package.modulesIncluded)
+  const allModularCodes = modularEnrollments.flatMap((e) => e.package.modulesIncluded)
   if (allModularCodes.length > 0) {
     const modularCourses = await prismaUnfiltered.course.findMany({
       where: { code: { in: allModularCodes } },
-      select: { id: true }
+      select: { id: true },
     })
-    modularCourses.forEach(c => enrolledCourseIds.add(c.id))
+    modularCourses.forEach((c) => enrolledCourseIds.add(c.id))
   }
 
   const courseIds = Array.from(enrolledCourseIds)
@@ -89,16 +90,16 @@ export async function getStudentResources() {
         {
           OR: [
             { courses: { none: {} } }, // Global resource
-            { courses: { some: { id: { in: courseIds } } } } // Linked to enrolled course
-          ]
+            { courses: { some: { id: { in: courseIds } } } }, // Linked to enrolled course
+          ],
         },
         {
           OR: [
             { pathways: { none: {} } }, // Global or not pathway-restricted
-            { pathways: { some: { id: profile?.pathwayId || 'none' } } } // Linked to their pathway
-          ]
-        }
-      ]
+            { pathways: { some: { id: profile?.pathwayId || 'none' } } }, // Linked to their pathway
+          ],
+        },
+      ],
     },
     include: {
       courses: { select: { id: true, code: true } },
@@ -133,7 +134,9 @@ export async function upsertResource(data: {
 
   // Reject dangerous URL schemes (javascript:, data:, vbscript:, …)
   if (!SAFE_URL_RE.test(rest.url)) {
-    throw new Error('Invalid resource URL. Only http(s), mailto, tel, or relative paths are allowed.')
+    throw new Error(
+      'Invalid resource URL. Only http(s), mailto, tel, or relative paths are allowed.'
+    )
   }
 
   // ── Category-aware visibility guard ──────────────────────────────────────
@@ -143,7 +146,11 @@ export async function upsertResource(data: {
     data.category === 'STUDENT_GUIDE'
       ? { showToInstructors: true, showToStaff: true, showToStudents: true }
       : data.category === 'ADMINISTRATIVE' || data.category === 'INSTITUTIONAL'
-        ? { showToInstructors: rest.showToInstructors, showToStaff: rest.showToStaff, showToStudents: false }
+        ? {
+            showToInstructors: rest.showToInstructors,
+            showToStaff: rest.showToStaff,
+            showToStudents: false,
+          }
         : {
             showToInstructors: rest.showToInstructors,
             showToStaff: rest.showToStaff,
@@ -151,26 +158,46 @@ export async function upsertResource(data: {
           }
 
   const finalData = { ...rest, ...visibility }
+  const isNew = !data.id
 
   const resource = await prismaUnfiltered.generalResource.upsert({
-    where: { id: data.id || 'new' },
+    where: { id: data.id ?? undefined },
     update: {
       ...finalData,
       courses: {
-        set: courseIds.map(id => ({ id }))
+        set: courseIds.map((id) => ({ id })),
       },
       pathways: {
-        set: pathwayIds.map(id => ({ id }))
-      }
+        set: pathwayIds.map((id) => ({ id })),
+      },
     },
     create: {
       ...finalData,
       courses: {
-        connect: courseIds.map(id => ({ id }))
+        connect: courseIds.map((id) => ({ id })),
       },
       pathways: {
-        connect: pathwayIds.map(id => ({ id }))
-      }
+        connect: pathwayIds.map((id) => ({ id })),
+      },
+    },
+  })
+
+  await createAuditLog({
+    action: isNew ? AuditAction.CREATE : AuditAction.UPDATE,
+    entity: 'GeneralResource',
+    entityId: resource.id,
+    userId: (await requireStaff()).id,
+    description: isNew
+      ? `Created resource: ${resource.name}`
+      : `Updated resource: ${resource.name}`,
+    changes: {
+      before: null,
+      after: {
+        name: resource.name,
+        category: resource.category,
+        url: resource.url,
+        type: resource.type,
+      },
     },
   })
 
@@ -186,8 +213,25 @@ export async function upsertResource(data: {
 export async function deleteResource(id: string) {
   await requireStaff()
 
+  const existing = await prismaUnfiltered.generalResource.findUnique({ where: { id } })
+  if (!existing) {
+    return { success: false, error: 'Resource not found' }
+  }
+
   await prismaUnfiltered.generalResource.delete({
     where: { id },
+  })
+
+  await createAuditLog({
+    action: AuditAction.DELETE,
+    entity: 'GeneralResource',
+    entityId: id,
+    userId: (await requireStaff()).id,
+    description: `Deleted resource: ${existing.name}`,
+    changes: {
+      before: { name: existing.name, category: existing.category, url: existing.url },
+      after: null,
+    },
   })
 
   revalidatePath('/instructor/resources')

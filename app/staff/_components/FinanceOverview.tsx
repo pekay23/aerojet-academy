@@ -8,16 +8,32 @@ import {
   XCircle,
   RefreshCw,
   Wallet,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import type { FinanceOverviewData } from '@/lib/finance/overview'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
+import { getTransactionStatusStyle, STATUS_LABELS } from '@/lib/utils/status-styles'
+import { formatCurrency, formatDate } from '@/lib/utils/formatters'
 const RevenueChart = dynamic(() => import('./RevenueChart'), { ssr: false })
 
-const STATUS_CONFIG: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; style: string }> = {
-  APPROVED: { label: 'Approved', icon: CheckCircle2, style: 'text-emerald-600 bg-emerald-50' },
-  PENDING: { label: 'Pending', icon: Clock, style: 'text-amber-600 bg-amber-50' },
-  REJECTED: { label: 'Rejected', icon: XCircle, style: 'text-red-600 bg-red-50' },
+// Map STATUS_ICONS keys to Lucide components
+const STATUS_ICON_COMPONENTS = {
+  pending: Clock,
+  approved: CheckCircle2,
+  rejected: XCircle,
+  processing: Loader2,
+  completed: CheckCircle2,
+  failed: AlertCircle,
+} as const
+
+function getStatusIcon(statusStyle: string) {
+  if (statusStyle.includes('emerald')) return STATUS_ICON_COMPONENTS.approved
+  if (statusStyle.includes('amber')) return STATUS_ICON_COMPONENTS.pending
+  if (statusStyle.includes('red')) return STATUS_ICON_COMPONENTS.rejected
+  if (statusStyle.includes('blue')) return STATUS_ICON_COMPONENTS.processing
+  return STATUS_ICON_COMPONENTS.approved
 }
 
 export default function FinanceOverview({
@@ -68,7 +84,7 @@ export default function FinanceOverview({
   const statCards = [
     {
       label: 'Total Revenue',
-      value: `EUR ${Number(data?.totalRevenue ?? 0).toLocaleString('en-GB', { minimumFractionDigits: 0 })}`,
+      value: formatCurrency(data?.totalRevenue ?? 0, 'EUR'),
       icon: TrendingUp,
       bg: 'bg-emerald-50',
       color: 'text-emerald-600',
@@ -76,7 +92,7 @@ export default function FinanceOverview({
     },
     {
       label: 'Registration Revenue',
-      value: `GHS ${Number(data?.totalRegistration ?? 0).toLocaleString('en-GH', { minimumFractionDigits: 0 })}`,
+      value: formatCurrency(data?.totalRegistration ?? 0, 'GHS'),
       icon: Wallet,
       bg: 'bg-blue-50',
       color: 'text-aerojet-sky',
@@ -85,7 +101,7 @@ export default function FinanceOverview({
     },
     {
       label: 'Course Revenue',
-      value: `EUR ${Number(data?.totalCourse ?? 0).toLocaleString('en-GB', { minimumFractionDigits: 0 })}`,
+      value: formatCurrency(data?.totalCourse ?? 0, 'EUR'),
       icon: Wallet,
       bg: 'bg-emerald-50',
       color: 'text-emerald-600',
@@ -100,7 +116,7 @@ export default function FinanceOverview({
       icon: Clock,
       bg: 'bg-amber-50',
       color: 'text-amber-600',
-      sub: data ? `Pending total: EUR ${Number(data.pendingTotal ?? 0).toLocaleString('en-GB', { minimumFractionDigits: 0 })}` : undefined,
+      sub: data ? `Pending total: ${formatCurrency(data.pendingTotal ?? 0, 'EUR')}` : undefined,
       href: '/staff/payments?tab=PENDING',
     },
   ]
@@ -230,12 +246,9 @@ export default function FinanceOverview({
                         .filter(Boolean)
                         .join(' ')
                     : tx.user.email
-                  const cfg = STATUS_CONFIG[tx.status] ?? {
-                    label: tx.status,
-                    icon: Clock,
-                    style: 'text-slate-500 bg-slate-50',
-                  }
-                  const StatusIcon = cfg.icon
+                  const statusStyle = getTransactionStatusStyle(tx.status)
+                  const statusLabel = STATUS_LABELS[tx.status] ?? tx.status
+                  const StatusIcon = getStatusIcon(statusStyle)
                   return (
                     <tr
                       key={tx.id}
@@ -249,25 +262,20 @@ export default function FinanceOverview({
                         {tx.referenceType?.replace(/_/g, ' ') ?? '-'}
                       </td>
                       <td className="text-aerojet-blue dark:text-aerojet-sky px-5 py-3.5 text-sm font-black">
-                        {tx.currency}{' '}
-                        {Number(tx.amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                        {formatCurrency(tx.amount, tx.currency)}
                       </td>
                       <td className="px-5 py-3.5 text-xs text-slate-500 dark:text-slate-400">
                         {tx.paymentMethod.replace(/_/g, ' ')}
                       </td>
                       <td className="px-5 py-3.5">
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${cfg.style}`}
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${statusStyle}`}
                         >
-                          <StatusIcon className="h-3 w-3" /> {cfg.label}
+                          <StatusIcon className="h-3 w-3" /> {statusLabel}
                         </span>
                       </td>
                       <td className="px-5 py-3.5 text-xs text-slate-500 dark:text-slate-400">
-                        {new Date(tx.createdAt).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                        {formatDate(tx.createdAt, 'SHORT')}
                       </td>
                     </tr>
                   )
@@ -297,12 +305,9 @@ export default function FinanceOverview({
                     .filter(Boolean)
                     .join(' ')
                 : tx.user.email
-              const cfg = STATUS_CONFIG[tx.status] ?? {
-                label: tx.status,
-                icon: Clock,
-                style: 'text-slate-500 bg-slate-50',
-              }
-              const StatusIcon = cfg.icon
+              const statusStyle = getTransactionStatusStyle(tx.status)
+              const statusLabel = STATUS_LABELS[tx.status] ?? tx.status
+              const StatusIcon = getStatusIcon(statusStyle)
               return (
                 <div key={tx.id} className="space-y-2 p-4">
                   <div className="flex items-start justify-between">
@@ -313,23 +318,22 @@ export default function FinanceOverview({
                       <p className="text-xs text-slate-400">{tx.user.email}</p>
                     </div>
                     <span
-                      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${cfg.style}`}
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${statusStyle}`}
                     >
-                      <StatusIcon className="h-3 w-3" /> {cfg.label}
+                      <StatusIcon className="h-3 w-3" /> {statusLabel}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
                       <p className="font-bold tracking-wider text-slate-400 uppercase">Amount</p>
                       <p className="text-aerojet-blue font-black dark:text-blue-400">
-                        {tx.currency}{' '}
-                        {Number(tx.amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                        {formatCurrency(tx.amount, tx.currency)}
                       </p>
                     </div>
                     <div>
                       <p className="font-bold tracking-wider text-slate-400 uppercase">Method</p>
                       <p className="font-bold text-slate-600 dark:text-slate-400">
-                        {tx.paymentMethod.replace(/_/g, ' ')}
+                        {tx.paymentMethod?.replace(/_/g, ' ') ?? '—'}
                       </p>
                     </div>
                     <div>
@@ -341,11 +345,7 @@ export default function FinanceOverview({
                     <div>
                       <p className="font-bold tracking-wider text-slate-400 uppercase">Date</p>
                       <p className="font-bold text-slate-600 dark:text-slate-400">
-                        {new Date(tx.createdAt).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                        {formatDate(tx.createdAt, 'SHORT')}
                       </p>
                     </div>
                   </div>

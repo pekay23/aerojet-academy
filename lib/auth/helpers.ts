@@ -2,7 +2,7 @@ import { getAuthSession } from '@/lib/auth/auth-options'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import { prismaBase as prisma } from '@/lib/prisma/db-base'
-import { rateLimit } from '@/lib/security/rate-limit'
+import { rateLimit, rateLimitByUser, rateLimitByIP } from '@/lib/security/rate-limit'
 
 /** Generates a random registration code like AERO-2026-A1B2C3 */
 export function generateRegistrationCode(): string {
@@ -195,3 +195,6 @@ export async function requireSuperAdmin() {
   }
   return session.user
 }
+
+// Re-export rate limiting functions
+export { rateLimitByUser, rateLimitByIP }

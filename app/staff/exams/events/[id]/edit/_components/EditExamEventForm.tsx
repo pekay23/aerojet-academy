@@ -77,7 +77,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
   }
 
   const form = useForm<ExamEventFormValues>({
-    resolver: zodResolver(createExamEventSchema) as any,
+    resolver: zodResolver(createExamEventSchema),
     defaultValues: {
       name: event.name,
       startDate: formatDateForInput(event.startDate),
@@ -93,6 +93,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
 
   // Track form changes for unsaved changes warning
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/incompatible-library -- form.watch() is React Hook Form API, not a hook
     const subscription = form.watch(() => markDirty())
     return () => subscription.unsubscribe()
   })
@@ -138,7 +139,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
-          control={form.control as any}
+          control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
@@ -158,7 +159,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
-            control={form.control as any}
+            control={form.control}
             name="startDate"
             render={({ field }) => (
               <FormItem>
@@ -171,7 +172,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             )}
           />
           <FormField
-            control={form.control as any}
+            control={form.control}
             name="endDate"
             render={({ field }) => (
               <FormItem>
@@ -187,7 +188,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
-            control={form.control as any}
+            control={form.control}
             name="paymentDeadline"
             render={({ field }) => (
               <FormItem>
@@ -203,7 +204,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             )}
           />
           <FormField
-            control={form.control as any}
+            control={form.control}
             name="joinDeadline"
             render={({ field }) => (
               <FormItem>
@@ -226,7 +227,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <FormField
-            control={form.control as any}
+            control={form.control}
             name="minRevenueTarget"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
@@ -241,6 +242,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
                       className="pl-10"
                       placeholder="25000.00"
                       {...field}
+                      value={field.value as string | number}
                     />
                   </div>
                 </FormControl>
@@ -250,7 +252,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             )}
           />
           <FormField
-            control={form.control as any}
+            control={form.control}
             name="minRevenueCurrency"
             render={({ field }) => (
               <FormItem>

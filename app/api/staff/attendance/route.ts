@@ -27,7 +27,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
   const url = new URL(req.url)
   const classId = url.searchParams.get('classId')
   const date = url.searchParams.get('date')
-  const { page, limit, skip } = parsePagination(url.searchParams)
+  const { limit, skip } = parsePagination(url.searchParams)
 
   if (!classId) return apiError('classId is required')
 
@@ -41,7 +41,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
     where.date = { gte: parsedDate, lt: next }
   }
 
-  const [records, total] = await Promise.all([
+  const [records] = await Promise.all([
     prismaUnfiltered.attendanceRecord.findMany({
       where,
       include: {

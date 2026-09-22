@@ -56,24 +56,24 @@ export function PeriodFilter() {
   return (
     <div className="flex flex-col items-end gap-3 sm:flex-row sm:items-center">
       {showCustom && (
-        <div className="flex animate-in fade-in slide-in-from-right-4 items-center gap-2 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-           <input
+        <div className="animate-in fade-in slide-in-from-right-4 flex items-center gap-2 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <input
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-            className="rounded-xl border-none bg-slate-50 px-3 py-2 text-xs font-bold text-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:bg-slate-800 dark:text-white"
+            className="text-aerojet-blue focus:ring-aerojet-blue/20 rounded-xl border-none bg-slate-50 px-3 py-2 text-xs font-bold focus:ring-2 dark:bg-slate-800 dark:text-white"
           />
           <ChevronRight className="h-4 w-4 text-slate-300" />
           <input
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
-            className="rounded-xl border-none bg-slate-50 px-3 py-2 text-xs font-bold text-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:bg-slate-800 dark:text-white"
+            className="text-aerojet-blue focus:ring-aerojet-blue/20 rounded-xl border-none bg-slate-50 px-3 py-2 text-xs font-bold focus:ring-2 dark:bg-slate-800 dark:text-white"
           />
           <button
             onClick={applyCustomRange}
             disabled={!fromDate || !toDate}
-            className="flex h-8 items-center justify-center rounded-xl bg-aerojet-blue px-4 text-xs font-black text-white hover:bg-aerojet-blue/90 disabled:opacity-30"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex h-8 items-center justify-center rounded-xl px-4 text-xs font-black text-white disabled:opacity-30"
           >
             Apply
           </button>
@@ -94,29 +94,44 @@ export function PeriodFilter() {
           <CalendarRange className="h-5 w-5" />
         </div>
         <Select value={showCustom ? 'custom' : period} onValueChange={handlePeriodChange}>
-          <SelectTrigger className="w-[200px] rounded-xl border-slate-100 bg-white font-black text-aerojet-blue shadow-sm transition-all hover:border-aerojet-blue/30 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+          <SelectTrigger className="text-aerojet-blue hover:border-aerojet-blue/30 w-[200px] rounded-xl border-slate-100 bg-white font-black shadow-sm transition-all dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
             <SelectValue placeholder="Select period" />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800">
-            <div className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <div className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
               Standard Intervals
             </div>
-            <SelectItem value="mom" className="font-bold">Last 30 Days (MoW)</SelectItem>
-            <SelectItem value="wow" className="font-bold">Last 7 Days (WoW)</SelectItem>
-            <SelectItem value="yoy" className="font-bold">Year on Year (YoY)</SelectItem>
-            
-            <div className="mt-2 border-t border-slate-50 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:border-slate-800">
+            <SelectItem value="mom" className="font-bold">
+              Last 30 Days (MoW)
+            </SelectItem>
+            <SelectItem value="wow" className="font-bold">
+              Last 7 Days (WoW)
+            </SelectItem>
+            <SelectItem value="yoy" className="font-bold">
+              Year on Year (YoY)
+            </SelectItem>
+
+            <div className="mt-2 border-t border-slate-50 px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:border-slate-800">
               Intraday Granularity
             </div>
-            <SelectItem value="day" className="font-bold">Last 24 Hours</SelectItem>
-            <SelectItem value="4h" className="font-bold">Last 4 Hours</SelectItem>
-            <SelectItem value="1h" className="font-bold">Last Hour</SelectItem>
+            <SelectItem value="day" className="font-bold">
+              Last 24 Hours
+            </SelectItem>
+            <SelectItem value="4h" className="font-bold">
+              Last 4 Hours
+            </SelectItem>
+            <SelectItem value="1h" className="font-bold">
+              Last Hour
+            </SelectItem>
 
-            <div className="mt-2 border-t border-slate-50 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:border-slate-800">
+            <div className="mt-2 border-t border-slate-50 px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:border-slate-800">
               Advanced Tools
             </div>
-            <SelectItem value="custom" className="flex items-center gap-2 font-bold text-aerojet-sky">
-              <Sparkles className="mr-2 h-3 w-3 inline" />
+            <SelectItem
+              value="custom"
+              className="text-aerojet-sky flex items-center gap-2 font-bold"
+            >
+              <Sparkles className="mr-2 inline h-3 w-3" />
               Customizable Range...
             </SelectItem>
           </SelectContent>
@@ -131,21 +146,17 @@ export function PeriodFilter() {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 rounded-xl">
-          {/* eslint-disable-next-line @next/next/no-location-assign-relative-destination */}
-          <DropdownMenuItem onClick={() => window.location.href = '/api/staff/export?type=students'}>
-            Export Students CSV
+          <DropdownMenuItem asChild>
+            <a href="/api/staff/export?type=students">Export Students CSV</a>
           </DropdownMenuItem>
-          {/* eslint-disable-next-line @next/next/no-location-assign-relative-destination */}
-          <DropdownMenuItem onClick={() => window.location.href = '/api/staff/export?type=pools'}>
-            Export Exam Pools CSV
+          <DropdownMenuItem asChild>
+            <a href="/api/staff/export?type=pools">Export Exam Pools CSV</a>
           </DropdownMenuItem>
-          {/* eslint-disable-next-line @next/next/no-location-assign-relative-destination */}
-          <DropdownMenuItem onClick={() => window.location.href = '/api/staff/export?type=finances'}>
-            Export Financials CSV
+          <DropdownMenuItem asChild>
+            <a href="/api/staff/export?type=finances">Export Financials CSV</a>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
     </div>
   )
 }

@@ -1,38 +1,47 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { createAuditLog } from '@/lib/audit/logger'
 import { getOrCreateWallet, topUpWallet } from '@/lib/wallet/operations'
 import { convertCurrency } from '@/lib/currency-api'
+import { rateLimitByUser, rateLimitByIP } from '@/lib/auth/helpers'
+import { withErrorHandler, apiSuccess, apiError, apiNotFound } from '@/lib/api/response'
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
+export const POST = withErrorHandler(
+  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const staff = await requirePermission(PERMISSIONS.APPROVE_PAYMENTS)
     const { id } = await params
+
+    // Rate limiting: 30 requests/min per user, 20 requests/min per IP
+    const userLimit = rateLimitByUser(staff.id, 30, 60000)
+    if (!userLimit.allowed) {
+      return apiError('Too many requests. Please try again later.', 429)
+    }
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+    const ipLimit = rateLimitByIP(ip, 20, 60000)
+    if (!ipLimit.allowed) {
+      return apiError('Too many requests from this IP. Please try again later.', 429)
+    }
 
     const payment = await prismaUnfiltered.payment.findUnique({
       where: { id },
     })
 
-    if (!payment) {
-      return NextResponse.json({ error: 'Payment record not found' }, { status: 404 })
-    }
-
-    if (payment.status !== 'PENDING') {
-      return NextResponse.json({ error: 'Top-up request is not pending' }, { status: 400 })
-    }
-
-    if (payment.referenceType !== 'WALLET_TOPUP') {
-      return NextResponse.json({ error: 'Payment is not a wallet top-up request' }, { status: 400 })
-    }
+    if (!payment) return apiNotFound('Payment record not found')
+    if (payment.status !== 'PENDING') return apiError('Top-up request is not pending')
+    if (payment.referenceType !== 'WALLET_TOPUP')
+      return apiError('Payment is not a wallet top-up request')
 
     // Ensure wallet exists before tx
     await getOrCreateWallet(payment.userId)
 
     // Use paymentCurrency and originalAmount if available (standardized fields)
-    const paymentCurrency = payment.paymentCurrency || (payment.currency !== 'EUR' ? payment.currency : 'EUR')
-    const originalAmount = payment.originalAmount ? Number(payment.originalAmount) : Number(payment.amount)
-    
+    const paymentCurrency =
+      payment.paymentCurrency || (payment.currency !== 'EUR' ? payment.currency : 'EUR')
+    const originalAmount = payment.originalAmount
+      ? Number(payment.originalAmount)
+      : Number(payment.amount)
+
     let eurAmount = Number(payment.amount) // Default to stored indicative amount
     let conversionNote = ''
 
@@ -78,9 +87,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         data: {
           userId: payment.userId,
           title: 'Wallet Top-Up Approved',
-          message: paymentCurrency !== 'EUR'
-            ? `Your ${paymentCurrency} ${payment.amount} top-up has been approved and credited as EUR ${eurAmount.toFixed(2)}.`
-            : `Your wallet top-up of EUR ${payment.amount} has been approved.`,
+          message:
+            paymentCurrency !== 'EUR'
+              ? `Your ${paymentCurrency} ${payment.amount} top-up has been approved and credited as EUR ${eurAmount.toFixed(2)}.`
+              : `Your wallet top-up of EUR ${payment.amount} has been approved.`,
           type: 'SUCCESS',
           linkUrl: '/student/wallet',
           linkText: 'View Wallet',
@@ -101,9 +111,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       description: `Approved wallet top-up of ${payment.amount} for user ID ${payment.userId}`,
     })
 
-    return NextResponse.json({ success: true })
-  } catch (error: unknown) {
-    console.error('Approve top-up err:', error instanceof Error ? error : 'Unknown error')
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    return apiSuccess({ success: true })
   }
-}
+)

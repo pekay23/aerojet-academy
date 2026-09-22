@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 import { createClassSchema } from '@/lib/validation/schemas'
 
 // We need to adapt the schema for the form because datetime strings are needed for the API
@@ -35,12 +36,16 @@ const formSchema = createClassSchema.extend({
   recurrenceDays: z.string().optional(),
   recurrenceUntil: z.string().optional().nullable(),
   classroomId: z.string().optional(),
-  weeklySchedule: z.array(z.object({
-    day: z.number(), // 0-6 (Sun-Sat)
-    active: z.boolean(),
-    startTime: z.string(),
-    endTime: z.string(),
-  })).optional(),
+  weeklySchedule: z
+    .array(
+      z.object({
+        day: z.number(), // 0-6 (Sun-Sat)
+        active: z.boolean(),
+        startTime: z.string(),
+        endTime: z.string(),
+      })
+    )
+    .optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -65,7 +70,11 @@ interface CreateClassFormProps {
 
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-export default function CreateClassForm({ courses, instructors, classrooms }: CreateClassFormProps) {
+export default function CreateClassForm({
+  courses,
+  instructors,
+  classrooms,
+}: CreateClassFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -103,9 +112,11 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
         instructorId: values.instructorId === 'none' ? undefined : values.instructorId,
         startDate: new Date(values.startDate).toISOString(),
         endDate: new Date(values.endDate).toISOString(),
-        recurrenceUntil: values.recurrenceUntil ? new Date(values.recurrenceUntil).toISOString() : undefined,
+        recurrenceUntil: values.recurrenceUntil
+          ? new Date(values.recurrenceUntil).toISOString()
+          : undefined,
         classroomId: values.classroomId === 'none' ? undefined : values.classroomId,
-        schedule: values.weeklySchedule?.filter(s => s.active),
+        schedule: values.weeklySchedule?.filter((s) => s.active),
       }
 
       const response = await fetch('/api/staff/classes', {
@@ -213,20 +224,22 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="class-room">Classroom/Venue (Optional)</FormLabel>
-                <Select 
+                <Select
                   onValueChange={(val) => {
                     field.onChange(val)
                     if (val !== 'none') {
-                      const room = classrooms.find(r => r.id === val)
+                      const room = classrooms.find((r) => r.id === val)
                       if (room) {
                         const currentMax = form.getValues('maxStudents')
                         if (currentMax > room.capacity) {
                           form.setValue('maxStudents', room.capacity)
-                          toast.info('Capacity Adjusted', { description: `Max students lowered to match room capacity (${room.capacity})` })
+                          toast.info('Capacity Adjusted', {
+                            description: `Max students lowered to match room capacity (${room.capacity})`,
+                          })
                         }
                       }
                     }
-                  }} 
+                  }}
                   defaultValue={field.value}
                 >
                   <FormControl>
@@ -255,12 +268,7 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
               <FormItem>
                 <FormLabel htmlFor="class-start">Start Date</FormLabel>
                 <FormControl>
-                  <Input
-                    id="class-start"
-                    type="date"
-                    autoComplete="off"
-                    {...field}
-                  />
+                  <Input id="class-start" type="date" autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -274,12 +282,7 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
               <FormItem>
                 <FormLabel htmlFor="class-end">End Date</FormLabel>
                 <FormControl>
-                  <Input
-                    id="class-end"
-                    type="date"
-                    autoComplete="off"
-                    {...field}
-                  />
+                  <Input id="class-end" type="date" autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -302,9 +305,11 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
                       const val = parseInt(e.target.value)
                       const roomId = form.getValues('classroomId')
                       if (roomId && roomId !== 'none') {
-                        const room = classrooms.find(r => r.id === roomId)
+                        const room = classrooms.find((r) => r.id === roomId)
                         if (room && val > room.capacity) {
-                          toast.error('Capacity Exceeded', { description: `Room max capacity is ${room.capacity}` })
+                          toast.error('Capacity Exceeded', {
+                            description: `Room max capacity is ${room.capacity}`,
+                          })
                           field.onChange(room.capacity)
                           return
                         }
@@ -344,35 +349,48 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
             <div className="col-span-full mt-4 space-y-4 rounded-xl border border-slate-200 p-6 dark:border-slate-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">Weekly Schedule Configuration</h4>
-                  <p className="text-xs text-slate-500">Configure instruction hours for each active day.</p>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                    Weekly Schedule Configuration
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Configure instruction hours for each active day.
+                  </p>
                 </div>
               </div>
               <div className="space-y-3">
                 {weeklySchedule?.map((schedule, index) => (
-                  <div key={index} className={`flex items-center gap-4 rounded-lg border p-3 transition-colors ${schedule.active ? 'border-aerojet-blue/30 bg-blue-50/50 dark:border-aerojet-blue/50 dark:bg-blue-900/10' : 'border-slate-100 dark:border-slate-800'}`}>
-                    <label className="flex w-24 items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
+                  <div
+                    key={index}
+                    className={`flex items-center gap-4 rounded-lg border p-3 transition-colors ${schedule.active ? 'border-aerojet-blue/30 dark:border-aerojet-blue/50 bg-blue-50/50 dark:bg-blue-900/10' : 'border-slate-100 dark:border-slate-800'}`}
+                  >
+                    <div className="flex w-24 items-center gap-2">
+                      <Checkbox
+                        id={`day-${index}`}
                         checked={schedule.active}
-                        onChange={(e) => {
-                          const schedules = [...form.getValues('weeklySchedule') || []]
-                          schedules[index].active = e.target.checked
+                        onCheckedChange={(checked) => {
+                          const schedules = [...(form.getValues('weeklySchedule') || [])]
+                          schedules[index].active = !!checked
                           form.setValue('weeklySchedule', schedules)
                         }}
-                        className="h-4 w-4 rounded border-slate-300 text-aerojet-blue focus:ring-aerojet-blue"
+                        className="text-aerojet-blue focus:ring-aerojet-blue border-slate-300"
                       />
-                      <span className={`text-sm font-bold ${schedule.active ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
+                      <label
+                        htmlFor={`day-${index}`}
+                        className={`cursor-pointer text-sm font-bold ${schedule.active ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}
+                      >
                         {DAYS_OF_WEEK[index]}
-                      </span>
-                    </label>
-                    
-                    <div className={`flex flex-1 items-center gap-3 ${!schedule.active && 'opacity-30 pointer-events-none'}`}>
+                      </label>
+                    </div>
+
+                    <div
+                      className={`flex flex-1 items-center gap-3 ${!schedule.active && 'pointer-events-none opacity-30'}`}
+                    >
                       <Input
                         type="time"
                         value={schedule.startTime}
+                        disabled={!schedule.active}
                         onChange={(e) => {
-                          const schedules = [...form.getValues('weeklySchedule') || []]
+                          const schedules = [...(form.getValues('weeklySchedule') || [])]
                           schedules[index].startTime = e.target.value
                           form.setValue('weeklySchedule', schedules)
                         }}
@@ -382,8 +400,9 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
                       <Input
                         type="time"
                         value={schedule.endTime}
+                        disabled={!schedule.active}
                         onChange={(e) => {
-                          const schedules = [...form.getValues('weeklySchedule') || []]
+                          const schedules = [...(form.getValues('weeklySchedule') || [])]
                           schedules[index].endTime = e.target.value
                           form.setValue('weeklySchedule', schedules)
                         }}
@@ -428,7 +447,11 @@ export default function CreateClassForm({ courses, instructors, classrooms }: Cr
           >
             Cancel
           </Button>
-          <Button type="submit" className="bg-aerojet-blue hover:bg-aerojet-blue/90" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90"
+            disabled={isLoading}
+          >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Schedule Class
           </Button>

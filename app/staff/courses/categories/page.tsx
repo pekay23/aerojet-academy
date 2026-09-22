@@ -240,7 +240,7 @@ export default function CourseCategoriesPage() {
               className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
             >
               {/* Accent stripe */}
-              <div className="from-aerojet-blue to-aerojet-sky h-1 w-full bg-linear-to-r" />
+              <div className="from-aerojet-blue to-aerojet-sky h-1 w-full bg-gradient-to-r" />
 
               <div className="flex flex-1 flex-col p-6">
                 {/* Top row: name + actions */}

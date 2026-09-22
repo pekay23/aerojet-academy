@@ -147,6 +147,10 @@ export default function NewsMarkdownEditor({
   const [pendingMediaType, setPendingMediaType] = useState<'IMAGE' | 'AUDIO' | null>(null)
   const [mediaUrl, setMediaUrl] = useState('')
 
+  // Link Insertion Modal State
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
+
   const handleUrlInsert = () => {
     if (!mediaUrl || !editor) return
 
@@ -162,6 +166,13 @@ export default function NewsMarkdownEditor({
     setIsUrlModalOpen(false)
     setPendingMediaType(null)
     setActiveMediaTab(null)
+  }
+
+  const handleLinkInsert = () => {
+    if (!linkUrl || !editor) return
+    editor.chain().focus().setLink({ href: linkUrl }).run()
+    setLinkUrl('')
+    setIsLinkModalOpen(false)
   }
 
   const editor = useEditor({
@@ -268,12 +279,11 @@ export default function NewsMarkdownEditor({
         <button
           type="button"
           onClick={() => {
-            const url = window.prompt('URL')
-            if (url) {
-              editor.chain().focus().setLink({ href: url }).run()
-            }
+            setLinkUrl('')
+            setIsLinkModalOpen(true)
           }}
           className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('link') ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
+          aria-label="Insert link"
         >
           <LinkIcon className="h-4 w-4" />
         </button>
@@ -659,6 +669,60 @@ export default function NewsMarkdownEditor({
               onClick={() => {
                 setIsUrlModalOpen(false)
                 setMediaUrl('')
+              }}
+              className="text-[10px] font-black tracking-widest uppercase"
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Link Insertion Modal */}
+      <Dialog open={isLinkModalOpen} onOpenChange={setIsLinkModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-black tracking-widest uppercase">
+              Insert Link
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center space-x-2 py-4">
+            <div className="grid flex-1 gap-2">
+              <label htmlFor="link-url" className="sr-only">
+                Link URL
+              </label>
+              <Input
+                id="link-url"
+                type="url"
+                inputMode="url"
+                placeholder="https://example.com"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleLinkInsert()
+                  }
+                }}
+                className="h-10 text-xs font-medium"
+              />
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-start">
+            <Button
+              type="button"
+              variant="default"
+              onClick={handleLinkInsert}
+              disabled={!linkUrl}
+              className="bg-aerojet-blue text-[10px] font-black tracking-widest uppercase"
+            >
+              Insert Link
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsLinkModalOpen(false)
+                setLinkUrl('')
               }}
               className="text-[10px] font-black tracking-widest uppercase"
             >

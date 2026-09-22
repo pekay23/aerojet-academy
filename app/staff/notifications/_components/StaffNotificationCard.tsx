@@ -17,7 +17,7 @@ export default function StaffNotificationCard({
   notification,
   onDismiss,
 }: StaffNotificationCardProps) {
-  const [isRead, setIsRead] = useState(notification.isRead)
+  const [isRead] = useState(notification.isRead)
   const [isDismissing, startDismissTransition] = useTransition()
   const pathname = usePathname()
   const searchParams = useSearchParams()

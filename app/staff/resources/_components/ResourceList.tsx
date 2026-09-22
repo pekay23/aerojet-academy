@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { FileText, ExternalLink, Trash2, Edit3, MoreVertical, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { FileText, ExternalLink, Trash2, Edit3, MoreVertical, ArrowUpDown, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,8 +20,7 @@ import { Button } from '@/components/ui/button'
 import { deleteResource } from '@/lib/actions/resources'
 import { toast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import ResourceForm from './ResourceForm'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 
 interface Resource {
   id: string
@@ -43,19 +42,24 @@ interface ResourceListProps {
 
 export default function ResourceList({ resources: initialResources }: ResourceListProps) {
   const [resources, setResources] = useState(initialResources)
-  const [editingResource, setEditingResource] = useState<Resource | null>(null)
+  const [, setEditingResource] = useState<Resource | null>(null)
   const [sortField, setSortField] = useState<'name' | 'category' | 'type' | 'visibility'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [deleteTarget, setDeleteTarget] = useState<Resource | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this resource?')) return
-
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setIsDeleting(true)
     try {
-      await deleteResource(id)
-      setResources(resources.filter((r) => r.id !== id))
+      await deleteResource(deleteTarget.id)
+      setResources(resources.filter((r) => r.id !== deleteTarget.id))
       toast.success('Resource deleted')
+      setDeleteTarget(null)
     } catch (_error) {
       toast.error('Failed to delete resource')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -101,6 +105,8 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
               <TableHead
                 onClick={() => toggleSort('name')}
                 className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+                aria-label="Sort by Name"
+                aria-sort={sortField === 'name' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
               >
                 <div className="flex items-center gap-1.5">
                   Resource
@@ -114,6 +120,8 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
               <TableHead
                 onClick={() => toggleSort('category')}
                 className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+                aria-label="Sort by Category"
+                aria-sort={sortField === 'category' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
               >
                 <div className="flex items-center gap-1.5">
                   Category
@@ -127,6 +135,8 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
               <TableHead
                 onClick={() => toggleSort('type')}
                 className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+                aria-label="Sort by Type"
+                aria-sort={sortField === 'type' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
               >
                 <div className="flex items-center gap-1.5">
                   Type
@@ -140,6 +150,8 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
               <TableHead
                 onClick={() => toggleSort('visibility')}
                 className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+                aria-label="Sort by Visibility"
+                aria-sort={sortField === 'visibility' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
               >
                 <div className="flex items-center gap-1.5">
                   Visibility
@@ -238,6 +250,7 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 rounded-lg outline-none"
+                          aria-label="Resource actions"
                         >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
@@ -250,7 +263,7 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
                           <Edit3 className="h-4 w-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDelete(resource.id)}
+                          onClick={() => setDeleteTarget(resource)}
                           className="cursor-pointer gap-2 rounded-lg text-rose-600 focus:text-rose-600"
                         >
                           <Trash2 className="h-4 w-4" /> Delete
@@ -262,25 +275,40 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
               ))
             )}
           </TableBody>
-        </Table>
+          </Table>
       </div>
 
-      <Dialog open={!!editingResource} onOpenChange={() => setEditingResource(null)}>
-        <DialogContent className="rounded-3xl lg:max-w-[1100px] sm:max-w-[600px] overflow-hidden p-8">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-black text-slate-900 dark:text-slate-100">
-              Edit Resource
-            </DialogTitle>
-          </DialogHeader>
-          <ResourceForm
-            initialData={editingResource ?? undefined}
-            onSuccess={() => {
-              setEditingResource(null)
-              window.location.reload()
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+      {deleteTarget && (
+        <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Delete Resource</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{deleteTarget.name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   )
 }
