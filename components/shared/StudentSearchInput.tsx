@@ -49,8 +49,7 @@ export function StudentSearchInput({
   useEffect(() => {
     prevValueRef.current = value
     if (!value) {
-      // prop-sync: syncing external `value` to internal state; no viable alternative
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- prop-sync: syncing external `value` to internal state; no viable alternative
       setSelectedId('')
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery('')

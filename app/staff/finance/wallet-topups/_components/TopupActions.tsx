@@ -10,6 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -29,11 +31,11 @@ export function TopupActions({
   const [loadingReject, setLoadingReject] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [isRejectModalOpen, setRejectModalOpen] = useState(false)
+  const [isApproveModalOpen, setApproveModalOpen] = useState(false)
 
   const { markDirty, markClean } = useFormDirty()
 
   const handleApprove = async () => {
-    if (!confirm(`Are you sure you want to approve ${amount} for ${userName}?`)) return
     setLoadingApprove(true)
     try {
       const res = await fetch(`/api/staff/finance/wallet-topups/${paymentId}/approve`, {
@@ -47,6 +49,7 @@ export function TopupActions({
       toast.error(message)
     } finally {
       setLoadingApprove(false)
+      setApproveModalOpen(false)
     }
   }
 
@@ -77,20 +80,57 @@ export function TopupActions({
 
   return (
     <div className="flex gap-2">
-      <Button
-        size="sm"
-        disabled={loadingApprove || loadingReject}
-        onClick={handleApprove}
-        className="h-8 rounded-xl bg-emerald-600 px-3 text-xs text-white hover:bg-emerald-700"
-      >
-        {loadingApprove ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <>
-            <CheckCircle2 className="mr-1 h-4 w-4" /> Approve
-          </>
-        )}
-      </Button>
+      <Dialog open={isApproveModalOpen} onOpenChange={setApproveModalOpen}>
+        <DialogTrigger asChild>
+          <Button
+            size="sm"
+            disabled={loadingApprove || loadingReject}
+            onClick={() => setApproveModalOpen(true)}
+            className="h-8 rounded-xl bg-emerald-600 px-3 text-xs text-white hover:bg-emerald-700"
+          >
+            {loadingApprove ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <CheckCircle2 className="mr-1 h-4 w-4" /> Approve
+              </>
+            )}
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Approve Top-up Request</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to approve {amount} for {userName}? This will credit the amount to their wallet.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => setApproveModalOpen(false)}
+              disabled={loadingApprove}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              className="rounded-xl bg-emerald-600 hover:bg-emerald-700"
+              disabled={loadingApprove}
+              onClick={handleApprove}
+            >
+              {loadingApprove ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Approving...
+                </>
+              ) : (
+                'Confirm Approval'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isRejectModalOpen} onOpenChange={setRejectModalOpen}>
         <DialogTrigger asChild>

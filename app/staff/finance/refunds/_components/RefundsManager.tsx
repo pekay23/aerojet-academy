@@ -133,7 +133,7 @@ export default function RefundsManager({
         const res = await action()
         if (res.error) toast.error(res.error)
         else toast.success(successMessage)
-      } catch (error) {
+      } catch (_e) {
         toast.error(errorMessage ?? 'Action failed')
       }
     },
@@ -269,7 +269,6 @@ export default function RefundsManager({
               autoComplete="off"
               aria-autocomplete="list"
               aria-controls="student-search-results"
-              aria-expanded={showDropdown && (studentQuery.length > 0 || options.length > 0)}
             />
             {showDropdown && (studentQuery.length > 0 || options.length > 0) && (
               <div
@@ -278,12 +277,12 @@ export default function RefundsManager({
                 role="listbox"
               >
                 {searching && (
-                  <div className="px-3 py-2 text-xs text-slate-400" role="option">
+                  <div className="px-3 py-2 text-xs text-slate-400" role="option" aria-selected={false}>
                     Searching…
                   </div>
                 )}
                 {!searching && options.length === 0 && studentQuery.length > 0 && (
-                  <div className="px-3 py-2 text-xs text-slate-400" role="option">
+                  <div className="px-3 py-2 text-xs text-slate-400" role="option" aria-selected={false}>
                     No matches.
                   </div>
                 )}
