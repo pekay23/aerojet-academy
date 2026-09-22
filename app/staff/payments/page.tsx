@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import PaymentsQueue from '../_components/PaymentsQueue'
 import { Metadata } from 'next'
+import { PaymentStatus } from '@prisma/client'
 
 export const metadata: Metadata = { title: 'Payments | Staff Portal' }
 
@@ -16,8 +17,9 @@ export default async function PaymentsPage({
   if (!session) redirect('/login')
 
   const pendingCount = await prismaUnfiltered.payment.count({ where: { status: 'PENDING' } })
-  const initialTab = ['PENDING', 'APPROVED', 'REJECTED'].includes(tabParam?.toUpperCase() ?? '')
-    ? tabParam!.toUpperCase()
-    : 'PENDING'
+  const validTabs: PaymentStatus[] = ['PENDING', 'APPROVED', 'REJECTED']
+  const initialTab = validTabs.includes(tabParam?.toUpperCase() as PaymentStatus)
+    ? (tabParam!.toUpperCase() as PaymentStatus)
+    : PaymentStatus.PENDING
   return <PaymentsQueue initialPendingCount={pendingCount} initialTab={initialTab} />
 }

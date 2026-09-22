@@ -15,6 +15,7 @@ import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import * as fs from 'fs'
 import * as path from 'path'
+import { resolveAttemptType } from '../lib/exams/attempt-types'
 
 const MIGRATION_REF = 'EXAM_CANDIDATE_IMPORT_2026_03'
 
@@ -39,7 +40,7 @@ interface ExamHistoryEntry {
   moduleCode: string
   bookingGroupRef: string
   bookingType: string
-  attemptType: 'first_attempt' | 'resit'
+  attemptType: string
   result: 'pass' | 'fail'
   sourceNotes?: string
 }
@@ -753,7 +754,8 @@ async function migrateCandidate(candidate: CandidateData) {
 
   // Step 3: Exam history bookings
   for (const entry of examHistory) {
-    const migRef = `${MIGRATION_REF}:${entry.bookingGroupRef}:${entry.moduleCode}:${entry.attemptType}`
+    const normalizedAttempt = resolveAttemptType(entry.attemptType)
+    const migRef = `${MIGRATION_REF}:${entry.bookingGroupRef}:${entry.moduleCode}:${normalizedAttempt}`
 
     const existing = await prisma.examBooking.findFirst({
       where: { userId: user.id, migrationRef: migRef },
@@ -773,16 +775,16 @@ async function migrateCandidate(candidate: CandidateData) {
           amountPaid: 0, // historical — already paid externally
           status: resultToStatus(entry.result),
           bookingGroupRef: entry.bookingGroupRef,
-          attemptType: entry.attemptType,
+          attemptType: normalizedAttempt,
           result: entry.result,
           sourceNotes: `[Migration] ${entry.sittingLabel}. ${entry.sourceNotes || ''}`,
           migrationRef: migRef,
         },
       })
-      console.log(`  Exam booking: ${entry.moduleCode} (${entry.attemptType}) = ${entry.result}`)
+      console.log(`  Exam booking: ${entry.moduleCode} (${normalizedAttempt}) = ${entry.result}`)
     } else {
       console.log(
-        `  Exam booking already exists: ${entry.moduleCode} (${entry.attemptType}) — skip`
+        `  Exam booking already exists: ${entry.moduleCode} (${normalizedAttempt}) — skip`
       )
     }
     // Always add to report for completeness
@@ -790,7 +792,7 @@ async function migrateCandidate(candidate: CandidateData) {
       email: personalEmail,
       module: entry.moduleCode,
       result: entry.result,
-      type: entry.attemptType,
+      type: normalizedAttempt,
     })
   }
 
@@ -814,7 +816,7 @@ async function migrateCandidate(candidate: CandidateData) {
           amountPaid: 0,
           status: paymentStatus,
           bookingGroupRef: planned.bookingGroupRef,
-          attemptType: 'first_attempt',
+          attemptType: resolveAttemptType('first_attempt'),
           result: 'pending',
           sourceNotes: `[Migration] Planned. ${planned.sourceNotes || ''}`,
           migrationRef: migRef,
@@ -830,7 +832,7 @@ async function migrateCandidate(candidate: CandidateData) {
       email: personalEmail,
       module: planned.moduleCode,
       result: 'pending',
-      type: 'first_attempt',
+      type: resolveAttemptType('first_attempt'),
     })
   }
 
@@ -1000,6 +1002,3 @@ main().catch((e) => {
   console.error('FATAL migration error:', e)
   process.exit(1)
 })
-
-
-

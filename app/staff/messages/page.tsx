@@ -4,7 +4,7 @@ import { Mail, Sparkles } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { getStaffRecipients } from '../actions'
+import { getStaffRecipients } from '../actions/index'
 import StaffNewMessageDialog from './_components/StaffNewMessageDialog'
 import StaffMessageThread from './_components/StaffMessageThread'
 import AutoRefresh from '@/components/AutoRefresh'
@@ -90,7 +90,7 @@ export default async function StaffMessagesPage() {
       {/* Header */}
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-slate-100">
+          <h1 className="text-aerojet-blue flex items-center gap-3 text-3xl font-black tracking-tight sm:text-4xl dark:text-slate-100">
             Messages
             {totalUnread > 0 && (
               <span className="flex h-7 min-w-[28px] items-center justify-center rounded-full bg-red-100 px-2 text-xs font-black text-red-700 shadow-lg ring-4 ring-white dark:bg-red-900/30 dark:text-red-400 dark:ring-slate-900">
@@ -99,7 +99,7 @@ export default async function StaffMessagesPage() {
             )}
           </h1>
           <p className="flex items-center gap-2 text-base font-medium text-slate-500 dark:text-slate-400">
-            <Sparkles className="h-5 w-5 text-aerojet-sky" />
+            <Sparkles className="text-aerojet-sky h-5 w-5" />
             Communicate with students, instructors, and academy staff.
           </p>
         </div>
@@ -111,7 +111,7 @@ export default async function StaffMessagesPage() {
           <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
             <Mail className="h-12 w-12 text-slate-300" />
           </div>
-          <h3 className="text-xl font-black text-aerojet-blue dark:text-slate-100">
+          <h3 className="text-aerojet-blue text-xl font-black dark:text-slate-100">
             No Messages Found
           </h3>
           <p className="mt-3 max-w-sm text-slate-500 dark:text-slate-400">

@@ -2,6 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { EnrollmentStatus } from '@prisma/client'
 import { NextResponse } from 'next/server'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 /**
  * POST /api/staff/enrollments/batch
@@ -24,8 +25,30 @@ export async function POST(req: Request) {
   }
 
   try {
-    const body = await req.json()
-    const { studentIds, courseIds, academicYearId, semesterId } = body
+    let body: unknown
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 })
+    }
+    const { studentIds, courseIds, academicYearId, semesterId } = body as {
+      studentIds?: string[]
+      courseIds?: string[]
+      academicYearId?: string
+      semesterId?: string
+    }
+
+    const MAX_STUDENTS = 200
+    const MAX_COURSES = 100
+    if ((studentIds?.length ?? 0) > MAX_STUDENTS) {
+      return NextResponse.json(
+        { error: `Maximum ${MAX_STUDENTS} students allowed` },
+        { status: 400 }
+      )
+    }
+    if ((courseIds?.length ?? 0) > MAX_COURSES) {
+      return NextResponse.json({ error: `Maximum ${MAX_COURSES} courses allowed` }, { status: 400 })
+    }
 
     if (!studentIds?.length || !courseIds?.length) {
       return NextResponse.json(
@@ -59,13 +82,12 @@ export async function POST(req: Request) {
       select: { id: true, price: true },
     })
 
-
     const validCourseIds = courses.map((c) => c.id)
     if (validCourseIds.length === 0) {
       return NextResponse.json({ error: 'No valid active courses found.' }, { status: 400 })
     }
 
-    const courseMap = new Map(courses.map(c => [c.id, c]))
+    const courseMap = new Map(courses.map((c) => [c.id, c]))
     const records = []
     for (const userId of validStudentIds) {
       for (const courseId of validCourseIds) {
@@ -86,6 +108,24 @@ export async function POST(req: Request) {
     const result = await prismaUnfiltered.enrollment.createMany({
       data: records,
       skipDuplicates: true,
+    })
+
+    // Audit log the privileged mutation
+    await createAuditLog({
+      action: AuditAction.ENROLLMENT_APPROVE,
+      userId: session.user.id,
+      entity: 'Enrollment',
+      entityId: undefined,
+      description: `Batch enrolled ${result.count} students into ${validCourseIds.length} courses`,
+      changes: {
+        created: result.count,
+        skipped: records.length - result.count,
+        courseIds: validCourseIds,
+        studentCount: validStudentIds.length,
+        targetUserIds: validStudentIds,
+      },
+      ipAddress: req.headers.get('x-forwarded-for') ?? undefined,
+      userAgent: req.headers.get('user-agent') ?? undefined,
     })
 
     return NextResponse.json({

@@ -40,14 +40,16 @@ interface LayoutData {
 }
 
 interface SeatingAssignmentProps {
-  sittingId: string
-  sittingLabel: string
+  classroomId: string
+  sittingId?: string
+  sittingLabel?: string
   layout: LayoutData
   seats: SeatData[]
   students: StudentData[]
 }
 
 export default function SeatingAssignment({
+  classroomId,
   sittingId,
   sittingLabel,
   layout,
@@ -114,7 +116,11 @@ export default function SeatingAssignment({
         seatId: s.seatId,
       }))
 
-      const res = await fetch(`/api/staff/exams/sittings/${sittingId}/seats`, {
+      const endpoint = sittingId
+        ? `/api/staff/exams/sittings/${sittingId}/seats`
+        : `/api/staff/classrooms/${classroomId}/seats`
+
+      const res = await fetch(endpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ assignments }),
@@ -215,9 +221,7 @@ export default function SeatingAssignment({
               }}
             >
               {unassignedStudents.length === 0 ? (
-                <p className="p-3 text-center text-xs text-slate-400">
-                  All students assigned!
-                </p>
+                <p className="p-3 text-center text-xs text-slate-400">All students assigned!</p>
               ) : (
                 unassignedStudents.map((student) => (
                   <div
@@ -225,7 +229,7 @@ export default function SeatingAssignment({
                     draggable
                     onDragStart={() => handleDragStart(student)}
                     onDragEnd={() => setDraggedStudent(null)}
-                    className="flex cursor-grab items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm transition-all hover:border-aerojet-sky hover:bg-indigo-50 active:cursor-grabbing dark:border-slate-700 dark:bg-slate-800 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/20"
+                    className="hover:border-aerojet-sky flex cursor-grab items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm transition-all hover:bg-indigo-50 active:cursor-grabbing dark:border-slate-700 dark:bg-slate-800 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/20"
                   >
                     <GripVertical className="h-3.5 w-3.5 shrink-0 text-slate-300" />
                     <User className="h-3.5 w-3.5 shrink-0 text-slate-400" />
@@ -244,7 +248,7 @@ export default function SeatingAssignment({
           <div className="flex justify-center">
             <div className="space-y-2">
               <div className="mb-4 flex items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white/50 px-6 py-2 dark:border-slate-700 dark:bg-slate-900/50">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                <span className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                   Front of Room
                 </span>
               </div>
@@ -257,9 +261,7 @@ export default function SeatingAssignment({
               >
                 {Array.from({ length: layout.rows }, (_, r) =>
                   Array.from({ length: layout.cols }, (_, c) => {
-                    const cell = layout.cells.find(
-                      (cell) => cell.row === r && cell.col === c
-                    )
+                    const cell = layout.cells.find((cell) => cell.row === r && cell.col === c)
                     const type = cell?.type ?? 'AISLE'
 
                     if (type !== 'DESK') {
@@ -273,18 +275,15 @@ export default function SeatingAssignment({
                               : 'border-transparent'
                           )}
                         >
-                          {type === 'OBSTACLE' && (
-                            <Ban className="h-4 w-4 text-red-300" />
-                          )}
+                          {type === 'OBSTACLE' && <Ban className="h-4 w-4 text-red-300" />}
                         </div>
                       )
                     }
 
                     // It's a desk - find the matching seat
-                    const seat = seats.find(
-                      (s) => s.row === r && s.col === c
-                    )
-                    if (!seat) return <div key={`${r}-${c}`} className="h-14 w-14 sm:h-16 sm:w-16" />
+                    const seat = seats.find((s) => s.row === r && s.col === c)
+                    if (!seat)
+                      return <div key={`${r}-${c}`} className="h-14 w-14 sm:h-16 sm:w-16" />
 
                     const occupant = getStudentOnSeat(seat.id)
                     const isDropTarget = draggedStudent && !occupant
@@ -307,30 +306,27 @@ export default function SeatingAssignment({
                           occupant
                             ? 'border-indigo-300 bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/30'
                             : isDropTarget
-                              ? 'border-aerojet-sky border-dashed bg-indigo-50 ring-2 ring-aerojet-sky/30 dark:bg-indigo-900/10'
+                              ? 'border-aerojet-sky ring-aerojet-sky/30 border-dashed bg-indigo-50 ring-2 dark:bg-indigo-900/10'
                               : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800'
                         )}
                       >
-                        <span className="text-[9px] font-bold text-slate-400">
-                          {seat.label}
-                        </span>
+                        <span className="text-[9px] font-bold text-slate-400">{seat.label}</span>
                         {occupant ? (
                           <>
                             <span
-                              className="max-w-[48px] truncate text-[9px] font-bold text-indigo-700 dark:text-indigo-400 sm:max-w-[56px]"
+                              className="max-w-[48px] truncate text-[9px] font-bold text-indigo-700 sm:max-w-[56px] dark:text-indigo-400"
                               title={occupant.name}
                             >
                               {occupant.name.split(' ')[0]}
                             </span>
                             <button
-                              onClick={() =>
-                                handleRemoveFromSeat(occupant.assignmentId)
-                              }
-                              className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
+                              onClick={() => handleRemoveFromSeat(occupant.assignmentId)}
+                              className="absolute -top-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
                               style={{ opacity: 1 }}
+                              aria-label={`Remove ${occupant.name} from seat ${seat.label}`}
                               title="Remove from seat"
                             >
-                              <X className="h-2.5 w-2.5" />
+                              <X className="h-4 w-4" />
                             </button>
                           </>
                         ) : (

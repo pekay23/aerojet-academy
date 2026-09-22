@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import {
   Plus,
@@ -100,75 +101,77 @@ export default function AcademicCalendarManager({
 
       setYearModalOpen(false)
       router.refresh()
-      } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Unknown error')
-      } finally {
-        setIsLoading(false)
-      }
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Submits Semester form
+  const handleSemesterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsLoading(true)
+    const formData = new FormData(e.currentTarget)
+    const payload = {
+      name: formData.get('name') as string,
+      academicYearId: editingSemester?.yearId,
+      startDate: formData.get('startDate') as string,
+      endDate: formData.get('endDate') as string,
+      isActive: formData.get('isActive') === 'on',
     }
 
-    // Submits Semester form
-    const handleSemesterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault()
-      setIsLoading(true)
-      const formData = new FormData(e.currentTarget)
-      const payload = {
-        name: formData.get('name') as string,
-        academicYearId: editingSemester?.yearId,
-        startDate: formData.get('startDate') as string,
-        endDate: formData.get('endDate') as string,
-        isActive: formData.get('isActive') === 'on',
-      }
+    try {
+      const isEdit = !!editingSemester?.sem?.id
+      const url = isEdit
+        ? `/api/staff/semesters/${editingSemester!.sem!.id}`
+        : '/api/staff/semesters'
+      const method = isEdit ? 'PUT' : 'POST'
 
-      try {
-        const isEdit = !!editingSemester?.sem?.id
-        const url = isEdit ? `/api/staff/semesters/${editingSemester!.sem!.id}` : '/api/staff/semesters'
-        const method = isEdit ? 'PUT' : 'POST'
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
 
-        const res = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
+      if (!res.ok) throw new Error((await res.json()).error)
 
-        if (!res.ok) throw new Error((await res.json()).error)
-
-        setSemModalOpen(false)
-        router.refresh()
-      } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Unknown error')
-      } finally {
-        setIsLoading(false)
-      }
+      setSemModalOpen(false)
+      router.refresh()
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    const handleDeleteYear = async (id: string) => {
-      if (!confirm('Are you sure you want to delete this Academic Year?')) return
-      try {
-        const res = await fetch(`/api/staff/academic-years/${id}`, { method: 'DELETE' })
-        if (!res.ok) throw new Error((await res.json()).error)
-        router.refresh()
-      } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Unknown error')
-      }
+  const handleDeleteYear = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this Academic Year?')) return
+    try {
+      const res = await fetch(`/api/staff/academic-years/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error((await res.json()).error)
+      router.refresh()
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Unknown error')
     }
+  }
 
-    const handleDeleteSemester = async (id: string) => {
-      if (!confirm('Are you sure you want to delete this Semester?')) return
-      try {
-        const res = await fetch(`/api/staff/semesters/${id}`, { method: 'DELETE' })
-        if (!res.ok) throw new Error((await res.json()).error)
-        router.refresh()
-      } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Unknown error')
-      }
+  const handleDeleteSemester = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this Semester?')) return
+    try {
+      const res = await fetch(`/api/staff/semesters/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error((await res.json()).error)
+      router.refresh()
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Unknown error')
     }
+  }
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div>
-          <h2 className="text-sm font-bold tracking-widest text-aerojet-blue uppercase dark:text-blue-400">
+          <h2 className="text-aerojet-blue text-sm font-bold tracking-widest uppercase dark:text-blue-400">
             Control Panel
           </h2>
           <p className="mt-1 text-xs text-slate-500">Add or manage global academic entities.</p>
@@ -379,7 +382,7 @@ export default function AcademicCalendarManager({
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl bg-aerojet-blue text-white hover:bg-blue-800"
+              className="bg-aerojet-blue w-full rounded-xl text-white hover:bg-blue-800"
             >
               {isLoading ? 'Saving...' : 'Save Year'}
             </Button>

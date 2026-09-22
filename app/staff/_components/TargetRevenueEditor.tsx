@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { Edit2, Check, X, Loader2 } from 'lucide-react'
-import { updateRevenueTarget } from '../actions'
+import { updateRevenueTarget } from '../actions/index'
+import { toast } from 'sonner'
 
 interface TargetRevenueEditorProps {
   initialAmount: number
@@ -21,7 +22,7 @@ export default function TargetRevenueEditor({ initialAmount, currency }: TargetR
     if (result.success) {
       setIsEditing(false)
     } else {
-      alert(result.error || 'Failed to update target')
+      toast.error(result.error || 'Failed to update target')
     }
   }
 
@@ -29,14 +30,14 @@ export default function TargetRevenueEditor({ initialAmount, currency }: TargetR
     return (
       <div className="flex items-center gap-2">
         <div className="relative">
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+          <span className="absolute top-1/2 left-2.5 -translate-y-1/2 text-xs font-bold text-slate-400">
             {currency}
           </span>
           <input
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="h-8 w-28 rounded-lg border border-slate-200 bg-white pl-6 pr-2 text-xs font-bold focus:border-aerojet-sky focus:outline-none dark:border-slate-700 dark:bg-slate-800"
+            className="focus:border-aerojet-sky h-8 w-28 rounded-lg border border-slate-200 bg-white pr-2 pl-6 text-xs font-bold focus:outline-none dark:border-slate-700 dark:bg-slate-800"
             autoFocus
           />
         </div>
@@ -61,13 +62,17 @@ export default function TargetRevenueEditor({ initialAmount, currency }: TargetR
   return (
     <div className="group flex items-center gap-2">
       <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-        Target: <span className="font-bold text-slate-600 dark:text-slate-300">{currency}{initialAmount.toLocaleString()}</span>
+        Target:{' '}
+        <span className="font-bold text-slate-600 dark:text-slate-300">
+          {currency}
+          {initialAmount.toLocaleString()}
+        </span>
       </p>
       <button
         onClick={() => setIsEditing(true)}
         className="opacity-30 transition-opacity group-hover:opacity-100"
       >
-        <Edit2 className="h-3 w-3 text-slate-400 hover:text-aerojet-sky" />
+        <Edit2 className="hover:text-aerojet-sky h-3 w-3 text-slate-400" />
       </button>
     </div>
   )

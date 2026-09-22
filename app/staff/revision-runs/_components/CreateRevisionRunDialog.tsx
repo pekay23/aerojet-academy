@@ -29,25 +29,48 @@ export default function CreateRevisionRunDialog() {
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
+    const capacity = parseInt(formData.get('capacity') as string)
+    const minClassSize = parseInt(formData.get('minClassSize') as string)
+
+    if (isNaN(capacity) || capacity < 1) {
+      toast.error('Invalid Capacity', { description: 'Capacity must be a positive number' })
+      setLoading(false)
+      return
+    }
+    if (isNaN(minClassSize) || minClassSize < 1) {
+      toast.error('Invalid Minimum', {
+        description: 'Minimum class size must be a positive number',
+      })
+      setLoading(false)
+      return
+    }
+    if (minClassSize > capacity) {
+      toast.error('Invalid Configuration', {
+        description: 'Minimum class size cannot exceed maximum capacity',
+      })
+      setLoading(false)
+      return
+    }
+
     const data = {
       title: formData.get('title') as string,
       moduleTag: formData.get('moduleTag') as string,
       description: formData.get('description') as string,
       startDatetime: new Date(formData.get('startDatetime') as string),
       endDatetime: new Date(formData.get('endDatetime') as string),
-      capacity: parseInt(formData.get('capacity') as string),
-      minClassSize: parseInt(formData.get('minClassSize') as string),
+      capacity,
+      minClassSize,
       price: parseFloat(formData.get('price') as string),
     }
 
     try {
       const res = await createTuitionRun(data)
-      if (res.success) {
+      if ('success' in res && res.success) {
         toast.success('Revision run created successfully')
         setOpen(false)
         router.refresh()
       } else {
-        toast.error(res.error || 'Failed to create revision run')
+        toast.error('error' in res ? res.error : 'Failed to create revision run')
       }
     } catch (_error) {
       toast.error('An unexpected error occurred')
@@ -59,14 +82,16 @@ export default function CreateRevisionRunDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="rounded-xl bg-aerojet-blue font-bold text-white hover:bg-aerojet-blue/90">
+        <Button className="bg-aerojet-blue hover:bg-aerojet-blue/90 rounded-xl font-bold text-white">
           <Plus className="mr-2 h-4 w-4" />
           Schedule Revision
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-black text-aerojet-blue uppercase">Schedule Revision Run</DialogTitle>
+          <DialogTitle className="text-aerojet-blue text-2xl font-black uppercase">
+            Schedule Revision Run
+          </DialogTitle>
           <DialogDescription>
             Create a new paid revision support class for students.
           </DialogDescription>
@@ -75,7 +100,12 @@ export default function CreateRevisionRunDialog() {
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" placeholder="e.g. Module 1 Mathematics Intensive Revision" required />
+            <Input
+              id="title"
+              name="title"
+              placeholder="e.g. Module 1 Mathematics Intensive Revision"
+              required
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -107,13 +137,23 @@ export default function CreateRevisionRunDialog() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="minClassSize">Min Students (to run)</Label>
-              <Input id="minClassSize" name="minClassSize" type="number" defaultValue="5" required />
+              <Input
+                id="minClassSize"
+                name="minClassSize"
+                type="number"
+                defaultValue="5"
+                required
+              />
             </div>
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" placeholder="Details about the revision session..." />
+            <Textarea
+              id="description"
+              name="description"
+              placeholder="Details about the revision session..."
+            />
           </div>
 
           <DialogFooter className="pt-4">

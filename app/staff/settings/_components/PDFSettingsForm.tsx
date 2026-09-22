@@ -68,7 +68,7 @@ interface PDFSettingsFormProps {
 export default function PDFSettingsForm({ values, pdfSettings }: PDFSettingsFormProps) {
   const [liveSettings, setLiveSettings] = useState(pdfSettings)
   const [isGenerating, setIsGenerating] = useState<string | null>(null)
-  const { markDirty, markClean } = useFormDirty()
+  const { markDirty } = useFormDirty()
 
   const handleFormChange = (e: React.FormEvent<HTMLDivElement>) => {
     // Warn user before closing/refreshing if they have unsaved changes
@@ -119,7 +119,6 @@ export default function PDFSettingsForm({ values, pdfSettings }: PDFSettingsForm
       setTimeout(() => URL.revokeObjectURL(url), 1000)
     } catch (_error) {
       toast.error('Failed to download PDF preview')
-      alert('Failed to generate PDF preview. Please try again.')
     } finally {
       setIsGenerating(null)
     }

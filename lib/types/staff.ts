@@ -513,3 +513,125 @@ export interface SerializedTransactionRelated {
     status: string
   }>
 }
+
+/* ─── Refund Types ─── */
+
+export type RefundStatus =
+  | 'REQUESTED'
+  | 'STAFF_CONFIRMED'
+  | 'ADMIN_APPROVED'
+  | 'PROCESSED'
+  | 'REJECTED'
+  | 'CANCELLED';
+
+export interface RefundRow {
+  id: string
+  amount: number
+  currency: string
+  reason: string
+  status: RefundStatus
+  rejectedReason: string | null
+  createdAt: string
+  user: {
+    id: string
+    email: string
+    profile: { firstName: string; lastName: string } | null
+    studentProfile: { studentId: string } | null
+  }
+}
+
+/* ─── Re-exports from utils ─── */
+
+export { getRefundStatusStyle, getTransactionStatusStyle, getPaymentStatusStyle } from '@/lib/utils/status-styles'
+
+/* ─── Additional types for other components ─── */
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+export interface ApiResponse<T> {
+  data: T | null
+  error?: string
+  status: number
+}
+
+export interface PaymentRow {
+  id: string
+  amount: number
+  currency: string
+  paymentCurrency?: string | null
+  originalAmount?: number | null
+  status: string
+  referenceType: string
+  referenceCode: string | null
+  paymentMethod: string | null
+  proofUrl: string | null
+  approvedAt: string | null
+  staffName: string | null
+  createdAt: string
+  user: {
+    id: string
+    email: string
+    profile: { firstName: string; lastName: string } | null
+    studentProfile: { studentId: string } | null
+  }
+}
+
+export interface ReconciliationPaymentRow {
+  id: string
+  amount: number
+  currency: string
+  paymentCurrency?: string | null
+  originalAmount?: number | null
+  status: string
+  referenceType: string
+  referenceCode: string | null
+  paymentMethod: string | null
+  proofUrl: string | null
+  approvedAt: string | null
+  staffName: string | null
+  createdAt: string
+  user: {
+    id: string
+    email: string
+    profile: { firstName: string; lastName: string } | null
+    studentProfile: { studentId: string } | null
+  }
+}
+
+export interface FinanceReportSummary {
+  totalRevenue: number
+  totalTransactions: number
+  avgTransactionValue: number
+  pendingReconciliation: number
+  refundRate: number
+}
+
+export interface FinanceOverviewData {
+  summary: FinanceReportSummary
+  revenueByType: Array<{ type: string; amount: number; count: number }>
+  paymentMethods: Array<{ method: string; count: number; amount: number }>
+  monthlyData: Array<{ month: string; revenue: number; count: number }>
+  paymentStatus: Array<{ status: string; count: number; amount: number }>
+}
+
+export const CURRENCY_OPTIONS = [
+  { value: 'EUR', label: 'EUR (€)' },
+  { value: 'USD', label: 'USD ($)' },
+  { value: 'GBP', label: 'GBP (£)' },
+] as const
+
+export const REFUND_FILTERS = [
+  { value: 'ALL', label: 'All Statuses' },
+  { value: 'REQUESTED', label: 'Requested' },
+  { value: 'STAFF_CONFIRMED', label: 'Staff Confirmed' },
+  { value: 'ADMIN_APPROVED', label: 'Admin Approved' },
+  { value: 'PROCESSED', label: 'Processed' },
+  { value: 'REJECTED', label: 'Rejected' },
+  { value: 'CANCELLED', label: 'Cancelled' },
+] as const

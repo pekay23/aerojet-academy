@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Plus, Calendar, Clock, MapPin, Users, ChevronDown, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
@@ -66,7 +67,7 @@ export default function InterviewSchedulesManager({
         markClean()
         router.refresh()
       } else {
-        alert('Failed to create schedule')
+        toast.error('Failed to create schedule')
       }
     } catch (e) {
       console.error(e)
@@ -95,7 +96,7 @@ export default function InterviewSchedulesManager({
         markClean()
         router.refresh()
       } else {
-        alert('Failed to create slot')
+        toast.error('Failed to create slot')
       }
     } catch (e) {
       console.error(e)
@@ -378,7 +379,7 @@ export default function InterviewSchedulesManager({
                                 setAddingSlotTo(null)
                                 router.refresh()
                               } else {
-                                alert('Failed to bulk generate slots')
+                                toast.error('Failed to bulk generate slots')
                               }
                             } catch (e) {
                               console.error(e)

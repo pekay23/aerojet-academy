@@ -4,10 +4,17 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Plus, Send, CheckCircle2, XCircle, Building2 } from 'lucide-react'
 import {
-  createPartner145,
-  initiate145Transfer,
-  advance145Transfer,
-} from '@/lib/part145/actions'
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { createPartner145, initiate145Transfer, advance145Transfer } from '@/lib/part145/actions'
 
 interface Org {
   id: string
@@ -48,6 +55,11 @@ export default function Part145Manager({
   const [isPending, startTransition] = useTransition()
   const [org, setOrg] = useState({ name: '', easaApprovalRef: '', contactEmail: '' })
   const [xfer, setXfer] = useState({ student: '', organisationId: '' })
+  const [rejectDialog, setRejectDialog] = useState<{
+    open: boolean
+    transferId: string
+    reason: string
+  }>({ open: false, transferId: '', reason: '' })
 
   const run = (fn: () => Promise<{ error?: string; success?: boolean }>, ok: string) =>
     startTransition(async () => {
@@ -55,6 +67,12 @@ export default function Part145Manager({
       if (res.error) toast.error(res.error)
       else toast.success(ok)
     })
+
+  const confirmReject = () => {
+    const reason = rejectDialog.reason.trim()
+    setRejectDialog({ open: false, transferId: '', reason: '' })
+    run(() => advance145Transfer(rejectDialog.transferId, 'REJECTED', reason), 'Rejected')
+  }
 
   return (
     <div className="space-y-8">
@@ -98,11 +116,9 @@ export default function Part145Manager({
               className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
             />
             <button
-              onClick={() =>
-                run(() => createPartner145(org), 'Organisation added')
-              }
+              onClick={() => run(() => createPartner145(org), 'Organisation added')}
               disabled={isPending}
-              className="flex items-center justify-center gap-1.5 rounded-lg bg-aerojet-blue px-3 py-2 text-sm font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
+              className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
             >
               <Plus className="h-4 w-4" /> Add
             </button>
@@ -136,10 +152,7 @@ export default function Part145Manager({
           </select>
           <button
             onClick={() =>
-              run(
-                () => initiate145Transfer(xfer.student, xfer.organisationId),
-                'Transfer packaged'
-              )
+              run(() => initiate145Transfer(xfer.student, xfer.organisationId), 'Transfer packaged')
             }
             disabled={isPending}
             className="flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
@@ -154,10 +167,18 @@ export default function Part145Manager({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/80 text-left dark:border-slate-800 dark:bg-slate-900/50">
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Student</th>
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Part-145</th>
-              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Status</th>
-              <th className="px-4 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">Actions</th>
+              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Student
+              </th>
+              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Part-145
+              </th>
+              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Status
+              </th>
+              <th className="px-4 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -212,13 +233,9 @@ export default function Part145Manager({
                           </button>
                           <button
                             disabled={isPending}
-                            onClick={() => {
-                              const reason = window.prompt('Rejection reason?') ?? ''
-                              run(
-                                () => advance145Transfer(t.id, 'REJECTED', reason),
-                                'Rejected'
-                              )
-                            }}
+                            onClick={() =>
+                              setRejectDialog({ open: true, transferId: t.id, reason: '' })
+                            }
                             className="flex items-center gap-1 rounded bg-slate-200 px-2 py-1 text-[10px] font-bold text-slate-600 hover:bg-slate-300 disabled:opacity-50 dark:bg-slate-700 dark:text-slate-300"
                           >
                             <XCircle className="h-3 w-3" /> Reject
@@ -240,6 +257,50 @@ export default function Part145Manager({
           </tbody>
         </table>
       </section>
+
+      <Dialog
+        open={rejectDialog.open}
+        onOpenChange={(open) => setRejectDialog((prev) => ({ ...prev, open }))}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Transfer</DialogTitle>
+            <DialogDescription>
+              Provide a reason for rejecting this Part-145 transfer. This will be recorded and
+              visible to the partner organisation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="reject-reason" className="text-sm font-medium">
+              Rejection Reason
+            </Label>
+            <Textarea
+              id="reject-reason"
+              value={rejectDialog.reason}
+              onChange={(e) => setRejectDialog((prev) => ({ ...prev, reason: e.target.value }))}
+              placeholder="Enter rejection reason..."
+              rows={4}
+              disabled={isPending}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRejectDialog({ open: false, transferId: '', reason: '' })}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmReject}
+              disabled={isPending || !rejectDialog.reason.trim()}
+            >
+              Reject
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

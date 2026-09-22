@@ -18,10 +18,13 @@ interface Props {
   logbookId: string
   mentorAssignments: Mentor[]
   availableMentors: Array<{ id: string; label: string }>
-  staffId: string
 }
 
-export default function MentorAssignments({ logbookId, mentorAssignments, availableMentors, staffId: _staffId }: Props) {
+export default function MentorAssignments({
+  logbookId,
+  mentorAssignments,
+  availableMentors,
+}: Props) {
   const router = useRouter()
   const [selectedMentor, setSelectedMentor] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,7 +39,10 @@ export default function MentorAssignments({ logbookId, mentorAssignments, availa
       const res = await fetch(`/api/staff/ojt/${logbookId}/mentors`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mentorId: selectedMentor, isPrimary: mentorAssignments.length === 0 }),
+        body: JSON.stringify({
+          mentorId: selectedMentor,
+          isPrimary: mentorAssignments.length === 0,
+        }),
       })
       if (!res.ok) throw new Error('Failed to assign mentor')
       toast.success('Mentor assigned')
@@ -52,7 +58,9 @@ export default function MentorAssignments({ logbookId, mentorAssignments, availa
   const removeMentor = async (assignmentId: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/staff/ojt/${logbookId}/mentors/${assignmentId}`, { method: 'DELETE' })
+      const res = await fetch(`/api/staff/ojt/${logbookId}/mentors/${assignmentId}`, {
+        method: 'DELETE',
+      })
       if (!res.ok) throw new Error('Failed to remove mentor')
       toast.success('Mentor removed')
       router.refresh()
@@ -99,22 +107,31 @@ export default function MentorAssignments({ logbookId, mentorAssignments, availa
           const mentor = availableMentors.find((a) => a.id === m.mentorId)
           const isEditing = editingId === m.id
           return (
-            <div key={m.id} className="rounded-xl border border-slate-100 px-4 py-3 dark:border-slate-800">
+            <div
+              key={m.id}
+              className="rounded-xl border border-slate-100 px-4 py-3 dark:border-slate-800"
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{mentor?.label || 'Unknown'}</p>
+                  <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                    {mentor?.label || 'Unknown'}
+                  </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Assigned {new Date(m.assignedDate).toLocaleDateString('en-GB')}
                     {m.endDate && <> · Ended {new Date(m.endDate).toLocaleDateString('en-GB')}</>}
                   </p>
-                  {m.isPrimary && <span className="ml-2 text-xs font-bold text-amber-600">★ Primary</span>}
+                  {m.isPrimary && (
+                    <span className="ml-2 text-xs font-bold text-amber-600">★ Primary</span>
+                  )}
                   {isEditing && (
                     <div className="mt-2 flex flex-col gap-2">
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
                         <input
                           type="checkbox"
                           checked={editPrimary[m.id] || false}
-                          onChange={(e) => setEditPrimary((p) => ({ ...p, [m.id]: e.target.checked }))}
+                          onChange={(e) =>
+                            setEditPrimary((p) => ({ ...p, [m.id]: e.target.checked }))
+                          }
                         />
                         Primary mentor
                       </label>
@@ -134,7 +151,7 @@ export default function MentorAssignments({ logbookId, mentorAssignments, availa
                       <button
                         onClick={() => updateMentor(m.id)}
                         disabled={loading}
-                        className="rounded-lg bg-aerojet-blue px-2 py-1 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+                        className="bg-aerojet-blue rounded-lg px-2 py-1 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50"
                       >
                         Save
                       </button>
@@ -182,13 +199,15 @@ export default function MentorAssignments({ logbookId, mentorAssignments, availa
           {availableMentors
             .filter((m) => !mentorAssignments.some((a) => a.mentorId === m.id))
             .map((m) => (
-              <option key={m.id} value={m.id}>{m.label}</option>
+              <option key={m.id} value={m.id}>
+                {m.label}
+              </option>
             ))}
         </select>
         <button
           onClick={addMentor}
           disabled={!selectedMentor || loading}
-          className="rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-sky disabled:opacity-50"
+          className="bg-aerojet-blue hover:bg-aerojet-sky rounded-xl px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
         >
           <UserPlus className="h-4 w-4" />
         </button>

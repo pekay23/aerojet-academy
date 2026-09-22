@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { MultiSelect, type Option } from '@/components/ui/multi-select'
+import { useFormDirty } from '@/hooks/useFormDirty'
 
 const courseFormSchema = z.object({
   code: z.string().min(2, {
@@ -61,6 +62,7 @@ export default function CreateCoursePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [licenseCategories, setLicenseCategories] = useState<Option[]>([])
+  const { markDirty, markClean } = useFormDirty()
 
   useEffect(() => {
     async function fetchData() {
@@ -85,7 +87,6 @@ export default function CreateCoursePage() {
       } catch (error) {
         console.error('Failed to fetch data:', error)
         toast.error('Failed to load course data')
-        toast.error('Failed to load course data')
       }
     }
     fetchData()
@@ -96,6 +97,13 @@ export default function CreateCoursePage() {
     mode: 'onChange',
   })
   const requiresPrerequisite = useWatch({ control: form.control, name: 'requiresPrerequisite' })
+
+  // Track form changes for unsaved changes warning
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/incompatible-library -- form.watch() is React Hook Form API, not a hook
+    const subscription = form.watch(() => markDirty())
+    return () => subscription.unsubscribe()
+  }, [form, markDirty])
 
   async function onSubmit(values: CourseFormValues) {
     setIsLoading(true)
@@ -111,7 +119,7 @@ export default function CreateCoursePage() {
           : [],
       }
 
-      const response = await fetch('/api/staff/courses/create', {
+      const response = await fetch('/api/staff/courses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -124,6 +132,7 @@ export default function CreateCoursePage() {
       }
 
       toast.success('Course created successfully')
+      markClean()
       router.push('/staff/courses')
     } catch (_error) {
       toast.error('Failed to create course')

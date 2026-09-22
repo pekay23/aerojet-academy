@@ -26,7 +26,7 @@ import {
   bulkDeleteUsers,
   bulkArchiveUsers,
   bulkBypassPasswordChange,
-} from '../actions'
+} from '../actions/index'
 import { toast } from 'sonner'
 
 interface Instructor {
@@ -38,9 +38,16 @@ interface Instructor {
   instructorProfile: { employeeId: string | null; specialization: string | null } | null
 }
 
-
 function slugify(text: string) {
-  return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+  return (
+    text
+      ?.toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-') || ''
+  )
 }
 
 export default function InstructorsTable() {
@@ -83,9 +90,7 @@ export default function InstructorsTable() {
   }, [search, page, perPage, searchParams])
 
   useEffect(() => {
-   
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [search])
 
@@ -111,7 +116,7 @@ export default function InstructorsTable() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search instructors..."
               autoComplete="off"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800/50"
+              className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
             />
           </div>
           <button
@@ -208,7 +213,9 @@ export default function InstructorsTable() {
                     .map((i) => i.email)
                     .filter(Boolean)
                   if (selectedEmails.length > 0) {
-                    window.location.href = `mailto:${selectedEmails.join(',')}`
+                    const link = document.createElement('a')
+                    link.href = `mailto:${selectedEmails.join(',')}`
+                    link.click()
                   }
                 },
               },
@@ -281,7 +288,7 @@ export default function InstructorsTable() {
                   <tr
                     key={instructor.id}
                     onClick={() => router.push(`/staff/users/${instructor.id}`)}
-                    className={`group cursor-pointer transition-all duration-150 ease-out hover:bg-accent hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:hover:bg-accent ${selectedIds.includes(instructor.id) ? 'bg-aerojet-blue/5' : ''}`}
+                    className={`group hover:bg-accent dark:hover:bg-accent cursor-pointer transition-all duration-150 ease-out hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] ${selectedIds.includes(instructor.id) ? 'bg-aerojet-blue/5' : ''}`}
                   >
                     <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                       <button
@@ -304,7 +311,7 @@ export default function InstructorsTable() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue dark:bg-slate-800">
+                        <div className="text-aerojet-blue flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold dark:bg-slate-800">
                           {instructor.profile?.firstName?.charAt(0)}
                           {instructor.profile?.lastName?.charAt(0)}
                         </div>
@@ -341,7 +348,7 @@ export default function InstructorsTable() {
                     <td className="px-6 py-4 text-right">
                       <Link
                         href={`/staff/users/${slugify(instructor.profile ? `${instructor.profile.firstName} ${instructor.profile.lastName}` : instructor.email.split('@')[0])}`}
-                        className="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-blue transition-all duration-150 ease-out hover:bg-aerojet-blue/8 hover:shadow-sm dark:text-aerojet-sky"
+                        className="text-aerojet-blue hover:bg-aerojet-blue/8 dark:text-aerojet-sky inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold transition-all duration-150 ease-out hover:shadow-sm"
                       >
                         View
                       </Link>

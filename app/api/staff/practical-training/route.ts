@@ -1,9 +1,21 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
+import {
+  apiSuccess,
+  apiError,
+  apiCreated,
+  withErrorHandler,
+  RouteContext,
+} from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { PracticalDeliveryMethod, PracticalResult, PracticalTaskCategory, Prisma } from '@prisma/client'
+import {
+  PracticalDeliveryMethod,
+  PracticalResult,
+  PracticalTaskCategory,
+  Prisma,
+} from '@prisma/client'
 import { z } from 'zod'
+import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 const MAX_STUDENTS_PER_SESSION = 15
 
@@ -15,7 +27,12 @@ const recordSchema = z.object({
   taskReference: z.string().optional(),
   ataChapterId: z.string().optional(),
   description: z.string().min(1),
-  deliveryMethod: z.enum(['TASK_PERFORMANCE', 'DEMONSTRATION', 'TECHNICAL_DISCUSSION', 'SIMULATION']),
+  deliveryMethod: z.enum([
+    'TASK_PERFORMANCE',
+    'DEMONSTRATION',
+    'TECHNICAL_DISCUSSION',
+    'SIMULATION',
+  ]),
   date: z.string(),
   durationMinutes: z.number().min(15),
   instructorId: z.string(),
@@ -38,12 +55,15 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
     if (sp) studentProfileId = sp.id
   }
   const courseId = url.searchParams.get('courseId')
+  const result = url.searchParams.get('result')
   const page = parseInt(url.searchParams.get('page') || '1')
   const limit = parseInt(url.searchParams.get('limit') || '50')
 
   const where: Prisma.PracticalTrainingRecordWhereInput = {}
   if (studentProfileId) where.studentProfileId = studentProfileId
   if (courseId) where.courseId = courseId
+  if (result && result !== 'PENDING') where.result = result as PracticalResult
+  if (result === 'PENDING') where.result = null
 
   const [records, total] = await Promise.all([
     prismaUnfiltered.practicalTrainingRecord.findMany({
@@ -76,14 +96,19 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
     })
 
     const completedChapterIds = new Set(
-      records.filter(r => r.ataChapterId && r.result === 'SATISFACTORY').map(r => r.ataChapterId!)
+      records
+        .filter((r) => r.ataChapterId && r.result === 'SATISFACTORY')
+        .map((r) => r.ataChapterId!)
     )
 
     ataCoverage = {
       total: allChapters.length,
       completed: completedChapterIds.size,
-      percent: allChapters.length > 0 ? Math.round((completedChapterIds.size / allChapters.length) * 100) : 0,
-      chapters: allChapters.map(ch => ({
+      percent:
+        allChapters.length > 0
+          ? Math.round((completedChapterIds.size / allChapters.length) * 100)
+          : 0,
+      chapters: allChapters.map((ch) => ({
         ...ch,
         completed: completedChapterIds.has(ch.id),
       })),
@@ -95,14 +120,18 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
 
 // POST — create practical training record
 export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext) => {
-  await requireStaff()
+  const staff = await requireStaff()
   const body = await req.json()
   const parsed = recordSchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid input')
 
   // Enforce 15-student max per instructor per session
   const sessionDate = new Date(parsed.data.date)
-  const dayStart = new Date(sessionDate.getFullYear(), sessionDate.getMonth(), sessionDate.getDate())
+  const dayStart = new Date(
+    sessionDate.getFullYear(),
+    sessionDate.getMonth(),
+    sessionDate.getDate()
+  )
   const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
 
   const studentsToday = await prismaUnfiltered.practicalTrainingRecord.findMany({
@@ -114,8 +143,10 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContex
     distinct: ['studentProfileId'],
   })
 
-  if (studentsToday.length >= MAX_STUDENTS_PER_SESSION &&
-      !studentsToday.some(s => s.studentProfileId === parsed.data.studentProfileId)) {
+  if (
+    studentsToday.length >= MAX_STUDENTS_PER_SESSION &&
+    !studentsToday.some((s) => s.studentProfileId === parsed.data.studentProfileId)
+  ) {
     return apiError(`Maximum ${MAX_STUDENTS_PER_SESSION} students per instructor per day`, 400)
   }
 
@@ -136,6 +167,15 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContex
       result: (parsed.data.result as PracticalResult) || null,
       assessorNotes: parsed.data.assessorNotes || null,
     },
+  })
+
+  await createAuditLog({
+    action: AuditAction.CREATE,
+    entity: 'PracticalTrainingRecord',
+    entityId: record.id,
+    userId: staff.id,
+    description: `Created practical training record for student ${parsed.data.studentProfileId}`,
+    changes: parsed.data,
   })
 
   return apiCreated(record)

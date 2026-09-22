@@ -2,19 +2,12 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
 export const dynamic = 'force-dynamic'
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache'
 
-import {
-  Calendar,
-  Clock,
-  ChevronLeft,
-  Plus,
-  Settings,
-  Armchair,
-} from 'lucide-react'
+import { Calendar, Clock, ChevronLeft, Plus, Settings, Armchair } from 'lucide-react'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
-import { evaluateGoNoGo } from '@/lib/events/go-no-go'
 import { getEventDemandSnapshot } from '@/lib/exams/demand'
 import EventOverrideControls from './EventOverrideControls'
 import GenerateSittingsButton from './GenerateSittingsButton'
@@ -26,9 +19,34 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
+const getExamEventById = unstable_cache(
+  async (id: string) => {
+    return prismaUnfiltered.examEvent.findUnique({
+      where: { id },
+      include: {
+        pools: {
+          include: {
+            _count: { select: { memberships: true } },
+          },
+          orderBy: { name: 'asc' },
+        },
+        sittings: {
+          include: {
+            examComponent: { include: { course: true } },
+            _count: { select: { assignments: true } },
+          },
+          orderBy: [{ dayNumber: 'asc' }, { sessionType: 'asc' }, { startTime: 'asc' }],
+        },
+      },
+    })
+  },
+  ['exam-event-by-id'],
+  { revalidate: 300, tags: ['exam-event'] }
+)
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const event = await prismaUnfiltered.examEvent.findUnique({ where: { id } })
+  const event = await getExamEventById(id)
   return { title: `${event?.name || 'Event Details'} | Staff Portal` }
 }
 
@@ -37,24 +55,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
   if (!session) redirect('/login')
 
   const { id } = await params
-  const event = await prismaUnfiltered.examEvent.findUnique({
-    where: { id },
-    include: {
-      pools: {
-        include: {
-          _count: { select: { memberships: true } },
-        },
-        orderBy: { name: 'asc' },
-      },
-      sittings: {
-        include: {
-          examComponent: { include: { course: true } },
-          _count: { select: { assignments: true } },
-        },
-        orderBy: [{ dayNumber: 'asc' }, { sessionType: 'asc' }, { startTime: 'asc' }],
-      },
-    },
-  })
+  const event = await getExamEventById(id)
 
   if (!event) notFound()
 
@@ -63,17 +64,14 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
   const serializablePools = JSON.parse(
     JSON.stringify(event.pools, (_key, value) => {
       // Check for Prisma.Decimal or any object that looks like one (minification safe)
-      if (value && typeof value === 'object' && ('d' in value && 's' in value && 'e' in value)) {
+      if (value && typeof value === 'object' && 'd' in value && 's' in value && 'e' in value) {
         return Number(value)
       }
       return value
     })
   )
 
-  const [_evaluation, demandSnapshot] = await Promise.all([
-    evaluateGoNoGo(id, { unfiltered: true }).catch(() => null),
-    getEventDemandSnapshot(id),
-  ])
+  const demandSnapshot = await getEventDemandSnapshot(id)
 
   return (
     <div className="flex h-[calc(100vh-80px)] flex-col overflow-hidden">
@@ -82,7 +80,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
         <div className="mb-4">
           <Link
             href="/staff/exams/events"
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-aerojet-blue dark:text-slate-400"
+            className="hover:text-aerojet-blue inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to Events
@@ -92,7 +90,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <div className="mb-2 flex items-center gap-3">
-              <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+              <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
                 {event.name}
               </h1>
               <span
@@ -112,7 +110,9 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
             <div className="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4 text-slate-400" />
-                {event.startDate ? format(new Date(event.startDate), 'EEEE, MMM d, yyyy') : 'No Start Date'}
+                {event.startDate
+                  ? format(new Date(event.startDate), 'EEEE, MMM d, yyyy')
+                  : 'No Start Date'}
               </div>
 
               <div className="flex items-center gap-1.5">
@@ -133,7 +133,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
             <EventOverrideControls eventId={event.id} currentOverride={event.overrideStatus} />
             <Link
               href={`/staff/exams/events/${event.id}/pools/create`}
-              className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
+              className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-colors"
             >
               <Plus className="h-4 w-4" />
               Add Pool
@@ -146,7 +146,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
       <div className="flex-1 overflow-hidden px-6 pb-6">
         <div className="grid h-full gap-8 lg:grid-cols-3">
           {/* Left Column: Stats & Demand (Scrollable) */}
-          <div className="h-full space-y-6 overflow-y-auto pr-2 [scrollbar-width:thin] lg:col-span-1">
+          <div className="h-full [scrollbar-width:thin] space-y-6 overflow-y-auto pr-2 lg:col-span-1">
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <h2 className="mb-4 text-lg font-bold text-slate-900 dark:text-slate-100">
                 Event Details
@@ -156,10 +156,12 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                   <div className="text-xs font-bold text-slate-400 uppercase">Payment Deadline</div>
                   <div className="mt-1 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <Calendar className="h-4 w-4 text-slate-400" />
-                    {event.paymentDeadline ? format(event.paymentDeadline, 'MMM d, yyyy') : 'Not set'}
+                    {event.paymentDeadline
+                      ? format(event.paymentDeadline, 'MMM d, yyyy')
+                      : 'Not set'}
                   </div>
                 </div>
-                
+
                 <div className="space-y-3 pt-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-500 dark:text-slate-400">Total Pools</span>
@@ -167,7 +169,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                       {event.pools.length}
                     </span>
                   </div>
-                  <div className="border-t border-slate-50 pt-3 flex items-center justify-between">
+                  <div className="flex items-center justify-between border-t border-slate-50 pt-3">
                     <span className="text-sm text-slate-500 dark:text-slate-400">
                       Total Candidates
                     </span>
@@ -175,7 +177,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                       {demandSnapshot?.totals.candidateCount || 0}
                     </span>
                   </div>
-                  <div className="border-t border-slate-50 pt-3 flex items-center justify-between">
+                  <div className="flex items-center justify-between border-t border-slate-50 pt-3">
                     <span className="text-sm text-slate-500 dark:text-slate-400">
                       Seats in Pools
                     </span>
@@ -183,7 +185,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                       {event.pools?.reduce((acc, p) => acc + (p.currentMemberCount || 0), 0) || 0}
                     </span>
                   </div>
-                  <div className="border-t border-slate-50 pt-3 flex items-center justify-between">
+                  <div className="flex items-center justify-between border-t border-slate-50 pt-3">
                     <span className="text-sm text-slate-500 dark:text-slate-400">
                       Scheduled Sittings
                     </span>
@@ -193,7 +195,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                   </div>
                   {demandSnapshot && (
                     <>
-                      <div className="border-t border-slate-50 pt-3 flex items-center justify-between">
+                      <div className="flex items-center justify-between border-t border-slate-50 pt-3">
                         <span className="text-sm text-slate-500 dark:text-slate-400">
                           Total Demand
                         </span>
@@ -201,7 +203,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                           {demandSnapshot.totals.bookingCount}
                         </span>
                       </div>
-                      <div className="border-t border-slate-50 pt-3 flex items-center justify-between">
+                      <div className="flex items-center justify-between border-t border-slate-50 pt-3">
                         <span className="text-sm text-slate-500 dark:text-slate-400">
                           Guaranteed Seats
                         </span>
@@ -209,7 +211,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                           {demandSnapshot.totals.guaranteedCount}
                         </span>
                       </div>
-                      <div className="border-t border-slate-50 pt-3 flex items-center justify-between">
+                      <div className="flex items-center justify-between border-t border-slate-50 pt-3">
                         <span className="text-sm text-slate-500 dark:text-slate-400">
                           Paid Seat Volume
                         </span>
@@ -241,7 +243,10 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                         </p>
                       ) : (
                         demandSnapshot.byBookingType.map((row) => (
-                          <div key={row.bookingType} className="flex items-center justify-between text-sm">
+                          <div
+                            key={row.bookingType}
+                            className="flex items-center justify-between text-sm"
+                          >
                             <span className="text-slate-500 dark:text-slate-400">
                               {row.bookingType.replaceAll('_', ' ')}
                             </span>
@@ -271,8 +276,13 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                         </p>
                       ) : (
                         demandSnapshot.modules.slice(0, 8).map((module) => (
-                          <div key={module.moduleCode} className="flex items-center justify-between text-sm">
-                            <span className="text-slate-500 dark:text-slate-400">{module.moduleCode}</span>
+                          <div
+                            key={module.moduleCode}
+                            className="flex items-center justify-between text-sm"
+                          >
+                            <span className="text-slate-500 dark:text-slate-400">
+                              {module.moduleCode}
+                            </span>
                             <span className="font-bold text-slate-900 dark:text-slate-100">
                               {module.bookingCount}
                               {module.guaranteedCount !== module.bookingCount && (
@@ -307,13 +317,14 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                             {sitting.examComponent.course?.code || sitting.examComponent.code}
                           </div>
                           <div className="text-xs text-slate-500 dark:text-slate-400">
-                            Day {sitting.dayNumber} · {sitting.sessionType} · {format(new Date(sitting.startTime), 'dd MMM yyyy, h:mm a')}
+                            Day {sitting.dayNumber} · {sitting.sessionType} ·{' '}
+                            {format(new Date(sitting.startTime), 'dd MMM yyyy, h:mm a')}
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <Link
                             href={`/staff/exams/sittings/${sitting.id}/seating`}
-                            className="flex items-center gap-1 text-xs font-bold text-aerojet-sky hover:text-aerojet-blue transition-colors"
+                            className="text-aerojet-sky hover:text-aerojet-blue flex items-center gap-1 text-xs font-bold transition-colors"
                             title="Manage seating"
                           >
                             <Armchair className="h-3.5 w-3.5" />
@@ -321,11 +332,10 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                           </Link>
                           <div className="text-right">
                             <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                              {sitting._count.assignments}/{sitting.capacity}
+                              {sitting.capacity > 0 ? sitting._count.assignments : 0}/
+                              {sitting.capacity || 0}
                             </div>
-                            <div className="text-[11px] text-slate-400">
-                              {sitting.status}
-                            </div>
+                            <div className="text-[11px] text-slate-400">{sitting.status}</div>
                           </div>
                         </div>
                       </div>
@@ -334,23 +344,29 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                 </div>
               </div>
             )}
-            
+
             <SchedulingWarningsPanel eventId={event.id} />
           </div>
 
           {/* Right Column: Pool Management (Scrollable) */}
-          <div className="h-full overflow-y-auto pr-2 [scrollbar-width:thin] lg:col-span-2">
+          <div className="h-full [scrollbar-width:thin] overflow-y-auto pr-2 lg:col-span-2">
             <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Exam Bookings</h2>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Exam Bookings
+                </h2>
                 {event.pools.length > 0 && (
                   <p className="text-xs text-slate-500">
                     {event.pools?.length || 0} pool{event.pools?.length !== 1 ? 's' : ''}
                     {' · '}
-                    {event.pools?.reduce((a, p) => a + (p.currentMemberCount || 0), 0) || 0} in pools
+                    {event.pools?.reduce((a, p) => a + (p.currentMemberCount || 0), 0) || 0} in
+                    pools
                     {demandSnapshot ? ` · ${demandSnapshot.totals.bookingCount} total demand` : ''}
                     {' · '}
-                    {event.pools?.filter((p) => (p.currentMemberCount || 0) >= (p.maxCandidates || 0)).length || 0} full
+                    {event.pools?.filter(
+                      (p) => (p.currentMemberCount || 0) >= (p.maxCandidates || 0)
+                    ).length || 0}{' '}
+                    full
                   </p>
                 )}
               </div>

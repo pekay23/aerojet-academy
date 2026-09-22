@@ -16,17 +16,17 @@ import { useRouter } from 'next/navigation'
 
 export default function AddResourceButton() {
   const [open, setOpen] = useState(false)
-  const _router = useRouter()
+  const router = useRouter()
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90">
+        <Button className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-colors">
           <Plus className="h-4 w-4" />
           Add Resource
         </Button>
       </DialogTrigger>
-      <DialogContent className="rounded-3xl lg:max-w-[1100px] sm:max-w-[600px] overflow-hidden p-8">
+      <DialogContent className="overflow-hidden rounded-3xl p-8 sm:max-w-[600px] lg:max-w-[1100px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-black text-slate-900 dark:text-slate-100">
             Add New Resource
@@ -38,7 +38,7 @@ export default function AddResourceButton() {
         <ResourceForm
           onSuccess={() => {
             setOpen(false)
-            window.location.reload()
+            router.refresh()
           }}
         />
       </DialogContent>
