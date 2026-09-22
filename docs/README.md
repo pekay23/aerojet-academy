@@ -112,14 +112,7 @@ Hand-authored HTML at the root of `docs/html/` (e.g. `design-gap-audit.html`) is
 
 ## Versioning & Releases
 
-This project uses [release-it](https://github.com/release-it/release-it) with [Conventional Commits](https://www.conventionalcommits.org/) to bump versions per-branch. Each branch (`dev`, `staging`, `main`) versions independently with branch-prefixed tags (`dev/v1.0.105`, `staging/v1.0.106`, `main/v1.0.107`).
-
-### Bump rules
-
-Commits that **do** bump the version: `feat:`, `fix:`, `perf:`, `revert:`
-Commits that **do not** bump: `docs:`, `test:`, `chore:`, `ci:`, `build:`, `style:`, `refactor:`
-
-Bump severity: `BREAKING CHANGE` or `!` → major | `feat:` → minor | `fix:`/`perf:`/`revert:` → patch
+This project uses [release-it](https://github.com/release-it/release-it) with [Conventional Commits](https://www.conventionalcommits.org/) for versioning and changelog generation. Branches `dev` and `main` each have independent version tags (`dev/v1.0.105`, `main/v1.0.107`). Releases are performed on `main` after merging from `dev`.
 
 ### Release commands
 
@@ -127,13 +120,7 @@ Bump severity: `BREAKING CHANGE` or `!` → major | `feat:` → minor | `fix:`/`
 # Dry-run (preview what would be released)
 bun run release --dry-run
 
-# Release on dev
-bun run release:dev
-
-# Release on staging
-bun run release:staging
-
-# Release on main
+# Release on main (after merging dev)
 bun run release:main
 ```
 
@@ -141,7 +128,7 @@ Each command:
 
 1. Scans commits since the last tag on the current branch
 2. Skips the release entirely if only non-bump commits are present
-3. Runs `type-check` + `test` before bumping
-4. Bumps `package.json` version, updates `docs/CHANGELOG.md`, commits, tags as `<branch>/vX.Y.Z`, and pushes
+3. Runs `tsc --noEmit` + tests before bumping
+4. Bumps `package.json` version, updates `docs/CHANGELOG.md`, commits, tags as `vX.Y.Z`, and pushes
 
-The pre-commit hook runs `lint-staged` (Prettier format only). Version bumps are explicit via `bun run release:*` — the pre-commit hook does **not** bump versions.
+The pre-commit hook runs `lint-staged` (Prettier format only). Version bumps are explicit via `bun run release:main` — the pre-commit hook does **not** bump versions.
