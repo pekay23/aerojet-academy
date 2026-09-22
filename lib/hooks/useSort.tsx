@@ -19,11 +19,13 @@ export function useSort<T>(items: T[], initialSort?: SortConfig) {
 
     return [...items].sort((a: T, b: T) => {
       const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
-        return path.split('.').reduce<unknown>(
-          (acc, part) =>
-            acc && typeof acc === 'object' ? (acc as Record<string, unknown>)[part] : acc,
-          obj
-        )
+        return path
+          .split('.')
+          .reduce<unknown>(
+            (acc, part) =>
+              acc && typeof acc === 'object' ? (acc as Record<string, unknown>)[part] : acc,
+            obj
+          )
       }
 
       const aValue = getNestedValue(a as unknown as Record<string, unknown>, sortConfig.key)
@@ -35,10 +37,8 @@ export function useSort<T>(items: T[], initialSort?: SortConfig) {
 
       // Handle dates
       if (
-        (aValue instanceof Date ||
-          (typeof aValue === 'string' && !isNaN(Date.parse(aValue)))) &&
-        (bValue instanceof Date ||
-          (typeof bValue === 'string' && !isNaN(Date.parse(bValue)))) &&
+        (aValue instanceof Date || (typeof aValue === 'string' && !isNaN(Date.parse(aValue)))) &&
+        (bValue instanceof Date || (typeof bValue === 'string' && !isNaN(Date.parse(bValue)))) &&
         typeof aValue !== 'number' &&
         typeof bValue !== 'number'
       ) {
@@ -98,31 +98,33 @@ export function SortHeader({
     <th
       scope="col"
       className={cn(
-        'cursor-pointer px-6 py-4 transition-colors select-none hover:bg-slate-100/50 dark:hover:bg-slate-800/50',
+        'px-6 py-4',
         align === 'center' && 'text-center',
         align === 'right' && 'text-right',
         className
       )}
-      onClick={() => onSort(sortKey)}
     >
-      <div
+      <button
+        type="button"
+        onClick={() => onSort(sortKey)}
         className={cn(
-          'flex items-center gap-1.5',
+          'focus:ring-aerojet-blue/50 inline-flex cursor-pointer items-center gap-1.5 rounded transition-colors select-none hover:bg-slate-100/50 focus:ring-2 focus:ring-offset-0 focus:outline-none dark:hover:bg-slate-800/50',
           align === 'center' && 'justify-center',
           align === 'right' && 'justify-end'
         )}
+        aria-label={`Sort by ${label}${isSorted ? `, currently ${order}ending` : ''}`}
       >
         <span>{label}</span>
         <div className="flex flex-col text-slate-300">
           {order === 'asc' ? (
-            <ChevronUp className="h-3 w-3 text-aerojet-blue dark:text-blue-400" />
+            <ChevronUp className="text-aerojet-blue h-3 w-3 dark:text-blue-400" />
           ) : order === 'desc' ? (
-            <ChevronDown className="h-3 w-3 text-aerojet-blue dark:text-blue-400" />
+            <ChevronDown className="text-aerojet-blue h-3 w-3 dark:text-blue-400" />
           ) : (
             <ChevronsUpDown className="h-3 w-3 opacity-30" />
           )}
         </div>
-      </div>
+      </button>
     </th>
   )
 }

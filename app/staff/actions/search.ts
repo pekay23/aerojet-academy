@@ -2,10 +2,33 @@
 
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { unstable_cache } from 'next/cache'
 import { UserRole } from '@prisma/client'
 import { handleActionError } from '@/lib/staff/errors'
 
-export async function searchStudents(query: string) {
+interface StudentOption {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  studentId: string
+}
+
+interface ModuleOption {
+  id: string
+  courseId: string
+  code: string
+  name: string
+  moduleCode: string
+  isComponent: boolean
+}
+
+export interface SearchStudentsResult {
+  students: StudentOption[]
+  error?: string
+}
+
+export async function searchStudents(query: string): Promise<SearchStudentsResult> {
   try {
     await requireStaff()
 
@@ -38,51 +61,63 @@ export async function searchStudents(query: string) {
       })),
     }
   } catch (error) {
-    handleActionError('searchStudents', error, 'Failed to search students.')
-    return { students: [] }
+    return {
+      students: [],
+      error: handleActionError('searchStudents', error, 'Failed to search students.'),
+    }
   }
 }
 
-export async function getAvailableModules() {
-  try {
-    await requireStaff()
-    const courses = await prismaUnfiltered.course.findMany({
-      select: { id: true, code: true, name: true },
-      orderBy: { code: 'asc' },
-    })
-    const components = await prismaUnfiltered.examComponent.findMany({
-      select: { 
-        id: true, 
-        code: true, 
-        name: true, 
-        type: true,
-        courseId: true,
-        course: { select: { code: true, name: true } }
-      },
-      orderBy: { code: 'asc' },
-    })
-    
-    const courseOptions = courses.map(c => ({
+const fetchAvailableModules = unstable_cache(
+  async (): Promise<ModuleOption[]> => {
+    const [courses, components] = await Promise.all([
+      prismaUnfiltered.course.findMany({
+        select: { id: true, code: true, name: true },
+        orderBy: { code: 'asc' },
+      }),
+      prismaUnfiltered.examComponent.findMany({
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          type: true,
+          courseId: true,
+          course: { select: { code: true, name: true } },
+        },
+        orderBy: { code: 'asc' },
+      }),
+    ])
+
+    const courseOptions = courses.map((c) => ({
       id: c.id,
       courseId: c.id,
       code: c.code,
       name: `${c.code}: ${c.name} (General)`,
       moduleCode: c.code,
-      isComponent: false
+      isComponent: false,
     }))
 
-    const componentOptions = components.map(c => ({
+    const componentOptions = components.map((c) => ({
       id: c.id,
       courseId: c.courseId,
       code: c.code,
       name: `${c.course.code}: ${c.name} (${c.type})`,
       moduleCode: c.course.code,
-      isComponent: true
+      isComponent: true,
     }))
-    
+
     return [...courseOptions, ...componentOptions].sort((a, b) => a.code.localeCompare(b.code))
+  },
+  ['available-modules'],
+  { revalidate: 300, tags: ['available-modules'] }
+)
+
+export async function getAvailableModules(): Promise<ModuleOption[]> {
+  try {
+    await requireStaff()
+    return await fetchAvailableModules()
   } catch (error) {
     handleActionError('getAvailableModules', error, 'Failed to load modules.')
-    return []
+    throw error
   }
 }

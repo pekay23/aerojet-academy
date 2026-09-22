@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import {
   Stethoscope,
   CheckCircle2,
@@ -34,10 +35,25 @@ export interface MedicalApp {
   }[]
 }
 
-const STAGE_BADGES: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
-  MEDICAL_PENDING: { label: 'Awaiting Docs', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', icon: Clock },
-  MEDICAL_SUBMITTED: { label: 'Ready for Review', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300', icon: FileText },
-  MEDICAL_CLEARED: { label: 'Cleared', color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300', icon: CheckCircle2 },
+const STAGE_BADGES: Record<
+  string,
+  { label: string; color: string; icon: React.ComponentType<{ className?: string }> }
+> = {
+  MEDICAL_PENDING: {
+    label: 'Awaiting Docs',
+    color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+    icon: Clock,
+  },
+  MEDICAL_SUBMITTED: {
+    label: 'Ready for Review',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    icon: FileText,
+  },
+  MEDICAL_CLEARED: {
+    label: 'Cleared',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    icon: CheckCircle2,
+  },
 }
 
 export default function MedicalReviewDashboard({ applications }: { applications: MedicalApp[] }) {
@@ -48,11 +64,11 @@ export default function MedicalReviewDashboard({ applications }: { applications:
   const [facility, setFacility] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const filtered = filter === 'ALL' ? applications : applications.filter(a => a.stage === filter)
+  const filtered = filter === 'ALL' ? applications : applications.filter((a) => a.stage === filter)
 
   const handleDecision = async (appId: string, decision: 'CLEARED' | 'FAILED' | 'EXEMPTED') => {
     if (decision === 'FAILED' && !notes.trim()) {
-      alert('Please provide notes explaining why the medical review failed')
+      toast.error('Please provide notes explaining why the medical review failed')
       return
     }
 
@@ -70,18 +86,18 @@ export default function MedicalReviewDashboard({ applications }: { applications:
         setFacility('')
         router.refresh()
       } else {
-        alert(data.error || 'Failed to process medical review')
+        toast.error(data.error || 'Failed to process medical review')
       }
     } catch {
-      alert('An error occurred')
+      toast.error('An error occurred')
     } finally {
       setLoading(false)
     }
   }
 
-  const pendingCount = applications.filter(a => a.stage === 'MEDICAL_PENDING').length
-  const submittedCount = applications.filter(a => a.stage === 'MEDICAL_SUBMITTED').length
-  const clearedCount = applications.filter(a => a.stage === 'MEDICAL_CLEARED').length
+  const pendingCount = applications.filter((a) => a.stage === 'MEDICAL_PENDING').length
+  const submittedCount = applications.filter((a) => a.stage === 'MEDICAL_SUBMITTED').length
+  const clearedCount = applications.filter((a) => a.stage === 'MEDICAL_CLEARED').length
 
   return (
     <div className="space-y-6">
@@ -93,8 +109,12 @@ export default function MedicalReviewDashboard({ applications }: { applications:
               <Clock className="h-5 w-5 text-amber-700 dark:text-amber-300" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-amber-800 dark:text-amber-200">{pendingCount}</p>
-              <p className="text-xs font-medium text-amber-600 dark:text-amber-400">Awaiting Documents</p>
+              <p className="text-2xl font-bold text-amber-800 dark:text-amber-200">
+                {pendingCount}
+              </p>
+              <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                Awaiting Documents
+              </p>
             </div>
           </div>
         </div>
@@ -104,8 +124,12 @@ export default function MedicalReviewDashboard({ applications }: { applications:
               <FileText className="h-5 w-5 text-blue-700 dark:text-blue-300" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">{submittedCount}</p>
-              <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Ready for Review</p>
+              <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">
+                {submittedCount}
+              </p>
+              <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                Ready for Review
+              </p>
             </div>
           </div>
         </div>
@@ -115,7 +139,9 @@ export default function MedicalReviewDashboard({ applications }: { applications:
               <CheckCircle2 className="h-5 w-5 text-green-700 dark:text-green-300" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-green-800 dark:text-green-200">{clearedCount}</p>
+              <p className="text-2xl font-bold text-green-800 dark:text-green-200">
+                {clearedCount}
+              </p>
               <p className="text-xs font-medium text-green-600 dark:text-green-400">Cleared</p>
             </div>
           </div>
@@ -129,13 +155,13 @@ export default function MedicalReviewDashboard({ applications }: { applications:
           { key: 'MEDICAL_SUBMITTED', label: `To Review (${submittedCount})` },
           { key: 'MEDICAL_PENDING', label: `Pending (${pendingCount})` },
           { key: 'MEDICAL_CLEARED', label: `Cleared (${clearedCount})` },
-        ].map(tab => (
+        ].map((tab) => (
           <button
             key={tab.key}
             onClick={() => setFilter(tab.key)}
             className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${
               filter === tab.key
-                ? 'bg-aerojet-blue text-white dark:bg-aerojet-sky'
+                ? 'bg-aerojet-blue dark:bg-aerojet-sky text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
             }`}
           >
@@ -152,7 +178,7 @@ export default function MedicalReviewDashboard({ applications }: { applications:
             <p className="text-slate-500">No applications in this category.</p>
           </div>
         ) : (
-          filtered.map(app => {
+          filtered.map((app) => {
             const badge = STAGE_BADGES[app.stage] || STAGE_BADGES.MEDICAL_PENDING
             const BadgeIcon = badge.icon
             const isReviewing = reviewingId === app.id
@@ -176,14 +202,16 @@ export default function MedicalReviewDashboard({ applications }: { applications:
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${badge.color}`}>
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${badge.color}`}
+                    >
                       <BadgeIcon className="h-3.5 w-3.5" />
                       {badge.label}
                     </span>
                     {app.stage === 'MEDICAL_SUBMITTED' && !isReviewing && (
                       <button
                         onClick={() => setReviewingId(app.id)}
-                        className="rounded-lg bg-aerojet-blue px-4 py-2 text-sm font-bold text-white hover:bg-aerojet-blue/90"
+                        className="bg-aerojet-blue hover:bg-aerojet-blue/90 rounded-lg px-4 py-2 text-sm font-bold text-white"
                       >
                         Review
                       </button>
@@ -196,7 +224,7 @@ export default function MedicalReviewDashboard({ applications }: { applications:
                   <div className="border-t border-slate-100 px-5 py-3 dark:border-slate-800">
                     <p className="mb-2 text-xs font-bold text-slate-500">Uploaded Documents</p>
                     <div className="flex flex-wrap gap-2">
-                      {app.documents.map(doc => (
+                      {app.documents.map((doc) => (
                         <a
                           key={doc.id}
                           href={doc.fileUpload.url}
@@ -215,26 +243,32 @@ export default function MedicalReviewDashboard({ applications }: { applications:
 
                 {/* Review Form */}
                 {isReviewing && (
-                  <div className="border-t border-aerojet-blue/20 bg-aerojet-blue/5 p-5 dark:border-aerojet-sky/20 dark:bg-aerojet-sky/5">
-                    <h4 className="mb-4 font-bold text-aerojet-blue dark:text-aerojet-sky">Medical Review Decision</h4>
+                  <div className="border-aerojet-blue/20 bg-aerojet-blue/5 dark:border-aerojet-sky/20 dark:bg-aerojet-sky/5 border-t p-5">
+                    <h4 className="text-aerojet-blue dark:text-aerojet-sky mb-4 font-bold">
+                      Medical Review Decision
+                    </h4>
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
-                        <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">Facility Name</label>
+                        <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                          Facility Name
+                        </label>
                         <input
                           type="text"
                           className="w-full rounded-lg border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
                           value={facility}
-                          onChange={e => setFacility(e.target.value)}
+                          onChange={(e) => setFacility(e.target.value)}
                           placeholder="e.g. Korle-Bu Teaching Hospital"
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">Notes</label>
+                        <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                          Notes
+                        </label>
                         <input
                           type="text"
                           className="w-full rounded-lg border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
                           value={notes}
-                          onChange={e => setNotes(e.target.value)}
+                          onChange={(e) => setNotes(e.target.value)}
                           placeholder="Any additional notes..."
                         />
                       </div>
@@ -262,7 +296,11 @@ export default function MedicalReviewDashboard({ applications }: { applications:
                         <XCircle className="h-4 w-4" /> Fail
                       </button>
                       <button
-                        onClick={() => { setReviewingId(null); setNotes(''); setFacility(''); }}
+                        onClick={() => {
+                          setReviewingId(null)
+                          setNotes('')
+                          setFacility('')
+                        }}
                         className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300"
                       >
                         Cancel

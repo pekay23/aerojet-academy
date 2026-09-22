@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useCurrentRole } from '@/hooks/use-current-role'
 import { format } from 'date-fns'
 import {
   Search,
@@ -24,12 +25,20 @@ import {
 import { toast } from 'sonner'
 import {
   updateExamBooking,
+  updateExamResult,
   searchStudents,
   bulkUpdateExamCategory,
   createExamRecord,
   deleteExamRecord,
-} from '../../actions'
+} from '@/app/staff/actions/index'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
+import {
+  ATTEMPT_FIRST,
+  ATTEMPT_LABELS,
+  ATTEMPT_VALUES,
+  normalizeAttemptType,
+} from '@/lib/exams/attempt-types'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 
 interface StudentOption {
   id: string
@@ -47,6 +56,13 @@ interface ModuleOption {
   name: string
   moduleCode: string
   isComponent?: boolean
+}
+
+type ResultOverride = { kind: 'auto' } | { kind: 'explicit'; value: string }
+
+function mapResultOverride(value: string): ResultOverride | undefined {
+  if (value === 'auto') return { kind: 'auto' }
+  return { kind: 'explicit', value }
 }
 
 interface ExamRecord {
@@ -85,14 +101,19 @@ interface ExamRecord {
 interface RecordsTabProps {
   records: ExamRecord[]
   modules: ModuleOption[]
+  totalCount?: number
 }
 
-const ATTEMPT_TYPES = [
-  { value: 'FIRST', label: '1st Attempt' },
-  { value: 'RESIT_1', label: 'Resit (2nd)' },
-  { value: 'RESIT_2', label: 'Resit (3rd)' },
-  { value: 'RESIT_3', label: 'Resit (4th+)' },
-]
+const ATTEMPT_TYPES = ATTEMPT_VALUES.map((value) => ({
+  value,
+  label: ATTEMPT_LABELS[value],
+}))
+
+function getAttemptLabel(value: string | null | undefined): string {
+  const normalized = normalizeAttemptType(value)
+  if (normalized) return ATTEMPT_LABELS[normalized]
+  return value == null || String(value).trim() === '' ? ATTEMPT_LABELS[ATTEMPT_FIRST] : '—'
+}
 
 const BOOKING_TYPES = [
   { value: 'INDIVIDUAL', label: 'Individual Exam (€520)', seats: 1 },
@@ -125,8 +146,10 @@ function statusBadgeClass(result?: string | null) {
   return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
 }
 
-export default function RecordsTab({ records, modules }: RecordsTabProps) {
+export default function RecordsTab({ records, modules, totalCount }: RecordsTabProps) {
   const router = useRouter()
+  const userRole = useCurrentRole()
+  const isSupervisor = ['ADMIN', 'SUPER_ADMIN'].includes(userRole || '')
   const {
     items: sortedRecords,
     requestSort,
@@ -178,11 +201,15 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
   const [tableFilter, setTableFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'OFFICIAL_EASA' | 'INTERNAL'>('ALL')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [_isBulkUpdating, setIsBulkUpdating] = useState(false)
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false)
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(50)
+
+  // Delete confirmation state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -282,6 +309,8 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
 
     setIsSubmitting(true)
     try {
+      const numScore = score ? parseFloat(score) : NaN
+      const parsedScore = !isNaN(numScore) && isFinite(numScore) ? numScore : undefined
       const res = await createExamRecord({
         userId: selectedStudent.id,
         bookingType,
@@ -294,8 +323,8 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
           courseId: sel.selected?.courseId,
           examComponentId: sel.selected?.isComponent ? sel.selected?.id : undefined,
           moduleCode: sel.selected?.moduleCode || sel.query,
-          score: score ? parseFloat(score) : undefined,
-          resultOverride: resultOverride === 'auto' ? undefined : resultOverride,
+          score: parsedScore,
+          resultOverride: mapResultOverride(resultOverride),
         })),
       })
 
@@ -314,21 +343,28 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this record?')) return
-    const res = await deleteExamRecord(id)
+    setDeleteTargetId(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTargetId) return
+    const res = await deleteExamRecord(deleteTargetId)
     if (res.success) {
       toast.success('Record deleted')
       router.refresh()
     } else {
       toast.error(res.error || 'Failed to delete')
     }
+    setDeleteDialogOpen(false)
+    setDeleteTargetId(null)
   }
 
   const startEdit = (record: ExamRecord) => {
     setEditingId(record.id)
     setEditCourseId(record.examId || null)
     setEditBookingType(record.bookingType || 'INDIVIDUAL')
-    setEditAttemptType(record.attemptType || 'FIRST')
+    setEditAttemptType(normalizeAttemptType(record.attemptType) ?? ATTEMPT_FIRST)
     setEditCategory((record.examCategory as 'INTERNAL' | 'OFFICIAL_EASA') || 'OFFICIAL_EASA')
     setEditModuleCode(record.moduleCode || '')
     setEditScore(record.score ? Number(record.score).toString() : '')
@@ -345,27 +381,45 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
     if (!editingId) return
     setIsUpdating(true)
 
-    const res = await updateExamBooking(
-      editingId.startsWith('result_') ? editingId.replace('result_', '') : editingId,
-      {
+    const numEditScore = editScore ? Number(editScore) : NaN
+    const parsedEditScore =
+      !isNaN(numEditScore) && isFinite(numEditScore) ? numEditScore : undefined
+    let res: { success: boolean } | { error: string }
+    if (editingId.startsWith('result_')) {
+      res = await updateExamResult(editingId.replace('result_', ''), {
         courseId: editCourseId || undefined,
         moduleCode: editModuleCode || undefined,
         examDate: editDate ? new Date(editDate) : undefined,
-        score: editScore ? Number(editScore) : undefined,
+        score: parsedEditScore,
         bookingType: editBookingType as 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK',
         attemptType: editAttemptType,
         examCategory: editCategory as 'INTERNAL' | 'OFFICIAL_EASA',
         isMigrated: editIsMigrated,
-      }
-    )
+      })
+    } else {
+      // Score is an exam OUTCOME, not a booking detail. Only supervisors may
+      // write it through the booking path; non-supervisors are routed to
+      // updateExamResult (which has its own locked-result gate) instead.
+      res = await updateExamBooking(editingId, {
+        courseId: editCourseId || undefined,
+        moduleCode: editModuleCode || undefined,
+        examDate: editDate ? new Date(editDate) : undefined,
+        score: isSupervisor ? (editScore ? Number(editScore) : undefined) : undefined,
+        bookingType: editBookingType as 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK',
+        attemptType: editAttemptType,
+        examCategory: editCategory as 'INTERNAL' | 'OFFICIAL_EASA',
+        isMigrated: editIsMigrated,
+      })
+    }
 
     setIsUpdating(false)
-    if (res.success) {
+    const succeeded = 'success' in res && res.success
+    if (succeeded) {
       toast.success('Record updated')
       setEditingId(null)
       router.refresh()
     } else {
-      toast.error(res.error || 'Failed to update')
+      toast.error('error' in res ? res.error : 'Failed to update')
     }
   }
 
@@ -463,7 +517,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 }}
                 placeholder="Search by name, email, or student ID..."
                 autoComplete="off"
-                className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm transition-colors focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm transition-colors focus:bg-white focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
               />
               {isSearching && (
                 <div className="absolute top-1/2 right-3 -translate-y-1/2">
@@ -526,7 +580,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 onChange={(e) =>
                   setBookingType(e.target.value as 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK')
                 }
-                className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold transition-colors focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold transition-colors focus:bg-white focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
               >
                 {BOOKING_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -547,7 +601,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 type="date"
                 value={examDate}
                 onChange={(e) => setExamDate(e.target.value)}
-                className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold transition-colors focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold transition-colors focus:bg-white focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
                 required
               />
             </div>
@@ -587,7 +641,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                       setTimeout(() => updateModuleSelection(idx, { showDropdown: false }), 200)
                     }}
                     placeholder="Search module code..."
-                    className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm font-bold uppercase transition-colors focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                    className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm font-bold uppercase transition-colors focus:bg-white focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
                   />
                   {selection.showDropdown && (
                     <div className="absolute top-full left-0 z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -635,7 +689,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               <select
                 value={attemptType}
                 onChange={(e) => setAttemptType(e.target.value)}
-                className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:bg-white focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
               >
                 {ATTEMPT_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -651,7 +705,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               <select
                 value={examCategory}
                 onChange={(e) => setExamCategory(e.target.value)}
-                className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:bg-white focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
               >
                 <option value="OFFICIAL_EASA">Official EASA</option>
                 <option value="INTERNAL">Internal Academy</option>
@@ -665,11 +719,15 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 type="number"
                 value={score}
                 onChange={(e) => setScore(e.target.value)}
-                placeholder="—"
+                placeholder={isSupervisor ? '—' : 'Supervisor only'}
                 min="0"
                 max="100"
                 step="0.01"
-                className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                disabled={!isSupervisor}
+                title={
+                  !isSupervisor ? 'Only ADMIN / SUPER_ADMIN may record exam scores' : undefined
+                }
+                className={`focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:bg-white focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 ${!isSupervisor ? 'cursor-not-allowed opacity-60' : ''}`}
               />
             </div>
             <div>
@@ -681,7 +739,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Optional notes"
-                className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:bg-white focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
               />
             </div>
           </div>
@@ -697,8 +755,11 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               </div>
               <button
                 type="button"
+                role="switch"
+                aria-checked={isPending}
+                aria-label="Pending record"
                 onClick={() => setIsPending(!isPending)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                className={`focus:ring-aerojet-blue/50 relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-0 focus:outline-none ${
                   isPending ? 'bg-amber-500' : 'bg-slate-200 dark:bg-slate-700'
                 }`}
               >
@@ -715,10 +776,11 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               <div className="flex-1">
                 <p className="text-xs font-bold text-slate-900 dark:text-white">Result Override</p>
                 <select
+                  aria-label="Result override"
                   disabled={isPending}
                   value={resultOverride}
                   onChange={(e) => setResultOverride(e.target.value)}
-                  className="mt-1 w-full bg-transparent text-[10px] font-bold text-slate-500 focus:outline-hidden disabled:opacity-50"
+                  className="focus:ring-aerojet-blue/50 mt-1 w-full bg-transparent text-[10px] font-bold text-slate-500 focus:ring-2 focus:outline-none disabled:opacity-50"
                 >
                   <option value="auto">Auto (from score)</option>
                   <option value="pass">Manual Pass</option>
@@ -794,7 +856,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               value={tableFilter}
               onChange={(e) => setTableFilter(e.target.value)}
               placeholder="Filter by student or module..."
-              className="focus:border-aerojet-blue w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-10 text-sm transition-colors focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+              className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-10 text-sm transition-colors focus:bg-white focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
             />
           </div>
         </div>
@@ -816,6 +878,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                   <th className="w-10 px-6 py-4">
                     <input
                       type="checkbox"
+                      aria-label="Select all records"
                       checked={
                         filteredRecords.length > 0 && selectedIds.length === filteredRecords.length
                       }
@@ -891,6 +954,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         <td className="px-6 py-4">
                           <input
                             type="checkbox"
+                            aria-label="Select record"
                             checked={selectedIds.includes(record.id)}
                             onChange={() => toggleSelectRecord(record.id)}
                             className="text-aerojet-blue h-4 w-4 rounded border-slate-300"
@@ -908,6 +972,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                           {isEditing ? (
                             <div className="relative">
                               <input
+                                aria-label="Module code"
                                 type="text"
                                 value={editModuleCode}
                                 autoComplete="off"
@@ -920,7 +985,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                                   if (editModuleCode.length > 0) setEditShowDropdown(true)
                                 }}
                                 onBlur={() => setTimeout(() => setEditShowDropdown(false), 200)}
-                                className="focus:border-aerojet-blue w-24 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold uppercase focus:outline-hidden"
+                                className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-24 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold uppercase focus:ring-2 focus:outline-none"
                               />
                               {editShowDropdown && (
                                 <div className="absolute top-full left-0 z-50 mt-1 max-h-48 w-64 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -965,10 +1030,11 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         <td className="px-6 py-4 text-xs font-bold text-slate-900">
                           {isEditing ? (
                             <input
+                              aria-label="Exam date"
                               type="date"
                               value={editDate}
                               onChange={(e) => setEditDate(e.target.value)}
-                              className="focus:border-aerojet-blue rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:outline-hidden"
+                              className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:ring-2 focus:outline-none"
                             />
                           ) : (
                             <div>
@@ -994,11 +1060,12 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         <td className="px-6 py-4">
                           {isEditing ? (
                             <select
+                              aria-label="Exam category"
                               value={editCategory}
                               onChange={(e) =>
                                 setEditCategory(e.target.value as 'INTERNAL' | 'OFFICIAL_EASA')
                               }
-                              className="focus:border-aerojet-blue rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:outline-hidden"
+                              className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:ring-2 focus:outline-none"
                             >
                               <option value="OFFICIAL_EASA">EASA</option>
                               <option value="INTERNAL">Internal</option>
@@ -1024,13 +1091,14 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         <td className="px-6 py-4 text-xs text-slate-500">
                           {isEditing ? (
                             <select
+                              aria-label="Booking type"
                               value={editBookingType}
                               onChange={(e) =>
                                 setEditBookingType(
                                   e.target.value as 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK'
                                 )
                               }
-                              className="focus:border-aerojet-blue rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:outline-hidden"
+                              className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:ring-2 focus:outline-none"
                             >
                               <option value="INDIVIDUAL">IND</option>
                               <option value="TWIN_PACK">TWIN</option>
@@ -1043,9 +1111,10 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         <td className="px-6 py-4">
                           {isEditing ? (
                             <select
+                              aria-label="Attempt type"
                               value={editAttemptType}
                               onChange={(e) => setEditAttemptType(e.target.value)}
-                              className="focus:border-aerojet-blue rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:outline-hidden"
+                              className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:ring-2 focus:outline-none"
                             >
                               {ATTEMPT_TYPES.map((t) => (
                                 <option key={t.value} value={t.value}>
@@ -1054,8 +1123,8 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                               ))}
                             </select>
                           ) : (
-                            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[9px] font-bold uppercase">
-                              {record.attemptType === 'MIGRATED' ? '—' : record.attemptType || '—'}
+                            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[9px] font-bold uppercase dark:bg-slate-800 dark:text-slate-400">
+                              {getAttemptLabel(record.attemptType)}
                             </span>
                           )}
                         </td>
@@ -1063,6 +1132,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                           {isEditing ? (
                             <div className="flex items-center gap-2">
                               <input
+                                aria-label="Migrated"
                                 type="checkbox"
                                 checked={editIsMigrated}
                                 onChange={(e) => setEditIsMigrated(e.target.checked)}
@@ -1077,7 +1147,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                               Migrated
                             </span>
                           ) : (
-                            <span className="text-[10px] font-bold text-slate-300 uppercase">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase">
                               —
                             </span>
                           )}
@@ -1092,10 +1162,17 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         <td className="px-6 py-4 text-right font-bold">
                           {isEditing ? (
                             <input
+                              aria-label="Score"
                               type="number"
                               value={editScore}
                               onChange={(e) => setEditScore(e.target.value)}
-                              className="focus:border-aerojet-blue w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-right text-xs font-bold focus:outline-hidden"
+                              disabled={!isSupervisor}
+                              title={
+                                !isSupervisor
+                                  ? 'Only ADMIN / SUPER_ADMIN may edit exam scores'
+                                  : undefined
+                              }
+                              className={`focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-right text-xs font-bold focus:ring-2 focus:outline-none ${!isSupervisor ? 'cursor-not-allowed opacity-50' : ''}`}
                             />
                           ) : scoreNum !== null ? (
                             `${scoreNum.toFixed(0)}%`
@@ -1107,12 +1184,14 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                           {isEditing ? (
                             <div className="flex items-center justify-end gap-2">
                               <button
+                                aria-label="Cancel editing"
                                 onClick={() => setEditingId(null)}
                                 className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
                               >
                                 <XCircle className="h-4 w-4" />
                               </button>
                               <button
+                                aria-label="Save changes"
                                 onClick={handleUpdate}
                                 disabled={isUpdating}
                                 className="rounded-lg bg-emerald-500 p-1.5 text-white hover:bg-emerald-600 disabled:opacity-50"
@@ -1127,12 +1206,14 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                           ) : (
                             <div className="flex items-center justify-end gap-1">
                               <button
+                                aria-label="Edit record"
                                 onClick={() => startEdit(record)}
                                 className="hover:text-aerojet-blue p-2 text-slate-400 transition-colors"
                               >
                                 <Edit className="h-4 w-4" />
                               </button>
                               <button
+                                aria-label="Delete record"
                                 onClick={() => handleDelete(record.id)}
                                 className="p-2 text-slate-400 transition-colors hover:text-red-500"
                               >
@@ -1155,12 +1236,13 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-slate-500 uppercase">Rows:</span>
                 <select
+                  aria-label="Rows per page"
                   value={pageSize}
                   onChange={(e) => {
                     setPageSize(Number(e.target.value))
                     setCurrentPage(1)
                   }}
-                  className="focus:border-aerojet-blue rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold focus:outline-hidden"
+                  className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold focus:ring-2 focus:outline-none"
                 >
                   {[25, 50, 100, 250, 500].map((size) => (
                     <option key={size} value={size}>
@@ -1178,12 +1260,16 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 <span className="font-bold text-slate-900 dark:text-white">
                   {Math.min(currentPage * pageSize, totalItems)}
                 </span>{' '}
-                of <span className="font-bold text-slate-900 dark:text-white">{totalItems}</span>
+                of{' '}
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {totalCount ?? totalItems}
+                </span>
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
@@ -1201,6 +1287,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                   return (
                     <button
                       key={pageNum}
+                      type="button"
                       onClick={() => setCurrentPage(pageNum)}
                       className={`h-8 min-w-[32px] rounded-lg border px-2 text-xs font-bold transition-all ${
                         currentPage === pageNum
@@ -1215,6 +1302,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               </div>
 
               <button
+                type="button"
                 onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages || totalPages === 0}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
@@ -1225,6 +1313,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               <div className="ml-2 flex items-center gap-2">
                 <span className="text-xs text-slate-500 uppercase">Go:</span>
                 <input
+                  aria-label="Go to page"
                   type="number"
                   min="1"
                   max={totalPages}
@@ -1235,7 +1324,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                     }
                   }}
                   placeholder={`1-${totalPages}`}
-                  className="focus:border-aerojet-blue w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center text-xs font-bold focus:outline-hidden"
+                  className="focus:border-aerojet-blue focus:ring-aerojet-blue/50 w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center text-xs font-bold focus:ring-2 focus:outline-none"
                 />
               </div>
             </div>
@@ -1262,19 +1351,32 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => handleBulkUpdate('OFFICIAL_EASA')}
-              className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:bg-blue-700"
+              disabled={isBulkUpdating}
+              className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:bg-blue-700 disabled:opacity-50"
             >
-              <Award className="h-4 w-4" /> Link to Official EASA
+              {isBulkUpdating ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                <Award className="h-4 w-4" />
+              )}
+              {isBulkUpdating ? 'Updating...' : 'Link to Official EASA'}
             </button>
             <button
               onClick={() => handleBulkUpdate('INTERNAL')}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:bg-indigo-700"
+              disabled={isBulkUpdating}
+              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:bg-indigo-700 disabled:opacity-50"
             >
-              <BookOpen className="h-4 w-4" /> Link to Internal
+              {isBulkUpdating ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                <BookOpen className="h-4 w-4" />
+              )}
+              {isBulkUpdating ? 'Updating...' : 'Link to Internal'}
             </button>
           </div>
 
           <button
+            aria-label="Clear selected records"
             onClick={() => setSelectedIds([])}
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500"
           >
@@ -1282,6 +1384,16 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
           </button>
         </div>
       )}
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Record"
+        description="Are you sure you want to delete this record? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="destructive"
+        onConfirm={confirmDelete}
+      />
     </div>
   )
 }

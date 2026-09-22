@@ -26,6 +26,7 @@ import {
   isUpcomingBooking as isUpcomingBookingFromLib,
   isMissedBooking as isMissedBookingFromLib,
 } from '@/lib/exams/fulfillment'
+import { ATTEMPT_FIRST, normalizeAttemptType } from '@/lib/exams/attempt-types'
 import type { ExamHistoryItem, SerializedExamBooking } from '@/lib/types/staff'
 
 interface Student {
@@ -65,6 +66,7 @@ interface Student {
     id: string
     score: number
     passed: boolean
+    attemptType?: string | null
     exam?: {
       name?: string | null
       examDate?: string | Date | null
@@ -209,6 +211,7 @@ export default function StudentDetailPanel({
     score: r.score != null ? Number(r.score) : null,
     passed: r.passed,
     result: r.passed ? 'PASS' : 'FAIL',
+    attemptType: r.attemptType,
   }))
 
   // 2. Completed bookings (have a definitive result like pass/fail, or a score)
@@ -287,11 +290,8 @@ export default function StudentDetailPanel({
       (r) =>
         !usedResultIds.has(r.id) &&
         r.moduleCode?.toUpperCase() === booking.moduleCode?.toUpperCase() &&
-        ((r.attemptType || 'FIRST') === (booking.attemptType || 'FIRST') ||
-          r.attemptType === 'MIGRATED' ||
-          booking.attemptType === 'MIGRATED' ||
-          !r.attemptType ||
-          !booking.attemptType)
+        (normalizeAttemptType(r.attemptType) ?? ATTEMPT_FIRST) ===
+          (normalizeAttemptType(booking.attemptType) ?? ATTEMPT_FIRST)
     )
 
     if (matchingResult) {

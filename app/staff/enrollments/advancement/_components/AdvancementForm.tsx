@@ -5,6 +5,8 @@ import { toast } from 'sonner'
 import { ArrowRight, Eye, PlayCircle } from 'lucide-react'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { previewAdvancement, runAdvancement } from '@/lib/progression/actions'
+import { useFormDirty } from '@/hooks/useFormDirty'
+import { FormDirtyIndicator } from '@/components/shared/FormDirtyIndicator'
 
 interface Opt {
   id: string
@@ -26,14 +28,17 @@ export default function AdvancementForm({
   const [fromYear, setFromYear] = useState(1)
   const [fromSemester, setFromSemester] = useState(1)
   const [holdRaw, setHoldRaw] = useState('')
-  const [preview, setPreview] = useState<{ count: number; to: { year: number; semester: number } } | null>(
-    null
-  )
+  const [preview, setPreview] = useState<{
+    count: number
+    to: { year: number; semester: number }
+  } | null>(null)
   const [isPending, startTransition] = useTransition()
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean
     onConfirm: () => void
   }>({ open: false, onConfirm: () => {} })
+
+  const { isDirty, markDirty, markClean } = useFormDirty()
 
   const base = () => ({
     pathwayId: pathwayId || undefined,
@@ -69,6 +74,7 @@ export default function AdvancementForm({
           else {
             toast.success(`Advanced ${res.advanced}, held ${res.held}`)
             setPreview(null)
+            markClean()
           }
         })
       },
@@ -79,10 +85,15 @@ export default function AdvancementForm({
     <div className="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm">
-          <span className="mb-1 block font-bold text-slate-600 dark:text-slate-300">Pathway (optional)</span>
+          <span className="mb-1 block font-bold text-slate-600 dark:text-slate-300">
+            Pathway (optional)
+          </span>
           <select
             value={pathwayId}
-            onChange={(e) => setPathwayId(e.target.value)}
+            onChange={(e) => {
+              setPathwayId(e.target.value)
+              markDirty()
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
           >
             <option value="">All pathways</option>
@@ -94,10 +105,15 @@ export default function AdvancementForm({
           </select>
         </label>
         <label className="text-sm">
-          <span className="mb-1 block font-bold text-slate-600 dark:text-slate-300">Academic Year (optional)</span>
+          <span className="mb-1 block font-bold text-slate-600 dark:text-slate-300">
+            Academic Year (optional)
+          </span>
           <select
             value={academicYearId}
-            onChange={(e) => setAcademicYearId(e.target.value)}
+            onChange={(e) => {
+              setAcademicYearId(e.target.value)
+              markDirty()
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
           >
             <option value="">Any</option>
@@ -114,15 +130,23 @@ export default function AdvancementForm({
             type="number"
             min={1}
             value={fromYear}
-            onChange={(e) => setFromYear(Number(e.target.value))}
+            onChange={(e) => {
+              setFromYear(Number(e.target.value))
+              markDirty()
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
           />
         </label>
         <label className="text-sm">
-          <span className="mb-1 block font-bold text-slate-600 dark:text-slate-300">From Semester</span>
+          <span className="mb-1 block font-bold text-slate-600 dark:text-slate-300">
+            From Semester
+          </span>
           <select
             value={fromSemester}
-            onChange={(e) => setFromSemester(Number(e.target.value))}
+            onChange={(e) => {
+              setFromSemester(Number(e.target.value))
+              markDirty()
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
           >
             <option value={1}>Semester 1</option>
@@ -137,7 +161,10 @@ export default function AdvancementForm({
         </span>
         <textarea
           value={holdRaw}
-          onChange={(e) => setHoldRaw(e.target.value)}
+          onChange={(e) => {
+            setHoldRaw(e.target.value)
+            markDirty()
+          }}
           rows={2}
           placeholder="userId1, userId2 …"
           className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
@@ -164,9 +191,10 @@ export default function AdvancementForm({
           <button
             onClick={doRun}
             disabled={isPending || !preview}
-            className="flex items-center gap-1.5 rounded-xl bg-aerojet-blue px-4 py-2 text-sm font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
           >
             <PlayCircle className="h-4 w-4" /> Run Advancement
+            <FormDirtyIndicator isDirty={isDirty} />
           </button>
         ) : (
           <span className="self-center text-xs text-slate-400">

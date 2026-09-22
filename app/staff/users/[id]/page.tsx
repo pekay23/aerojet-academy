@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { ProtectedImage } from '@/components/ProtectedImage'
 import { proxyImageUrl } from '@/lib/storage/signed-url'
 import { ArrowLeft, Mail, Phone, Globe, Calendar, User as UserIcon, Shield } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
 import UserActionsMenu from '../../_components/UserActionsMenu'
 import EditIdDialog from './_components/EditIdDialog'
 import EditProfileDialog from './_components/EditProfileDialog'
@@ -18,6 +17,7 @@ import OjtSection from './_components/OjtSection'
 import AcademicHistorySection from './_components/AcademicHistorySection'
 import EditInstructorProfileDialog from './_components/EditInstructorProfileDialog'
 import EditStaffProfileDialog from './_components/EditStaffProfileDialog'
+import LastActive from './_components/LastActive'
 import { Metadata } from 'next'
 import { PathwayCode } from './_components/EditPathwayDialog'
 import { UserStatus, UserRole, EnrollmentStatus } from '@/types/enums'
@@ -154,18 +154,6 @@ export default async function UserProfilePage({ params }: Props) {
     [UserRole.STUDENT]:
       'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
     [UserRole.APPLICANT]: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-  }
-
-  const formatLastActive = (): string => {
-    const ts = user.lastSeenAt ?? user.lastLoginAt
-    if (!ts) return 'Never active'
-    const d = new Date(ts)
-    if (Number.isNaN(d.getTime())) return 'Never active'
-    const ms = Date.now() - d.getTime()
-    if (ms < 0) return d.toLocaleDateString()
-    // Within 90s → "online now" (matches presence ONLINE_THRESHOLD_MS)
-    if (ms < 90_000) return 'Online now'
-    return formatDistanceToNow(d, { addSuffix: true })
   }
 
   return (
@@ -568,11 +556,7 @@ export default async function UserProfilePage({ params }: Props) {
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                   Last Active
                 </span>
-                <span
-                  className={`text-xs font-bold ${formatLastActive() === 'Online now' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-800 dark:text-white'}`}
-                >
-                  {formatLastActive()}
-                </span>
+                <LastActive ts={user.lastSeenAt ?? user.lastLoginAt} />
               </div>
             </div>
           </div>

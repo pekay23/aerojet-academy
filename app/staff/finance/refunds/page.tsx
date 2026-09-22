@@ -21,6 +21,7 @@ export default async function StaffRefundsPage() {
     include: {
       user: {
         select: {
+          id: true,
           email: true,
           profile: { select: { firstName: true, lastName: true } },
           studentProfile: { select: { studentId: true } },
@@ -32,7 +33,7 @@ export default async function StaffRefundsPage() {
   return (
     <div className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-2xl font-black tracking-tight dark:text-white">
           Refunds
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

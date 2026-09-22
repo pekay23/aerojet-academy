@@ -19,11 +19,6 @@ interface ClassActionsMenuProps {
   onActionComplete?: () => void
 }
 
-
-function slugify(text: string) {
-  return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
-}
-
 export default function ClassActionsMenu({
   classId,
   className,
@@ -61,7 +56,7 @@ export default function ClassActionsMenu({
     {
       label: 'View Class',
       icon: Eye,
-      href: `/staff/classes/${slugify(className) || classId}`,
+      href: `/staff/classes/${classId}`,
     },
     {
       label: 'View Roster',
@@ -71,7 +66,7 @@ export default function ClassActionsMenu({
     {
       label: 'Edit Class',
       icon: Pencil,
-      href: `/staff/classes/${slugify(className) || classId}/edit`,
+      href: `/staff/classes/${classId}/edit`,
     },
   ]
 
@@ -80,7 +75,7 @@ export default function ClassActionsMenu({
       <DropdownMenuTrigger asChild>
         <button
           disabled={!!loading}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 outline-none transition-all hover:bg-slate-100 hover:text-slate-700 focus:ring-2 focus:ring-aerojet-blue focus:ring-offset-2 disabled:opacity-50"
+          className="focus:ring-aerojet-blue flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all outline-none hover:bg-slate-100 hover:text-slate-700 focus:ring-2 focus:ring-offset-2 disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -97,7 +92,7 @@ export default function ClassActionsMenu({
             <DropdownMenuItem
               key={item.label}
               asChild
-              className="text-slate-700 focus:bg-slate-50 dark:bg-slate-800/50 focus:text-slate-900 dark:text-slate-100"
+              className="text-slate-700 focus:bg-slate-50 focus:text-slate-900 dark:bg-slate-800/50 dark:text-slate-100"
             >
               <Link
                 href={item.href}

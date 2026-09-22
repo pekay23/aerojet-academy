@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { format } from 'date-fns'
-import { Loader2 } from 'lucide-react'
+import { Loader2, CheckCircle2, Clock, XCircle, AlertCircle } from 'lucide-react'
 import TablePagination from './TablePagination'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -17,6 +16,8 @@ import {
 import { SortableTh } from '@/components/ui/sortable-th'
 import SearchInput from '@/components/SearchInput'
 import { SerializedTransactionRow, SerializedTransactionRelated } from '@/lib/types/staff'
+import { getTransactionStatusStyle } from '@/lib/utils/status-styles'
+import { formatDate } from '@/lib/utils/formatters'
 
 interface TransactionsTableProps {
   currencySymbol: string
@@ -68,21 +69,19 @@ export default function TransactionsTable({
   useEffect(() => {
     const isInitial = page === 1 && perPage === 25 && sortBy === 'createdAt' && sortDir === 'desc'
     if (!isInitial) {
-   
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchData()
     }
   }, [page, perPage, sortBy, sortDir, fetchData])
 
   // Build lookup maps from related data
   const paymentDataMap = new Map<string, SerializedTransactionRelated['payments'][number]>(
-    (related?.payments || []).map((p) => [
-      p.id,
-      p,
-    ])
+    (related?.payments || []).map((p) => [p.id, p])
   )
-  const examBookingStatusByReference = new Map<string, SerializedTransactionRelated['examBookings'][number]>(
+  const examBookingStatusByReference = new Map<
+    string,
+    SerializedTransactionRelated['examBookings'][number]
+  >(
     (related?.examBookings || []).flatMap((b) => {
       const entries: [string, SerializedTransactionRelated['examBookings'][number]][] = [[b.id, b]]
       if (b.walletTxnId) entries.push([b.walletTxnId, b])
@@ -136,21 +135,6 @@ export default function TransactionsTable({
       refId = `TX-${tx.id.slice(-8).toUpperCase()}`
     }
     return { type: typeLabel, id: refId }
-  }
-
-  const getStatusStyle = (status: string) => {
-    const n = status.toUpperCase()
-    if (
-      ['PAID', 'APPROVED', 'COMPLETED', 'CONFIRMED', 'RECONCILED', 'POSTED'].some((s) =>
-        n.includes(s)
-      )
-    )
-      return 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'
-    if (['PENDING', 'RESERVED', 'DUE', 'POOLED', 'SCHEDULED'].some((s) => n.includes(s)))
-      return 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400'
-    if (['FAILED', 'REJECTED', 'CANCELLED', 'EXPIRED'].some((s) => n.includes(s)))
-      return 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
-    return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
   }
 
   const getTransactionStatus = (
@@ -273,15 +257,15 @@ export default function TransactionsTable({
                           {symbol}
                           {Number(tx.amount).toFixed(2)}
                         </span>
-                        {paymentData?.paymentCurrency &&
-                          paymentData.paymentCurrency !== symbol && (
-                            <span className="text-[10px] font-medium text-slate-400">
-                              ({paymentData.paymentCurrency}{' '}
-                              {paymentData.originalAmount != null
-                                ? paymentData.originalAmount.toFixed(2)
-                                : '0.00'})
-                            </span>
-                          )}
+                        {paymentData?.paymentCurrency && paymentData.paymentCurrency !== symbol && (
+                          <span className="text-[10px] font-medium text-slate-400">
+                            ({paymentData.paymentCurrency}{' '}
+                            {paymentData.originalAmount != null
+                              ? paymentData.originalAmount.toFixed(2)
+                              : '0.00'}
+                            )
+                          </span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-5">
@@ -291,8 +275,18 @@ export default function TransactionsTable({
                             {reference.type}
                           </span>
                           <span
-                            className={`flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold ${getStatusStyle(statusLabel)}`}
+                            className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold ${getTransactionStatusStyle(statusLabel)}`}
                           >
+                            <span className="flex h-3 w-3">
+                              {(() => {
+                                const style = getTransactionStatusStyle(statusLabel)
+                                if (style.includes('emerald'))
+                                  return <CheckCircle2 className="h-3 w-3" />
+                                if (style.includes('amber')) return <Clock className="h-3 w-3" />
+                                if (style.includes('red')) return <XCircle className="h-3 w-3" />
+                                return <AlertCircle className="h-3 w-3" />
+                              })()}
+                            </span>
                             {statusLabel}
                           </span>
                         </div>
@@ -302,7 +296,7 @@ export default function TransactionsTable({
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-5 text-xs text-slate-500">
-                      {format(new Date(tx.createdAt), 'MMM d, yyyy HH:mm')}
+                      {formatDate(tx.createdAt, 'DATETIME_24H')}
                     </TableCell>
                   </TableRow>
                 )

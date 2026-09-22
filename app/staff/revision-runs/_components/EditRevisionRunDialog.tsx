@@ -14,6 +14,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Edit2, Trash2, Loader2 } from 'lucide-react'
 import { updateTuitionRun, deleteTuitionRun } from '../../scheduling/actions'
 import type { TuitionRunStatus } from '@prisma/client'
@@ -41,7 +48,6 @@ export default function EditRevisionRunDialog({ run }: EditRevisionRunDialogProp
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
 
-  // Format datetime for datetime-local inputs: "YYYY-MM-DDTHH:MM"
   const formatDateForInput = (date: Date) => {
     const d = new Date(date)
     const year = d.getFullYear()
@@ -57,26 +63,49 @@ export default function EditRevisionRunDialog({ run }: EditRevisionRunDialogProp
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
+    const capacity = parseInt(formData.get('capacity') as string)
+    const minClassSize = parseInt(formData.get('minClassSize') as string)
+
+    if (isNaN(capacity) || capacity < 1) {
+      toast.error('Invalid Capacity', { description: 'Capacity must be a positive number' })
+      setLoading(false)
+      return
+    }
+    if (isNaN(minClassSize) || minClassSize < 1) {
+      toast.error('Invalid Minimum', {
+        description: 'Minimum class size must be a positive number',
+      })
+      setLoading(false)
+      return
+    }
+    if (minClassSize > capacity) {
+      toast.error('Invalid Configuration', {
+        description: 'Minimum class size cannot exceed maximum capacity',
+      })
+      setLoading(false)
+      return
+    }
+
     const data = {
       title: formData.get('title') as string,
       moduleTag: formData.get('moduleTag') as string,
       description: formData.get('description') as string,
       startDatetime: new Date(formData.get('startDatetime') as string),
       endDatetime: new Date(formData.get('endDatetime') as string),
-      capacity: parseInt(formData.get('capacity') as string),
-      minClassSize: parseInt(formData.get('minClassSize') as string),
+      capacity,
+      minClassSize,
       price: parseFloat(formData.get('price') as string),
       status: formData.get('status') as TuitionRunStatus,
     }
 
     try {
       const res = await updateTuitionRun(run.id, data)
-      if (res.success) {
+      if ('success' in res && res.success) {
         toast.success('Revision run updated successfully')
         setOpen(false)
         router.refresh()
       } else {
-        toast.error(res.error || 'Failed to update revision run')
+        toast.error('error' in res ? res.error : 'Failed to update revision run')
       }
     } catch (_error) {
       toast.error('An unexpected error occurred')
@@ -96,12 +125,12 @@ export default function EditRevisionRunDialog({ run }: EditRevisionRunDialogProp
     setDeleting(true)
     try {
       const res = await deleteTuitionRun(run.id)
-      if (res.success) {
+      if ('success' in res && res.success) {
         toast.success('Revision run deleted successfully')
         setOpen(false)
         router.refresh()
       } else {
-        toast.error(res.error || 'Failed to delete revision run')
+        toast.error('error' in res ? res.error : 'Failed to delete revision run')
       }
     } catch (_error) {
       toast.error('An unexpected error occurred')
@@ -211,16 +240,16 @@ export default function EditRevisionRunDialog({ run }: EditRevisionRunDialogProp
             </div>
             <div className="grid gap-2">
               <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                name="status"
-                defaultValue={run.status}
-                className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="SCHEDULED">SCHEDULED</option>
-                <option value="OPEN">OPEN</option>
-                <option value="CANCELLED">CANCELLED</option>
-              </select>
+              <Select name="status" defaultValue={run.status}>
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SCHEDULED">SCHEDULED</SelectItem>
+                  <SelectItem value="OPEN">OPEN</SelectItem>
+                  <SelectItem value="CANCELLED">CANCELLED</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

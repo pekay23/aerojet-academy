@@ -4,13 +4,22 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronDown, ChevronUp, CheckCircle, AlertTriangle, XCircle, BookOpen, FileText, ClipboardList } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronUp,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  BookOpen,
+  FileText,
+  ClipboardList,
+} from 'lucide-react'
 import AddExamRecordDialog from '../../../students/[id]/_components/AddExamRecordDialog'
+import { ATTEMPT_FIRST, ATTEMPT_LABELS, normalizeAttemptType } from '@/lib/exams/attempt-types'
 
 // ---------------------------------------------------------------------------
 // TYPES
 // ---------------------------------------------------------------------------
-
 
 interface ExamBookingData {
   id: string
@@ -66,6 +75,12 @@ function isExamPathway(profile: StudentProfileData): boolean {
     EXAM_PATHWAY_TYPES.includes(profile.programmeChoice ?? '') ||
     EXAM_PATHWAY_TYPES.includes(profile.enrollmentType ?? '')
   )
+}
+
+function getAttemptLabel(value: string | null | undefined): string {
+  const normalized = normalizeAttemptType(value)
+  if (normalized) return ATTEMPT_LABELS[normalized]
+  return value == null || String(value).trim() === '' ? ATTEMPT_LABELS[ATTEMPT_FIRST] : '—'
 }
 
 interface SemesterGroup {
@@ -136,11 +151,13 @@ function getCompletenessStatus(group: SemesterGroup): 'complete' | 'partial' | '
   let withResults = 0
   for (const e of group.enrollments) {
     const exams = group.examResults.get(e.course.code) || []
-    if (exams.some((ex) => ex.result?.toLowerCase() === 'pass' || ex.result?.toLowerCase() === 'fail')) {
+    if (
+      exams.some((ex) => ex.result?.toLowerCase() === 'pass' || ex.result?.toLowerCase() === 'fail')
+    ) {
       withResults++
     } else if (exams.length > 0) {
       // Has exam bookings but no final result yet
-      withResults += 0.5 
+      withResults += 0.5
     }
   }
 
@@ -169,7 +186,9 @@ function ExamOnlyHistory({
   const router = useRouter()
   const passed = examBookings.filter((b) => b.result?.toLowerCase() === 'pass').length
   const failed = examBookings.filter((b) => b.result?.toLowerCase() === 'fail').length
-  const booked = examBookings.filter((b) => b.result && !['pass', 'fail', 'absent'].includes(b.result.toLowerCase())).length
+  const booked = examBookings.filter(
+    (b) => b.result && !['pass', 'fail', 'absent'].includes(b.result.toLowerCase())
+  ).length
   const pending = examBookings.filter((b) => !b.result || b.status === 'PENDING').length
 
   const fundingColors: Record<string, string> = {
@@ -179,8 +198,7 @@ function ExamOnlyHistory({
   }
 
   const pathwayLabel =
-    studentProfile.programmeChoice === 'EXAM_ONLY' ||
-    studentProfile.enrollmentType === 'EXAM_ONLY'
+    studentProfile.programmeChoice === 'EXAM_ONLY' || studentProfile.enrollmentType === 'EXAM_ONLY'
       ? 'Exam-Only Pathway'
       : 'Modular Pathway'
 
@@ -192,10 +210,12 @@ function ExamOnlyHistory({
           <ClipboardList className="h-4 w-4" /> Exam History
         </h2>
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+          <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-black text-blue-700 uppercase dark:bg-blue-900/30 dark:text-blue-400">
             {pathwayLabel}
           </span>
-          <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${fundingColors[studentProfile.fundingSource] || fundingColors.SELF_FUNDED}`}>
+          <span
+            className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${fundingColors[studentProfile.fundingSource] || fundingColors.SELF_FUNDED}`}
+          >
             {studentProfile.fundingSource.replace('_', ' ')}
           </span>
         </div>
@@ -236,10 +256,14 @@ function ExamOnlyHistory({
               <tr className="border-b border-slate-100 bg-slate-50 text-left dark:border-slate-700 dark:bg-slate-800/40">
                 <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Module</th>
                 <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Date</th>
-                <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Category</th>
+                <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">
+                  Category
+                </th>
                 <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Result</th>
                 <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Score</th>
-                <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Attempt</th>
+                <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">
+                  Attempt
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -247,41 +271,52 @@ function ExamOnlyHistory({
                 const resultLower = booking.result?.toLowerCase()
                 const isPending = !booking.result || booking.status === 'PENDING'
                 return (
-                  <tr key={booking.id} className="border-b border-slate-50 last:border-0 dark:border-slate-800">
+                  <tr
+                    key={booking.id}
+                    className="border-b border-slate-50 last:border-0 dark:border-slate-800"
+                  >
                     <td className="px-4 py-2 font-mono text-xs font-bold text-slate-700 dark:text-slate-300">
                       {booking.moduleCode || '—'}
                     </td>
                     <td className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400">
-                      {booking.examDate
-                        ? new Date(booking.examDate).toLocaleDateString('en-GB', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          })
-                        : <span className="italic text-slate-300">TBD</span>}
+                      {booking.examDate ? (
+                        new Date(booking.examDate).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })
+                      ) : (
+                        <span className="text-slate-300 italic">TBD</span>
+                      )}
                     </td>
                     <td className="px-4 py-2">
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                        booking.examCategory === 'OFFICIAL_EASA'
-                          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
-                          : 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
-                      }`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          booking.examCategory === 'OFFICIAL_EASA'
+                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                            : 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
+                        }`}
+                      >
                         {booking.examCategory === 'OFFICIAL_EASA' ? 'EASA' : 'Internal'}
                       </span>
                     </td>
                     <td className="px-4 py-2">
                       {isPending ? (
-                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">PENDING</span>
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                          PENDING
+                        </span>
                       ) : (
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                          resultLower === 'pass'
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                            : resultLower === 'fail'
-                              ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                              : ['booked', 'scheduled', 'attended'].includes(resultLower || '')
-                                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                        }`}>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            resultLower === 'pass'
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                              : resultLower === 'fail'
+                                ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                                : ['booked', 'scheduled', 'attended'].includes(resultLower || '')
+                                  ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                                  : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                          }`}
+                        >
                           {booking.result!.toUpperCase()}
                         </span>
                       )}
@@ -290,7 +325,7 @@ function ExamOnlyHistory({
                       {booking.percentage != null ? `${booking.percentage}%` : '—'}
                     </td>
                     <td className="px-4 py-2 text-xs text-slate-500">
-                      {booking.attemptType === 'MIGRATED' ? '—' : (booking.attemptType?.replace('_', ' ') || '—')}
+                      {getAttemptLabel(booking.attemptType)}
                     </td>
                   </tr>
                 )
@@ -317,7 +352,14 @@ function ExamOnlyHistory({
 // MAIN COMPONENT
 // ---------------------------------------------------------------------------
 
-export default function AcademicHistorySection({ studentId, studentName, examComponents, enrollments, examBookings, studentProfile }: Props) {
+export default function AcademicHistorySection({
+  studentId,
+  studentName,
+  examComponents,
+  enrollments,
+  examBookings,
+  studentProfile,
+}: Props) {
   const router = useRouter()
   const [expandedSemester, setExpandedSemester] = useState<string | null>(null)
 
@@ -326,9 +368,9 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
   // Exam-only / Modular students: show flat exam history, no semester grouping
   if (isExamPathway(studentProfile)) {
     return (
-      <ExamOnlyHistory 
-        examBookings={examBookings} 
-        studentProfile={studentProfile} 
+      <ExamOnlyHistory
+        examBookings={examBookings}
+        studentProfile={studentProfile}
         studentId={studentId}
         studentName={studentName}
         examComponents={examComponents}
@@ -341,11 +383,17 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
 
   // Count unmatched exam bookings (not linked to any enrollment)
   const matchedModules = new Set(semesters.flatMap((s) => s.enrollments.map((e) => e.course.code)))
-  const unmatchedExams = examBookings.filter((b) => b.moduleCode && !matchedModules.has(b.moduleCode))
+  const unmatchedExams = examBookings.filter(
+    (b) => b.moduleCode && !matchedModules.has(b.moduleCode)
+  )
 
   const _totalCourses = enrollments.length
-  const totalExamsWithResults = examBookings.filter((b) => b.result?.toLowerCase() === 'pass' || b.result?.toLowerCase() === 'fail').length
-  const upcomingExamsCount = examBookings.filter((b) => !b.result || !['pass', 'fail', 'absent'].includes(b.result.toLowerCase())).length
+  const totalExamsWithResults = examBookings.filter(
+    (b) => b.result?.toLowerCase() === 'pass' || b.result?.toLowerCase() === 'fail'
+  ).length
+  const upcomingExamsCount = examBookings.filter(
+    (b) => !b.result || !['pass', 'fail', 'absent'].includes(b.result.toLowerCase())
+  ).length
   const passedExams = examBookings.filter((b) => b.result?.toLowerCase() === 'pass').length
 
   const fundingColors: Record<string, string> = {
@@ -377,10 +425,14 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
           <BookOpen className="h-4 w-4" /> Academic History
         </h2>
         <div className="flex items-center gap-2">
-          <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${fundingColors[studentProfile.fundingSource] || fundingColors.SELF_FUNDED}`}>
+          <span
+            className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${fundingColors[studentProfile.fundingSource] || fundingColors.SELF_FUNDED}`}
+          >
             {studentProfile.fundingSource.replace('_', ' ')}
           </span>
-          <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${statusColors[studentProfile.enrollmentStatus] || statusColors.ENROLLED}`}>
+          <span
+            className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${statusColors[studentProfile.enrollmentStatus] || statusColors.ENROLLED}`}
+          >
             {studentProfile.enrollmentStatus}
           </span>
         </div>
@@ -389,19 +441,27 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
       {/* Summary Stats */}
       <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
-          <p className="text-2xl font-black text-aerojet-blue dark:text-white">{semesters.length}</p>
+          <p className="text-aerojet-blue text-2xl font-black dark:text-white">
+            {semesters.length}
+          </p>
           <p className="text-[10px] font-bold text-slate-400 uppercase">Semesters</p>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
-          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{passedExams}</p>
+          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+            {passedExams}
+          </p>
           <p className="text-[10px] font-bold text-slate-400 uppercase">Passed</p>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
-          <p className="text-2xl font-black text-blue-500 dark:text-blue-400">{upcomingExamsCount}</p>
+          <p className="text-2xl font-black text-blue-500 dark:text-blue-400">
+            {upcomingExamsCount}
+          </p>
           <p className="text-[10px] font-bold text-slate-400 uppercase">Upcoming</p>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
-          <p className="text-2xl font-black text-slate-400 dark:text-slate-500">{totalExamsWithResults}</p>
+          <p className="text-2xl font-black text-slate-400 dark:text-slate-500">
+            {totalExamsWithResults}
+          </p>
           <p className="text-[10px] font-bold text-slate-400 uppercase">Results</p>
         </div>
       </div>
@@ -411,11 +471,12 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
         <div className="mb-5 flex flex-wrap gap-2">
           {semesters.map((sem) => {
             const status = getCompletenessStatus(sem)
-            const bgClass = status === 'complete'
-              ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20'
-              : status === 'partial'
-                ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
-                : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
+            const bgClass =
+              status === 'complete'
+                ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20'
+                : status === 'partial'
+                  ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
+                  : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
 
             return (
               <button
@@ -439,9 +500,13 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
           <p className="text-sm font-semibold text-slate-500">No semester enrollments found</p>
           <p className="mt-1 text-xs text-slate-400">
             Import academic records via{' '}
-            <Link href="/staff/students/import" className="text-blue-500 hover:underline">Student Import</Link>
-            {' '}or use{' '}
-            <Link href="/staff/enrollments/batch" className="text-blue-500 hover:underline">Batch Enrollment</Link>
+            <Link href="/staff/students/import" className="text-blue-500 hover:underline">
+              Student Import
+            </Link>{' '}
+            or use{' '}
+            <Link href="/staff/enrollments/batch" className="text-blue-500 hover:underline">
+              Batch Enrollment
+            </Link>
           </p>
         </div>
       ) : (
@@ -451,7 +516,10 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
             const status = getCompletenessStatus(sem)
 
             return (
-              <div key={sem.key} className="rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+              <div
+                key={sem.key}
+                className="overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800"
+              >
                 <button
                   className="flex w-full items-center justify-between bg-slate-50 px-4 py-3 text-left transition-colors hover:bg-slate-100 dark:bg-slate-800/40 dark:hover:bg-slate-800/60"
                   onClick={() => setExpandedSemester(isExpanded ? null : sem.key)}
@@ -466,7 +534,11 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
                       {sem.enrollments.length} courses
                     </span>
                   </div>
-                  {isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+                  {isExpanded ? (
+                    <ChevronUp className="h-4 w-4 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-slate-400" />
+                  )}
                 </button>
 
                 {isExpanded && (
@@ -474,12 +546,24 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-slate-100 bg-white text-left dark:border-slate-700 dark:bg-slate-900/30">
-                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Code</th>
-                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Course</th>
-                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Enrollment</th>
-                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Exam Result</th>
-                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Score</th>
-                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Attempt</th>
+                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">
+                            Code
+                          </th>
+                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">
+                            Course
+                          </th>
+                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">
+                            Enrollment
+                          </th>
+                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">
+                            Exam Result
+                          </th>
+                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">
+                            Score
+                          </th>
+                          <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">
+                            Attempt
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -488,7 +572,10 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
                           const latestExam = exams.length > 0 ? exams[exams.length - 1] : null
 
                           return (
-                            <tr key={enrollment.id} className="border-b border-slate-50 dark:border-slate-800">
+                            <tr
+                              key={enrollment.id}
+                              className="border-b border-slate-50 dark:border-slate-800"
+                            >
                               <td className="px-4 py-2 font-mono text-xs font-bold text-slate-600 dark:text-slate-300">
                                 {enrollment.course.code}
                               </td>
@@ -496,38 +583,46 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
                                 {enrollment.course.name}
                               </td>
                               <td className="px-4 py-2">
-                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                                  enrollment.status === 'COMPLETED'
-                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                    : enrollment.status === 'ACTIVE'
-                                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                      : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                                }`}>
+                                <span
+                                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                    enrollment.status === 'COMPLETED'
+                                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                      : enrollment.status === 'ACTIVE'
+                                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                        : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                                  }`}
+                                >
                                   {enrollment.status}
                                 </span>
                               </td>
                               <td className="px-4 py-2">
                                 {latestExam ? (
-                                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                                    latestExam.result?.toLowerCase() === 'pass'
-                                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                      : latestExam.result?.toLowerCase() === 'fail'
-                                        ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                                        : ['booked', 'scheduled', 'attended'].includes(latestExam.result?.toLowerCase() || '')
-                                          ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                                          : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                                  }`}>
+                                  <span
+                                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                      latestExam.result?.toLowerCase() === 'pass'
+                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                        : latestExam.result?.toLowerCase() === 'fail'
+                                          ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                                          : ['booked', 'scheduled', 'attended'].includes(
+                                                latestExam.result?.toLowerCase() || ''
+                                              )
+                                            ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                                            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                                    }`}
+                                  >
                                     {latestExam.result?.toUpperCase() || 'PENDING'}
                                   </span>
                                 ) : (
-                                  <span className="text-xs italic text-slate-400">No exam record</span>
+                                  <span className="text-xs text-slate-400 italic">
+                                    No exam record
+                                  </span>
                                 )}
                               </td>
                               <td className="px-4 py-2 font-mono text-xs text-slate-600 dark:text-slate-300">
                                 {latestExam?.percentage != null ? `${latestExam.percentage}%` : '—'}
                               </td>
                               <td className="px-4 py-2 text-xs text-slate-500">
-                                {latestExam?.attemptType?.replace('_', ' ') || '—'}
+                                {getAttemptLabel(latestExam?.attemptType)}
                               </td>
                             </tr>
                           )
@@ -550,7 +645,8 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
           </h3>
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
             <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
-              The following exams were taken independently or transferred, and are not linked to a specific semester enrollment.
+              The following exams were taken independently or transferred, and are not linked to a
+              specific semester enrollment.
             </p>
             <div className="flex flex-wrap gap-2">
               {unmatchedExams.map((exam) => {
@@ -559,8 +655,8 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
                 const statusColor = isPass
                   ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-400'
                   : isFail
-                  ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400'
-                  : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                    ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400'
+                    : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
 
                 return (
                   <span

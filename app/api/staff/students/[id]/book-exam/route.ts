@@ -5,6 +5,7 @@ import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 import { logAuditEvent } from '@/lib/audit/logger'
 import { revalidatePath } from 'next/cache'
+import { resolveAttemptType } from '@/lib/exams/attempt-types'
 
 /**
  * POST /api/staff/students/[id]/book-exam
@@ -23,7 +24,15 @@ export const POST = withErrorHandler(
     const { staffBookExamSchema, validateBody } = await import('@/lib/validation/schemas')
     const validation = validateBody(staffBookExamSchema, body)
     if (!validation.success) return apiError(validation.error)
-    const { bookingType, moduleIds, eventId, examDate, paymentMethod, notes: _notes, attemptType } = validation.data
+    const {
+      bookingType,
+      moduleIds,
+      eventId,
+      examDate,
+      paymentMethod,
+      notes: _notes,
+      attemptType,
+    } = validation.data
 
     // Validate module count per booking type
     const expectedModules: Record<string, number> = {
@@ -94,7 +103,7 @@ export const POST = withErrorHandler(
         if (available < totalPrice) {
           throw new Error(
             `Insufficient wallet balance. Need €${totalPrice.toFixed(2)}, available €${available.toFixed(2)}. ` +
-            `Please adjust the student's wallet balance first (Student Profile → Wallet tab → Manual Adjustment), then try booking again.`
+              `Please adjust the student's wallet balance first (Student Profile → Wallet tab → Manual Adjustment), then try booking again.`
           )
         }
 
@@ -135,9 +144,11 @@ export const POST = withErrorHandler(
             examDate: resolvedExamDate!,
             eventId: eventId || undefined,
             amountPaid: isFirst ? totalPrice : 0,
-            status: paymentMethod === 'AUTO_DEBIT' ? ('COMPLETED') : ('PENDING'),
+            status: paymentMethod === 'AUTO_DEBIT' ? 'COMPLETED' : 'PENDING',
             bookingType: bookingType,
-            attemptType: attemptType || (bookingType === 'RESIT' ? 'RESIT_1' : 'FIRST'),
+            attemptType: resolveAttemptType(
+              attemptType || (bookingType === 'RESIT' ? 'RESIT_1' : 'FIRST')
+            ),
             isResit: bookingType === 'RESIT',
 
             bookingGroupRef,
@@ -167,7 +178,9 @@ export const POST = withErrorHandler(
       }
     })
 
-    const studentName = student.profile ? `${student.profile.firstName} ${student.profile.lastName}` : student.email
+    const studentName = student.profile
+      ? `${student.profile.firstName} ${student.profile.lastName}`
+      : student.email
 
     // Audit log
     await logAuditEvent({

@@ -28,7 +28,7 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Central Audit, Issues &amp; Fixes Tracker</h1>
-  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-07 (Post-type-check + ESLint verification) <strong>Status</strong>: All critical issues fixed.</p>
+  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-21 (Staff API/UI/UX audit — waves 1–6 complete and verified) <strong>Status</strong>: Staff portal audit remediation complete.</p>
 </header>
 <hr />
 <section class="he-section" id="current-state-summary"><div class="he-section__num">01 · Current State Summary</div><h2 class="he-section__title">Current State Summary</h2></section>
@@ -289,7 +289,30 @@
 </tbody>
 </table>
 <hr />
-<section class="he-section" id="next-steps"><div class="he-section__num">05 · Next Steps</div><h2 class="he-section__title">Next Steps</h2></section>
+<section class="he-section" id="staff-apiuiux-audit-remediation-2026-09-20-2026-09-21"><div class="he-section__num">05 · Staff API/UI/UX Audit Remediation (2026-09-20 → 2026-09-21)</div><h2 class="he-section__title">Staff API/UI/UX Audit Remediation (2026-09-20 → 2026-09-21)</h2></section>
+<p>Plan: <code>docs/audits/staff-api-ui-ux-audit-plan.md</code>. All six sequential waves implemented and verified.</p>
+<table>
+<thead>
+<tr><th>Wave</th><th>Scope</th><th>Status</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>P0 security/correctness — search errors, booking <code>classId</code>, role route + audit</td><td>✅</td></tr>
+<tr><td>2</td><td>Action-file ownership — delete legacy <code>actions.ts</code>/<code>exams.ts</code>, single barrel</td><td>✅</td></tr>
+<tr><td>3</td><td>Bounded queries, N+1 elimination, set-based updates</td><td>✅</td></tr>
+<tr><td>4</td><td>Accessible interactions — dialogs, focus traps, loading boundaries</td><td>✅</td></tr>
+<tr><td>5</td><td>Scheduling audit follow-up — bounded reads, audit logging, tablist</td><td>✅</td></tr>
+<tr><td>6</td><td>Type safety &amp; maintainability — sanitizer, withdrawals, exam tabs, audit-log types, role route, newsroom form consolidation, cached-query bounds</td><td>✅</td></tr>
+</tbody>
+</table>
+<p>Verification (2026-09-21):</p>
+<ul>
+<li><code>bun x tsc --noEmit --pretty false</code> — <strong>0 errors</strong></li>
+<li><code>bun run test --run --no-file-parallelism --no-color</code> — <strong>150 files, 788 tests passed</strong></li>
+<li><code>bun run build</code> — Next.js 16.3.3 Turbopack, compiled successfully, 265/265 static pages, all routes generated</li>
+</ul>
+<p>Remaining baseline: ~2,066 pre-existing TS errors on <code>dev</code> (unrelated concurrent work), ESLint v10 incompatibility, full <code>dev→main</code> merge blocked.</p>
+<hr />
+<section class="he-section" id="next-steps"><div class="he-section__num">06 · Next Steps</div><h2 class="he-section__title">Next Steps</h2></section>
 <ol>
 <li><del>Run <code>bun run db:push</code></del> — Done (2026-09-04, Neon + Supabase)</li>
 <li><del>Run <code>bun run type-check</code></del> — Done (2026-09-07, 0 errors, commit 02717b1e)</li>
@@ -305,7 +328,7 @@
 <li><code>docs/audits/portal-audits/PORTAL-AUDIT-TRACKER.md</code> has duplicated type-check status paragraphs (3x) — cosmetic cleanup only.</li>
 </ul>
 <hr />
-<section class="he-section" id="audit-document-locations"><div class="he-section__num">06 · Audit Document Locations</div><h2 class="he-section__title">Audit Document Locations</h2></section>
+<section class="he-section" id="audit-document-locations"><div class="he-section__num">07 · Audit Document Locations</div><h2 class="he-section__title">Audit Document Locations</h2></section>
 <ul>
 <li><strong>Staff:</strong> <code>docs/audits/portal-audits/staff/staff-portal-audit-2026-08-27.md</code></li>
 <li><strong>Student:</strong> <code>docs/audits/portal-audits/student/student-portal-audit-2026-08-27.md</code></li>
@@ -335,6 +358,7 @@
     <li class="he-toc__l3"><a href="#easa-exam-compliance-complete">EASA Exam Compliance Complete</a></li>
     <li class="he-toc__l2"><a href="#files-created-new">Files Created (New)</a></li>
     <li class="he-toc__l2"><a href="#verification-log">Verification Log</a></li>
+    <li class="he-toc__l2"><a href="#staff-apiuiux-audit-remediation-2026-09-20-2026-09-21">Staff API/UI/UX Audit Remediation (2026-09-20 → 2026-09-21)</a></li>
     <li class="he-toc__l2"><a href="#next-steps">Next Steps</a></li>
     <li class="he-toc__l3"><a href="#outstanding-minor">Outstanding (minor)</a></li>
     <li class="he-toc__l2"><a href="#audit-document-locations">Audit Document Locations</a></li>

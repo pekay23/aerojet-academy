@@ -4,6 +4,7 @@ import { apiPaginated, withErrorHandler } from '@/lib/api/response'
 import { parsePagination } from '@/lib/api/response'
 import { queryAuditLogs } from '@/lib/audit/logger'
 import { AuditAction } from '@/lib/audit/logger'
+import { maskIp } from '@/lib/utils/string'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   await requirePermission(PERMISSIONS.VIEW_AUDIT_LOGS)
@@ -27,5 +28,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     limit,
     offset: skip,
   })
-  return apiPaginated(logs, total, page, limit)
+  return apiPaginated(
+    logs.map((l) => ({ ...l, ipAddress: maskIp(l.ipAddress) })),
+    total,
+    page,
+    limit
+  )
 })

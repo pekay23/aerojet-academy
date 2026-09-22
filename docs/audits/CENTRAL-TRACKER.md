@@ -1,7 +1,7 @@
 # Central Audit, Issues & Fixes Tracker
 
-**Last Updated**: 2026-09-11 (exam lifecycle, reconciliation, question-bank, and notification audits)
-**Status**: Core portal and exam-domain audits implemented. TypeScript: 0 errors. ESLint remains unavailable locally because the installed ESLint v10 configuration is incompatible with the legacy project configuration.
+**Last Updated**: 2026-09-21 (Staff API/UI/UX audit — waves 1–6 complete and verified)
+**Status**: Staff portal audit remediation complete. TypeScript: 0 errors. ESLint remains unavailable locally because the installed ESLint v10 configuration is incompatible with the legacy project configuration.
 
 ---
 
@@ -226,6 +226,29 @@
 | Integration Tests | 2026-09-04 | 6 test files       | 52/52 passed                                                               |
 | Accessibility     | 2026-09-02 | 10 requirements    | 10/10 complete                                                             |
 | EASA Compliance   | 2026-09-02 | 14 requirements    | 14/14 complete                                                             |
+
+---
+
+## Staff API/UI/UX Audit Remediation (2026-09-20 → 2026-09-21)
+
+Plan: `docs/audits/staff-api-ui-ux-audit-plan.md`. All six sequential waves implemented and verified.
+
+| Wave | Scope                                                                                                                                            | Status |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| 1    | P0 security/correctness — search errors, booking `classId`, role route + audit                                                                   | ✅     |
+| 2    | Action-file ownership — delete legacy `actions.ts`/`exams.ts`, single barrel                                                                     | ✅     |
+| 3    | Bounded queries, N+1 elimination, set-based updates                                                                                              | ✅     |
+| 4    | Accessible interactions — dialogs, focus traps, loading boundaries                                                                               | ✅     |
+| 5    | Scheduling audit follow-up — bounded reads, audit logging, tablist                                                                               | ✅     |
+| 6    | Type safety & maintainability — sanitizer, withdrawals, exam tabs, audit-log types, role route, newsroom form consolidation, cached-query bounds | ✅     |
+
+Verification (2026-09-21):
+
+- `bun x tsc --noEmit --pretty false` — **0 errors**
+- `bun run test --run --no-file-parallelism --no-color` — **150 files, 788 tests passed**
+- `bun run build` — Next.js 16.3.3 Turbopack, compiled successfully, 265/265 static pages, all routes generated
+
+Remaining baseline: ~2,066 pre-existing TS errors on `dev` (unrelated concurrent work), ESLint v10 incompatibility, full `dev→main` merge blocked.
 
 ---
 

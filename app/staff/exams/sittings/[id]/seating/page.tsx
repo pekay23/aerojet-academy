@@ -13,11 +13,7 @@ export const metadata: Metadata = {
   description: 'Assign candidates to seats for an exam sitting.',
 }
 
-export default async function SittingSeatingPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function SittingSeatingPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getAuthSession()
   if (!session || !['SUPER_ADMIN', 'ADMIN', 'STAFF'].includes(session.user.role)) {
     redirect('/login')
@@ -70,31 +66,28 @@ export default async function SittingSeatingPage({
   const students = sitting.assignments.map((a) => ({
     assignmentId: a.id,
     userId: a.userId,
-    name: a.user.profile
-      ? `${a.user.profile.firstName} ${a.user.profile.lastName}`
-      : a.user.email,
+    name: a.user.profile ? `${a.user.profile.firstName} ${a.user.profile.lastName}` : a.user.email,
     seatId: a.seatId,
     seatLabel: a.seat?.label ?? null,
   }))
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1400px] space-y-6 duration-700">
       {/* Header */}
       <div>
         <Link
           href={`/staff/exams/events/${sitting.event.id}`}
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition-colors hover:text-aerojet-sky"
+          className="hover:text-aerojet-sky mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to {sitting.event.name}
         </Link>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Seating Assignment
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           {sitting.examComponent.course?.code || sitting.examComponent.code} —{' '}
-          {sitting.examComponent.name} | Day {sitting.dayNumber},{' '}
-          {sitting.sessionType} |{' '}
+          {sitting.examComponent.name} | Day {sitting.dayNumber}, {sitting.sessionType} |{' '}
           {format(new Date(sitting.startTime), 'MMM d, yyyy h:mm a')}
         </p>
       </div>
@@ -107,12 +100,8 @@ export default async function SittingSeatingPage({
             No Floor Plan Available
           </h3>
           <p className="mt-2 max-w-md text-center text-sm text-slate-500 dark:text-slate-400">
-            You need to design a floor plan for a classroom before you can assign seats.
-            Go to{' '}
-            <Link
-              href="/staff/classrooms"
-              className="font-bold text-aerojet-sky hover:underline"
-            >
+            You need to design a floor plan for a classroom before you can assign seats. Go to{' '}
+            <Link href="/staff/classrooms" className="text-aerojet-sky font-bold hover:underline">
               Facilities Management
             </Link>{' '}
             to set up a room layout.
@@ -120,6 +109,7 @@ export default async function SittingSeatingPage({
         </div>
       ) : (
         <SeatingAssignment
+          classroomId={classroomWithSeats.id}
           sittingId={sittingId}
           sittingLabel={sittingLabel}
           layout={layout}

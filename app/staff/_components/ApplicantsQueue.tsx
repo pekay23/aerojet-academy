@@ -15,7 +15,7 @@ import {
   Mail,
   Archive,
 } from 'lucide-react'
-import { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers } from '../actions'
+import { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers } from '../actions/index'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import ApplicantDetailDrawer from './ApplicantDetailDrawer'
@@ -255,7 +255,9 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                       .map((a) => a.email)
                       .filter(Boolean)
                     if (selectedEmails.length > 0) {
-                      window.location.href = `mailto:${selectedEmails.join(',')}`
+                      const link = document.createElement('a')
+                      link.href = `mailto:${selectedEmails.join(',')}`
+                      link.click()
                     }
                   },
                 },

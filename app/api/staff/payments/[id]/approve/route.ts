@@ -15,6 +15,8 @@ import {
   generateToken,
   generateTempPassword,
   generateAcademyEmail,
+  rateLimitByUser,
+  rateLimitByIP,
 } from '@/lib/auth/helpers'
 import { PaymentStatus } from '@prisma/client'
 import { topUpWallet } from '@/lib/wallet/operations'
@@ -37,7 +39,18 @@ export const POST = withErrorHandler(
 
     if (!id) return apiError('Payment ID required')
 
-     let body: {
+    // Rate limiting: 30 requests/min per user, 20 requests/min per IP
+    const userLimit = rateLimitByUser(staff.id, 30, 60000)
+    if (!userLimit.allowed) {
+      return apiError('Too many requests. Please try again later.', 429)
+    }
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+    const ipLimit = rateLimitByIP(ip, 20, 60000)
+    if (!ipLimit.allowed) {
+      return apiError('Too many requests from this IP. Please try again later.', 429)
+    }
+
+    let body: {
       action?: string
       notes?: string
       reason?: string
