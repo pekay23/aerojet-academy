@@ -104,7 +104,6 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
       } catch (error) {
         console.error('Failed to fetch data:', error)
         toast.error('Failed to load course data')
-        toast.error('Failed to load course data')
       }
     }
     fetchData()
@@ -123,7 +122,9 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
       price: Number(initialData.price) || 0,
       isActive: initialData.isActive ?? true,
       requiresPrerequisite: initialData.requiresPrerequisite ?? false,
-      prerequisites: initialData.prerequisites ? initialData.prerequisites.join(', ') : '',
+      prerequisites: initialData.prerequisites
+        ? initialData.prerequisites.join(', ')
+        : '',
       syllabusUrl: initialData.syllabusUrl || '',
       materialsUrl: initialData.materialsUrl || '',
     },
@@ -133,6 +134,7 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
 
   // Track form changes for unsaved changes warning
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/incompatible-library -- form.watch() is React Hook Form API, not a hook
     const subscription = form.watch(() => markDirty())
     return () => subscription.unsubscribe()
   })

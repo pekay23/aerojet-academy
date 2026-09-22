@@ -94,7 +94,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx?: RouteContext
     // Certificate model may not be in the generated client yet
   }
 
-  const session = s as any
+  const session = s as NonNullable<typeof s>
 
   return apiSuccess({
     id: session.id,
@@ -159,7 +159,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx?: RouteContext
         reason?: string
         status?: string
         createdAt: Date
-        questionId?: string
+        questionId?: string | null
         question?: { syllabusRef?: string | null } | null
       }) => ({
         id: r.id,

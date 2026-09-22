@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import {
   Save,
   Loader2,
@@ -96,9 +96,15 @@ export default function FloorPlanDesigner({
 
   const deskCount = cells.filter((c) => c.type === 'DESK').length
 
+  const cellMap = useMemo(() => {
+    const map = new Map<string, Cell>()
+    for (const c of cells) map.set(`${c.row}-${c.col}`, c)
+    return map
+  }, [cells])
+
   const getCell = useCallback(
-    (row: number, col: number) => cells.find((c) => c.row === row && c.col === col),
-    [cells]
+    (row: number, col: number) => cellMap.get(`${row}-${col}`),
+    [cellMap]
   )
 
   function updateCell(row: number, col: number) {
@@ -303,28 +309,39 @@ export default function FloorPlanDesigner({
                   const label = cell?.label
 
                   return (
-                    <button
-                      key={`${r}-${c}`}
-                      onMouseDown={(e) => {
-                        e.preventDefault()
-                        setIsDragging(true)
-                        updateCell(r, c)
-                      }}
-                      onMouseEnter={() => {
-                        if (isDragging) updateCell(r, c)
-                      }}
-                      onMouseUp={() => setIsDragging(false)}
-                      className={cn(
-                        'flex h-10 w-10 items-center justify-center rounded-lg border text-[10px] font-bold transition-all sm:h-12 sm:w-12',
-                        type === 'DESK' &&
-                          'border-indigo-300 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-                        type === 'AISLE' &&
-                          'border-slate-200 bg-white/60 text-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/30 dark:text-slate-600',
-                        type === 'OBSTACLE' &&
-                          'border-red-200 bg-red-50 text-red-400 hover:bg-red-100 dark:border-red-800 dark:bg-red-900/20 dark:text-red-500'
-                      )}
-                      title={`Row ${r + 1}, Col ${c + 1} — ${type}${label ? ` (${label})` : ''}`}
-                    >
+<button
+                       key={`${r}-${c}`}
+                       onMouseDown={(e) => {
+                         e.preventDefault()
+                         setIsDragging(true)
+                         updateCell(r, c)
+                       }}
+                       onMouseEnter={() => {
+                         if (isDragging) updateCell(r, c)
+                       }}
+                       onMouseUp={() => setIsDragging(false)}
+                       onKeyDown={(e) => {
+                         if (e.key === 'Enter' || e.key === ' ') {
+                           e.preventDefault()
+                           updateCell(r, c)
+                         }
+                       }}
+role="gridcell"
+                        aria-rowindex={r + 1}
+                        aria-colindex={c + 1}
+                       aria-label={`Row ${r + 1}, Col ${c + 1} — ${type}${label ? ` (${label})` : ''}. Press Enter to toggle to ${activeTool}.`}
+                       tabIndex={-1}
+                       className={cn(
+                         'flex h-10 w-10 items-center justify-center rounded-lg border text-[10px] font-bold transition-all sm:h-12 sm:w-12',
+                         type === 'DESK' &&
+                           'border-indigo-300 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+                         type === 'AISLE' &&
+                           'border-slate-200 bg-white/60 text-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/30 dark:text-slate-600',
+                         type === 'OBSTACLE' &&
+                           'border-red-200 bg-red-50 text-red-400 hover:bg-red-100 dark:border-red-800 dark:bg-red-900/20 dark:text-red-500'
+                       )}
+                       title={`Row ${r + 1}, Col ${c + 1} — ${type}${label ? ` (${label})` : ''}`}
+                     >
                       {type === 'DESK' && label}
                       {type === 'OBSTACLE' && <Ban className="h-3.5 w-3.5" />}
                     </button>
