@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.7] — 2026-09-22
+
+### Changed
+
+- Staff API/UI/UX audit remediation wave 6 complete (all portal audits, table sorting, error boundaries, accessible interactions)
+- Merged PR #33: tiptap core security update (XSS fix via prosemirror-view 1.42.3)
+- Simplified branch strategy from `dev → staging → main` to `dev → main` only
+- Deleted all non-essential branches (staging, preview/*, v1-archive, v2-*, feature/*, renovate/*, vercel/*)
+
 ## [1.2.6] — 2026-09-17
 
 ### Changed
