@@ -63,9 +63,11 @@ export function serializePrisma<T>(data: T): SerializedPrisma<T> {
       return data.toISOString() as SerializedPrisma<T>
     }
 
-    // Recursively serialize object properties using a null-prototype object
-    // to prevent prototype pollution via __proto__ keys
-    const result = Object.create(null) as Record<string, unknown>
+    // Recursively serialize object properties using a plain object
+    // (Object.prototype, not null) — Next.js rejects null-prototype objects
+    // when passing data from Server Components to Client Components.
+    // __proto__ pollution is still prevented via Object.defineProperty.
+    const result = {} as Record<string, unknown>
     const dataRecord = data as Record<string, unknown>
     for (const key of Object.keys(dataRecord)) {
       // Use Object.defineProperty to avoid __proto__ setter issues
