@@ -1,7 +1,7 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { serializePrisma } from '@/lib/utils/serialization'
+
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -16,6 +16,63 @@ import {
 } from 'lucide-react'
 import ClassActionsMenu from '../../_components/ClassActionsMenu'
 import { Metadata } from 'next'
+
+const DAY_LABELS: Record<number, string> = {
+  0: 'Sunday',
+  1: 'Monday',
+  2: 'Tuesday',
+  3: 'Wednesday',
+  4: 'Thursday',
+  5: 'Friday',
+  6: 'Saturday',
+}
+
+function WeeklyScheduleDisplay({
+  schedule,
+}: {
+  schedule: Record<string, unknown>
+}) {
+  const entries = Array.isArray(schedule)
+    ? (schedule as unknown[])
+    : Object.values(schedule)
+
+  const weekly = entries.filter(
+    (e): e is Record<string, unknown> =>
+      typeof e === 'object' && e !== null && 'day' in e
+  )
+
+  if (weekly.length === 0) {
+    return (
+      <p className="text-xs text-slate-400 italic">
+        Schedule data is not in a recognised weekly format.
+      </p>
+    )
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {weekly.map((s, i) => {
+        const dayNum = Number(s.day)
+        const label = DAY_LABELS[dayNum] ?? `Day ${dayNum}`
+        const start = String(s.startTime ?? '')
+        const end = String(s.endTime ?? '')
+        return (
+          <div
+            key={i}
+            className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800/50"
+          >
+            <span className="font-bold text-slate-700 dark:text-slate-300">
+              {label}
+            </span>
+            <span className="font-mono text-xs text-slate-500">
+              {start} → {end}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 export const metadata: Metadata = { title: 'Class Details | Staff Portal' }
 
@@ -182,9 +239,7 @@ export default async function ClassDetailsPage({ params }: Props) {
             </h2>
             <div className="space-y-2">
               {cls.schedule ? (
-                <pre className="text-xs font-bold whitespace-pre-wrap text-slate-700 dark:text-slate-300">
-                  {JSON.stringify(serializePrisma(cls.schedule), null, 2)}
-                </pre>
+                <WeeklyScheduleDisplay schedule={cls.schedule as unknown as Record<string, unknown>} />
               ) : (
                 <p className="text-xs text-slate-400 italic">No specific weekly schedule set.</p>
               )}

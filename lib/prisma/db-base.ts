@@ -268,7 +268,7 @@ function getClient(): PrismaClient {
   // Improve Prisma error logging: Prisma's default "prisma:error undefined"
   // output is unhelpful when the error object lacks a .message property.
   // This handler logs the full error context for diagnostics.
-  client.$on('error', (e: any) => {
+  client.$on('error', (e: { message?: string; code?: string; target?: string; meta?: Record<string, unknown> }) => {
     const msg = e?.message ?? '[No message in Prisma error event]'
     const code = e?.code ? ` (code: ${e.code})` : ''
     const target = e?.target ? ` (model: ${e.target})` : ''

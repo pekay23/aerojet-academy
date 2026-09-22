@@ -5,8 +5,9 @@ import StaffExamsTabs from '../_components/StaffExamsTabs'
 import ExamBookingsTable, { type ExamBookingWithDetails } from '../_components/ExamBookingsTable'
 import RecordsTab from './_components/RecordsTab'
 import { GroupCharterModal } from './_components/GroupCharterModal'
-import { getAvailableModules } from '../actions'
+import { getAvailableModules } from '../actions/index'
 import { serializePrisma } from '@/lib/utils/serialization'
+
 import Link from 'next/link'
 import SearchInput from '@/components/SearchInput'
 import { format } from 'date-fns'
@@ -139,7 +140,7 @@ const VALID_TABS = ['events', 'bookings', 'results', 'records']
 export default async function StaffExamsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; query?: string }>
+  searchParams: Promise<{ tab?: string; query?: string; page?: string; limit?: string }>
 }) {
   const session = await getAuthSession()
   if (!session) redirect('/login')
@@ -581,8 +582,14 @@ function formatBookingDisplayResult(value: string | null) {
   return value.toUpperCase()
 }
 
-async function RecordsTabServer({ query }: { query?: string }) {
+async function RecordsTabServer({
+  query,
+}: {
+  query?: string
+}) {
   try {
+    // Fetch all records for server-side filtering - no skip, no fetchLimit
+    // Client handles pagination after merging
     const [bookingsRaw, resultsRaw, modules] = await Promise.all([
       prismaUnfiltered.examBooking.findMany({
         where: query
@@ -612,6 +619,7 @@ async function RecordsTabServer({ query }: { query?: string }) {
           },
         },
         orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
       prismaUnfiltered.examResult.findMany({
         where: query
@@ -631,12 +639,14 @@ async function RecordsTabServer({ query }: { query?: string }) {
           },
         },
         orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
-      getAvailableModules(),
-    ])
+     getAvailableModules(),
+  ])
 
-    // Unify bookings and results
+  // Unify bookings and results
     const unifiedRecords: ExamRecord[] = []
+    const bookingsMap = new Map<string, ExamRecord>()
 
     // 1. Add all bookings
     for (const b of bookingsRaw) {
@@ -657,9 +667,9 @@ async function RecordsTabServer({ query }: { query?: string }) {
           ? 'TBC'
           : 'TBD'
 
-      unifiedRecords.push({
+      const record = {
         ...b,
-        source: 'booking',
+        source: 'booking' as const,
         id: b.id,
         score: b.score != null ? Number(b.score) : null,
         passed: hasRealResult
@@ -674,37 +684,38 @@ async function RecordsTabServer({ query }: { query?: string }) {
         sittingLabel: sitting ? `Day ${sitting.dayNumber} ${sitting.sessionType}` : null,
         displayResult: formatBookingDisplayResult(displayResultKind),
         displayResultKind,
-      } as ExamRecord)
+      } as ExamRecord
+
+      unifiedRecords.push(record)
+      bookingsMap.set(`${b.userId}:${(b.moduleCode || '').toUpperCase()}`, record)
     }
 
     // 2. Merge results into bookings or add as standalone
     for (const r of resultsRaw) {
       const rModule = (r.moduleCode || '').toUpperCase()
-      const existingIndex = unifiedRecords.findIndex(
-        (rec) => {
-          if (rec.source !== 'booking' || rec.userId !== r.userId || (rec.moduleCode?.toUpperCase() || '') !== rModule) return false
-          if (rec.attemptType && r.attemptType && rec.attemptType !== r.attemptType) return false
-          return true
-        }
-      )
+      const mapKey = `${r.userId}:${rModule}`
+      const existingRecord = bookingsMap.get(mapKey)
 
-      if (existingIndex !== -1) {
-        unifiedRecords[existingIndex] = {
-          ...unifiedRecords[existingIndex],
-          id: `result_${r.id}`,
-          score: r.score != null ? Number(r.score) : unifiedRecords[existingIndex].score,
-          passed: r.passed,
-          source: 'result',
-          result: r.passed ? 'PASS' : 'FAIL',
-          displayResult: r.passed ? 'PASS' : 'FAIL',
-          displayResultKind: r.passed ? 'PASS' : 'FAIL',
-          examDate: unifiedRecords[existingIndex].examDate || r.createdAt,
-          dateDisplayKind: 'DATE',
-          dateDisplay: format(new Date(unifiedRecords[existingIndex].examDate || r.createdAt), 'MMM d, yyyy'),
-          examCategory: r.examCategory || unifiedRecords[existingIndex].examCategory,
-          attemptType: r.attemptType || unifiedRecords[existingIndex].attemptType,
-          isMigrated: !!r.migrationRef || !!unifiedRecords[existingIndex].migrationRef,
-          migrationRef: r.migrationRef || unifiedRecords[existingIndex].migrationRef,
+      if (existingRecord) {
+        const existingIndex = unifiedRecords.findIndex((rec) => rec.id === existingRecord.id)
+        if (existingIndex !== -1) {
+          unifiedRecords[existingIndex] = {
+            ...unifiedRecords[existingIndex],
+            id: `result_${r.id}`,
+            score: r.score != null ? Number(r.score) : unifiedRecords[existingIndex].score,
+            passed: r.passed,
+            source: 'result',
+            result: r.passed ? 'PASS' : 'FAIL',
+            displayResult: r.passed ? 'PASS' : 'FAIL',
+            displayResultKind: r.passed ? 'PASS' : 'FAIL',
+            examDate: unifiedRecords[existingIndex].examDate || r.createdAt,
+            dateDisplayKind: 'DATE',
+            dateDisplay: format(new Date(unifiedRecords[existingIndex].examDate || r.createdAt), 'MMM d, yyyy'),
+            examCategory: r.examCategory || unifiedRecords[existingIndex].examCategory,
+            attemptType: r.attemptType || unifiedRecords[existingIndex].attemptType,
+            isMigrated: !!r.migrationRef || !!unifiedRecords[existingIndex].migrationRef,
+            migrationRef: r.migrationRef || unifiedRecords[existingIndex].migrationRef,
+          }
         }
       } else {
         const matchingBooking = bookingsRaw.find((b) => {
@@ -740,12 +751,12 @@ async function RecordsTabServer({ query }: { query?: string }) {
       const dateB = new Date(b.examDate || b.createdAt).getTime()
       if (dateB !== dateA) return dateB - dateA
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    }).slice(0, 2000)
+    })
 
     const serialized = serializePrisma(finalRecords)
 
     // eslint-disable-next-line react-hooks/error-boundaries
-    return <RecordsTab records={serialized} modules={modules} />
+    return <RecordsTab records={serialized} modules={modules} totalCount={finalRecords.length} />
   } catch (error) {
     console.error('[RecordsTabServer] Error:', error)
     return <DataUnavailableError />

@@ -82,6 +82,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
 
   // Track form changes for unsaved changes warning
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/incompatible-library -- form.watch() is React Hook Form API, not a hook
     const subscription = form.watch(() => markDirty())
     return () => subscription.unsubscribe()
   })

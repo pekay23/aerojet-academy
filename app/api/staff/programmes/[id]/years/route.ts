@@ -6,9 +6,11 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 // POST /api/staff/programmes/[id]/years — Add a programme year
 export const POST = withErrorHandler(
-  async (req: NextRequest, context?: { params: Record<string, string> }) => {
+  async (req: NextRequest, context?: { params: Promise<Record<string, string>> }) => {
     const staff = await requireStaff()
-    const programmeId = context?.params?.id
+    if (!context) return apiError('Context required')
+    const params = await context.params
+    const programmeId = params.id
     if (!programmeId) return apiError('Programme ID required')
 
     const body = await req.json()
@@ -21,18 +23,31 @@ export const POST = withErrorHandler(
     const programme = await prismaUnfiltered.fullTimeProgramme.findUnique({ where: { id: programmeId } })
     if (!programme) return apiError('Programme not found', 404)
 
+    const parsedYearNumber = Number.parseInt(yearNumber, 10)
+    if (Number.isNaN(parsedYearNumber) || parsedYearNumber < 1) {
+      return apiError('Invalid year number')
+    }
+
     const existing = await prismaUnfiltered.programmeYear.findUnique({
-      where: { programmeId_yearNumber: { programmeId, yearNumber: parseInt(yearNumber) } },
+      where: { programmeId_yearNumber: { programmeId, yearNumber: parsedYearNumber } },
     })
     if (existing) return apiError(`Year ${yearNumber} already exists for this programme`)
+
+    const parsedYearFee = yearFeeAmount ? Number.parseFloat(yearFeeAmount) : null
+    const parsedSeatFee = seatConfirmationFee
+      ? Number.parseFloat(seatConfirmationFee)
+      : 1500
+    const parsedFirstPayment = firstPaymentAmount
+      ? Number.parseFloat(firstPaymentAmount)
+      : 3500
 
     const year = await prismaUnfiltered.programmeYear.create({
       data: {
         programmeId,
-        yearNumber: parseInt(yearNumber),
-        yearFeeAmount: yearFeeAmount ? parseFloat(yearFeeAmount) : null,
-        seatConfirmationFee: seatConfirmationFee ? parseFloat(seatConfirmationFee) : 1500,
-        firstPaymentAmount: firstPaymentAmount ? parseFloat(firstPaymentAmount) : 3500,
+        yearNumber: parsedYearNumber,
+        yearFeeAmount: parsedYearFee,
+        seatConfirmationFee: parsedSeatFee,
+        firstPaymentAmount: parsedFirstPayment,
         semesters: semesters,
       },
     })
@@ -51,8 +66,11 @@ export const POST = withErrorHandler(
 
 // PATCH /api/staff/programmes/[id]/years — Update a programme year
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, _context?: { params: Record<string, string> }) => {
+  async (req: NextRequest, _context?: { params: Promise<Record<string, string>> }) => {
     const staff = await requireStaff()
+    const params = await _context?.params ?? { id: '' }
+    void params
+
     const body = await req.json()
     const { yearId, yearFeeAmount, seatConfirmationFee, firstPaymentAmount, semesters, isActive } =
       body
@@ -66,13 +84,17 @@ export const PATCH = withErrorHandler(
       where: { id: yearId },
       data: {
         ...(yearFeeAmount !== undefined && {
-          yearFeeAmount: yearFeeAmount ? parseFloat(yearFeeAmount) : null,
+          yearFeeAmount: yearFeeAmount ? Number.parseFloat(yearFeeAmount) : null,
         }),
         ...(seatConfirmationFee !== undefined && {
-          seatConfirmationFee: parseFloat(seatConfirmationFee),
+          seatConfirmationFee: Number.isNaN(Number.parseFloat(seatConfirmationFee))
+          ? year.seatConfirmationFee
+          : Number.parseFloat(seatConfirmationFee),
         }),
         ...(firstPaymentAmount !== undefined && {
-          firstPaymentAmount: parseFloat(firstPaymentAmount),
+          firstPaymentAmount: Number.isNaN(Number.parseFloat(firstPaymentAmount))
+          ? year.firstPaymentAmount
+          : Number.parseFloat(firstPaymentAmount),
         }),
         ...(semesters !== undefined && {
           semesters: semesters,
@@ -86,7 +108,8 @@ export const PATCH = withErrorHandler(
       entity: 'ProgrammeYear',
       entityId: yearId,
       userId: staff.id,
-      details: body,
+      description: `Updated programme year ${yearId}`,
+      changes: { before: body, after: { yearFeeAmount, seatConfirmationFee, firstPaymentAmount, semesters, isActive } },
     })
 
     return apiSuccess(updated)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { naturalCompare } from '@/lib/utils/array'
 import {
   Search,
@@ -15,7 +15,7 @@ import {
   ArrowDown,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { updateExamBooking, deleteExamRecord } from '@/app/staff/actions/index'
+import { updateExamBooking, updateExamResult, deleteExamRecord } from '@/app/staff/actions/index'
 import BookExamForStudentDialog from './BookExamForStudentDialog'
 import AddExamRecordDialog from './AddExamRecordDialog'
 import CertificateReleaseControl from './CertificateReleaseControl'
@@ -41,8 +41,101 @@ const EXAM_FILTERS = [
 
 type ExamFilter = (typeof EXAM_FILTERS)[number]['key']
 
-import type { SerializedStudent } from '@/lib/types/staff'
-type StudentSummary = SerializedStudent
+type StudentSummary = {
+  id: string
+  email: string
+  profile: { firstName: string; lastName: string } | null
+  studentProfile: {
+    studentId: string | null
+    enrollmentType: string | null
+    enrollmentDate: string | null
+    studyPathwayLocked: boolean
+    studyPathwayLockedAt: string | null
+    fundingSource: string | null
+    currentYearNumber: number | null
+    currentSemesterNumber: number | null
+    programmeChoice: string | null
+    certificatesReleased: boolean
+    documentsReleased: boolean
+    pathwayRel?: { code: string; name: string } | null
+    academicYear?: { id: string; name: string } | null
+    semester?: { id: string; name: string } | null
+    licenseTargets?: { licenseCategory: { name?: string | null; code?: string | null } | null }[]
+    academicYearId?: string | null
+    semesterId?: string | null
+    CGPA?: number | null
+  } | null
+  wallet: { availableBalance: number; reservedBalance: number; balance: number; currency: string } | null
+  examBookings: {
+    id: string
+    moduleCode: string
+    examDate: string | null
+    score: number | null
+    percentage: number | null
+    result: string | null
+    status: string
+    bookingType: string | null
+    attemptType: string | null
+    examCategory: string | null
+    amountPaid: number | null
+    isResit: boolean
+    eventName: string | null
+    sittingLabel: string | null
+    attendanceStatus: string | null
+    bookedAt?: string | null
+    createdAt?: string
+    demandStatus?: string | null
+    executedAt?: string | null
+    rolloverToEventId?: string | null
+    examAttendance?: { status?: string | null } | null
+    sittingAssignments?: { attendanceStatus?: string | null; sitting?: { dayNumber?: number; sessionType?: string } | null }[] | null
+    course?: { id?: string; name: string; code: string } | null
+    exam?: {
+      name?: string | null
+      examDate?: string | Date | null
+      examComponent?: {
+        course?: { id?: string; name: string; code: string } | null
+      } | null
+    } | null
+    event?: {
+      id?: string
+      name: string
+      startDate?: string | null
+      endDate?: string | null
+      status?: string | null
+    } | null
+  }[] | null
+  examResults: {
+    id: string
+    moduleCode: string
+    score: number
+    maxScore: number
+    percentage: number
+    passed: boolean
+    attemptType: string | null
+    sourceNotes: string | null
+    certificateUrl: string | null
+    examCategory: string | null
+    createdAt?: string
+    exam?: {
+      name?: string | null
+      examDate?: string | Date | null
+      examComponent?: {
+        course?: { id?: string; code?: string; name?: string } | null
+      } | null
+    } | null
+  }[] | null
+  examBundles: {
+    id: string
+    bundleType: string
+    usedSeats: number
+    totalSeats: number
+    amountPaid: number
+    status: string
+    validUntil: string | null
+    createdAt?: string
+  }[] | null
+}
 
 export type UnifiedExamRecord = {
   id: string
@@ -264,22 +357,22 @@ export default function ExamsTab({
   }, [student.examBookings, student.examResults])
 
   // ---- Upcoming / Missed helpers ----
-  const isUpcomingBooking = (r: UnifiedExamRecord) =>
+  const isUpcomingBooking = useCallback((r: UnifiedExamRecord) =>
     isUpcomingBookingFromLib({
       examDate: r.examDate,
       result: r.result,
       demandStatus: r.demandStatus,
       eventStatus: r.eventStatus,
-    })
+    }), [])
 
-  const isMissedBooking = (r: UnifiedExamRecord) =>
+  const isMissedBooking = useCallback((r: UnifiedExamRecord) =>
     isMissedBookingFromLib({
       examDate: r.examDate,
       result: r.result,
       score: r.score,
       demandStatus: r.demandStatus,
       hasResult: r.hasResult,
-    })
+    }), [])
 
   // Apply filters
   const filteredRecords = useMemo(() => {
@@ -351,19 +444,34 @@ export default function ExamsTab({
   // Handle inline edit save
   const handleSaveEdit = async (record: UnifiedExamRecord) => {
     try {
-      const res = await updateExamBooking(record.id, {
-        score: editData.score,
-        result: editData.result,
-        examDate: editData.examDate ? new Date(editData.examDate) : undefined,
-        moduleCode: editData.moduleCode || undefined,
-        attemptType: editData.attemptType || undefined,
-        bookingType: editData.bookingType || undefined,
-        examCategory:
-          (editData.examCategory as 'INTERNAL' | 'OFFICIAL_EASA' | undefined) || undefined,
-        resultIdToSync: (record as { resultId?: string }).resultId || undefined,
-      })
-      if ('error' in res && res.error) {
-        toast.error(res.error)
+      let res: { success: boolean } | { error: string }
+      if (record.id.startsWith('result_')) {
+        res = await updateExamResult(record.id.replace('result_', ''), {
+          score: editData.score,
+          result: editData.result,
+          examDate: editData.examDate ? new Date(editData.examDate) : undefined,
+          moduleCode: editData.moduleCode || undefined,
+          attemptType: editData.attemptType || undefined,
+          bookingType: editData.bookingType || undefined,
+          examCategory:
+            (editData.examCategory as 'INTERNAL' | 'OFFICIAL_EASA' | undefined) || undefined,
+        })
+      } else {
+        res = await updateExamBooking(record.id, {
+          score: editData.score,
+          result: editData.result,
+          examDate: editData.examDate ? new Date(editData.examDate) : undefined,
+          moduleCode: editData.moduleCode || undefined,
+          attemptType: editData.attemptType || undefined,
+          bookingType: editData.bookingType || undefined,
+          examCategory:
+            (editData.examCategory as 'INTERNAL' | 'OFFICIAL_EASA' | undefined) || undefined,
+          resultIdToSync: (record as { resultId?: string }).resultId || undefined,
+        })
+      }
+      const succeeded = (res as { success: boolean }).success
+      if (!succeeded) {
+        toast.error((res as { error: string }).error)
       } else {
         toast.success('Exam record updated')
         setEditingId(null)
