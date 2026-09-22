@@ -367,16 +367,27 @@
 
 ---
 
-## 9. RECOVERY BRANCHES CREATED
+## 9. RECOVERY BRANCHES CREATED (DELETED 2026-09-22)
 
-| Branch | Commit | Description |
-|--------|--------|-------------|
-| `recovery/claude-checkpoint-2` | `73e6d24c` | Cline checkpoint — 617 modified files, 23,903 ins / 11,874 del |
-| `recovery/merged-2026-08-30` | — | Merged checkpoint + feature/v1.4.0 + select preview/new-features |
-| `recovery/from-kilo-db` | — | 952 files extracted from kilo.db write operations |
-| `v1-archive` | `66673915` | Speed updates branch (untracked changes committed here) |
-| `feature/v1.4.0-audit-and-refactor` | `9d95af30` | Audit and refactor branch (40 unique files vs dev) |
-| `preview/new-features` | — | 533 unique files (mostly aerojet-careers, 11 useful for academy) |
+> All non-essential branches were deleted on 2026-09-22 as part of branch strategy
+> simplification to `dev` + `main` only. Commits are preserved in GitHub's reflog
+> for 90 days.
+
+| Branch | Commit | Description | Status |
+|--------|--------|-------------|--------|
+| `recovery/claude-checkpoint-2` | `73e6d24c` | Cline checkpoint — 617 modified files, 23,903 ins / 11,874 del | Deleted (recoverable) |
+| `recovery/merged-2026-08-30` | — | Merged checkpoint + feature/v1.4.0 + select preview/new-features | Deleted (recoverable) |
+| `recovery/from-kilo-db` | — | 952 files extracted from kilo.db write operations | Deleted (recoverable) |
+| `v1-archive` | `66673915` | Speed updates branch (untracked changes committed here) | Deleted (recoverable) |
+| `feature/v1.4.0-audit-and-refactor` | `9d95af30` | Audit and refactor branch (40 unique files vs dev) | Deleted (recoverable) |
+| `preview/new-features` | — | 533 unique files (mostly aerojet-careers, 11 useful for academy) | Deleted (recoverable) |
+| `v2-ui` | `61638c66` | V2 UI refinements and universal topbar | Deleted (recoverable) |
+| `v2-update` | `dceb9562` | Accessibility updates | Deleted (recoverable) |
+| `staging` | `3fe5f60b` | Synced with main (audit remediation + tiptap) | Deleted (recoverable) |
+| `preview/homepage-design-lab` | `99cf47b5` | Homepage design lab | Deleted (recoverable) |
+| `renovate/tiptap-monorepo` | `988582e4` | Tiptap dependency update (merged to main via PR #33) | Deleted (merged) |
+| `vercel/vercel-speed-insights-to-nextj-dq2m6t` | `fb0a5775` | Add Vercel Speed Insights (closed) | Deleted (recoverable) |
+| `vercel/vercel-web-analytics-to-nextjs-9kufdd` | `ff51b6c9` | Add Vercel Web Analytics (closed) | Deleted (recoverable) |
 
 ---
 

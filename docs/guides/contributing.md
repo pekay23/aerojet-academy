@@ -1,10 +1,8 @@
 # Contributing to Aerojet Academy
 
 ## 🌿 Branch Strategy
-- `main` — Production-ready code.
-- `staging` — Pre-production validation.
-- `dev` — Integration branch for features.
-- `feature/*` — Individual feature development.
+- `main` — Production-ready code, always tagged and deployable.
+- `dev` — Integration branch for all in-progress and unverified work.
 
 ## 🔄 Commit Messages & Versioning
 We use **Conventional Commits** to automate versioning and changelogs.
@@ -21,10 +19,10 @@ To specify a bump type, use the `BUMP_TYPE` environment variable:
 - **Bash**: `BUMP_TYPE=minor git commit -m "..."`
 
 ## 🧪 Development Workflow
-1. Branch from `dev`.
+1. Branch from `dev` (or commit directly to `dev` for solo work).
 2. Sync your local database: `bun run db:push`.
-3. Make changes and verify with `bun run type-check`.
-4. Submit a PR to `dev`.
+3. Make changes and verify with `bun x tsc --noEmit`.
+4. Submit a PR to `dev` or commit directly.
 
 ## 🗄️ Database Management
 - **Primary**: Neon (Serverless PostgreSQL).

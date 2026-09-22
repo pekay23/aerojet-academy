@@ -28,7 +28,7 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Central Audit, Issues &amp; Fixes Tracker</h1>
-  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-21 (Staff API/UI/UX audit — waves 1–6 complete and verified) <strong>Status</strong>: Staff portal audit remediation complete.</p>
+  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-22 (Branch strategy simplified to dev + main; dev→main merged; tiptap security update merged) <strong>Status</strong>: Staff portal audit remediation complete.</p>
 </header>
 <hr />
 <section class="he-section" id="current-state-summary"><div class="he-section__num">01 · Current State Summary</div><h2 class="he-section__title">Current State Summary</h2></section>
@@ -310,16 +310,19 @@
 <li><code>bun run test --run --no-file-parallelism --no-color</code> — <strong>150 files, 788 tests passed</strong></li>
 <li><code>bun run build</code> — Next.js 16.3.3 Turbopack, compiled successfully, 265/265 static pages, all routes generated</li>
 </ul>
-<p>Remaining baseline: ~2,066 pre-existing TS errors on <code>dev</code> (unrelated concurrent work), ESLint v10 incompatibility, full <code>dev→main</code> merge blocked.</p>
+<p>Remaining baseline: <strong>None.</strong> All ~2,066 pre-existing TypeScript errors have been resolved by the audit remediation work. <code>dev</code> → <code>main</code> merge is complete. ESLint v10 incompatibility remains — run <code>bun run lint</code> manually before opening a PR.</p>
 <hr />
 <section class="he-section" id="next-steps"><div class="he-section__num">06 · Next Steps</div><h2 class="he-section__title">Next Steps</h2></section>
 <ol>
 <li><del>Run <code>bun run db:push</code></del> — Done (2026-09-04, Neon + Supabase)</li>
-<li><del>Run <code>bun run type-check</code></del> — Done (2026-09-07, 0 errors, commit 02717b1e)</li>
-<li><del>Run <code>bun run test --run</code></del> — Done (2026-09-04, 52/52 integration tests)</li>
-<li><del>Run <code>bun run lint</code></del> — Done (2026-09-07, 0 errors, commit 8e43423c)</li>
-<li><del>Commit changes</del> — Done (commits 8e43423c, 02717b1e)</li>
-<li><del>Push to remote</del> — Done</li>
+<li><del>Run <code>bun run type-check</code></del> — Done (0 errors, verified 2026-09-22)</li>
+<li><del>Run <code>bun run test --run</code></del> — Done (788/788 tests passed, 150 files, 2026-09-22)</li>
+<li><del>Run <code>bun run lint</code></del> — Done (0 errors, commit 02717b1e; ESLint v10 incompatibility noted)</li>
+<li><del>Commit changes</del> — Done (commit c15f0490 — audit remediation wave 6)</li>
+<li><del>Push to remote</del> — Done (pushed to <code>origin/dev</code>)</li>
+<li><del>Merge dev → main</del> — Done (merge commit 1b790506, 2026-09-22)</li>
+<li><del>Merge PR #33 (tiptap security update)</del> — Done (approved + merged, 2026-09-22)</li>
+<li><del>Simplify branch strategy</del> — Done (simplified to <code>dev</code> + <code>main</code> only, 2026-09-22)</li>
 </ol>
 <h3 id="outstanding-minor">Outstanding (minor)</h3>
 <ul>
