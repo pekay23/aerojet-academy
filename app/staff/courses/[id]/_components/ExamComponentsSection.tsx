@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,7 +11,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Plus, Loader2, Trash2, FileText, CheckSquare, Pencil, ChevronDown, ChevronRight, ClipboardList } from 'lucide-react'
+import {
+  Plus,
+  Loader2,
+  Trash2,
+  FileText,
+  CheckSquare,
+  Pencil,
+  ChevronDown,
+  ChevronRight,
+  ClipboardList,
+} from 'lucide-react'
 
 interface ExamComponentData {
   id: string
@@ -78,7 +89,9 @@ export default function ExamComponentsSection({
     // Sort keys: A, B1, B2, B3, then Uncategorized
     const order = ['A', 'B1', 'B2', 'B3', 'Uncategorized']
     return Object.entries(groups).sort(
-      ([a], [b]) => (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b))
+      ([a], [b]) =>
+        (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) -
+        (order.indexOf(b) === -1 ? 99 : order.indexOf(b))
     )
   }, [components, useGrouped])
 
@@ -134,7 +147,16 @@ export default function ExamComponentsSection({
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, name, type, duration, individualPrice, poolPrice, questionCount: questionCount || undefined, categoryCode: categoryCode || undefined }),
+        body: JSON.stringify({
+          code,
+          name,
+          type,
+          duration,
+          individualPrice,
+          poolPrice,
+          questionCount: questionCount || undefined,
+          categoryCode: categoryCode || undefined,
+        }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || 'Failed to save')
@@ -164,7 +186,7 @@ export default function ExamComponentsSection({
       if (!res.ok) throw new Error(data.error || 'Failed to delete')
       router.refresh()
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Unknown error')
+      toast.error(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setDeleting(null)
     }
@@ -189,10 +211,13 @@ export default function ExamComponentsSection({
           <p className="text-xs text-slate-500">
             {comp.type}
             {comp.questionCount ? ` · ${comp.questionCount} questions` : ''}
-            {' · '}{comp.duration}min
+            {' · '}
+            {comp.duration}min
             {comp.categoryCode ? ` · Cat ${comp.categoryCode}` : ''}
-            {' · '}{comp._count.exams} exam{comp._count.exams !== 1 ? 's' : ''}
-            {' · '}{comp._count.bookings} booking{comp._count.bookings !== 1 ? 's' : ''}
+            {' · '}
+            {comp._count.exams} exam{comp._count.exams !== 1 ? 's' : ''}
+            {' · '}
+            {comp._count.bookings} booking{comp._count.bookings !== 1 ? 's' : ''}
           </p>
         </div>
       </div>
@@ -252,9 +277,7 @@ export default function ExamComponentsSection({
           </DialogTrigger>
           <DialogContent className="sm:max-w-[440px]">
             <DialogHeader>
-              <DialogTitle>
-                {editingId ? 'Edit Exam Component' : 'Add Exam Component'}
-              </DialogTitle>
+              <DialogTitle>{editingId ? 'Edit Exam Component' : 'Add Exam Component'}</DialogTitle>
             </DialogHeader>
             <div className="mt-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
@@ -404,9 +427,7 @@ export default function ExamComponentsSection({
                     </span>
                     <span className="text-[10px] text-slate-400">({items.length})</span>
                   </button>
-                  {!isCollapsed && (
-                    <div className="space-y-2 pl-5">{items.map(renderCard)}</div>
-                  )}
+                  {!isCollapsed && <div className="space-y-2 pl-5">{items.map(renderCard)}</div>}
                 </div>
               )
             })}

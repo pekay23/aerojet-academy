@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { CheckSquare, Square, CheckCircle2, XCircle, Trash2 } from 'lucide-react'
 import { bulkUpdateEnrollmentStatus, bulkDeleteEnrollments } from '../../actions'
 import { toast } from 'sonner'
@@ -48,16 +48,16 @@ export type EnrollmentWithDetails = {
 
 interface EnrollmentsTableProps {
   enrollments: EnrollmentWithDetails[]
+  total: number
 }
 
-export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps) {
+export default function EnrollmentsTable({ enrollments, total }: EnrollmentsTableProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState(25)
-
-  const total = enrollments.length
-  const paged = enrollments.slice((page - 1) * perPage, page * perPage)
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1)
+  const perPage = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25))
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -80,10 +80,10 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
   }
 
   const toggleAll = () => {
-    if (selectedIds.length === paged.length && paged.length > 0) {
+    if (selectedIds.length === enrollments.length && enrollments.length > 0) {
       setSelectedIds([])
     } else {
-      setSelectedIds(paged.map((e) => e.id))
+      setSelectedIds(enrollments.map((e) => e.id))
     }
   }
 
@@ -152,12 +152,12 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                   id="select-all-enrollments"
                   name="select-all-enrollments"
                   role="checkbox"
-                  aria-checked={selectedIds.length === paged.length && paged.length > 0}
+                  aria-checked={selectedIds.length === enrollments.length && enrollments.length > 0}
                   aria-label="Select all enrollments on this page"
                   onClick={toggleAll}
                   className="hover:text-aerojet-blue text-slate-400 transition-colors"
                 >
-                  {selectedIds.length === paged.length && paged.length > 0 ? (
+                  {selectedIds.length === enrollments.length && enrollments.length > 0 ? (
                     <CheckSquare className="text-aerojet-blue h-4 w-4" />
                   ) : (
                     <Square className="h-4 w-4" />
@@ -172,7 +172,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paged.length === 0 ? (
+            {enrollments.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={6}
@@ -182,7 +182,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                 </TableCell>
               </TableRow>
             ) : (
-              paged.map((enrollment) => (
+              enrollments.map((enrollment) => (
                 <TableRow
                   key={enrollment.id}
                   className={selectedIds.includes(enrollment.id) ? 'bg-aerojet-blue/5' : ''}
@@ -254,8 +254,18 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
           page={page}
           perPage={perPage}
           total={total}
-          onPageChange={setPage}
-          onPerPageChange={setPerPage}
+          onPageChange={(newPage) => {
+            const params = new URLSearchParams(searchParams.toString())
+            params.set('page', String(newPage))
+            params.set('limit', String(perPage))
+            router.replace(`${pathname}?${params.toString()}`)
+          }}
+          onPerPageChange={(newPerPage) => {
+            const params = new URLSearchParams(searchParams.toString())
+            params.set('page', '1')
+            params.set('limit', String(newPerPage))
+            router.replace(`${pathname}?${params.toString()}`)
+          }}
         />
       </div>
     </div>

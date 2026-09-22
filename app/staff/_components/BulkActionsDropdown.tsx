@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { MoreVertical, LucideIcon } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 
 export interface BulkAction {
   label: string
@@ -115,107 +114,90 @@ export default function BulkActionsDropdown({
         </button>
 
         {/* Dropdown menu */}
-        <AnimatePresence>
-          {open && count > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -4 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2.5 dark:border-slate-800">
-                <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  {count} selected
-                </span>
-                <button
-                  onClick={() => {
-                    onClear()
-                    setOpen(false)
-                  }}
-                  className="text-[10px] font-bold text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
-                >
-                  Clear
-                </button>
-              </div>
+        {open && count > 0 && (
+          <div className="animate-fade-in absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2.5 dark:border-slate-800">
+              <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                {count} selected
+              </span>
+              <button
+                onClick={() => {
+                  onClear()
+                  setOpen(false)
+                }}
+                className="text-[10px] font-bold text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
+              >
+                Clear
+              </button>
+            </div>
 
-              {/* Action items */}
-              <div className="py-1">
-                {actions.map((action, idx) => {
-                  const styles = getStyles(action.variant)
-                  return (
-                    <button
-                      key={idx}
-                      disabled={loading}
-                      onClick={() => {
-                        if (action.confirmTitle) {
-                          setActiveAction(action)
-                          setOpen(false)
-                        } else {
-                          handleExecute(action)
-                        }
-                      }}
-                      className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm font-medium transition-all disabled:opacity-50 ${styles.hover}`}
-                    >
-                      <action.icon className={`h-4 w-4 ${styles.text}`} />
-                      <span className={styles.text}>{action.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {/* Action items */}
+            <div className="py-1">
+              {actions.map((action, idx) => {
+                const styles = getStyles(action.variant)
+                return (
+                  <button
+                    key={idx}
+                    disabled={loading}
+                    onClick={() => {
+                      if (action.confirmTitle) {
+                        setActiveAction(action)
+                        setOpen(false)
+                      } else {
+                        handleExecute(action)
+                      }
+                    }}
+                    className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm font-medium transition-all disabled:opacity-50 ${styles.hover}`}
+                  >
+                    <action.icon className={`h-4 w-4 ${styles.text}`} />
+                    <span className={styles.text}>{action.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Confirmation modal — same pattern as BulkActionsBar */}
-      <AnimatePresence>
-        {activeAction && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div
-                  className={`mb-4 flex h-16 w-16 items-center justify-center rounded-3xl ${getStyles(activeAction.variant).bg}`}
-                >
-                  <activeAction.icon
-                    className={`h-8 w-8 ${getStyles(activeAction.variant).text}`}
-                  />
-                </div>
-                <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                  {activeAction.confirmTitle || 'Confirm Action'}
-                </h3>
-                <p className="mt-2 text-sm text-slate-500">
-                  {activeAction.confirmMessage ||
-                    `Are you sure you want to perform this action on ${count} items?`}
-                </p>
-
-                <div className="mt-8 flex w-full flex-col gap-2">
-                  <button
-                    disabled={loading}
-                    onClick={() => handleExecute(activeAction)}
-                    className={`w-full rounded-2xl py-3 text-sm font-black text-white transition-all ${getStyles(activeAction.variant).confirmBg}`}
-                  >
-                    {loading ? 'Processing...' : 'Confirm Action'}
-                  </button>
-                  <button
-                    disabled={loading}
-                    onClick={() => setActiveAction(null)}
-                    className="w-full rounded-2xl bg-slate-100 py-3 text-sm font-bold text-slate-600 transition-all hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400"
-                  >
-                    Cancel
-                  </button>
-                </div>
+      {activeAction && (
+        <div className="animate-fade-in fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="animate-scale-in w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+            <div className="flex flex-col items-center text-center">
+              <div
+                className={`mb-4 flex h-16 w-16 items-center justify-center rounded-3xl ${getStyles(activeAction.variant).bg}`}
+              >
+                <activeAction.icon className={`h-8 w-8 ${getStyles(activeAction.variant).text}`} />
               </div>
-            </motion.div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                {activeAction.confirmTitle || 'Confirm Action'}
+              </h3>
+              <p className="mt-2 text-sm text-slate-500">
+                {activeAction.confirmMessage ||
+                  `Are you sure you want to perform this action on ${count} items?`}
+              </p>
+
+              <div className="mt-8 flex w-full flex-col gap-2">
+                <button
+                  disabled={loading}
+                  onClick={() => handleExecute(activeAction)}
+                  className={`w-full rounded-2xl py-3 text-sm font-black text-white transition-all ${getStyles(activeAction.variant).confirmBg}`}
+                >
+                  {loading ? 'Processing...' : 'Confirm Action'}
+                </button>
+                <button
+                  disabled={loading}
+                  onClick={() => setActiveAction(null)}
+                  className="w-full rounded-2xl bg-slate-100 py-3 text-sm font-bold text-slate-600 transition-all hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </>
   )
 }

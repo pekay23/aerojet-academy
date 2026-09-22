@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiError, apiCreated, withErrorHandler , RouteContext } from '@/lib/api/response'
+import { apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { RecencyActivityType } from '@prisma/client'
 import { z } from 'zod'
+import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 const recencySchema = z.object({
   activityType: z.enum(RecencyActivityType),
@@ -13,7 +14,7 @@ const recencySchema = z.object({
 })
 
 export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
-  await requireStaff()
+  const staff = await requireStaff()
   const { id } = (await ctx!.params) as { id: string }
   const body = await req.json()
   const parsed = recencySchema.safeParse(body)
@@ -27,6 +28,15 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
       hours: parsed.data.hours,
       date: new Date(parsed.data.date),
     },
+  })
+
+  await createAuditLog({
+    action: AuditAction.CREATE,
+    entity: 'InstructorRecency',
+    entityId: entry.id,
+    userId: staff.id,
+    description: `Added recency activity for instructor ${id}`,
+    changes: parsed.data,
   })
 
   return apiCreated(entry)

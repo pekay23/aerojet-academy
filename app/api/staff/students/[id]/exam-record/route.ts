@@ -4,6 +4,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { revalidatePath } from 'next/cache'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
+import { resolveAttemptType } from '@/lib/exams/attempt-types'
 
 /**
  * POST /api/staff/students/[id]/exam-record
@@ -26,28 +27,21 @@ export const POST = withErrorHandler(
     if (!studentId) return apiError('Student ID required')
 
     const body = await req.json()
-    const {
-      bookingType,
-      examDate,
-      attemptType,
-      examCategory,
-      notes,
-      entries,
-      isPending,
-    } = body as {
-      bookingType?: 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK'
-      examDate?: string | null
-      attemptType?: string
-      examCategory?: 'INTERNAL' | 'OFFICIAL_EASA'
-      notes?: string
-      isPending?: boolean
-      entries: {
-        courseId?: string
-        moduleCode: string
-        score?: number
-        resultOverride?: string
-      }[]
-    }
+    const { bookingType, examDate, attemptType, examCategory, notes, entries, isPending } =
+      body as {
+        bookingType?: 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK'
+        examDate?: string | null
+        attemptType?: string
+        examCategory?: 'INTERNAL' | 'OFFICIAL_EASA'
+        notes?: string
+        isPending?: boolean
+        entries: {
+          courseId?: string
+          moduleCode: string
+          score?: number
+          resultOverride?: string
+        }[]
+      }
 
     if (!entries || entries.length === 0) {
       return apiError('At least one entry is required')
@@ -69,7 +63,7 @@ export const POST = withErrorHandler(
       }
       if (!finalModuleCode) return apiError('Module code is required')
 
-      const targetAttemptType = attemptType || 'FIRST'
+      const targetAttemptType = resolveAttemptType(attemptType)
 
       // -----------------------------------------------------------------------
       // Resolve result + percentage
@@ -81,7 +75,7 @@ export const POST = withErrorHandler(
         result = undefined
         percentage = undefined
       } else if (entry.resultOverride && entry.resultOverride !== 'auto') {
-        result = entry.resultOverride  // 'pass' | 'fail' | 'deferred' | 'absent'
+        result = entry.resultOverride // 'pass' | 'fail' | 'deferred' | 'absent'
         if (entry.score !== undefined && entry.score !== null) percentage = entry.score
       } else if (entry.score !== undefined && entry.score !== null) {
         percentage = entry.score
@@ -112,7 +106,8 @@ export const POST = withErrorHandler(
           where: { id: existing.id },
           data: {
             courseId: entry.courseId ?? existing.courseId,
-            examDate: examDate !== undefined ? (examDate ? new Date(examDate) : null) : existing.examDate,
+            examDate:
+              examDate !== undefined ? (examDate ? new Date(examDate) : null) : existing.examDate,
             result,
             score: entry.score ?? existing.score,
             percentage: percentage ?? existing.percentage,
@@ -154,10 +149,13 @@ export const POST = withErrorHandler(
       if (result && ['pass', 'fail'].includes(result)) {
         const scoreVal = entry.score ?? (result === 'pass' ? 75 : 0)
         const grade =
-          (percentage ?? 0) >= 90 ? 'A'
-          : (percentage ?? 0) >= 80 ? 'B'
-          : (percentage ?? 0) >= 75 ? 'C'
-          : 'F'
+          (percentage ?? 0) >= 90
+            ? 'A'
+            : (percentage ?? 0) >= 80
+              ? 'B'
+              : (percentage ?? 0) >= 75
+                ? 'C'
+                : 'F'
 
         const existingResult = await prismaUnfiltered.examResult.findFirst({
           where: {
@@ -225,8 +223,13 @@ export const POST = withErrorHandler(
     const newCount = createdBookings.filter((b) => b.isNew).length
     const updatedCount = createdBookings.filter((b) => !b.isNew).length
 
-    const studentProfile = await prismaUnfiltered.profile.findUnique({ where: { userId: studentId }, select: { firstName: true, lastName: true } })
-    const studentName = studentProfile ? `${studentProfile.firstName} ${studentProfile.lastName}` : student.email
+    const studentProfile = await prismaUnfiltered.profile.findUnique({
+      where: { userId: studentId },
+      select: { firstName: true, lastName: true },
+    })
+    const studentName = studentProfile
+      ? `${studentProfile.firstName} ${studentProfile.lastName}`
+      : student.email
 
     await createAuditLog({
       userId: staff.id,

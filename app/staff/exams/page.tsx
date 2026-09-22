@@ -5,8 +5,10 @@ import StaffExamsTabs from '../_components/StaffExamsTabs'
 import ExamBookingsTable, { type ExamBookingWithDetails } from '../_components/ExamBookingsTable'
 import RecordsTab from './_components/RecordsTab'
 import { GroupCharterModal } from './_components/GroupCharterModal'
-import { getAvailableModules } from '../actions'
+import { getAvailableModules } from '../actions/index'
 import { serializePrisma } from '@/lib/utils/serialization'
+import { normalizeAttemptType, resolveAttemptType } from '@/lib/exams/attempt-types'
+
 import Link from 'next/link'
 import SearchInput from '@/components/SearchInput'
 import { format } from 'date-fns'
@@ -15,14 +17,7 @@ import {
   fulfillmentStateLabel,
   type BookingFulfillmentState,
 } from '@/lib/exams/fulfillment'
-import {
-  Plus,
-  Calendar,
-  Trophy,
-  BookOpen,
-  AlertCircle,
-} from 'lucide-react'
-
+import { Plus, Calendar, Trophy, BookOpen, AlertCircle } from 'lucide-react'
 
 import { BookingType, ExamCategory } from '@prisma/client'
 
@@ -139,7 +134,7 @@ const VALID_TABS = ['events', 'bookings', 'results', 'records']
 export default async function StaffExamsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; query?: string }>
+  searchParams: Promise<{ tab?: string; query?: string; page?: string; limit?: string }>
 }) {
   const session = await getAuthSession()
   if (!session) redirect('/login')
@@ -161,9 +156,7 @@ export default async function StaffExamsPage({
 async function EventsTab({ query }: { query?: string }) {
   try {
     const eventsRaw = await prismaUnfiltered.examEvent.findMany({
-      where: query
-        ? { name: { contains: query, mode: 'insensitive' } }
-        : undefined,
+      where: query ? { name: { contains: query, mode: 'insensitive' } } : undefined,
       include: {
         pools: { select: { currentMemberCount: true, maxCandidates: true } },
         _count: { select: { pools: true } },
@@ -179,6 +172,7 @@ async function EventsTab({ query }: { query?: string }) {
         where: { status: { in: ['OPEN', 'DRAFT'] } },
         select: { id: true, name: true },
         orderBy: { startDate: 'asc' },
+        take: 100, // Fix #4: cap charter events query
       }),
       prismaUnfiltered.examComponent.findMany({
         select: { id: true, code: true, name: true },
@@ -216,13 +210,10 @@ function EventsTabContent({
           <SearchInput id="exams-events-search" placeholder="Search events..." />
         </div>
         <div className="flex gap-3">
-          <GroupCharterModal
-            events={charterEvents}
-            modules={charterModules}
-          />
+          <GroupCharterModal events={charterEvents} modules={charterModules} />
           <Link
             href="/staff/exams/events/create"
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-colors"
           >
             <Plus className="h-4 w-4" />
             Create Event
@@ -280,14 +271,14 @@ function EventsTabContent({
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black tracking-wide uppercase ${
                             event.status === 'OPEN'
-                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                              ? 'border border-emerald-100 bg-emerald-50 text-emerald-600'
                               : event.status === 'CONFIRMED'
-                                ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                                ? 'border border-blue-100 bg-blue-50 text-blue-600'
                                 : event.status === 'DRAFT'
-                                  ? 'bg-slate-50 text-slate-500 border border-slate-100'
-                                  : 'bg-red-50 text-red-600 border border-red-100'
+                                  ? 'border border-slate-100 bg-slate-50 text-slate-500'
+                                  : 'border border-red-100 bg-red-50 text-red-600'
                           }`}
                         >
                           {event.status}
@@ -295,7 +286,7 @@ function EventsTabContent({
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                          <Calendar className="h-3.5 w-3.5 text-aerojet-blue" />
+                          <Calendar className="text-aerojet-blue h-3.5 w-3.5" />
                           {format(new Date(event.startDate), 'MMM d')} –{' '}
                           {format(new Date(event.endDate), 'MMM d, yyyy')}
                         </div>
@@ -309,7 +300,7 @@ function EventsTabContent({
                       <td className="px-6 py-4 text-right">
                         <Link
                           href={`/staff/exams/events/${event.id}`}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-600 shadow-sm transition-all hover:border-aerojet-blue/30 hover:bg-aerojet-blue/5 hover:text-aerojet-blue dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-blue/50"
+                          className="hover:border-aerojet-blue/30 hover:bg-aerojet-blue/5 hover:text-aerojet-blue dark:hover:border-aerojet-blue/50 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-wider text-slate-600 uppercase shadow-sm transition-all dark:border-slate-800 dark:bg-slate-900"
                         >
                           Manage
                         </Link>
@@ -341,7 +332,9 @@ async function BookingsTab({ query }: { query?: string }) {
           }
         : undefined,
       include: {
-        user: { include: { profile: { select: { firstName: true, middleName: true, lastName: true } } } },
+        user: {
+          include: { profile: { select: { firstName: true, middleName: true, lastName: true } } },
+        },
         event: { select: { name: true, startDate: true, endDate: true } },
         exam: {
           select: {
@@ -356,10 +349,22 @@ async function BookingsTab({ query }: { query?: string }) {
               select: {
                 name: true,
                 examDate: true,
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
+        bundle: {
+          select: {
+            id: true,
+            bundleType: true,
+            totalSeats: true,
+            usedSeats: true,
+            amountPaid: true,
+            validUntil: true,
+            freeModuleChanges: true,
+            usedModuleChanges: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: 300,
@@ -386,44 +391,48 @@ function BookingsTabContent({ bookings }: { bookings: ExamBookingWithDetails[] }
 /* ─── Results Tab ─── */
 async function ResultsTab({ query }: { query?: string }) {
   try {
-    const formalResults = await prismaUnfiltered.examResult.findMany({
-      where: query
-        ? {
-            OR: [
-              userSearchFilter(query),
-              examComponentCodeFilter(query),
-              { moduleCode: { contains: query, mode: 'insensitive' } },
-            ],
-          }
-        : undefined,
-      include: {
-        user: { include: { profile: { select: { firstName: true, lastName: true } } } },
-        exam: {
-          include: {
-            examComponent: { include: { course: { select: { name: true, code: true } } } },
+    const formalResults = await prismaUnfiltered.examResult
+      .findMany({
+        where: query
+          ? {
+              OR: [
+                userSearchFilter(query),
+                examComponentCodeFilter(query),
+                { moduleCode: { contains: query, mode: 'insensitive' } },
+              ],
+            }
+          : undefined,
+        include: {
+          user: { include: { profile: { select: { firstName: true, lastName: true } } } },
+          exam: {
+            include: {
+              examComponent: { include: { course: { select: { name: true, code: true } } } },
+            },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 300,
-    }).then(res => serializePrisma(res))
+        orderBy: { createdAt: 'desc' },
+        take: 300,
+      })
+      .then((res) => serializePrisma(res))
 
     // Unify results
-    const allResults = formalResults.map((r: SerializedFormalResult) => ({
-      id: r.id,
-      type: 'FORMAL' as const,
-      user: r.user,
-      moduleCode: r.moduleCode || r.exam?.examComponent?.course?.code || '—',
-      examName: r.exam?.name || 'Manual Result',
-      date: r.exam?.examDate || r.createdAt,
-      score: r.score ? Number(r.score) : null,
-      passed: r.passed,
-      certificateUrl: r.certificateUrl,
-    })).sort((a: FormalResultRow, b: FormalResultRow) => {
-      const aTime = a.date ? new Date(a.date).getTime() : 0
-      const bTime = b.date ? new Date(b.date).getTime() : 0
-      return bTime - aTime
-    })
+    const allResults = formalResults
+      .map((r: SerializedFormalResult) => ({
+        id: r.id,
+        type: 'FORMAL' as const,
+        user: r.user,
+        moduleCode: r.moduleCode || r.exam?.examComponent?.course?.code || '—',
+        examName: r.exam?.name || 'Manual Result',
+        date: r.exam?.examDate || r.createdAt,
+        score: r.score ? Number(r.score) : null,
+        passed: r.passed,
+        certificateUrl: r.certificateUrl,
+      }))
+      .sort((a: FormalResultRow, b: FormalResultRow) => {
+        const aTime = a.date ? new Date(a.date).getTime() : 0
+        const bTime = b.date ? new Date(b.date).getTime() : 0
+        return bTime - aTime
+      })
 
     // eslint-disable-next-line react-hooks/error-boundaries
     return <ResultsTabContent allResults={allResults} query={query} />
@@ -433,12 +442,21 @@ async function ResultsTab({ query }: { query?: string }) {
   }
 }
 
-function ResultsTabContent({ allResults, query }: { allResults: FormalResultRow[]; query?: string }) {
+function ResultsTabContent({
+  allResults,
+  query,
+}: {
+  allResults: FormalResultRow[]
+  query?: string
+}) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-end">
         <div className="w-full max-w-sm">
-          <SearchInput id="exams-results-search" placeholder="Search students, exams, or modules..." />
+          <SearchInput
+            id="exams-results-search"
+            placeholder="Search students, exams, or modules..."
+          />
         </div>
       </div>
 
@@ -453,7 +471,7 @@ function ResultsTabContent({ allResults, query }: { allResults: FormalResultRow[
                 <th className="px-6 py-4 text-center">Score</th>
                 <th className="px-6 py-4 text-center">Type</th>
                 <th className="px-6 py-4">Result</th>
-                <th className="px-6 py-4 text-right"></th>
+                <th className="px-6 py-4 text-right">Certificate</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -481,7 +499,7 @@ function ResultsTabContent({ allResults, query }: { allResults: FormalResultRow[
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue">
+                        <div className="text-aerojet-blue flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold">
                           {result.user.profile?.firstName?.charAt(0)}
                           {result.user.profile?.lastName?.charAt(0)}
                         </div>
@@ -497,7 +515,7 @@ function ResultsTabContent({ allResults, query }: { allResults: FormalResultRow[
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-aerojet-blue" />
+                        <BookOpen className="text-aerojet-blue h-4 w-4" />
                         <span className="font-medium text-slate-700">
                           {result.moduleCode} - {result.examName}
                         </span>
@@ -506,7 +524,7 @@ function ResultsTabContent({ allResults, query }: { allResults: FormalResultRow[
                     <td className="px-6 py-4 text-center">
                       <div className="flex flex-col items-center justify-center gap-0.5">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                          <Calendar className="h-3 w-3 text-aerojet-blue" />
+                          <Calendar className="text-aerojet-blue h-3 w-3" />
                           {result.date ? format(new Date(result.date), 'MMM d, yyyy') : '—'}
                         </div>
                       </div>
@@ -542,12 +560,14 @@ function ResultsTabContent({ allResults, query }: { allResults: FormalResultRow[
                           href={result.certificateUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-aerojet-blue shadow-sm transition-all hover:border-aerojet-blue/30 hover:bg-aerojet-blue/5 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-blue/50"
+                          className="text-aerojet-blue hover:border-aerojet-blue/30 hover:bg-aerojet-blue/5 dark:hover:border-aerojet-blue/50 inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-wider uppercase shadow-sm transition-all dark:border-slate-800 dark:bg-slate-900"
                         >
                           Certificate
                         </a>
                       ) : (
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">N/A</span>
+                        <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                          Not issued
+                        </span>
                       )}
                     </td>
                   </tr>
@@ -583,16 +603,21 @@ function formatBookingDisplayResult(value: string | null) {
 
 async function RecordsTabServer({ query }: { query?: string }) {
   try {
+    // Fetch all records for server-side filtering - no skip, no fetchLimit
+    // Client handles pagination after merging
     const [bookingsRaw, resultsRaw, modules] = await Promise.all([
       prismaUnfiltered.examBooking.findMany({
-        where: query
-          ? {
-              OR: [
-                userSearchFilter(query),
-                { moduleCode: { contains: query, mode: 'insensitive' } },
-              ],
-            }
-          : undefined,
+        where: {
+          deletedAt: null,
+          ...(query
+            ? {
+                OR: [
+                  userSearchFilter(query),
+                  { moduleCode: { contains: query, mode: 'insensitive' } },
+                ],
+              }
+            : {}),
+        },
         include: {
           examAttendance: {
             include: {
@@ -612,6 +637,7 @@ async function RecordsTabServer({ query }: { query?: string }) {
           },
         },
         orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
       prismaUnfiltered.examResult.findMany({
         where: query
@@ -631,14 +657,16 @@ async function RecordsTabServer({ query }: { query?: string }) {
           },
         },
         orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
       getAvailableModules(),
     ])
 
     // Unify bookings and results
     const unifiedRecords: ExamRecord[] = []
+    const bookingsMap = new Map<string, ExamRecord>()
 
-    // 1. Add all bookings
+    // 1. Add all bookings, keyed by exact (userId, moduleCode, normalizedAttemptType)
     for (const b of bookingsRaw) {
       const activeAssignment = b.sittingAssignments?.[0] || null
       const sitting = activeAssignment?.sitting || b.examAttendance?.sitting || null
@@ -653,66 +681,76 @@ async function RecordsTabServer({ query }: { query?: string }) {
       const hasRealResult = ['pass', 'fail'].includes(b.result?.toLowerCase() || '')
       const dateDisplayKind = effectiveExamDate
         ? 'DATE'
-        : (b.eventId || ['POOLED', 'SCHEDULED', 'POSTPONED'].includes(b.demandStatus))
+        : b.eventId || ['POOLED', 'SCHEDULED', 'POSTPONED'].includes(b.demandStatus)
           ? 'TBC'
           : 'TBD'
 
-      unifiedRecords.push({
+      const record = {
         ...b,
-        source: 'booking',
+        source: 'booking' as const,
         id: b.id,
         score: b.score != null ? Number(b.score) : null,
-        passed: hasRealResult
-          ? b.result?.toLowerCase() === 'pass'
-          : null,
+        passed: hasRealResult ? b.result?.toLowerCase() === 'pass' : null,
         isMigrated: b.result?.toUpperCase() === 'MIGRATED',
         migrationRef: null,
         examCategory: b.examCategory as ExamCategory,
         examDate: effectiveExamDate,
-        dateDisplay: effectiveExamDate ? format(new Date(effectiveExamDate), 'MMM d, yyyy') : dateDisplayKind,
+        dateDisplay: effectiveExamDate
+          ? format(new Date(effectiveExamDate), 'MMM d, yyyy')
+          : dateDisplayKind,
         dateDisplayKind,
         sittingLabel: sitting ? `Day ${sitting.dayNumber} ${sitting.sessionType}` : null,
         displayResult: formatBookingDisplayResult(displayResultKind),
         displayResultKind,
-      } as ExamRecord)
+      } as ExamRecord
+
+      unifiedRecords.push(record)
+      const bModule = (b.moduleCode || '').toUpperCase()
+      const bAttempt = normalizeAttemptType(b.attemptType) || resolveAttemptType(b.attemptType)
+      bookingsMap.set(`${b.userId}:${bModule}:${bAttempt}`, record)
     }
 
     // 2. Merge results into bookings or add as standalone
     for (const r of resultsRaw) {
       const rModule = (r.moduleCode || '').toUpperCase()
-      const existingIndex = unifiedRecords.findIndex(
-        (rec) => {
-          if (rec.source !== 'booking' || rec.userId !== r.userId || (rec.moduleCode?.toUpperCase() || '') !== rModule) return false
-          if (rec.attemptType && r.attemptType && rec.attemptType !== r.attemptType) return false
-          return true
-        }
-      )
+      const rAttempt = normalizeAttemptType(r.attemptType) || resolveAttemptType(r.attemptType)
+      const mapKey = `${r.userId}:${rModule}:${rAttempt}`
+      const existingRecord = bookingsMap.get(mapKey)
 
-      if (existingIndex !== -1) {
-        unifiedRecords[existingIndex] = {
-          ...unifiedRecords[existingIndex],
-          id: `result_${r.id}`,
-          score: r.score != null ? Number(r.score) : unifiedRecords[existingIndex].score,
-          passed: r.passed,
-          source: 'result',
-          result: r.passed ? 'PASS' : 'FAIL',
-          displayResult: r.passed ? 'PASS' : 'FAIL',
-          displayResultKind: r.passed ? 'PASS' : 'FAIL',
-          examDate: unifiedRecords[existingIndex].examDate || r.createdAt,
-          dateDisplayKind: 'DATE',
-          dateDisplay: format(new Date(unifiedRecords[existingIndex].examDate || r.createdAt), 'MMM d, yyyy'),
-          examCategory: r.examCategory || unifiedRecords[existingIndex].examCategory,
-          attemptType: r.attemptType || unifiedRecords[existingIndex].attemptType,
-          isMigrated: !!r.migrationRef || !!unifiedRecords[existingIndex].migrationRef,
-          migrationRef: r.migrationRef || unifiedRecords[existingIndex].migrationRef,
+      if (existingRecord) {
+        const existingIndex = unifiedRecords.findIndex((rec) => rec.id === existingRecord.id)
+        if (existingIndex !== -1) {
+          unifiedRecords[existingIndex] = {
+            ...unifiedRecords[existingIndex],
+            id: `result_${r.id}`,
+            score: r.score != null ? Number(r.score) : unifiedRecords[existingIndex].score,
+            passed: r.passed,
+            source: 'result',
+            result: r.passed ? 'PASS' : 'FAIL',
+            displayResult: r.passed ? 'PASS' : 'FAIL',
+            displayResultKind: r.passed ? 'PASS' : 'FAIL',
+            examDate: unifiedRecords[existingIndex].examDate || r.createdAt,
+            dateDisplayKind: 'DATE',
+            dateDisplay: format(
+              new Date(unifiedRecords[existingIndex].examDate || r.createdAt),
+              'MMM d, yyyy'
+            ),
+            examCategory: r.examCategory || unifiedRecords[existingIndex].examCategory,
+            attemptType: r.attemptType || unifiedRecords[existingIndex].attemptType,
+            isMigrated: !!r.migrationRef || !!unifiedRecords[existingIndex].migrationRef,
+            migrationRef: r.migrationRef || unifiedRecords[existingIndex].migrationRef,
+          }
         }
       } else {
+        // Standalone result row — match only by exact (userId, moduleCode, normalizedAttemptType).
+        // No fuzzy substring fallback (prevents M1 colliding with M10).
         const matchingBooking = bookingsRaw.find((b) => {
           if (b.userId !== r.userId) return false
           const bModule = (b.moduleCode || '').trim().toUpperCase()
           const rModuleNorm = rModule.trim()
-          if (!rModuleNorm) return false
-          return bModule === rModuleNorm || bModule.includes(rModuleNorm) || rModuleNorm.includes(bModule)
+          if (!rModuleNorm || bModule !== rModuleNorm) return false
+          const bAttempt = normalizeAttemptType(b.attemptType) || resolveAttemptType(b.attemptType)
+          return bAttempt === rAttempt
         })
 
         unifiedRecords.push({
@@ -734,18 +772,32 @@ async function RecordsTabServer({ query }: { query?: string }) {
       }
     }
 
+    // Deduplicate unified rows by (userId, moduleCode, normalizedAttemptType, source).
+    // Keeps the most recent record per key to avoid duplicate unified rows.
+    const seenKeys = new Set<string>()
+    const deduped: ExamRecord[] = []
+    for (const rec of unifiedRecords) {
+      const recModule = (rec.moduleCode || '').toUpperCase()
+      const recAttempt =
+        normalizeAttemptType(rec.attemptType) || resolveAttemptType(rec.attemptType)
+      const key = `${rec.userId}:${recModule}:${recAttempt}:${rec.source}`
+      if (seenKeys.has(key)) continue
+      seenKeys.add(key)
+      deduped.push(rec)
+    }
+
     // Final sort and serialization
-    const finalRecords = unifiedRecords.sort((a, b) => {
+    const finalRecords = deduped.sort((a, b) => {
       const dateA = new Date(a.examDate || a.createdAt).getTime()
       const dateB = new Date(b.examDate || b.createdAt).getTime()
       if (dateB !== dateA) return dateB - dateA
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    }).slice(0, 2000)
+    })
 
     const serialized = serializePrisma(finalRecords)
 
     // eslint-disable-next-line react-hooks/error-boundaries
-    return <RecordsTab records={serialized} modules={modules} />
+    return <RecordsTab records={serialized} modules={modules} totalCount={finalRecords.length} />
   } catch (error) {
     console.error('[RecordsTabServer] Error:', error)
     return <DataUnavailableError />
@@ -756,8 +808,12 @@ function DataUnavailableError() {
   return (
     <div className="rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center dark:border-slate-800">
       <AlertCircle className="mx-auto mb-4 h-12 w-12 text-amber-500" />
-      <h3 className="text-lg font-black text-slate-900 dark:text-white">Data temporarily unavailable</h3>
-      <p className="mt-2 text-sm text-slate-500">The database connection timed out. Please refresh the page in a few moments.</p>
+      <h3 className="text-lg font-black text-slate-900 dark:text-white">
+        Data temporarily unavailable
+      </h3>
+      <p className="mt-2 text-sm text-slate-500">
+        The database connection timed out. Please refresh the page in a few moments.
+      </p>
     </div>
   )
 }

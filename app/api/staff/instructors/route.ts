@@ -13,7 +13,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext)
   const search = url.searchParams.get('search') || ''
 
   const where: Prisma.InstructorProfileWhereInput = {
-    user: { role: 'INSTRUCTOR' }
+    user: { role: 'INSTRUCTOR' },
   }
 
   if (search) {
@@ -22,6 +22,8 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext)
       { user: { profile: { firstName: { contains: search, mode: 'insensitive' } } } },
       { user: { profile: { lastName: { contains: search, mode: 'insensitive' } } } },
       { employeeId: { contains: search, mode: 'insensitive' } },
+      { department: { contains: search, mode: 'insensitive' } },
+      { specialization: { contains: search, mode: 'insensitive' } },
     ]
   }
 
@@ -58,11 +60,11 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: RouteContext)
 
   const enriched = instructors.map((inst) => {
     const recentHours = inst.instructorRecency
-      .filter(r => r.date >= twentyFourMonthsAgo)
+      .filter((r) => r.date >= twentyFourMonthsAgo)
       .reduce((sum, r) => sum + r.hours, 0)
 
     const qualExpiring = inst.instructorQualifications.filter(
-      q => q.expiryDate && q.expiryDate <= new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000)
+      (q) => q.expiryDate && q.expiryDate <= new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000)
     )
 
     return {

@@ -9,40 +9,9 @@ export const dynamic = 'force-dynamic'
 export default async function OJTLogbooksPage() {
   await requireStaff()
 
-  // Auto-provision OJT logbooks for ALL students enrolled in FULL_TIME_4YEAR who lack them
-  const ojtEligibleMissing = await prismaUnfiltered.studentProfile.findMany({
-    where: {
-      programmeChoice: 'FULL_TIME_4YEAR',
-      ojtLogbook: { is: null },
-    },
-    include: {
-      licenseTargets: {
-        include: { licenseCategory: true },
-      },
-    },
-  })
-
-  if (ojtEligibleMissing.length > 0) {
-    const logbookCreates = ojtEligibleMissing.flatMap((student) => {
-      const licenceCategoryId = student.licenseTargets[0]?.licenseCategoryId
-      if (!licenceCategoryId) {
-        console.warn(`[OJT] Skipped auto-provision for student ${student.studentId}: no license target found`)
-        return []
-      }
-      return [
-        prismaUnfiltered.oJTLogbook.create({
-          data: {
-            studentProfileId: student.id,
-            licenceCategoryId,
-            facilityName: 'Aerojet Academy',
-            startDate: new Date(),
-            status: 'ACTIVE',
-          },
-        }),
-      ]
-    })
-    await Promise.all(logbookCreates)
-  }
+  // Auto-provision OJT logbooks is now lazy - only runs when explicitly triggered
+  // via the "Provision Missing" button in the dashboard or the /api/staff/ojt/provision endpoint
+  // This avoids silent DB writes on every page load
 
   const [logbooks, statusCounts] = await Promise.all([
     prismaUnfiltered.oJTLogbook.findMany({

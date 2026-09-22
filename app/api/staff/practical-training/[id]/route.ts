@@ -1,11 +1,13 @@
+import { Prisma } from '@prisma/client'
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 // PUT — sign/update a practical training record (dual signature or full admin edit)
 export const PUT = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
-  await requireStaff()
+  const staff = await requireStaff()
   const { id } = (await ctx!.params) as { id: string }
   const body = await req.json()
 
@@ -32,11 +34,21 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{
         assessorNotes: body.assessorNotes || null,
       },
     })
+
+    await createAuditLog({
+      action: AuditAction.UPDATE,
+      entity: 'PracticalTrainingRecord',
+      entityId: id,
+      userId: staff.id,
+      description: `Updated practical training record for student ${record.studentProfileId}`,
+      changes: body as Prisma.InputJsonValue,
+    })
+
     return apiSuccess(updated)
   }
 
   // Otherwise fallback to the signature/quick-result update path
-   const data: Record<string, unknown> = {}
+  const data: Record<string, unknown> = {}
 
   // Instructor signature
   if (body.signedByInstructor !== undefined) {
@@ -65,20 +77,43 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{
     data,
   })
 
+  await createAuditLog({
+    action: AuditAction.UPDATE,
+    entity: 'PracticalTrainingRecord',
+    entityId: id,
+    userId: staff.id,
+    description: `Updated practical training record ${id} (signature/result)`,
+    changes: data as Prisma.InputJsonValue,
+  })
+
   return apiSuccess(updated)
 })
 
 // DELETE — delete practical training record
-export const DELETE = withErrorHandler(async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
-  await requireStaff()
-  const { id } = (await ctx!.params) as { id: string }
+export const DELETE = withErrorHandler(
+  async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
+    const staff = await requireStaff()
+    const { id } = (await ctx!.params) as { id: string }
 
-  const record = await prismaUnfiltered.practicalTrainingRecord.findUnique({ where: { id } })
-  if (!record) return apiError('Record not found', 404)
+    const record = await prismaUnfiltered.practicalTrainingRecord.findUnique({ where: { id } })
+    if (!record) return apiError('Record not found', 404)
 
-  await prismaUnfiltered.practicalTrainingRecord.delete({
-    where: { id },
-  })
+    await prismaUnfiltered.practicalTrainingRecord.delete({
+      where: { id },
+    })
 
-  return apiSuccess({ message: 'Practical training record deleted successfully' })
-})
+    await createAuditLog({
+      action: AuditAction.DELETE,
+      entity: 'PracticalTrainingRecord',
+      entityId: id,
+      userId: staff.id,
+      description: `Deleted practical training record for student ${record.studentProfileId}`,
+      changes: {
+        studentProfileId: record.studentProfileId,
+        courseId: record.courseId,
+      } as Prisma.InputJsonValue,
+    })
+
+    return apiSuccess({ message: 'Practical training record deleted successfully' })
+  }
+)

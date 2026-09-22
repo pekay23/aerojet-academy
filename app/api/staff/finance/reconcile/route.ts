@@ -1,11 +1,22 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { requireStaff } from '@/lib/auth/helpers'
+import { requireStaff, rateLimitByUser, rateLimitByIP } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const staff = await requireStaff()
+
+  // Rate limiting: 10 requests/min per user (bulk operations are heavier), 10 requests/min per IP
+  const userLimit = rateLimitByUser(staff.id, 10, 60000)
+  if (!userLimit.allowed) {
+    return apiError('Too many requests. Please try again later.', 429)
+  }
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  const ipLimit = rateLimitByIP(ip, 10, 60000)
+  if (!ipLimit.allowed) {
+    return apiError('Too many requests from this IP. Please try again later.', 429)
+  }
 
   let body: { paymentIds: string[]; notes?: string }
   try {

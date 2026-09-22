@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
 import AdvancementForm from './_components/AdvancementForm'
 
 export const metadata: Metadata = { title: 'Year/Semester Advancement | Staff Portal' }
@@ -25,10 +26,13 @@ export default async function AdvancementPage() {
     }),
   ])
 
+  const serializedPathways = serializePrisma(pathways)
+  const serializedAcademicYears = serializePrisma(academicYears)
+
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-2xl font-black tracking-tight dark:text-white">
           Year / Semester Advancement
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -37,7 +41,11 @@ export default async function AdvancementPage() {
           logged.
         </p>
       </div>
-      <AdvancementForm pathways={pathways} academicYears={academicYears} isAdmin={isAdmin} />
+      <AdvancementForm
+        pathways={serializedPathways}
+        academicYears={serializedAcademicYears}
+        isAdmin={isAdmin}
+      />
     </div>
   )
 }

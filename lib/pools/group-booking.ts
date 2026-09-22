@@ -44,6 +44,15 @@ export async function createGroupBooking(params: GroupBookingParams) {
     throw new Error('One or more invalid exam modules selected.')
   }
 
+  // Fix #1: Validate representative user exists (clear error instead of confusing wallet error)
+  const repUser = await prisma.user.findUnique({
+    where: { id: repUserId },
+    select: { id: true },
+  })
+  if (!repUser) {
+    throw new Error('Representative user not found.')
+  }
+
   return prisma.$transaction(
     async (tx) => {
       // Check wallet balance

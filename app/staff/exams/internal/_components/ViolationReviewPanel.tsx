@@ -1,16 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  ShieldAlert,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  Send,
-} from 'lucide-react'
+import { toast } from 'sonner'
+import { ShieldAlert, Clock, CheckCircle2, XCircle, AlertCircle, Send } from 'lucide-react'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
-
 
 export interface Violation {
   id: string
@@ -31,7 +24,10 @@ interface ViolationReviewPanelProps {
   violations: Violation[]
 }
 
-const SEVERITY_LABELS: Record<string, { label: string; Icon: React.ComponentType<{ className?: string }> }> = {
+const SEVERITY_LABELS: Record<
+  string,
+  { label: string; Icon: React.ComponentType<{ className?: string }> }
+> = {
   WARNING: { label: 'Warning', Icon: AlertCircle },
   NOTICE: { label: 'Notice', Icon: ShieldAlert },
   CRITICAL: { label: 'Critical', Icon: ShieldAlert },
@@ -47,9 +43,12 @@ const VIOLATION_TYPE_LABELS: Record<string, string> = {
 
 function SeverityBadge({ severity }: { severity: Violation['severity'] }) {
   const config: Record<Violation['severity'], string> = {
-    WARNING: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
-    NOTICE: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800',
-    CRITICAL: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
+    WARNING:
+      'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
+    NOTICE:
+      'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800',
+    CRITICAL:
+      'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
   }
   const { Icon } = SEVERITY_LABELS[severity] || { Icon: AlertCircle }
   return (
@@ -64,12 +63,19 @@ function SeverityBadge({ severity }: { severity: Violation['severity'] }) {
 
 function ReviewStatusBadge({ outcome }: { outcome: Violation['reviewOutcome'] }) {
   const config: Record<Violation['reviewOutcome'], string> = {
-    PENDING: 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700',
-    GRACIOUS: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800',
-    STRICT: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
-    DISMISSED: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
+    PENDING:
+      'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700',
+    GRACIOUS:
+      'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800',
+    STRICT:
+      'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
+    DISMISSED:
+      'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
   }
-  const label = outcome === 'PENDING' ? 'Pending Review' : outcome.charAt(0).toUpperCase() + outcome.slice(1).toLowerCase()
+  const label =
+    outcome === 'PENDING'
+      ? 'Pending Review'
+      : outcome.charAt(0).toUpperCase() + outcome.slice(1).toLowerCase()
   return (
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold ${config[outcome]}`}
@@ -95,7 +101,11 @@ export default function ViolationReviewPanel({ sessionId, violations }: Violatio
   const pendingCount = items.filter((v) => v.reviewOutcome === 'PENDING').length
   const criticalCount = items.filter((v) => v.severity === 'CRITICAL').length
 
-  const patchOutcome = async (ids: string[], outcome: Violation['reviewOutcome'], note?: string) => {
+  const patchOutcome = async (
+    ids: string[],
+    outcome: Violation['reviewOutcome'],
+    note?: string
+  ) => {
     if (ids.length === 0) return
     const key = ids.join(',')
     setLoadingIds((prev) => new Set([...prev, key]))
@@ -109,14 +119,16 @@ export default function ViolationReviewPanel({ sessionId, violations }: Violatio
       if (json.success) {
         setItems((prev) =>
           prev.map((v) =>
-            ids.includes(v.id) ? { ...v, reviewOutcome: outcome, reviewNote: note || v.reviewNote } : v
+            ids.includes(v.id)
+              ? { ...v, reviewOutcome: outcome, reviewNote: note || v.reviewNote }
+              : v
           )
         )
       } else {
-        alert(json.error || 'Failed to update outcome')
+        toast.error(json.error || 'Failed to update outcome')
       }
     } catch {
-      alert('Failed to update outcome')
+      toast.error('Failed to update outcome')
     } finally {
       setLoadingIds((prev) => {
         const next = new Set(prev)
@@ -132,7 +144,8 @@ export default function ViolationReviewPanel({ sessionId, violations }: Violatio
       setConfirmState({
         open: true,
         title: 'End Exam Now?',
-        description: 'This will immediately terminate the student\'s exam session and auto-submit all answers. This action cannot be undone.',
+        description:
+          "This will immediately terminate the student's exam session and auto-submit all answers. This action cannot be undone.",
         confirmLabel: 'End Exam',
         onConfirm: () => forceEndExam(),
       })
@@ -157,12 +170,12 @@ export default function ViolationReviewPanel({ sessionId, violations }: Violatio
         if (pendingIds.length > 0) {
           await patchOutcome(pendingIds, 'STRICT', 'Session force-ended by admin')
         }
-        alert('Exam ended and submitted. Student notified.')
+        toast.success('Exam ended and submitted. Student notified.')
       } else {
-        alert(json.error || 'Failed to end exam')
+        toast.error(json.error || 'Failed to end exam')
       }
     } catch {
-      alert('Failed to end exam')
+      toast.error('Failed to end exam')
     } finally {
       setBulkLoading(false)
     }
@@ -176,7 +189,8 @@ export default function ViolationReviewPanel({ sessionId, violations }: Violatio
       setConfirmState({
         open: true,
         title: `End Exam & Mark ${pendingIds.length} violation(s) as Strict?`,
-        description: 'This will immediately terminate the student\'s exam session and auto-submit all answers. This action cannot be undone.',
+        description:
+          "This will immediately terminate the student's exam session and auto-submit all answers. This action cannot be undone.",
         confirmLabel: 'End Exam',
         onConfirm: async () => {
           setConfirmState((prev) => ({ ...prev, open: false }))
@@ -187,7 +201,8 @@ export default function ViolationReviewPanel({ sessionId, violations }: Violatio
       setConfirmState({
         open: true,
         title: `Dismiss ${pendingIds.length} violation(s)?`,
-        description: 'These violations will be marked as dismissed and will not affect the exam outcome.',
+        description:
+          'These violations will be marked as dismissed and will not affect the exam outcome.',
         confirmLabel: 'Dismiss All',
         onConfirm: async () => {
           setConfirmState((prev) => ({ ...prev, open: false }))
@@ -198,7 +213,8 @@ export default function ViolationReviewPanel({ sessionId, violations }: Violatio
       setConfirmState({
         open: true,
         title: `Allow Continue for ${pendingIds.length} violation(s)?`,
-        description: 'These violations will be marked as GRACIOUS — the student may continue without penalty.',
+        description:
+          'These violations will be marked as GRACIOUS — the student may continue without penalty.',
         confirmLabel: 'Allow Continue',
         onConfirm: async () => {
           setConfirmState((prev) => ({ ...prev, open: false }))
@@ -212,7 +228,7 @@ export default function ViolationReviewPanel({ sessionId, violations }: Violatio
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-8 text-sm text-slate-500">
+      <div className="py-8 text-center text-sm text-slate-500">
         <ShieldAlert className="mx-auto mb-2 h-6 w-6 opacity-50" />
         No violations recorded for this session.
       </div>
@@ -309,7 +325,7 @@ export default function ViolationReviewPanel({ sessionId, violations }: Violatio
                 <td className="px-3 py-2.5">
                   <SeverityBadge severity={v.severity} />
                 </td>
-                <td className="px-3 py-2.5 max-w-xs truncate text-slate-600 dark:text-slate-400">
+                <td className="max-w-xs truncate px-3 py-2.5 text-slate-600 dark:text-slate-400">
                   {v.detail || <span className="italic">No detail captured</span>}
                 </td>
                 <td className="px-3 py-2.5">

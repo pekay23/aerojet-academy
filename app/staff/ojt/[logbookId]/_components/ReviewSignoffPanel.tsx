@@ -22,11 +22,9 @@ interface Entry {
 
 interface Props {
   entries: Entry[]
-  logbookId: string
-  staffId: string
 }
 
-export default function ReviewSignoffPanel({ entries, logbookId: _logbookId, staffId: _staffId }: Props) {
+export default function ReviewSignoffPanel({ entries }: Props) {
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [commentId, setCommentId] = useState<string | null>(null)
@@ -86,12 +84,24 @@ export default function ReviewSignoffPanel({ entries, logbookId: _logbookId, sta
 
   const statusBadge = (entry: Entry) => {
     if (entry.verifiedByManagement) {
-      return <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-black text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Fully Verified</span>
+      return (
+        <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-black text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+          Fully Verified
+        </span>
+      )
     }
     if (entry.supervisorSignature) {
-      return <span className="rounded-full bg-blue-100 px-2 py-1 text-[10px] font-black text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Supervisor Signed</span>
+      return (
+        <span className="rounded-full bg-blue-100 px-2 py-1 text-[10px] font-black text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+          Supervisor Signed
+        </span>
+      )
     }
-    return <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-black text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Unsigned</span>
+    return (
+      <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-black text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+        Unsigned
+      </span>
+    )
   }
 
   return (
@@ -122,8 +132,12 @@ export default function ReviewSignoffPanel({ entries, logbookId: _logbookId, sta
                 <td className="max-w-[240px] truncate px-3 py-3 text-xs text-slate-600 dark:text-slate-300">
                   {entry.taskDescription}
                 </td>
-                <td className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">{entry.maintenanceType}</td>
-                <td className="px-3 py-3 text-xs font-bold text-slate-700 dark:text-slate-200">{entry.durationHours.toFixed(1)}</td>
+                <td className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">
+                  {entry.maintenanceType}
+                </td>
+                <td className="px-3 py-3 text-xs font-bold text-slate-700 dark:text-slate-200">
+                  {entry.durationHours.toFixed(1)}
+                </td>
                 <td className="px-3 py-3">{statusBadge(entry)}</td>
                 <td className="px-3 py-3">
                   <div className="flex flex-wrap gap-2">
@@ -138,7 +152,9 @@ export default function ReviewSignoffPanel({ entries, logbookId: _logbookId, sta
                         {commentId === entry.id && (
                           <textarea
                             value={comments[entry.id] || ''}
-                            onChange={(e) => setComments((c) => ({ ...c, [entry.id]: e.target.value }))}
+                            onChange={(e) =>
+                              setComments((c) => ({ ...c, [entry.id]: e.target.value }))
+                            }
                             placeholder="Supervisor comments (optional)"
                             rows={2}
                             className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"

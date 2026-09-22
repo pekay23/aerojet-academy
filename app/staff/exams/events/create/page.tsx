@@ -34,9 +34,9 @@ type ExamEventFormValues = z.input<typeof createExamEventSchema>
 export default function CreateExamEventPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const form = useForm<ExamEventFormValues>({
-    resolver: zodResolver(createExamEventSchema) as any,
-    defaultValues: {
+const form = useForm<ExamEventFormValues>({
+  resolver: zodResolver(createExamEventSchema),
+  defaultValues: {
       name: '',
       minRevenueTarget: 25000,
       minRevenueCurrency: 'EUR',
@@ -47,6 +47,7 @@ export default function CreateExamEventPage() {
 
   // Track form changes for unsaved changes warning
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/incompatible-library -- form.watch() is React Hook Form API, not a hook
     const subscription = form.watch(() => markDirty())
     return () => subscription.unsubscribe()
   })
@@ -127,7 +128,7 @@ export default function CreateExamEventPage() {
                       Core Information
                     </h3>
                     <FormField
-                      control={form.control as any}
+                      control={form.control}
                       name="name"
                       render={({ field }) => (
                         <FormItem>
@@ -159,7 +160,7 @@ export default function CreateExamEventPage() {
                     </h3>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                       <FormField
-                        control={form.control as any}
+                        control={form.control}
                         name="minRevenueTarget"
                         render={({ field }) => (
                           <FormItem className="sm:col-span-2">
@@ -182,6 +183,7 @@ export default function CreateExamEventPage() {
                                   className="focus:ring-aerojet-blue/10 h-12 border-slate-200 bg-white pl-10 text-base focus:ring-4 dark:border-slate-800 dark:bg-slate-900"
                                   placeholder="25000.00"
                                   {...field}
+                                  value={field.value as string | number}
                                 />
                               </div>
                             </FormControl>
@@ -193,7 +195,7 @@ export default function CreateExamEventPage() {
                         )}
                       />
                       <FormField
-                        control={form.control as any}
+                        control={form.control}
                         name="minRevenueCurrency"
                         render={({ field }) => (
                           <FormItem>
@@ -235,7 +237,7 @@ export default function CreateExamEventPage() {
 
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <FormField
-                      control={form.control as any}
+                      control={form.control}
                       name="startDate"
                       render={({ field }) => (
                         <FormItem>
@@ -260,7 +262,7 @@ export default function CreateExamEventPage() {
                       )}
                     />
                     <FormField
-                      control={form.control as any}
+                      control={form.control}
                       name="endDate"
                       render={({ field }) => (
                         <FormItem>
@@ -288,7 +290,7 @@ export default function CreateExamEventPage() {
 
                   <div className="space-y-6 border-t border-slate-100 pt-4 dark:border-slate-800">
                     <FormField
-                      control={form.control as any}
+                      control={form.control}
                       name="paymentDeadline"
                       render={({ field }) => (
                         <FormItem>
@@ -316,7 +318,7 @@ export default function CreateExamEventPage() {
                       )}
                     />
                     <FormField
-                      control={form.control as any}
+                      control={form.control}
                       name="joinDeadline"
                       render={({ field }) => (
                         <FormItem>

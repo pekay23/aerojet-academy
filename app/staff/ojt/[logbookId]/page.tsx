@@ -159,7 +159,6 @@ export default async function LogbookDetailPage({
       logbook={serialised}
       ataChapters={ataOptions}
       supervisors={supervisorOptions}
-      staffId={logbook.studentProfile.userId}
       mentorAssignments={serialised.mentorAssignments}
     />
   )

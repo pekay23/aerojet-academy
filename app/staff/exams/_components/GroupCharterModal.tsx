@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Users, Loader2, CheckCircle, X, Building2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Users, Loader2, CheckCircle, X, Building2, Search } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { useRouter } from 'next/navigation'
+import { useDebouncedCallback } from 'use-debounce'
+import { searchStudents } from '@/app/staff/actions/search'
 
 interface Event {
   id: string
@@ -27,6 +29,14 @@ interface GroupCharterModalProps {
   modules: Module[]
 }
 
+interface StudentOption {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  studentId: string
+}
+
 export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -34,16 +44,51 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  const [repUserId, setRepUserId] = useState('')
+  // Fix #2: Auto-close modal after success (was stuck due to setTimeout only)
+  useEffect(() => {
+    if (!success) return
+    const timer = setTimeout(() => {
+      setOpen(false)
+      router.refresh()
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [success, router])
+
   const [eventId, setEventId] = useState('')
   const [groupName, setGroupName] = useState('')
   const [memberCount, setMemberCount] = useState(1)
   const [selectedModules, setSelectedModules] = useState<string[]>([])
+  const [repUserId, setRepUserId] = useState('')
+
+  // Fix #1: Student search state
+  const [repStudents, setRepStudents] = useState<StudentOption[]>([])
+  const [repQuery, setRepQuery] = useState('')
+  const [repSearching, setRepSearching] = useState(false)
 
   const toggleModule = (id: string) => {
-    setSelectedModules((prev) =>
-      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
-    )
+    setSelectedModules((prev) => (prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]))
+  }
+
+  // Debounced student search using useDebouncedCallback (avoids cascading renders)
+  const doSearch = useDebouncedCallback(async (q: string) => {
+    if (q.length < 2) {
+      setRepStudents([])
+      return
+    }
+    setRepSearching(true)
+    try {
+      const result = await searchStudents(q)
+      setRepStudents(result.students || [])
+    } catch {
+      setRepStudents([])
+    } finally {
+      setRepSearching(false)
+    }
+  }, 250)
+
+  const handleSearchChange = (q: string) => {
+    setRepQuery(q)
+    doSearch(q)
   }
 
   const handleSubmit = async () => {
@@ -72,10 +117,6 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
         setError(data.error || 'Failed to create group charter')
       } else {
         setSuccess(true)
-        setTimeout(() => {
-          setOpen(false)
-          router.refresh()
-        }, 1500)
       }
     } catch {
       setError('Network error')
@@ -93,12 +134,20 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
     setSelectedModules([])
     setError(null)
     setSuccess(false)
+    setRepStudents([])
+    setRepQuery('')
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); else setOpen(true) }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) handleClose()
+        else setOpen(true)
+      }}
+    >
       <DialogTrigger asChild>
-        <button className="flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-bold text-indigo-700 transition-all hover:border-indigo-300 hover:bg-indigo-100 dark:border-indigo-900/30 dark:bg-indigo-900/10 dark:text-indigo-400">
+        <button className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800">
           <Building2 className="h-4 w-4" />
           Group Charter
         </button>
@@ -106,7 +155,7 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
 
       <DialogContent className="max-w-lg rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg font-black text-aerojet-blue">
+          <DialogTitle className="text-aerojet-blue flex items-center gap-2 text-lg font-black">
             <Building2 className="h-5 w-5" />
             Create Group Charter Booking
           </DialogTitle>
@@ -114,22 +163,66 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
 
         <div className="space-y-4 pt-2">
           <p className="text-xs text-slate-500">
-            Group charters reserve a dedicated pool (up to 28 seats) for an organisation
-            or military group. The representative&apos;s wallet will be charged €7,500.
+            Group charters reserve a dedicated pool (up to 28 seats) for an organisation or military
+            group. The representative&apos;s wallet will be charged €7,500.
           </p>
 
-          {/* Representative User ID */}
+          {/* Fix #1: Representative Student — searchable combobox */}
           <div className="space-y-1.5">
             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
-              Representative User ID
+              Representative Student
             </label>
-            <input
-              type="text"
-              value={repUserId}
-              onChange={(e) => setRepUserId(e.target.value)}
-              placeholder="Paste student/rep user ID"
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
+            <div className="relative">
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={repQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Search by name, email, or student ID..."
+                className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-10 pl-10 text-sm font-medium shadow-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+              {repSearching && (
+                <Loader2 className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />
+              )}
+            </div>
+            {repStudents.length > 0 && (
+              <div className="z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                {repStudents.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => {
+                      setRepUserId(s.id)
+                      setRepQuery(`${s.firstName} ${s.lastName} (${s.studentId})`)
+                      setRepStudents([])
+                    }}
+                    className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
+                      repUserId === s.id
+                        ? 'bg-aerojet-blue/10 text-aerojet-blue font-bold'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                    }`}
+                  >
+                    <div className="text-aerojet-blue flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold dark:bg-slate-800">
+                      {s.firstName.charAt(0)}
+                      {s.lastName.charAt(0)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-medium text-slate-900 dark:text-slate-100">
+                        {s.firstName} {s.lastName}
+                      </div>
+                      <div className="truncate text-xs text-slate-500 dark:text-slate-400">
+                        {s.studentId} · {s.email}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            {repQuery.length >= 2 && !repSearching && repStudents.length === 0 && (
+              <div className="mt-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                No students found matching &ldquo;{repQuery}&rdquo;
+              </div>
+            )}
           </div>
 
           {/* Event */}
@@ -140,11 +233,13 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
             <select
               value={eventId}
               onChange={(e) => setEventId(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             >
               <option value="">— Select event —</option>
               {events.map((e) => (
-                <option key={e.id} value={e.id}>{e.name}</option>
+                <option key={e.id} value={e.id}>
+                  {e.name}
+                </option>
               ))}
             </select>
           </div>
@@ -159,7 +254,7 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="e.g. Irish Air Corps, Ryanair"
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
 
@@ -173,8 +268,10 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
               min={1}
               max={28}
               value={memberCount}
-              onChange={(e) => setMemberCount(Math.min(28, Math.max(1, parseInt(e.target.value) || 1)))}
-              className="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              onChange={(e) =>
+                setMemberCount(Math.min(28, Math.max(1, parseInt(e.target.value) || 1)))
+              }
+              className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-28 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
 
@@ -189,7 +286,7 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
                   key={m.id}
                   className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
                     selectedModules.includes(m.id)
-                      ? 'bg-aerojet-blue/10 font-bold text-aerojet-blue'
+                      ? 'bg-aerojet-blue/10 text-aerojet-blue font-bold'
                       : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700/50'
                   }`}
                 >
@@ -197,7 +294,7 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
                     type="checkbox"
                     checked={selectedModules.includes(m.id)}
                     onChange={() => toggleModule(m.id)}
-                    className="rounded accent-aerojet-blue"
+                    className="accent-aerojet-blue rounded"
                   />
                   <span className="font-mono text-xs">{m.code}</span>
                   <span className="truncate">{m.name}</span>
@@ -230,7 +327,14 @@ export function GroupCharterModal({ events, modules }: GroupCharterModalProps) {
             </button>
             <button
               onClick={handleSubmit}
-              disabled={isSubmitting || success || !repUserId || !eventId || !groupName.trim() || selectedModules.length === 0}
+              disabled={
+                isSubmitting ||
+                success ||
+                !repUserId ||
+                !eventId ||
+                !groupName.trim() ||
+                selectedModules.length === 0
+              }
               className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}

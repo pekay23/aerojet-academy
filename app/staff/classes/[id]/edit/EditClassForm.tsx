@@ -75,7 +75,7 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
     try {
       const data = {
         ...values,
-        instructorId: values.instructorId === 'none' ? null : values.instructorId,
+        instructorId: values.instructorId === 'none' ? undefined : values.instructorId,
         startDate: new Date(values.startDate).toISOString(),
         endDate: new Date(values.endDate).toISOString(),
       }
@@ -185,12 +185,7 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
               <FormItem>
                 <FormLabel htmlFor="edit-class-start">Start Date</FormLabel>
                 <FormControl>
-                  <Input
-                    id="edit-class-start"
-                    type="date"
-                    autoComplete="off"
-                    {...field}
-                  />
+                  <Input id="edit-class-start" type="date" autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -204,12 +199,7 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
               <FormItem>
                 <FormLabel htmlFor="edit-class-end">End Date</FormLabel>
                 <FormControl>
-                  <Input
-                    id="edit-class-end"
-                    type="date"
-                    autoComplete="off"
-                    {...field}
-                  />
+                  <Input id="edit-class-end" type="date" autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -246,7 +236,11 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
           >
             Cancel
           </Button>
-          <Button type="submit" className="bg-aerojet-blue hover:bg-aerojet-blue/90" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90"
+            disabled={isLoading}
+          >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Changes
           </Button>

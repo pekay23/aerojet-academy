@@ -91,7 +91,11 @@ export async function staffConfirmWithdrawal(id: string) {
     if (wr.status !== 'REQUESTED') return { error: 'Only requested withdrawals can be confirmed.' }
     await prismaUnfiltered.withdrawalRequest.update({
       where: { id },
-      data: { status: 'STAFF_CONFIRMED', staffConfirmedById: staff.id, staffConfirmedAt: new Date() },
+      data: {
+        status: 'STAFF_CONFIRMED',
+        staffConfirmedById: staff.id,
+        staffConfirmedAt: new Date(),
+      },
     })
     await createAuditLog({
       action: AuditAction.UPDATE,
@@ -114,6 +118,7 @@ export async function rejectWithdrawal(id: string, reason: string) {
     const staff = await requireStaff()
     const wr = await prismaUnfiltered.withdrawalRequest.findUnique({ where: { id } })
     if (!wr) return { error: 'Request not found.' }
+    if (!reason?.trim()) return { error: 'A rejection reason is required.' }
     if (!OPEN_STATUSES.includes(wr.status as (typeof OPEN_STATUSES)[number])) {
       return { error: 'This request can no longer be rejected.' }
     }

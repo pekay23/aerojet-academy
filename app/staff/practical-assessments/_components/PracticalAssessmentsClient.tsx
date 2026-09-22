@@ -1,15 +1,28 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Plus, Calendar, CheckCircle, XCircle, AlertTriangle, ShieldCheck, UserCheck, X, Loader2, Edit, Trash2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  Plus,
+  Calendar,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  ShieldCheck,
+  UserCheck,
+  X,
+  Loader2,
+  Edit,
+  Trash2,
+} from 'lucide-react'
 import { useConfirmDialog } from '@/hooks/use-confirm-dialog'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { useToast } from '@/hooks/use-toast'
+import { useRouter } from 'next/navigation'
 
 type PracticalResult = 'SATISFACTORY' | 'UNSATISFACTORY' | 'NEEDS_REVIEW'
 type PracticalTaskCategory = 'P1' | 'P2'
-type PracticalDeliveryMethod = 'TASK_PERFORMANCE' | 'DEMONSTRATION' | 'TECHNICAL_DISCUSSION' | 'SIMULATION'
+type PracticalDeliveryMethod =
+  'TASK_PERFORMANCE' | 'DEMONSTRATION' | 'TECHNICAL_DISCUSSION' | 'SIMULATION'
 
 import type { SerializedPracticalRecord } from '@/lib/staff/types'
 type RecordItem = SerializedPracticalRecord
@@ -51,18 +64,51 @@ export default function PracticalAssessmentsClient({
   instructors: InstructorOption[]
   ataChapters: AtaChapterOption[]
 }) {
-  const _router = useRouter()
   const confirmDialog = useConfirmDialog()
   const toast = useToast()
-  const [records, _setRecords] = useState<RecordItem[]>(initialRecords)
+  const router = useRouter()
+  const [records, setRecords] = useState<RecordItem[]>(initialRecords)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isActionPending, setIsActionPending] = useState(false)
-  
+  const [isLoading, setIsLoading] = useState(false)
+
   // Filters state
   const [studentFilter, setStudentFilter] = useState('')
   const [courseFilter, setCourseFilter] = useState('')
   const [resultFilter, setResultFilter] = useState('')
+
+  const fetchFilteredRecords = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (studentFilter) params.append('studentProfileId', studentFilter)
+      if (courseFilter) params.append('courseId', courseFilter)
+      if (resultFilter) params.append('result', resultFilter)
+      params.append('page', '1')
+      params.append('limit', '50')
+
+      const res = await fetch(`/api/staff/practical-training?${params.toString()}`)
+      if (res.ok) {
+        const data = await res.json()
+        setRecords(data.records)
+      } else {
+        toast.error('Failed to load records')
+      }
+    } catch {
+      toast.error('An error occurred while loading records')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [studentFilter, courseFilter, resultFilter, toast])
+
+  // Debounce filter changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchFilteredRecords()
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [fetchFilteredRecords])
 
   // New Record Form state
   const [formData, setFormData] = useState(DEFAULT_FORM)
@@ -103,9 +149,11 @@ export default function PracticalAssessmentsClient({
       }
 
       const isEditing = !!editingId
-      const url = isEditing ? `/api/staff/practical-training/${editingId}` : '/api/staff/practical-training'
+      const url = isEditing
+        ? `/api/staff/practical-training/${editingId}`
+        : '/api/staff/practical-training'
       const method = isEditing ? 'PUT' : 'POST'
-      
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -116,9 +164,13 @@ export default function PracticalAssessmentsClient({
         const err = await res.json()
         toast.error(err.error || 'Failed to save practical record')
       } else {
-        toast.success(isEditing ? 'Practical record updated successfully!' : 'Practical assessment record saved successfully!')
+        toast.success(
+          isEditing
+            ? 'Practical record updated successfully!'
+            : 'Practical assessment record saved successfully!'
+        )
         setIsModalOpen(false)
-        window.location.reload()
+        router.refresh()
       }
     } catch (_error) {
       toast.error('An unexpected error occurred.')
@@ -130,7 +182,7 @@ export default function PracticalAssessmentsClient({
   const signRecord = (id: string, approve: boolean) => {
     confirmDialog.confirm({
       title: approve ? 'Approve and Sign' : 'Sign Record',
-      description: approve 
+      description: approve
         ? 'Are you sure you want to sign this practical record as Satisfactory? This will mark the task as complete.'
         : 'Are you sure you want to apply your instructor signature to this record?',
       onConfirm: async () => {
@@ -146,7 +198,7 @@ export default function PracticalAssessmentsClient({
           })
           if (res.ok) {
             toast.success('Record signed successfully.')
-            window.location.reload()
+            router.refresh()
           } else {
             toast.error('Failed to sign record.')
           }
@@ -156,14 +208,15 @@ export default function PracticalAssessmentsClient({
           setIsActionPending(false)
           confirmDialog.close()
         }
-      }
+      },
     })
   }
 
   const deleteRecord = (id: string) => {
     confirmDialog.confirm({
       title: 'Delete Practical Record',
-      description: 'Are you sure you want to permanently delete this record? This action cannot be undone.',
+      description:
+        'Are you sure you want to permanently delete this record? This action cannot be undone.',
       onConfirm: async () => {
         setIsActionPending(true)
         try {
@@ -172,7 +225,7 @@ export default function PracticalAssessmentsClient({
           })
           if (res.ok) {
             toast.success('Record deleted successfully.')
-            window.location.reload()
+            router.refresh()
           } else {
             const err = await res.json()
             toast.error(err.error || 'Failed to delete record.')
@@ -183,30 +236,36 @@ export default function PracticalAssessmentsClient({
           setIsActionPending(false)
           confirmDialog.close()
         }
-      }
+      },
     })
   }
 
-  const filteredRecords = useMemo(() => {
-    return records.filter((rec) => {
-      const profile = rec.studentProfile?.user?.profile
-      const stdName = profile ? `${profile.firstName} ${profile.lastName}`.toLowerCase() : ''
-      const matchesStd = studentFilter === '' || rec.studentProfileId === studentFilter || stdName.includes(studentFilter.toLowerCase())
-      const matchesCourse = courseFilter === '' || rec.course.id === courseFilter
-      const matchesResult = resultFilter === '' || (rec.result || 'PENDING') === resultFilter
-      return matchesStd && matchesCourse && matchesResult
-    })
-  }, [records, studentFilter, courseFilter, resultFilter])
-
   const getResultBadge = (res: PracticalResult | null) => {
-    if (!res) return <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800 dark:bg-yellow-500/10 dark:text-yellow-400">Pending Review</span>
+    if (!res)
+      return (
+        <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800 dark:bg-yellow-500/10 dark:text-yellow-400">
+          Pending Review
+        </span>
+      )
     switch (res) {
       case 'SATISFACTORY':
-        return <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400"><CheckCircle className="h-3 w-3" /> Satisfactory</span>
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
+            <CheckCircle className="h-3 w-3" /> Satisfactory
+          </span>
+        )
       case 'NEEDS_REVIEW':
-        return <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-800 dark:bg-orange-500/10 dark:text-orange-400"><AlertTriangle className="h-3 w-3" /> Needs Review</span>
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-800 dark:bg-orange-500/10 dark:text-orange-400">
+            <AlertTriangle className="h-3 w-3" /> Needs Review
+          </span>
+        )
       case 'UNSATISFACTORY':
-        return <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-800 dark:bg-rose-500/10 dark:text-rose-400"><XCircle className="h-3 w-3" /> Fail</span>
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-800 dark:bg-rose-500/10 dark:text-rose-400">
+            <XCircle className="h-3 w-3" /> Fail
+          </span>
+        )
     }
   }
 
@@ -231,8 +290,10 @@ export default function PracticalAssessmentsClient({
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
           >
             <option value="">All Courses / Modules</option>
-            {courses.map(c => (
-              <option key={c.id} value={c.id}>{c.code} - {c.name}</option>
+            {courses.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.code} - {c.name}
+              </option>
             ))}
           </select>
 
@@ -242,8 +303,10 @@ export default function PracticalAssessmentsClient({
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
           >
             <option value="">All Students</option>
-            {students.map(s => (
-              <option key={s.id} value={s.id}>{s.studentId} — {s.user?.profile?.firstName || ''} {s.user?.profile?.lastName || ''}</option>
+            {students.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.studentId} — {s.user?.profile?.firstName || ''} {s.user?.profile?.lastName || ''}
+              </option>
             ))}
           </select>
 
@@ -272,7 +335,7 @@ export default function PracticalAssessmentsClient({
       {/* Main Data Table */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
+          <thead className="bg-slate-50 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
             <tr>
               <th className="px-6 py-4">Date / Module</th>
               <th className="px-6 py-4">Student</th>
@@ -283,9 +346,12 @@ export default function PracticalAssessmentsClient({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-slate-700/60">
-            {filteredRecords.map((rec) => (
-              <tr key={rec.id} className="transition hover:bg-slate-50/30 dark:hover:bg-slate-800/30">
-                <td className="whitespace-nowrap px-6 py-4">
+            {records.map((rec) => (
+              <tr
+                key={rec.id}
+                className="transition hover:bg-slate-50/30 dark:hover:bg-slate-800/30"
+              >
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
                     <Calendar className="h-4 w-4 text-slate-400" />
                     {new Date(rec.date).toLocaleDateString()}
@@ -297,15 +363,16 @@ export default function PracticalAssessmentsClient({
 
                 <td className="px-6 py-4">
                   <div className="font-bold text-slate-900 dark:text-white">
-                    {rec.studentProfile?.user?.profile?.firstName || 'Unknown'} {rec.studentProfile?.user?.profile?.lastName || 'Student'}
+                    {rec.studentProfile?.user?.profile?.firstName || 'Unknown'}{' '}
+                    {rec.studentProfile?.user?.profile?.lastName || 'Student'}
                   </div>
                   <div className="mt-0.5 font-mono text-xs text-slate-500 dark:text-slate-400">
                     ID: {rec.studentProfile?.studentId}
                   </div>
                 </td>
 
-                <td className="px-6 py-4 max-w-xs">
-                  <div className="font-medium text-slate-800 dark:text-slate-200 line-clamp-1">
+                <td className="max-w-xs px-6 py-4">
+                  <div className="line-clamp-1 font-medium text-slate-800 dark:text-slate-200">
                     {rec.description}
                   </div>
                   <div className="mt-1 flex flex-wrap gap-1 text-xs">
@@ -321,10 +388,11 @@ export default function PracticalAssessmentsClient({
                   </div>
                 </td>
 
-                <td className="whitespace-nowrap px-6 py-4">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div>{getResultBadge(rec.result)}</div>
                   <div className="mt-1 flex items-center gap-1 font-mono text-[10px] font-black text-slate-400">
-                    TASK CAT: <span className="text-slate-600 dark:text-slate-300">{rec.taskCategory}</span>
+                    TASK CAT:{' '}
+                    <span className="text-slate-600 dark:text-slate-300">{rec.taskCategory}</span>
                   </div>
                 </td>
 
@@ -355,7 +423,7 @@ export default function PracticalAssessmentsClient({
                   </div>
                 </td>
 
-                <td className="whitespace-nowrap px-6 py-4 text-right">
+                <td className="px-6 py-4 text-right whitespace-nowrap">
                   <div className="flex justify-end gap-2">
                     {!rec.signedByInstructor ? (
                       <button
@@ -367,11 +435,11 @@ export default function PracticalAssessmentsClient({
                         Sign
                       </button>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 mr-2">
+                      <span className="mr-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                         <ShieldCheck className="h-4 w-4" /> Complete
                       </span>
                     )}
-                    
+
                     <button
                       onClick={() => handleEditClick(rec)}
                       title="Edit Record"
@@ -379,7 +447,7 @@ export default function PracticalAssessmentsClient({
                     >
                       <Edit className="h-3.5 w-3.5" />
                     </button>
-                    
+
                     <button
                       onClick={() => deleteRecord(rec.id)}
                       title="Delete Record"
@@ -391,12 +459,20 @@ export default function PracticalAssessmentsClient({
                 </td>
               </tr>
             ))}
-            {filteredRecords.length === 0 && (
+            {isLoading ? (
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center font-medium text-slate-500">
-                  No practical assessment records found for current selection.
+                  Loading records...
                 </td>
               </tr>
+            ) : (
+              records.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center font-medium text-slate-500">
+                    No practical assessment records found for current selection.
+                  </td>
+                </tr>
+              )
             )}
           </tbody>
         </table>
@@ -405,12 +481,15 @@ export default function PracticalAssessmentsClient({
       {/* Log/Edit Record Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl overflow-y-auto max-h-[90vh] rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+          <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-200/60 pb-4 dark:border-slate-700/60">
               <h2 className="text-xl font-black text-slate-900 dark:text-white">
                 {editingId ? 'Edit Practical Record' : 'Log New Practical Training Record'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="rounded-lg p-1 hover:bg-slate-100 dark:hover:bg-slate-800">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="rounded-lg p-1 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
                 <X className="h-5 w-5 text-slate-400" />
               </button>
             </div>
@@ -418,7 +497,7 @@ export default function PracticalAssessmentsClient({
             <form onSubmit={handleSave} className="mt-6 space-y-5">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                  <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     Student <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -428,14 +507,17 @@ export default function PracticalAssessmentsClient({
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value="">-- Select Student --</option>
-                    {students.map(s => (
-                      <option key={s.id} value={s.id}>{s.studentId} — {s.user?.profile?.firstName || ''} {s.user?.profile?.lastName || ''}</option>
+                    {students.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.studentId} — {s.user?.profile?.firstName || ''}{' '}
+                        {s.user?.profile?.lastName || ''}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                  <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     Course / Module <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -445,14 +527,16 @@ export default function PracticalAssessmentsClient({
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value="">-- Select Module --</option>
-                    {courses.map(c => (
-                      <option key={c.id} value={c.id}>{c.code} — {c.name}</option>
+                    {courses.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.code} — {c.name}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                  <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     Practical category <span className="text-red-500">*</span>
                   </label>
                   <div className="flex gap-3">
@@ -474,7 +558,7 @@ export default function PracticalAssessmentsClient({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                  <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     ATA Chapter
                   </label>
                   <select
@@ -483,14 +567,16 @@ export default function PracticalAssessmentsClient({
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value="">-- Select ATA Chapter (Optional) --</option>
-                    {ataChapters.map(c => (
-                      <option key={c.id} value={c.id}>{c.code} — {c.title}</option>
+                    {ataChapters.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.code} — {c.title}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                  <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     Date Conducted <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -503,7 +589,7 @@ export default function PracticalAssessmentsClient({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                  <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     Duration (Minutes) <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -511,13 +597,15 @@ export default function PracticalAssessmentsClient({
                     required
                     min={15}
                     value={formData.durationMinutes}
-                    onChange={(e) => setFormData({ ...formData, durationMinutes: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, durationMinutes: Number(e.target.value) })
+                    }
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                  <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     Responsible Instructor <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -527,20 +615,27 @@ export default function PracticalAssessmentsClient({
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value="">-- Select Instructor --</option>
-                    {instructors.map(i => (
-                      <option key={i.id} value={i.id}>{i.profile?.firstName || ''} {i.profile?.lastName || ''}</option>
+                    {instructors.map((i) => (
+                      <option key={i.id} value={i.id}>
+                        {i.profile?.firstName || ''} {i.profile?.lastName || ''}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                  <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     Delivery Method <span className="text-red-500">*</span>
                   </label>
                   <select
                     required
                     value={formData.deliveryMethod}
-                    onChange={(e) => setFormData({ ...formData, deliveryMethod: e.target.value as PracticalDeliveryMethod })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        deliveryMethod: e.target.value as PracticalDeliveryMethod,
+                      })
+                    }
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value="TASK_PERFORMANCE">Task Performance</option>
@@ -552,7 +647,7 @@ export default function PracticalAssessmentsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                   Task / Manual Reference
                 </label>
                 <input
@@ -565,7 +660,7 @@ export default function PracticalAssessmentsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                   Task Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -579,15 +674,19 @@ export default function PracticalAssessmentsClient({
               </div>
 
               <div className="border-t border-slate-200/60 pt-4 dark:border-slate-700/60">
-                <h3 className="text-sm font-black text-slate-800 dark:text-white mb-3">Assessment</h3>
+                <h3 className="mb-3 text-sm font-black text-slate-800 dark:text-white">
+                  Assessment
+                </h3>
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                    <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                       Result / Competency
                     </label>
                     <select
                       value={formData.result}
-                      onChange={(e) => setFormData({ ...formData, result: e.target.value as PracticalResult })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, result: e.target.value as PracticalResult })
+                      }
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     >
                       <option value="">-- Leave Unassessed (Pending) --</option>
@@ -597,7 +696,7 @@ export default function PracticalAssessmentsClient({
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">
+                    <label className="mb-1 block text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                       Instructor Notes
                     </label>
                     <input
@@ -611,7 +710,7 @@ export default function PracticalAssessmentsClient({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 border-t border-slate-200/60 pt-4 dark:border-slate-700/60 mt-6">
+              <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-200/60 pt-4 dark:border-slate-700/60">
                 <button
                   type="button"
                   disabled={isActionPending}
@@ -625,7 +724,11 @@ export default function PracticalAssessmentsClient({
                   disabled={isActionPending}
                   className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-bold text-white shadow-md transition hover:bg-blue-700 active:scale-95 disabled:opacity-60"
                 >
-                  {isActionPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+                  {isActionPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4" />
+                  )}
                   {editingId ? 'Update Practical Task' : 'Save Practical Task'}
                 </button>
               </div>

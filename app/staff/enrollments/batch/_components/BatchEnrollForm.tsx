@@ -1,16 +1,9 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import {
-  CheckCircle2,
-  AlertCircle,
-  Users,
-  BookOpen,
-  Calendar,
-  Loader2,
-  Check,
-  ChevronsUpDown as _ChevronsUpDown,
-} from 'lucide-react'
+import { CheckCircle2, AlertCircle, Users, BookOpen, Calendar, Loader2, Check } from 'lucide-react'
+import { useFormDirty } from '@/hooks/useFormDirty'
+import { FormDirtyIndicator } from '@/components/shared/FormDirtyIndicator'
 
 type AcademicYear = {
   id: string
@@ -51,6 +44,8 @@ export default function BatchEnrollForm({
   const [result, setResult] = useState<{ created: number; skipped: number } | null>(null)
   const [error, setError] = useState('')
 
+  const { isDirty, markDirty, markClean } = useFormDirty()
+
   const selectedYear = academicYears.find((y) => y.id === selectedYearId)
   const semesters = selectedYear?.semesters || []
 
@@ -68,6 +63,7 @@ export default function BatchEnrollForm({
       }
       return next
     })
+    markDirty()
   }
 
   const toggleCourse = (id: string) => {
@@ -80,6 +76,7 @@ export default function BatchEnrollForm({
       }
       return next
     })
+    markDirty()
   }
 
   const selectAllStudents = () => {
@@ -88,6 +85,7 @@ export default function BatchEnrollForm({
     } else {
       setSelectedStudentIds(new Set(students.map((s) => s.id)))
     }
+    markDirty()
   }
 
   const selectAllEasaModules = () => {
@@ -102,6 +100,22 @@ export default function BatchEnrollForm({
       }
       return next
     })
+    markDirty()
+  }
+
+  const selectAllOtherCourses = () => {
+    const otherIds = new Set(otherCourses.map((c) => c.id))
+    const allSelected = otherCourses.every((c) => selectedCourseIds.has(c.id))
+    setSelectedCourseIds((prev) => {
+      const next = new Set(prev)
+      if (allSelected) {
+        otherIds.forEach((id) => next.delete(id))
+      } else {
+        otherIds.forEach((id) => next.add(id))
+      }
+      return next
+    })
+    markDirty()
   }
 
   const handleSubmit = async () => {
@@ -134,6 +148,7 @@ export default function BatchEnrollForm({
       }
 
       setResult({ created: data.created, skipped: data.skipped })
+      markClean()
     } catch (_err) {
       setError('Network error. Please try again.')
     } finally {
@@ -172,6 +187,7 @@ export default function BatchEnrollForm({
               onChange={(e) => {
                 setSelectedYearId(e.target.value)
                 setSelectedSemesterId('')
+                markDirty()
               }}
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               autoComplete="off"
@@ -196,7 +212,10 @@ export default function BatchEnrollForm({
               id="batch-semester"
               name="batch-semester"
               value={selectedSemesterId}
-              onChange={(e) => setSelectedSemesterId(e.target.value)}
+              onChange={(e) => {
+                setSelectedSemesterId(e.target.value)
+                markDirty()
+              }}
               disabled={!selectedYearId}
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               autoComplete="off"
@@ -307,6 +326,16 @@ export default function BatchEnrollForm({
                   : 'Select All EASA'}
               </button>
             )}
+            {otherCourses.length > 0 && (
+              <button
+                onClick={selectAllOtherCourses}
+                className="rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-600 transition-colors hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300"
+              >
+                {otherCourses.every((c) => selectedCourseIds.has(c.id))
+                  ? 'Deselect Other'
+                  : 'Select All Other'}
+              </button>
+            )}
           </div>
           <div className="max-h-[400px] overflow-y-auto p-3 sm:p-4">
             {/* EASA Modules */}
@@ -321,8 +350,8 @@ export default function BatchEnrollForm({
                     return (
                       <button
                         key={course.id}
-                        id={`select-course-${course.id}`}
-                        name={`select-course-${course.id}`}
+                        id={`select-easa-course-${course.id}`}
+                        name={`select-easa-course-${course.id}`}
                         role="checkbox"
                         aria-checked={isSelected}
                         aria-label={`Select course ${course.code}`}
@@ -366,22 +395,22 @@ export default function BatchEnrollForm({
                     return (
                       <button
                         key={course.id}
-                        id={`select-course-${course.id}`}
-                        name={`select-course-${course.id}`}
+                        id={`select-other-course-${course.id}`}
+                        name={`select-other-course-${course.id}`}
                         role="checkbox"
                         aria-checked={isSelected}
                         aria-label={`Select course ${course.code}`}
                         onClick={() => toggleCourse(course.id)}
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                           isSelected
-                            ? 'bg-purple-50 ring-1 ring-purple-200 dark:bg-purple-900/20 dark:ring-purple-800'
+                            ? 'bg-amber-50 ring-1 ring-amber-200 dark:bg-amber-900/20 dark:ring-amber-800'
                             : 'hover:bg-white/80 dark:hover:bg-slate-800/40'
                         }`}
                       >
                         <div
                           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors ${
                             isSelected
-                              ? 'bg-purple-600 text-white'
+                              ? 'bg-amber-600 text-white'
                               : 'border border-slate-300 dark:border-slate-600'
                           }`}
                         >
@@ -426,14 +455,22 @@ export default function BatchEnrollForm({
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">
+          <div
+            className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300"
+            role="status"
+            aria-live="polite"
+          >
             <AlertCircle className="h-4 w-4 shrink-0" />
             {error}
           </div>
         )}
 
         {result && (
-          <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/10 dark:text-emerald-300">
+          <div
+            className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/10 dark:text-emerald-300"
+            role="status"
+            aria-live="polite"
+          >
             <CheckCircle2 className="h-4 w-4 shrink-0" />
             <span>
               <strong>{result.created}</strong> enrollment{result.created !== 1 ? 's' : ''} created
@@ -450,7 +487,7 @@ export default function BatchEnrollForm({
         <button
           onClick={handleSubmit}
           disabled={loading || selectedStudentIds.size === 0 || selectedCourseIds.size === 0}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-3 text-sm font-bold text-white transition-all hover:bg-[#003a7c] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-8"
+          className="bg-aerojet-blue flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-all hover:bg-[#003a7c] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-8"
         >
           {loading ? (
             <>
@@ -461,6 +498,7 @@ export default function BatchEnrollForm({
             <>
               <CheckCircle2 className="h-4 w-4" />
               Activate Courses
+              <FormDirtyIndicator isDirty={isDirty} />
             </>
           )}
         </button>

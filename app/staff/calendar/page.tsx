@@ -166,11 +166,7 @@ export default async function StaffCalendarPage({
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-8">
-      <StaffCalendarGrid
-        events={events}
-        initialDate={currentDate}
-        currentUserId={session.user.id}
-      />
+      <StaffCalendarGrid events={events} initialDate={currentDate} />
     </div>
   )
 }
