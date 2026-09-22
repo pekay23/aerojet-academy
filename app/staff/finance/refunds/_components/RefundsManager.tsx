@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useDebounce } from 'use-debounce'
 import { toast } from 'sonner'
 import { CheckCircle2, XCircle, ShieldCheck, Plus, Search, User as UserIcon } from 'lucide-react'
@@ -11,43 +11,13 @@ import {
   approveAndProcessRefund,
 } from '@/lib/refund/actions'
 import { useFormDirty } from '@/hooks/useFormDirty'
-
-interface StudentOption {
-  id: string
-  name: string
-  email: string
-  studentId: string | null
-}
-
-const CURRENCY_OPTIONS = [
-  { code: 'EUR', symbol: '€', label: 'EUR · €' },
-  { code: 'USD', symbol: '$', label: 'USD · $' },
-  { code: 'GHS', symbol: 'GH₵', label: 'GHS · GH₵' },
-] as const
-
-interface RefundRow {
-  id: string
-  amount: number
-  currency: string
-  reason: string
-  status: string
-  createdAt: string
-  rejectedReason: string | null
-  user: {
-    email: string
-    profile: { firstName: string; lastName: string } | null
-    studentProfile: { studentId: string } | null
-  }
-}
-
-const STATUS_STYLE: Record<string, string> = {
-  REQUESTED: 'bg-amber-100 text-amber-700',
-  STAFF_CONFIRMED: 'bg-blue-100 text-blue-700',
-  ADMIN_APPROVED: 'bg-indigo-100 text-indigo-700',
-  PROCESSED: 'bg-emerald-100 text-emerald-700',
-  REJECTED: 'bg-red-100 text-red-700',
-  CANCELLED: 'bg-slate-100 text-slate-500',
-}
+import RejectRefundDialog from '@/components/shared/RejectRefundDialog'
+import {
+  getRefundStatusStyle,
+  CURRENCY_OPTIONS,
+  REFUND_FILTERS,
+  type RefundRow,
+} from '@/lib/types/staff'
 
 export default function RefundsManager({
   refunds,
@@ -56,7 +26,6 @@ export default function RefundsManager({
   refunds: RefundRow[]
   isAdmin: boolean
 }) {
-  const [isPending, startTransition] = useTransition()
   const [filter, setFilter] = useState('OPEN')
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState({
@@ -69,13 +38,32 @@ export default function RefundsManager({
 
   const { markDirty, markClean } = useFormDirty()
 
-  // ── Student search (debounced typeahead) ─────────────────────────────
+  // Student search (debounced typeahead)
   const [studentQuery, setStudentQuery] = useState('')
   const [debouncedQuery] = useDebounce(studentQuery, 200)
-  const [options, setOptions] = useState<StudentOption[]>([])
+  const [options, setOptions] = useState<
+    Array<{
+      id: string
+      name: string
+      email: string
+      studentId: string | null
+    }>
+  >([])
   const [searching, setSearching] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
 
+  // Reject dialog state
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [rejectTargetId, setRejectTargetId] = useState<string | null>(null)
+  const [rejectLoading, setRejectLoading] = useState(false)
+
+  // Confirm dialog state
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<'confirm' | 'approve' | null>(null)
+  const [confirmTargetId, setConfirmTargetId] = useState<string | null>(null)
+  const [confirmLoading, setConfirmLoading] = useState(false)
+
+  // Load student options
   useEffect(() => {
     if (!showCreate) return
     if (debouncedQuery.trim().length < 1) {
@@ -96,7 +84,6 @@ export default function RefundsManager({
         if (!res.ok) throw new Error('search failed')
         const json = await res.json()
         if (cancelled) return
-        // Endpoint returns `{ data: User[] }` via apiPaginated
         const rows: Array<{
           id: string
           profile?: { firstName: string; lastName: string } | null
@@ -125,25 +112,40 @@ export default function RefundsManager({
     }
   }, [debouncedQuery, showCreate])
 
-  const pickStudent = (s: StudentOption) => {
+  const pickStudent = (s: {
+    id: string
+    name: string
+    email: string
+    studentId: string | null
+  }) => {
     setForm((f) => ({ ...f, student: s.email, studentId: s.id }))
     setStudentQuery(`${s.name} · ${s.email}`)
     setShowDropdown(false)
   }
 
-  const run = (fn: () => Promise<{ error?: string; success?: boolean }>, ok: string) =>
-    startTransition(async () => {
-      const res = await fn()
-      if (res.error) toast.error(res.error)
-      else toast.success(ok)
-    })
+  const handleAction = useCallback(
+    async (
+      action: () => Promise<{ error?: string; success?: boolean }>,
+      successMessage: string,
+      errorMessage?: string
+    ) => {
+      try {
+        const res = await action()
+        if (res.error) toast.error(res.error)
+        else toast.success(successMessage)
+      } catch (error) {
+        toast.error(errorMessage ?? 'Action failed')
+      }
+    },
+    []
+  )
 
   const create = () => {
     if (!form.student.trim() || !form.amount || !form.reason.trim()) {
       toast.error('Student, amount and reason are all required.')
       return
     }
-    run(
+    handleAction(
       () =>
         requestRefund({
           student: form.studentId || form.student.trim(),
@@ -159,6 +161,46 @@ export default function RefundsManager({
     setShowCreate(false)
   }
 
+  const handleConfirm = (action: 'confirm' | 'approve', id: string) => {
+    setConfirmAction(action)
+    setConfirmTargetId(id)
+    setConfirmDialogOpen(true)
+  }
+
+  const handleConfirmAction = async () => {
+    if (!confirmTargetId || !confirmAction) return
+    setConfirmLoading(true)
+    try {
+      if (confirmAction === 'confirm') {
+        await handleAction(() => staffConfirmRefund(confirmTargetId), 'Confirmed')
+      } else if (confirmAction === 'approve') {
+        await handleAction(() => approveAndProcessRefund(confirmTargetId), 'Refund processed')
+      }
+    } finally {
+      setConfirmLoading(false)
+      setConfirmAction(null)
+      setConfirmTargetId(null)
+      setConfirmDialogOpen(false)
+    }
+  }
+
+  const handleReject = (id: string) => {
+    setRejectTargetId(id)
+    setRejectDialogOpen(true)
+  }
+
+  const handleRejectConfirm = async (reason: string) => {
+    if (!rejectTargetId) return
+    setRejectLoading(true)
+    try {
+      await handleAction(() => rejectRefund(rejectTargetId, reason), 'Rejected')
+    } finally {
+      setRejectLoading(false)
+      setRejectTargetId(null)
+      setRejectDialogOpen(false)
+    }
+  }
+
   const visible = refunds.filter((r) =>
     filter === 'OPEN'
       ? ['REQUESTED', 'STAFF_CONFIRMED', 'ADMIN_APPROVED'].includes(r.status)
@@ -170,65 +212,92 @@ export default function RefundsManager({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
-          {['OPEN', 'ALL', 'PROCESSED', 'REJECTED'].map((f) => (
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Refund status filters">
+          {REFUND_FILTERS.map((f: { value: string; label: string }) => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
+              key={f.value}
+              onClick={() => setFilter(f.value)}
               className={`rounded-full border px-3 py-1 text-xs font-bold transition-all ${
-                filter === f
+                filter === f.value
                   ? 'border-aerojet-blue bg-aerojet-blue text-white'
                   : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800'
               }`}
+              aria-pressed={filter === f.value}
             >
-              {f}
+              {f.label}
             </button>
           ))}
         </div>
         <button
           onClick={() => setShowCreate((s) => !s)}
           className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold text-white"
+          aria-expanded={showCreate}
+          aria-controls="create-refund-form"
         >
           <Plus className="h-4 w-4" /> New Refund
         </button>
       </div>
 
       {showCreate && (
-        <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+        <div
+          id="create-refund-form"
+          className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+          role="region"
+          aria-label="Create new refund"
+        >
           {/* Student typeahead */}
           <div className="relative">
-            <label className="mb-1 block text-[10px] font-black tracking-widest text-slate-500 uppercase">
+            <label
+              htmlFor="refund-student-search"
+              className="mb-1 block text-[10px] font-black tracking-widest text-slate-500 uppercase"
+            >
               Student
             </label>
             <Search className="pointer-events-none absolute top-8.5 left-3 h-4 w-4 text-slate-400" />
             <input
+              id="refund-student-search"
               value={studentQuery}
               onChange={(e) => {
                 setStudentQuery(e.target.value)
                 setShowDropdown(true)
-                // Reset the resolved id if the user is typing again
                 if (form.studentId) setForm((f) => ({ ...f, studentId: '', student: '' }))
               }}
               onFocus={() => setShowDropdown(true)}
               onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
               placeholder="Search by name, email, or student ID…"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 pl-9 text-sm dark:border-slate-700 dark:bg-slate-800"
+              autoComplete="off"
+              aria-autocomplete="list"
+              aria-controls="student-search-results"
+              aria-expanded={showDropdown && (studentQuery.length > 0 || options.length > 0)}
             />
             {showDropdown && (studentQuery.length > 0 || options.length > 0) && (
-              <div className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
-                {searching && <div className="px-3 py-2 text-xs text-slate-400">Searching…</div>}
+              <div
+                id="student-search-results"
+                className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                role="listbox"
+              >
+                {searching && (
+                  <div className="px-3 py-2 text-xs text-slate-400" role="option">
+                    Searching…
+                  </div>
+                )}
                 {!searching && options.length === 0 && studentQuery.length > 0 && (
-                  <div className="px-3 py-2 text-xs text-slate-400">No matches.</div>
+                  <div className="px-3 py-2 text-xs text-slate-400" role="option">
+                    No matches.
+                  </div>
                 )}
                 {options.map((opt) => (
                   <button
                     key={opt.id}
                     type="button"
+                    role="option"
+                    aria-selected={form.studentId === opt.id}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => pickStudent(opt)}
                     className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
                   >
-                    <UserIcon className="h-4 w-4 shrink-0 text-slate-400" />
+                    <UserIcon className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium text-slate-900 dark:text-slate-100">
                         {opt.name}
@@ -239,7 +308,7 @@ export default function RefundsManager({
                       </p>
                     </div>
                     {form.studentId === opt.id && (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-hidden="true" />
                     )}
                   </button>
                 ))}
@@ -250,11 +319,15 @@ export default function RefundsManager({
           <div className="grid gap-3 sm:grid-cols-4">
             {/* Amount + currency */}
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-[10px] font-black tracking-widest text-slate-500 uppercase">
+              <label
+                htmlFor="refund-amount"
+                className="mb-1 block text-[10px] font-black tracking-widest text-slate-500 uppercase"
+              >
                 Amount
               </label>
               <div className="flex">
                 <input
+                  id="refund-amount"
                   type="number"
                   min={0}
                   step={0.01}
@@ -265,8 +338,10 @@ export default function RefundsManager({
                   }}
                   placeholder="0.00"
                   className="w-full rounded-l-lg border border-r-0 border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                  aria-required="true"
                 />
                 <select
+                  id="refund-currency"
                   value={form.currency}
                   onChange={(e) => {
                     setForm((f) => ({
@@ -278,8 +353,8 @@ export default function RefundsManager({
                   className="rounded-r-lg border border-l-0 border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-700 dark:text-slate-100"
                   aria-label="Currency"
                 >
-                  {CURRENCY_OPTIONS.map((c) => (
-                    <option key={c.code} value={c.code}>
+                  {CURRENCY_OPTIONS.map((c: { value: string; label: string }) => (
+                    <option key={c.value} value={c.value}>
                       {c.label}
                     </option>
                   ))}
@@ -289,10 +364,14 @@ export default function RefundsManager({
 
             {/* Reason */}
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-[10px] font-black tracking-widest text-slate-500 uppercase">
+              <label
+                htmlFor="refund-reason"
+                className="mb-1 block text-[10px] font-black tracking-widest text-slate-500 uppercase"
+              >
                 Reason
               </label>
               <input
+                id="refund-reason"
                 value={form.reason}
                 onChange={(e) => {
                   setForm((f) => ({ ...f, reason: e.target.value }))
@@ -300,6 +379,8 @@ export default function RefundsManager({
                 }}
                 placeholder="Why is this refund being issued?"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                aria-required="true"
+                maxLength={500}
               />
             </div>
           </div>
@@ -313,7 +394,7 @@ export default function RefundsManager({
             </button>
             <button
               onClick={create}
-              disabled={isPending || !form.studentId || !form.amount || !form.reason}
+              disabled={!form.studentId || !form.amount || !form.reason}
               className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
             >
               Create refund
@@ -323,22 +404,37 @@ export default function RefundsManager({
       )}
 
       <div className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" role="grid">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/80 text-left dark:border-slate-800 dark:bg-slate-900/50">
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              <th
+                scope="col"
+                className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+              >
                 Student
               </th>
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              <th
+                scope="col"
+                className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+              >
                 Amount
               </th>
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              <th
+                scope="col"
+                className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+              >
                 Reason
               </th>
-              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              <th
+                scope="col"
+                className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase"
+              >
                 Status
               </th>
-              <th className="px-4 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              <th
+                scope="col"
+                className="px-4 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase"
+              >
                 Actions
               </th>
             </tr>
@@ -354,6 +450,7 @@ export default function RefundsManager({
               const canReject = ['REQUESTED', 'STAFF_CONFIRMED', 'ADMIN_APPROVED'].includes(
                 r.status
               )
+
               return (
                 <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
                   <td className="px-4 py-3">
@@ -363,7 +460,7 @@ export default function RefundsManager({
                     </div>
                   </td>
                   <td className="px-4 py-3 font-mono font-black text-slate-800 dark:text-slate-200">
-                    {r.currency} {r.amount.toFixed(2)}
+                    {r.currency} {Number(r.amount).toFixed(2)}
                   </td>
                   <td className="max-w-70 px-4 py-3 text-slate-600 dark:text-slate-300">
                     <p className="line-clamp-2">{r.reason}</p>
@@ -373,9 +470,7 @@ export default function RefundsManager({
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                        STATUS_STYLE[r.status] ?? 'bg-slate-100 text-slate-500'
-                      }`}
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${getRefundStatusStyle(r.status)}`}
                     >
                       {r.status.replace('_', ' ')}
                     </span>
@@ -384,34 +479,32 @@ export default function RefundsManager({
                     <div className="flex items-center justify-end gap-1.5">
                       {canConfirm && (
                         <button
-                          disabled={isPending}
-                          onClick={() => run(() => staffConfirmRefund(r.id), 'Confirmed')}
+                          disabled={confirmLoading}
+                          onClick={() => handleConfirm('confirm', r.id)}
                           className="flex items-center gap-1 rounded bg-blue-600 px-2 py-1 text-[10px] font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+                          aria-label={`Confirm refund for ${name}`}
                         >
-                          <CheckCircle2 className="h-3 w-3" /> Confirm
+                          <CheckCircle2 className="h-3 w-3" aria-hidden="true" /> Confirm
                         </button>
                       )}
                       {canApprove && (
                         <button
-                          disabled={isPending}
-                          onClick={() =>
-                            run(() => approveAndProcessRefund(r.id), 'Refund processed')
-                          }
+                          disabled={confirmLoading}
+                          onClick={() => handleConfirm('approve', r.id)}
                           className="flex items-center gap-1 rounded bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+                          aria-label={`Approve and process refund for ${name}`}
                         >
-                          <ShieldCheck className="h-3 w-3" /> Approve &amp; Pay
+                          <ShieldCheck className="h-3 w-3" aria-hidden="true" /> Approve & Pay
                         </button>
                       )}
                       {canReject && (
                         <button
-                          disabled={isPending}
-                          onClick={() => {
-                            const reason = window.prompt('Reason for rejection?') ?? ''
-                            run(() => rejectRefund(r.id, reason), 'Rejected')
-                          }}
+                          disabled={rejectLoading}
+                          onClick={() => handleReject(r.id)}
                           className="flex items-center gap-1 rounded bg-slate-200 px-2 py-1 text-[10px] font-bold text-slate-600 hover:bg-slate-300 disabled:opacity-50 dark:bg-slate-700 dark:text-slate-300"
+                          aria-label={`Reject refund for ${name}`}
                         >
-                          <XCircle className="h-3 w-3" /> Reject
+                          <XCircle className="h-3 w-3" aria-hidden="true" /> Reject
                         </button>
                       )}
                     </div>
@@ -429,6 +522,130 @@ export default function RefundsManager({
           </tbody>
         </table>
       </div>
+
+      {/* Confirm Dialog */}
+      <RejectRefundDialog
+        open={rejectDialogOpen}
+        onOpenChange={setRejectDialogOpen}
+        onConfirm={handleRejectConfirm}
+        onCancel={() => setRejectTargetId(null)}
+        loading={rejectLoading}
+        title="Reject Refund"
+        description="Please provide a reason for rejecting this refund. This will be recorded and shown to the student."
+        placeholder="Enter rejection reason..."
+        maxLength={500}
+      />
+
+      {/* Confirm Action Dialog */}
+      <ConfirmActionDialog
+        open={confirmDialogOpen}
+        onOpenChange={setConfirmDialogOpen}
+        onConfirm={handleConfirmAction}
+        onCancel={() => {
+          setConfirmAction(null)
+          setConfirmTargetId(null)
+        }}
+        loading={confirmLoading}
+        action={confirmAction}
+      />
     </div>
+  )
+}
+
+/* ─── Confirm Action Dialog Component ─── */
+import {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+
+interface ConfirmActionDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: () => void
+  onCancel: () => void
+  loading: boolean
+  action: 'confirm' | 'approve' | null
+}
+
+function ConfirmActionDialog({
+  open,
+  onOpenChange,
+  onConfirm,
+  onCancel,
+  loading,
+  action,
+}: ConfirmActionDialogProps) {
+  if (!action) return null
+
+  const isApprove = action === 'approve'
+  const title = isApprove ? 'Approve & Process Refund' : 'Confirm Refund'
+  const description = isApprove
+    ? "This will credit the refund amount to the student's wallet. This action cannot be undone."
+    : 'This will mark the refund as staff-confirmed and ready for admin approval.'
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
+        <DialogContent className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+          <DialogHeader>
+            <DialogTitle className="text-aerojet-blue text-lg font-black dark:text-white">
+              {title}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+              {description}
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="mt-6 flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={onCancel} disabled={loading}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              onClick={onConfirm}
+              disabled={loading}
+              className={
+                isApprove ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'
+              }
+            >
+              {loading ? (
+                <>
+                  <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  {isApprove ? 'Processing...' : 'Confirming...'}
+                </>
+              ) : isApprove ? (
+                'Approve & Pay'
+              ) : (
+                'Confirm'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
   )
 }
