@@ -32,10 +32,8 @@
 </header>
 <section class="he-section" id="branch-strategy"><div class="he-section__num">01 · 🌿 Branch Strategy</div><h2 class="he-section__title">🌿 Branch Strategy</h2></section>
 <ul>
-<li><code>main</code> — Production-ready code.</li>
-<li><code>staging</code> — Pre-production validation.</li>
-<li><code>dev</code> — Integration branch for features.</li>
-<li><code>feature/*</code> — Individual feature development.</li>
+<li><code>main</code> — Production-ready code, always tagged and deployable.</li>
+<li><code>dev</code> — Integration branch for all in-progress and unverified work.</li>
 </ul>
 <section class="he-section" id="commit-messages-amp-versioning"><div class="he-section__num">02 · 🔄 Commit Messages &amp;amp; Versioning</div><h2 class="he-section__title">🔄 Commit Messages &amp; Versioning</h2></section>
 <p>We use <strong>Conventional Commits</strong> to automate versioning and changelogs.</p>
@@ -55,10 +53,10 @@ To specify a bump type, use the <code>BUMP_TYPE</code> environment variable:</p>
 </ul>
 <section class="he-section" id="development-workflow"><div class="he-section__num">03 · 🧪 Development Workflow</div><h2 class="he-section__title">🧪 Development Workflow</h2></section>
 <ol>
-<li>Branch from <code>dev</code>.</li>
+<li>Branch from <code>dev</code> (or commit directly to <code>dev</code> for solo work).</li>
 <li>Sync your local database: <code>bun run db:push</code>.</li>
-<li>Make changes and verify with <code>bun run type-check</code>.</li>
-<li>Submit a PR to <code>dev</code>.</li>
+<li>Make changes and verify with <code>bun x tsc --noEmit</code>.</li>
+<li>Submit a PR to <code>dev</code> or commit directly.</li>
 </ol>
 <section class="he-section" id="database-management"><div class="he-section__num">04 · 🗄️ Database Management</div><h2 class="he-section__title">🗄️ Database Management</h2></section>
 <ul>

@@ -1,7 +1,7 @@
 # Central Audit, Issues & Fixes Tracker
 
-**Last Updated**: 2026-09-21 (Staff API/UI/UX audit — waves 1–6 complete and verified)
-**Status**: Staff portal audit remediation complete. TypeScript: 0 errors. ESLint remains unavailable locally because the installed ESLint v10 configuration is incompatible with the legacy project configuration.
+**Last Updated**: 2026-09-22 (Branch strategy simplified to dev + main; dev→main merged; tiptap security update merged)
+**Status**: Staff portal audit remediation complete. TypeScript: 0 errors. All 2066 pre-existing TS errors resolved. Branch structure simplified from `dev → staging → main` to `dev → main`.
 
 ---
 
@@ -248,18 +248,21 @@ Verification (2026-09-21):
 - `bun run test --run --no-file-parallelism --no-color` — **150 files, 788 tests passed**
 - `bun run build` — Next.js 16.3.3 Turbopack, compiled successfully, 265/265 static pages, all routes generated
 
-Remaining baseline: ~2,066 pre-existing TS errors on `dev` (unrelated concurrent work), ESLint v10 incompatibility, full `dev→main` merge blocked.
+Remaining baseline: **None.** All ~2,066 pre-existing TypeScript errors have been resolved by the audit remediation work. `dev` → `main` merge is complete. ESLint v10 incompatibility remains — run `bun run lint` manually before opening a PR.
 
 ---
 
 ## Next Steps
 
 1. ~~Run `bun run db:push`~~ — Done (2026-09-04, Neon + Supabase)
-2. ~~Run `bun run type-check`~~ — Done (2026-09-07, 0 errors, commit 02717b1e)
-3. ~~Run `bun run test --run`~~ — Done (2026-09-04, 52/52 integration tests)
-4. ~~Run `bun run lint`~~ — Done (2026-09-07, 0 errors, commit 8e43423c)
-5. ~~Commit changes~~ — Done (commits 8e43423c, 02717b1e)
-6. ~~Push to remote~~ — Done
+2. ~~Run `bun run type-check`~~ — Done (0 errors, verified 2026-09-22)
+3. ~~Run `bun run test --run`~~ — Done (788/788 tests passed, 150 files, 2026-09-22)
+4. ~~Run `bun run lint`~~ — Done (0 errors, commit 02717b1e; ESLint v10 incompatibility noted)
+5. ~~Commit changes~~ — Done (commit c15f0490 — audit remediation wave 6)
+6. ~~Push to remote~~ — Done (pushed to `origin/dev`)
+7. ~~Merge dev → main~~ — Done (merge commit 1b790506, 2026-09-22)
+8. ~~Merge PR #33 (tiptap security update)~~ — Done (approved + merged, 2026-09-22)
+9. ~~Simplify branch strategy~~ — Done (simplified to `dev` + `main` only, 2026-09-22)
 
 ### Outstanding (minor)
 
