@@ -49,20 +49,13 @@ export function StudentSearchInput({
   useEffect(() => {
     prevValueRef.current = value
     if (!value) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- prop-sync: syncing external `value` to internal state; no viable alternative
       setSelectedId('')
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery('')
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStudents([])
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveIndex(-1)
     } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedId(value)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery('')
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveIndex(-1)
     }
   }, [value])

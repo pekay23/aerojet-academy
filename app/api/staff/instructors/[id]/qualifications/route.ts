@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiError, apiCreated, withErrorHandler , RouteContext } from '@/lib/api/response'
+import { apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
+import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 const qualSchema = z.object({
   qualificationType: z.string().min(1),
@@ -13,7 +14,7 @@ const qualSchema = z.object({
 })
 
 export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
-  await requireStaff()
+  const staff = await requireStaff()
   const { id } = (await ctx!.params) as { id: string }
   const body = await req.json()
   const parsed = qualSchema.safeParse(body)
@@ -28,6 +29,15 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
       expiryDate: parsed.data.expiryDate ? new Date(parsed.data.expiryDate) : null,
       notes: parsed.data.notes || null,
     },
+  })
+
+  await createAuditLog({
+    action: AuditAction.CREATE,
+    entity: 'InstructorQualification',
+    entityId: qual.id,
+    userId: staff.id,
+    description: `Added qualification for instructor ${id}`,
+    changes: parsed.data,
   })
 
   return apiCreated(qual)

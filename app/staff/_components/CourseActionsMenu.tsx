@@ -11,6 +11,15 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { useRouter } from 'next/navigation'
 
 interface CourseActionsMenuProps {
@@ -31,15 +40,14 @@ export default function CourseActionsMenu({
 
   const slug = courseCode || courseId
 
-  const handleDelete = async (force = false): Promise<void> => {
-    const msg = force
-      ? `FORCE DELETE "${courseName}"? This will remove all enrollments, classes, exam components, bookings, and related records. This cannot be undone.`
-      : `Are you sure you want to delete the course "${courseName}"? This action cannot be undone.`
-    if (!confirm(msg)) return
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteForce, setDeleteForce] = useState(false)
 
+  const handleDelete = async () => {
+    setShowDeleteConfirm(false)
     setLoading('delete')
     try {
-      const url = force
+      const url = deleteForce
         ? `/api/staff/courses/${courseId}?force=true`
         : `/api/staff/courses/${courseId}`
       const res = await fetch(url, { method: 'DELETE' })
@@ -47,13 +55,9 @@ export default function CourseActionsMenu({
       if (!res.ok) {
         // If 409 conflict (has related records), offer force-delete
         if (res.status === 409) {
-          const doForce = confirm(
-            `${data.error || 'Course has related records.'}\n\nWould you like to force-delete and remove all related data?`
-          )
-          if (doForce) {
-            setLoading(null)
-            return handleDelete(true)
-          }
+          setDeleteForce(true)
+          setShowDeleteConfirm(true)
+          setLoading(null)
           return
         }
         throw new Error(data.error || 'Failed to delete course')
@@ -84,48 +88,86 @@ export default function CourseActionsMenu({
   ]
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          disabled={!!loading}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 outline-none transition-all hover:bg-slate-100 hover:text-slate-700 focus:ring-2 focus:ring-aerojet-blue focus:ring-offset-2 disabled:opacity-50"
-        >
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <MoreHorizontal className="h-4 w-4" />
-          )}
-        </button>
-      </DropdownMenuTrigger>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            disabled={!!loading}
+            className="focus:ring-aerojet-blue flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all outline-none hover:bg-slate-100 hover:text-slate-700 focus:ring-2 focus:ring-offset-2 disabled:opacity-50"
+            aria-label="Course actions"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <MoreHorizontal className="h-4 w-4" />
+            )}
+          </button>
+        </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" side="bottom" collisionPadding={10} className="w-48 p-1">
-        {actions.map((item) => {
-          const Icon = item.icon
-          return (
-            <DropdownMenuItem
-              key={item.label}
-              asChild
-              className="text-slate-700 focus:bg-slate-50 dark:bg-slate-800/50 focus:text-slate-900 dark:text-slate-100"
-            >
-              <Link
-                href={item.href}
-                className="flex w-full cursor-pointer items-center gap-2.5 px-2 py-2"
+        <DropdownMenuContent align="end" side="bottom" collisionPadding={10} className="w-48 p-1">
+          {actions.map((item) => {
+            const Icon = item.icon
+            return (
+              <DropdownMenuItem
+                key={item.label}
+                asChild
+                className="text-slate-700 focus:bg-slate-50 focus:text-slate-900 dark:bg-slate-800/50 dark:text-slate-100"
               >
-                <Icon className="h-3.5 w-3.5" />
-                {item.label}
-              </Link>
-            </DropdownMenuItem>
-          )
-        })}
-        <DropdownMenuSeparator className="my-1 bg-slate-100" />
-        <DropdownMenuItem
-          onClick={() => handleDelete(false)}
-          className="flex w-full cursor-pointer items-center gap-2.5 px-2 py-2 text-red-600 focus:bg-red-50 focus:text-red-600"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-          Delete Course
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+                <Link
+                  href={item.href}
+                  className="flex w-full cursor-pointer items-center gap-2.5 px-2 py-2"
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {item.label}
+                </Link>
+              </DropdownMenuItem>
+            )
+          })}
+          <DropdownMenuSeparator className="my-1 bg-slate-100" />
+          <DropdownMenuItem
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex w-full cursor-pointer items-center gap-2.5 px-2 py-2 text-red-600 focus:bg-red-50 focus:text-red-600"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete Course
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {showDeleteConfirm && (
+        <Dialog open={showDeleteConfirm} onOpenChange={() => setShowDeleteConfirm(false)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Delete Course</DialogTitle>
+              <DialogDescription>
+                {deleteForce
+                  ? `Force delete "${courseName}"? This will permanently remove all enrollments, classes, exam components, bookings, and related records. This cannot be undone.`
+                  : `Are you sure you want to delete the course "${courseName}"? This action cannot be undone.`}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={!!loading}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDelete} disabled={!!loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {deleteForce ? 'Force Deleting...' : 'Deleting...'}
+                  </>
+                ) : deleteForce ? (
+                  'Force Delete'
+                ) : (
+                  'Delete Course'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   )
 }

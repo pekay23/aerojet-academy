@@ -1,54 +1,93 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { UserRole, EnrollmentType } from '@prisma/client'
 import { sendStudentPromotionEmail } from '@/lib/email/service'
-import { AuditAction, createAuditLog } from '@/lib/audit/logger'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import {
+  withErrorHandler,
+  apiSuccess,
+  apiError,
+  apiForbidden,
+  RouteContext,
+} from '@/lib/api/response'
 
 const updateRoleSchema = z.object({
   role: z.enum(['APPLICANT', 'STUDENT', 'EXAMINER', 'INSTRUCTOR', 'STAFF', 'ADMIN']),
 })
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const session = await requirePermission(PERMISSIONS.MANAGE_ROLES)
+interface RoleChangeResult {
+  id: string
+  role: UserRole
+  generatedStudentId: string | null
+}
 
-    const { id: userId } = await params
-    const body = await req.json()
+// Select only the fields the route and its side-effect logic need.
+// Deliberately excludes password, twoFactorSecret, passkeyBridgeToken,
+// passwordResetToken, verifyToken, and other credential columns so no raw
+// Prisma user row (including password hash) is ever returned to the caller.
+const userSelect = {
+  id: true,
+  email: true,
+  personalEmail: true,
+  academyEmail: true,
+  role: true,
+  profile: { select: { firstName: true, lastName: true } },
+  studentProfile: { select: { id: true } },
+  instructorProfile: { select: { id: true } },
+  staffProfile: { select: { id: true } },
+} as const
+
+export const PATCH = withErrorHandler(
+  async (req: NextRequest, ctx: RouteContext<{ id: string }>) => {
+    // requirePermission throws 'Unauthorized' (no session), 'Staff access
+    // required' (authenticated but not staff), or 'Permission denied: <key>'
+    // (staff without the grant). Translate those into standard 401/403 codes
+    // instead of letting them surface as 500s.
+    let actor: { id: string; role: string }
+    try {
+      actor = await requirePermission(PERMISSIONS.MANAGE_ROLES)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : ''
+      if (message === 'Unauthorized') throw error
+      return apiForbidden()
+    }
+
+    const { id: userId } = await ctx.params
+    if (!userId) return apiError('User ID required', 400)
+
+    let body: unknown
+    try {
+      body = await req.json()
+    } catch {
+      return apiError('Invalid JSON body', 400)
+    }
+
     const validation = updateRoleSchema.safeParse(body)
-
     if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: validation.error.format() },
-        { status: 400 }
-      )
+      return apiError('Invalid input', 400, { details: validation.error.format() })
     }
 
     const { role: newRole } = validation.data
 
     const user = await prismaUnfiltered.user.findUnique({
       where: { id: userId },
-      include: {
-        studentProfile: true,
-        instructorProfile: true,
-        staffProfile: true,
-        profile: true,
-      },
+      select: userSelect,
     })
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
+    if (!user) return apiError('User not found', 404)
     if (user.role === newRole) {
-      return NextResponse.json({ message: 'Role is already set to ' + newRole })
+      return apiSuccess<RoleChangeResult>({
+        id: user.id,
+        role: user.role,
+        generatedStudentId: null,
+      })
     }
 
     let generatedStudentId: string | null = null
 
-    const updatedUser = await prismaUnfiltered.$transaction(async (tx) => {
-      // Role-specific ID generation with retry loop
+    await prismaUnfiltered.$transaction(async (tx) => {
       const generateUniqueId = async (prefix: string, type: 'STUDENT' | 'INSTRUCTOR' | 'STAFF') => {
         let isUnique = false
         let newId = ''
@@ -70,69 +109,53 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         return newId
       }
 
-      // 1. Update the base role
-      const updated = await tx.user.update({
+      await tx.user.update({
         where: { id: userId },
         data: { role: newRole as UserRole },
+        select: { id: true, role: true },
       })
 
-      // 2. Ensure the required profile exists for the new role
       if ((newRole === 'INSTRUCTOR' || newRole === 'EXAMINER') && !user.instructorProfile) {
         const prefix = newRole === 'EXAMINER' ? 'EX' : 'IN'
         const empId = await generateUniqueId(prefix, 'INSTRUCTOR')
-        await tx.instructorProfile.create({
-          data: {
-            userId,
-            employeeId: empId,
-          },
-        })
+        await tx.instructorProfile.create({ data: { userId, employeeId: empId } })
       } else if (['STAFF', 'ADMIN'].includes(newRole) && !user.staffProfile) {
         const prefix = newRole === 'ADMIN' ? 'AD' : 'ST'
         const empId = await generateUniqueId(prefix, 'STAFF')
-        await tx.staffProfile.create({
-          data: {
-            userId,
-            employeeId: empId,
-          },
-        })
+        await tx.staffProfile.create({ data: { userId, employeeId: empId } })
       } else if (newRole === 'STUDENT' && !user.studentProfile) {
         const studentId = await generateUniqueId('AATA', 'STUDENT')
         generatedStudentId = studentId
         await tx.studentProfile.create({
-          data: {
-            userId,
-            studentId,
-            enrollmentType: EnrollmentType.FULL_TIME,
-          },
+          data: { userId, studentId, enrollmentType: EnrollmentType.FULL_TIME },
         })
       }
-
-      return updated
     })
 
-    // 3. Send promotion email if promoting to STUDENT
     if (newRole === 'STUDENT' && generatedStudentId && user.email) {
       const firstName = user.profile?.firstName || 'Student'
-      const targetEmail = user.personalEmail || user.email
+      const targetEmail = user.academyEmail || user.personalEmail || user.email
       await sendStudentPromotionEmail(targetEmail, firstName, generatedStudentId)
     }
 
     await createAuditLog({
-      userId: session.id,
-      action: AuditAction.UPDATE,
+      action: AuditAction.USER_ROLE_CHANGED,
+      userId: actor.id,
+      targetUserId: userId,
       entity: 'User',
       entityId: userId,
       description: `Changed user role from ${user.role} to ${newRole}.`,
       changes: {
-        previousRole: user.role,
-        newRole,
+        before: { role: user.role },
+        after: { role: newRole },
         generatedStudentId,
       },
     })
 
-    return NextResponse.json(updatedUser)
-  } catch (error) {
-    console.error('Error updating role:', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    return apiSuccess<RoleChangeResult>({
+      id: user.id,
+      role: newRole as UserRole,
+      generatedStudentId,
+    })
   }
-}
+)

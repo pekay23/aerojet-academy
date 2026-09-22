@@ -1,41 +1,59 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiNotFound, withErrorHandler , RouteContext } from '@/lib/api/response'
+import {
+  apiSuccess,
+  apiError,
+  apiNotFound,
+  withErrorHandler,
+  RouteContext,
+} from '@/lib/api/response'
 import { updateClassSchema, validateBody } from '@/lib/validation/schemas'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
-export const GET = withErrorHandler(
-  async (req: NextRequest, ctx?: RouteContext) => {
-    await requireStaff()
-    const cls = await prismaUnfiltered.class.findUnique({
-      where: { id: (await ctx!.params).id },
-      include: {
-        course: true,
-        instructor: { include: { user: { include: { profile: true } } } },
-        attendanceRecords: { orderBy: { date: 'desc' }, take: 30 },
-      },
-    })
-    if (!cls) return apiNotFound('Class not found')
-    return apiSuccess(cls)
-  }
-)
+export const GET = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
+  await requireStaff()
+  const cls = await prismaUnfiltered.class.findUnique({
+    where: { id: (await ctx!.params).id },
+    include: {
+      course: true,
+      instructor: { include: { user: { include: { profile: true } } } },
+      attendanceRecords: { orderBy: { date: 'desc' }, take: 30 },
+    },
+  })
+  if (!cls) return apiNotFound('Class not found')
+  return apiSuccess(cls)
+})
 
-export const PATCH = withErrorHandler(
-  async (req: NextRequest, ctx?: RouteContext) => {
-    const staff = await requireStaff()
-    const body = await req.json()
-    const validation = validateBody(updateClassSchema, body)
-    if (!validation.success) return apiError(validation.error)
-    const id = (await ctx!.params).id
-    const updated = await prismaUnfiltered.class.update({ where: { id }, data: validation.data })
-    await createAuditLog({
-      action: AuditAction.UPDATE,
-      entity: 'Class',
-      entityId: id!,
-      userId: staff.id,
-      details: validation.data,
-    })
-    return apiSuccess(updated)
-  }
-)
+export const PATCH = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
+  const staff = await requireStaff()
+  const body = await req.json()
+  const validation = validateBody(updateClassSchema, body)
+  if (!validation.success) return apiError(validation.error)
+  const id = (await ctx!.params).id
+  const updated = await prismaUnfiltered.class.update({ where: { id }, data: validation.data })
+  await createAuditLog({
+    action: AuditAction.UPDATE,
+    entity: 'Class',
+    entityId: id!,
+    userId: staff.id,
+    changes: validation.data,
+  })
+  return apiSuccess(updated)
+})
+
+export const DELETE = withErrorHandler(async (req: NextRequest, ctx?: RouteContext) => {
+  const staff = await requireStaff()
+  const id = (await ctx!.params).id
+  const existing = await prismaUnfiltered.class.findUnique({ where: { id } })
+  if (!existing) return apiNotFound('Class not found')
+  await prismaUnfiltered.class.delete({ where: { id } })
+  await createAuditLog({
+    action: AuditAction.DELETE,
+    entity: 'Class',
+    entityId: id,
+    userId: staff.id,
+    changes: { before: { id, name: existing.name, courseId: existing.courseId } },
+  })
+  return apiSuccess({ deleted: true })
+})

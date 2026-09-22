@@ -27,7 +27,7 @@ import {
   bulkDeleteUsers,
   bulkArchiveUsers,
   bulkBypassPasswordChange,
-} from '../actions'
+} from '../actions/index'
 import { toast } from 'sonner'
 import { CurrencyDisplay, CurrencyToggle } from '@/components/shared/CurrencyDisplay'
 
@@ -268,7 +268,9 @@ export default function StudentsTable({
                     .map((s) => s.email)
                     .filter(Boolean)
                   if (selectedEmails.length > 0) {
-                    window.location.href = `mailto:${selectedEmails.join(',')}`
+                    const link = document.createElement('a')
+                    link.href = `mailto:${selectedEmails.join(',')}`
+                    link.click()
                   }
                 },
               },

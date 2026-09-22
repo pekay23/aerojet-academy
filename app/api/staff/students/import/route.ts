@@ -20,6 +20,7 @@ import {
   FundingSource,
 } from '@prisma/client'
 import crypto from 'crypto'
+import { resolveAttemptType } from '@/lib/exams/attempt-types'
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -83,7 +84,7 @@ interface ExamHistoryEntry {
   moduleCode: string
   bookingGroupRef: string
   bookingType: string // twin, single, quad, etc.
-  attemptType: 'first_attempt' | 'resit'
+  attemptType: string
   result: 'pass' | 'fail'
   score?: number
   percentage?: number
@@ -531,7 +532,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                 moduleCode: mod.moduleCode,
                 amountPaid: 0,
                 status: PaymentStatus.COMPLETED,
-                attemptType: 'first_attempt',
+                attemptType: resolveAttemptType('first_attempt'),
                 result: mod.result,
                 sourceNotes:
                   `[Import] Completed elsewhere${mod.institution ? ` at ${mod.institution}` : ''}. ${mod.sourceNotes || ''}`.trim(),
@@ -546,7 +547,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       // ===================== EXAM HISTORY =====================
       if (s.examHistory && s.examHistory.length > 0) {
         for (const entry of s.examHistory) {
-          const migRef = `${migrationRef}:${entry.bookingGroupRef}:${entry.moduleCode}:${entry.attemptType}`
+          const normalizedAttempt = resolveAttemptType(entry.attemptType)
+          const migRef = `${migrationRef}:${entry.bookingGroupRef}:${entry.moduleCode}:${normalizedAttempt}`
 
           const existing = await prismaUnfiltered.examBooking.findFirst({
             where: { userId, migrationRef: migRef },
@@ -561,7 +563,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                 amountPaid: 0,
                 status: PaymentStatus.COMPLETED,
                 bookingGroupRef: entry.bookingGroupRef,
-                attemptType: entry.attemptType,
+                attemptType: normalizedAttempt,
                 result: entry.result,
                 ...(entry.score != null && { score: entry.score }),
                 ...(entry.percentage != null && { percentage: entry.percentage }),
@@ -624,7 +626,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                     ? PaymentStatus.COMPLETED
                     : PaymentStatus.PENDING,
                 bookingGroupRef: planned.bookingGroupRef,
-                attemptType: 'first_attempt',
+                attemptType: resolveAttemptType('first_attempt'),
                 result: 'pending',
                 sourceNotes: `[Import] Planned. ${planned.sourceNotes || ''}`.trim(),
                 migrationRef: migRef,
@@ -662,7 +664,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             })
 
             if (!academicYear) {
-              throw new Error('No academic year configured. Please create an academic year before importing students.')
+              throw new Error(
+                'No academic year configured. Please create an academic year before importing students.'
+              )
             }
 
             await prismaUnfiltered.fullTimeEnrollment.upsert({

@@ -3,6 +3,7 @@
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
+import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 export async function upsertATAChapter(data: {
   id?: string
@@ -13,11 +14,12 @@ export async function upsertATAChapter(data: {
   sortOrder: number
   isActive: boolean
 }) {
-  const _staff = await requireStaff()
+  const staff = await requireStaff()
 
   try {
+    let chapter
     if (data.id) {
-      await prismaUnfiltered.aTAChapter.update({
+      chapter = await prismaUnfiltered.aTAChapter.update({
         where: { id: data.id },
         data: {
           code: data.code,
@@ -29,7 +31,7 @@ export async function upsertATAChapter(data: {
         },
       })
     } else {
-      await prismaUnfiltered.aTAChapter.create({
+      chapter = await prismaUnfiltered.aTAChapter.create({
         data: {
           code: data.code,
           title: data.title,
@@ -41,6 +43,17 @@ export async function upsertATAChapter(data: {
       })
     }
 
+    await createAuditLog({
+      action: data.id ? AuditAction.UPDATE : AuditAction.CREATE,
+      entity: 'ATAChapter',
+      entityId: chapter.id,
+      userId: staff.id,
+      description: data.id
+        ? `Updated ATA Chapter ${chapter.code}`
+        : `Created ATA Chapter ${chapter.code}`,
+      changes: data,
+    })
+
     revalidatePath('/staff/ata-chapters')
     return { success: true }
   } catch (error: unknown) {
@@ -50,12 +63,21 @@ export async function upsertATAChapter(data: {
 }
 
 export async function toggleATAChapterStatus(id: string, isActive: boolean) {
-  const _staff = await requireStaff()
+  const staff = await requireStaff()
 
   try {
-    await prismaUnfiltered.aTAChapter.update({
+    const chapter = await prismaUnfiltered.aTAChapter.update({
       where: { id },
       data: { isActive },
+    })
+
+    await createAuditLog({
+      action: AuditAction.UPDATE,
+      entity: 'ATAChapter',
+      entityId: id,
+      userId: staff.id,
+      description: `ATA Chapter ${chapter.code} ${isActive ? 'activated' : 'deactivated'}`,
+      changes: { isActive },
     })
 
     revalidatePath('/staff/ata-chapters')

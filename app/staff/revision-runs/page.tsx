@@ -9,6 +9,8 @@ import { buildOrderBy } from '@/lib/utils/build-order-by'
 import type { Prisma } from '@prisma/client'
 import CreateRevisionRunDialog from './_components/CreateRevisionRunDialog'
 import EditRevisionRunDialog from './_components/EditRevisionRunDialog'
+import ClassesPagination from '../_components/ClassesPagination'
+import { parsePagination } from '@/lib/api/response'
 
 export const metadata: Metadata = {
   title: 'Revision Support | Staff Portal',
@@ -25,7 +27,7 @@ const ALLOWED_SORT_KEYS = {
 type SortKey = keyof typeof ALLOWED_SORT_KEYS
 
 interface RevisionRunsPageProps {
-  searchParams: Promise<{ sort?: string; order?: string }>
+  searchParams: Promise<{ sort?: string; order?: string; page?: string; limit?: string }>
 }
 
 export default async function RevisionRunsPage({ searchParams }: RevisionRunsPageProps) {
@@ -35,14 +37,33 @@ export default async function RevisionRunsPage({ searchParams }: RevisionRunsPag
   }
 
   const params = await searchParams
+  const { page, limit, skip } = parsePagination(
+    new URLSearchParams(params as Record<string, string>)
+  )
   const orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { startDatetime: 'desc' })
 
-  const runs = await prismaUnfiltered.tuitionRun.findMany({
-    include: {
-      _count: { select: { bookings: true } },
-    },
-    orderBy: orderBy as Prisma.TuitionRunOrderByWithRelationInput,
-  })
+  const [runs, total] = await Promise.all([
+    prismaUnfiltered.tuitionRun.findMany({
+      select: {
+        id: true,
+        title: true,
+        moduleTag: true,
+        description: true,
+        startDatetime: true,
+        endDatetime: true,
+        capacity: true,
+        minClassSize: true,
+        price: true,
+        status: true,
+        currentEnrollments: true,
+        _count: { select: { bookings: true } },
+      },
+      orderBy: orderBy as Prisma.TuitionRunOrderByWithRelationInput,
+      take: limit,
+      skip,
+    }),
+    prismaUnfiltered.tuitionRun.count(),
+  ])
 
   const plainRuns = runs.map((run) => ({
     ...run,
@@ -53,10 +74,12 @@ export default async function RevisionRunsPage({ searchParams }: RevisionRunsPag
     <div className="mx-auto max-w-[1400px]">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white uppercase">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight uppercase dark:text-white">
             Revision Support
           </h1>
-          <p className="text-slate-500 dark:text-slate-400">Manage paid revision classes and module support runs</p>
+          <p className="text-slate-500 dark:text-slate-400">
+            Manage paid revision classes and module support runs
+          </p>
         </div>
         <CreateRevisionRunDialog />
       </div>
@@ -67,7 +90,9 @@ export default async function RevisionRunsPage({ searchParams }: RevisionRunsPag
             <div className="mb-4 rounded-full bg-slate-50 p-4 dark:bg-slate-800">
               <Calendar className="h-10 w-10 text-slate-300" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No Revision Runs Scheduled</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+              No Revision Runs Scheduled
+            </h3>
             <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500">
               Create your first revision support run to allow students to book extra module support.
             </p>
@@ -89,11 +114,18 @@ export default async function RevisionRunsPage({ searchParams }: RevisionRunsPag
                 </thead>
                 <tbody className="divide-y divide-slate-200/50">
                   {plainRuns.map((run) => (
-                    <tr key={run.id} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                    <tr
+                      key={run.id}
+                      className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
+                    >
                       <td className="px-6 py-4">
-                        <div className="font-bold text-slate-900 dark:text-slate-100">{run.title}</div>
+                        <div className="font-bold text-slate-900 dark:text-slate-100">
+                          {run.title}
+                        </div>
                         {run.description && (
-                          <div className="text-xs text-slate-500 line-clamp-1">{run.description}</div>
+                          <div className="line-clamp-1 text-xs text-slate-500">
+                            {run.description}
+                          </div>
                         )}
                       </td>
                       <td className="px-6 py-4">
@@ -113,8 +145,16 @@ export default async function RevisionRunsPage({ searchParams }: RevisionRunsPag
                         <div className="flex items-center gap-2">
                           <div className="flex h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
                             <div
-                              className={run.currentEnrollments >= run.minClassSize ? 'bg-emerald-500' : 'bg-amber-500'}
-                              style={{ width: `${Math.min(100, (run.currentEnrollments / run.capacity) * 100)}%` }}
+                              className={
+                                run.currentEnrollments >= run.capacity
+                                  ? 'bg-emerald-500'
+                                  : run.currentEnrollments >= run.minClassSize
+                                    ? 'bg-aerojet-sky'
+                                    : 'bg-amber-500'
+                              }
+                              style={{
+                                width: `${Math.min(100, (run.currentEnrollments / run.capacity) * 100)}%`,
+                              }}
                             />
                           </div>
                           <span className="text-xs font-bold text-slate-600">
@@ -122,7 +162,7 @@ export default async function RevisionRunsPage({ searchParams }: RevisionRunsPag
                           </span>
                         </div>
                         {run.currentEnrollments < run.minClassSize && (
-                          <div className="mt-1 text-[10px] text-amber-600 font-bold">
+                          <div className="mt-1 text-[10px] font-bold text-amber-600">
                             Min: {run.minClassSize}
                           </div>
                         )}
@@ -131,12 +171,17 @@ export default async function RevisionRunsPage({ searchParams }: RevisionRunsPag
                         €{run.price.toString()}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
-                          run.status === 'OPEN' ? 'bg-emerald-100 text-emerald-700' :
-                          run.status === 'SCHEDULED' ? 'bg-blue-100 text-blue-700' :
-                          run.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
-                          'bg-slate-100 text-slate-700'
-                        }`}>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
+                            run.status === 'OPEN'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : run.status === 'SCHEDULED'
+                                ? 'bg-blue-100 text-blue-700'
+                                : run.status === 'CANCELLED'
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-slate-100 text-slate-700'
+                          }`}
+                        >
                           {run.status}
                         </span>
                       </td>
@@ -151,6 +196,7 @@ export default async function RevisionRunsPage({ searchParams }: RevisionRunsPag
           </div>
         )}
       </div>
+      <ClassesPagination page={page} perPage={limit} total={total} />
     </div>
   )
 }

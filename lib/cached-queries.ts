@@ -1,15 +1,14 @@
 import { unstable_cache } from 'next/cache'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
-/**
- * Cached reference data queries for frequently-read, rarely-changed data.
- * All use prismaUnfiltered to bypass RLS overhead.
- */
-
-// Academic structure data changes rarely (yearly) — cache for 1 hour
 const STRUCTURE_TTL = 3600
-// Operational data changes more frequently — cache for 5 minutes
 const OPERATIONAL_TTL = 300
+
+const LICENSE_CATEGORY_REQUIREMENT_SELECT = {
+  id: true,
+  courseId: true,
+  course: { select: { id: true, code: true } },
+} as const
 
 export const getCachedCourseCategories = unstable_cache(
   async () => {
@@ -24,8 +23,15 @@ export const getCachedCourseCategories = unstable_cache(
 export const getCachedLicenseCategories = unstable_cache(
   async () => {
     return prismaUnfiltered.licenseCategory.findMany({
-      include: {
-        requirements: { include: { course: { select: { id: true, code: true } } } },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        description: true,
+        requirements: {
+          select: LICENSE_CATEGORY_REQUIREMENT_SELECT,
+          take: 100,
+        },
       },
       orderBy: { code: 'asc' },
     })
@@ -53,7 +59,18 @@ export const getCachedSemesters = unstable_cache(
 export const getCachedExamComponents = unstable_cache(
   async () => {
     return prismaUnfiltered.examComponent.findMany({
-      include: { course: { select: { id: true, name: true, code: true } } },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        type: true,
+        duration: true,
+        categoryCode: true,
+        questionCount: true,
+        courseId: true,
+        course: { select: { id: true, name: true, code: true } },
+      },
+      take: 500,
       orderBy: { code: 'asc' },
     })
   },
@@ -65,7 +82,23 @@ export const getCachedActiveCourses = unstable_cache(
   async () => {
     return prismaUnfiltered.course.findMany({
       where: { isActive: true },
-      include: { category: true },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        description: true,
+        moduleType: true,
+        duration: true,
+        price: true,
+        currency: true,
+        isActive: true,
+        requiresPrerequisite: true,
+        prerequisites: true,
+        syllabusUrl: true,
+        categoryId: true,
+        category: { select: { id: true, name: true } },
+      },
+      take: 1000,
       orderBy: { code: 'asc' },
     })
   },

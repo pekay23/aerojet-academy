@@ -6,7 +6,7 @@ import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
 import { Eye, Clock, Calendar, User as UserIcon, ArrowLeft } from 'lucide-react'
 import ShareButtons from '../_components/ShareButtons'
 import { getBaseUrl } from '@/lib/utils/url'
-import { sanitizeHtml } from '@/lib/utils/sanitize'
+import { sanitizeHtml } from '@/lib/utils/html-sanitizer'
 
 export const dynamic = 'force-dynamic'
 

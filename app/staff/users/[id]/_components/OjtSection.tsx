@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Plus, Loader2, Briefcase, Clock } from 'lucide-react'
 import { useFormDirty } from '@/hooks/useFormDirty'
+import { toast } from 'sonner'
 
 interface OjtPeriod {
   id: string
@@ -106,12 +107,12 @@ export default function OjtSection({
       })
       if (!res.ok) {
         const data = await res.json()
-        alert(data.error || 'Failed to update')
+        toast.error(data.error || 'Failed to update')
         return
       }
       router.refresh()
     } catch {
-      alert('Network error')
+      toast.error('Network error')
     }
   }
 

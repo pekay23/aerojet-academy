@@ -8,12 +8,12 @@ import { PaymentStatus } from '@prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 import { handleActionError } from '@/lib/staff/errors'
 import { getRequestContext } from '@/lib/server/request-context'
+import {
+  AttemptType,
+  resolveAttemptType as resolveAttemptTypeValue,
+} from '@/lib/exams/attempt-types'
 
-type AttemptType = 'FIRST' | 'RESIT_1'
-
-type ResultOverride =
-  | { kind: 'auto' }
-  | { kind: 'explicit'; value: string }
+type ResultOverride = { kind: 'auto' } | { kind: 'explicit'; value: string }
 
 type ExamEntry = {
   courseId?: string
@@ -60,9 +60,7 @@ function normalizeResultOverride(override?: ResultOverride): ResultOverride {
 }
 
 function resolveAttemptType(raw?: string): AttemptType {
-  const normalized = (raw || 'FIRST').toUpperCase().trim()
-  if (normalized === 'RESIT_1') return 'RESIT_1'
-  return 'FIRST'
+  return resolveAttemptTypeValue(raw)
 }
 
 function validateExamDate(raw: string): Date {
@@ -88,7 +86,10 @@ async function resolveModuleCode(tx: Prisma.TransactionClient, entry: ExamEntry)
   return finalModuleCode
 }
 
-function computeResult(entry: ExamEntry, isPending: boolean | undefined): { result?: 'pass' | 'fail'; percentage?: number; override: boolean } {
+function computeResult(
+  entry: ExamEntry,
+  isPending: boolean | undefined
+): { result?: 'pass' | 'fail'; percentage?: number; override: boolean } {
   if (isPending) return { override: false }
   const override = normalizeResultOverride(entry.resultOverride)
   if (override.kind === 'explicit') {
@@ -102,11 +103,25 @@ function computeResult(entry: ExamEntry, isPending: boolean | undefined): { resu
   return { override: false }
 }
 
-async function upsertExamBooking(tx: Prisma.TransactionClient, input: BookingInput): Promise<string> {
+async function upsertExamBooking(
+  tx: Prisma.TransactionClient,
+  input: BookingInput
+): Promise<string> {
   const {
-    userId, courseId, examComponentId, moduleCode, examDate, bookingType,
-    attemptType, bookingStatus, result, score, percentage, examCategory,
-    bookingGroupRef, staffId: _staffId
+    userId,
+    courseId,
+    examComponentId,
+    moduleCode,
+    examDate,
+    bookingType,
+    attemptType,
+    bookingStatus,
+    result,
+    score,
+    percentage,
+    examCategory,
+    bookingGroupRef,
+    staffId: _staffId,
   } = input
 
   const existing = await tx.examBooking.findFirst({
@@ -152,7 +167,13 @@ async function upsertExamBooking(tx: Prisma.TransactionClient, input: BookingInp
   return created.id
 }
 
-async function upsertExamAttendance(tx: Prisma.TransactionClient, bookingId: string, userId: string, examDate: Date, staffId: string): Promise<void> {
+async function upsertExamAttendance(
+  tx: Prisma.TransactionClient,
+  bookingId: string,
+  userId: string,
+  examDate: Date,
+  staffId: string
+): Promise<void> {
   await tx.examAttendance.upsert({
     where: { bookingId },
     update: { status: 'PRESENT' },
@@ -175,7 +196,19 @@ function computeGrade(percentage: number | undefined): string {
 }
 
 async function upsertExamResult(tx: Prisma.TransactionClient, input: ResultInput): Promise<void> {
-  const { userId, moduleCode, attemptType, scoreVal, percentage, passed, grade, examCategory, notes, existingNotes, override: _override } = input
+  const {
+    userId,
+    moduleCode,
+    attemptType,
+    scoreVal,
+    percentage,
+    passed,
+    grade,
+    examCategory,
+    notes,
+    existingNotes,
+    override: _override,
+  } = input
 
   const existing = await tx.examResult.findFirst({
     where: { userId, moduleCode, attemptType },
@@ -223,13 +256,38 @@ export async function createExamRecord(data: {
 }) {
   try {
     const staff = await requireStaff()
-    const { userId, bookingType, examDate, attemptType, examCategory, notes, entries, isPending } = data
+    const isSupervisor = ['ADMIN', 'SUPER_ADMIN'].includes(staff.role)
+    const { userId, bookingType, examDate, attemptType, examCategory, notes, entries, isPending } =
+      data
 
     const user = await prismaUnfiltered.user.findUnique({ where: { id: userId } })
     if (!user) return { error: 'Student not found.' }
 
     const parsedExamDate = validateExamDate(examDate)
     const targetAttemptType = resolveAttemptType(attemptType)
+
+    // Score is an exam OUTCOME. Recording it on a manual record writes both an
+    // ExamResult row and an ExamAttendance row, so only supervisors may do it.
+    const hasScore = entries.some((entry) => entry.score !== undefined && entry.score !== null)
+    if (hasScore && !isSupervisor) {
+      await createAuditLog({
+        action: AuditAction.CREATE,
+        entity: 'ExamBooking',
+        entityId: userId,
+        userId: staff.id,
+        description: `Denied non-supervisor manual score entry for student ${user.email} (role ${staff.role}).`,
+        changes: {
+          studentId: userId,
+          deniedRole: staff.role,
+          reason: 'SCORE_ENTRY_REQUIRES_SUPERVISOR',
+          entryCount: entries.length,
+        },
+      })
+      return {
+        error:
+          'Recording exam scores is restricted to ADMIN / SUPER_ADMIN. Use the Results tab or contact a supervisor.',
+      }
+    }
 
     for (const entry of entries) {
       validateScore(entry.score)
@@ -294,8 +352,13 @@ export async function createExamRecord(data: {
     revalidatePath(`/staff/users/${userId}`, 'page')
     revalidatePath('/staff/reports', 'page')
 
-    const studentProfile = await prismaUnfiltered.profile.findUnique({ where: { userId }, select: { firstName: true, lastName: true } })
-    const studentName = studentProfile ? `${studentProfile.firstName} ${studentProfile.lastName}` : user.email
+    const studentProfile = await prismaUnfiltered.profile.findUnique({
+      where: { userId },
+      select: { firstName: true, lastName: true },
+    })
+    const studentName = studentProfile
+      ? `${studentProfile.firstName} ${studentProfile.lastName}`
+      : user.email
 
     const ctx = await getRequestContext()
     await createAuditLog({
@@ -345,7 +408,10 @@ export async function deleteExamRecord(id: string) {
     if (existing.deletedAt) return { error: 'Record already deleted.' }
 
     if (isResultId && 'certificateUrl' in existing && existing.certificateUrl) {
-      return { error: 'Cannot delete an issued exam result. Contact a SUPER_ADMIN if correction is required.' }
+      return {
+        error:
+          'Cannot delete an issued exam result. Contact a SUPER_ADMIN if correction is required.',
+      }
     }
 
     if (isResultId) {

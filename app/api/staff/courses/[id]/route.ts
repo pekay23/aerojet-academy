@@ -75,6 +75,7 @@ export const PATCH = withErrorHandler(
     })
 
     revalidateTag('courses', 'max')
+    revalidateTag('exam-components', 'max')
     return apiSuccess(updated)
   }
 )

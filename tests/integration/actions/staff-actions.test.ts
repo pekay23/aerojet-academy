@@ -5,12 +5,16 @@ import {
   sendStaffMessage,
   markMessageAsRead,
   bulkUpdateUserStatus,
+  searchStudents,
+  getAvailableModules,
 } from '@/app/staff/actions/index'
 
 // Mock server-only and next/cache
 vi.mock('server-only', () => ({}))
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
+  unstable_cache: (fn: (...args: never[]) => unknown) => fn,
 }))
 
 // Mock auth helpers
@@ -23,7 +27,7 @@ vi.mock('@/lib/auth/helpers', () => ({
 
 describe('Staff Actions', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
     mockRequireStaff.mockResolvedValue({ id: 'staff-1', email: 'staff@test.com' })
   })
 

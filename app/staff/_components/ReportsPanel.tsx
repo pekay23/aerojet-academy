@@ -154,7 +154,14 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
       : 0
 
   const handleExportCSV = () => {
-    window.open(`/api/staff/export?type=finances`, '_blank')
+    // Use a temporary anchor to trigger download without popup blocker issues
+    const link = document.createElement('a')
+    link.href = `/api/staff/export?type=finances`
+    link.target = '_blank'
+    link.rel = 'noopener noreferrer'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   return (
@@ -219,17 +226,14 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() =>
-              window.open(
-                `/api/staff/finance/reports/export?year=${year}&month=${month}&format=html`,
-                '_blank'
-              )
-            }
+          <a
+            href={`/api/staff/finance/reports/export?year=${year}&month=${month}&format=html`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="hover:border-aerojet-blue hover:text-aerojet-blue dark:hover:border-aerojet-sky dark:hover:text-aerojet-sky flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold tracking-wide text-slate-700 uppercase shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
           >
             <FileText className="h-3.5 w-3.5" /> View Report
-          </button>
+          </a>
           <button
             onClick={() => generateFinancialPDF(data, year, month)}
             className="flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-bold tracking-wide text-indigo-700 uppercase shadow-sm transition-all hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50"

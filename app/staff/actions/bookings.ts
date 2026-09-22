@@ -10,7 +10,7 @@ import { getRequestContext } from '@/lib/server/request-context'
 
 export async function bulkUpdateExamBookingStatus(bookingIds: string[], status: PaymentStatus) {
   try {
-    await requireStaff()
+    const staff = await requireStaff()
     if (!bookingIds.length || !status) return { error: 'Invalid parameters.' }
 
     await prismaUnfiltered.examBooking.updateMany({
@@ -21,6 +21,16 @@ export async function bulkUpdateExamBookingStatus(bookingIds: string[], status: 
     revalidatePath('/staff/exams', 'page')
     revalidatePath('/student/exams', 'page')
     revalidatePath('/staff/reports', 'page')
+
+    await createAuditLog({
+      action: AuditAction.UPDATE,
+      entity: 'ExamBooking',
+      entityId: bookingIds.slice(0, 50).join(','),
+      userId: staff.id,
+      description: `Bulk updated exam booking status to ${status} for ${bookingIds.length} booking(s).`,
+      changes: { bookingIds, status, affectedCount: bookingIds.length },
+    })
+
     return { success: true }
   } catch (error) {
     return {
@@ -226,6 +236,34 @@ async function syncExamResultFromBooking(
 export async function updateExamBooking(bookingId: string, data: ExamRecordUpdateData) {
   try {
     const staff = await requireStaff()
+    const isSupervisor = ['ADMIN', 'SUPER_ADMIN'].includes(staff.role)
+
+    // Score/grade is an exam OUTCOME, not a booking detail. Recording or
+    // mutating it must go through the results workflow (updateExamResult),
+    // which enforces resultLocked and supervisor-override justification.
+    // A bare score edit here would also auto-approve the booking and create
+    // an ExamResult + ExamAttendance row with no gate, so it is blocked
+    // entirely unless a supervisor explicitly requests it.
+    if (data.score !== undefined && data.score !== null && !isSupervisor) {
+      await createAuditLog({
+        action: AuditAction.UPDATE,
+        entity: 'ExamBooking',
+        entityId: bookingId,
+        userId: staff.id,
+        description: `Denied non-supervisor score edit on booking ${bookingId} (role ${staff.role}).`,
+        changes: {
+          attemptedFields: ['score'],
+          attemptedValue: data.score,
+          deniedRole: staff.role,
+          reason: 'SCORE_EDIT_REQUIRES_SUPERVISOR',
+        },
+      })
+      return {
+        error:
+          'Editing exam score on a booking is not permitted for your role. Use the Results tab or a supervisor to record exam outcomes.',
+      }
+    }
+
     const moduleCode = data.moduleCode?.toUpperCase()
     const score = data.score !== undefined && data.score !== null ? data.score : undefined
     const percentage = score !== undefined ? score : undefined
@@ -319,7 +357,6 @@ export async function updateExamBooking(bookingId: string, data: ExamRecordUpdat
               eventId: booking.eventId,
               examId: booking.examId,
               examComponentId: booking.examComponentId,
-              classId: booking.courseId ? undefined : undefined,
             },
           })
         }
@@ -474,7 +511,7 @@ export async function bulkUpdateExamCategory(
   category: 'INTERNAL' | 'OFFICIAL_EASA'
 ) {
   try {
-    await requireStaff()
+    const staff = await requireStaff()
 
     if (!ids || ids.length === 0) {
       return { error: 'No records selected' }
@@ -538,6 +575,21 @@ export async function bulkUpdateExamCategory(
 
     revalidatePath('/staff/exams', 'page')
     revalidatePath('/staff/reports', 'page')
+
+    await createAuditLog({
+      action: AuditAction.UPDATE,
+      entity: 'ExamBooking',
+      entityId: ids.slice(0, 50).join(','),
+      userId: staff.id,
+      description: `Bulk updated exam category to ${category} for ${ids.length} record(s).`,
+      changes: {
+        ids,
+        category,
+        affectedBookingCount: bookingIds.size,
+        affectedResultCount: resultIds.size,
+      },
+    })
+
     return { success: true }
   } catch (error) {
     return {

@@ -5,6 +5,14 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { CalendarAudience, RecurrenceType } from '@prisma/client'
 import { AuditAction, logAuditEvent } from '@/lib/audit/logger'
+import { z } from 'zod'
+
+const recurrenceTypeSchema = z.enum(['NONE', 'DAILY', 'WEEKLY', 'MONTHLY'] as const)
+
+function validateRecurrenceType(value: string): RecurrenceType {
+  const result = recurrenceTypeSchema.safeParse(value)
+  return result.success ? result.data : 'NONE'
+}
 
 export interface AdminEventInput {
   title: string
@@ -53,7 +61,7 @@ export async function createAdminCalendarEvent(data: AdminEventInput) {
         startDate: new Date(data.startDate),
         endDate: data.endDate ? new Date(data.endDate) : null,
         color: data.color || '#3b82f6',
-        recurrenceType: (data.recurrenceType as RecurrenceType) || 'NONE',
+        recurrenceType: validateRecurrenceType(data.recurrenceType || 'NONE'),
         recurrenceDays: data.recurrenceDays || null,
         recurrenceUntil: data.recurrenceUntil ? new Date(data.recurrenceUntil) : null,
         visibleTo: data.visibleTo,
@@ -123,7 +131,7 @@ export async function updateAdminCalendarEvent(id: string, data: AdminEventInput
         startDate: new Date(data.startDate),
         endDate: data.endDate ? new Date(data.endDate) : null,
         color: data.color || '#3b82f6',
-        recurrenceType: (data.recurrenceType as RecurrenceType) || 'NONE',
+        recurrenceType: validateRecurrenceType(data.recurrenceType || 'NONE'),
         recurrenceDays: data.recurrenceDays || null,
         recurrenceUntil: data.recurrenceUntil ? new Date(data.recurrenceUntil) : null,
         visibleTo: data.visibleTo,
