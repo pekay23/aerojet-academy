@@ -54,9 +54,8 @@ export default function StaffSidebar({
 
   useEffect(() => {
     // Reset override anytime the user navigates
-   
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOverrideMenu(false)
   }, [pathname, searchParams])
 
@@ -125,10 +124,9 @@ export default function StaffSidebar({
       children: [
         { label: 'Course Enrollments', href: '/enrollments' },
         { label: 'Exam Management', href: '/exams' },
-        { label: 'Exam Events', href: '/exams/events' },
         { label: 'Pool Members', href: '/exams/pools/members' },
         ...(internalExamEnabled ? [{ label: 'Internal Exams', href: '/exams/internal' }] : []),
-        { label: 'Batch Processing', href: '/enrollments/batch' },
+        { label: 'Batch Enrollment', href: '/enrollments/batch' },
         { label: 'Year/Semester Advancement', href: '/enrollments/advancement' },
         { label: 'Attendance', href: '/attendance' },
       ],

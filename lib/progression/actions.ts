@@ -54,7 +54,6 @@ export async function previewAdvancement(input: AdvanceInput) {
 export async function runAdvancement(input: AdvanceInput) {
   try {
     const admin = await requireAdmin()
-    const hold = new Set(input.holdUserIds ?? [])
     const to = nextTerm(input.fromYear, input.fromSemester)
     const runRef = `ADV-${Date.now()}`
 
@@ -68,6 +67,14 @@ export async function runAdvancement(input: AdvanceInput) {
       },
       select: { id: true, userId: true },
     })
+
+    const validUserIds = new Set(profiles.map((p) => p.userId))
+    const holdUserIds = input.holdUserIds ?? []
+    const invalidIds = holdUserIds.filter((id) => !validUserIds.has(id))
+    if (invalidIds.length > 0) {
+      return { error: `Invalid hold user IDs not found in cohort: ${invalidIds.join(', ')}` }
+    }
+    const hold = new Set(holdUserIds)
 
     let advanced = 0
     let held = 0

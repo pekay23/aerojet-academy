@@ -17,24 +17,10 @@ import {
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
+import type { ReconciliationPaymentRow } from '@/lib/types/staff'
 
-interface Payment {
-  id: string
-  amount: number
-  currency: string
-  paymentCurrency?: string | null
-  originalAmount?: number | null
-  paymentMethod: string
-  referenceType: string
-  referenceCode: string | null
-  proofUrl: string | null
-  createdAt: string
-  approvedAt: string | null
-  user: {
-    email: string
-    profile?: { firstName: string; lastName: string } | null
-  }
-}
+// Use shared type from lib/types/staff.ts
+type Payment = ReconciliationPaymentRow
 
 export default function ReconciliationQueue() {
   const [payments, setPayments] = useState<Payment[]>([])
@@ -59,8 +45,7 @@ export default function ReconciliationQueue() {
   }, [])
 
   useEffect(() => {
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPayments()
   }, [fetchPayments])
 
@@ -195,9 +180,28 @@ export default function ReconciliationQueue() {
                     className="h-4 w-4 rounded border-slate-300 transition-all checked:bg-blue-600"
                   />
                 </th>
-                <SortHeader label="Student" sortKey="_studentSort" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-                <SortHeader label="Payment Details" sortKey="_amount" currentSort={sortConfig} onSort={requestSort} align="right" className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
-                <SortHeader label="Approval" sortKey="_approvalDate" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
+                <SortHeader
+                  label="Student"
+                  sortKey="_studentSort"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                />
+                <SortHeader
+                  label="Payment Details"
+                  sortKey="_amount"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  align="right"
+                  className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                />
+                <SortHeader
+                  label="Approval"
+                  sortKey="_approvalDate"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                />
                 <th className="px-6 py-4 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Action
                 </th>
@@ -250,7 +254,8 @@ export default function ReconciliationQueue() {
                     </td>
                     <td className="px-6 py-5">
                       <div className="text-aerojet-blue text-sm font-black dark:text-blue-400">
-                        {p.paymentCurrency || p.currency} {Number(p.originalAmount ?? p.amount).toFixed(2)}
+                        {p.paymentCurrency || p.currency}{' '}
+                        {Number(p.originalAmount ?? p.amount).toFixed(2)}
                       </div>
                       {(p.paymentCurrency || p.currency) !== 'EUR' && (
                         <div className="text-[10px] font-medium text-slate-400">
@@ -258,7 +263,7 @@ export default function ReconciliationQueue() {
                         </div>
                       )}
                       <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
-                        <span>{p.paymentMethod.replace(/_/g, ' ')}</span>
+                        <span>{p.paymentMethod?.replace(/_/g, ' ') ?? '—'}</span>
                         <span className="h-1 w-1 rounded-full bg-slate-200" />
                         <span className="font-mono">{p.referenceCode || 'No Ref'}</span>
                       </div>
@@ -273,7 +278,7 @@ export default function ReconciliationQueue() {
                           href={p.proofUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="mt-1 flex items-center gap-1 text-[10px] font-black tracking-widest text-aerojet-sky uppercase hover:underline dark:text-blue-400"
+                          className="text-aerojet-sky mt-1 flex items-center gap-1 text-[10px] font-black tracking-widest uppercase hover:underline dark:text-blue-400"
                         >
                           <ExternalLink className="h-3 w-3" /> View Proof
                         </a>

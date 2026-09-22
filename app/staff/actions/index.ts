@@ -1,10 +1,27 @@
 export { getStaffRecipients, sendStaffMessage, markMessageAsRead } from './messages'
-export { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers, bulkBypassPasswordChange } from './users'
+export {
+  bulkUpdateUserStatus,
+  bulkDeleteUsers,
+  bulkArchiveUsers,
+  bulkBypassPasswordChange,
+} from './users'
 export { bulkUpdateEnrollmentStatus, bulkDeleteEnrollments } from './enrollments'
-export { bulkUpdateExamBookingStatus, updateExamBooking, updateExamResult, bulkUpdateExamCategory } from './bookings'
+export {
+  bulkUpdateExamBookingStatus,
+  updateExamBooking,
+  updateExamResult,
+  bulkUpdateExamCategory,
+} from './bookings'
 export { createExamRecord, deleteExamRecord } from './results'
 export { searchStudents, getAvailableModules } from './search'
 export { bulkUpdatePaymentStatus, updateRevenueTarget } from './finance'
 export { setCertificateRelease } from './certificates'
 export { fetchApplicants } from './applicants'
-export { dismissStaffNotification } from './notifications'
+export { dismissStaffNotification, ensureSystemNotifications } from './notifications'
+export { toggleCourseAssignment, ensureTermsForPathwayLicense } from '../scheduling/actions'
+export { upsertATAChapter, toggleATAChapterStatus } from '../ata-chapters/actions'
+export {
+  createAdminCalendarEvent,
+  updateAdminCalendarEvent,
+  deleteAdminCalendarEvent,
+} from '../calendar/actions'

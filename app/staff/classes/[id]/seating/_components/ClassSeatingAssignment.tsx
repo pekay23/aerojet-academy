@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import {
   Save,
   Loader2,
@@ -67,7 +67,9 @@ export default function ClassSeatingAssignment({
           const data = await res.json()
           setAssignments(data.assignments || {})
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       setLoading(false)
     }
     load()
@@ -77,12 +79,30 @@ export default function ClassSeatingAssignment({
   const unassignedStudents = students.filter((s) => !assignedStudentIds.has(s.id))
   const assignedCount = assignedStudentIds.size
 
+  const studentById = useMemo(() => {
+    const map = new Map<string, StudentData>()
+    for (const s of students) map.set(s.id, s)
+    return map
+  }, [students])
+
+  const cellMap = useMemo(() => {
+    const map = new Map<string, { row: number; col: number; type: string; label: string | null }>()
+    for (const c of layout.cells) map.set(`${c.row}-${c.col}`, c)
+    return map
+  }, [layout.cells])
+
+  const seatMap = useMemo(() => {
+    const map = new Map<string, SeatData>()
+    for (const s of seats) map.set(`${s.row}-${s.col}`, s)
+    return map
+  }, [seats])
+
   const getStudentOnSeat = useCallback(
     (seatId: string) => {
       const userId = assignments[seatId]
-      return userId ? students.find((s) => s.id === userId) : undefined
+      return userId ? studentById.get(userId) : undefined
     },
-    [assignments, students]
+    [assignments, studentById]
   )
 
   function handleDropOnSeat(seat: SeatData) {
@@ -225,9 +245,7 @@ export default function ClassSeatingAssignment({
               }}
             >
               {unassignedStudents.length === 0 ? (
-                <p className="p-3 text-center text-xs text-slate-400">
-                  All students assigned!
-                </p>
+                <p className="p-3 text-center text-xs text-slate-400">All students assigned!</p>
               ) : (
                 unassignedStudents.map((student) => (
                   <div
@@ -235,7 +253,7 @@ export default function ClassSeatingAssignment({
                     draggable
                     onDragStart={() => setDraggedStudent(student)}
                     onDragEnd={() => setDraggedStudent(null)}
-                    className="flex cursor-grab items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm transition-all hover:border-aerojet-sky hover:bg-indigo-50 active:cursor-grabbing dark:border-slate-700 dark:bg-slate-800 dark:hover:border-indigo-600"
+                    className="hover:border-aerojet-sky flex cursor-grab items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm transition-all hover:bg-indigo-50 active:cursor-grabbing dark:border-slate-700 dark:bg-slate-800 dark:hover:border-indigo-600"
                   >
                     <GripVertical className="h-3.5 w-3.5 shrink-0 text-slate-300" />
                     <User className="h-3.5 w-3.5 shrink-0 text-slate-400" />
@@ -254,7 +272,7 @@ export default function ClassSeatingAssignment({
           <div className="flex justify-center">
             <div className="space-y-2">
               <div className="mb-4 flex items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white/50 px-6 py-2 dark:border-slate-700 dark:bg-slate-900/50">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                <span className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                   Front of Room
                 </span>
               </div>
@@ -267,9 +285,7 @@ export default function ClassSeatingAssignment({
               >
                 {Array.from({ length: layout.rows }, (_, r) =>
                   Array.from({ length: layout.cols }, (_, c) => {
-                    const cell = layout.cells.find(
-                      (cell) => cell.row === r && cell.col === c
-                    )
+                    const cell = cellMap.get(`${r}-${c}`)
                     const type = cell?.type ?? 'AISLE'
 
                     if (type !== 'DESK') {
@@ -288,8 +304,9 @@ export default function ClassSeatingAssignment({
                       )
                     }
 
-                    const seat = seats.find((s) => s.row === r && s.col === c)
-                    if (!seat) return <div key={`${r}-${c}`} className="h-14 w-14 sm:h-16 sm:w-16" />
+                    const seat = seatMap.get(`${r}-${c}`)
+                    if (!seat)
+                      return <div key={`${r}-${c}`} className="h-14 w-14 sm:h-16 sm:w-16" />
 
                     const occupant = getStudentOnSeat(seat.id)
                     const isDropTarget = draggedStudent && !occupant
@@ -312,7 +329,7 @@ export default function ClassSeatingAssignment({
                           occupant
                             ? 'border-indigo-300 bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/30'
                             : isDropTarget
-                              ? 'border-aerojet-sky border-dashed bg-indigo-50 ring-2 ring-aerojet-sky/30 dark:bg-indigo-900/10'
+                              ? 'border-aerojet-sky ring-aerojet-sky/30 border-dashed bg-indigo-50 ring-2 dark:bg-indigo-900/10'
                               : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800'
                         )}
                       >
@@ -320,17 +337,18 @@ export default function ClassSeatingAssignment({
                         {occupant ? (
                           <>
                             <span
-                              className="max-w-[48px] truncate text-[9px] font-bold text-indigo-700 dark:text-indigo-400 sm:max-w-[56px]"
+                              className="max-w-[48px] truncate text-[9px] font-bold text-indigo-700 sm:max-w-[56px] dark:text-indigo-400"
                               title={occupant.name}
                             >
                               {occupant.name.split(' ')[0]}
                             </span>
                             <button
                               onClick={() => handleRemoveFromSeat(seat.id)}
-                              className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600"
+                              className="absolute -top-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600"
+                              aria-label={`Remove occupant from seat ${seat.label}`}
                               title="Remove from seat"
                             >
-                              <X className="h-2.5 w-2.5" />
+                              <X className="h-4 w-4" />
                             </button>
                           </>
                         ) : (

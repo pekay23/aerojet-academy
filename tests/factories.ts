@@ -9,7 +9,44 @@
 
 import { mockAdmin, mockStudent, mockApplicant, mockInstructor } from './fixtures/users'
 import { mockPool, mockNearFullPool, mockConfirmedPool, mockMembership } from './fixtures/pools'
-import { mockWallet, mockTopUpTransaction, mockReserveTransaction, mockPayment } from './fixtures/transactions'
+import {
+  mockWallet,
+  mockTopUpTransaction,
+  mockReserveTransaction,
+  mockPayment,
+} from './fixtures/transactions'
+
+// ---------------------------------------------------------------------------
+// Withdrawal Requests
+// ---------------------------------------------------------------------------
+
+export function createMockWithdrawalRequest(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 'withdrawal-1',
+    reason: 'Personal reasons',
+    status: 'REQUESTED' as const,
+    createdAt: new Date('2026-01-15').toISOString(),
+    rejectedReason: null,
+    user: {
+      email: 'student1@test.com',
+      profile: { firstName: 'Student', lastName: 'One' },
+      studentProfile: { studentId: 'AJA-2026-0001' },
+    },
+    ...overrides,
+  }
+}
+
+export function createMockWithdrawalRequests(
+  count: number,
+  overrides: Record<string, unknown> = {}
+) {
+  return Array.from({ length: count }, (_, i) =>
+    createMockWithdrawalRequest({
+      id: `withdrawal-${i + 1}`,
+      ...overrides,
+    })
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Users
@@ -27,7 +64,7 @@ export function createMockUser(overrides: Record<string, unknown> = {}) {
   }
 
   const role = overrides.role as string | undefined
-  const base = role ? baseMap[role] ?? mockStudent : mockStudent
+  const base = role ? (baseMap[role] ?? mockStudent) : mockStudent
 
   return {
     ...base,
@@ -62,9 +99,12 @@ export function createMockInstructorProfile(overrides: Record<string, unknown> =
 
 export function createMockExamPool(overrides: Record<string, unknown> = {}) {
   const status = overrides.status as string | undefined
-  const base = status === 'NEAR_FULL' ? mockNearFullPool
-    : status === 'CONFIRMED' ? mockConfirmedPool
-    : mockPool
+  const base =
+    status === 'NEAR_FULL'
+      ? mockNearFullPool
+      : status === 'CONFIRMED'
+        ? mockConfirmedPool
+        : mockPool
 
   return {
     ...base,

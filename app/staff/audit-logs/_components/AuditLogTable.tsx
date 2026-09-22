@@ -24,8 +24,13 @@ type AuditLog = {
   entity: string | null
   entityId: string | null
   description: string | null
-  createdAt: string | Date
+  changes: unknown
+  createdAt: string
   ipAddress: string | null
+  userAgent: string | null
+  previousHash: string | null
+  hash: string | null
+  entryHash: string | null
   user: {
     email: string
     profile: { firstName: string; lastName: string } | null
@@ -125,7 +130,7 @@ const LogRow = memo(
         </td>
 
         {/* User */}
-        <td className="px-6 py-5 min-w-[200px]">
+        <td className="min-w-[200px] px-6 py-5">
           <div className="flex items-center gap-3 overflow-hidden">
             <div
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white font-bold text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-800 dark:text-slate-300"
@@ -171,7 +176,12 @@ interface AuditLogTableProps {
   query?: string
 }
 
-export default function AuditLogTable({ logs: initialLogs, total: initialTotal, entityLabels, query }: AuditLogTableProps) {
+export default function AuditLogTable({
+  logs: initialLogs,
+  total: initialTotal,
+  entityLabels,
+  query,
+}: AuditLogTableProps) {
   const [logs, setLogs] = useState<AuditLog[]>(initialLogs)
   const [total, setTotal] = useState(initialTotal)
   const [loading, setLoading] = useState(false)
@@ -210,7 +220,7 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
     // Skip first fetch if it's the initial page and we have initial logs
     const isInitial = page === 1 && perPage === 25
     if (!isInitial) {
-        fetchLogs()
+      fetchLogs()
     }
   }, [page, perPage, fetchLogs])
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -361,7 +371,13 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
           </tbody>
         </table>
       </div>
-      <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+      <TablePagination
+        page={page}
+        perPage={perPage}
+        total={total}
+        onPageChange={setPage}
+        onPerPageChange={setPerPage}
+      />
 
       {/* Glassmorphic Detail Modal */}
       {selectedLog && (
@@ -379,7 +395,7 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
                   {getEntityIcon(selectedLog.entity)}
                 </div>
                 <div>
-                  <h2 className="text-xl font-black tracking-tight text-aerojet-blue dark:text-white">
+                  <h2 className="text-aerojet-blue text-xl font-black tracking-tight dark:text-white">
                     Event Detail
                   </h2>
                   <p className="mt-0.5 font-mono text-[10px] text-slate-500 dark:text-slate-400">
@@ -490,7 +506,7 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
             <div className="flex justify-end border-t border-slate-200/60 bg-slate-50/50 px-8 py-5 dark:border-slate-800/80 dark:bg-slate-900/50">
               <button
                 onClick={() => setSelectedLog(null)}
-                className="rounded-xl bg-aerojet-blue px-8 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#003875] hover:shadow-lg dark:hover:bg-aerojet-sky"
+                className="bg-aerojet-blue dark:hover:bg-aerojet-sky rounded-xl px-8 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#003875] hover:shadow-lg"
               >
                 Done
               </button>

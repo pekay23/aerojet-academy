@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useTransition, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { Plus, Edit2, Loader2, ArrowUp, ArrowDown, ArrowUpDown, ChevronDown } from 'lucide-react'
 import { upsertATAChapter, toggleATAChapterStatus } from '../actions'
+import { useToast } from '@/hooks/use-toast'
 
 interface ATAChapter {
   id: string
@@ -16,11 +18,9 @@ interface ATAChapter {
 
 type SortField = 'code' | 'title' | 'sortOrder' | 'isActive'
 
-export default function ATAChaptersClient({
-  initialChapters,
-}: {
-  initialChapters: ATAChapter[]
-}) {
+export default function ATAChaptersClient({ initialChapters }: { initialChapters: ATAChapter[] }) {
+  const router = useRouter()
+  const toast = useToast()
   const [chapters, _setChapters] = useState(initialChapters)
   const [isPending, startTransition] = useTransition()
   const [editingChapter, setEditingChapter] = useState<ATAChapter | null>(null)
@@ -40,7 +40,9 @@ export default function ATAChaptersClient({
   const [code, setCode] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [category, setCategory] = useState<'AIRFRAME' | 'POWERPLANT' | 'AVIONICS' | 'GENERAL'>('GENERAL')
+  const [category, setCategory] = useState<'AIRFRAME' | 'POWERPLANT' | 'AVIONICS' | 'GENERAL'>(
+    'GENERAL'
+  )
   const [sortOrder, setSortOrder] = useState<number>(0)
   const [isActive, setIsActive] = useState(true)
 
@@ -84,10 +86,10 @@ export default function ATAChaptersClient({
       })
 
       if (!res.success) {
-        alert(res.error || 'Failed to save chapter')
+        toast.error(res.error || 'Failed to save chapter')
       } else {
         closeModal()
-        window.location.reload()
+        router.refresh()
       }
     })
   }
@@ -96,9 +98,9 @@ export default function ATAChaptersClient({
     startTransition(async () => {
       const res = await toggleATAChapterStatus(id, !currentStatus)
       if (!res.success) {
-        alert(res.error || 'Failed to toggle status')
+        toast.error(res.error || 'Failed to toggle status')
       } else {
-        window.location.reload()
+        router.refresh()
       }
     })
   }
@@ -132,11 +134,12 @@ export default function ATAChaptersClient({
   const CATEGORIES = ['GENERAL', 'AIRFRAME', 'AVIONICS', 'POWERPLANT']
 
   const SortIndicator = ({ field }: { field: SortField }) => {
-    if (sortField !== field) return <ArrowUpDown className="ml-1 mb-0.5 inline-block h-3 w-3 opacity-30" />
+    if (sortField !== field)
+      return <ArrowUpDown className="mb-0.5 ml-1 inline-block h-3 w-3 opacity-30" />
     return sortDirection === 'asc' ? (
-      <ArrowUp className="ml-1 mb-0.5 inline-block h-3 w-3 text-blue-600 dark:text-blue-400" />
+      <ArrowUp className="mb-0.5 ml-1 inline-block h-3 w-3 text-blue-600 dark:text-blue-400" />
     ) : (
-      <ArrowDown className="ml-1 mb-0.5 inline-block h-3 w-3 text-blue-600 dark:text-blue-400" />
+      <ArrowDown className="mb-0.5 ml-1 inline-block h-3 w-3 text-blue-600 dark:text-blue-400" />
     )
   }
 
@@ -191,25 +194,25 @@ export default function ATAChaptersClient({
                   <thead>
                     <tr className="border-y border-slate-200/60 bg-white dark:border-slate-700/60 dark:bg-slate-900">
                       <th
-                        className="cursor-pointer select-none px-4 py-3 text-left font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-500 select-none hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                         onClick={() => handleSort('code')}
                       >
                         ATA Code <SortIndicator field="code" />
                       </th>
                       <th
-                        className="cursor-pointer select-none px-4 py-3 text-left font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-500 select-none hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                         onClick={() => handleSort('title')}
                       >
                         Title <SortIndicator field="title" />
                       </th>
                       <th
-                        className="cursor-pointer select-none px-4 py-3 text-center font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        className="cursor-pointer px-4 py-3 text-center font-semibold text-slate-500 select-none hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                         onClick={() => handleSort('sortOrder')}
                       >
                         Order <SortIndicator field="sortOrder" />
                       </th>
                       <th
-                        className="cursor-pointer select-none px-4 py-3 text-center font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        className="cursor-pointer px-4 py-3 text-center font-semibold text-slate-500 select-none hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                         onClick={() => handleSort('isActive')}
                       >
                         Status <SortIndicator field="isActive" />
@@ -296,7 +299,11 @@ export default function ATAChaptersClient({
                   </label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as 'AIRFRAME' | 'POWERPLANT' | 'AVIONICS' | 'GENERAL')}
+                    onChange={(e) =>
+                      setCategory(
+                        e.target.value as 'AIRFRAME' | 'POWERPLANT' | 'AVIONICS' | 'GENERAL'
+                      )
+                    }
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500"
                   >
                     <option value="GENERAL">General</option>

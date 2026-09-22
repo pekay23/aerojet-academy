@@ -6,7 +6,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import BatchEnrollForm from './_components/BatchEnrollForm'
 
-export const metadata: Metadata = { title: 'Batch Enroll | Staff Portal' }
+export const metadata: Metadata = { title: 'Batch Enrollment | Staff Portal' }
 
 export default async function BatchEnrollPage() {
   const session = await getAuthSession()
@@ -30,6 +30,7 @@ export default async function BatchEnrollPage() {
     prismaUnfiltered.course.findMany({
       where: { isActive: true },
       orderBy: { code: 'asc' },
+      take: 200,
     }),
     prismaUnfiltered.user.findMany({
       where: {
@@ -49,6 +50,7 @@ export default async function BatchEnrollPage() {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: 200,
     }),
   ])
 
@@ -87,11 +89,12 @@ export default async function BatchEnrollPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-black tracking-tight text-slate-900 sm:text-2xl lg:text-3xl dark:text-slate-100">
-          Batch Course Activation
+          Batch Enrollment
         </h1>
         <p className="mt-1 text-xs text-slate-500 sm:text-sm dark:text-slate-400">
           Activate courses for full-time students by semester. Select the academic period, students,
-          and courses to enroll them in.
+          and courses to enroll them in. Only the first 200 students and courses are shown; use
+          individual enrollment for additional records.
         </p>
       </div>
 

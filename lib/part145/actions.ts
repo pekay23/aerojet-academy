@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requireStaff, requireAdmin } from '@/lib/auth/helpers'
+import { requireAdmin } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getLicenseProgress } from '@/lib/license/progress'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
@@ -48,7 +48,7 @@ export async function createPartner145(input: {
 /** Initiate a transfer and package the student's training data (JSON). */
 export async function initiate145Transfer(studentQuery: string, organisationId: string) {
   try {
-    const staff = await requireStaff()
+    const admin = await requireAdmin()
     if (!organisationId) return { error: 'Select a Part-145 organisation.' }
 
     const q = studentQuery.trim()
@@ -100,7 +100,7 @@ export async function initiate145Transfer(studentQuery: string, organisationId: 
         userId: student.id,
         organisationId,
         status: 'DATA_PACKAGED',
-        initiatedById: staff.id,
+        initiatedById: admin.id,
         notes: JSON.stringify(dataPackage),
       },
     })
@@ -108,7 +108,7 @@ export async function initiate145Transfer(studentQuery: string, organisationId: 
       action: AuditAction.CREATE,
       entity: 'Maintenance145Transfer',
       entityId: transfer.id,
-      userId: staff.id,
+      userId: admin.id,
       description: `Packaged Part-145 transfer for ${student.id}.`,
     })
     revalidatePath('/staff/part-145')
@@ -125,7 +125,7 @@ export async function advance145Transfer(
   rejectedReason?: string
 ) {
   try {
-    const staff = await requireStaff()
+    const admin = await requireAdmin()
     const t = await prismaUnfiltered.maintenance145Transfer.findUnique({ where: { id } })
     if (!t) return { error: 'Transfer not found.' }
     await prismaUnfiltered.maintenance145Transfer.update({
@@ -140,7 +140,7 @@ export async function advance145Transfer(
       action: AuditAction.UPDATE,
       entity: 'Maintenance145Transfer',
       entityId: id,
-      userId: staff.id,
+      userId: admin.id,
       description: `Part-145 transfer → ${status}`,
     })
     revalidatePath('/staff/part-145')

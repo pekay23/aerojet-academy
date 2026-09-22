@@ -12,12 +12,9 @@ const assignmentSchema = z.object({
 /**
  * GET: Retrieve class seating assignments
  */
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAuthSession()
-  if (!session) {
+  if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -27,9 +24,7 @@ export async function GET(
     where: { key: `${SETTING_PREFIX}${id}` },
   })
 
-  const assignments: Record<string, string> = setting
-    ? JSON.parse(setting.value)
-    : {}
+  const assignments: Record<string, string> = setting ? JSON.parse(setting.value) : {}
 
   return NextResponse.json({ assignments })
 }
@@ -37,10 +32,7 @@ export async function GET(
 /**
  * PUT: Save class seating assignments
  */
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAuthSession()
   if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

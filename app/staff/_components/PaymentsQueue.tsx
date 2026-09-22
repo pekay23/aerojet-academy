@@ -10,11 +10,13 @@ import {
   ExternalLink,
   Loader2,
 } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import * as Dialog from '@radix-ui/react-dialog'
 import { PaymentStatus } from '@/types/enums'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
+import { getPaymentStatusStyle } from '@/lib/utils/status-styles'
+import { formatCurrency, formatDate } from '@/lib/utils/formatters'
+import type { PaymentRow } from '@/lib/types/staff'
 
 interface FileUpload {
   id: string
@@ -23,34 +25,14 @@ interface FileUpload {
   createdAt: string
 }
 
-interface Payment {
-  id: string
-  amount: number
-  currency: string
-  status: string
-  paymentMethod: string
-  referenceType?: string | null
-  referenceCode?: string | null
-  proofUrl?: string | null
-  createdAt: string
-  user: {
-    id: string
-    email: string
-    profile?: { firstName: string; lastName: string } | null
-  }
-}
+// Use shared PaymentRow type from lib/types/staff.ts
+type Payment = PaymentRow
 
 const TABS = [
   { key: PaymentStatus.PENDING, label: 'Pending', color: 'text-amber-600' },
   { key: PaymentStatus.APPROVED, label: 'Approved', color: 'text-emerald-600' },
   { key: PaymentStatus.REJECTED, label: 'Rejected', color: 'text-red-600' },
 ]
-
-const STATUS_STYLE: Record<string, string> = {
-  [PaymentStatus.PENDING]: 'bg-amber-100 text-amber-700',
-  [PaymentStatus.APPROVED]: 'bg-emerald-100 text-emerald-700',
-  [PaymentStatus.REJECTED]: 'bg-red-100 text-red-600',
-}
 
 export default function PaymentsQueue({
   initialPendingCount,
@@ -166,7 +148,7 @@ export default function PaymentsQueue({
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
+          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
             Payments
           </h1>
           <p className="mt-1 text-sm text-slate-400">
@@ -187,7 +169,7 @@ export default function PaymentsQueue({
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         {/* Toolbar */}
         <div className="flex flex-col items-start justify-between gap-3 border-b border-slate-100 px-6 py-4 sm:flex-row sm:items-center dark:border-slate-800">
-          <div 
+          <div
             role="tablist"
             className="relative flex gap-1 rounded-2xl bg-slate-100 p-1.5 shadow-inner ring-1 ring-black/5 dark:bg-slate-800/80 dark:ring-white/5"
           >
@@ -205,11 +187,9 @@ export default function PaymentsQueue({
                 }`}
               >
                 {tab === t.key && (
-                  <motion.div
-                    layoutId="payments-tab"
-                    className="absolute inset-0 bg-white shadow-md ring-1 ring-black/5 dark:bg-slate-700 dark:ring-white/10"
+                  <div
+                    className="absolute inset-0 bg-white shadow-md ring-1 ring-black/5 transition-all duration-300 ease-out dark:bg-slate-700 dark:ring-white/10"
                     style={{ borderRadius: 9999, zIndex: 0 }}
-                    transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                   />
                 )}
                 <span className="relative z-10">{t.label}</span>
@@ -229,7 +209,7 @@ export default function PaymentsQueue({
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search user or ref..."
               autoComplete="off"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800/50"
+              className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
             />
           </div>
         </div>
@@ -240,11 +220,43 @@ export default function PaymentsQueue({
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
-                <SortHeader label="User" sortKey="_userSort" currentSort={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
-                <SortHeader label="Type" sortKey="referenceType" currentSort={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
-                <SortHeader label="Amount" sortKey="_amount" currentSort={sortConfig} onSort={requestSort} align="right" className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
-                <SortHeader label="Method" sortKey="paymentMethod" currentSort={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
-                <SortHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} align="center" className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <SortHeader
+                  label="User"
+                  sortKey="_userSort"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase"
+                />
+                <SortHeader
+                  label="Type"
+                  sortKey="referenceType"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase"
+                />
+                <SortHeader
+                  label="Amount"
+                  sortKey="_amount"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  align="right"
+                  className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase"
+                />
+                <SortHeader
+                  label="Method"
+                  sortKey="paymentMethod"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase"
+                />
+                <SortHeader
+                  label="Status"
+                  sortKey="status"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                  align="center"
+                  className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase"
+                />
                 <th className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase">
                   Proof
                 </th>
@@ -294,16 +306,15 @@ export default function PaymentsQueue({
                         <td className="px-5 py-3.5 text-xs font-bold text-slate-600 dark:text-slate-400">
                           {p.referenceType?.replace(/_/g, ' ') ?? '—'}
                         </td>
-                        <td className="px-5 py-3.5 text-sm font-black text-aerojet-blue">
-                          {p.currency}{' '}
-                          {Number(p.amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                        <td className="text-aerojet-blue px-5 py-3.5 text-sm font-black">
+                          {formatCurrency(p.amount, p.currency)}
                         </td>
                         <td className="px-5 py-3.5 text-xs text-slate-500 dark:text-slate-400">
-                          {p.paymentMethod.replace(/_/g, ' ')}
+                          {p.paymentMethod?.replace(/_/g, ' ') ?? '—'}
                         </td>
                         <td className="px-5 py-3.5">
                           <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${STATUS_STYLE[p.status] ?? 'bg-slate-100 text-slate-500'}`}
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${getPaymentStatusStyle(p.status as PaymentStatus)}`}
                           >
                             {p.status}
                           </span>
@@ -315,7 +326,7 @@ export default function PaymentsQueue({
                                 href={p.proofUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-sky transition-all duration-150 ease-out hover:bg-aerojet-sky/10 hover:shadow-sm"
+                                className="text-aerojet-sky hover:bg-aerojet-sky/10 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-bold transition-all duration-150 ease-out hover:shadow-sm"
                               >
                                 <ExternalLink className="h-3.5 w-3.5" /> Latest
                               </a>
@@ -355,11 +366,7 @@ export default function PaymentsQueue({
                             </div>
                           ) : (
                             <span className="text-xs text-slate-500 dark:text-slate-400">
-                              {new Date(p.createdAt).toLocaleDateString('en-GB', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                              })}
+                              {formatDate(p.createdAt, 'SHORT')}
                             </span>
                           )}
                         </td>
@@ -447,7 +454,7 @@ export default function PaymentsQueue({
                       <p className="text-xs text-slate-400">{p.user.email}</p>
                     </div>
                     <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${STATUS_STYLE[p.status] ?? 'bg-slate-100 text-slate-500'}`}
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${getPaymentStatusStyle(p.status as PaymentStatus)}`}
                     >
                       {p.status}
                     </span>
@@ -457,15 +464,14 @@ export default function PaymentsQueue({
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
                       <p className="font-bold tracking-wider text-slate-400 uppercase">Amount</p>
-                      <p className="font-black text-aerojet-blue dark:text-blue-400">
-                        {p.currency}{' '}
-                        {Number(p.amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                      <p className="text-aerojet-blue font-black dark:text-blue-400">
+                        {formatCurrency(p.amount, p.currency)}
                       </p>
                     </div>
                     <div>
                       <p className="font-bold tracking-wider text-slate-400 uppercase">Method</p>
                       <p className="font-bold text-slate-600 dark:text-slate-400">
-                        {p.paymentMethod.replace(/_/g, ' ')}
+                        {p.paymentMethod?.replace(/_/g, ' ') ?? '—'}
                       </p>
                     </div>
                     <div>
@@ -477,11 +483,7 @@ export default function PaymentsQueue({
                     <div>
                       <p className="font-bold tracking-wider text-slate-400 uppercase">Date</p>
                       <p className="font-bold text-slate-600 dark:text-slate-400">
-                        {new Date(p.createdAt).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                        {formatDate(p.createdAt, 'SHORT')}
                       </p>
                     </div>
                   </div>
@@ -493,7 +495,7 @@ export default function PaymentsQueue({
                         href={p.proofUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-sky transition-all duration-150 ease-out hover:bg-aerojet-sky/10 hover:shadow-sm"
+                        className="text-aerojet-sky hover:bg-aerojet-sky/10 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-bold transition-all duration-150 ease-out hover:shadow-sm"
                       >
                         <ExternalLink className="h-3.5 w-3.5" /> View Proof
                       </a>
@@ -590,7 +592,7 @@ export default function PaymentsQueue({
           <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
           <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-4 flex items-center justify-between">
-              <Dialog.Title className="text-lg font-black text-aerojet-blue dark:text-white">
+              <Dialog.Title className="text-aerojet-blue text-lg font-black dark:text-white">
                 Upload History
               </Dialog.Title>
               <Dialog.Description className="sr-only">
@@ -604,7 +606,7 @@ export default function PaymentsQueue({
             <div className="space-y-3">
               {historyLoading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-aerojet-sky" />
+                  <Loader2 className="text-aerojet-sky h-6 w-6 animate-spin" />
                 </div>
               ) : uploadHistory.length === 0 ? (
                 <div className="py-6 text-center text-sm text-slate-500">
@@ -622,18 +624,17 @@ export default function PaymentsQueue({
                           {file.filename}
                         </p>
                         <p className="text-[10px] text-slate-400">
-                          {new Date(file.createdAt).toLocaleString(undefined, {
-                            dateStyle: 'medium',
-                            timeStyle: 'short',
-                          })}
-                          {i === 0 && <span className="ml-2 font-bold text-aerojet-sky">Latest</span>}
+                          {formatDate(file.createdAt, 'DATETIME_SHORT')}
+                          {i === 0 && (
+                            <span className="text-aerojet-sky ml-2 font-bold">Latest</span>
+                          )}
                         </p>
                       </div>
                       <a
                         href={file.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:text-aerojet-blue hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-white"
+                        className="hover:text-aerojet-blue flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-white"
                       >
                         <ExternalLink className="h-3.5 w-3.5" /> Open
                       </a>

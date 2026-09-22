@@ -29,6 +29,13 @@ export function maskEmail(email: string): string {
   return `${local[0]}${local[1]}***@${domain}`
 }
 
+export function maskIp(ip: string | null | undefined): string {
+  if (!ip) return 'INTERNAL'
+  const parts = ip.split('.')
+  if (parts.length < 3) return '***.***.***.***'
+  return `${parts[0]}.${parts[1]}.***.***`
+}
+
 export function formatPaymentType(type: string): string {
   if (!type) return 'Payment'
 

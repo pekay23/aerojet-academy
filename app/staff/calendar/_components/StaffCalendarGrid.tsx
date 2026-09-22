@@ -51,13 +51,7 @@ export interface StaffCalendarEvent {
   source: 'class' | 'exam' | 'admin'
   editable: boolean
   visibleTo:
-    | 'ALL'
-    | 'STUDENTS'
-    | 'INSTRUCTORS'
-    | 'EXAM_ONLY'
-    | 'MODULAR'
-    | 'FULL_TIME'
-    | 'SPECIFIC_USER'
+    'ALL' | 'STUDENTS' | 'INSTRUCTORS' | 'EXAM_ONLY' | 'MODULAR' | 'FULL_TIME' | 'SPECIFIC_USER'
   recurrenceType?: string | null
   recurrenceDays?: string | null
   recurrenceUntil?: string | null
@@ -67,7 +61,6 @@ export interface StaffCalendarEvent {
 interface Props {
   events: StaffCalendarEvent[]
   initialDate?: Date
-  currentUserId: string
 }
 
 const AUDIENCE_OPTIONS = [
@@ -132,7 +125,7 @@ function AudienceBadge({ visibleTo }: { visibleTo: string }) {
   )
 }
 
-export default function StaffCalendarGrid({ events, initialDate, currentUserId: _currentUserId }: Props) {
+export default function StaffCalendarGrid({ events, initialDate }: Props) {
   const [currentDate, setCurrentDate] = useState(initialDate || new Date())
   const [viewMode, setViewMode] = useState<'Month' | 'Week' | 'Day'>('Week')
   const [popupEvent, setPopupEvent] = useState<StaffCalendarEvent | null>(null)
@@ -213,7 +206,10 @@ export default function StaffCalendarGrid({ events, initialDate, currentUserId: 
     setFormStart(evt.startDate.slice(0, 16))
     setFormEnd(evt.endDate?.slice(0, 16) || '')
     setFormColor(evt.color)
-    setFormAudience(evt.visibleTo as 'ALL' | 'STUDENTS' | 'INSTRUCTORS' | 'EXAM_ONLY' | 'MODULAR' | 'FULL_TIME' | 'SPECIFIC_USER')
+    setFormAudience(
+      evt.visibleTo as
+        'ALL' | 'STUDENTS' | 'INSTRUCTORS' | 'EXAM_ONLY' | 'MODULAR' | 'FULL_TIME' | 'SPECIFIC_USER'
+    )
     setFormTargetUserId(evt.targetUserId || '')
     setFormRecurrence(evt.recurrenceType || 'NONE')
     setPopupEvent(null)
@@ -499,7 +495,7 @@ export default function StaffCalendarGrid({ events, initialDate, currentUserId: 
               })}
             </div>
           </div>
-          <div className="flex h-[720px] overflow-y-auto">
+          <div className="flex h-auto min-h-[400px] overflow-y-auto" style={{ maxHeight: '720px' }}>
             <div className="relative grid w-full grid-cols-[80px_1fr]">
               <div className="border-r border-slate-100 dark:border-slate-800">
                 {timeSlots.map((h) => (
@@ -522,7 +518,7 @@ export default function StaffCalendarGrid({ events, initialDate, currentUserId: 
                 {weekDays.map((day, di) => (
                   <div
                     key={di}
-                    className="h-[1920px] border-r border-slate-100 last:border-r-0 dark:border-slate-800"
+                    className="h-full border-r border-slate-100 last:border-r-0 dark:border-slate-800"
                   />
                 ))}
                 {weekDays.map((day, di) => {
@@ -794,7 +790,18 @@ export default function StaffCalendarGrid({ events, initialDate, currentUserId: 
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setFormAudience(opt.value as 'ALL' | 'STUDENTS' | 'INSTRUCTORS' | 'EXAM_ONLY' | 'MODULAR' | 'FULL_TIME' | 'SPECIFIC_USER')}
+                      onClick={() =>
+                        setFormAudience(
+                          opt.value as
+                            | 'ALL'
+                            | 'STUDENTS'
+                            | 'INSTRUCTORS'
+                            | 'EXAM_ONLY'
+                            | 'MODULAR'
+                            | 'FULL_TIME'
+                            | 'SPECIFIC_USER'
+                        )
+                      }
                       className={cn(
                         'flex flex-col items-center justify-center gap-1 rounded-2xl border-2 p-2 text-center text-xs font-bold transition-all',
                         formAudience === opt.value

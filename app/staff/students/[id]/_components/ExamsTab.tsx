@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { naturalCompare } from '@/lib/utils/array'
+import { useCurrentRole } from '@/hooks/use-current-role'
 import {
   Search,
   Plus,
@@ -25,6 +26,15 @@ import {
   isUpcomingBooking as isUpcomingBookingFromLib,
   isMissedBooking as isMissedBookingFromLib,
 } from '@/lib/exams/fulfillment'
+import {
+  ATTEMPT_FIRST,
+  ATTEMPT_LABELS,
+  ATTEMPT_RESIT_1,
+  ATTEMPT_RESIT_2,
+  ATTEMPT_RESIT_3,
+  normalizeAttemptType,
+  type AttemptType,
+} from '@/lib/exams/attempt-types'
 import type { SerializedExamComponent, SerializedExamBundle } from '@/lib/types/staff'
 
 const EXAM_FILTERS = [
@@ -65,76 +75,92 @@ type StudentSummary = {
     semesterId?: string | null
     CGPA?: number | null
   } | null
-  wallet: { availableBalance: number; reservedBalance: number; balance: number; currency: string } | null
-  examBookings: {
-    id: string
-    moduleCode: string
-    examDate: string | null
-    score: number | null
-    percentage: number | null
-    result: string | null
-    status: string
-    bookingType: string | null
-    attemptType: string | null
-    examCategory: string | null
-    amountPaid: number | null
-    isResit: boolean
-    eventName: string | null
-    sittingLabel: string | null
-    attendanceStatus: string | null
-    bookedAt?: string | null
-    createdAt?: string
-    demandStatus?: string | null
-    executedAt?: string | null
-    rolloverToEventId?: string | null
-    examAttendance?: { status?: string | null } | null
-    sittingAssignments?: { attendanceStatus?: string | null; sitting?: { dayNumber?: number; sessionType?: string } | null }[] | null
-    course?: { id?: string; name: string; code: string } | null
-    exam?: {
-      name?: string | null
-      examDate?: string | Date | null
-      examComponent?: {
+  wallet: {
+    availableBalance: number
+    reservedBalance: number
+    balance: number
+    currency: string
+  } | null
+  examBookings:
+    | {
+        id: string
+        moduleCode: string
+        examDate: string | null
+        score: number | null
+        percentage: number | null
+        result: string | null
+        status: string
+        bookingType: string | null
+        attemptType: string | null
+        examCategory: string | null
+        amountPaid: number | null
+        isResit: boolean
+        eventName: string | null
+        sittingLabel: string | null
+        attendanceStatus: string | null
+        bookedAt?: string | null
+        createdAt?: string
+        demandStatus?: string | null
+        executedAt?: string | null
+        rolloverToEventId?: string | null
+        examAttendance?: { status?: string | null } | null
+        sittingAssignments?:
+          | {
+              attendanceStatus?: string | null
+              sitting?: { dayNumber?: number; sessionType?: string } | null
+            }[]
+          | null
         course?: { id?: string; name: string; code: string } | null
-      } | null
-    } | null
-    event?: {
-      id?: string
-      name: string
-      startDate?: string | null
-      endDate?: string | null
-      status?: string | null
-    } | null
-  }[] | null
-  examResults: {
-    id: string
-    moduleCode: string
-    score: number
-    maxScore: number
-    percentage: number
-    passed: boolean
-    attemptType: string | null
-    sourceNotes: string | null
-    certificateUrl: string | null
-    examCategory: string | null
-    createdAt?: string
-    exam?: {
-      name?: string | null
-      examDate?: string | Date | null
-      examComponent?: {
-        course?: { id?: string; code?: string; name?: string } | null
-      } | null
-    } | null
-  }[] | null
-  examBundles: {
-    id: string
-    bundleType: string
-    usedSeats: number
-    totalSeats: number
-    amountPaid: number
-    status: string
-    validUntil: string | null
-    createdAt?: string
-  }[] | null
+        exam?: {
+          name?: string | null
+          examDate?: string | Date | null
+          examComponent?: {
+            course?: { id?: string; name: string; code: string } | null
+          } | null
+        } | null
+        event?: {
+          id?: string
+          name: string
+          startDate?: string | null
+          endDate?: string | null
+          status?: string | null
+        } | null
+      }[]
+    | null
+  examResults:
+    | {
+        id: string
+        moduleCode: string
+        score: number
+        maxScore: number
+        percentage: number
+        passed: boolean
+        attemptType: string | null
+        sourceNotes: string | null
+        certificateUrl: string | null
+        examCategory: string | null
+        createdAt?: string
+        exam?: {
+          name?: string | null
+          examDate?: string | Date | null
+          examComponent?: {
+            course?: { id?: string; code?: string; name?: string } | null
+          } | null
+        } | null
+      }[]
+    | null
+  examBundles:
+    | {
+        id: string
+        bundleType: string
+        usedSeats: number
+        totalSeats: number
+        amountPaid: number
+        status: string
+        validUntil: string | null
+        createdAt?: string
+      }[]
+    | null
 }
 
 export type UnifiedExamRecord = {
@@ -166,6 +192,25 @@ export type UnifiedExamRecord = {
   certificateUrl?: string | null
 }
 
+function getAttemptLabel(value: string | null | undefined): string {
+  const normalized = normalizeAttemptType(value)
+  if (normalized) return ATTEMPT_LABELS[normalized]
+  return value == null || String(value).trim() === '' ? ATTEMPT_LABELS[ATTEMPT_FIRST] : '—'
+}
+
+function isFirstAttemptType(value: string | null | undefined): boolean {
+  return getAttemptLabel(value) === ATTEMPT_LABELS[ATTEMPT_FIRST]
+}
+
+function isResitAttemptType(value: string | null | undefined): boolean {
+  const attemptType = normalizeAttemptType(value)
+  return (
+    attemptType === ATTEMPT_RESIT_1 ||
+    attemptType === ATTEMPT_RESIT_2 ||
+    attemptType === ATTEMPT_RESIT_3
+  )
+}
+
 interface Props {
   student: StudentSummary
   examComponents: SerializedExamComponent[]
@@ -183,6 +228,8 @@ export default function ExamsTab({
   semesters,
   onRefresh,
 }: Props) {
+  const userRole = useCurrentRole()
+  const isSupervisor = ['ADMIN', 'SUPER_ADMIN'].includes(userRole || '')
   const [filter, setFilter] = useState<ExamFilter>('all')
   const [search, setSearch] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -248,12 +295,8 @@ export default function ExamsTab({
             ? 'COMPLETED'
             : b.status,
         bookingType: b.bookingType,
-        attemptType:
-          b.attemptType?.toUpperCase().includes('MIGRATE') ||
-          b.attemptType?.toUpperCase().includes('HISTORICAL')
-            ? null
-            : b.attemptType,
-        isResit: b.isResit || (b.attemptType?.toUpperCase().startsWith('RESIT') ?? false),
+        attemptType: normalizeAttemptType(b.attemptType),
+        isResit: b.isResit || isResitAttemptType(b.attemptType),
         eventName: b.event?.name,
         eventStatus: b.event?.status || null,
         demandStatus: b.demandStatus || null,
@@ -271,11 +314,13 @@ export default function ExamsTab({
     // From examResults (formal results)
     for (const r of student.examResults || []) {
       const rModuleCode = r.moduleCode || r.exam?.examComponent?.course?.code || '—'
+      const normalizedResultAttemptType = normalizeAttemptType(r.attemptType)
       const existingBooking = records.find(
         (rec) =>
           rec.source === 'booking' &&
           rec.moduleCode?.toUpperCase() === rModuleCode.toUpperCase() &&
-          (rec.attemptType || 'FIRST') === (r.attemptType || 'FIRST')
+          (normalizeAttemptType(rec.attemptType) ?? ATTEMPT_FIRST) ===
+            (normalizedResultAttemptType ?? ATTEMPT_FIRST)
       )
 
       if (existingBooking) {
@@ -297,24 +342,15 @@ export default function ExamsTab({
           existingBooking.result = null
         }
 
-        const rType = r.attemptType?.toUpperCase() || ''
-        const bType = existingBooking.attemptType?.toUpperCase() || ''
+        const normalizedResultAttemptType = normalizeAttemptType(r.attemptType)
+        const normalizedBookingAttemptType = normalizeAttemptType(existingBooking.attemptType)
 
-        const isPlaceholder = (s: string) =>
-          s.includes('MIGRATE') || s.includes('HISTORICAL') || s === '—'
-
-        if (rType && !isPlaceholder(rType)) {
-          existingBooking.attemptType = r.attemptType
-          existingBooking.isResit = (r.attemptType || '').startsWith('RESIT')
-        } else if (!bType || isPlaceholder(bType)) {
-          if (rType && !isPlaceholder(rType)) {
-            existingBooking.attemptType = r.attemptType
-            existingBooking.isResit = (r.attemptType || '').startsWith('RESIT')
-          } else if (r.attemptType) {
-            // Fallback to result's attempt type even if it's a placeholder,
-            // but only if booking has nothing better
-            existingBooking.attemptType = r.attemptType
-          }
+        if (normalizedResultAttemptType) {
+          existingBooking.attemptType = normalizedResultAttemptType
+          existingBooking.isResit = isResitAttemptType(normalizedResultAttemptType)
+        } else if (!normalizedBookingAttemptType && r.attemptType) {
+          existingBooking.attemptType = null
+          existingBooking.isResit = false
         }
       } else {
         records.push({
@@ -329,12 +365,8 @@ export default function ExamsTab({
           passed: r.passed,
           status: 'COMPLETED',
           bookingType: null,
-          attemptType:
-            r.attemptType?.toUpperCase().includes('MIGRATE') ||
-            r.attemptType?.toUpperCase().includes('HISTORICAL')
-              ? null
-              : r.attemptType,
-          isResit: r.attemptType ? r.attemptType.toUpperCase().startsWith('RESIT') : false,
+          attemptType: normalizeAttemptType(r.attemptType),
+          isResit: isResitAttemptType(r.attemptType),
           eventName: null,
           sourceNotes: r.sourceNotes,
           bookedAt: r.createdAt,
@@ -357,22 +389,28 @@ export default function ExamsTab({
   }, [student.examBookings, student.examResults])
 
   // ---- Upcoming / Missed helpers ----
-  const isUpcomingBooking = useCallback((r: UnifiedExamRecord) =>
-    isUpcomingBookingFromLib({
-      examDate: r.examDate,
-      result: r.result,
-      demandStatus: r.demandStatus,
-      eventStatus: r.eventStatus,
-    }), [])
+  const isUpcomingBooking = useCallback(
+    (r: UnifiedExamRecord) =>
+      isUpcomingBookingFromLib({
+        examDate: r.examDate,
+        result: r.result,
+        demandStatus: r.demandStatus,
+        eventStatus: r.eventStatus,
+      }),
+    []
+  )
 
-  const isMissedBooking = useCallback((r: UnifiedExamRecord) =>
-    isMissedBookingFromLib({
-      examDate: r.examDate,
-      result: r.result,
-      score: r.score,
-      demandStatus: r.demandStatus,
-      hasResult: r.hasResult,
-    }), [])
+  const isMissedBooking = useCallback(
+    (r: UnifiedExamRecord) =>
+      isMissedBookingFromLib({
+        examDate: r.examDate,
+        result: r.result,
+        score: r.score,
+        demandStatus: r.demandStatus,
+        hasResult: r.hasResult,
+      }),
+    []
+  )
 
   // Apply filters
   const filteredRecords = useMemo(() => {
@@ -383,9 +421,7 @@ export default function ExamsTab({
     } else if (filter === 'failed') {
       filtered = filtered.filter((r) => !r.passed && r.result?.toLowerCase() === 'fail')
     } else if (filter === 'resit') {
-      filtered = filtered.filter(
-        (r) => r.isResit || ['RESIT_1', 'RESIT_2', 'RESIT_3'].includes(r.attemptType || '')
-      )
+      filtered = filtered.filter((r) => r.isResit || isResitAttemptType(r.attemptType))
     } else if (filter === 'upcoming') {
       filtered = filtered.filter((r) => isUpcomingBooking(r))
     } else if (filter === 'missed') {
@@ -429,9 +465,7 @@ export default function ExamsTab({
       all: allExamRecords.length,
       passed: allExamRecords.filter((r) => r.passed || r.result?.toLowerCase() === 'pass').length,
       failed: allExamRecords.filter((r) => !r.passed && r.result?.toLowerCase() === 'fail').length,
-      resit: allExamRecords.filter(
-        (r) => r.isResit || ['RESIT_1', 'RESIT_2', 'RESIT_3'].includes(r.attemptType || '')
-      ).length,
+      resit: allExamRecords.filter((r) => r.isResit || isResitAttemptType(r.attemptType)).length,
       upcoming: allExamRecords.filter((r) => isUpcomingBooking(r)).length,
       missed: allExamRecords.filter((r) => isMissedBooking(r)).length,
       completed: allExamRecords.filter((r) => r.status === 'COMPLETED').length,
@@ -457,8 +491,11 @@ export default function ExamsTab({
             (editData.examCategory as 'INTERNAL' | 'OFFICIAL_EASA' | undefined) || undefined,
         })
       } else {
+        // Score is an exam OUTCOME, not a booking detail. Only supervisors may
+        // write it through the booking path; non-supervisors are routed to
+        // updateExamResult (which has its own locked-result gate) instead.
         res = await updateExamBooking(record.id, {
-          score: editData.score,
+          score: isSupervisor ? editData.score : undefined,
           result: editData.result,
           examDate: editData.examDate ? new Date(editData.examDate) : undefined,
           moduleCode: editData.moduleCode || undefined,
@@ -943,26 +980,30 @@ export default function ExamsTab({
                   <td className="px-4 py-3 text-center">
                     {editingId === record.id ? (
                       <select
-                        value={editData.attemptType ?? record.attemptType ?? 'FIRST'}
+                        value={
+                          editData.attemptType ??
+                          normalizeAttemptType(record.attemptType) ??
+                          ATTEMPT_FIRST
+                        }
                         onChange={(e) =>
                           setEditData((d) => ({ ...d, attemptType: e.target.value }))
                         }
                         className="w-28 rounded border border-slate-200 px-2 py-1 text-xs"
                       >
-                        <option value="FIRST">First Attempt</option>
-                        <option value="RESIT_1">Resit 1</option>
-                        <option value="RESIT_2">Resit 2</option>
-                        <option value="RESIT_3">Resit 3</option>
+                        <option value="FIRST">{ATTEMPT_LABELS[ATTEMPT_FIRST]}</option>
+                        <option value="RESIT_1">{ATTEMPT_LABELS[ATTEMPT_RESIT_1]}</option>
+                        <option value="RESIT_2">{ATTEMPT_LABELS[ATTEMPT_RESIT_2]}</option>
+                        <option value="RESIT_3">{ATTEMPT_LABELS[ATTEMPT_RESIT_3]}</option>
                       </select>
                     ) : (
                       <span
                         className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                          record.attemptType === 'FIRST' || !record.attemptType
+                          isFirstAttemptType(record.attemptType)
                             ? 'bg-slate-100 text-slate-500'
                             : 'bg-amber-100 text-amber-700'
                         }`}
                       >
-                        {(record.attemptType || 'FIRST').replace(/_/g, ' ')}
+                        {getAttemptLabel(record.attemptType)}
                       </span>
                     )}
                   </td>
@@ -1000,7 +1041,13 @@ export default function ExamsTab({
                             score: e.target.value ? Number(e.target.value) : undefined,
                           }))
                         }
-                        className="w-16 rounded border border-slate-200 px-2 py-1 text-center font-mono text-xs"
+                        disabled={!isSupervisor}
+                        title={
+                          !isSupervisor
+                            ? 'Only ADMIN / SUPER_ADMIN may edit exam scores'
+                            : undefined
+                        }
+                        className={`focus:ring-aerojet-blue/50 w-16 rounded border border-slate-200 px-2 py-1 text-center font-mono text-xs focus:ring-2 focus:outline-none ${!isSupervisor ? 'cursor-not-allowed opacity-50' : ''}`}
                         min={0}
                         max={100}
                       />
@@ -1117,7 +1164,8 @@ export default function ExamsTab({
                                     ? new Date(record.examDate).toISOString().split('T')[0]
                                     : '',
                                   result: record.result || undefined,
-                                  attemptType: record.attemptType || 'FIRST',
+                                  attemptType:
+                                    normalizeAttemptType(record.attemptType) ?? ATTEMPT_FIRST,
                                   bookingType: record.bookingType || 'INDIVIDUAL',
                                   examCategory: record.examCategory || 'OFFICIAL_EASA',
                                 })

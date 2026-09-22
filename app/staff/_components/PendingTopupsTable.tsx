@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { CheckSquare, Square, CheckCircle2, XCircle, ExternalLink } from 'lucide-react'
-import { bulkUpdatePaymentStatus } from '../actions'
+import { bulkUpdatePaymentStatus } from '../actions/index'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { PaymentStatus } from '@/types/enums'
@@ -49,10 +49,9 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
     () =>
       requests.map((r) => ({
         ...r,
-        _studentSort:
-          r.user.profile
-            ? `${r.user.profile.lastName ?? ''} ${r.user.profile.firstName ?? ''}`.toLowerCase()
-            : r.user.email.toLowerCase(),
+        _studentSort: r.user.profile
+          ? `${r.user.profile.lastName ?? ''} ${r.user.profile.firstName ?? ''}`.toLowerCase()
+          : r.user.email.toLowerCase(),
       })),
     [requests]
   )

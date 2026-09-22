@@ -28,7 +28,7 @@ import {
   bulkDeleteUsers,
   bulkArchiveUsers,
   bulkBypassPasswordChange,
-} from '../actions'
+} from '../actions/index'
 import { toast } from 'sonner'
 
 export default function UsersTable({ initialTotal }: { initialTotal: number }) {
@@ -77,8 +77,6 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
     return () => clearTimeout(t)
   }, [fetchUsers, search])
 
-
-
   const bulkActions = [
     {
       label: 'Activate',
@@ -88,8 +86,10 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
       confirmMessage: `Are you sure you want to activate ${selectedIds.length} selected users?`,
       onClick: async (ids: string[]) => {
         const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
-        if (res.success) { toast.success(`Activated ${ids.length} users`); fetchUsers() }
-        else toast.error(res.error)
+        if (res.success) {
+          toast.success(`Activated ${ids.length} users`)
+          fetchUsers()
+        } else toast.error(res.error)
       },
     },
     {
@@ -100,8 +100,10 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
       confirmMessage: `Are you sure you want to suspend ${selectedIds.length} selected users?`,
       onClick: async (ids: string[]) => {
         const res = await bulkUpdateUserStatus(ids, 'SUSPENDED')
-        if (res.success) { toast.success(`Suspended ${ids.length} users`); fetchUsers() }
-        else toast.error(res.error)
+        if (res.success) {
+          toast.success(`Suspended ${ids.length} users`)
+          fetchUsers()
+        } else toast.error(res.error)
       },
     },
     {
@@ -137,8 +139,10 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           confirmMessage: `Are you sure you want to permanently delete ${selectedIds.length} users? This cannot be undone.`,
           onClick: async (ids: string[]) => {
             const res = await bulkDeleteUsers(ids)
-            if (res.success) { toast.success(`Permanently deleted ${ids.length} users`); fetchUsers() }
-            else toast.error(res.error)
+            if (res.success) {
+              toast.success(`Permanently deleted ${ids.length} users`)
+              fetchUsers()
+            } else toast.error(res.error)
           },
         }
       : {
@@ -149,8 +153,10 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           confirmMessage: `Are you sure you want to archive ${selectedIds.length} users?`,
           onClick: async (ids: string[]) => {
             const res = await bulkArchiveUsers(ids)
-            if (res.success) { toast.success(`Archived ${ids.length} users`); fetchUsers() }
-            else toast.error(res.error)
+            if (res.success) {
+              toast.success(`Archived ${ids.length} users`)
+              fetchUsers()
+            } else toast.error(res.error)
           },
         },
     {
@@ -161,8 +167,10 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
       confirmMessage: `Are you sure you want to bypass the required password change for ${selectedIds.length} selected users?`,
       onClick: async (ids: string[]) => {
         const res = await bulkBypassPasswordChange(ids)
-        if (res.success) { toast.success(`Bypassed password change for ${ids.length} users`); fetchUsers() }
-        else toast.error(res.error)
+        if (res.success) {
+          toast.success(`Bypassed password change for ${ids.length} users`)
+          fetchUsers()
+        } else toast.error(res.error)
       },
     },
     {
@@ -175,7 +183,9 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           .map((u) => u.email)
           .filter(Boolean)
         if (selectedEmails.length > 0) {
-          window.location.href = `mailto:${selectedEmails.join(',')}`
+          const link = document.createElement('a')
+          link.href = `mailto:${selectedEmails.join(',')}`
+          link.click()
         }
       },
     },
@@ -216,9 +226,18 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
         role={role}
         status={status}
         search={search}
-        onRoleChange={(r) => { setRole(r); setPage(1); }}
-        onStatusChange={(s) => { setStatus(s); setPage(1); }}
-        onSearchChange={(s) => { setSearch(s); setPage(1); }}
+        onRoleChange={(r) => {
+          setRole(r)
+          setPage(1)
+        }}
+        onStatusChange={(s) => {
+          setStatus(s)
+          setPage(1)
+        }}
+        onSearchChange={(s) => {
+          setSearch(s)
+          setPage(1)
+        }}
       />
 
       {/* Table */}

@@ -37,8 +37,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     data: {
       code,
       name,
-      durationYears: parseInt(durationYears),
-      totalFee: parseFloat(totalFee),
+      durationYears: Number.parseInt(durationYears, 10) || 0,
+      totalFee: Number.parseFloat(totalFee) || 0,
       currency: currency || 'EUR',
       description: description || null,
     },

@@ -246,7 +246,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
     <div className="mx-auto max-w-[1800px]">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight dark:text-white">
             Full-Time Programmes
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -269,7 +269,12 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
             <div className="mt-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="prog-code" className="mb-1 block text-xs font-bold text-slate-600">Code</label>
+                  <label
+                    htmlFor="prog-code"
+                    className="mb-1 block text-xs font-bold text-slate-600"
+                  >
+                    Code
+                  </label>
                   <input
                     id="prog-code"
                     name="code"
@@ -281,7 +286,10 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                   />
                 </div>
                 <div>
-                  <label htmlFor="prog-duration" className="mb-1 block text-xs font-bold text-slate-600">
+                  <label
+                    htmlFor="prog-duration"
+                    className="mb-1 block text-xs font-bold text-slate-600"
+                  >
                     Duration (years)
                   </label>
                   <input
@@ -296,7 +304,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                 </div>
               </div>
               <div>
-                <label htmlFor="prog-name" className="mb-1 block text-xs font-bold text-slate-600">Name</label>
+                <label htmlFor="prog-name" className="mb-1 block text-xs font-bold text-slate-600">
+                  Name
+                </label>
                 <input
                   id="prog-name"
                   name="name"
@@ -308,7 +318,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                 />
               </div>
               <div>
-                <label htmlFor="prog-fee" className="mb-1 block text-xs font-bold text-slate-600">Total Fee</label>
+                <label htmlFor="prog-fee" className="mb-1 block text-xs font-bold text-slate-600">
+                  Total Fee
+                </label>
                 <input
                   id="prog-fee"
                   name="totalFee"
@@ -321,7 +333,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                 />
               </div>
               <div>
-                <label htmlFor="prog-desc" className="mb-1 block text-xs font-bold text-slate-600">Description</label>
+                <label htmlFor="prog-desc" className="mb-1 block text-xs font-bold text-slate-600">
+                  Description
+                </label>
                 <textarea
                   id="prog-desc"
                   name="description"
@@ -404,7 +418,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                         <p className="text-sm text-slate-600 dark:text-slate-400">
                           {prog.description}
                         </p>
-                      ) : <div />}
+                      ) : (
+                        <div />
+                      )}
                       <Button
                         size="sm"
                         variant="secondary"
@@ -438,16 +454,31 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                         {prog.programmeYears.map((y) => {
                           const effectiveYearFee = y.yearFeeAmount
                             ? Number(y.yearFeeAmount)
-                            : Number(prog.totalFee) / prog.durationYears
-                          
+                            : prog.durationYears > 0
+                              ? Number(prog.totalFee) / prog.durationYears
+                              : 0
+
                           const hasSeatFee = y.yearNumber === 1
                           const seatFee = hasSeatFee ? Number(y.seatConfirmationFee) : 0
-                          const firstPayment = hasSeatFee ? Number(y.firstPaymentAmount) : (effectiveYearFee * 0.5)
+                          const firstPayment = hasSeatFee
+                            ? Number(y.firstPaymentAmount)
+                            : effectiveYearFee > 0
+                              ? effectiveYearFee * 0.5
+                              : 0
                           const remaining = Math.max(0, effectiveYearFee - seatFee - firstPayment)
 
-                          const seatPct = Math.round((seatFee / effectiveYearFee) * 100) || 0
-                          const firstPct = Math.round((firstPayment / effectiveYearFee) * 100) || 0
-                          const remainingPct = Math.round((remaining / effectiveYearFee) * 100) || 0
+                          const seatPct =
+                            effectiveYearFee > 0
+                              ? Math.round((seatFee / effectiveYearFee) * 100)
+                              : 0
+                          const firstPct =
+                            effectiveYearFee > 0
+                              ? Math.round((firstPayment / effectiveYearFee) * 100)
+                              : 0
+                          const remainingPct =
+                            effectiveYearFee > 0
+                              ? Math.round((remaining / effectiveYearFee) * 100)
+                              : 0
 
                           return (
                             <div
@@ -501,11 +532,13 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                                       Seat ({seatPct}%): {prog.currency} {seatFee.toLocaleString()}
                                     </p>
                                   )}
-                                  <p className={!hasSeatFee ? "mt-0.5" : ""}>
-                                    Sem 1 ({firstPct}%): {prog.currency} {firstPayment.toLocaleString()}
+                                  <p className={!hasSeatFee ? 'mt-0.5' : ''}>
+                                    Sem 1 ({firstPct}%): {prog.currency}{' '}
+                                    {firstPayment.toLocaleString()}
                                   </p>
                                   <p>
-                                    Sem 2 ({remainingPct}%): {prog.currency} {remaining.toLocaleString()}
+                                    Sem 2 ({remainingPct}%): {prog.currency}{' '}
+                                    {remaining.toLocaleString()}
                                   </p>
                                 </div>
                               </div>
@@ -536,7 +569,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
           <div className="mt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="year-num" className="mb-1 block text-xs font-bold text-slate-600">Year Number</label>
+                <label htmlFor="year-num" className="mb-1 block text-xs font-bold text-slate-600">
+                  Year Number
+                </label>
                 <input
                   id="year-num"
                   name="yearNumber"
@@ -564,10 +599,15 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                 />
               </div>
             </div>
-            <div className={`grid ${Number(yearNumber) === 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
+            <div
+              className={`grid ${Number(yearNumber) === 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}
+            >
               {Number(yearNumber) === 1 && (
                 <div>
-                  <label htmlFor="year-seat" className="mb-1 block text-xs font-bold text-slate-600">
+                  <label
+                    htmlFor="year-seat"
+                    className="mb-1 block text-xs font-bold text-slate-600"
+                  >
                     Seat Confirmation Fee
                   </label>
                   <input
@@ -600,7 +640,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
 
             <div className="pt-2">
               <div className="mb-2 flex items-center justify-between">
-                <label htmlFor="sem-name-0" className="block text-xs font-bold text-slate-600">Semesters</label>
+                <label htmlFor="sem-name-0" className="block text-xs font-bold text-slate-600">
+                  Semesters
+                </label>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -634,7 +676,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label htmlFor={`sem-start-${idx}`} className="text-xs text-slate-500">Start</label>
+                        <label htmlFor={`sem-start-${idx}`} className="text-xs text-slate-500">
+                          Start
+                        </label>
                         <input
                           id={`sem-start-${idx}`}
                           name={`semester-start-${idx}`}
@@ -646,7 +690,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                         />
                       </div>
                       <div>
-                        <label htmlFor={`sem-end-${idx}`} className="text-xs text-slate-500">End</label>
+                        <label htmlFor={`sem-end-${idx}`} className="text-xs text-slate-500">
+                          End
+                        </label>
                         <input
                           id={`sem-end-${idx}`}
                           name={`semester-end-${idx}`}
@@ -693,7 +739,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
           <div className="mt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Code (Cannot be changed)</label>
+                <label className="mb-1 block text-xs font-bold text-slate-600">
+                  Code (Cannot be changed)
+                </label>
                 <input
                   value={code}
                   disabled
@@ -712,7 +760,12 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
               </div>
             </div>
             <div>
-              <label htmlFor="edit-prog-name" className="mb-1 block text-xs font-bold text-slate-600">Name</label>
+              <label
+                htmlFor="edit-prog-name"
+                className="mb-1 block text-xs font-bold text-slate-600"
+              >
+                Name
+              </label>
               <input
                 id="edit-prog-name"
                 value={name}
@@ -722,7 +775,12 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
               />
             </div>
             <div>
-              <label htmlFor="edit-prog-fee" className="mb-1 block text-xs font-bold text-slate-600">Total Fee</label>
+              <label
+                htmlFor="edit-prog-fee"
+                className="mb-1 block text-xs font-bold text-slate-600"
+              >
+                Total Fee
+              </label>
               <input
                 id="edit-prog-fee"
                 type="number"
@@ -733,7 +791,12 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
               />
             </div>
             <div>
-              <label htmlFor="edit-prog-desc" className="mb-1 block text-xs font-bold text-slate-600">Description</label>
+              <label
+                htmlFor="edit-prog-desc"
+                className="mb-1 block text-xs font-bold text-slate-600"
+              >
+                Description
+              </label>
               <textarea
                 id="edit-prog-desc"
                 value={description}
@@ -749,9 +812,12 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                 type="checkbox"
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-aerojet-blue focus:ring-aerojet-blue"
+                className="text-aerojet-blue focus:ring-aerojet-blue h-4 w-4 rounded border-slate-300"
               />
-              <label htmlFor="edit-prog-active" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+              <label
+                htmlFor="edit-prog-active"
+                className="text-sm font-bold text-slate-700 dark:text-slate-300"
+              >
                 Is Active
               </label>
             </div>

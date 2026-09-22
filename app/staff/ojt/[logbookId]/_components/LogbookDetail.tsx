@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -127,13 +128,11 @@ export default function LogbookDetail({
   logbook,
   ataChapters,
   supervisors,
-  staffId,
   mentorAssignments = [],
 }: {
   logbook: LogbookData
   ataChapters: ATAOption[]
   supervisors: SupervisorOption[]
-  staffId: string
   mentorAssignments: LogbookData['mentorAssignments']
 }) {
   const router = useRouter()
@@ -921,15 +920,12 @@ export default function LogbookDetail({
         </table>
       </div>
 
-      <ReviewSignoffPanel entries={logbook.entries} logbookId={logbook.id} staffId={staffId} />
+      <ReviewSignoffPanel entries={logbook.entries} />
       <MentorAssignments
         logbookId={logbook.id}
         mentorAssignments={mentorAssignments}
         availableMentors={supervisors}
-        staffId={staffId}
       />
     </div>
   )
 }
-
-import React from 'react'
