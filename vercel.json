@@ -1,6 +1,11 @@
 {
   "github": {
-    "enabled": true
+    "enabled": true,
+    "autoAlias": true,
+    "silent": false,
+    "deploymentEnabled": {
+      "main": false
+    }
   },
   "crons": [
     {
