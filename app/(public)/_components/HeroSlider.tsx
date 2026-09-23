@@ -29,6 +29,7 @@ export default function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [paused, setPaused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const sectionRef = useRef<HTMLElement>(null)
 
   const startTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current)
@@ -50,13 +51,32 @@ export default function HeroSlider() {
     return stopTimer
   }, [paused, startTimer, stopTimer])
 
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+
+    const handleMouseEnter = () => setPaused(true)
+    const handleMouseLeave = () => setPaused(false)
+    const handleFocus = () => setPaused(true)
+    const handleBlur = () => setPaused(false)
+
+    el.addEventListener('mouseenter', handleMouseEnter)
+    el.addEventListener('mouseleave', handleMouseLeave)
+    el.addEventListener('focusin', handleFocus)
+    el.addEventListener('focusout', handleBlur)
+
+    return () => {
+      el.removeEventListener('mouseenter', handleMouseEnter)
+      el.removeEventListener('mouseleave', handleMouseLeave)
+      el.removeEventListener('focusin', handleFocus)
+      el.removeEventListener('focusout', handleBlur)
+    }
+  }, [])
+
   return (
     <section
+      ref={sectionRef}
       className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-black md:min-h-[80vh]"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
       aria-roledescription="carousel"
       aria-label="Hero image slideshow"
     >
