@@ -1,11 +1,22 @@
 /**
  * Debug login flow - capture error message
+ * Requires: E2E_STAFF_EMAIL, E2E_STAFF_PASSWORD env vars
  */
 import { chromium } from '@playwright/test'
 import path from 'path'
+import { config } from 'dotenv'
+config()
 
 const BASE_URL = 'http://localhost:3000'
 const SCREENSHOT_DIR = path.join(process.cwd(), 'tests', 'e2e', 'tour-screenshots')
+
+const staffEmail = process.env.E2E_STAFF_EMAIL || 'staff@aerojet-academy.com'
+const staffPassword = process.env.E2E_STAFF_PASSWORD || ''
+
+if (!staffPassword) {
+  console.error('ERROR: E2E_STAFF_PASSWORD environment variable is required')
+  process.exit(1)
+}
 
 async function main() {
   const browser = await chromium.launch({ headless: true })
@@ -15,8 +26,8 @@ async function main() {
 
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' })
 
-  await page.fill('#email', 'staff@aerojet-academy.com')
-  await page.fill('#password', 'Staff@2026')
+  await page.fill('#email', staffEmail)
+  await page.fill('#password', staffPassword)
 
   // Wait for submit button to be enabled
   const submitBtn = page.locator('button[type="submit"]')
@@ -36,19 +47,19 @@ async function main() {
 
   // Check for error message
   const errorDiv = page.locator('.rounded-xl.border.border-red-200')
-  if (await errorDiv.count() > 0) {
+  if ((await errorDiv.count()) > 0) {
     const errorText = await errorDiv.first().textContent()
     console.log('Error message:', errorText?.trim())
   }
 
   // Check for 2FA field
   const totpInput = page.locator('#totpCode')
-  if (await totpInput.count() > 0) {
+  if ((await totpInput.count()) > 0) {
     console.log('2FA code input is visible - 2FA required!')
   }
 
   // Check if we see "Signing In..." (loading state)
-  if (await page.locator('text=Signing In').count() > 0) {
+  if ((await page.locator('text=Signing In').count()) > 0) {
     console.log('Login is still processing (Signing In...)')
     await page.waitForTimeout(5000)
   }
@@ -70,5 +81,3 @@ async function main() {
 }
 
 main().catch(console.error)
-
-

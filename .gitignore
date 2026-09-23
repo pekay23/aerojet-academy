@@ -47,6 +47,12 @@ next-env.d.ts
 
 # prisma
 prisma/migrations
+prisma/seed*.ts
+!prisma/seed-easa-questions.ts
+!prisma/seed-mock-data.ts
+
+# docs build output
+docs/html/
 
 # IDE
 .idea/

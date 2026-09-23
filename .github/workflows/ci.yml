@@ -39,6 +39,11 @@ jobs:
       - name: Check encoding
         run: bun run scripts/check-encoding.mjs
 
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --source . --no-git --verbose
+
       - name: Run tests
         run: bun run test --run
         env:

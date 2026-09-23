@@ -10,6 +10,20 @@ async function login(page: any, email: string, password: string) {
   await page.waitForURL((url: URL) => url.pathname !== '/login', { timeout: 20000 })
 }
 
+function getRequiredEnv(key: string): string {
+  const value = process.env[key]
+  if (!value) {
+    console.error(`ERROR: ${key} environment variable is required`)
+    process.exit(1)
+  }
+  return value
+}
+
+const studentEmail = getRequiredEnv('E2E_STUDENT_EMAIL')
+const studentPassword = getRequiredEnv('E2E_STUDENT_PASSWORD')
+const staffEmail = getRequiredEnv('E2E_STAFF_EMAIL')
+const staffPassword = getRequiredEnv('E2E_STAFF_PASSWORD')
+
 test.describe('WCAG 2.1 AA — Exam Pages', () => {
   test('login page has no accessibility violations', async ({ page }) => {
     await page.goto('/login')
@@ -20,7 +34,7 @@ test.describe('WCAG 2.1 AA — Exam Pages', () => {
   })
 
   test('student dashboard has no accessibility violations', async ({ page }) => {
-    await login(page, 'student@aerojet-academy.com', 'Student@2026')
+    await login(page, studentEmail, studentPassword)
     await page.goto('/student/dashboard')
     // Wait for page to fully load
     await page.waitForLoadState('networkidle')
@@ -29,7 +43,7 @@ test.describe('WCAG 2.1 AA — Exam Pages', () => {
   })
 
   test('staff exam management has no accessibility violations', async ({ page }) => {
-    await login(page, 'staff@aerojet-academy.com', 'Staff@2026')
+    await login(page, staffEmail, staffPassword)
     await page.goto('/staff/exams/internal')
     // Wait for page to fully load
     await page.waitForLoadState('networkidle')

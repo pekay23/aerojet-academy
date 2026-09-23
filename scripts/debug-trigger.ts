@@ -1,11 +1,22 @@
 /**
  * Debug: Login as staff, click tour trigger, verify Joyride renders
+ * Requires: E2E_STAFF_EMAIL, E2E_STAFF_PASSWORD env vars
  */
 import { chromium } from '@playwright/test'
 import path from 'path'
+import { config } from 'dotenv'
+config()
 
 const BASE_URL = 'http://localhost:3000'
 const SCREENSHOT_DIR = path.join(process.cwd(), 'tests', 'e2e', 'tour-screenshots')
+
+const staffEmail = process.env.E2E_STAFF_EMAIL || 'staff@aerojet-academy.com'
+const staffPassword = process.env.E2E_STAFF_PASSWORD || ''
+
+if (!staffPassword) {
+  console.error('ERROR: E2E_STAFF_PASSWORD environment variable is required')
+  process.exit(1)
+}
 
 async function main() {
   const browser = await chromium.launch({ headless: true })
@@ -27,8 +38,8 @@ async function main() {
   // === LOGIN ===
   log('=== LOGIN ===')
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' })
-  await page.fill('#email', 'staff@aerojet-academy.com')
-  await page.fill('#password', 'Staff@2026')
+  await page.fill('#email', staffEmail)
+  await page.fill('#password', staffPassword)
 
   // Click submit and wait for navigation
   await Promise.all([
@@ -135,5 +146,3 @@ async function main() {
 }
 
 main().catch(console.error)
-
-
