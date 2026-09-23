@@ -1,11 +1,22 @@
 /**
  * Debug: Authenticate via browser, capture cookies, test tour
+ * Requires: E2E_STAFF_EMAIL, E2E_STAFF_PASSWORD env vars
  */
 import { chromium } from '@playwright/test'
 import path from 'path'
+import { config } from 'dotenv'
+config()
 
 const BASE_URL = 'http://localhost:3000'
 const SCREENSHOT_DIR = 'tests/e2e/tour-screenshots'
+
+const staffEmail = process.env.E2E_STAFF_EMAIL || 'staff@aerojet-academy.com'
+const staffPassword = process.env.E2E_STAFF_PASSWORD || ''
+
+if (!staffPassword) {
+  console.error('ERROR: E2E_STAFF_PASSWORD environment variable is required')
+  process.exit(1)
+}
 
 async function main() {
   const log = (msg: string) => console.log(msg)
@@ -22,25 +33,30 @@ async function main() {
   // === Step 1: Go to login and fill form ===
   log('Step 1: Navigating to login page...')
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' })
-  await page.fill('#email', 'staff@aerojet-academy.com')
-  await page.fill('#password', 'REDACTED_PASSWORD')
+  await page.fill('#email', staffEmail)
+  await page.fill('#password', staffPassword)
 
   // === Step 2: Intercept the credentials response ===
   log('Step 2: Submitting form with response interception...')
   const [_response] = await Promise.all([
-    page.waitForResponse(async (resp) => {
-      const url = resp.url()
-      if (url.includes('/api/auth/callback/credentials')) {
-        const body = await resp.text().catch(() => '')
-        log(`  Auth response: status=${resp.status()}, url=${url}`)
-        log(`  Response body (first 200): ${body?.substring(0, 200)}`)
-        return true
-      }
-      return false
-    }, { timeout: 30000 }).catch(() => {
-      log('  No auth response captured')
-      return null
-    }),
+    page
+      .waitForResponse(
+        async (resp) => {
+          const url = resp.url()
+          if (url.includes('/api/auth/callback/credentials')) {
+            const body = await resp.text().catch(() => '')
+            log(`  Auth response: status=${resp.status()}, url=${url}`)
+            log(`  Response body (first 200): ${body?.substring(0, 200)}`)
+            return true
+          }
+          return false
+        },
+        { timeout: 30000 }
+      )
+      .catch(() => {
+        log('  No auth response captured')
+        return null
+      }),
     page.click('button[type="submit"]'),
   ])
 
@@ -50,7 +66,7 @@ async function main() {
   log(`  URL after submit: ${page.url()}`)
 
   const cookies = await context.cookies()
-  const sessionCookie = cookies.find(c => c.name === 'next-auth.session-token')
+  const sessionCookie = cookies.find((c) => c.name === 'next-auth.session-token')
   log(`  Session token cookie: ${sessionCookie ? 'PRESENT' : 'NOT FOUND'}`)
 
   // Check for error message on page
@@ -74,7 +90,10 @@ async function main() {
   log(`  URL: ${page.url()}`)
 
   // Check what's on the page
-  const bodyText = await page.locator('body').textContent().catch(() => '')
+  const bodyText = await page
+    .locator('body')
+    .textContent()
+    .catch(() => '')
   const hasSignIn = bodyText?.includes('Sign In')
   const hasDashboard = bodyText?.includes('Dashboard')
   const hasWelcome = bodyText?.includes('Welcome')
@@ -149,15 +168,25 @@ async function main() {
     // Check if we're on the login page
     if (page.url().includes('/login')) {
       log('  We are on the login page - login failed!')
-      const errorEl = await page.locator('.border-red-200, [class*="error"], [class*="red"]').count()
+      const errorEl = await page
+        .locator('.border-red-200, [class*="error"], [class*="red"]')
+        .count()
       log(`  Error-like elements: ${errorEl}`)
 
       // Try to get the full page text
       const fullText = await page.locator('body').textContent()
-      const errorLines = fullText?.split('\n').filter(l => l.includes('Invalid') || l.includes('error') || l.includes('Error') || l.includes('wrong'))
+      const errorLines = fullText
+        ?.split('\n')
+        .filter(
+          (l) =>
+            l.includes('Invalid') ||
+            l.includes('error') ||
+            l.includes('Error') ||
+            l.includes('wrong')
+        )
       log(`  Potential error lines: ${errorLines?.length || 0}`)
       if (errorLines && errorLines.length > 0) {
-        errorLines.forEach(l => log(`    > ${l.trim()}`))
+        errorLines.forEach((l) => log(`    > ${l.trim()}`))
       }
     }
   }
@@ -167,5 +196,3 @@ async function main() {
 }
 
 main().catch(console.error)
-
-

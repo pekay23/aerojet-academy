@@ -9,11 +9,16 @@ test.describe('Student Journey E2E', () => {
     await expect(page).toHaveURL(/\/register/)
 
     const uniqueEmail = `test.student.${Date.now()}@example.com`
+    const testPassword = process.env.E2E_TEST_REGISTRATION_PASSWORD || ''
+    if (!testPassword) {
+      console.error('ERROR: E2E_TEST_REGISTRATION_PASSWORD environment variable is required')
+      process.exit(1)
+    }
     await page.fill('#firstName', 'Test')
     await page.fill('#lastName', 'Student')
     await page.fill('#email', uniqueEmail)
-    await page.fill('#password', 'REDACTED_PASSWORD')
-    await page.fill('#confirmPassword', 'REDACTED_PASSWORD')
+    await page.fill('#password', testPassword)
+    await page.fill('#confirmPassword', testPassword)
 
     await page.click('button[type="submit"]')
     await expect(page.locator('text=/Success|Account created|Check your email/i')).toBeVisible()
@@ -34,8 +39,12 @@ test.describe('Student Journey E2E', () => {
     await page.goto('/student/grades')
     await waitForDashboard(page, 'My Grades')
     await expect(page.locator('h1')).toContainText(/My Grades/i)
-    await expect(page.locator('text=/Average Score|Assessments|Modules Completed/i').first()).toBeVisible({ timeout: 15000 })
-    await expect(page.locator('table, [class*="rounded-2xl"]').first()).toBeVisible({ timeout: 15000 })
+    await expect(
+      page.locator('text=/Average Score|Assessments|Modules Completed/i').first()
+    ).toBeVisible({ timeout: 15000 })
+    await expect(page.locator('table, [class*="rounded-2xl"]').first()).toBeVisible({
+      timeout: 15000,
+    })
   })
 
   test('student grades page shows academic records or empty state', async ({ page }) => {
@@ -56,7 +65,9 @@ test.describe('Student Journey E2E', () => {
     await page.goto('/student/courses')
     await waitForDashboard(page, 'My Courses')
     await expect(page.locator('h1')).toContainText(/My Courses/i)
-    await expect(page.locator('text=/Manage your active|Browse Course/i').first()).toBeVisible({ timeout: 15000 })
+    await expect(page.locator('text=/Manage your active|Browse Course/i').first()).toBeVisible({
+      timeout: 15000,
+    })
   })
 
   test('student courses page shows enrollments or empty state', async ({ page }) => {

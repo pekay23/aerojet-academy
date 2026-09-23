@@ -41,10 +41,28 @@ bun run test           # Run tests (Vitest)
 
 ## Demo Credentials (after seeding)
 
-| Role        | Email                          | Password        |
-| ----------- | ------------------------------ | --------------- |
-| Super Admin | admin@aerojet-academy.com      | REDACTED_PASSWORD      |
-| Staff       | staff@aerojet-academy.com      | REDACTED_PASSWORD      |
-| Instructor  | instructor@aerojet-academy.com | REDACTED_PASSWORD |
-| Student     | student@aerojet-academy.com    | REDACTED_PASSWORD    |
-| Applicant   | applicant@example.com          | REDACTED_PASSWORD  |
+Set the following environment variables for local development and E2E tests:
+
+```bash
+# Staff portal
+E2E_STAFF_EMAIL="staff@aerojet-academy.com"
+E2E_STAFF_PASSWORD="your-secure-password"
+
+# Student portal
+E2E_STUDENT_EMAIL="student@aerojet-academy.com"
+E2E_STUDENT_PASSWORD="your-secure-password"
+
+# Instructor portal
+E2E_INSTRUCTOR_EMAIL="instructor@aerojet-academy.com"
+E2E_INSTRUCTOR_PASSWORD="your-secure-password"
+
+# Applicant portal
+E2E_APPLICANT_EMAIL="applicant@example.com"
+E2E_APPLICANT_PASSWORD="your-secure-password"
+
+# Admin
+E2E_ADMIN_EMAIL="admin@aerojet-academy.com"
+E2E_ADMIN_PASSWORD="your-secure-password"
+```
+
+**Important**: Never commit real credentials. Use unique, strong passwords per environment. The seeded passwords are managed via the seed scripts using environment variables.

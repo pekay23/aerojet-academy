@@ -1,11 +1,22 @@
 /**
  * Debug login flow - step by step with screenshots
+ * Requires: E2E_STAFF_EMAIL, E2E_STAFF_PASSWORD env vars
  */
 import { chromium } from '@playwright/test'
 import path from 'path'
+import { config } from 'dotenv'
+config()
 
 const BASE_URL = 'http://localhost:3000'
 const SCREENSHOT_DIR = path.join(process.cwd(), 'tests', 'e2e', 'tour-screenshots')
+
+const staffEmail = process.env.E2E_STAFF_EMAIL || 'staff@aerojet-academy.com'
+const staffPassword = process.env.E2E_STAFF_PASSWORD || ''
+
+if (!staffPassword) {
+  console.error('ERROR: E2E_STAFF_PASSWORD environment variable is required')
+  process.exit(1)
+}
 
 async function main() {
   const browser = await chromium.launch({ headless: true })
@@ -46,7 +57,7 @@ async function main() {
   const passwordExists = await passwordInput.count()
   console.log('Password input found:', passwordExists > 0)
   if (passwordExists > 0) {
-    await passwordInput.fill('REDACTED_PASSWORD')
+    await passwordInput.fill(staffPassword)
   }
 
   // Step 4: Check for submit button
@@ -75,14 +86,17 @@ async function main() {
   console.log('After submit, URL:', page.url())
 
   // Check for any error messages
-  const errorElements = await page.locator('.error, .alert-error, [class*="error"], [role="alert"]').count()
+  const errorElements = await page
+    .locator('.error, .alert-error, [class*="error"], [role="alert"]')
+    .count()
   console.log('Error elements found:', errorElements)
 
   // Check if we see any validation messages
   const bodyText = await page.locator('body').textContent()
   if (bodyText) {
     // Look for common error indicators
-    const hasInvalid = bodyText.includes('Invalid') || bodyText.includes('incorrect') || bodyText.includes('error')
+    const hasInvalid =
+      bodyText.includes('Invalid') || bodyText.includes('incorrect') || bodyText.includes('error')
     const hasPasswordError = bodyText.includes('Password is incorrect')
     const hasEmailError = bodyText.includes('Email is incorrect')
     console.log('Has error text:', hasInvalid)
@@ -111,5 +125,3 @@ async function main() {
 }
 
 main().catch(console.error)
-
-

@@ -1,12 +1,23 @@
 /**
  * Comprehensive debug: login, navigate, inspect DOM for tour trigger
+ * Requires: E2E_STAFF_EMAIL, E2E_STAFF_PASSWORD env vars
  */
 import { chromium } from '@playwright/test'
 import path from 'path'
 import fs from 'fs'
+import { config } from 'dotenv'
+config()
 
 const BASE_URL = 'http://localhost:3000'
 const SCREENSHOT_DIR = path.join(process.cwd(), 'tests', 'e2e', 'tour-screenshots')
+
+const staffEmail = process.env.E2E_STAFF_EMAIL || 'staff@aerojet-academy.com'
+const staffPassword = process.env.E2E_STAFF_PASSWORD || ''
+
+if (!staffPassword) {
+  console.error('ERROR: E2E_STAFF_PASSWORD environment variable is required')
+  process.exit(1)
+}
 
 async function main() {
   const browser = await chromium.launch({ headless: true })
@@ -34,8 +45,8 @@ async function main() {
   // Step 1: Login
   log('Step 1: Logging in as staff...')
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' })
-  await page.fill('#email', 'staff@aerojet-academy.com')
-  await page.fill('#password', 'REDACTED_PASSWORD')
+  await page.fill('#email', staffEmail)
+  await page.fill('#password', staffPassword)
 
   // Wait for submit button
   await page.waitForSelector('button[type="submit"]', { state: 'visible' })
@@ -43,7 +54,9 @@ async function main() {
   // Click submit and wait for navigation
   log('Step 2: Clicking submit...')
   await Promise.all([
-    page.waitForNavigation({ timeout: 30000 }).catch(() => log('  (no navigation event, might be client-side)')),
+    page
+      .waitForNavigation({ timeout: 30000 })
+      .catch(() => log('  (no navigation event, might be client-side)')),
     page.click('button[type="submit"]'),
   ])
 
@@ -99,7 +112,10 @@ async function main() {
   log(`  joyride-portal: ${joyridePortal}`)
 
   // Step 6: Dump HTML of header area
-  const headerHtml = await page.locator('header, [class*="topbar"], [class*="TopBar"]').first().evaluate(el => el.outerHTML?.substring(0, 500) || 'not found')
+  const headerHtml = await page
+    .locator('header, [class*="topbar"], [class*="TopBar"]')
+    .first()
+    .evaluate((el) => el.outerHTML?.substring(0, 500) || 'not found')
   log(`Step 6: Header HTML: ${headerHtml}`)
 
   // Step 7: Check for any elements with data-tour-id
@@ -108,15 +124,10 @@ async function main() {
   tourElements.forEach((text, i) => log(`  ${i}: ${text || '(empty text)'}`))
 
   // Save debug log
-  fs.writeFileSync(
-    path.join(SCREENSHOT_DIR, 'debug-staff-full-log.txt'),
-    logs.join('\n')
-  )
+  fs.writeFileSync(path.join(SCREENSHOT_DIR, 'debug-staff-full-log.txt'), logs.join('\n'))
 
   await browser.close()
   log('\nDebug complete!')
 }
 
 main().catch(console.error)
-
-

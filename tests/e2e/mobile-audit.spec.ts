@@ -82,9 +82,19 @@ const APPLICANT_ROUTES = [
 ]
 
 async function loginApplicant(page: Page) {
+  const email = process.env.E2E_APPLICANT_EMAIL
+  const password = process.env.E2E_APPLICANT_PASSWORD
+
+  if (!email || !password) {
+    console.error(
+      'ERROR: E2E_APPLICANT_EMAIL and E2E_APPLICANT_PASSWORD environment variables are required'
+    )
+    process.exit(1)
+  }
+
   await page.goto('/login')
-  await page.fill('#email', process.env.APPLICANT_EMAIL || 'applicant@example.com')
-  await page.fill('#password', process.env.APPLICANT_PASSWORD || 'REDACTED_PASSWORD')
+  await page.fill('#email', email)
+  await page.fill('#password', password)
   await page.click('button[type="submit"]')
   // Applicant landing varies by stage; just wait until we leave /login.
   await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 30000 })
