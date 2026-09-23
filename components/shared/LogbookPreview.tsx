@@ -222,7 +222,7 @@ function PreviewPage({
   ownerLabel: string
 }) {
   return (
-    <article className="logbook-page relative mx-auto min-h-[640px] max-w-4xl overflow-hidden rounded-lg border border-slate-200 bg-white p-6 text-slate-900 shadow-sm dark:border-slate-700">
+    <article className="logbook-page relative mx-auto min-h-160 max-w-4xl overflow-hidden rounded-lg border border-slate-200 bg-white p-6 text-slate-900 shadow-sm dark:border-slate-700">
       <div className="pointer-events-none absolute inset-0 opacity-[0.035] before:absolute before:inset-8 before:bg-contain before:bg-center before:bg-no-repeat" />
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.06]"

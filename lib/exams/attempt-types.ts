@@ -87,6 +87,30 @@ export function resolveAttemptType(raw: string | null | undefined): AttemptType 
   throw new Error(`Unknown attempt type: '${raw}'`)
 }
 
+/**
+ * Merge-friendly resolution: like resolveAttemptType but never throws.
+ * Returns a stable uppercase string for unknown non-blank values (so they
+ * don't collide with canonical values). This is the function callers should
+ * use when they need a deterministic merge key and can't fail on unknown input.
+ */
+export function mergeAttemptType(raw: string | null | undefined): AttemptType | string {
+  const normalized = normalizeAttemptType(raw)
+  if (normalized) return normalized
+  if (raw == null || String(raw).trim() === '') return ATTEMPT_FIRST
+  return String(raw).trim().toUpperCase()
+}
+
+/**
+ * Format an attempt type for display: normalise and return the human-readable
+ * label, or em-dash for unknown/unmappable values.
+ */
+export function formatAttemptType(raw: string | null | undefined): string {
+  const normalized = normalizeAttemptType(raw)
+  if (normalized) return ATTEMPT_LABELS[normalized]
+  if (raw == null || String(raw).trim() === '') return ATTEMPT_LABELS[ATTEMPT_FIRST]
+  return '—'
+}
+
 /** Build a stable merge key from a module code + attempt type. */
 export function attemptRecordKey(
   moduleCode: string | null | undefined,
