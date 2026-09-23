@@ -77,7 +77,7 @@ const nextConfig: NextConfig = {
         key: 'Content-Security-Policy',
         value: [
           "default-src 'self'",
-          "script-src 'self' https://js.stripe.com https://uploadthing.com https://www.google.com https://www.gstatic.com https://va.vercel-scripts.com",
+          "script-src 'self' 'unsafe-inline' https://js.stripe.com https://uploadthing.com https://www.google.com https://www.gstatic.com https://va.vercel-scripts.com",
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
           "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://uploadthing.com https://lh3.googleusercontent.com https://flagcdn.com https://api.dicebear.com https://www.gstatic.com",
           "font-src 'self' data: https://fonts.gstatic.com",
@@ -88,6 +88,7 @@ const nextConfig: NextConfig = {
           "object-src 'none'",
           "base-uri 'self'",
           "form-action 'self'",
+          "manifest-src 'self' blob: https://*.vercel.com https://vercel.com",
           'upgrade-insecure-requests',
         ].join('; '),
       })
