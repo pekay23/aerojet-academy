@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 
 import { useEffect } from 'react'
 import Link from 'next/link'
-import Logo from '@/components/shared/Logo'
 
 export default function GlobalError({
   error,
@@ -19,10 +18,6 @@ export default function GlobalError({
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6">
-      <Link href="/" className="mb-12">
-        <Logo className="h-10 w-auto opacity-50 grayscale" />
-      </Link>
-
       <div className="w-full max-w-md space-y-6 rounded-4xl border border-slate-100 bg-white p-12 text-center shadow-xl">
         <div className="flex justify-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
@@ -47,7 +42,7 @@ export default function GlobalError({
             System Disturbance
           </h1>
           <p className="text-sm leading-relaxed font-medium text-slate-600">
-            We've encountered an unexpected technical issue. Our engineers have been notified.
+            We&apos;ve encountered an unexpected technical issue. Our engineers have been notified.
           </p>
         </div>
 
@@ -57,7 +52,7 @@ export default function GlobalError({
             className="bg-public-primary hover:bg-public-secondary flex h-12 items-center justify-center gap-2 rounded-xl px-8 text-xs font-black tracking-widest text-white uppercase transition-all hover:shadow-lg active:scale-95"
           >
             <svg
-              className="h-4 w-4 animate-spin-reverse"
+              className="animate-spin-reverse h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -79,11 +74,11 @@ export default function GlobalError({
             Back to Base
           </Link>
         </div>
-      </div>
 
-      <p className="mt-8 text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase">
-        Error Log: {error.digest || 'Internal Transmission Error'}
-      </p>
+        <p className="mt-8 text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase">
+          Error Log: {error.digest || 'Internal Transmission Error'}
+        </p>
+      </div>
     </div>
   )
 }
