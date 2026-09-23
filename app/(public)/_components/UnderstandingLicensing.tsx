@@ -6,15 +6,12 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import SectionReveal from './SectionReveal'
 
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger)
-}
-
 export default function UnderstandingLicensing() {
   const containerRef = useRef<HTMLElement>(null)
 
   useGSAP(
     () => {
+      gsap.registerPlugin(ScrollTrigger)
       gsap.from('.license-card', {
         scrollTrigger: {
           trigger: containerRef.current,
