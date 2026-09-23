@@ -50,7 +50,8 @@ export async function getBankRules(bankId: string) {
     retakeWaitDays: override?.retakeWaitDays ?? EASA_DEFAULTS.retakeWaitDays,
     maxRetakes: override?.maxRetakes ?? EASA_DEFAULTS.maxRetakes,
     completionWindowYears: override?.completionWindowYears ?? EASA_DEFAULTS.completionWindowYears,
-    allowKeyboardAutoSubmit: override?.allowKeyboardAutoSubmit ?? EASA_DEFAULTS.allowKeyboardAutoSubmit,
+    allowKeyboardAutoSubmit:
+      override?.allowKeyboardAutoSubmit ?? EASA_DEFAULTS.allowKeyboardAutoSubmit,
     customInstructions: override?.customInstructions ?? null,
   }
 }
@@ -61,7 +62,9 @@ export async function getBankRules(bankId: string) {
 
 export type PoolHealth = 'GREEN' | 'AMBER' | 'RED'
 
-export async function getPoolHealth(bankId: string): Promise<{ health: PoolHealth; questionCount: number; requiredMinimum: number }> {
+export async function getPoolHealth(
+  bankId: string
+): Promise<{ health: PoolHealth; questionCount: number; requiredMinimum: number }> {
   const bank = await prismaUnfiltered.internalExamBank.findUnique({
     where: { id: bankId },
     select: { mcqCount: true, minimumPoolSize: true, moduleCode: true, categoryCode: true },
@@ -72,7 +75,9 @@ export async function getPoolHealth(bankId: string): Promise<{ health: PoolHealt
     where: { bankId, isActive: true, status: 'APPROVED' },
   })
 
-  const easaMinimum = bank.moduleCode ? calculateMinimumPoolSize(bank.moduleCode, bank.categoryCode) : null
+  const easaMinimum = bank.moduleCode
+    ? calculateMinimumPoolSize(bank.moduleCode, bank.categoryCode)
+    : null
   const requiredMinimum = easaMinimum ?? bank.minimumPoolSize ?? bank.mcqCount * 5
   const ratio = questionCount / requiredMinimum
 
@@ -127,23 +132,23 @@ export async function selectInternalExamQuestions(bankId: string, count: number)
   for (const topic of topics) {
     const pool = byTopic[topic]
     const minServed = pool[0]?.timesServed ?? 0
-    const leastServed = pool.filter(q => q.timesServed === minServed)
+    const leastServed = pool.filter((q) => q.timesServed === minServed)
 
     let picked: typeof pool
     if (leastServed.length >= perTopic) {
       picked = shuffle(leastServed).slice(0, perTopic)
     } else {
-      const rest = pool.filter(q => q.timesServed > minServed)
+      const rest = pool.filter((q) => q.timesServed > minServed)
       picked = [...leastServed, ...shuffle(rest).slice(0, perTopic - leastServed.length)]
     }
-    selected.push(...picked.map(q => q.id))
+    selected.push(...picked.map((q) => q.id))
   }
 
   // Fill remaining from global pool if needed
   if (selected.length < count) {
-    const remaining = questions.filter(q => !selected.includes(q.id))
+    const remaining = questions.filter((q) => !selected.includes(q.id))
     const fill = shuffle(remaining).slice(0, count - selected.length)
-    selected.push(...fill.map(q => q.id))
+    selected.push(...fill.map((q) => q.id))
   }
 
   // Trim to exact count
@@ -161,46 +166,11 @@ export async function selectInternalExamQuestions(bankId: string, count: number)
 }
 
 // ---------------------------------------------------------------------------
-// Eligibility check (retake wait, attempt limit, ban)
+// Eligibility check (retake wait, attempt limit, ban) — uses compliance layer
 // ---------------------------------------------------------------------------
 
-export async function checkEligibility(studentId: string, bankId: string) {
-  const _rules = await getBankRules(bankId)
-  const _now = new Date()
-
-  // Get previous sessions for this student + bank (exclude VOIDED)
-  const sessions = await prismaUnfiltered.internalExamSession.findMany({
-    where: { studentId, bankId, status: { in: ['COMPLETED', 'TIMED_OUT'] } },
-    orderBy: { submittedAt: 'desc' },
-  })
-
-  // Check if they've already taken it (non-voided)
-  if (sessions.length >= 1) {
-    return {
-      eligible: false,
-      reason: 'Internal exams can only be taken once. You have already completed this exam.',
-    }
-  }
-
-  // Also check for an in-progress session
-  const inProgress = await prismaUnfiltered.internalExamSession.findFirst({
-    where: { studentId, bankId, status: 'IN_PROGRESS' },
-  })
-  if (inProgress) {
-    return {
-      eligible: true,
-      attemptNumber: 1,
-      totalAttempts: 0,
-      resumeSessionId: inProgress.id,
-    }
-  }
-
-  return {
-    eligible: true,
-    attemptNumber: 1,
-    totalAttempts: sessions.length,
-  }
-}
+export { checkEasaCompliance as checkEligibility } from '@/lib/compliance/easa-attempts'
+export type { ComplianceCheckResult, ModuleComplianceConfig } from '@/lib/compliance/easa-attempts'
 
 // ---------------------------------------------------------------------------
 // Build randomised paper (shuffled question order + shuffled options)
@@ -226,10 +196,12 @@ export async function buildRandomizedPaper(
     points: number
     subTopic?: string | null
     syllabusRef?: string | null
-  }>,
+  }>
 ): Promise<RandomizedPaper> {
-  const shuffledQuestions = shuffle(rawQuestions.map(q => ({ ...q, options: shuffle(q.options) })))
-  const questionOrder = shuffledQuestions.map(q => q.id)
+  const shuffledQuestions = shuffle(
+    rawQuestions.map((q) => ({ ...q, options: shuffle(q.options) }))
+  )
+  const questionOrder = shuffledQuestions.map((q) => q.id)
 
   return {
     paper: shuffledQuestions,

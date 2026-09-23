@@ -35,6 +35,8 @@ import { useSort, SortHeader } from '@/lib/hooks/useSort'
 import {
   ATTEMPT_FIRST,
   ATTEMPT_LABELS,
+  ATTEMPT_RESIT_1,
+  ATTEMPT_RESIT_2,
   ATTEMPT_VALUES,
   normalizeAttemptType,
 } from '@/lib/exams/attempt-types'
@@ -111,8 +113,19 @@ const ATTEMPT_TYPES = ATTEMPT_VALUES.map((value) => ({
 
 function getAttemptLabel(value: string | null | undefined): string {
   const normalized = normalizeAttemptType(value)
-  if (normalized) return ATTEMPT_LABELS[normalized]
+  if (normalized) return getAttemptLabelInternal(normalized)
   return value == null || String(value).trim() === '' ? ATTEMPT_LABELS[ATTEMPT_FIRST] : '—'
+}
+
+function getAttemptLabelInternal(type: import('@/lib/exams/attempt-types').AttemptType): string {
+  if (type === ATTEMPT_FIRST) return ATTEMPT_LABELS[ATTEMPT_FIRST]
+  if (type === ATTEMPT_RESIT_1) return ATTEMPT_LABELS[ATTEMPT_RESIT_1]
+  if (type === ATTEMPT_RESIT_2) return ATTEMPT_LABELS[ATTEMPT_RESIT_2]
+  if (type.startsWith('RETAKE_')) {
+    const n = Number.parseInt(type.slice(7), 10)
+    return `Retake ${n}`
+  }
+  return type
 }
 
 const BOOKING_TYPES = [

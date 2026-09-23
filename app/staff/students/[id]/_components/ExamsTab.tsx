@@ -31,7 +31,7 @@ import {
   ATTEMPT_LABELS,
   ATTEMPT_RESIT_1,
   ATTEMPT_RESIT_2,
-  ATTEMPT_RESIT_3,
+  formatAttemptType,
   normalizeAttemptType,
   type AttemptType,
 } from '@/lib/exams/attempt-types'
@@ -193,9 +193,7 @@ export type UnifiedExamRecord = {
 }
 
 function getAttemptLabel(value: string | null | undefined): string {
-  const normalized = normalizeAttemptType(value)
-  if (normalized) return ATTEMPT_LABELS[normalized]
-  return value == null || String(value).trim() === '' ? ATTEMPT_LABELS[ATTEMPT_FIRST] : '—'
+  return formatAttemptType(value)
 }
 
 function isFirstAttemptType(value: string | null | undefined): boolean {
@@ -207,7 +205,7 @@ function isResitAttemptType(value: string | null | undefined): boolean {
   return (
     attemptType === ATTEMPT_RESIT_1 ||
     attemptType === ATTEMPT_RESIT_2 ||
-    attemptType === ATTEMPT_RESIT_3
+    (attemptType !== null && attemptType.startsWith('RETAKE_'))
   )
 }
 
@@ -993,7 +991,7 @@ export default function ExamsTab({
                         <option value="FIRST">{ATTEMPT_LABELS[ATTEMPT_FIRST]}</option>
                         <option value="RESIT_1">{ATTEMPT_LABELS[ATTEMPT_RESIT_1]}</option>
                         <option value="RESIT_2">{ATTEMPT_LABELS[ATTEMPT_RESIT_2]}</option>
-                        <option value="RESIT_3">{ATTEMPT_LABELS[ATTEMPT_RESIT_3]}</option>
+                        <option value="RETAKE_1">Retake 1</option>
                       </select>
                     ) : (
                       <span
@@ -1077,16 +1075,18 @@ export default function ExamsTab({
                   <td className="px-4 py-3 text-center">
                     {editingId === record.id ? (
                       <select
-                        value={editData.bookingType ?? record.bookingType ?? 'INDIVIDUAL'}
+                        value={editData.attemptType}
                         onChange={(e) =>
-                          setEditData((d) => ({ ...d, bookingType: e.target.value }))
+                          setEditData((d) => ({ ...d, attemptType: e.target.value }))
                         }
                         className="w-28 rounded border border-slate-200 px-2 py-1 text-xs"
                       >
-                        <option value="INDIVIDUAL">Individual</option>
-                        <option value="MANUAL">Manual Record</option>
-                        <option value="TWIN_PACK">Twin Pack</option>
-                        <option value="FOUR_PACK">Four Pack</option>
+                        <option value="FIRST">{ATTEMPT_LABELS[ATTEMPT_FIRST]}</option>
+                        <option value="RESIT_1">{ATTEMPT_LABELS[ATTEMPT_RESIT_1]}</option>
+                        <option value="RESIT_2">{ATTEMPT_LABELS[ATTEMPT_RESIT_2]}</option>
+                        <option value="RETAKE_1">Retake 1</option>
+                        <option value="RETAKE_2">Retake 2</option>
+                        <option value="RETAKE_2">Retake 2</option>
                       </select>
                     ) : record.bookingType ? (
                       <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-500 dark:bg-slate-800">

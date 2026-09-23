@@ -3,7 +3,6 @@ import {
   ATTEMPT_FIRST,
   ATTEMPT_RESIT_1,
   ATTEMPT_RESIT_2,
-  ATTEMPT_RESIT_3,
   ATTEMPT_LABELS,
   mergeAttemptType,
   normalizeAttemptType,
@@ -38,10 +37,6 @@ describe('normalizeAttemptType', () => {
 
   it('normalizes canonical RESIT_2', () => {
     expect(normalizeAttemptType('RESIT_2')).toBe(ATTEMPT_RESIT_2)
-  })
-
-  it('normalizes canonical RESIT_3', () => {
-    expect(normalizeAttemptType('RESIT_3')).toBe(ATTEMPT_RESIT_3)
   })
 
   it('normalizes legacy first_attempt synonym', () => {
@@ -88,14 +83,6 @@ describe('normalizeAttemptType', () => {
     expect(normalizeAttemptType('SECOND RESIT')).toBe(ATTEMPT_RESIT_2)
   })
 
-  it('normalizes THIRD_RESIT synonym to RESIT_3', () => {
-    expect(normalizeAttemptType('third_resit')).toBe(ATTEMPT_RESIT_3)
-  })
-
-  it('normalizes space-separated THIRD RESIT synonym to RESIT_3', () => {
-    expect(normalizeAttemptType('THIRD RESIT')).toBe(ATTEMPT_RESIT_3)
-  })
-
   it('normalizes RESIT (bare) to RESIT_1', () => {
     expect(normalizeAttemptType('RESIT')).toBe(ATTEMPT_RESIT_1)
   })
@@ -104,9 +91,19 @@ describe('normalizeAttemptType', () => {
     expect(normalizeAttemptType('resit-1')).toBe(ATTEMPT_RESIT_1)
   })
 
-  it('normalizes RESIT_4+ to RESIT_3 (capped)', () => {
-    expect(normalizeAttemptType('RESIT_4')).toBe(ATTEMPT_RESIT_3)
-    expect(normalizeAttemptType('RESIT_99')).toBe(ATTEMPT_RESIT_3)
+  it('maps RESIT_3 to RETAKE_1 (after max 2 resits)', () => {
+    expect(normalizeAttemptType('RESIT_3')).toBe('RETAKE_1')
+    expect(normalizeAttemptType('THIRD_RESIT')).toBe('RETAKE_1')
+  })
+
+  it('maps RESIT_4 to RETAKE_2', () => {
+    expect(normalizeAttemptType('RESIT_4')).toBe('RETAKE_2')
+  })
+
+  it('normalizes RETAKE_N forms', () => {
+    expect(normalizeAttemptType('RETAKE_1')).toBe('RETAKE_1')
+    expect(normalizeAttemptType('RETAKE_2')).toBe('RETAKE_2')
+    expect(normalizeAttemptType('RETAKE_5')).toBe('RETAKE_5')
   })
 
   it('returns null for unknown nonblank value', () => {
@@ -141,6 +138,10 @@ describe('resolveAttemptType', () => {
     expect(resolveAttemptType('second_resit')).toBe(ATTEMPT_RESIT_2)
   })
 
+  it('returns RETAKE_1 for RESIT_3', () => {
+    expect(resolveAttemptType('RESIT_3')).toBe('RETAKE_1')
+  })
+
   it('throws on unknown nonblank value', () => {
     expect(() => resolveAttemptType('BOGUS')).toThrow('Unknown attempt type')
   })
@@ -155,47 +156,51 @@ describe('resolveAttemptType', () => {
     expect(resolveAttemptType('FIRST_RESIT')).toBe(resolveAttemptType('RESIT_1'))
     expect(resolveAttemptType('RESIT')).toBe(resolveAttemptType('RESIT_1'))
     expect(resolveAttemptType('SECOND_RESIT')).toBe(resolveAttemptType('RESIT_2'))
-    expect(resolveAttemptType('THIRD_RESIT')).toBe(resolveAttemptType('RESIT_3'))
   })
 })
 
 describe('formatAttemptType', () => {
-  it('returns "1st Attempt" for null', () => {
+  it('returns "First Attempt" for null', () => {
     expect(formatAttemptType(null)).toBe(ATTEMPT_LABELS[ATTEMPT_FIRST])
   })
 
-  it('returns "1st Attempt" for undefined', () => {
+  it('returns "First Attempt" for undefined', () => {
     expect(formatAttemptType(undefined)).toBe(ATTEMPT_LABELS[ATTEMPT_FIRST])
   })
 
-  it('returns "1st Attempt" for empty string', () => {
+  it('returns "First Attempt" for empty string', () => {
     expect(formatAttemptType('')).toBe(ATTEMPT_LABELS[ATTEMPT_FIRST])
   })
 
-  it('returns "1st Attempt" for whitespace-only string', () => {
+  it('returns "First Attempt" for whitespace-only string', () => {
     expect(formatAttemptType('   ')).toBe(ATTEMPT_LABELS[ATTEMPT_FIRST])
   })
 
   it('returns canonical label for FIRST', () => {
-    expect(formatAttemptType('FIRST')).toBe('1st Attempt')
+    expect(formatAttemptType('FIRST')).toBe('First Attempt')
   })
 
   it('returns canonical label for RESIT_1', () => {
-    expect(formatAttemptType(ATTEMPT_RESIT_1)).toBe('Resit (2nd)')
+    expect(formatAttemptType(ATTEMPT_RESIT_1)).toBe('Resit 1')
   })
 
   it('returns canonical label for RESIT_2', () => {
-    expect(formatAttemptType(ATTEMPT_RESIT_2)).toBe('Resit (3rd)')
+    expect(formatAttemptType(ATTEMPT_RESIT_2)).toBe('Resit 2')
   })
 
-  it('returns canonical label for RESIT_3', () => {
-    expect(formatAttemptType(ATTEMPT_RESIT_3)).toBe('Resit (4th+)')
+  it('returns canonical label for RETAKE_N', () => {
+    expect(formatAttemptType('RETAKE_1')).toBe('Retake 1')
+    expect(formatAttemptType('RETAKE_2')).toBe('Retake 2')
+    expect(formatAttemptType('RETAKE_5')).toBe('Retake 5')
   })
 
   it('returns canonical label for legacy synonyms', () => {
-    expect(formatAttemptType('first_attempt')).toBe('1st Attempt')
-    expect(formatAttemptType('FIRST_RESIT')).toBe('Resit (2nd)')
-    expect(formatAttemptType('third_resit')).toBe('Resit (4th+)')
+    expect(formatAttemptType('first_attempt')).toBe('First Attempt')
+    expect(formatAttemptType('FIRST_RESIT')).toBe('Resit 1')
+  })
+
+  it('maps legacy RESIT_3 to Retake 1', () => {
+    expect(formatAttemptType('RESIT_3')).toBe('Retake 1')
   })
 
   it('returns em-dash for unknown nonblank value', () => {
@@ -231,7 +236,11 @@ describe('mergeAttemptType', () => {
   it('returns canonical values for known resit inputs', () => {
     expect(mergeAttemptType('RESIT_1')).toBe(ATTEMPT_RESIT_1)
     expect(mergeAttemptType('RESIT_2')).toBe(ATTEMPT_RESIT_2)
-    expect(mergeAttemptType('RESIT_3')).toBe(ATTEMPT_RESIT_3)
+  })
+
+  it('returns RETAKE_N for retake inputs', () => {
+    expect(mergeAttemptType('RETAKE_1')).toBe('RETAKE_1')
+    expect(mergeAttemptType('RETAKE_2')).toBe('RETAKE_2')
   })
 
   it('returns canonical values for legacy synonyms', () => {

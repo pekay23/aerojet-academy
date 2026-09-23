@@ -15,7 +15,7 @@ import {
   ClipboardList,
 } from 'lucide-react'
 import AddExamRecordDialog from '../../../students/[id]/_components/AddExamRecordDialog'
-import { ATTEMPT_FIRST, ATTEMPT_LABELS, normalizeAttemptType } from '@/lib/exams/attempt-types'
+import { ATTEMPT_FIRST, ATTEMPT_LABELS, formatAttemptType } from '@/lib/exams/attempt-types'
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -78,9 +78,7 @@ function isExamPathway(profile: StudentProfileData): boolean {
 }
 
 function getAttemptLabel(value: string | null | undefined): string {
-  const normalized = normalizeAttemptType(value)
-  if (normalized) return ATTEMPT_LABELS[normalized]
-  return value == null || String(value).trim() === '' ? ATTEMPT_LABELS[ATTEMPT_FIRST] : '—'
+  return formatAttemptType(value)
 }
 
 interface SemesterGroup {

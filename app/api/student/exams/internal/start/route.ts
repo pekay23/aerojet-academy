@@ -175,7 +175,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           status: 'NOT_STARTED',
           supervised: true,
           expiresAt,
-          attemptNumber: 'attemptNumber' in eligibility ? eligibility.attemptNumber : 1,
+          attemptNumber: eligibility.attemptsUsed + 1,
           categoryCode: selectedCategoryCode,
         },
       })
@@ -378,7 +378,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       startedAt: new Date(),
       expiresAt,
       questionOrder,
-      attemptNumber: 'attemptNumber' in eligibility ? eligibility.attemptNumber : 1,
+      attemptNumber: eligibility.attemptsUsed + 1,
       categoryCode: selectedCategoryCode,
       ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
       userAgent: req.headers.get('user-agent') || null,

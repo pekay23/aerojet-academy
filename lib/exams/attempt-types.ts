@@ -20,6 +20,7 @@ export const ATTEMPT_VALUES: readonly (
   typeof ATTEMPT_FIRST | typeof ATTEMPT_RESIT_1 | typeof ATTEMPT_RESIT_2
 )[] = [ATTEMPT_FIRST, ATTEMPT_RESIT_1, ATTEMPT_RESIT_2]
 
+// Labels for known canonical types; RETAKE_N handled dynamically
 export const ATTEMPT_LABELS: Record<
   typeof ATTEMPT_FIRST | typeof ATTEMPT_RESIT_1 | typeof ATTEMPT_RESIT_2,
   string
@@ -33,10 +34,23 @@ function retakeLabel(n: number): string {
   return `Retake ${n}`
 }
 
+/** Get label for any AttemptType (including RETAKE_N) */
+export function getAttemptLabel(type: AttemptType): string {
+  if (type === ATTEMPT_FIRST) return ATTEMPT_LABELS[ATTEMPT_FIRST]
+  if (type === ATTEMPT_RESIT_1) return ATTEMPT_LABELS[ATTEMPT_RESIT_1]
+  if (type === ATTEMPT_RESIT_2) return ATTEMPT_LABELS[ATTEMPT_RESIT_2]
+  if (type.startsWith('RETAKE_')) {
+    const n = Number.parseInt(type.slice(7), 10)
+    return retakeLabel(n)
+  }
+  return type // fallback
+}
+
 /** Canonical alias map: normalized keys (spaces/hyphens → underscores, uppercase). */
 const ATTEMPT_ALIASES: Record<string, AttemptType> = {
   FIRST: ATTEMPT_FIRST,
   FIRST_ATTEMPT: ATTEMPT_FIRST,
+  FIRST_ATTEMPT_INITIAL: ATTEMPT_FIRST,
   INITIAL: ATTEMPT_FIRST,
   INITIAL_ATTEMPT: ATTEMPT_FIRST,
   '1ST': ATTEMPT_FIRST,
@@ -46,6 +60,7 @@ const ATTEMPT_ALIASES: Record<string, AttemptType> = {
   FIRST_RESIT: ATTEMPT_RESIT_1,
   RESIT_2: ATTEMPT_RESIT_2,
   SECOND_RESIT: ATTEMPT_RESIT_2,
+  THIRD_RESIT: 'RETAKE_1' as AttemptType,
 }
 
 /**
