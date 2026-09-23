@@ -7,6 +7,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    concurrency:
+      group: release-main
+      cancel-in-progress: false
     permissions:
       contents: write
 
@@ -34,8 +37,26 @@ jobs:
           echo "Creating $TAG for $BRANCH"
 
       - name: Create and push tag
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+          COMMIT: ${{ github.sha }}
         run: |
+          set -euo pipefail
+
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git tag "${{ steps.release.outputs.tag }}"
-          git push origin "${{ steps.release.outputs.tag }}"
+
+          if git ls-remote --exit-code --refs origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            EXISTING_COMMIT="$(git ls-remote origin "refs/tags/$TAG^{}" | awk '{print $1}')"
+
+            if [ "$EXISTING_COMMIT" = "$COMMIT" ]; then
+              echo "Tag $TAG already points to $COMMIT; nothing to do."
+              exit 0
+            fi
+
+            echo "::error::Tag $TAG already exists at $EXISTING_COMMIT, but this release is $COMMIT."
+            exit 1
+          fi
+
+          git tag "$TAG" "$COMMIT"
+          git push origin "refs/tags/$TAG"
