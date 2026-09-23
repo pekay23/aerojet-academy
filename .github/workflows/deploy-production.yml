@@ -1,11 +1,15 @@
-name: Deploy Production
+name: Pre-Deploy Validation
+
+# Note: Production deployment is handled by Vercel's Git integration
+# (auto-deploys on push to main). This workflow only runs validation
+# checks to gate the Vercel deployment.
 
 on:
   push:
     branches: [main]
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
     environment: production
 
@@ -25,10 +29,13 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Type check
+        run: bun run type-check
+
       - name: Run tests
         run: bun run test --run
 
-      - name: Run DB migrations
+      - name: Run DB migrations (before deploy)
         run: |
           export DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}"
           export DIRECT_URL="${DATABASE_URL/-pooler/}"
@@ -50,8 +57,5 @@ jobs:
           bun run clear-lock.js
           bunx prisma migrate deploy
 
-      - name: Deploy to Vercel (Production)
-        run: bunx vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      - name: Build check
+        run: bun run build
