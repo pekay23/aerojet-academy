@@ -5,13 +5,13 @@ import { withErrorHandler } from '@/lib/api/response'
 import { env } from '@/lib/env'
 import { transitionExamSession } from '@/lib/internal-exam/state-machine'
 
-export const GET = withErrorHandler(async (req: NextRequest) => {
-  const authHeader = req.headers.get('authorization')
-  const cronSecret = env.CRON_SECRET
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+function isAuthorized(request: NextRequest): boolean {
+  const expected = env.CRON_SECRET
+  const authorization = request.headers.get('authorization')
+  return Boolean(expected) && authorization === `Bearer ${expected}`
+}
 
+async function processExamTimeouts() {
   const expiredSessions = await prismaUnfiltered.internalExamSession.findMany({
     where: {
       status: 'IN_PROGRESS',
@@ -45,5 +45,29 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     })
   }
 
+  return count
+}
+
+export async function POST(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const count = await processExamTimeouts()
+    return NextResponse.json({ ok: true, count })
+  } catch (error) {
+    console.error('Exam timeout processing failed', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// Retain GET for backward compatibility
+export const GET = withErrorHandler(async (req: NextRequest) => {
+  if (!isAuthorized(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const count = await processExamTimeouts()
   return NextResponse.json({ success: true, count })
 })

@@ -1,24 +1,16 @@
-import { NextRequest } from 'next/server'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { NextRequest, NextResponse } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { transitionExamSession } from '@/lib/internal-exam/state-machine'
 import { env } from '@/lib/env'
 
-/**
- * POST /api/cron/recover-exams
- *
- * Recovery cron for expired exam attempts that were not auto-submitted.
- * Runs on a short interval (e.g. every 60s) and on server startup.
- * Gates on CRON_SECRET to prevent unauthorised access.
- */
-export const POST = withErrorHandler(async (req: NextRequest) => {
-  const authHeader = req.headers.get('authorization')
-  const cronSecret = env.CRON_SECRET
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return apiError('Unauthorized', 401)
-  }
+function isAuthorized(request: NextRequest): boolean {
+  const expected = env.CRON_SECRET
+  const authorization = request.headers.get('authorization')
+  return Boolean(expected) && authorization === `Bearer ${expected}`
+}
 
+async function processRecoveryJobs() {
   const now = new Date()
 
   // Find expired IN_PROGRESS sessions that haven't been recovered
@@ -83,8 +75,34 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     recovered++
   }
 
-  return apiSuccess({
-    recovered,
-    scannedAt: now.toISOString(),
-  })
-})
+  return { recovered, scannedAt: now.toISOString() }
+}
+
+export async function POST(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const result = await processRecoveryJobs()
+    return NextResponse.json({ ok: true, ...result })
+  } catch (error) {
+    console.error('Exam recovery processing failed', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// Retain GET for backward compatibility
+export async function GET(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const result = await processRecoveryJobs()
+    return NextResponse.json({ success: true, ...result })
+  } catch (error) {
+    console.error('Exam recovery processing failed', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
