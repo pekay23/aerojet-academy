@@ -47,26 +47,26 @@ Optional local overrides:
 All 17 cron endpoints are registered in `vercel.json` and require
 `Authorization: Bearer <CRON_SECRET>`. Schedules are in `vercel.json`:
 
-| Endpoint                               | Schedule (cron) | Purpose                                            |
-| -------------------------------------- | --------------- | -------------------------------------------------- |
-| `/api/cron/check-events`               | `0 1 * * *`     | Daily 01:00 — Update exam event statuses           |
-| `/api/cron/check-pools`                | `0 2 * * *`     | Daily 02:00 — Fail expired exam pools              |
-| `/api/cron/payment-deadlines`          | `0 3 * * *`     | Daily 03:00 — Mark overdue payments                |
-| `/api/cron/backup`                     | `0 4 * * *`     | Daily 04:00 — Trigger DB backup                    |
-| `/api/cron/sync-check`                 | `0 4 * * 1`     | Mondays 04:00 — Neon ↔ Supabase replication health |
-| `/api/cron/supabase-mirror`            | `30 4 * * *`    | Daily 04:30 — Push pending writes to Supabase      |
-| `/api/cron/cleanup-abandoned-accounts` | `0 5 * * *`     | Daily 05:00 — GDPR-style cleanup                   |
-| `/api/cron/scheduled-reports`          | `0 8 * * 1`     | Mondays 08:00 — Scheduled analytics                |
-| `/api/cron/milestone-reminders`        | `0 9 * * *`     | Daily 09:00 — Milestone T-7/T-1 reminders          |
-| `/api/cron/renewal-reminders`        | `0 6 * * *`     | Daily 06:00 — Subscription & certificate renewal reminders |
-| `/api/cron/renewal-reminders`        | `0 6 * * *`     | Daily 06:00 — Subscription & certificate renewal reminders |
-| `/api/cron/send-reminders`             | `0 10 * * *`    | Daily 10:00 — Exam T-7/T-1 reminders               |
-| `/api/cron/aptitude-reminders`         | `0 11 * * *`    | Daily 11:00 — Aptitude test reminders              |
-| `/api/cron/interview-reminders`        | `0 12 * * *`    | Daily 12:00 — Interview reminders                  |
-| `/api/cron/modular-deadlines`          | `0 13 * * *`    | Daily 13:00 — Modular deadline checks              |
-| `/api/cron/expire-bundles`             | `0 0 * * *`     | Daily 00:00 — Expire exam bundles                  |
-| `/api/cron/cleanup-audit-logs`         | `0 0 1 * *`     | 1st of month 00:00 — Retention sweep               |
-| `/api/cron/gdpr-retention`             | `0 3 * * 1`     | Mondays 03:00 — Data retention sweep               |
+| Endpoint                               | Schedule (cron) | Purpose                                                    |
+| -------------------------------------- | --------------- | ---------------------------------------------------------- |
+| `/api/cron/check-events`               | `0 1 * * *`     | Daily 01:00 — Update exam event statuses                   |
+| `/api/cron/check-pools`                | `0 2 * * *`     | Daily 02:00 — Fail expired exam pools                      |
+| `/api/cron/payment-deadlines`          | `0 3 * * *`     | Daily 03:00 — Mark overdue payments                        |
+| `/api/cron/backup`                     | `0 4 * * *`     | Daily 04:00 — Trigger DB backup                            |
+| `/api/cron/sync-check`                 | `0 4 * * 1`     | Mondays 04:00 — Neon ↔ Supabase replication health         |
+| `/api/cron/supabase-mirror`            | `30 4 * * *`    | Daily 04:30 — Push pending writes to Supabase              |
+| `/api/cron/cleanup-abandoned-accounts` | `0 5 * * *`     | Daily 05:00 — GDPR-style cleanup                           |
+| `/api/cron/scheduled-reports`          | `0 8 * * 1`     | Mondays 08:00 — Scheduled analytics                        |
+| `/api/cron/milestone-reminders`        | `0 9 * * *`     | Daily 09:00 — Milestone T-7/T-1 reminders                  |
+| `/api/cron/renewal-reminders`          | `0 6 * * *`     | Daily 06:00 — Subscription & certificate renewal reminders |
+| `/api/cron/renewal-reminders`          | `0 6 * * *`     | Daily 06:00 — Subscription & certificate renewal reminders |
+| `/api/cron/send-reminders`             | `0 10 * * *`    | Daily 10:00 — Exam T-7/T-1 reminders                       |
+| `/api/cron/aptitude-reminders`         | `0 11 * * *`    | Daily 11:00 — Aptitude test reminders                      |
+| `/api/cron/interview-reminders`        | `0 12 * * *`    | Daily 12:00 — Interview reminders                          |
+| `/api/cron/modular-deadlines`          | `0 13 * * *`    | Daily 13:00 — Modular deadline checks                      |
+| `/api/cron/expire-bundles`             | `0 0 * * *`     | Daily 00:00 — Expire exam bundles                          |
+| `/api/cron/cleanup-audit-logs`         | `0 0 1 * *`     | 1st of month 00:00 — Retention sweep                       |
+| `/api/cron/gdpr-retention`             | `0 3 * * 1`     | Mondays 03:00 — Data retention sweep                       |
 
 ## Database Migrations
 
@@ -124,3 +124,23 @@ Portal auth is enforced in three layers:
 curl https://your-domain.example/api/health
 # 200 OK + a JSON body
 ```
+
+## Deployment Cleanup (Vercel)
+
+When cleaning up Vercel deployments via the dashboard or API:
+
+- **Always preserve the live production deployment** on the `main` branch (`target: "production"`)
+- Only delete preview/stale deployments to free up Hobby plan resources
+- If using the Vercel API directly, filter by `readyState: "READY"` and exclude `target: "production"` before deletion
+
+### CI/CD Status
+
+The project has GitHub Actions workflows under `.github/workflows/`:
+
+- `ci.yml` — runs on push/PR to `main` and `dev` (not `develop`)
+- `deploy-production.yml` — deploys to Vercel production on push to `main`
+- `exam-crons.yml` — runs exam processing cron jobs every 5 minutes via GitHub Actions (Vercel Hobby doesn't support high-frequency crons)
+- `release.yml` — tags releases on push to `main`
+
+If GitHub Actions minutes are exhausted (common on free accounts), use manual Vercel deployments
+via the Vercel CLI or dashboard instead.

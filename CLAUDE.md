@@ -223,8 +223,8 @@ Registered in `vercel.json` and live under `app/api/cron/*/route.ts`. Pattern: c
 | `cleanup-abandoned-accounts` | `0 5 * * *`                                               |
 | `scheduled-reports`          | `0 8 * * 1` (Mondays 08:00)                               |
 | `milestone-reminders`        | `0 9 * * *`                                               |
-| `renewal-reminders`         | `0 6 * * *`                                               |
-| `renewal-reminders`         | `0 6 * * *`                                               |
+| `renewal-reminders`          | `0 6 * * *`                                               |
+| `renewal-reminders`          | `0 6 * * *`                                               |
 | `send-reminders`             | `0 10 * * *`                                              |
 | `aptitude-reminders`         | `0 11 * * *`                                              |
 | `interview-reminders`        | `0 12 * * *`                                              |
@@ -252,6 +252,7 @@ import prisma from '@/lib/prisma/client'
 ```
 
 Current state:
+
 - **Staff/instructor portals**: use `prismaUnfiltered` directly.
 - **Student/applicant portals**: use `prismaUnfiltered` with explicit `userId` filters rather than relying on RLS.
 
@@ -494,6 +495,12 @@ The following problems were discovered and fixed. **Do not reintroduce them.**
 
 - `output: 'standalone'` in `next.config.ts` (Docker/standalone builds)
 - Security headers applied globally (X-Frame-Options, CSP, HSTS, etc.)
+
+## Vercel Deployment Management
+
+- When cleaning up Vercel deployments, **always preserve the live production deployment** on the `main` branch.
+- Only delete preview/stale deployments to free up Hobby plan resources.
+- Use the Vercel API with `readyState: "READY"` filter to identify deployments, then exclude production target before deletion.
 
 ## Verification
 
