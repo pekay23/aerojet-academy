@@ -3,6 +3,9 @@
  *
  * Login: Direct CSRF → credentials callback POST (bypasses JS signIn race)
  * Tour: Capture before-tour (before 1.5s auto-start), then step through Joyride
+ * Requires: E2E_STAFF_EMAIL, E2E_STAFF_PASSWORD, E2E_STUDENT_EMAIL, E2E_STUDENT_PASSWORD,
+ *           E2E_INSTRUCTOR_EMAIL, E2E_INSTRUCTOR_PASSWORD, E2E_APPLICANT_EMAIL, E2E_APPLICANT_PASSWORD,
+ *           E2E_EXAMINER_EMAIL, E2E_EXAMINER_PASSWORD env vars
  */
 import { test, expect, Page } from '@playwright/test'
 // auth helpers intentionally not imported here since they are unused
@@ -25,13 +28,69 @@ interface PortalConfig {
   expectsPath: string
 }
 
-const PORTALS: PortalConfig[] = [
-  { role: 'Staff', email: 'staff@aerojet-academy.com', password: 'REDACTED_PASSWORD', dashboardUrl: '/staff/dashboard', expectsPath: '/staff' },
-  { role: 'Student', email: 'student@aerojet-academy.com', password: 'REDACTED_PASSWORD', dashboardUrl: '/student', expectsPath: '/student' },
-  { role: 'Instructor', email: 'instructor@aerojet-academy.com', password: 'REDACTED_PASSWORD', dashboardUrl: '/instructor/dashboard', expectsPath: '/instructor' },
-  { role: 'Applicant', email: 'applicant@example.com', password: 'REDACTED_PASSWORD', dashboardUrl: '/applicant', expectsPath: '/applicant' },
-  { role: 'Examiner', email: 'examiner@aerojet-academy.com', password: 'REDACTED_PASSWORD', dashboardUrl: '/examiner', expectsPath: '/examiner' },
-]
+function getPortals(): PortalConfig[] {
+  const roles = [
+    {
+      role: 'Staff',
+      emailEnv: 'E2E_STAFF_EMAIL',
+      passwordEnv: 'E2E_STAFF_PASSWORD',
+      dashboardUrl: '/staff/dashboard',
+      expectsPath: '/staff',
+    },
+    {
+      role: 'Student',
+      emailEnv: 'E2E_STUDENT_EMAIL',
+      passwordEnv: 'E2E_STUDENT_PASSWORD',
+      dashboardUrl: '/student',
+      expectsPath: '/student',
+    },
+    {
+      role: 'Instructor',
+      emailEnv: 'E2E_INSTRUCTOR_EMAIL',
+      passwordEnv: 'E2E_INSTRUCTOR_PASSWORD',
+      dashboardUrl: '/instructor/dashboard',
+      expectsPath: '/instructor',
+    },
+    {
+      role: 'Applicant',
+      emailEnv: 'E2E_APPLICANT_EMAIL',
+      passwordEnv: 'E2E_APPLICANT_PASSWORD',
+      dashboardUrl: '/applicant',
+      expectsPath: '/applicant',
+    },
+    {
+      role: 'Examiner',
+      emailEnv: 'E2E_EXAMINER_EMAIL',
+      passwordEnv: 'E2E_EXAMINER_PASSWORD',
+      dashboardUrl: '/examiner',
+      expectsPath: '/examiner',
+    },
+  ]
+
+  const portals: PortalConfig[] = []
+
+  for (const r of roles) {
+    const email = process.env[r.emailEnv]
+    const password = process.env[r.passwordEnv]
+
+    if (!email || !password) {
+      console.error(`ERROR: ${r.emailEnv} and ${r.passwordEnv} environment variables are required`)
+      process.exit(1)
+    }
+
+    portals.push({
+      role: r.role,
+      email,
+      password,
+      dashboardUrl: r.dashboardUrl,
+      expectsPath: r.expectsPath,
+    })
+  }
+
+  return portals
+}
+
+const PORTALS = getPortals()
 
 /**
  * Login via direct CSRF → credentials callback POST.
@@ -78,7 +137,7 @@ async function loginViaApi(page: Page, portal: PortalConfig) {
 
   const cookies = await page.context().cookies()
   const sessionCookie = cookies.find(
-    (c) => c.name === 'next-auth.session-token' || c.name === '__Secure-next-auth.session-token',
+    (c) => c.name === 'next-auth.session-token' || c.name === '__Secure-next-auth.session-token'
   )
   if (!sessionCookie) {
     throw new Error(`[${portal.role}] No session cookie after credentials POST`)
@@ -132,12 +191,10 @@ async function captureTourScreenshots(page: Page, portalName: string) {
     const count = await trigger.count()
     if (count > 0) {
       await trigger.scrollIntoViewIfNeeded().catch(() => {})
-      await trigger
-        .click({ position: { x: 16, y: 16 } })
-        .catch(async (_e) => {
-          console.log(`[${portalName}] Click failed (overlay?), trying JS click`)
-          await trigger.evaluate((el: HTMLElement) => el.click())
-        })
+      await trigger.click({ position: { x: 16, y: 16 } }).catch(async (_e) => {
+        console.log(`[${portalName}] Click failed (overlay?), trying JS click`)
+        await trigger.evaluate((el: HTMLElement) => el.click())
+      })
       console.log(`[${portalName}] Clicked tour trigger`)
       await page.waitForSelector(JOYRIDE_TOOLTIP, { state: 'visible', timeout: 8000 })
       tourVisible = true
@@ -191,7 +248,10 @@ async function captureTourScreenshots(page: Page, portalName: string) {
       break
     }
 
-    const btnText = await primaryBtn.first().textContent().catch(() => '')
+    const btnText = await primaryBtn
+      .first()
+      .textContent()
+      .catch(() => '')
     const isFinish = btnText?.toLowerCase().includes('finish') ?? false
 
     await page.screenshot({

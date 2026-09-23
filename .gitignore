@@ -50,6 +50,7 @@ prisma/migrations
 prisma/seed*.ts
 !prisma/seed-easa-questions.ts
 !prisma/seed-mock-data.ts
+prisma/seeds/
 
 # docs build output
 docs/html/

@@ -1,9 +1,18 @@
 /**
  * Debug: Login via direct CSRF → credentials callback, then verify session
+ * Requires: E2E_STAFF_EMAIL, E2E_STAFF_PASSWORD env vars
  */
 import { chromium } from '@playwright/test'
+import { config } from 'dotenv'
+config()(async () => {
+  const staffEmail = process.env.E2E_STAFF_EMAIL || 'staff@aerojet-academy.com'
+  const staffPassword = process.env.E2E_STAFF_PASSWORD || ''
 
-(async () => {
+  if (!staffPassword) {
+    console.error('ERROR: E2E_STAFF_PASSWORD environment variable is required')
+    process.exit(1)
+  }
+
   const browser = await chromium.launch({ headless: true })
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } })
   const page = await context.newPage()
@@ -28,8 +37,8 @@ import { chromium } from '@playwright/test'
   console.log('\nStep 2: POSTing credentials...')
   const body = new URLSearchParams({
     csrfToken,
-    email: 'staff@aerojet-academy.com',
-    password: 'REDACTED_PASSWORD',
+    email: staffEmail,
+    password: staffPassword,
     redirect: 'false',
   }).toString()
 
@@ -69,6 +78,3 @@ import { chromium } from '@playwright/test'
   await page.screenshot({ path: 'tests/e2e/tour-screenshots/debug-direct-api.png', fullPage: true })
   await browser.close()
 })().catch((e) => console.error('FATAL:', (e as Error).message))
-
-
-

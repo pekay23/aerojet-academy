@@ -1,9 +1,18 @@
 /**
  * Debug: Direct API login to test credentials and session
+ * Requires: E2E_STAFF_EMAIL, E2E_STAFF_PASSWORD env vars
  */
 import { chromium } from '@playwright/test'
 
 (async () => {
+  const staffEmail = process.env.E2E_STAFF_EMAIL || 'staff@aerojet-academy.com'
+  const staffPassword = process.env.E2E_STAFF_PASSWORD || ''
+  
+  if (!staffPassword) {
+    console.error('ERROR: E2E_STAFF_PASSWORD environment variable is required')
+    process.exit(1)
+  }
+  
   const browser = await chromium.launch({ headless: true })
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } })
   const page = await context.newPage()
@@ -45,8 +54,8 @@ import { chromium } from '@playwright/test'
   const response = await page.request.post('http://localhost:3000/api/auth/callback/credentials', {
     data: new URLSearchParams({
       csrfToken: csrfToken || '',
-      email: 'staff@aerojet-academy.com',
-      password: 'REDACTED_PASSWORD',
+      email: staffEmail,
+      password: staffPassword,
       redirect: 'false',
     }).toString(),
     headers: {

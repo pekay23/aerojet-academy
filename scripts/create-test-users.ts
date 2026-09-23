@@ -1,21 +1,30 @@
 // Create remaining test users that the seed script hasn't reached yet
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import bcrypt from 'bcryptjs'
+import { config } from 'dotenv'
+config()
 
 async function main() {
   // Check existing examiner users
   const existingExaminers = await prismaUnfiltered.user.findMany({
     where: { role: 'EXAMINER' },
-    select: { email: true, role: true }
+    select: { email: true, role: true },
   })
   console.log('Existing examiners:', JSON.stringify(existingExaminers, null, 2))
 
+  const examinerPassword = process.env.SEED_EXAMINER_PASSWORD || ''
+  if (!examinerPassword) {
+    console.error('ERROR: SEED_EXAMINER_PASSWORD environment variable is required')
+    process.exit(1)
+  }
+
+  const hashedPassword = await bcrypt.hash(examinerPassword, 12)
+
   // Create Examiner - check the schema first
-  const examinerPassword = await bcrypt.hash('REDACTED_PASSWORD', 12)
   await prismaUnfiltered.user.upsert({
     where: { email: 'examiner@aerojet-academy.com' },
     update: {
-      password: examinerPassword,
+      password: hashedPassword,
       status: 'ACTIVE',
       emailVerified: new Date(),
       mustChangePassword: false,
@@ -23,7 +32,7 @@ async function main() {
     create: {
       email: 'examiner@aerojet-academy.com',
       academyEmail: 'examiner@aerojet-academy.com',
-      password: examinerPassword,
+      password: hashedPassword,
       role: 'EXAMINER',
       emailVerified: new Date(),
       status: 'ACTIVE',
@@ -40,7 +49,7 @@ async function main() {
       },
     },
   })
-  console.log('✅ Examiner created: examiner@aerojet-academy.com / REDACTED_PASSWORD')
+  console.log('✅ Examiner created: examiner@aerojet-academy.com / [password from env]')
 
   // Also ensure the existing examiner has a known password
   const existingExaminerEmail = existingExaminers[0]?.email
@@ -48,7 +57,7 @@ async function main() {
     await prismaUnfiltered.user.update({
       where: { email: existingExaminerEmail },
       data: {
-        password: examinerPassword,
+        password: hashedPassword,
         status: 'ACTIVE',
         emailVerified: new Date(),
       },
@@ -57,6 +66,9 @@ async function main() {
   }
 }
 
-main().catch(e => { console.error(e); process.exit(1); }).finally(() => prismaUnfiltered.$disconnect())
-
-
+main()
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+  .finally(() => prismaUnfiltered.$disconnect())

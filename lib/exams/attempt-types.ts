@@ -1,75 +1,87 @@
 /**
- * Canonical exam attempt-type vocabulary and normalisation.
+ * Simplified canonical exam attempt-type vocabulary.
  *
- * All exam booking/result writes and merges route through this module so that
- * legacy labels such as `first_attempt`, `FIRST_ATTEMPT`, `INITIAL`, `resit`,
- * `FIRST_RESIT`, `SECOND_RESIT`, `THIRD_RESIT` collapse to the same canonical
- * value as the modern `FIRST` / `RESIT_1` / `RESIT_2` / `RESIT_3` labels.
+ * - FIRST: First attempt at a module
+ * - RESIT_1, RESIT_2: Immediate re-attempts (same session/period)
+ * - RETAKE_1, RETAKE_2, RETAKE_3...: Later re-attempts (new session/period, unlimited)
+ *
+ * All inputs normalise to these canonical values.
  */
 
 export const ATTEMPT_FIRST = 'FIRST'
 export const ATTEMPT_RESIT_1 = 'RESIT_1'
 export const ATTEMPT_RESIT_2 = 'RESIT_2'
-export const ATTEMPT_RESIT_3 = 'RESIT_3'
+export const RETAKE_PREFIX = 'RETAKE_'
 
 export type AttemptType =
-  typeof ATTEMPT_FIRST | typeof ATTEMPT_RESIT_1 | typeof ATTEMPT_RESIT_2 | typeof ATTEMPT_RESIT_3
+  typeof ATTEMPT_FIRST | typeof ATTEMPT_RESIT_1 | typeof ATTEMPT_RESIT_2 | `RETAKE_${number}`
 
-export const ATTEMPT_VALUES: readonly AttemptType[] = [
-  ATTEMPT_FIRST,
-  ATTEMPT_RESIT_1,
-  ATTEMPT_RESIT_2,
-  ATTEMPT_RESIT_3,
-]
+export const ATTEMPT_VALUES: readonly (
+  typeof ATTEMPT_FIRST | typeof ATTEMPT_RESIT_1 | typeof ATTEMPT_RESIT_2
+)[] = [ATTEMPT_FIRST, ATTEMPT_RESIT_1, ATTEMPT_RESIT_2]
 
-export const ATTEMPT_LABELS: Record<AttemptType, string> = {
-  [ATTEMPT_FIRST]: '1st Attempt',
-  [ATTEMPT_RESIT_1]: 'Resit (2nd)',
-  [ATTEMPT_RESIT_2]: 'Resit (3rd)',
-  [ATTEMPT_RESIT_3]: 'Resit (4th+)',
+export const ATTEMPT_LABELS: Record<
+  typeof ATTEMPT_FIRST | typeof ATTEMPT_RESIT_1 | typeof ATTEMPT_RESIT_2,
+  string
+> = {
+  [ATTEMPT_FIRST]: 'First Attempt',
+  [ATTEMPT_RESIT_1]: 'Resit 1',
+  [ATTEMPT_RESIT_2]: 'Resit 2',
 }
 
-/** Labels that map to the FIRST attempt. */
-const FIRST_SYNONYMS = new Set<string>([
-  'FIRST',
-  'FIRST_ATTEMPT',
-  'INITIAL',
-  'INITIAL_ATTEMPT',
-  'FIRST_ATTEMPT_INITIAL',
-])
+function retakeLabel(n: number): string {
+  return `Retake ${n}`
+}
 
-/** Labels that map to RESIT_1. */
-const RESIT_1_SYNONYMS = new Set<string>(['RESIT_1', 'FIRST_RESIT', 'RESIT', 'RESIT1'])
+/** Canonical alias map: normalized keys (spaces/hyphens → underscores, uppercase). */
+const ATTEMPT_ALIASES: Record<string, AttemptType> = {
+  FIRST: ATTEMPT_FIRST,
+  FIRST_ATTEMPT: ATTEMPT_FIRST,
+  INITIAL: ATTEMPT_FIRST,
+  INITIAL_ATTEMPT: ATTEMPT_FIRST,
+  '1ST': ATTEMPT_FIRST,
 
-/** Labels that map to RESIT_2. */
-const RESIT_2_SYNONYMS = new Set<string>(['RESIT_2', 'SECOND_RESIT', 'RESIT2'])
-
-/** Labels that map to RESIT_3. */
-const RESIT_3_SYNONYMS = new Set<string>(['RESIT_3', 'THIRD_RESIT', 'RESIT3'])
+  RESIT: ATTEMPT_RESIT_1,
+  RESIT_1: ATTEMPT_RESIT_1,
+  FIRST_RESIT: ATTEMPT_RESIT_1,
+  RESIT_2: ATTEMPT_RESIT_2,
+  SECOND_RESIT: ATTEMPT_RESIT_2,
+}
 
 /**
  * Normalise any incoming attempt-type string to the canonical vocabulary.
  *
- * - null / undefined / empty → FIRST (safe default for display + merge keys)
+ * - null / undefined / empty → null (caller decides default)
  * - unknown / unmapped values → null (caller decides; never silently coerce to FIRST)
+ * - spaces and hyphens are treated as underscores before matching
  */
 export function normalizeAttemptType(raw: string | null | undefined): AttemptType | null {
   if (raw == null) return null
   const normalized = String(raw).trim().toUpperCase()
   if (!normalized) return null
 
-  if (FIRST_SYNONYMS.has(normalized)) return ATTEMPT_FIRST
-  if (RESIT_1_SYNONYMS.has(normalized)) return ATTEMPT_RESIT_1
-  if (RESIT_2_SYNONYMS.has(normalized)) return ATTEMPT_RESIT_2
-  if (RESIT_3_SYNONYMS.has(normalized)) return ATTEMPT_RESIT_3
+  // Convert spaces and hyphens to underscores for canonical lookup
+  const key = normalized.replace(/[\s-]+/g, '_')
 
-  // Allow RESIT_N numeric suffixes as a final fallback (RESIT_4 → RESIT_3).
-  const numericResit = normalized.match(/^RESIT[_-]?(\d+)$/)
+  // Direct alias lookup
+  const alias = ATTEMPT_ALIASES[key]
+  if (alias) return alias
+
+  // RETAKE_N (unlimited)
+  const retakeMatch = key.match(/^RETAKE_(\d+)$/)
+  if (retakeMatch) {
+    const n = Number.parseInt(retakeMatch[1], 10)
+    if (n >= 1) return `RETAKE_${n}` as AttemptType
+  }
+
+  // Legacy RESIT_N numeric suffixes (RESIT_3 → RETAKE_1, RESIT_4 → RETAKE_2, etc.)
+  const numericResit = key.match(/^RESIT_(\d+)$/)
   if (numericResit) {
     const n = Number.parseInt(numericResit[1], 10)
     if (n <= 1) return ATTEMPT_RESIT_1
     if (n === 2) return ATTEMPT_RESIT_2
-    return ATTEMPT_RESIT_3
+    // RESIT_3+ maps to RETAKE_(n-2)
+    return `RETAKE_${n - 2}` as AttemptType
   }
 
   return null
@@ -106,7 +118,15 @@ export function mergeAttemptType(raw: string | null | undefined): AttemptType | 
  */
 export function formatAttemptType(raw: string | null | undefined): string {
   const normalized = normalizeAttemptType(raw)
-  if (normalized) return ATTEMPT_LABELS[normalized]
+  if (normalized) {
+    if (normalized === ATTEMPT_FIRST) return ATTEMPT_LABELS[ATTEMPT_FIRST]
+    if (normalized === ATTEMPT_RESIT_1) return ATTEMPT_LABELS[ATTEMPT_RESIT_1]
+    if (normalized === ATTEMPT_RESIT_2) return ATTEMPT_LABELS[ATTEMPT_RESIT_2]
+    // RETAKE_N
+    const retakeMatch = normalized.match(/^RETAKE_(\d+)$/)
+    if (retakeMatch) return retakeLabel(Number.parseInt(retakeMatch[1], 10))
+    return normalized // fallback
+  }
   if (raw == null || String(raw).trim() === '') return ATTEMPT_LABELS[ATTEMPT_FIRST]
   return '—'
 }

@@ -8,6 +8,9 @@
  * - Broken links
  *
  * Run: npx playwright test portal-explore --config=tests/e2e/tour-verification.config.ts
+ * Requires: E2E_STAFF_EMAIL, E2E_STAFF_PASSWORD, E2E_STUDENT_EMAIL, E2E_STUDENT_PASSWORD,
+ *           E2E_INSTRUCTOR_EMAIL, E2E_INSTRUCTOR_PASSWORD, E2E_APPLICANT_EMAIL, E2E_APPLICANT_PASSWORD,
+ *           E2E_EXAMINER_EMAIL, E2E_EXAMINER_PASSWORD env vars
  */
 
 import { test, Page } from '@playwright/test'
@@ -25,74 +28,101 @@ interface PortalConfig {
   pathsToVisit: string[]
 }
 
-const PORTALS: PortalConfig[] = [
-  {
-    name: 'Staff',
-    role: 'staff',
-    email: 'staff@aerojet-academy.com',
-    password: 'REDACTED_PASSWORD',
-    dashboardUrl: '/staff/dashboard',
-    pathsToVisit: [
-      '/staff/dashboard',
-      '/staff/courses',
-      '/staff/classes',
-      '/staff/exams',
-      '/staff/students',
-      '/staff/newsroom',
-      '/staff/settings',
-    ],
-  },
-  {
-    name: 'Student',
-    role: 'student',
-    email: 'student@aerojet-academy.com',
-    password: 'REDACTED_PASSWORD',
-    dashboardUrl: '/student',
-    pathsToVisit: [
-      '/student',
-      '/student/exams',
-      '/student/grades',
-      '/student/schedule',
-      '/student/messages',
-    ],
-  },
-  {
-    name: 'Instructor',
-    role: 'instructor',
-    email: 'instructor@aerojet-academy.com',
-    password: 'REDACTED_PASSWORD',
-    dashboardUrl: '/instructor/dashboard',
-    pathsToVisit: [
-      '/instructor/dashboard',
-      '/instructor/classes',
-      '/instructor/materials',
-      '/instructor/exams',
-      '/instructor/grades',
-    ],
-  },
-  {
-    name: 'Applicant',
-    role: 'applicant',
-    email: 'applicant@example.com',
-    password: 'REDACTED_PASSWORD',
-    dashboardUrl: '/applicant',
-    pathsToVisit: [
-      '/applicant',
-      '/applicant/applications',
-      '/applicant/documents',
-      '/applicant/status',
-      '/applicant/messages',
-    ],
-  },
-  {
-    name: 'Examiner',
-    role: 'examiner',
-    email: 'examiner@aerojet-academy.com',
-    password: 'REDACTED_PASSWORD',
-    dashboardUrl: '/examiner',
-    pathsToVisit: ['/examiner', '/examiner/exams', '/examiner/schedule', '/examiner/results'],
-  },
-]
+function getPortals(): PortalConfig[] {
+  const roles = [
+    {
+      name: 'Staff',
+      role: 'staff',
+      emailEnv: 'E2E_STAFF_EMAIL',
+      passwordEnv: 'E2E_STAFF_PASSWORD',
+      dashboardUrl: '/staff/dashboard',
+      pathsToVisit: [
+        '/staff/dashboard',
+        '/staff/courses',
+        '/staff/classes',
+        '/staff/exams',
+        '/staff/students',
+        '/staff/newsroom',
+        '/staff/settings',
+      ],
+    },
+    {
+      name: 'Student',
+      role: 'student',
+      emailEnv: 'E2E_STUDENT_EMAIL',
+      passwordEnv: 'E2E_STUDENT_PASSWORD',
+      dashboardUrl: '/student',
+      pathsToVisit: [
+        '/student',
+        '/student/exams',
+        '/student/grades',
+        '/student/schedule',
+        '/student/messages',
+      ],
+    },
+    {
+      name: 'Instructor',
+      role: 'instructor',
+      emailEnv: 'E2E_INSTRUCTOR_EMAIL',
+      passwordEnv: 'E2E_INSTRUCTOR_PASSWORD',
+      dashboardUrl: '/instructor/dashboard',
+      pathsToVisit: [
+        '/instructor/dashboard',
+        '/instructor/classes',
+        '/instructor/materials',
+        '/instructor/exams',
+        '/instructor/grades',
+      ],
+    },
+    {
+      name: 'Applicant',
+      role: 'applicant',
+      emailEnv: 'E2E_APPLICANT_EMAIL',
+      passwordEnv: 'E2E_APPLICANT_PASSWORD',
+      dashboardUrl: '/applicant',
+      pathsToVisit: [
+        '/applicant',
+        '/applicant/applications',
+        '/applicant/documents',
+        '/applicant/status',
+        '/applicant/messages',
+      ],
+    },
+    {
+      name: 'Examiner',
+      role: 'examiner',
+      emailEnv: 'E2E_EXAMINER_EMAIL',
+      passwordEnv: 'E2E_EXAMINER_PASSWORD',
+      dashboardUrl: '/examiner',
+      pathsToVisit: ['/examiner', '/examiner/exams', '/examiner/schedule', '/examiner/results'],
+    },
+  ]
+
+  const portals: PortalConfig[] = []
+
+  for (const r of roles) {
+    const email = process.env[r.emailEnv]
+    const password = process.env[r.passwordEnv]
+
+    if (!email || !password) {
+      console.error(`ERROR: ${r.emailEnv} and ${r.passwordEnv} environment variables are required`)
+      process.exit(1)
+    }
+
+    portals.push({
+      name: r.name,
+      role: r.role,
+      email,
+      password,
+      dashboardUrl: r.dashboardUrl,
+      pathsToVisit: r.pathsToVisit,
+    })
+  }
+
+  return portals
+}
+
+const PORTALS = getPortals()
 
 interface IssueRecord {
   portal: string
