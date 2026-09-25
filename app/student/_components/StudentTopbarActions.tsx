@@ -76,7 +76,7 @@ export default function StudentTopbarActions() {
           >
             <Bell className="text-muted-foreground h-4 w-4" />
             {unreadNotifCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                 {formatBadge(unreadNotifCount)}
               </span>
             )}
@@ -97,7 +97,7 @@ export default function StudentTopbarActions() {
               No notifications
             </div>
           ) : (
-            <div className="max-h-[300px] overflow-y-auto">
+            <div className="max-h-75 overflow-y-auto">
               {notifications.map((notif) => {
                 const typeConfig = notificationTypeIcons[notif.type] || notificationTypeIcons.INFO
                 const TypeIcon = typeConfig.icon
@@ -158,7 +158,7 @@ export default function StudentTopbarActions() {
           >
             <Mail className="text-muted-foreground h-4 w-4" />
             {unreadMsgCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                 {formatBadge(unreadMsgCount)}
               </span>
             )}
@@ -178,7 +178,7 @@ export default function StudentTopbarActions() {
           {messages.length === 0 ? (
             <div className="text-muted-foreground px-4 py-6 text-center text-sm">No messages</div>
           ) : (
-            <div className="max-h-[300px] overflow-y-auto">
+            <div className="max-h-75 overflow-y-auto">
               {messages.map((msg) => (
                 <DropdownMenuItem key={msg.id} asChild>
                   <Link

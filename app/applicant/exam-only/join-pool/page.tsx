@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -16,7 +17,7 @@ interface PageProps {
 
 export default async function JoinPoolPage({ searchParams }: PageProps) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { poolId } = await searchParams
   if (!poolId) redirect('/applicant/exam-bookings')
@@ -35,18 +36,18 @@ export default async function JoinPoolPage({ searchParams }: PageProps) {
   const isFull = pool.currentMemberCount >= pool.maxCandidates
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-3xl space-y-6 duration-700">
       <Link
         href="/applicant/exam-bookings"
-        className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-aerojet-blue dark:text-slate-400"
+        className="hover:text-aerojet-blue inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to bookings
       </Link>
 
-      <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 space-y-6">
+      <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight dark:text-white">
             Join Exam Booking
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -54,8 +55,8 @@ export default async function JoinPoolPage({ searchParams }: PageProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4 space-y-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-2 rounded-xl border border-slate-100 p-4 dark:border-slate-800">
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <Calendar className="h-4 w-4" />
               <span className="font-medium">Date</span>
@@ -66,7 +67,7 @@ export default async function JoinPoolPage({ searchParams }: PageProps) {
           </div>
 
           {pool.event?.location && (
-            <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4 space-y-2">
+            <div className="space-y-2 rounded-xl border border-slate-100 p-4 dark:border-slate-800">
               <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                 <MapPin className="h-4 w-4" />
                 <span className="font-medium">Location</span>
@@ -77,7 +78,7 @@ export default async function JoinPoolPage({ searchParams }: PageProps) {
             </div>
           )}
 
-          <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4 space-y-2">
+          <div className="space-y-2 rounded-xl border border-slate-100 p-4 dark:border-slate-800">
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <Users className="h-4 w-4" />
               <span className="font-medium">Seats</span>
@@ -87,7 +88,7 @@ export default async function JoinPoolPage({ searchParams }: PageProps) {
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4 space-y-2">
+          <div className="space-y-2 rounded-xl border border-slate-100 p-4 dark:border-slate-800">
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <CreditCard className="h-4 w-4" />
               <span className="font-medium">Seat Price</span>
@@ -104,7 +105,12 @@ export default async function JoinPoolPage({ searchParams }: PageProps) {
           </div>
         )}
 
-        <JoinPoolForm poolId={pool.id} poolName={pool.name} seatPrice={Number(pool.seatPrice)} disabled={isFull} />
+        <JoinPoolForm
+          poolId={pool.id}
+          poolName={pool.name}
+          seatPrice={Number(pool.seatPrice)}
+          disabled={isFull}
+        />
       </div>
     </div>
   )

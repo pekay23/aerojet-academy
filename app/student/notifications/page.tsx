@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { Mail } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default async function NotificationsPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const notifications = await prismaUnfiltered.notification.findMany({
     where: { userId: session.user.id },

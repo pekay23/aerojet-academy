@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { redirect } from 'next/navigation'
 
 // All imports below are used by the commented-out full page.
@@ -18,7 +19,7 @@ export default async function StudentInvoicesPage() {
 /*
 export default async function StudentInvoicesPageFull() {
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'STUDENT') redirect('/login')
+  if (!session || session.user.role !== 'STUDENT') return await redirectToLogin()
 
   const invoices = await prismaUnfiltered.invoice.findMany({
     where: { userId: session.user.id },
@@ -26,7 +27,7 @@ export default async function StudentInvoicesPageFull() {
   })
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="mx-auto max-w-350 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">

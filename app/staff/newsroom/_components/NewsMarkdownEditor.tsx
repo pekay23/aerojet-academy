@@ -200,7 +200,7 @@ export default function NewsMarkdownEditor({
     editorProps: {
       attributes: {
         class:
-          'prose prose-slate prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[500px] p-8 prose-headings:text-aerojet-blue prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-aerojet-blue prose-a:text-aerojet-sky prose-a:font-bold prose-a:no-underline hover:prose-a:underline',
+          'prose prose-slate prose-lg dark:prose-invert max-w-none focus:outline-none min-h-125 p-8 prose-headings:text-aerojet-blue prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-aerojet-blue prose-a:text-aerojet-sky prose-a:font-bold prose-a:no-underline hover:prose-a:underline',
       },
     },
     onUpdate: ({ editor }) => {
@@ -615,7 +615,7 @@ export default function NewsMarkdownEditor({
           </div>
 
           {mode === 'SPLIT' && (
-            <div className="max-h-[800px] overflow-y-auto bg-slate-50/30 p-8 dark:bg-slate-950/30">
+            <div className="max-h-200 overflow-y-auto bg-slate-50/30 p-8 dark:bg-slate-950/30">
               <div
                 className="prose prose-slate prose-lg dark:prose-invert prose-headings:text-aerojet-blue prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-aerojet-blue prose-a:text-aerojet-sky prose-a:font-bold prose-a:no-underline hover:prose-a:underline max-w-none"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(editor.getHTML()) }}

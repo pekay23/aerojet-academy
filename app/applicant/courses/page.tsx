@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { Clock, Globe, BookOpen, CheckCircle2, Lock } from 'lucide-react'
 import { Suspense } from 'react'
 
@@ -42,7 +42,7 @@ export default async function CoursesPage({
 }) {
   const { category } = await searchParams
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const [portalState, allCategories] = await Promise.all([
     prismaUnfiltered.user.findUnique({

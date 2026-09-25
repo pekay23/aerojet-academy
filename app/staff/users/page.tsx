@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getCachedSession } from '@/lib/auth/session-context'
-import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
 import PeopleTabs from '../_components/PeopleTabs'
 
@@ -12,7 +12,7 @@ export default async function PeoplePage({
 }) {
   const { tab } = await searchParams
   const session = await getCachedSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   return <PeopleTabs initialTab={tab} />
 }

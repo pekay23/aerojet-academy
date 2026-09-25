@@ -492,7 +492,7 @@ export default function AcademicCalendar({
                 {weekDays.map((day, di) => (
                   <div
                     key={di}
-                    className="h-[1920px] border-r border-slate-100 last:border-r-0 dark:border-slate-800"
+                    className="h-480 border-r border-slate-100 last:border-r-0 dark:border-slate-800"
                   />
                 ))}
                 {weekDays.map((day, di) => {

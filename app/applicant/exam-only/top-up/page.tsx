@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
@@ -17,7 +17,7 @@ export default async function ExamOnlyTopUpPage({
 }) {
   const { required: requiredAmount } = await searchParams
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -67,7 +67,7 @@ export default async function ExamOnlyTopUpPage({
   ])
 
   if (!user || user.role === 'STUDENT') {
-    redirect('/login')
+    return await redirectToLogin()
   }
 
   const lowestIndividual =

@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import StaffNotificationsList from './_components/StaffNotificationsList'
@@ -12,11 +12,11 @@ export const dynamic = 'force-dynamic'
 
 export default async function StaffNotificationsPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'STAFF']
   if (!allowedRoles.includes(session.user.role)) {
-    redirect('/login')
+    return await redirectToLogin()
   }
 
   const notifications = await prismaUnfiltered.notification.findMany({
@@ -29,10 +29,10 @@ export default async function StaffNotificationsPage() {
   const criticalCount = notifications.filter((n) => n.type === 'CRITICAL' && !n.isRead).length
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-7xl space-y-8 duration-700">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight uppercase dark:text-white">
             Notifications
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

@@ -321,7 +321,7 @@ export default function RegistrationForm({
                       }}
                     >
                       <FormControl>
-                        <SelectTrigger className="focus:ring-aerojet-blue h-[50px] w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-slate-900 transition-all outline-none focus:ring-2 [&>span]:flex [&>span]:items-center [&>span]:gap-2">
+                        <SelectTrigger className="focus:ring-aerojet-blue h-12.5 w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-slate-900 transition-all outline-none focus:ring-2 [&>span]:flex [&>span]:items-center [&>span]:gap-2">
                           <SelectValue placeholder="Code" />
                         </SelectTrigger>
                       </FormControl>
@@ -364,7 +364,7 @@ export default function RegistrationForm({
                       type="tel"
                       placeholder={getPhonePlaceholder(phoneCountryCode ?? '')}
                       {...field}
-                      className="focus:ring-aerojet-blue h-[50px] w-full rounded-lg border-gray-300 bg-white px-4 text-slate-900 focus:ring-2"
+                      className="focus:ring-aerojet-blue h-12.5 w-full rounded-lg border-gray-300 bg-white px-4 text-slate-900 focus:ring-2"
                     />
                   </FormControl>
                   <FormMessage />

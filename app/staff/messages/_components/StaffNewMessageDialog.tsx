@@ -98,7 +98,7 @@ export default function StaffNewMessageDialog({ recipients }: StaffNewMessageDia
           <span>New Message</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[520px]">
+      <DialogContent className="sm:max-w-130">
         <DialogHeader>
           <DialogTitle>Send Message</DialogTitle>
           <DialogDescription>
@@ -119,7 +119,7 @@ export default function StaffNewMessageDialog({ recipients }: StaffNewMessageDia
               </SelectTrigger>
               <SelectContent>
                 {recipients.length === 0 ? (
-                  <div className="p-2 text-center text-sm text-muted-foreground">
+                  <div className="text-muted-foreground p-2 text-center text-sm">
                     No recipients available
                   </div>
                 ) : (
@@ -156,7 +156,7 @@ export default function StaffNewMessageDialog({ recipients }: StaffNewMessageDia
             <Textarea
               id="body"
               placeholder="Type your message here..."
-              className="min-h-[150px]"
+              className="min-h-37.5"
               value={formData.body}
               onChange={(e) => setFormData({ ...formData, body: e.target.value })}
               required

@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
@@ -10,7 +11,6 @@ import { getActivePaymentMethods } from '@/lib/payment-methods'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import { prismaUnfiltered, prisma } from '@/lib/prisma/client'
 
-
 export const metadata: Metadata = { title: 'Purchase Course | Applicant Portal' }
 
 interface Props {
@@ -19,7 +19,7 @@ interface Props {
 
 export default async function PurchasePage({ params }: Props) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { id } = await params
   const userId = session.user.id

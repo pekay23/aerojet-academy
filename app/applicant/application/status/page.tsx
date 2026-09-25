@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, User, CreditCard, ShieldCheck } from 'lucide-react'
 
@@ -42,7 +42,7 @@ const PROGRAMME_LABELS: Record<string, string> = {
 
 export default async function ApplicationStatusPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -99,7 +99,7 @@ export default async function ApplicationStatusPage() {
     isPipelineEnabled(),
   ])
 
-  if (!applicant) redirect('/login')
+  if (!applicant) return await redirectToLogin()
 
   const application = applicant.application
 

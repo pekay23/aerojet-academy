@@ -1,5 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function EditExamEventPage({ params }: PageProps) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { id } = await params
   const event = await prismaUnfiltered.examEvent.findUnique({
@@ -32,7 +33,7 @@ export default async function EditExamEventPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Edit Exam Event
         </h1>
         <p className="text-slate-500 dark:text-slate-400">Update details for {event.name}</p>

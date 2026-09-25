@@ -9,7 +9,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { FileText, ExternalLink, Trash2, Edit3, MoreVertical, ArrowUpDown, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
+import {
+  FileText,
+  ExternalLink,
+  Trash2,
+  Edit3,
+  MoreVertical,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Loader2,
+} from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +30,14 @@ import { Button } from '@/components/ui/button'
 import { deleteResource } from '@/lib/actions/resources'
 import { toast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
 
 interface Resource {
   id: string
@@ -87,8 +104,14 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
         valA = a.type || ''
         valB = b.type || ''
       } else if (sortField === 'visibility') {
-        valA = (a.showToInstructors ? '1' : '0') + (a.showToStaff ? '1' : '0') + (a.showToStudents ? '1' : '0')
-        valB = (b.showToInstructors ? '1' : '0') + (b.showToStaff ? '1' : '0') + (b.showToStudents ? '1' : '0')
+        valA =
+          (a.showToInstructors ? '1' : '0') +
+          (a.showToStaff ? '1' : '0') +
+          (a.showToStudents ? '1' : '0')
+        valB =
+          (b.showToInstructors ? '1' : '0') +
+          (b.showToStaff ? '1' : '0') +
+          (b.showToStudents ? '1' : '0')
       }
 
       const comparison = valA.localeCompare(valB, undefined, { sensitivity: 'base' })
@@ -104,61 +127,93 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
             <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
               <TableHead
                 onClick={() => toggleSort('name')}
-                className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+                className="group cursor-pointer text-[10px] font-bold tracking-wider uppercase select-none hover:text-slate-900 dark:hover:text-white"
                 aria-label="Sort by Name"
-                aria-sort={sortField === 'name' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                aria-sort={
+                  sortField === 'name' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'
+                }
               >
                 <div className="flex items-center gap-1.5">
                   Resource
                   {sortField === 'name' ? (
-                    sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-blue-600" /> : <ArrowDown className="h-3 w-3 text-blue-600" />
+                    sortOrder === 'asc' ? (
+                      <ArrowUp className="h-3 w-3 text-blue-600" />
+                    ) : (
+                      <ArrowDown className="h-3 w-3 text-blue-600" />
+                    )
                   ) : (
-                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity" />
+                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 transition-opacity group-hover:opacity-100" />
                   )}
                 </div>
               </TableHead>
               <TableHead
                 onClick={() => toggleSort('category')}
-                className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+                className="group cursor-pointer text-[10px] font-bold tracking-wider uppercase select-none hover:text-slate-900 dark:hover:text-white"
                 aria-label="Sort by Category"
-                aria-sort={sortField === 'category' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                aria-sort={
+                  sortField === 'category'
+                    ? sortOrder === 'asc'
+                      ? 'ascending'
+                      : 'descending'
+                    : 'none'
+                }
               >
                 <div className="flex items-center gap-1.5">
                   Category
                   {sortField === 'category' ? (
-                    sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-blue-600" /> : <ArrowDown className="h-3 w-3 text-blue-600" />
+                    sortOrder === 'asc' ? (
+                      <ArrowUp className="h-3 w-3 text-blue-600" />
+                    ) : (
+                      <ArrowDown className="h-3 w-3 text-blue-600" />
+                    )
                   ) : (
-                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity" />
+                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 transition-opacity group-hover:opacity-100" />
                   )}
                 </div>
               </TableHead>
               <TableHead
                 onClick={() => toggleSort('type')}
-                className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+                className="group cursor-pointer text-[10px] font-bold tracking-wider uppercase select-none hover:text-slate-900 dark:hover:text-white"
                 aria-label="Sort by Type"
-                aria-sort={sortField === 'type' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                aria-sort={
+                  sortField === 'type' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'
+                }
               >
                 <div className="flex items-center gap-1.5">
                   Type
                   {sortField === 'type' ? (
-                    sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-blue-600" /> : <ArrowDown className="h-3 w-3 text-blue-600" />
+                    sortOrder === 'asc' ? (
+                      <ArrowUp className="h-3 w-3 text-blue-600" />
+                    ) : (
+                      <ArrowDown className="h-3 w-3 text-blue-600" />
+                    )
                   ) : (
-                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity" />
+                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 transition-opacity group-hover:opacity-100" />
                   )}
                 </div>
               </TableHead>
               <TableHead
                 onClick={() => toggleSort('visibility')}
-                className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+                className="group cursor-pointer text-[10px] font-bold tracking-wider uppercase select-none hover:text-slate-900 dark:hover:text-white"
                 aria-label="Sort by Visibility"
-                aria-sort={sortField === 'visibility' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                aria-sort={
+                  sortField === 'visibility'
+                    ? sortOrder === 'asc'
+                      ? 'ascending'
+                      : 'descending'
+                    : 'none'
+                }
               >
                 <div className="flex items-center gap-1.5">
                   Visibility
                   {sortField === 'visibility' ? (
-                    sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-blue-600" /> : <ArrowDown className="h-3 w-3 text-blue-600" />
+                    sortOrder === 'asc' ? (
+                      <ArrowUp className="h-3 w-3 text-blue-600" />
+                    ) : (
+                      <ArrowDown className="h-3 w-3 text-blue-600" />
+                    )
                   ) : (
-                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity" />
+                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 transition-opacity group-hover:opacity-100" />
                   )}
                 </div>
               </TableHead>
@@ -193,7 +248,7 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
                         <div className="font-bold text-slate-900 dark:text-slate-100">
                           {resource.name}
                         </div>
-                        <div className="max-w-[200px] truncate font-mono text-[10px] text-slate-400">
+                        <div className="max-w-50 truncate font-mono text-[10px] text-slate-400">
                           {resource.url}
                         </div>
                       </div>
@@ -231,16 +286,19 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
                           STU
                         </Badge>
                       )}
-                       {(resource.courses ?? []).length > 0 && (
-                         <Badge variant="outline" className="h-5 px-1.5 text-[9px] tracking-tighter font-mono">
-                           {(resource.courses ?? []).length} MOD
-                         </Badge>
-                       )}
-                       {(resource.pathways ?? []).length > 0 && (
-                         <Badge variant="outline" className="h-5 px-1.5 text-[9px] tracking-tighter">
-                           {(resource.pathways ?? []).length} PTH
-                         </Badge>
-                       )}
+                      {(resource.courses ?? []).length > 0 && (
+                        <Badge
+                          variant="outline"
+                          className="h-5 px-1.5 font-mono text-[9px] tracking-tighter"
+                        >
+                          {(resource.courses ?? []).length} MOD
+                        </Badge>
+                      )}
+                      {(resource.pathways ?? []).length > 0 && (
+                        <Badge variant="outline" className="h-5 px-1.5 text-[9px] tracking-tighter">
+                          {(resource.pathways ?? []).length} PTH
+                        </Badge>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
@@ -275,11 +333,16 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
               ))
             )}
           </TableBody>
-          </Table>
+        </Table>
       </div>
 
       {deleteTarget && (
-        <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <Dialog
+          open={!!deleteTarget}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null)
+          }}
+        >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Delete Resource</DialogTitle>
@@ -291,11 +354,7 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
               <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>
                 Cancel
               </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeleting}
-              >
+              <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
                 {isDeleting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -620,7 +620,7 @@ export default function PaymentsQueue({
                       className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/40"
                     >
                       <div>
-                        <p className="mb-0.5 max-w-[200px] truncate text-xs font-bold text-slate-700 dark:text-slate-300">
+                        <p className="mb-0.5 max-w-50 truncate text-xs font-bold text-slate-700 dark:text-slate-300">
                           {file.filename}
                         </p>
                         <p className="text-[10px] text-slate-400">

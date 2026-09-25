@@ -308,7 +308,7 @@ export default function StaffCalendarGrid({ events, initialDate }: Props) {
           >
             <ChevronLeft className="h-5 w-5 text-slate-500" />
           </button>
-          <span className="min-w-[160px] text-center text-xl font-black text-slate-900 dark:text-white">
+          <span className="min-w-40 text-center text-xl font-black text-slate-900 dark:text-white">
             {label}
           </span>
           <button
@@ -415,7 +415,7 @@ export default function StaffCalendarGrid({ events, initialDate }: Props) {
               {format(currentDate, 'MMMM d')}
             </h3>
           </div>
-          <div className="max-h-[760px] overflow-y-auto">
+          <div className="max-h-190 overflow-y-auto">
             {timeSlots.map((hour) => {
               const hourEvents = currentDayEvents.filter(
                 (evt) => getHours(new Date(evt.startDate)) === hour
@@ -423,7 +423,7 @@ export default function StaffCalendarGrid({ events, initialDate }: Props) {
               return (
                 <div
                   key={hour}
-                  className="grid min-h-[84px] grid-cols-[72px_1fr] border-b border-slate-100 dark:border-slate-800"
+                  className="grid min-h-21 grid-cols-[72px_1fr] border-b border-slate-100 dark:border-slate-800"
                 >
                   <div className="border-r border-slate-100 px-3 py-4 text-right text-xs font-bold text-slate-400 dark:border-slate-800">
                     {hour === 0
@@ -495,11 +495,11 @@ export default function StaffCalendarGrid({ events, initialDate }: Props) {
               })}
             </div>
           </div>
-          <div className="flex h-auto min-h-[400px] overflow-y-auto" style={{ maxHeight: '720px' }}>
+          <div className="flex h-auto min-h-100 overflow-y-auto" style={{ maxHeight: '720px' }}>
             <div className="relative grid w-full grid-cols-[80px_1fr]">
               <div className="border-r border-slate-100 dark:border-slate-800">
                 {timeSlots.map((h) => (
-                  <div key={h} className="relative h-[80px]">
+                  <div key={h} className="relative h-20">
                     <span className="absolute -top-3 left-0 w-full text-center text-xs font-medium text-slate-400">
                       {h === 0 ? '12 am' : h < 12 ? `${h} am` : h === 12 ? '12 pm' : `${h - 12} pm`}
                     </span>
@@ -509,10 +509,7 @@ export default function StaffCalendarGrid({ events, initialDate }: Props) {
               <div className="relative grid grid-cols-7">
                 <div className="pointer-events-none absolute inset-0 flex flex-col">
                   {timeSlots.map((h) => (
-                    <div
-                      key={h}
-                      className="h-[80px] border-b border-slate-100 dark:border-slate-800"
-                    />
+                    <div key={h} className="h-20 border-b border-slate-100 dark:border-slate-800" />
                   ))}
                 </div>
                 {weekDays.map((day, di) => (
@@ -588,7 +585,7 @@ export default function StaffCalendarGrid({ events, initialDate }: Props) {
                 <div
                   key={idx}
                   className={cn(
-                    'relative min-h-[110px] border-r border-b border-slate-100 p-2 dark:border-slate-800',
+                    'relative min-h-27.5 border-r border-b border-slate-100 p-2 dark:border-slate-800',
                     !isCur && 'bg-slate-50/50 dark:bg-slate-900/50',
                     isToday && 'bg-[#F8FBFF] dark:bg-blue-900/10'
                   )}
@@ -650,7 +647,7 @@ export default function StaffCalendarGrid({ events, initialDate }: Props) {
           onClick={() => setPopupEvent(null)}
         >
           <div
-            className="relative w-full max-w-sm rounded-[28px] bg-white p-7 shadow-2xl dark:bg-slate-900"
+            className="rounded-28 relative w-full max-w-sm bg-white p-7 shadow-2xl dark:bg-slate-900"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -719,8 +716,8 @@ export default function StaffCalendarGrid({ events, initialDate }: Props) {
 
       {/* Create/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[28px] border border-slate-100 bg-white p-8 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="rounded-28 w-full max-w-md border border-slate-100 bg-white p-8 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-6 flex items-center justify-between">
               <h3 className="text-xl font-black text-slate-900 dark:text-white">
                 {editingEvent ? 'Edit Event' : 'New Calendar Event'}

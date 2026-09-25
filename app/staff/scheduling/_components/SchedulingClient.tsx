@@ -291,7 +291,7 @@ export default function SchedulingClient({
   )
 
   return (
-    <div className="mx-auto max-w-[1800px] space-y-8">
+    <div className="mx-auto max-w-450 space-y-8">
       <div className="sr-only" aria-live="polite" role="status">
         {operationStatus ?? ''}
       </div>
@@ -330,7 +330,7 @@ export default function SchedulingClient({
 
       {/* Programme Selector for all devices */}
       <div className="mb-2 w-full sm:max-w-md">
-        <label className="mb-2 block flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400">
+        <label className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400">
           <Layers className="h-4 w-4" aria-hidden="true" />
           Select Programme
         </label>
@@ -395,45 +395,14 @@ function ProgrammeSchedulePanel({
   // + each license category that has terms OR that's available
   const categoryOptions = useMemo(() => {
     const options: { id: string | null; code: string; name: string }[] = [
-      { id: null, code: 'ALL', name: 'All Modules (General)' },
+      { id: null, code: 'NO_LIC', name: 'No License Required (Short Courses)' },
     ]
 
-    const progCode = (tab.programme.code || '').toUpperCase()
-    const progName = (tab.programme.name || '').toUpperCase()
-
-    // Determine if the programme code or name explicitly mentions ANY license category
-    let hasAnyExplicitMatch = false
     for (const lc of licenseCategories) {
-      const lcCodeStripped = lc.code.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() // 'B1.1' -> 'B11'
-      const looseMatch = lcCodeStripped.replace('11', '1') // 'B11' -> 'B1'
-
-      if (
-        progCode.includes(lcCodeStripped) ||
-        progCode.includes(looseMatch) ||
-        progName.includes(lc.code.toUpperCase())
-      ) {
-        hasAnyExplicitMatch = true
-        break
-      }
-    }
-
-    for (const lc of licenseCategories) {
-      const lcCodeStripped = lc.code.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
-      const looseMatch = lcCodeStripped.replace('11', '1')
-
-      const isMatch =
-        progCode.includes(lcCodeStripped) ||
-        progCode.includes(looseMatch) ||
-        progName.includes(lc.code.toUpperCase())
-
-      // If the programme specifies specific licenses, only show those.
-      // If it's a generic programme (no specific licenses mentioned), show all.
-      if (!hasAnyExplicitMatch || isMatch) {
-        options.push({ id: lc.id, code: lc.code, name: `${lc.code} — ${lc.name}` })
-      }
+      options.push({ id: lc.id, code: lc.code, name: `${lc.code} — ${lc.name}` })
     }
     return options
-  }, [licenseCategories, tab.programme.code, tab.programme.name])
+  }, [licenseCategories])
 
   const licensePanelId = `scheduling-license-panel-${pathway.id}`
 
@@ -451,21 +420,9 @@ function ProgrammeSchedulePanel({
     })
   }, [pathway.academicTerms, activeLicenseId])
 
-  // Filter courses to only those relevant to the selected license category
   const filteredGroupedCourses = useMemo(() => {
-    if (activeLicenseId === null) return groupedCourses
-    const requiredCourseIds = licenseCourseMap[activeLicenseId]
-    if (!requiredCourseIds) return groupedCourses
-
-    const filtered: Record<string, Course[]> = {}
-    for (const [cat, catCourses] of Object.entries(groupedCourses)) {
-      const matching = catCourses.filter((c) => requiredCourseIds.has(c.id))
-      if (matching.length > 0) {
-        filtered[cat] = matching
-      }
-    }
-    return filtered
-  }, [groupedCourses, activeLicenseId, licenseCourseMap])
+    return groupedCourses
+  }, [groupedCourses])
 
   const hasTerms = filteredTerms.length > 0
 
@@ -477,8 +434,8 @@ function ProgrammeSchedulePanel({
       className="space-y-6"
     >
       <Tabs
-        value={activeLicenseId ?? 'general'}
-        onValueChange={(val) => setActiveLicenseId(val === 'general' ? null : val)}
+        value={activeLicenseId ?? 'no_lic'}
+        onValueChange={(val) => setActiveLicenseId(val === 'no_lic' ? null : val)}
       >
         <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto pb-2">
           <ShieldCheck className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
@@ -492,8 +449,8 @@ function ProgrammeSchedulePanel({
         >
           {categoryOptions.map((opt) => (
             <TabsTrigger
-              key={opt.id ?? 'general'}
-              value={opt.id ?? 'general'}
+              key={opt.id ?? 'no_lic'}
+              value={opt.id ?? 'no_lic'}
               className={cn(
                 'shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
                 activeLicenseId === opt.id
@@ -501,11 +458,11 @@ function ProgrammeSchedulePanel({
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
               )}
             >
-              {opt.code === 'ALL' ? 'General' : opt.code}
+              {opt.code === 'NO_LIC' ? 'No License' : opt.code}
             </TabsTrigger>
           ))}
         </TabsList>
-        <TabsContent value={activeLicenseId ?? 'general'} id={licensePanelId}>
+        <TabsContent value={activeLicenseId ?? 'no_lic'} id={licensePanelId}>
           {/* No Terms Yet - Prompt to create */}
           {!hasTerms && activeLicenseId !== null && (
             <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/50 p-8 text-center dark:border-blue-900/30 dark:bg-blue-900/10">
@@ -543,13 +500,13 @@ function ProgrammeSchedulePanel({
                   <Table>
                     <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
                       <TableRow className="hover:bg-transparent">
-                        <TableHead className="text-aerojet-blue sticky left-0 z-30 w-[160px] min-w-[160px] border-r bg-slate-50 py-6 text-sm font-bold sm:w-[300px] sm:min-w-[300px] dark:bg-slate-900 dark:text-slate-300">
+                        <TableHead className="text-aerojet-blue sticky left-0 z-30 w-40 min-w-40 border-r bg-slate-50 py-6 text-sm font-bold sm:w-72 sm:min-w-72 dark:bg-slate-900 dark:text-slate-300">
                           Module Name
                         </TableHead>
                         {filteredTerms.map((term) => (
                           <TableHead
                             key={term.id}
-                            className="min-w-[160px] border-r text-center align-middle"
+                            className="min-w-40 border-r text-center align-middle"
                           >
                             <div className="flex flex-col items-center gap-1.5">
                               <span className="text-aerojet-blue text-sm font-bold dark:text-slate-100">
@@ -582,69 +539,97 @@ function ProgrammeSchedulePanel({
                           </TableRow>
 
                           {/* Course Rows */}
-                          {catCourses.map((course) => (
-                            <TableRow
-                              key={course.id}
-                              className="group border-b border-slate-50 transition-all duration-150 ease-out hover:bg-white/80 dark:border-slate-800/50 dark:hover:bg-slate-800/40"
-                            >
-                              <TableCell className="sticky left-0 z-20 w-[160px] min-w-[160px] border-r bg-white py-5 transition-all duration-150 ease-out group-hover:bg-white group-hover:shadow-sm sm:w-[300px] sm:min-w-[300px] dark:bg-slate-950 dark:group-hover:bg-slate-900">
-                                <div className="space-y-1.5 px-2">
-                                  <div className="text-aerojet-blue text-sm leading-tight font-bold break-words whitespace-normal sm:text-lg dark:text-slate-100">
-                                    {course.name}
-                                  </div>
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-bold text-slate-500 dark:bg-slate-800">
-                                      {course.code}
-                                    </span>
-                                    {course.duration > 0 && (
-                                      <span className="text-[10px] font-medium text-slate-400 sm:text-xs">
-                                        {course.duration} hrs
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </TableCell>
+                          {catCourses.map((course) => {
+                            const isRequired =
+                              activeLicenseId !== null &&
+                              licenseCourseMap[activeLicenseId]?.has(course.id)
 
-                              {filteredTerms.map((term) => {
-                                const isAssigned = term.courseAssignments.some(
-                                  (a) => a.courseId === course.id
-                                )
-                                const isLoading = loading === `${term.id}-${course.id}`
-
-                                return (
-                                  <TableCell
-                                    key={`${term.id}-${course.id}`}
-                                    className={`relative border-r p-0 text-center transition-all ${
-                                      isAssigned
-                                        ? 'bg-blue-50/20 dark:bg-blue-900/5'
-                                        : 'bg-transparent'
-                                    }`}
-                                  >
-                                    <label
-                                      htmlFor={`check-${term.id}-${course.id}`}
-                                      className="flex h-full min-h-[80px] w-full cursor-pointer items-center justify-center transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10"
-                                    >
-                                      {isLoading ? (
-                                        <Loader2
-                                          className={`text-aerojet-sky h-5 w-5 ${!reduceMotion ? 'animate-spin' : ''}`}
-                                          aria-hidden="true"
-                                        />
-                                      ) : (
-                                        <Checkbox
-                                          id={`check-${term.id}-${course.id}`}
-                                          checked={isAssigned}
-                                          onCheckedChange={(checked) =>
-                                            onToggle(term.id, course.id, !!checked)
-                                          }
-                                          className="data-[state=checked]:border-aerojet-blue data-[state=checked]:bg-aerojet-blue h-6 w-6 rounded-lg border-2 border-slate-200 transition-all dark:border-slate-800"
-                                        />
+                            return (
+                              <TableRow
+                                key={course.id}
+                                className={cn(
+                                  'group border-b transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40',
+                                  isRequired
+                                    ? 'border-amber-100 bg-amber-50/20 dark:border-amber-900/30 dark:bg-amber-900/10'
+                                    : 'border-slate-50 dark:border-slate-800/50'
+                                )}
+                              >
+                                <TableCell
+                                  className={cn(
+                                    'sticky left-0 z-20 w-40 min-w-40 border-r py-5 transition-all duration-150 ease-out group-hover:shadow-sm sm:w-72 sm:min-w-72',
+                                    isRequired
+                                      ? 'bg-amber-50/50 group-hover:bg-amber-100/50 dark:bg-amber-900/20 dark:group-hover:bg-amber-900/30'
+                                      : 'bg-white group-hover:bg-white dark:bg-slate-950 dark:group-hover:bg-slate-900'
+                                  )}
+                                >
+                                  <div className="space-y-1.5 px-2">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <div className="text-aerojet-blue text-sm leading-tight font-bold break-words whitespace-normal sm:text-lg dark:text-slate-100">
+                                        {course.name}
+                                      </div>
+                                      {isRequired && (
+                                        <Badge
+                                          variant="outline"
+                                          className="shrink-0 border-amber-200 bg-amber-100 text-[9px] font-black tracking-widest text-amber-700 uppercase dark:border-amber-900/50 dark:bg-amber-950/50 dark:text-amber-400"
+                                        >
+                                          Required
+                                        </Badge>
                                       )}
-                                    </label>
-                                  </TableCell>
-                                )
-                              })}
-                            </TableRow>
-                          ))}
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-bold text-slate-500 dark:bg-slate-800">
+                                        {course.code}
+                                      </span>
+                                      {course.duration > 0 && (
+                                        <span className="text-[10px] font-medium text-slate-400 sm:text-xs">
+                                          {course.duration} hrs
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </TableCell>
+
+                                {filteredTerms.map((term) => {
+                                  const isAssigned = term.courseAssignments.some(
+                                    (a) => a.courseId === course.id
+                                  )
+                                  const isLoading = loading === `${term.id}-${course.id}`
+
+                                  return (
+                                    <TableCell
+                                      key={`${term.id}-${course.id}`}
+                                      className={`relative border-r p-0 text-center transition-all ${
+                                        isAssigned
+                                          ? 'bg-blue-50/20 dark:bg-blue-900/5'
+                                          : 'bg-transparent'
+                                      }`}
+                                    >
+                                      <label
+                                        htmlFor={`check-${term.id}-${course.id}`}
+                                        className="flex h-full min-h-20 w-full cursor-pointer items-center justify-center transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10"
+                                      >
+                                        {isLoading ? (
+                                          <Loader2
+                                            className={`text-aerojet-sky h-5 w-5 ${!reduceMotion ? 'animate-spin' : ''}`}
+                                            aria-hidden="true"
+                                          />
+                                        ) : (
+                                          <Checkbox
+                                            id={`check-${term.id}-${course.id}`}
+                                            checked={isAssigned}
+                                            onCheckedChange={(checked) =>
+                                              onToggle(term.id, course.id, !!checked)
+                                            }
+                                            className="data-[state=checked]:bg-aerojet-blue data-[state=checked]:border-aerojet-blue h-6 w-6 rounded-lg border-2 border-slate-200 transition-all dark:border-slate-800"
+                                          />
+                                        )}
+                                      </label>
+                                    </TableCell>
+                                  )
+                                })}
+                              </TableRow>
+                            )
+                          })}
                         </React.Fragment>
                       ))}
 
@@ -667,12 +652,13 @@ function ProgrammeSchedulePanel({
             </Card>
           )}
 
-          {/* General tab with terms */}
+          {/* No License tab with terms */}
           {hasTerms && activeLicenseId === null && (
             <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/50">
-              <strong>General</strong> schedule applies to all students regardless of license
-              category. Select a specific license category above to create a tailored semester
-              schedule (e.g. B1.1 students see different modules than B2).
+              <strong>No License Required</strong> schedule is intended for short courses or
+              university summer programmes that do not require EASA Part-66 compliance mapping.
+              Select a specific license category above to create a tailored semester schedule for
+              formal EASA programmes.
             </div>
           )}
         </TabsContent>

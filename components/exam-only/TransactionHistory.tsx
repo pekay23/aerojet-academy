@@ -81,11 +81,7 @@ export function TransactionHistory({ walletId: _walletId }: TransactionHistoryPr
   const totalPages = Math.ceil(transactions.length / perPage)
 
   if (isLoading) {
-    return (
-      <div className="p-5 text-center text-[#888]">
-        Loading transactions...
-      </div>
-    )
+    return <div className="p-5 text-center text-[#888]">Loading transactions...</div>
   }
 
   if (transactions.length === 0) {
@@ -102,15 +98,13 @@ export function TransactionHistory({ walletId: _walletId }: TransactionHistoryPr
         {paginatedTx.map((tx) => (
           <div
             key={tx.id}
-            className="flex items-center justify-between py-3 px-4 bg-white/[0.02] border-b border-white/[0.06] transition-[background] duration-150"
+            className="flex items-center justify-between border-b border-white/[0.06] bg-white/[0.02] px-4 py-3 transition-[background] duration-150"
           >
-            <div className="flex items-center gap-3 flex-1">
-              <span className="text-[18px]">{getTypeIcon(tx.type)}</span>
+            <div className="flex flex-1 items-center gap-3">
+              <span className="text-lg">{getTypeIcon(tx.type)}</span>
               <div>
-                <div className="text-[13px] font-medium text-[#e0e0e0]">
-                  {tx.description}
-                </div>
-                <div className="text-[11px] text-[#888] mt-0.5">
+                <div className="text-[13px] font-medium text-[#e0e0e0]">{tx.description}</div>
+                <div className="mt-0.5 text-[11px] text-[#888]">
                   {new Date(tx.createdAt).toLocaleDateString('en-GB', {
                     day: '2-digit',
                     month: 'short',
@@ -125,7 +119,7 @@ export function TransactionHistory({ walletId: _walletId }: TransactionHistoryPr
               </div>
             </div>
             <div className="text-right">
-              <div className={`text-[14px] font-semibold ${getTypeColorClass(tx.type)}`}>
+              <div className={`text-sm font-semibold ${getTypeColorClass(tx.type)}`}>
                 {['TOP_UP', 'CREDIT', 'REFUND', 'RELEASE'].includes(tx.type) ? '+' : '-'}€
                 {Number(tx.amount).toFixed(2)}
               </div>
@@ -140,28 +134,28 @@ export function TransactionHistory({ walletId: _walletId }: TransactionHistoryPr
       </div>
 
       {totalPages > 1 && (
-        <div className="flex justify-center gap-2 p-3 mt-2">
+        <div className="mt-2 flex justify-center gap-2 p-3">
           <button
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page === 1}
-            className={`py-1 px-3 border-none rounded text-[12px] ${
+            className={`rounded border-none px-3 py-1 text-xs ${
               page === 1
-                ? 'bg-white/[0.05] text-[#666] cursor-default'
-                : 'bg-[rgba(59,130,246,0.2)] text-[#93c5fd] cursor-pointer'
+                ? 'cursor-default bg-white/[0.05] text-[#666]'
+                : 'cursor-pointer bg-[rgba(59,130,246,0.2)] text-[#93c5fd]'
             }`}
           >
             ← Prev
           </button>
-          <span className="text-[12px] text-[#888] py-1 px-2">
+          <span className="px-2 py-1 text-xs text-[#888]">
             {page} / {totalPages}
           </span>
           <button
             onClick={() => setPage(Math.min(totalPages, page + 1))}
             disabled={page === totalPages}
-            className={`py-1 px-3 border-none rounded text-[12px] ${
+            className={`rounded border-none px-3 py-1 text-xs ${
               page === totalPages
-                ? 'bg-white/[0.05] text-[#666] cursor-default'
-                : 'bg-[rgba(59,130,246,0.2)] text-[#93c5fd] cursor-pointer'
+                ? 'cursor-default bg-white/[0.05] text-[#666]'
+                : 'cursor-pointer bg-[rgba(59,130,246,0.2)] text-[#93c5fd]'
             }`}
           >
             Next →

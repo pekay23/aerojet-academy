@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -57,7 +58,7 @@ export default async function CourseDetailsPage({
   const { slug } = await params
   const { error } = await searchParams
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const allEnrollments = await prismaUnfiltered.enrollment.findMany({
     where: { userId: session.user.id },
@@ -117,14 +118,10 @@ export default async function CourseDetailsPage({
 
   // Course materials + global student guides fetched in parallel when paid.
   const [linkedResources, studentGuides] = isPaid
-    ? await Promise.all([
-        getStudentCourseResources(course.id),
-        getStudentGuideResources(),
-      ])
+    ? await Promise.all([getStudentCourseResources(course.id), getStudentGuideResources()])
     : [[], []]
 
-  const hasAnyMaterial =
-    !!course.materialsUrl || linkedResources.length > 0
+  const hasAnyMaterial = !!course.materialsUrl || linkedResources.length > 0
   const hasStudentGuides = studentGuides.length > 0
 
   return (
@@ -203,7 +200,9 @@ export default async function CourseDetailsPage({
                 <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-sky-400">
                   <BookOpen className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Student Guide</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  Student Guide
+                </h3>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Academy-wide handbooks and reference material.
                 </p>

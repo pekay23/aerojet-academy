@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { Award, CheckCircle2, Circle } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -12,12 +12,12 @@ export const metadata: Metadata = {
 
 export default async function LicenseProgressPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const progress = await getLicenseProgress(session.user.id)
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
           License Progress

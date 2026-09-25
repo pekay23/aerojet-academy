@@ -1,14 +1,8 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { redirect, notFound } from 'next/navigation'
-import {
-  ChevronLeft,
-  Users,
-  ClipboardCheck,
-  BookOpen,
-  BarChart3,
-  Calendar,
-} from 'lucide-react'
+import { notFound } from 'next/navigation'
+import { ChevronLeft, Users, ClipboardCheck, BookOpen, BarChart3, Calendar } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
@@ -37,16 +31,23 @@ export default async function Page({
   const activeTab = tab || 'roster'
 
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'INSTRUCTOR') redirect('/login')
+  if (!session || session.user.role !== 'INSTRUCTOR') return await redirectToLogin()
 
-  
   function slugify(text: string) {
-    return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+    return (
+      text
+        ?.toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-') || ''
+    )
   }
 
-  const allClasses = await prismaUnfiltered.class.findMany({ select: { id: true, name: true } });
-  const matchedClass = allClasses.find(c => slugify(c.name) === id);
-  const targetId = matchedClass ? matchedClass.id : id;
+  const allClasses = await prismaUnfiltered.class.findMany({ select: { id: true, name: true } })
+  const matchedClass = allClasses.find((c) => slugify(c.name) === id)
+  const targetId = matchedClass ? matchedClass.id : id
 
   const classData = await prismaUnfiltered.class.findUnique({
     where: { id: targetId },
@@ -94,7 +95,13 @@ export default async function Page({
     const late = attendanceRecords.filter((r) => r.status === 'LATE').length
     const absent = attendanceRecords.filter((r) => r.status === 'ABSENT').length
     const total = attendanceRecords.length
-    attendanceStats = { rate: total > 0 ? Math.round((present / total) * 100) : 0, present, late, absent, total }
+    attendanceStats = {
+      rate: total > 0 ? Math.round((present / total) * 100) : 0,
+      present,
+      late,
+      absent,
+      total,
+    }
   }
 
   if (activeTab === 'materials') {
@@ -113,12 +120,12 @@ export default async function Page({
   ]
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
       {/* Header */}
       <div>
         <Link
           href="/instructor/classes"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-500 dark:text-slate-500 uppercase transition-colors hover:text-aerojet-sky"
+          className="hover:text-aerojet-sky mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors dark:text-slate-500"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes
@@ -126,13 +133,13 @@ export default async function Page({
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black tracking-widest text-aerojet-sky uppercase">
+              <span className="text-aerojet-sky text-xs font-black tracking-widest uppercase">
                 {course.code}
               </span>
               <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-slate-700" />
               <span className="text-xs font-bold text-slate-400">{classData.name}</span>
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+            <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
               {course.name}
             </h1>
           </div>
@@ -176,7 +183,9 @@ export default async function Page({
                 <span
                   className={cn(
                     'rounded-lg px-1.5 py-0.5 text-xs font-black',
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
                   )}
                 >
                   {t.count}
@@ -198,7 +207,7 @@ export default async function Page({
               </h2>
               <Link
                 href={`/instructor/attendance/${id}`}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-aerojet-sky px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
+                className="bg-aerojet-sky hover:bg-aerojet-blue inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all"
               >
                 <ClipboardCheck className="h-3 w-3" />
                 Take Attendance
@@ -263,7 +272,7 @@ export default async function Page({
               </h2>
               <Link
                 href={`/instructor/attendance/${id}`}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-aerojet-sky px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
+                className="bg-aerojet-sky hover:bg-aerojet-blue inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all"
               >
                 <ClipboardCheck className="h-3 w-3" />
                 Mark Attendance
@@ -271,13 +280,19 @@ export default async function Page({
             </div>
             <div className="grid grid-cols-2 gap-4 border-b border-slate-50 p-6 sm:grid-cols-4 dark:border-slate-800">
               {[
-                { label: 'Attendance Rate', value: `${attendanceStats.rate}%`, color: 'text-blue-600' },
+                {
+                  label: 'Attendance Rate',
+                  value: `${attendanceStats.rate}%`,
+                  color: 'text-blue-600',
+                },
                 { label: 'Present', value: attendanceStats.present, color: 'text-emerald-600' },
                 { label: 'Late', value: attendanceStats.late, color: 'text-orange-600' },
                 { label: 'Absent', value: attendanceStats.absent, color: 'text-red-600' },
               ].map((stat) => (
                 <div key={stat.label} className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
-                  <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">{stat.label}</p>
+                  <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                    {stat.label}
+                  </p>
                   <p className={cn('mt-1 text-2xl font-black', stat.color)}>{stat.value}</p>
                 </div>
               ))}
@@ -303,10 +318,13 @@ export default async function Page({
                     <span
                       className={cn(
                         'rounded-lg px-2.5 py-1 text-[10px] font-black uppercase',
-                        record.status === 'PRESENT' && 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10',
+                        record.status === 'PRESENT' &&
+                          'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10',
                         record.status === 'ABSENT' && 'bg-red-50 text-red-600 dark:bg-red-500/10',
-                        record.status === 'LATE' && 'bg-orange-50 text-orange-600 dark:bg-orange-500/10',
-                        record.status === 'EXCUSED' && 'bg-blue-50 text-blue-600 dark:bg-blue-500/10'
+                        record.status === 'LATE' &&
+                          'bg-orange-50 text-orange-600 dark:bg-orange-500/10',
+                        record.status === 'EXCUSED' &&
+                          'bg-blue-50 text-blue-600 dark:bg-blue-500/10'
                       )}
                     >
                       {record.status}
@@ -319,7 +337,7 @@ export default async function Page({
                   <p className="text-sm font-medium">No attendance records yet.</p>
                   <Link
                     href={`/instructor/attendance/${id}`}
-                    className="mt-3 inline-flex text-xs font-bold text-aerojet-sky hover:underline"
+                    className="text-aerojet-sky mt-3 inline-flex text-xs font-bold hover:underline"
                   >
                     Start taking attendance
                   </Link>
@@ -338,7 +356,7 @@ export default async function Page({
               </h2>
               <Link
                 href="/instructor/grading"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-aerojet-sky px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
+                className="bg-aerojet-sky hover:bg-aerojet-blue inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all"
               >
                 <BarChart3 className="h-3 w-3" />
                 Grading Hub
@@ -346,15 +364,27 @@ export default async function Page({
             </div>
             {grades.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px]">
+                <table className="w-full min-w-175">
                   <thead>
                     <tr className="border-b border-slate-50 bg-slate-50/30 dark:border-slate-800 dark:bg-slate-800/30">
-                      <th className="px-6 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">Student</th>
-                      <th className="px-6 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">Assessment</th>
-                      <th className="px-6 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">Type</th>
-                      <th className="px-6 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">Score</th>
-                      <th className="px-6 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">%</th>
-                      <th className="px-6 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Grade</th>
+                      <th className="px-6 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                        Student
+                      </th>
+                      <th className="px-6 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                        Assessment
+                      </th>
+                      <th className="px-6 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                        Type
+                      </th>
+                      <th className="px-6 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                        Score
+                      </th>
+                      <th className="px-6 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                        %
+                      </th>
+                      <th className="px-6 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                        Grade
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -362,34 +392,51 @@ export default async function Page({
                       const pct = Number(grade.percentage) || 0
                       const passing = pct >= 75
                       return (
-                        <tr key={grade.id} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                        <tr
+                          key={grade.id}
+                          className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                        >
                           <td className="px-6 py-3">
                             <div className="flex items-center gap-3">
                               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-500 uppercase dark:bg-slate-800">
-                                {grade.user.profile?.firstName?.[0]}{grade.user.profile?.lastName?.[0]}
+                                {grade.user.profile?.firstName?.[0]}
+                                {grade.user.profile?.lastName?.[0]}
                               </div>
                               <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
                                 {grade.user.profile?.firstName} {grade.user.profile?.lastName}
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-3 text-sm text-slate-700 dark:text-slate-300">{grade.assessmentName}</td>
-                          <td className="px-6 py-3">
-                            <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500 uppercase dark:bg-slate-800">{grade.assessmentType}</span>
+                          <td className="px-6 py-3 text-sm text-slate-700 dark:text-slate-300">
+                            {grade.assessmentName}
                           </td>
-                          <td className="px-6 py-3 text-right text-sm font-bold tabular-nums text-slate-700 dark:text-slate-300">
+                          <td className="px-6 py-3">
+                            <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500 uppercase dark:bg-slate-800">
+                              {grade.assessmentType}
+                            </span>
+                          </td>
+                          <td className="px-6 py-3 text-right text-sm font-bold text-slate-700 tabular-nums dark:text-slate-300">
                             {Number(grade.score)}/{Number(grade.maxScore)}
                           </td>
                           <td className="px-6 py-3 text-right">
-                            <span className={cn('text-sm font-black tabular-nums', passing ? 'text-emerald-600' : 'text-red-600')}>
+                            <span
+                              className={cn(
+                                'text-sm font-black tabular-nums',
+                                passing ? 'text-emerald-600' : 'text-red-600'
+                              )}
+                            >
                               {pct.toFixed(1)}%
                             </span>
                           </td>
                           <td className="px-6 py-3 text-center">
-                            <span className={cn(
-                              'inline-flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-black',
-                              passing ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' : 'bg-red-50 text-red-600 dark:bg-red-500/10'
-                            )}>
+                            <span
+                              className={cn(
+                                'inline-flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-black',
+                                passing
+                                  ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10'
+                                  : 'bg-red-50 text-red-600 dark:bg-red-500/10'
+                              )}
+                            >
                               {grade.grade}
                             </span>
                           </td>
@@ -451,7 +498,9 @@ export default async function Page({
                   Access Course Materials
                 </a>
               ) : (
-                <p className="text-xs text-slate-400 italic">No additional materials uploaded yet.</p>
+                <p className="text-xs text-slate-400 italic">
+                  No additional materials uploaded yet.
+                </p>
               )}
             </div>
             {resources.length > 0 && (
@@ -462,9 +511,14 @@ export default async function Page({
                 </h3>
                 <div className="space-y-2">
                   {resources.map((resource) => (
-                    <div key={resource.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-800/50">
+                    <div
+                      key={resource.id}
+                      className="flex items-center justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-800/50"
+                    >
                       <div>
-                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{resource.name}</p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                          {resource.name}
+                        </p>
                         {resource.description && (
                           <p className="mt-0.5 text-xs text-slate-400">{resource.description}</p>
                         )}

@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -126,7 +127,7 @@ function deriveStatus(user: {
 
 export default async function ApplicantDashboardPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const registrationFeeSetting = await getSystemSetting('registration_fee', '350')
   const registrationCurrencySetting = await getSystemSetting('registration_currency', 'EUR')
@@ -156,7 +157,7 @@ export default async function ApplicantDashboardPage() {
     },
   })
 
-  if (!applicant) redirect('/login')
+  if (!applicant) return await redirectToLogin()
 
   // If user has been promoted to STUDENT, redirect to student portal
   if (applicant.role === 'STUDENT') {
@@ -200,7 +201,11 @@ export default async function ApplicantDashboardPage() {
         // Full time / Military
         return choice
           ? { href: '/applicant/pathway', label: 'Complete Enrollment', icon: ArrowRight }
-          : { href: '/applicant/application/status', label: 'Review Application', icon: ClipboardList }
+          : {
+              href: '/applicant/application/status',
+              label: 'Review Application',
+              icon: ClipboardList,
+            }
     }
   }
 
@@ -224,7 +229,9 @@ export default async function ApplicantDashboardPage() {
                 : Number(registrationFeeSetting)
             }
             currency={
-              applicant.registrationPaid ? applicant.registrationCurrency : registrationCurrencySetting
+              applicant.registrationPaid
+                ? applicant.registrationCurrency
+                : registrationCurrencySetting
             }
           />
         </div>
@@ -243,9 +250,9 @@ export default async function ApplicantDashboardPage() {
   ]
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Welcome, {firstName}
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -302,7 +309,7 @@ export default async function ApplicantDashboardPage() {
             {(appStatus === 'payment_pending' || appStatus === 'registered') && (
               <Link
                 href="/applicant/application/payment"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold tracking-widest text-aerojet-blue uppercase shadow-sm transition-all hover:bg-aerojet-blue hover:text-white dark:bg-slate-900"
+                className="text-aerojet-blue hover:bg-aerojet-blue mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold tracking-widest uppercase shadow-sm transition-all hover:text-white dark:bg-slate-900"
               >
                 <CreditCard className="h-4 w-4" />
                 Upload Payment Proof
@@ -367,15 +374,15 @@ export default async function ApplicantDashboardPage() {
           <Link
             key={label}
             href={href}
-            className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-aerojet-sky hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
+            className="group hover:border-aerojet-sky flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 transition-colors group-hover:bg-aerojet-blue dark:bg-slate-800/50">
+            <div className="group-hover:bg-aerojet-blue flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 transition-colors dark:bg-slate-800/50">
               <Icon className="h-5 w-5 text-slate-400 transition-colors group-hover:text-white" />
             </div>
             <div className="flex-1">
               <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{label}</span>
             </div>
-            <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-aerojet-sky" />
+            <ArrowRight className="group-hover:text-aerojet-sky h-4 w-4 text-slate-300" />
           </Link>
         ))}
       </div>

@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -36,7 +36,7 @@ export default async function EnrollmentsPage({
   }>
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const params = await searchParams
   const query = params.query?.trim() || undefined

@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { Mail, Sparkles } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function StaffMessagesPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -83,7 +83,7 @@ export default async function StaffMessagesPage() {
   const totalUnread = threads.reduce((sum, t) => sum + t.unreadCount, 0)
 
   return (
-    <div className="mx-auto max-w-[1920px] space-y-8">
+    <div className="mx-auto max-w-480 space-y-8">
       <MessagesRealtime userId={userId} />
       <AutoRefresh intervalMs={20000} />
 
@@ -93,7 +93,7 @@ export default async function StaffMessagesPage() {
           <h1 className="text-aerojet-blue flex items-center gap-3 text-3xl font-black tracking-tight sm:text-4xl dark:text-slate-100">
             Messages
             {totalUnread > 0 && (
-              <span className="flex h-7 min-w-[28px] items-center justify-center rounded-full bg-red-100 px-2 text-xs font-black text-red-700 shadow-lg ring-4 ring-white dark:bg-red-900/30 dark:text-red-400 dark:ring-slate-900">
+              <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-red-100 px-2 text-xs font-black text-red-700 shadow-lg ring-4 ring-white dark:bg-red-900/30 dark:text-red-400 dark:ring-slate-900">
                 {totalUnread}
               </span>
             )}

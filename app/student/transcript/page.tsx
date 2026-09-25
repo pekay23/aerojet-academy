@@ -1,8 +1,7 @@
 import 'server-only'
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { calculateAttendancePercentage } from '@/lib/attendance'
@@ -20,7 +19,7 @@ export const metadata: Metadata = {
 
 export default async function TranscriptPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
   const showEnrollments = isFullTime

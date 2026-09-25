@@ -52,7 +52,7 @@ export function ApplicantPortalShell({
         id="main-content"
         className="relative min-h-screen min-w-0 flex-1 overflow-x-hidden pt-16 lg:pt-0"
       >
-        <div className="mx-auto max-w-[1920px] p-4 pt-16 sm:p-8 lg:px-8 lg:py-6 lg:pt-10">
+        <div className="mx-auto max-w-480 p-4 pt-16 sm:p-8 lg:px-8 lg:py-6 lg:pt-10">
           <PortalHeader actions={<TourTrigger title="Take a tour of your application" />}>
             <BreadcrumbNav />
           </PortalHeader>

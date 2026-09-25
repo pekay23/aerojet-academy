@@ -1,6 +1,7 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import Link from 'next/link'
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 export default async function SittingSeatingPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getAuthSession()
   if (!session || !['SUPER_ADMIN', 'ADMIN', 'STAFF'].includes(session.user.role)) {
-    redirect('/login')
+    return await redirectToLogin()
   }
 
   const { id: sittingId } = await params
@@ -72,7 +73,7 @@ export default async function SittingSeatingPage({ params }: { params: Promise<{
   }))
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1400px] space-y-6 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-350 space-y-6 duration-700">
       {/* Header */}
       <div>
         <Link

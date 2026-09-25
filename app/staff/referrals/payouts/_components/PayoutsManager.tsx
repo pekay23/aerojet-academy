@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -29,11 +30,16 @@ const STATUS_COLOR: Record<string, string> = {
 export default function PayoutsManager({ payouts }: { payouts: PayoutRow[] }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [periodStart, setPeriodStart] = useState(() => new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10))
+  const [periodStart, setPeriodStart] = useState(() =>
+    new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
+  )
   const [periodEnd, setPeriodEnd] = useState(() => new Date().toISOString().slice(0, 10))
 
   const call = async (url: string, init: RequestInit, ok: string) => {
-    const res = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json', ...(init.headers || {}) } })
+    const res = await fetch(url, {
+      ...init,
+      headers: { 'Content-Type': 'application/json', ...(init.headers || {}) },
+    })
     const json = await res.json().catch(() => ({}))
     if (!res.ok || json?.success === false) {
       toast.error(json?.error || `Request failed (${res.status})`)
@@ -45,19 +51,27 @@ export default function PayoutsManager({ payouts }: { payouts: PayoutRow[] }) {
   }
 
   const onCreateRun = async () => {
-    const json = await call('/api/staff/referrals/payouts', {
-      method: 'POST',
-      body: JSON.stringify({ periodStart, periodEnd }),
-    }, 'Payout run created')
+    const json = await call(
+      '/api/staff/referrals/payouts',
+      {
+        method: 'POST',
+        body: JSON.stringify({ periodStart, periodEnd }),
+      },
+      'Payout run created'
+    )
     if (!json) return
     toast.info(`${json.data?.created ?? 0} payout rows created`)
   }
 
   const onTransition = async (id: string, next: PayoutRow['status']) => {
-    await call(`/api/staff/referrals/payouts/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: next }),
-    }, `Payout ${next.toLowerCase()}`)
+    await call(
+      `/api/staff/referrals/payouts/${id}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ status: next }),
+      },
+      `Payout ${next.toLowerCase()}`
+    )
   }
 
   const onExport = async () => {
@@ -79,7 +93,9 @@ export default function PayoutsManager({ payouts }: { payouts: PayoutRow[] }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-2 rounded-2xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
         <div>
-          <label className="block text-[10px] font-black tracking-widest text-slate-400 uppercase">Period start</label>
+          <label className="block text-[10px] font-black tracking-widest text-slate-400 uppercase">
+            Period start
+          </label>
           <input
             type="date"
             value={periodStart}
@@ -88,7 +104,9 @@ export default function PayoutsManager({ payouts }: { payouts: PayoutRow[] }) {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-black tracking-widest text-slate-400 uppercase">Period end</label>
+          <label className="block text-[10px] font-black tracking-widest text-slate-400 uppercase">
+            Period end
+          </label>
           <input
             type="date"
             value={periodEnd}
@@ -99,7 +117,7 @@ export default function PayoutsManager({ payouts }: { payouts: PayoutRow[] }) {
         <button
           disabled={isPending}
           onClick={onCreateRun}
-          className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-3 py-2 text-sm font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
+          className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
         >
           <Plus className="h-4 w-4" /> Create payout run
         </button>
@@ -130,27 +148,48 @@ export default function PayoutsManager({ payouts }: { payouts: PayoutRow[] }) {
                   <p className="text-xs text-slate-500">{p.referrerEmail}</p>
                 </td>
                 <td className="px-3 py-2 text-xs text-slate-500">
-                  {new Date(p.periodStart).toLocaleDateString()} → {new Date(p.periodEnd).toLocaleDateString()}
+                  {formatDate(p.periodStart)} → {formatDate(p.periodEnd)}
                 </td>
                 <td className="px-3 py-2 font-mono text-sm font-black">
-                  <DollarSign className="inline h-3.5 w-3.5 text-emerald-600" /> {p.amount.toFixed(2)} {p.currency}
+                  <DollarSign className="inline h-3.5 w-3.5 text-emerald-600" />{' '}
+                  {p.amount.toFixed(2)} {p.currency}
                 </td>
                 <td className="px-3 py-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${STATUS_COLOR[p.status]}`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${STATUS_COLOR[p.status]}`}
+                  >
                     {p.status}
                   </span>
-                  {p.paidAt && <p className="mt-1 text-[10px] text-slate-400">paid {new Date(p.paidAt).toLocaleDateString()}</p>}
+                  {p.paidAt && (
+                    <p className="mt-1 text-[10px] text-slate-400">paid {formatDate(p.paidAt)}</p>
+                  )}
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex flex-wrap gap-1">
                     {p.status === 'PENDING' && (
                       <>
-                        <button disabled={isPending} onClick={() => onTransition(p.id, 'APPROVED')} className="rounded bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-30">Approve</button>
-                        <button disabled={isPending} onClick={() => onTransition(p.id, 'REJECTED')} className="rounded bg-red-50 px-2 py-1 text-xs font-bold text-red-700 hover:bg-red-100 disabled:opacity-30">Reject</button>
+                        <button
+                          disabled={isPending}
+                          onClick={() => onTransition(p.id, 'APPROVED')}
+                          className="rounded bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-30"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          disabled={isPending}
+                          onClick={() => onTransition(p.id, 'REJECTED')}
+                          className="rounded bg-red-50 px-2 py-1 text-xs font-bold text-red-700 hover:bg-red-100 disabled:opacity-30"
+                        >
+                          Reject
+                        </button>
                       </>
                     )}
                     {p.status === 'APPROVED' && (
-                      <button disabled={isPending} onClick={() => onTransition(p.id, 'PAID')} className="rounded bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-30">
+                      <button
+                        disabled={isPending}
+                        onClick={() => onTransition(p.id, 'PAID')}
+                        className="rounded bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-30"
+                      >
                         <Check className="inline h-3 w-3" /> Mark paid
                       </button>
                     )}
@@ -159,7 +198,11 @@ export default function PayoutsManager({ payouts }: { payouts: PayoutRow[] }) {
               </tr>
             ))}
             {payouts.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-400">No payouts yet — create a run above.</td></tr>
+              <tr>
+                <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-400">
+                  No payouts yet — create a run above.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

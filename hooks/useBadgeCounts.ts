@@ -13,6 +13,34 @@ interface BadgeCounts {
 
 const DEFAULT_POLL_INTERVAL = 30000 // 30 seconds
 
+function isValidBadgeCounts(data: unknown): data is BadgeCounts {
+  if (typeof data !== 'object' || data === null) return false
+  const d = data as Record<string, unknown>
+  const allowedKeys = [
+    'notifications',
+    'messages',
+    'applicants',
+    'enrollments',
+    'payments',
+    'pendingGrading',
+  ]
+  const keys = Object.keys(d)
+  if (keys.some((k) => !allowedKeys.includes(k))) return false
+  return (
+    typeof d.notifications === 'number' &&
+    Number.isFinite(d.notifications) &&
+    typeof d.messages === 'number' &&
+    Number.isFinite(d.messages) &&
+    (d.applicants === undefined ||
+      (typeof d.applicants === 'number' && Number.isFinite(d.applicants))) &&
+    (d.enrollments === undefined ||
+      (typeof d.enrollments === 'number' && Number.isFinite(d.enrollments))) &&
+    (d.payments === undefined || (typeof d.payments === 'number' && Number.isFinite(d.payments))) &&
+    (d.pendingGrading === undefined ||
+      (typeof d.pendingGrading === 'number' && Number.isFinite(d.pendingGrading)))
+  )
+}
+
 export function useBadgeCounts(
   initialCounts?: Partial<BadgeCounts>,
   pollInterval = DEFAULT_POLL_INTERVAL
@@ -32,8 +60,11 @@ export function useBadgeCounts(
     try {
       const res = await fetch('/api/badge-counts')
       if (res.ok) {
-        const data: BadgeCounts = await res.json()
-        setCounts(data)
+        const data = await res.json()
+        if (isValidBadgeCounts(data)) {
+          setCounts(data)
+        }
+        // Ignore malformed/error-shaped responses — keep stale counts
       }
     } catch {
       // Silently fail — stale counts are fine
@@ -47,9 +78,6 @@ export function useBadgeCounts(
 
   useEffect(() => {
     // Fetch immediately on mount
-   
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCounts()
 
     // Set up polling

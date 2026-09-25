@@ -129,7 +129,7 @@ export default function ReviewSignoffPanel({ entries }: Props) {
                 <td className="px-3 py-3 text-xs font-bold text-slate-700 dark:text-slate-200">
                   {entry.ataChapter.code}
                 </td>
-                <td className="max-w-[240px] truncate px-3 py-3 text-xs text-slate-600 dark:text-slate-300">
+                <td className="max-w-60 truncate px-3 py-3 text-xs text-slate-600 dark:text-slate-300">
                   {entry.taskDescription}
                 </td>
                 <td className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">

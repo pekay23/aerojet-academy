@@ -1,12 +1,7 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import {
-  BookOpen,
-  GraduationCap,
-  Clock,
-  ChevronRight,
-} from 'lucide-react'
+import { BookOpen, GraduationCap, Clock, ChevronRight } from 'lucide-react'
 import { Suspense } from 'react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -26,7 +21,7 @@ export const metadata: Metadata = {
 
 export default async function CoursesPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { isFullTime, isExamOnly, isModular: _isModular } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'courses')
@@ -48,7 +43,7 @@ export default async function CoursesPage() {
     }
 
     return (
-      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             My Courses
@@ -68,7 +63,7 @@ export default async function CoursesPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
@@ -152,7 +147,12 @@ async function CourseList({ userId, canEnroll }: { userId: string; canEnroll: bo
       {enrollments.map((enrollment) => (
         <Link
           key={enrollment.id}
-          href={`/student/courses/${enrollment.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-')}`}
+          href={`/student/courses/${enrollment.course.name
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\-]+/g, '')
+            .replace(/\-\-+/g, '-')}`}
           className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
         >
           {/* Header */}

@@ -1,6 +1,12 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler, RouteContext, parsePagination } from '@/lib/api/response'
+import {
+  apiSuccess,
+  apiError,
+  withErrorHandler,
+  RouteContext,
+  parsePagination,
+} from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AttendanceStatus, AttendanceRecord } from '@prisma/client'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -11,14 +17,16 @@ const STATUSES = Object.values(AttendanceStatus) as [AttendanceStatus, ...Attend
 const batchSchema = z.object({
   classId: z.string(),
   date: z.string(),
-  records: z.array(
-    z.object({
-      userId: z.string(),
-      status: z.enum(STATUSES),
-      minutesLate: z.number().optional(),
-      notes: z.string().optional(),
-    })
-  ).max(200, 'Cannot submit more than 200 records at once'),
+  records: z
+    .array(
+      z.object({
+        userId: z.string(),
+        status: z.enum(STATUSES),
+        minutesLate: z.number().optional(),
+        notes: z.string().optional(),
+      })
+    )
+    .max(200, 'Cannot submit more than 200 records at once'),
 })
 
 // GET — fetch attendance for a class + date, and the class roster (from course enrollments)
@@ -41,7 +49,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
     where.date = { gte: parsedDate, lt: next }
   }
 
-  const [records] = await Promise.all([
+  const [records] = (await Promise.all([
     prismaUnfiltered.attendanceRecord.findMany({
       where,
       include: {
@@ -59,7 +67,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
       skip,
     }),
     prismaUnfiltered.attendanceRecord.count({ where }),
-  ]) as [AttendanceRecord[], number]
+  ])) as [AttendanceRecord[], number]
 
   // Get the class with its courseId to pull enrolled students
   const classData = await prismaUnfiltered.class.findUnique({
@@ -90,6 +98,10 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
       })
     : []
 
+  const roster = Array.from(
+    new Map(enrollments.map((enrollment) => [enrollment.user.id, enrollment.user])).values()
+  )
+
   // Attendance stats
   const present = records.filter((r) => r.status === 'PRESENT' || r.status === 'LATE').length
   const rate = records.length > 0 ? Math.round((present / records.length) * 100) : 0
@@ -97,7 +109,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext
   return apiSuccess(
     {
       records,
-      roster: enrollments.map((e) => e.user),
+      roster,
       className: classData?.name,
       stats: { total: records.length, present, rate },
     },

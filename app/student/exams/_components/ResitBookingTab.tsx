@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Wallet } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -55,16 +55,20 @@ async function getBookingData(userId: string) {
     where: { userId, passed: false },
     include: { exam: { include: { examComponent: true } } },
   })
-  
+
   const eligibleIds = new Set<string>()
-  failedResults.forEach((r) => { if (r.exam?.examComponentId) eligibleIds.add(r.exam.examComponentId) })
+  failedResults.forEach((r) => {
+    if (r.exam?.examComponentId) eligibleIds.add(r.exam.examComponentId)
+  })
 
   // Determine which components the user has "active" memberships for
   const activeMemberships = await prisma.poolMembership.findMany({
     where: { userId, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
-    select: { examComponentId: true }
+    select: { examComponentId: true },
   })
-  const activeComponentIds = new Set(activeMemberships.map(m => m.examComponentId).filter(Boolean))
+  const activeComponentIds = new Set(
+    activeMemberships.map((m) => m.examComponentId).filter(Boolean)
+  )
 
   const eligibleModules = ecMapped.filter(
     (ec) => eligibleIds.has(ec.id) && !activeComponentIds.has(ec.id)
@@ -75,9 +79,16 @@ async function getBookingData(userId: string) {
 
 export default async function ResitBookingTab() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
-  const { wallet: _wallet, pricing, balance, currency, currencySymbol, openEvents } = await getBookingData(session.user.id)
+  const {
+    wallet: _wallet,
+    pricing,
+    balance,
+    currency,
+    currencySymbol,
+    openEvents,
+  } = await getBookingData(session.user.id)
 
   const [failedResults, failedBookings] = await Promise.all([
     prisma.examResult.findMany({
@@ -96,8 +107,8 @@ export default async function ResitBookingTab() {
       include: {
         course: true,
         exam: { include: { examComponent: { include: { course: true } }, event: true } },
-      }
-    })
+      },
+    }),
   ])
 
   // Audit 4e: free-resit balance comes from real ExamBundle entitlement
@@ -129,17 +140,20 @@ export default async function ResitBookingTab() {
     .filter((r) => r.remaining > 0)
 
   // Deduplicate and map failed exams by Module Code to handle legacy migrated data
-  const failedMap = new Map<string, {
-    examId: string
-    examName: string
-    moduleCode: string
-    moduleName: string
-    score: number
-    passingScore: number
-    examDate: string
-    eventName: string | null
-    examComponentId: string | null
-  }>()
+  const failedMap = new Map<
+    string,
+    {
+      examId: string
+      examName: string
+      moduleCode: string
+      moduleName: string
+      score: number
+      passingScore: number
+      examDate: string
+      eventName: string | null
+      examComponentId: string | null
+    }
+  >()
 
   failedResults.forEach((r) => {
     const code = r.moduleCode || r.exam?.examComponent?.course?.code || '—'
@@ -150,7 +164,9 @@ export default async function ResitBookingTab() {
         moduleCode: code,
         moduleName: r.exam?.examComponent?.course?.name || '—',
         score: r.score ? Number(r.score) : 0,
-        passingScore: r.exam?.passingScore ? Number(r.exam.passingScore) : ACADEMIC_RULES.EASA_PASS_MARK,
+        passingScore: r.exam?.passingScore
+          ? Number(r.exam.passingScore)
+          : ACADEMIC_RULES.EASA_PASS_MARK,
         examDate: (r.exam?.examDate || r.createdAt).toISOString(),
         eventName: r.exam?.event?.name || null,
         examComponentId: r.exam?.examComponentId || null,
@@ -192,11 +208,14 @@ export default async function ResitBookingTab() {
     <div className="space-y-6">
       <div className="rounded-xl border border-l-4 border-slate-100 border-l-rose-500 bg-rose-50/30 p-5 dark:border-slate-800 dark:bg-rose-900/10">
         <h2 className="text-lg font-black text-slate-900 dark:text-slate-100">Exam Resit</h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Book a resit for an exam you did not pass.</p>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          Book a resit for an exam you did not pass.
+        </p>
         <div className="mt-3 flex items-center gap-2 text-sm">
           <Wallet className="h-4 w-4 text-slate-400" />
           <span className="font-bold text-slate-700 dark:text-slate-300">
-            Available: {currencySymbol}{balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            Available: {currencySymbol}
+            {balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </span>
         </div>
       </div>
@@ -210,7 +229,8 @@ export default async function ResitBookingTab() {
           </span>
         </div>
         <p className="mb-6 text-sm text-slate-500">
-          Select a failed module and an upcoming exam window. Resit attempts are automatically queued for pool assignment.
+          Select a failed module and an upcoming exam window. Resit attempts are automatically
+          queued for pool assignment.
         </p>
 
         <ResitBooking

@@ -1,6 +1,7 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import {
   ChevronLeft,
   BookOpen,
@@ -21,7 +22,7 @@ export const dynamic = 'force-dynamic'
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'INSTRUCTOR') redirect('/login')
+  if (!session || session.user.role !== 'INSTRUCTOR') return await redirectToLogin()
 
   const classData = await prismaUnfiltered.class.findUnique({
     where: { id },

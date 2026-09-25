@@ -47,7 +47,7 @@ export default function ProfileTabs({ children }: { children: React.ReactNode })
 
   return (
     <ProfileDirtyContext.Provider value={{ markDirty, markClean }}>
-      <div className="mx-auto w-full max-w-[1800px] px-4 py-6 sm:px-6 lg:px-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto w-full max-w-450 space-y-6 px-4 py-6 duration-700 sm:px-6 lg:px-8">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-blue-800 sm:text-3xl dark:text-white">
             My Profile

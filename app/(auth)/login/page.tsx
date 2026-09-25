@@ -4,7 +4,17 @@ import LoginForm from './_components/LoginForm'
 
 export const metadata: Metadata = { title: 'Sign In ' }
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ returnTo?: string }>
+}) {
+  const { returnTo } = await searchParams
+
+  // Only allow relative paths to prevent open-redirect attacks
+  const safeReturnTo =
+    returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : undefined
+
   return (
     <div>
       <div className="mb-8">
@@ -16,7 +26,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <LoginForm />
+      <LoginForm returnTo={safeReturnTo} />
 
       <div className="mt-8 text-center">
         <p className="text-base text-slate-500 dark:text-slate-400">

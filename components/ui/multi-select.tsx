@@ -51,7 +51,7 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           className={cn(
-            'flex h-auto min-h-[40px] w-full items-center justify-between rounded-xl px-3 py-2 hover:bg-transparent focus:ring-2 focus:ring-aerojet-blue focus:ring-offset-2',
+            'focus:ring-aerojet-blue flex h-auto min-h-10 w-full items-center justify-between rounded-xl px-3 py-2 hover:bg-transparent focus:ring-2 focus:ring-offset-2',
             className
           )}
         >
@@ -65,7 +65,7 @@ export function MultiSelect({
                 <Badge
                   key={item}
                   variant="secondary"
-                  className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-300"
+                  className="text-aerojet-blue flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-bold dark:bg-blue-900/30 dark:text-blue-300"
                   onClick={(e) => {
                     e.stopPropagation()
                     handleUnselect(item)
@@ -73,7 +73,7 @@ export function MultiSelect({
                 >
                   {option?.label || item}
                   <button
-                    className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    className="ring-offset-background focus:ring-ring ml-1 rounded-full outline-none focus:ring-2 focus:ring-offset-2"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         handleUnselect(item)
@@ -98,7 +98,7 @@ export function MultiSelect({
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-full min-w-(--radix-dropdown-menu-trigger-width) max-h-[300px] overflow-y-auto p-1">
+      <DropdownMenuContent className="max-h-300 w-full min-w-(--radix-dropdown-menu-trigger-width) overflow-y-auto p-1">
         {options.map((option) => (
           <DropdownMenuCheckboxItem
             key={option.value}
@@ -111,9 +111,7 @@ export function MultiSelect({
           </DropdownMenuCheckboxItem>
         ))}
         {options.length === 0 && (
-          <div className="px-2 py-4 text-center text-xs text-slate-400">
-            No options available
-          </div>
+          <div className="px-2 py-4 text-center text-xs text-slate-400">No options available</div>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,12 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import {
-  apiCreated,
-  apiError,
-  withErrorHandler,
-  RouteContext,
-} from '@/lib/api/response'
+import { apiCreated, apiError, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { z } from 'zod'
 import { rateLimitByUser } from '@/lib/security/rate-limit'
@@ -76,12 +71,39 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx?: RouteContext
     },
   })
 
+  // Fetch mentor name and student info for readable audit log
+  const [mentorUser, logbook] = await Promise.all([
+    prismaUnfiltered.user.findUnique({
+      where: { id: parsed.data.mentorId },
+      select: { email: true, profile: { select: { firstName: true, lastName: true } } },
+    }),
+    prismaUnfiltered.oJTLogbook.findUnique({
+      where: { id: logbookId },
+      select: {
+        id: true,
+        studentProfile: {
+          select: {
+            studentId: true,
+            user: {
+              select: { email: true, profile: { select: { firstName: true, lastName: true } } },
+            },
+          },
+        },
+      },
+    }),
+  ])
+
+  const mentorName = mentorUser?.profile
+    ? `${mentorUser.profile.firstName ?? ''} ${mentorUser.profile.lastName ?? ''}`.trim()
+    : mentorUser?.email || 'Unknown'
+  const studentId = logbook?.studentProfile?.studentId || 'Unknown'
+
   await createAuditLog({
     userId: staff.id,
     action: AuditAction.CREATE,
     entity: 'OJTMentorAssignment',
     entityId: assignment.id,
-    description: `Mentor ${parsed.data.mentorId} assigned to logbook ${logbookId}`,
+    description: `Mentor ${mentorName} assigned to logbook for student ${studentId}`,
     changes: {
       mentorId: parsed.data.mentorId,
       isPrimary: parsed.data.isPrimary,

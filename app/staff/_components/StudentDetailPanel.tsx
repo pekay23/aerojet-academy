@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -736,7 +737,7 @@ function ExamTabContent({
                     )}
                   </div>
                   <p className="mt-0.5 text-[10px] text-slate-400">
-                    {exam.date ? new Date(exam.date).toLocaleDateString() : '—'}
+                    {exam.date ? formatDate(exam.date) : '—'}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -797,7 +798,7 @@ function ExamTabContent({
                     )}
                   </div>
                   <p className="mt-0.5 text-[10px] text-slate-400">
-                    {exam.date ? new Date(exam.date).toLocaleDateString() : '—'}
+                    {exam.date ? formatDate(exam.date) : '—'}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -853,7 +854,7 @@ function ExamTabContent({
                       )}
                     </div>
                     <p className="mt-0.5 text-[10px] text-slate-400">
-                      {h.date ? new Date(h.date).toLocaleDateString() : '—'}
+                      {h.date ? formatDate(h.date) : '—'}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1">

@@ -112,7 +112,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
           Add Internal Grade
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto rounded-3xl border border-slate-100 p-0 sm:rounded-[2rem] dark:border-slate-800 dark:bg-slate-950">
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto rounded-3xl border border-slate-100 p-0 sm:rounded-4xl dark:border-slate-800 dark:bg-slate-950">
         <div className="bg-slate-50 p-6 pb-8 dark:bg-slate-900/50">
           <DialogHeader className="mb-2">
             <DialogTitle className="text-aerojet-blue text-xl font-black dark:text-white">
@@ -299,7 +299,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
                   markDirty()
                 }}
                 placeholder="Add private instructor notes or student feedback..."
-                className="min-h-[100px] resize-none rounded-xl border-slate-200 bg-white p-4 font-medium dark:border-slate-800 dark:bg-slate-900"
+                className="min-h-25 resize-none rounded-xl border-slate-200 bg-white p-4 font-medium dark:border-slate-800 dark:bg-slate-900"
               />
             </div>
 

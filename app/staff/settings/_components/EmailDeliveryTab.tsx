@@ -136,7 +136,7 @@ export default function EmailDeliveryTab() {
       </div>
 
       <form onSubmit={onSearch} className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[240px] flex-1">
+        <div className="relative min-w-60 flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             value={search}

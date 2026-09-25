@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -316,8 +317,7 @@ export default function OjtSection({
                       {ojt.companyName}
                     </p>
                     <p className="text-xs text-slate-500">
-                      {ojt.programmeName} &middot; Started{' '}
-                      {new Date(ojt.startDate).toLocaleDateString()}
+                      {ojt.programmeName} &middot; Started {formatDate(ojt.startDate)}
                       {ojt.supervisorName && ` &middot; Supervisor: ${ojt.supervisorName}`}
                     </p>
                   </div>

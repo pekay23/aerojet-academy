@@ -8,6 +8,7 @@ import {
   normalizeAttemptType,
   resolveAttemptType,
   formatAttemptType,
+  attemptRecordKey,
 } from '@/lib/exams/attempt-types'
 
 describe('normalizeAttemptType', () => {

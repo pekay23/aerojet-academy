@@ -1,7 +1,7 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import React from 'react'
 import { TrendingUp, Users, Award } from 'lucide-react'
 import { getEnrollmentTrends } from '@/lib/analytics/reports'
@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function EnrollmentPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const data = await getEnrollmentTrends()
 
@@ -22,10 +22,10 @@ export default async function EnrollmentPage() {
   const topCourse = data[0]
 
   return (
-    <div className="mx-auto max-w-[1920px] space-y-8">
+    <div className="mx-auto max-w-480 space-y-8">
       <div className="flex flex-col flex-wrap items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight sm:text-4xl dark:text-white">
             Enrollment Trends
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -84,7 +84,9 @@ export default async function EnrollmentPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Module enrollment details showing course code, name, and total enrollments</caption>
+              <caption className="sr-only">
+                Module enrollment details showing course code, name, and total enrollments
+              </caption>
               <thead className="bg-slate-50/50 text-[11px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/20">
                 <tr>
                   <th className="px-6 py-4">Code</th>
@@ -95,7 +97,10 @@ export default async function EnrollmentPage() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {data.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="px-6 py-12 text-center text-sm font-medium text-slate-400 italic">
+                    <td
+                      colSpan={3}
+                      className="px-6 py-12 text-center text-sm font-medium text-slate-400 italic"
+                    >
                       No enrollment data available.
                     </td>
                   </tr>

@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import StaffCalendarGrid from './_components/StaffCalendarGrid'
@@ -62,7 +62,7 @@ export default async function StaffCalendarPage({
 }) {
   const session = await getAuthSession()
   if (!session || !['ADMIN', 'STAFF'].includes(session.user.role)) {
-    redirect('/login')
+    return await redirectToLogin()
   }
 
   const { month } = await searchParams
@@ -165,7 +165,7 @@ export default async function StaffCalendarPage({
   ]
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-8">
+    <div className="mx-auto max-w-350 px-4 py-6 md:px-8">
       <StaffCalendarGrid events={events} initialDate={currentDate} />
     </div>
   )

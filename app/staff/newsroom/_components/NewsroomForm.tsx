@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
@@ -95,21 +96,24 @@ export default function NewsroomForm({
   })
 
   // Auto-generate slug from title (only for drafts and if not manually edited)
-  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const title = e.target.value
-    setFormData((prev) => {
-      if (prev.status === 'DRAFT' && !slugManuallyEdited) {
-        const basicSlug = title
-          .toLowerCase()
-          .trim()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/[\s_-]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-        return { ...prev, title, slug: basicSlug }
-      }
-      return { ...prev, title }
-    })
-  }, [slugManuallyEdited])
+  const handleTitleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const title = e.target.value
+      setFormData((prev) => {
+        if (prev.status === 'DRAFT' && !slugManuallyEdited) {
+          const basicSlug = title
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+          return { ...prev, title, slug: basicSlug }
+        }
+        return { ...prev, title }
+      })
+    },
+    [slugManuallyEdited]
+  )
 
   const handleSlugChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, slug: e.target.value }))
@@ -129,10 +133,10 @@ export default function NewsroomForm({
   // Format date for display
   const getDisplayDate = () => {
     if (formData.customPublishedAt) {
-      return new Date(formData.customPublishedAt).toLocaleDateString()
+      return formatDate(formData.customPublishedAt)
     }
     if (formData.publishedAt) {
-      return new Date(formData.publishedAt).toLocaleDateString()
+      return formatDate(formData.publishedAt)
     }
     return new Date().toLocaleDateString()
   }
@@ -151,7 +155,7 @@ export default function NewsroomForm({
 
   return (
     <TooltipProvider>
-      <div className="mx-auto max-w-[1800px] space-y-6">
+      <div className="mx-auto max-w-450 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
@@ -217,9 +221,7 @@ export default function NewsroomForm({
                   {isPreview ? 'Edit Mode' : 'Preview'}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">
-                Toggle between editing and preview mode
-              </TooltipContent>
+              <TooltipContent side="bottom">Toggle between editing and preview mode</TooltipContent>
             </Tooltip>
 
             <Button
@@ -228,7 +230,11 @@ export default function NewsroomForm({
               disabled={isSubmitting || isDeleting}
               className="bg-aerojet-blue hover:bg-aerojet-blue/90 disabled:opacity-70 dark:bg-blue-600 dark:hover:bg-blue-700"
             >
-              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
               {submitLabel}
             </Button>
           </div>
@@ -240,21 +246,27 @@ export default function NewsroomForm({
               {!isPreview ? (
                 <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
                   <div>
-                    <Label htmlFor="title" className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <Label
+                      htmlFor="title"
+                      className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+                    >
                       Article Title
                     </Label>
                     <Input
                       id="title"
                       required
                       placeholder="Enter a compelling title..."
-                      className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-3 text-lg font-medium text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                      className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-transparent px-4 py-3 text-lg font-medium text-slate-900 outline-none focus:ring-2 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                       value={formData.title}
                       onChange={handleTitleChange}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="content" className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <Label
+                      htmlFor="content"
+                      className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+                    >
                       Content (Markdown & Media Supported)
                     </Label>
                     <NewsMarkdownEditor
@@ -281,12 +293,12 @@ export default function NewsroomForm({
                         <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent" />
                       </>
                     ) : (
-                      <div className="absolute inset-0 bg-aerojet-blue" />
+                      <div className="bg-aerojet-blue absolute inset-0" />
                     )}
 
                     <div className="absolute inset-0 flex items-end pb-8">
                       <div className="px-8">
-                        <div className="mb-4 inline-block rounded-full bg-aerojet-sky px-3 py-1 text-[11px] font-black tracking-widest text-white uppercase">
+                        <div className="bg-aerojet-sky mb-4 inline-block rounded-full px-3 py-1 text-[11px] font-black tracking-widest text-white uppercase">
                           Academy News
                         </div>
                         <h1 className="mb-4 text-2xl font-black tracking-tight text-white sm:text-3xl">
@@ -294,11 +306,11 @@ export default function NewsroomForm({
                         </h1>
                         <div className="flex flex-wrap items-center gap-4 text-[11px] font-bold tracking-widest text-slate-200 uppercase">
                           <div className="flex items-center gap-2">
-                            <UserIcon className="h-3 w-3 text-aerojet-sky" />
+                            <UserIcon className="text-aerojet-sky h-3 w-3" />
                             <span>{getDisplayAuthor()}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Calendar className="h-3 w-3 text-aerojet-sky" />
+                            <Calendar className="text-aerojet-sky h-3 w-3" />
                             <span>{getDisplayDate()}</span>
                           </div>
                         </div>
@@ -326,11 +338,16 @@ export default function NewsroomForm({
 
             <div className="space-y-6">
               <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                <h3 className="mb-4 text-sm font-bold text-slate-900 dark:text-white">Publishing</h3>
+                <h3 className="mb-4 text-sm font-bold text-slate-900 dark:text-white">
+                  Publishing
+                </h3>
 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="status" className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                    <Label
+                      htmlFor="status"
+                      className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
+                    >
                       Status
                     </Label>
                     <Select
@@ -354,7 +371,10 @@ export default function NewsroomForm({
                   </div>
 
                   <div>
-                    <Label htmlFor="slug" className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                    <Label
+                      htmlFor="slug"
+                      className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
+                    >
                       URL Slug
                     </Label>
                     <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-[#101622]">
@@ -379,13 +399,16 @@ export default function NewsroomForm({
 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="excerpt" className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                    <Label
+                      htmlFor="excerpt"
+                      className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
+                    >
                       Excerpt
                     </Label>
                     <Textarea
                       id="excerpt"
                       rows={3}
-                      className="w-full resize-none rounded-xl border border-slate-200 bg-transparent px-4 py-3 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                      className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full resize-none rounded-xl border border-slate-200 bg-transparent px-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                       value={formData.excerpt}
                       onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                       placeholder="Short summary for preview cards..."
@@ -393,12 +416,15 @@ export default function NewsroomForm({
                   </div>
 
                   <div>
-                    <Label htmlFor="tags" className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                    <Label
+                      htmlFor="tags"
+                      className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
+                    >
                       Tags (Comma separated)
                     </Label>
                     <Input
                       id="tags"
-                      className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                      className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                       placeholder="e.g. Aviation, News, Training"
                       value={formData.tags.join(', ')}
                       onChange={(e) => {
@@ -414,25 +440,33 @@ export default function NewsroomForm({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="customAuthorName" className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                      <Label
+                        htmlFor="customAuthorName"
+                        className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
+                      >
                         Custom Author
                       </Label>
                       <Input
                         id="customAuthorName"
-                        className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                        className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                         placeholder="Enter author name..."
                         value={formData.customAuthorName}
-                        onChange={(e) => setFormData({ ...formData, customAuthorName: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, customAuthorName: e.target.value })
+                        }
                       />
                     </div>
                     <div>
-                      <Label htmlFor="publishedAt" className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                      <Label
+                        htmlFor="publishedAt"
+                        className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
+                      >
                         System Publish Date
                       </Label>
                       <Input
                         id="publishedAt"
                         type="datetime-local"
-                        className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                        className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                         value={formData.publishedAt}
                         onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
                       />
@@ -440,15 +474,20 @@ export default function NewsroomForm({
                   </div>
 
                   <div>
-                    <Label htmlFor="customPublishedAt" className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                    <Label
+                      htmlFor="customPublishedAt"
+                      className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
+                    >
                       Custom Display Date
                     </Label>
                     <Input
                       id="customPublishedAt"
                       type="datetime-local"
-                      className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                      className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                       value={formData.customPublishedAt}
-                      onChange={(e) => setFormData({ ...formData, customPublishedAt: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, customPublishedAt: e.target.value })
+                      }
                     />
                     <p className="mt-1 text-[11px] text-slate-400">
                       Overrides the default publication date shown on cards and the article.
@@ -456,7 +495,10 @@ export default function NewsroomForm({
                   </div>
 
                   <div>
-                    <Label htmlFor="coverImage" className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                    <Label
+                      htmlFor="coverImage"
+                      className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
+                    >
                       Cover Image URL
                     </Label>
                     <div className="space-y-3">
@@ -467,7 +509,7 @@ export default function NewsroomForm({
                         <Input
                           id="coverImage"
                           type="url"
-                          className="w-full rounded-xl border border-slate-200 bg-transparent py-2.5 pr-4 pl-10 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                          className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-transparent py-2.5 pr-4 pl-10 text-sm text-slate-900 outline-none focus:ring-2 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                           placeholder="https://..."
                           value={formData.coverImage}
                           onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
@@ -476,7 +518,9 @@ export default function NewsroomForm({
 
                       <div className="flex items-center gap-2">
                         <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
-                        <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">OR</span>
+                        <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                          OR
+                        </span>
                         <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
                       </div>
 

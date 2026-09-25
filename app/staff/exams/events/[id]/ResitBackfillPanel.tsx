@@ -201,7 +201,7 @@ export default function ResitBackfillPanel({ eventId }: { eventId: string }) {
                 <div className="col-span-2">Module</div>
                 <div className="col-span-5">Target Sitting</div>
               </div>
-              <div className="max-h-[300px] space-y-2 overflow-y-auto pr-2">
+              <div className="max-h-75 space-y-2 overflow-y-auto pr-2">
                 {result.proposals.map((proposal, i) => (
                   <div
                     key={i}

@@ -1,6 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
 import { ChevronLeft, Users, BookOpen, Calendar } from 'lucide-react'
@@ -27,7 +27,7 @@ export default async function PoolMembersReportPage({
   searchParams: Promise<{ query?: string; sort?: string; order?: string }>
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const params = await searchParams
   const query = params.query?.toLowerCase()
@@ -89,26 +89,29 @@ export default async function PoolMembersReportPage({
     .filter((event) => event.pools.length > 0)
 
   return (
-    <div className="mx-auto max-w-[1800px] space-y-8">
+    <div className="mx-auto max-w-450 space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <Link
             href="/staff/exams"
-            className="mb-2 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-aerojet-blue dark:text-slate-400"
+            className="hover:text-aerojet-blue mb-2 inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to Exams
           </Link>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             Booking Members Overview
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            A comprehensive list of all students across all active exam bookings and their respective
-            modules.
+            A comprehensive list of all students across all active exam bookings and their
+            respective modules.
           </p>
         </div>
         <div className="w-full max-w-sm">
-          <SearchInput id="pool-members-search" placeholder="Search students by name, email, or ID..." />
+          <SearchInput
+            id="pool-members-search"
+            placeholder="Search students by name, email, or ID..."
+          />
         </div>
       </div>
 
@@ -177,7 +180,7 @@ export default async function PoolMembersReportPage({
                             >
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue dark:bg-slate-800 dark:text-blue-400">
+                                  <div className="text-aerojet-blue flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 font-bold dark:bg-slate-800 dark:text-blue-400">
                                     {member.user.profile?.firstName?.charAt(0)}
                                     {member.user.profile?.lastName?.charAt(0)}
                                   </div>
@@ -217,7 +220,7 @@ export default async function PoolMembersReportPage({
                               <td className="px-6 py-4 text-right">
                                 <Link
                                   href={`/staff/exams/pools/${pool.id}`}
-                                  className="text-xs font-bold text-aerojet-blue underline-offset-4 hover:underline dark:text-blue-400"
+                                  className="text-aerojet-blue text-xs font-bold underline-offset-4 hover:underline dark:text-blue-400"
                                 >
                                   Manage
                                 </Link>

@@ -27,7 +27,7 @@ export default function VariantA() {
   return (
     <div className="bg-[#0a1628] font-sans text-white">
       {/* HERO */}
-      <section ref={heroRef} className="relative h-[92vh] min-h-[600px] overflow-hidden">
+      <section ref={heroRef} className="relative h-[92vh] min-h-150 overflow-hidden">
         <motion.div style={{ y: imgY }} className="absolute inset-0 scale-110">
           <Img src={IMG.heroA} className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-linear-to-t from-[#0a1628] via-[#0a1628]/55 to-[#0a1628]/30" />
@@ -40,7 +40,7 @@ export default function VariantA() {
         >
           <motion.span
             {...reveal}
-            className="text-aerojet-sky text-[12px] font-semibold tracking-[0.4em] uppercase"
+            className="text-aerojet-sky text-xs font-semibold tracking-[0.4em] uppercase"
           >
             {HERO.eyebrow}
           </motion.span>

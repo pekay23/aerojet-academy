@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 
@@ -16,7 +16,7 @@ export default async function Page({
   searchParams: Promise<{ month?: string }>
 }) {
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'INSTRUCTOR') redirect('/login')
+  if (!session || session.user.role !== 'INSTRUCTOR') return await redirectToLogin()
 
   const { month } = await searchParams
   const currentDate = month ? new Date(month) : new Date()
@@ -58,33 +58,33 @@ export default async function Page({
   ])
 
   type ClassWithCourse = {
-  id: string
-  name: string
-  startDate: Date
-  endDate: Date
-  recurrenceType: 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM' | null
-  recurrenceDays: string | null
-  recurrenceUntil: Date | null
-  course: { id: string; code: string; name: string; category: string | null }
-}
+    id: string
+    name: string
+    startDate: Date
+    endDate: Date
+    recurrenceType: 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM' | null
+    recurrenceDays: string | null
+    recurrenceUntil: Date | null
+    course: { id: string; code: string; name: string; category: string | null }
+  }
 
-type ExamSittingWithRefs = {
-  id: string
-  startTime: Date
-  endTime: Date | null
-  sessionType: string | null
-  event: { name: string } | null
-  examComponent: { code: string; name: string } | null
-}
+  type ExamSittingWithRefs = {
+    id: string
+    startTime: Date
+    endTime: Date | null
+    sessionType: string | null
+    event: { name: string } | null
+    examComponent: { code: string; name: string } | null
+  }
 
-type AdminEventRow = {
-  id: string
-  title: string
-  description: string | null
-  startDate: Date
-  endDate: Date | null
-  color: string | null
-}
+  type AdminEventRow = {
+    id: string
+    title: string
+    description: string | null
+    startDate: Date
+    endDate: Date | null
+    color: string | null
+  }
 
   const events: UnifiedCalendarEvent[] = [
     ...(classes as ClassWithCourse[]).map((cls) => ({

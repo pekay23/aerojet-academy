@@ -59,17 +59,21 @@ export default async function ExaminerSittingPage({
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-8">
+    <div className="mx-auto max-w-350 space-y-8">
       <div>
-        <Link href="/examiner" className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition-colors hover:text-aerojet-sky">
+        <Link
+          href="/examiner"
+          className="hover:text-aerojet-sky mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition-colors"
+        >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to Examiner Hub
         </Link>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           {sitting.examComponent?.course?.name || sitting.examComponent?.name || 'Exam Sitting'}
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          {sitting.event?.name} &middot; Day {sitting.dayNumber} {sitting.sessionType} &middot; {format(new Date(sitting.startTime), 'EEEE, MMM do yyyy @ HH:mm')}
+          {sitting.event?.name} &middot; Day {sitting.dayNumber} {sitting.sessionType} &middot;{' '}
+          {format(new Date(sitting.startTime), 'EEEE, MMM do yyyy @ HH:mm')}
         </p>
       </div>
 
@@ -78,7 +82,12 @@ export default async function ExaminerSittingPage({
           <ExternalLink className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
             Exam invigilation is managed on the{' '}
-            <a href="https://www.suntech-bc.com/" target="_blank" rel="noopener noreferrer" className="font-bold underline">
+            <a
+              href="https://www.suntech-bc.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold underline"
+            >
               suntech-bc.com
             </a>{' '}
             examiner portal. Use this page to review assigned candidates and record final results.
@@ -99,10 +108,16 @@ export default async function ExaminerSittingPage({
             {sitting.assignments.map((a) => (
               <tr key={a.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
                 <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
-                  {a.user.profile ? `${a.user.profile.firstName} ${a.user.profile.lastName}` : a.userId}
+                  {a.user.profile
+                    ? `${a.user.profile.firstName} ${a.user.profile.lastName}`
+                    : a.userId}
                 </td>
-                <td className="px-4 py-3 font-mono text-slate-500">{a.booking?.moduleCode ?? sitting.examComponent?.course?.code ?? '—'}</td>
-                <td className="px-4 py-3 text-center text-slate-600">{a.attendanceStatus ?? 'Pending'}</td>
+                <td className="px-4 py-3 font-mono text-slate-500">
+                  {a.booking?.moduleCode ?? sitting.examComponent?.course?.code ?? '—'}
+                </td>
+                <td className="px-4 py-3 text-center text-slate-600">
+                  {a.attendanceStatus ?? 'Pending'}
+                </td>
               </tr>
             ))}
             {sitting.assignments.length === 0 && (

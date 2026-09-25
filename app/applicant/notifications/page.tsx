@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import NotificationsList from '@/app/student/notifications/_components/NotificationsList'
@@ -18,7 +18,7 @@ export default async function ApplicantNotificationsPage({
   searchParams: Promise<SearchParams>
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const sp = await searchParams
   const limit = Math.min(100, Math.max(1, parseInt((sp.limit as string) || '50', 10)))
@@ -45,7 +45,7 @@ export default async function ApplicantNotificationsPage({
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+            <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
               Notifications
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

@@ -25,7 +25,12 @@ interface Props {
   staffRole: string
 }
 
-export default function AdminNotesTab({ student, onRefresh: _onRefresh, staffId, staffRole }: Props) {
+export default function AdminNotesTab({
+  student,
+  onRefresh: _onRefresh,
+  staffId,
+  staffRole,
+}: Props) {
   const [notes, setNotes] = useState<AdminNote[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [newNote, setNewNote] = useState('')
@@ -51,7 +56,7 @@ export default function AdminNotesTab({ student, onRefresh: _onRefresh, staffId,
   }, [student.id])
 
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotes()
   }, [fetchNotes])
 
@@ -147,7 +152,7 @@ export default function AdminNotesTab({ student, onRefresh: _onRefresh, staffId,
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
           placeholder="Write a private note about this student..."
-          className="focus:border-aerojet-blue focus:ring-aerojet-blue min-h-[100px] w-full rounded-lg border border-slate-200 p-3 text-sm focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          className="focus:border-aerojet-blue focus:ring-aerojet-blue min-h-100 w-full rounded-lg border border-slate-200 p-3 text-sm focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
         />
         <div className="mt-3 flex justify-end">
           <button
@@ -244,7 +249,7 @@ export default function AdminNotesTab({ student, onRefresh: _onRefresh, staffId,
                   <textarea
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
-                    className="focus:border-aerojet-blue focus:ring-aerojet-blue min-h-[80px] w-full rounded-lg border border-slate-200 p-3 text-sm focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="focus:border-aerojet-blue focus:ring-aerojet-blue min-h-20 w-full rounded-lg border border-slate-200 p-3 text-sm focus:ring-1 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                   <div className="mt-2 flex justify-end gap-2">
                     <button

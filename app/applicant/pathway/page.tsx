@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -31,7 +32,7 @@ const PATHWAY_PRICING: Record<
 
 export default async function PathwayPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -43,7 +44,11 @@ export default async function PathwayPage() {
       }),
       prismaUnfiltered.fullTimeEnrollment.findFirst({
         where: { studentId: userId },
-        include: { programme: true, academicYear: true, milestones: { orderBy: { yearNumber: 'asc' } } },
+        include: {
+          programme: true,
+          academicYear: true,
+          milestones: { orderBy: { yearNumber: 'asc' } },
+        },
       }),
       prisma.systemSetting.findMany({ where: { key: 'course_currency' } }),
       prisma.wallet.findUnique({ where: { userId } }),
@@ -71,7 +76,7 @@ export default async function PathwayPage() {
       }),
     ])
 
-  if (!applicant) redirect('/login')
+  if (!applicant) return await redirectToLogin()
 
   // If already a STUDENT and has enrollment, redirect to student portal
   if (applicant.role === 'STUDENT' && enrollment) {
@@ -128,8 +133,8 @@ export default async function PathwayPage() {
                   Seat Confirmed
                 </h2>
                 <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
-                   Your place in <strong>{enrollment.programme.name}</strong> is secured. Year{' '}
-                   {enrollment.currentYearNumber} — {enrollment.academicYear?.name || '2026/2027'}
+                  Your place in <strong>{enrollment.programme.name}</strong> is secured. Year{' '}
+                  {enrollment.currentYearNumber} — {enrollment.academicYear?.name || '2026/2027'}
                 </p>
               </div>
             </div>

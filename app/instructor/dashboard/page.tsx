@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import {
@@ -12,7 +13,6 @@ import {
 } from 'lucide-react'
 import WelcomeBanner from '@/components/WelcomeBanner'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { getInstructorDashboardData } from '@/lib/actions/instructor'
 
@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function Page() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const instructorData = await getInstructorDashboardData()
   const firstName = session.user.name?.split(' ')[0]

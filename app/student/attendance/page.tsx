@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { Calendar, CheckCircle2, XCircle, Clock } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 export default async function AttendancePage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { isFullTime } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'classes')
@@ -42,7 +42,7 @@ export default async function AttendancePage() {
     }
 
     return (
-      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             Attendance Registry
@@ -119,7 +119,7 @@ export default async function AttendancePage() {
     stats.total > 0 ? Math.round(((stats.present + stats.late) / stats.total) * 100) : 0
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
           Attendance Registry

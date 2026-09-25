@@ -1,5 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Users, Calendar, MapPin, CreditCard, CheckCircle2, Clock } from 'lucide-react'
 
@@ -15,7 +16,7 @@ interface Props {
 
 export default async function ExamBookingDetailPage({ params }: Props) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { id } = await params
   const userId = session.user.id
@@ -57,19 +58,19 @@ export default async function ExamBookingDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-3xl space-y-6 duration-700">
       <Link
         href="/applicant/exam-bookings"
-        className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-aerojet-blue dark:text-slate-400"
+        className="hover:text-aerojet-blue inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to bookings
       </Link>
 
-      <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 space-y-6">
+      <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
+            <h1 className="text-aerojet-blue text-2xl font-black tracking-tight dark:text-white">
               {pool.name}
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -85,8 +86,8 @@ export default async function ExamBookingDetailPage({ params }: Props) {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4 space-y-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-2 rounded-xl border border-slate-100 p-4 dark:border-slate-800">
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <Calendar className="h-4 w-4" />
               <span className="font-medium">Date</span>
@@ -97,7 +98,7 @@ export default async function ExamBookingDetailPage({ params }: Props) {
           </div>
 
           {pool.event?.location && (
-            <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4 space-y-2">
+            <div className="space-y-2 rounded-xl border border-slate-100 p-4 dark:border-slate-800">
               <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                 <MapPin className="h-4 w-4" />
                 <span className="font-medium">Location</span>
@@ -108,7 +109,7 @@ export default async function ExamBookingDetailPage({ params }: Props) {
             </div>
           )}
 
-          <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4 space-y-2">
+          <div className="space-y-2 rounded-xl border border-slate-100 p-4 dark:border-slate-800">
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <Users className="h-4 w-4" />
               <span className="font-medium">Seats</span>
@@ -118,7 +119,7 @@ export default async function ExamBookingDetailPage({ params }: Props) {
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4 space-y-2">
+          <div className="space-y-2 rounded-xl border border-slate-100 p-4 dark:border-slate-800">
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <CreditCard className="h-4 w-4" />
               <span className="font-medium">Seat Price</span>
@@ -131,12 +132,14 @@ export default async function ExamBookingDetailPage({ params }: Props) {
 
         {pool.allowedModules && pool.allowedModules.length > 0 && (
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Allowed Modules</h3>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+              Allowed Modules
+            </h3>
             <div className="flex flex-wrap gap-2">
               {pool.allowedModules.map((module: string) => (
                 <span
                   key={module}
-                  className="rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-300"
+                  className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300"
                 >
                   {module}
                 </span>
@@ -145,7 +148,7 @@ export default async function ExamBookingDetailPage({ params }: Props) {
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row dark:border-slate-800">
           {isMember ? (
             <div className="flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
               <CheckCircle2 className="h-4 w-4" />
@@ -164,7 +167,7 @@ export default async function ExamBookingDetailPage({ params }: Props) {
           ) : (
             <Link
               href={`/applicant/exam-only/join-pool?poolId=${pool.id}`}
-              className="inline-flex items-center justify-center rounded-xl bg-aerojet-blue px-6 py-3 text-sm font-bold text-white hover:bg-aerojet-blue/90 transition-colors"
+              className="bg-aerojet-blue hover:bg-aerojet-blue/90 inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-bold text-white transition-colors"
             >
               Join Pool
             </Link>
@@ -173,7 +176,7 @@ export default async function ExamBookingDetailPage({ params }: Props) {
           {!isMember && !hasBooked && isFull && (
             <Link
               href={`/applicant/exam-only/join-waitlist?poolId=${pool.id}`}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 px-6 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-6 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               Join Waitlist
             </Link>

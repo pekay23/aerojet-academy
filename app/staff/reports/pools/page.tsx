@@ -1,7 +1,7 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import React from 'react'
 import { Calendar, TrendingUp, Users } from 'lucide-react'
 import { format } from 'date-fns'
@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function PoolsPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { pools, chartData } = await getPoolAnalytics()
 
@@ -25,10 +25,10 @@ export default async function PoolsPage() {
   const pendingSeats = totalCapacity - totalMembers
 
   return (
-    <div className="mx-auto max-w-[1920px] space-y-8">
+    <div className="mx-auto max-w-480 space-y-8">
       <div className="flex flex-col flex-wrap items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight sm:text-4xl dark:text-white">
             Booking Analytics
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -87,7 +87,9 @@ export default async function PoolsPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Exam booking pool details showing name, event, exam date, status, and utilization</caption>
+              <caption className="sr-only">
+                Exam booking pool details showing name, event, exam date, status, and utilization
+              </caption>
               <thead className="bg-slate-50/50 text-[11px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/20">
                 <tr>
                   <th className="px-6 py-4">Booking Name</th>
@@ -100,7 +102,10 @@ export default async function PoolsPage() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {pools.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-sm font-medium text-slate-400 italic">
+                    <td
+                      colSpan={5}
+                      className="px-6 py-12 text-center text-sm font-medium text-slate-400 italic"
+                    >
                       No pool analytics data available.
                     </td>
                   </tr>
@@ -129,8 +134,8 @@ export default async function PoolsPage() {
                               pool.status === 'CONFIRMED'
                                 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
                                 : pool.status === 'FAILED'
-                                ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                                : 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                                  ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                  : 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
                             }`}
                           >
                             {pool.status}
@@ -152,8 +157,8 @@ export default async function PoolsPage() {
                                   fillPercentage > 90
                                     ? 'bg-amber-500'
                                     : fillPercentage > 75
-                                    ? 'bg-blue-500'
-                                    : 'bg-emerald-500'
+                                      ? 'bg-blue-500'
+                                      : 'bg-emerald-500'
                                 }`}
                                 style={{ width: `${Math.min(fillPercentage, 100)}%` }}
                               />

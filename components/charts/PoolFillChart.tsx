@@ -28,7 +28,7 @@ export function PoolFillChart({ data, title = 'Pool Capacity Utilization' }: Poo
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="h-[350px] w-full">
+      <CardContent className="h-87.5 w-full">
         <ChartContainer config={poolFillConfig} className="h-full w-full">
           <BarChart
             data={data}
@@ -50,10 +50,10 @@ export function PoolFillChart({ data, title = 'Pool Capacity Utilization' }: Poo
               content={
                 <ChartTooltipContent
                   indicator="dot"
-                    formatter={(value, name) => {
-                      if (name === 'fill') return [`${Number(value ?? 0)}%`, 'Fill Rate']
-                      return [value ?? 0, name ?? '']
-                    }}
+                  formatter={(value, name) => {
+                    if (name === 'fill') return [`${Number(value ?? 0)}%`, 'Fill Rate']
+                    return [value ?? 0, name ?? '']
+                  }}
                 />
               }
             />

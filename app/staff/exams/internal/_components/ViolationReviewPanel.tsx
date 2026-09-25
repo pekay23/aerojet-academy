@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -309,9 +310,7 @@ export default function ViolationReviewPanel({ sessionId, violations }: Violatio
                     <Clock className="h-3 w-3" />
                     {new Date(v.createdAt).toLocaleTimeString()}
                   </div>
-                  <div className="text-[10px] text-slate-400">
-                    {new Date(v.createdAt).toLocaleDateString()}
-                  </div>
+                  <div className="text-[10px] text-slate-400">{formatDate(v.createdAt)}</div>
                 </td>
                 <td className="px-3 py-2.5">
                   {v.type ? (

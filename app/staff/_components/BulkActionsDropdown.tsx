@@ -162,7 +162,7 @@ export default function BulkActionsDropdown({
 
       {/* Confirmation modal — same pattern as BulkActionsBar */}
       {activeAction && (
-        <div className="animate-fade-in fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div className="animate-fade-in fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="animate-scale-in w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900">
             <div className="flex flex-col items-center text-center">
               <div

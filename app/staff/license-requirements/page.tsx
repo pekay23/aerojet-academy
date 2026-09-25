@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'License Module Requirements | Staff 
 
 export default async function LicenseRequirementsPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const [licenseCategories, courses] = await Promise.all([
     prismaUnfiltered.licenseCategory.findMany({

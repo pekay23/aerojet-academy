@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { CalendarDays, Users, MapPin, BookOpen, Info } from 'lucide-react'
 import { Suspense } from 'react'
 
@@ -36,17 +36,17 @@ const poolStatusColor: Record<string, string> = {
 
 export default async function ExamPoolsPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Exam Bookings
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          View available examination bookings. Enrollment in exam bookings requires an active student
-          account.
+          View available examination bookings. Enrollment in exam bookings requires an active
+          student account.
         </p>
       </div>
 
@@ -59,8 +59,8 @@ export default async function ExamPoolsPage() {
           <div>
             <p className="text-sm font-bold text-blue-900">Credit Your Exam Wallet</p>
             <p className="mt-1 text-sm text-blue-700">
-              To join these exam bookings, you must first convert your Applicant account to an active
-              Student account by crediting your Exam Wallet.
+              To join these exam bookings, you must first convert your Applicant account to an
+              active Student account by crediting your Exam Wallet.
             </p>
           </div>
         </div>
@@ -109,7 +109,9 @@ async function PoolList() {
           location: true,
         },
       },
-      _count: { select: { memberships: { where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } } } } },
+      _count: {
+        select: { memberships: { where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } } } },
+      },
     },
     orderBy: { createdAt: 'desc' },
     take: 30,
@@ -121,10 +123,12 @@ async function PoolList() {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-slate-300 shadow-sm dark:bg-slate-900">
           <BookOpen className="h-8 w-8" />
         </div>
-        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No open exam bookings</h3>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+          No open exam bookings
+        </h3>
         <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-          There are currently no active exam bookings open for registration. Exam bookings will be listed
-          here when they become available.
+          There are currently no active exam bookings open for registration. Exam bookings will be
+          listed here when they become available.
         </p>
       </div>
     )
@@ -201,13 +205,13 @@ async function PoolList() {
             <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-3">
               <div>
                 <p className="text-[10px] text-slate-400">Exam Fee</p>
-                <p className="text-base font-black text-aerojet-blue dark:text-blue-400">
+                <p className="text-aerojet-blue text-base font-black dark:text-blue-400">
                   {currency} {Number(pool.seatPrice).toLocaleString()}
                 </p>
               </div>
               <Link
                 href={`/applicant/exam-bookings/${pool.id}`}
-                className="text-xs font-bold text-aerojet-blue hover:underline"
+                className="text-aerojet-blue text-xs font-bold hover:underline"
               >
                 View Details
               </Link>

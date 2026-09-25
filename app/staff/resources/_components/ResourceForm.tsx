@@ -4,7 +4,23 @@ import React from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Loader2, Search, Info, Upload, Link2, CheckCircle2, X, FileText, Image as ImageIcon, File, ShieldCheck, BookOpen, GraduationCap, ClipboardList, Building2 } from 'lucide-react'
+import {
+  Loader2,
+  Search,
+  Info,
+  Upload,
+  Link2,
+  CheckCircle2,
+  X,
+  FileText,
+  Image as ImageIcon,
+  File,
+  ShieldCheck,
+  BookOpen,
+  GraduationCap,
+  ClipboardList,
+  Building2,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -37,47 +53,56 @@ import { cn } from '@/lib/utils'
 // Maps each category to its metadata (label, description, badge colour, icon).
 // STUDENT_GUIDE and INSTITUTIONAL are always staff+instructor only (never students).
 // ACADEMIC and EXAMINATION are fully configurable per-audience.
-export type ResourceCategory = 'STUDENT_GUIDE' | 'ACADEMIC' | 'ADMINISTRATIVE' | 'EXAMINATION' | 'INSTITUTIONAL'
+export type ResourceCategory =
+  'STUDENT_GUIDE' | 'ACADEMIC' | 'ADMINISTRATIVE' | 'EXAMINATION' | 'INSTITUTIONAL'
 
-export const RESOURCE_CATEGORIES: Record<ResourceCategory, {
-  label: string
-  description: string
-  badgeClass: string
-  badgeTextClass: string
-  icon: React.ReactNode
-}> = {
+export const RESOURCE_CATEGORIES: Record<
+  ResourceCategory,
+  {
+    label: string
+    description: string
+    badgeClass: string
+    badgeTextClass: string
+    icon: React.ReactNode
+  }
+> = {
   STUDENT_GUIDE: {
     label: 'Student Guide',
     description: 'Academy-wide student handbook and reference material. Always visible to all.',
-    badgeClass: 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400',
+    badgeClass:
+      'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400',
     badgeTextClass: 'text-amber-600 dark:text-amber-400',
     icon: <GraduationCap className="h-3 w-3" />,
   },
   ACADEMIC: {
     label: 'Academic',
     description: 'Course materials, textbooks, and learning resources for specific modules.',
-    badgeClass: 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400',
+    badgeClass:
+      'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400',
     badgeTextClass: 'text-blue-600 dark:text-blue-400',
     icon: <BookOpen className="h-3 w-3" />,
   },
   ADMINISTRATIVE: {
     label: 'Administrative',
     description: 'Academy procedures, calendars, and general notices. Not shown to students.',
-    badgeClass: 'bg-purple-50 border-purple-200 text-purple-700 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-400',
+    badgeClass:
+      'bg-purple-50 border-purple-200 text-purple-700 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-400',
     badgeTextClass: 'text-purple-600 dark:text-purple-400',
     icon: <ClipboardList className="h-3 w-3" />,
   },
   EXAMINATION: {
     label: 'Examination',
     description: 'Exam timetables, regulations, and past papers for specific modules.',
-    badgeClass: 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/20 dark:border-rose-800 dark:text-rose-400',
+    badgeClass:
+      'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/20 dark:border-rose-800 dark:text-rose-400',
     badgeTextClass: 'text-rose-600 dark:text-rose-400',
     icon: <ShieldCheck className="h-3 w-3" />,
   },
   INSTITUTIONAL: {
     label: 'Institutional',
     description: 'Internal staff and instructor reference documents. Not shown to students.',
-    badgeClass: 'bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400',
+    badgeClass:
+      'bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400',
     badgeTextClass: 'text-slate-500 dark:text-slate-400',
     icon: <Building2 className="h-3 w-3" />,
   },
@@ -140,7 +165,10 @@ function getFileIcon(type: string) {
 }
 
 export default function ResourceForm({ initialData, onSuccess }: ResourceFormProps) {
-  const [options, setOptions] = React.useState<{ courses: ResourceCourseOption[]; pathways: ResourcePathwayOption[] }>({
+  const [options, setOptions] = React.useState<{
+    courses: ResourceCourseOption[]
+    pathways: ResourcePathwayOption[]
+  }>({
     courses: [],
     pathways: [],
   })
@@ -189,7 +217,8 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
 
   // ── Derived UI state per category ───────────────────────────────────────
   const isStudentGuide = watchedCategory === 'STUDENT_GUIDE'
-  const isStaffOnlyCategory = watchedCategory === 'ADMINISTRATIVE' || watchedCategory === 'INSTITUTIONAL'
+  const isStaffOnlyCategory =
+    watchedCategory === 'ADMINISTRATIVE' || watchedCategory === 'INSTITUTIONAL'
 
   // When switching to a staff-only category, force showToStudents OFF.
   React.useEffect(() => {
@@ -224,13 +253,13 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full max-h-[80vh]">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full max-h-[80vh] flex-col">
         <ScrollArea className="flex-1 pr-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 pb-6">
+          <div className="grid grid-cols-1 gap-8 pb-6 lg:grid-cols-2 lg:gap-12">
             {/* ── Left Column: Basic Info & Visibility ───────────────────── */}
             <div className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">
+                <h3 className="text-sm font-black tracking-widest text-slate-400 uppercase">
                   Basic Information
                 </h3>
 
@@ -239,7 +268,12 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="res-name" className="text-xs font-bold uppercase text-slate-600">Resource Name</FormLabel>
+                      <FormLabel
+                        htmlFor="res-name"
+                        className="text-xs font-bold text-slate-600 uppercase"
+                      >
+                        Resource Name
+                      </FormLabel>
                       <FormControl>
                         <Input
                           id="res-name"
@@ -260,7 +294,12 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel htmlFor="res-type" className="text-xs font-bold uppercase text-slate-600">File Type</FormLabel>
+                        <FormLabel
+                          htmlFor="res-type"
+                          className="text-xs font-bold text-slate-600 uppercase"
+                        >
+                          File Type
+                        </FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger id="res-type" className="rounded-xl border-slate-200">
@@ -286,7 +325,12 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                     name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel htmlFor="res-cat" className="text-xs font-bold uppercase text-slate-600">Category</FormLabel>
+                        <FormLabel
+                          htmlFor="res-cat"
+                          className="text-xs font-bold text-slate-600 uppercase"
+                        >
+                          Category
+                        </FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger id="res-cat" className="rounded-xl border-slate-200">
@@ -299,12 +343,19 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                               return (
                                 <SelectItem key={key} value={key}>
                                   <div className="flex items-center gap-2.5 py-0.5">
-                                    <span className={cn('flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-black', cat.badgeClass)}>
+                                    <span
+                                      className={cn(
+                                        'flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-black',
+                                        cat.badgeClass
+                                      )}
+                                    >
                                       {cat.icon}
                                       {cat.label}
                                     </span>
                                     {key === 'ADMINISTRATIVE' || key === 'INSTITUTIONAL' ? (
-                                      <span className="ml-1 text-[10px] text-slate-400">(not for students)</span>
+                                      <span className="ml-1 text-[10px] text-slate-400">
+                                        (not for students)
+                                      </span>
                                     ) : null}
                                   </div>
                                 </SelectItem>
@@ -314,11 +365,12 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                         </Select>
 
                         {/* Category description below the select */}
-                        {watchedCategory && RESOURCE_CATEGORIES[watchedCategory as ResourceCategory] && (
-                          <p className="mt-1.5 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
-                            {RESOURCE_CATEGORIES[watchedCategory as ResourceCategory].description}
-                          </p>
-                        )}
+                        {watchedCategory &&
+                          RESOURCE_CATEGORIES[watchedCategory as ResourceCategory] && (
+                            <p className="mt-1.5 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
+                              {RESOURCE_CATEGORIES[watchedCategory as ResourceCategory].description}
+                            </p>
+                          )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -331,8 +383,8 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   name="url"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="flex items-center justify-between mb-2">
-                        <FormLabel className="text-xs font-bold uppercase text-slate-600">
+                      <div className="mb-2 flex items-center justify-between">
+                        <FormLabel className="text-xs font-bold text-slate-600 uppercase">
                           File Source
                         </FormLabel>
                         <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-0.5 dark:border-slate-700 dark:bg-slate-800">
@@ -342,7 +394,7 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                             className={cn(
                               'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest uppercase transition-all',
                               sourceMode === 'upload'
-                                ? 'bg-white text-aerojet-blue shadow-sm dark:bg-slate-900 dark:text-aerojet-sky'
+                                ? 'text-aerojet-blue dark:text-aerojet-sky bg-white shadow-sm dark:bg-slate-900'
                                 : 'text-slate-400 hover:text-slate-600'
                             )}
                           >
@@ -355,7 +407,7 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                             className={cn(
                               'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest uppercase transition-all',
                               sourceMode === 'url'
-                                ? 'bg-white text-aerojet-blue shadow-sm dark:bg-slate-900 dark:text-aerojet-sky'
+                                ? 'text-aerojet-blue dark:text-aerojet-sky bg-white shadow-sm dark:bg-slate-900'
                                 : 'text-slate-400 hover:text-slate-600'
                             )}
                           >
@@ -376,7 +428,7 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                                 <p className="truncate text-xs font-bold text-emerald-800 dark:text-emerald-300">
                                   {uploadedFile?.name || 'Uploaded file'}
                                 </p>
-                                <p className="truncate text-[10px] font-mono text-emerald-600/70 dark:text-emerald-400/70">
+                                <p className="truncate font-mono text-[10px] text-emerald-600/70 dark:text-emerald-400/70">
                                   {uploadedFile?.url || currentUrl}
                                 </p>
                               </div>
@@ -409,18 +461,21 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                                 }}
                                 content={{
                                   button({ ready, isUploading }) {
-                                    if (isUploading) return (
-                                      <span className="flex items-center gap-2">
-                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                        Uploading…
-                                      </span>
-                                    )
+                                    if (isUploading)
+                                      return (
+                                        <span className="flex items-center gap-2">
+                                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                          Uploading…
+                                        </span>
+                                      )
                                     return ready ? (
                                       <span className="flex items-center gap-2">
                                         <Upload className="h-3.5 w-3.5" />
                                         Choose File to Upload
                                       </span>
-                                    ) : 'Preparing…'
+                                    ) : (
+                                      'Preparing…'
+                                    )
                                   },
                                 }}
                                 onUploadBegin={() => setIsUploading(true)}
@@ -458,7 +513,11 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                               {...field}
                             />
                             <p className="mt-1.5 text-[10px] text-slate-400">
-                              Relative path from <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-800">public/</code> or a full https:// URL.
+                              Relative path from{' '}
+                              <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-800">
+                                public/
+                              </code>{' '}
+                              or a full https:// URL.
                             </p>
                           </div>
                         </FormControl>
@@ -472,13 +531,18 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="res-desc" className="text-xs font-bold uppercase text-slate-600">Description (Optional)</FormLabel>
+                      <FormLabel
+                        htmlFor="res-desc"
+                        className="text-xs font-bold text-slate-600 uppercase"
+                      >
+                        Description (Optional)
+                      </FormLabel>
                       <FormControl>
                         <Textarea
                           id="res-desc"
                           placeholder="What is this resource for? Who should use it?"
                           autoComplete="off"
-                          className="min-h-[100px] resize-none rounded-xl border-slate-200"
+                          className="min-h-25 resize-none rounded-xl border-slate-200"
                           {...field}
                         />
                       </FormControl>
@@ -503,9 +567,18 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                       name="showToStaff"
                       render={({ field }) => (
                         <FormItem className="flex items-center justify-between space-y-0">
-                          <FormLabel htmlFor="res-vis-staff" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Show to Staff</FormLabel>
+                          <FormLabel
+                            htmlFor="res-vis-staff"
+                            className="text-sm font-semibold text-slate-700 dark:text-slate-300"
+                          >
+                            Show to Staff
+                          </FormLabel>
                           <FormControl>
-                            <Switch id="res-vis-staff" checked={field.value} onCheckedChange={field.onChange} />
+                            <Switch
+                              id="res-vis-staff"
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -517,9 +590,18 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                       name="showToInstructors"
                       render={({ field }) => (
                         <FormItem className="flex items-center justify-between space-y-0">
-                          <FormLabel htmlFor="res-vis-instructors" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Show to Instructors</FormLabel>
+                          <FormLabel
+                            htmlFor="res-vis-instructors"
+                            className="text-sm font-semibold text-slate-700 dark:text-slate-300"
+                          >
+                            Show to Instructors
+                          </FormLabel>
                           <FormControl>
-                            <Switch id="res-vis-instructors" checked={field.value} onCheckedChange={field.onChange} />
+                            <Switch
+                              id="res-vis-instructors"
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -536,14 +618,20 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                               htmlFor="res-vis-students"
                               className={cn(
                                 'text-sm font-semibold',
-                                isStaffOnlyCategory ? 'text-slate-400 dark:text-slate-600' : 'text-slate-700 dark:text-slate-300'
+                                isStaffOnlyCategory
+                                  ? 'text-slate-400 dark:text-slate-600'
+                                  : 'text-slate-700 dark:text-slate-300'
                               )}
                             >
                               Show to Students
                             </FormLabel>
                             {isStaffOnlyCategory ? (
                               <p className="text-[10px] text-rose-400">
-                                Locked — {watchedCategory === 'ADMINISTRATIVE' ? 'Administrative' : 'Institutional'} resources are never shown to students.
+                                Locked —{' '}
+                                {watchedCategory === 'ADMINISTRATIVE'
+                                  ? 'Administrative'
+                                  : 'Institutional'}{' '}
+                                resources are never shown to students.
                               </p>
                             ) : (
                               <p className="text-[10px] text-slate-400">
@@ -577,7 +665,8 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                       Student Guides are always globally available
                     </p>
                     <p className="mt-1 text-[10px] leading-relaxed text-amber-600 dark:text-amber-500">
-                      This resource will be visible to all students, instructors, and staff — no course or pathway targeting needed.
+                      This resource will be visible to all students, instructors, and staff — no
+                      course or pathway targeting needed.
                     </p>
                   </div>
                 </div>
@@ -588,15 +677,20 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
             <div
               className={cn(
                 'relative flex flex-col space-y-6 transition-all duration-300',
-                (!watchedShowToStudents || isStudentGuide) && 'opacity-40 grayscale-[0.5] pointer-events-none select-none'
+                (!watchedShowToStudents || isStudentGuide) &&
+                  'pointer-events-none opacity-40 grayscale-[0.5] select-none'
               )}
             >
               {!watchedShowToStudents && !isStudentGuide && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center p-8 text-center">
                   <div className="rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm dark:bg-slate-950/80">
-                    <Info className="mx-auto mb-3 h-8 w-8 text-aerojet-sky opacity-50" />
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed">
-                      Enable &quot;Show to Students&quot;<br />to configure target modules<br />and pathways
+                    <Info className="text-aerojet-sky mx-auto mb-3 h-8 w-8 opacity-50" />
+                    <p className="text-xs leading-relaxed font-bold tracking-widest text-slate-500 uppercase">
+                      Enable &quot;Show to Students&quot;
+                      <br />
+                      to configure target modules
+                      <br />
+                      and pathways
                     </p>
                   </div>
                 </div>
@@ -605,15 +699,16 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                 <div className="absolute inset-0 z-10 flex items-center justify-center p-8 text-center">
                   <div className="rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm dark:bg-slate-950/80">
                     <GraduationCap className="mx-auto mb-3 h-8 w-8 text-amber-400 opacity-50" />
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed">
-                      Student Guides are always global —<br />no targeting required
+                    <p className="text-xs leading-relaxed font-bold tracking-widest text-slate-500 uppercase">
+                      Student Guides are always global —<br />
+                      no targeting required
                     </p>
                   </div>
                 </div>
               )}
 
               <div className="space-y-4">
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">
+                <h3 className="text-sm font-black tracking-widest text-slate-400 uppercase">
                   Targeted Access
                 </h3>
 
@@ -623,34 +718,39 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   render={() => (
                     <FormItem className="space-y-4">
                       <div className="flex flex-col gap-1.5">
-                        <FormLabel htmlFor="res-course-search" className="text-xs font-bold uppercase text-slate-600">
+                        <FormLabel
+                          htmlFor="res-course-search"
+                          className="text-xs font-bold text-slate-600 uppercase"
+                        >
                           Specific Modules
                         </FormLabel>
                         <FormDescription className="text-[10px]">
-                          Only show to students enrolled in these modules. Leave empty for all enrolled students.
+                          Only show to students enrolled in these modules. Leave empty for all
+                          enrolled students.
                         </FormDescription>
                       </div>
 
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <Input
                           id="res-course-search"
                           name="courseSearch"
                           placeholder="Search module code or name..."
                           autoComplete="off"
-                          className="pl-9 rounded-xl border-slate-200"
+                          className="rounded-xl border-slate-200 pl-9"
                           value={courseSearch}
                           onChange={(e) => setCourseSearch(e.target.value)}
                         />
                       </div>
 
                       <div className="rounded-2xl border border-slate-100 bg-white p-2 dark:border-slate-800 dark:bg-slate-900/40">
-                        <ScrollArea className="h-[220px]">
+                        <ScrollArea className="h-55">
                           <div className="grid grid-cols-1 gap-1 p-2">
                             {options.courses
-                              .filter(course =>
-                                course.code.toLowerCase().includes(courseSearch.toLowerCase()) ||
-                                course.name.toLowerCase().includes(courseSearch.toLowerCase())
+                              .filter(
+                                (course) =>
+                                  course.code.toLowerCase().includes(courseSearch.toLowerCase()) ||
+                                  course.name.toLowerCase().includes(courseSearch.toLowerCase())
                               )
                               .map((course) => (
                                 <FormField
@@ -662,7 +762,7 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                                     return (
                                       <FormItem
                                         className={cn(
-                                          'flex flex-row items-center space-x-3 space-y-0 rounded-xl px-3 py-2.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50',
+                                          'flex flex-row items-center space-y-0 space-x-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50',
                                           checked && 'bg-blue-50/50 dark:bg-blue-900/10'
                                         )}
                                       >
@@ -672,12 +772,17 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                                             onCheckedChange={(checked) => {
                                               return checked
                                                 ? field.onChange([...field.value, course.id])
-                                                : field.onChange(field.value?.filter((v) => v !== course.id))
+                                                : field.onChange(
+                                                    field.value?.filter((v) => v !== course.id)
+                                                  )
                                             }}
                                           />
                                         </FormControl>
-                                        <FormLabel className="flex flex-1 items-center gap-2 cursor-pointer text-xs font-medium">
-                                          <Badge variant="outline" className="font-mono text-[9px] px-1.5 h-5 border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
+                                        <FormLabel className="flex flex-1 cursor-pointer items-center gap-2 text-xs font-medium">
+                                          <Badge
+                                            variant="outline"
+                                            className="h-5 border-slate-200 bg-white px-1.5 font-mono text-[9px] dark:border-slate-700 dark:bg-slate-800"
+                                          >
                                             {course.code}
                                           </Badge>
                                           <span className="truncate">{course.name}</span>
@@ -700,10 +805,13 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   name="pathwayIds"
                   render={() => (
                     <FormItem className="space-y-4">
-                      <div className="flex flex-col gap-1.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-                        <FormLabel className="text-xs font-bold uppercase text-slate-600">Specific Pathways</FormLabel>
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4 dark:border-slate-800">
+                        <FormLabel className="text-xs font-bold text-slate-600 uppercase">
+                          Specific Pathways
+                        </FormLabel>
                         <FormDescription className="text-[10px]">
-                          Only show to students in these study pathways. Leave empty for all pathways.
+                          Only show to students in these study pathways. Leave empty for all
+                          pathways.
                         </FormDescription>
                       </div>
 
@@ -718,7 +826,7 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                               return (
                                 <FormItem
                                   className={cn(
-                                    'flex flex-row items-center space-x-3 space-y-0 rounded-xl border px-4 py-3 transition-all',
+                                    'flex flex-row items-center space-y-0 space-x-3 rounded-xl border px-4 py-3 transition-all',
                                     checked
                                       ? 'border-aerojet-sky bg-aerojet-sky/5 shadow-sm'
                                       : 'border-slate-100 hover:border-slate-200 dark:border-slate-800 dark:hover:border-slate-700'
@@ -730,7 +838,9 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                                       onCheckedChange={(checked) => {
                                         return checked
                                           ? field.onChange([...field.value, pathway.id])
-                                          : field.onChange(field.value?.filter((v) => v !== pathway.id))
+                                          : field.onChange(
+                                              field.value?.filter((v) => v !== pathway.id)
+                                            )
                                       }}
                                     />
                                   </FormControl>
@@ -753,10 +863,10 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
         </ScrollArea>
 
         {/* ── Action Buttons ─────────────────────────────────────────────── */}
-        <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex justify-end gap-3 border-t border-slate-100 pt-6 dark:border-slate-800">
           <Button
             type="submit"
-            className="rounded-xl bg-aerojet-blue px-8 py-6 text-base font-black text-white shadow-xl transition-all hover:bg-aerojet-blue/90 hover:shadow-2xl active:scale-95 disabled:opacity-50"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 rounded-xl px-8 py-6 text-base font-black text-white shadow-xl transition-all hover:shadow-2xl active:scale-95 disabled:opacity-50"
             disabled={isLoading || isUploading}
           >
             {isLoading ? (

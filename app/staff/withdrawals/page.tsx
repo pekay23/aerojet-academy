@@ -51,7 +51,7 @@ export default async function StaffWithdrawalsPage() {
   )
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-350 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
         <h1 className="text-aerojet-blue text-2xl font-black tracking-tight dark:text-white">
           Student Withdrawals

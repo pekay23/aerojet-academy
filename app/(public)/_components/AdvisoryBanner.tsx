@@ -6,7 +6,7 @@ import { AlertCircle, X } from 'lucide-react'
 /**
  * Sets a CSS custom property --advisory-banner-height on <html> so the
  * fixed navbar (z-50) can offset itself downward when the banner is visible.
- * The banner itself is fixed at top-0 with z-[60] (above the navbar).
+ * The banner itself is fixed at top-0 with z-60 (above the navbar).
  */
 export default function AdvisoryBanner({ message }: { message: string }) {
   const [isVisible, setIsVisible] = useState(false)
@@ -55,7 +55,7 @@ export default function AdvisoryBanner({ message }: { message: string }) {
   return (
     <div
       ref={bannerRef}
-      className="fixed top-0 right-0 left-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-3 shadow-sm sm:px-6 lg:px-8"
+      className="fixed top-0 right-0 left-0 z-60 border-b border-amber-300 bg-amber-50 px-4 py-3 shadow-sm sm:px-6 lg:px-8"
     >
       <div className="mx-auto flex max-w-7xl items-center justify-center gap-3">
         <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" />

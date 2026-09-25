@@ -26,7 +26,7 @@ export default function AddResourceButton() {
           Add Resource
         </Button>
       </DialogTrigger>
-      <DialogContent className="overflow-hidden rounded-3xl p-8 sm:max-w-[600px] lg:max-w-[1100px]">
+      <DialogContent className="overflow-hidden rounded-3xl p-8 sm:max-w-150 lg:max-w-275">
         <DialogHeader>
           <DialogTitle className="text-xl font-black text-slate-900 dark:text-slate-100">
             Add New Resource

@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -312,7 +313,7 @@ export default function MedicalReviewDashboard({ applications }: { applications:
                 {/* Existing clearance info */}
                 {app.medicalClearedAt && (
                   <div className="border-t border-green-200 bg-green-50/50 px-5 py-3 text-sm text-green-800 dark:border-green-800/50 dark:bg-green-900/10 dark:text-green-300">
-                    Cleared on {new Date(app.medicalClearedAt).toLocaleDateString()}
+                    Cleared on {formatDate(app.medicalClearedAt)}
                     {app.medicalFacility && ` — ${app.medicalFacility}`}
                   </div>
                 )}

@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useTransition } from 'react'
 import { createStudentPoolAction } from '@/app/student/actions'
@@ -85,18 +86,23 @@ export default function CreatePoolModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="create-pool-title"
-            onKeyDown={(e) => { if (e.key === 'Escape' && !isPending) setOpen(false) }}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape' && !isPending) setOpen(false)
+            }}
             className="relative z-10 w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
               <div>
-                <h2 id="create-pool-title" className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                <h2
+                  id="create-pool-title"
+                  className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100"
+                >
                   Start New Exam Booking
                 </h2>
                 <p className="mt-1 text-xs text-pretty text-slate-500 dark:text-slate-400">
-                  Initiate a booking for a module not currently listed. Minimum 25 candidates required
-                  for confirmation.
+                  Initiate a booking for a module not currently listed. Minimum 25 candidates
+                  required for confirmation.
                 </p>
               </div>
               <button
@@ -145,8 +151,7 @@ export default function CreatePoolModal({
                     <option value="">— Select an upcoming event —</option>
                     {events.map((e) => (
                       <option key={e.id} value={e.id}>
-                        {e.name} ({new Date(e.startDate).toLocaleDateString()} -{' '}
-                        {new Date(e.endDate).toLocaleDateString()})
+                        {e.name} ({formatDate(e.startDate)} - {formatDate(e.endDate)})
                       </option>
                     ))}
                   </select>

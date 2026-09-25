@@ -905,7 +905,7 @@ export default function ExamOperations() {
                                   <td className="px-2 py-1.5 font-mono text-slate-500">
                                     {ans.questionRef || '—'}
                                   </td>
-                                  <td className="max-w-[200px] truncate px-2 py-1.5 text-slate-700 dark:text-slate-300">
+                                  <td className="max-w-50 truncate px-2 py-1.5 text-slate-700 dark:text-slate-300">
                                     {ans.questionText}
                                   </td>
                                   <td className="px-2 py-1.5">

@@ -566,7 +566,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     <>
       {/* Fullscreen Prompt Overlay */}
       {showFullscreenPrompt && !result && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-sm">
           <div className="animate-in zoom-in-95 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-2xl dark:border-slate-800 dark:bg-slate-900">
             <ShieldAlert className="mx-auto mb-4 h-16 w-16 text-amber-500" />
             <h2 className="text-xl font-black text-slate-900 dark:text-white">

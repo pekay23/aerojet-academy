@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Staff Portal — UI/UX &amp;amp; Accessibility Audit · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Staff Portal — UI/UX &amp;amp; Accessibility Audit</h1>
+  <p class="he-deck">Date: 2026-08-27 Auditor: UI/UX Auditor Agent……</p>
+</header>
+<h1 id="staff-portal-uiux-amp-accessibility-audit">Staff Portal — UI/UX &amp; Accessibility Audit</h1>
+<p>Date: 2026-08-27 Auditor: UI/UX Auditor Agent…</p>
+<section class="he-section" id="01-executive-summary"><div class="he-section__num">01 · 01 · Executive Summary</div><h2 class="he-section__title">01 · Executive Summary</h2></section>
+<p>The Staff portal is built on a well-structured shared design system (<code>DashboardSidebar</code>, <code>DashboardSkeleton</code>, <code>AlertsCenter</code>, glassmorphism top bar) with largely consistent spacing, animations, and dark-mode surfaces. The most material gaps are (1) inconsistent dark-mode coverage on status badges, (2) user-uploaded profile photos rendered without the <code>ProtectedImage</code> wrapper, and (3) data tables that fall back to horizontal scroll rather than true mobile card layouts.</p>
+<section class="he-section" id="02-findings"><div class="he-section__num">02 · 02 · Findings</div><h2 class="he-section__title">02 · Findings</h2></section>
+<h3 id="category-design-system">Category: Design System</h3>
+<p>Inconsistent status-badge dark-mode tokens</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/_components/StudentsTable.tsx</code> (lines 69–74), <code>app/staff/_components/StudentDetailPanel.tsx</code> (lines 92–95), <code>app/staff/_components/PaymentsQueue.tsx</code> (lines 49–51), <code>app/staff/_components/ApplicantsQueue.tsx</code> (lines 463–464), <code>app/staff/_components/PoolStatusBadge.tsx</code> (lines 4–12), <code>app/staff/withdrawals/_components/WithdrawalsManager.tsx</code> (lines 26–31), <code>app/staff/part-145/_components/Part145Manager.tsx</code> (lines 32–36)</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Bug</p>
+</li>
+<li>
+<p><strong>Description</strong>: Several status-badge maps are defined with ONLY light-mode classes (e.g. <code>bg-emerald-100 text-emerald-700</code>) and omit the <code>dark:</code> variants that the rest of the portal uses (e.g. <code>dark:bg-emerald-500/20 dark:text-emerald-400</code>). In dark mode these badges render as near-white pills with dark text, which is visually inconsistent with the design system and lowers legibility against dark cards.</p>
+</li>
+</ul>
+<p><strong>Recommendation</strong>: Standardise every badge map to the portal pattern, e.g.
+<code>ACTIVE: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400'</code>. Consider extracting a shared <code>STATUS_BADGE</code> token map (or a <code>&amp;lt;StatusBadge&amp;gt;</code> component) to prevent future drift.
+<strong>Code Reference</strong>:</p>
+<pre><code class="language-tsx">const STATUS_STYLE: Record&amp;lt;string, string&amp;gt; = {
+  ACTIVE: 'bg-emerald-100 text-emerald-700',
+  SUSPENDED: 'bg-amber-100 text-amber-700',
+  ARCHIVED: 'bg-slate-100 text-slate-500',
+  PENDING: 'bg-blue-100 text-blue-700',
+}
+
+</code></pre>
+<p>Stat-card hover/affordance is consistent (No Action Needed)</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/dashboard/page.tsx</code> (lines 284–313)</p>
+</li>
+<li>
+<p><strong>Severity</strong>: No Action Needed</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: Stat cards follow a consistent rounded-2xl / border-slate-100 / shadow-sm / hover:shadow-md pattern with proper dark variants. Linked cards correctly use <code>&amp;lt;a&amp;gt;</code> so they remain keyboard-accessible.</p>
+</li>
+</ul>
+<h3 id="category-responsive">Category: Responsive</h3>
+<p>Data tables rely on horizontal scroll instead of mobile card equivalents</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/_components/StudentsTable.tsx</code> (line 302 area, filter row + table), <code>app/staff/_components/UsersTable.tsx</code> (line 220), <code>app/staff/_components/ExaminersTable.tsx</code> (line 101), <code>app/staff/_components/ExamBookingsTable.tsx</code> (line 144), <code>app/staff/_components/ReconciliationQueue.tsx</code> (line 163), <code>app/staff/_components/InstructorsTable.tsx</code> (line 211), <code>app/staff/_components/ApplicantsQueue.tsx</code> (line 329)</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Most Staff tables wrap content in a single <code>&amp;lt;div className=&amp;quot;overflow-x-auto&amp;quot;&amp;gt;</code> and show the same <code>&amp;lt;table&amp;gt;</code> at all breakpoints. Per CLAUDE.md performance/convention guidance, dense tables should provide mobile card equivalents. Only <code>FinanceOverview.tsx</code> (lines 180/270) and <code>PaymentsQueue.tsx</code> (lines 225/409) implement the <code>hidden md:block</code> table + <code>block md:hidden</code> card list pattern; the others force small-screen users to horizontally scroll a wide table.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Adopt the <code>FinanceOverview</code>/<code>PaymentsQueue</code> dual-rendering pattern for the highest-traffic tables (<code>StudentsTable</code>, <code>UsersTable</code>, <code>ApplicantsQueue</code>), or at minimum hide low-priority columns below <code>md</code> using <code>hidden md:table-cell</code>.</p>
+</li>
+</ul>
+<h3 id="category-loading-states">Category: Loading States</h3>
+<p>Route segment missing required <code>loading.tsx</code></p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/ojt/preview/page.tsx</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Bug</p>
+</li>
+<li>
+<p><strong>Description</strong>: CLAUDE.md states &quot;Every page directory MUST have a <code>loading.tsx</code>&quot;. An automated scan of all <code>page.tsx</code> directories found exactly one exception: <code>app/staff/ojt/preview</code> has no <code>loading.tsx</code>, so it falls back to the root <code>app/staff/loading.tsx</code> full-screen spinner during navigation.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>app/staff/ojt/preview/loading.tsx</code> (a <code>DashboardSkeleton</code> variant or small <code>TableSkeleton</code>) for Suspense streaming parity with sibling routes.</p>
+</li>
+</ul>
+<p>Skeleton coverage is otherwise strong (No Action Needed)</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/dashboard/loading.tsx</code>, <code>components/shared/DashboardSkeleton.tsx</code>, <code>components/shared/TableSkeleton</code> usage</p>
+</li>
+<li>
+<p><strong>Severity</strong>: No Action Needed</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: The shared <code>DashboardSkeleton</code>/<code>TableSkeleton</code> provide consistent, dark-mode-aware shimmer placeholders, and nearly all leaf routes supply their own <code>loading.tsx</code>. Good practice.</p>
+</li>
+</ul>
+<h3 id="category-accessibility">Category: Accessibility</h3>
+<p>Low-contrast secondary text (<code>text-slate-400</code>) on light backgrounds</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/dashboard/page.tsx</code> (line 299 — stat label <code>text-slate-400 text-[11px] uppercase</code>), and pervasive <code>text-slate-400</code>/<code>text-slate-500</code> usage for labels, timestamps, and helper text across <code>StaffTopBar.tsx</code>, <code>StudentDetailPanel.tsx</code>, <code>ApplicantsQueue.tsx</code>, etc.</p>
+</li>
+<li>
+<p><strong>Severity</strong>: High</p>
+</li>
+<li>
+<p><strong>Type</strong>: Bug</p>
+</li>
+<li>
+<p><strong>Description</strong>: <code>text-slate-400</code> (#94a3b8) on a white/slate-50 background has a contrast ratio of ~2.5:1, failing WCAG 2.1 AA (requires 4.5:1 for normal text, 3:1 for large/bold text). The 11px uppercase stat labels and many secondary descriptions fall below this threshold, harming readability for low-vision users.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Promote secondary text to at least <code>text-slate-500</code> (3.6:1) and primary labels to <code>text-slate-600</code> (5.3:1) where it conveys meaning. Reserve <code>text-slate-400</code> for purely decorative/non-essential hints. The dark-mode equivalents (<code>text-slate-500</code>/<code>text-slate-400</code>) are already lighter and acceptable.</p>
+</li>
+</ul>
+<p>Error and empty states are accessible (No Action Needed)</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/error.tsx</code>, <code>app/staff/not-found.tsx</code>, <code>app/staff/dashboard/_components/AlertsCenter.tsx</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: No Action Needed</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: <code>error.tsx</code> uses <code>role=&amp;quot;alert&amp;quot;</code> and a focusable retry button with a visible focus ring; <code>not-found.tsx</code> provides a clear recovery path; <code>AlertsCenter</code> exposes an empty-state with <code>role</code>/<code>aria-live</code> on its container. Good.</p>
+</li>
+</ul>
+<h3 id="category-typography">Category: Typography</h3>
+<p>Mixed micro-label scale</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/dashboard/page.tsx</code> (line 299 <code>text-[11px]</code>), <code>app/staff/_components/PoolStatusBadge.tsx</code>, plus <code>text-[10px]</code> badge labels in <code>UsersTableRow.tsx</code> (lines 76/83)</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: Stat labels use <code>text-[11px]</code>, status badges use <code>text-[10px]</code>, and section headers use <code>text-sm font-black uppercase</code>. The 10–11px range is below the 12px floor recommended for comfortable readability and sits at the edge of WCAG &quot;large text&quot; exceptions.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Standardise badge/label micro-text to <code>text-xs</code> (12px) where feasible, keeping <code>font-black</code>/<code>tracking-wider</code> for legibility.</p>
+</li>
+</ul>
+<h3 id="category-spacing">Category: Spacing</h3>
+<p>Surface token inconsistency in dark mode</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/classes/[id]/seating/_components/ClassSeatingAssignment.tsx</code> (line 253), <code>app/staff/classrooms/[id]/_components/FloorPlanDesigner.tsx</code> (line 281), <code>app/staff/classrooms/[id]/_components/SeatingAssignment.tsx</code> (line 242), <code>app/staff/scheduling/_components/SchedulingClient.tsx</code> (line 436) vs. most cards using <code>dark:bg-slate-900/50</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: Seating/floor-plan surfaces use <code>dark:bg-slate-950</code> while the rest of the portal cards use <code>dark:bg-slate-900/50</code>. The darker slate-950 appears alongside slate-900 surfaces, creating subtle but inconsistent dark depth.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Pick one dark-card token (prefer <code>dark:bg-slate-900/50</code> to match the dashboard/table standard) and apply it consistently, or document the slate-950 exception for &quot;canvas&quot; surfaces.</p>
+</li>
+</ul>
+<h3 id="category-animations">Category: Animations</h3>
+<p>Inconsistent page-entry animation coverage</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/admissions/interviews/page.tsx</code> (line 75), <code>app/staff/classrooms/page.tsx</code> (line 28), <code>app/staff/classrooms/[id]/page.tsx</code> (line 38) use <code>animate-in fade-in slide-in-from-bottom-4 duration-700</code>; most other <code>page.tsx</code> files have no entry animation.</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: A subset of pages animate their entrance while the majority do not, producing an inconsistent feel as staff navigate between sections.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Either wrap all primary page content in a shared <code>&amp;lt;PageTransition&amp;gt;</code> (e.g. <code>animate-in fade-in slide-in-from-bottom-4 duration-500</code>) or remove entry animations entirely for consistency.</p>
+</li>
+</ul>
+<p>Hover/transition tokens are consistent (No Action Needed)</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/dashboard/page.tsx</code>, <code>app/staff/_components/*</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: No Action Needed</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: Interactive elements consistently use <code>transition-all duration-150 ease-out</code> with hover elevation, and loading spinners use a unified <code>Loader2 animate-spin</code> pattern. Good.</p>
+</li>
+</ul>
+<h3 id="category-navigation">Category: Navigation</h3>
+<p>Navigation is coherent (No Action Needed)</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/_components/StaffSidebar.tsx</code>, <code>app/staff/_components/StaffTopBar.tsx</code>, <code>components/layouts/DashboardSidebar.tsx</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: No Action Needed</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: The sidebar provides collapsible groups, badges, active-state highlighting, a mobile slide-over with hamburger trigger, and a <code>MobileTopBar</code> breadcrumb; the top bar provides breadcrumbs, live clock, and accessible icon buttons with <code>aria-label</code>. No blocking issues found. Minor note: the desktop top bar is <code>hidden ... lg:flex</code>, so on tablet/mobile the breadcrumb lives only in the <code>MobileTopBar</code> — acceptable but worth a conscious decision.</p>
+</li>
+</ul>
+<h3 id="category-dark-mode">Category: Dark Mode</h3>
+<p>Status badges without dark variants (see Design System)</p>
+<ul>
+<li>
+<p><strong>File</strong>: listed under Design System above</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Bug</p>
+</li>
+<li>
+<p><strong>Description</strong>: Same root cause as the Design System finding — status badges that omit <code>dark:</code> classes are the primary dark-mode defect. Surfaces, headers, and top bar otherwise handle dark mode well (e.g. <code>bg-white/80 dark:bg-slate-900/80</code>, <code>border-slate-200 dark:border-slate-700</code>).</p>
+</li>
+</ul>
+<h3 id="category-protected-images">Category: Protected Images</h3>
+<p>User-uploaded profile photos not rendered via <code>ProtectedImage</code></p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/_components/users-table/UsersTableRow.tsx</code> (lines 58–60), <code>app/staff/_components/StudentsTable.tsx</code> (lines 427–429), <code>app/staff/_components/StudentDetailPanel.tsx</code> (lines 299–301), <code>app/staff/_components/ApplicantsQueue.tsx</code> (lines 433–435), <code>app/staff/_components/ApplicantDetailDrawer.tsx</code> (lines 230–232), <code>app/staff/users/[id]/page.tsx</code> (lines 166–168), <code>app/staff/students/[id]/page.tsx</code> (lines 268–270)</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Bug</p>
+</li>
+<li>
+<p><strong>Description</strong>: Across the portal, user-uploaded <code>profilePhotoUrl</code> images are rendered with plain <code>next/image</code> (e.g. <code>&amp;lt;Image src={user.profile.profilePhotoUrl} ... /&amp;gt;</code>). CLAUDE.md specifies that user-uploaded content must use the <code>ProtectedImage</code> component (right-click protection, drag prevention, invisible overlay, <code>select-none</code>). A repo-wide grep found <strong>zero</strong> <code>ProtectedImage</code> usages under <code>app/staff</code>, so profile photos — which are user-controlled/uploads — are unprotected.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace plain <code>next/image</code> avatars with <code>ProtectedImage</code> (wrapping <code>proxyImageUrl(url, 'profile-photos')</code> per the storage scope convention) at each of the listed call sites. This both protects the asset and routes it through the authenticated image proxy.</p>
+</li>
+</ul>
+<section class="he-section" id="03-appendix"><div class="he-section__num">03 · 03 · Appendix</div><h2 class="he-section__title">03 · Appendix</h2></section>
+<p>Files audited (representative set):</p>
+<ul>
+<li>
+<p><code>app/staff/layout.tsx</code>, <code>app/staff/loading.tsx</code>, <code>app/staff/error.tsx</code>, <code>app/staff/not-found.tsx</code></p>
+</li>
+<li>
+<p><code>app/staff/_components/StaffSidebar.tsx</code>, <code>app/staff/_components/StaffTopBar.tsx</code></p>
+</li>
+<li>
+<p><code>app/staff/dashboard/page.tsx</code>, <code>app/staff/dashboard/loading.tsx</code>, <code>app/staff/dashboard/_components/AlertsCenter.tsx</code></p>
+</li>
+<li>
+<p><code>app/staff/_components/StudentsTable.tsx</code>, <code>UsersTable.tsx</code>, <code>ExaminersTable.tsx</code>, <code>ExamBookingsTable.tsx</code>, <code>ReconciliationQueue.tsx</code>, <code>InstructorsTable.tsx</code>, <code>ApplicantsQueue.tsx</code>, <code>PaymentsQueue.tsx</code>, <code>StudentDetailPanel.tsx</code>, <code>PoolStatusBadge.tsx</code>, <code>FinanceOverview.tsx</code></p>
+</li>
+<li>
+<p><code>app/staff/withdrawals/_components/WithdrawalsManager.tsx</code>, <code>app/staff/part-145/_components/Part145Manager.tsx</code></p>
+</li>
+<li>
+<p><code>app/staff/users/[id]/page.tsx</code>, <code>app/staff/students/[id]/page.tsx</code>, <code>app/staff/_components/users-table/UsersTableRow.tsx</code></p>
+</li>
+<li>
+<p><code>app/staff/ojt/preview/page.tsx</code>, <code>app/staff/classrooms/*</code>, <code>app/staff/scheduling/_components/SchedulingClient.tsx</code></p>
+</li>
+<li>
+<p><code>components/shared/DashboardSkeleton.tsx</code>, <code>components/layouts/DashboardSidebar.tsx</code>, <code>components/ProtectedImage.tsx</code></p>
+</li>
+<li>
+<p><code>app/globals.css</code></p>
+</li>
+<li>
+<p>Total findings: 11 (1 High, 3 Medium, 5 Low, 2 cross-referenced, plus 6 &quot;No Action Needed&quot; category notes)</p>
+<p>On this page
+<a href="#executive-summary">Executive Summary</a>
+<a href="#findings">Findings</a>
+<a href="#category-design-system">Category: Design System</a>
+<a href="#category-responsive">Category: Responsive</a>
+<a href="#category-loading-states">Category: Loading States</a>
+<a href="#category-accessibility">Category: Accessibility</a>
+<a href="#category-typography">Category: Typography</a>
+<a href="#category-spacing">Category: Spacing</a>
+<a href="#category-animations">Category: Animations</a>
+<a href="#category-navigation">Category: Navigation</a>
+<a href="#category-dark-mode">Category: Dark Mode</a>
+<a href="#category-protected-images">Category: Protected Images</a>
+<a href="#appendix">Appendix</a></p>
+</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#01-executive-summary">01 · Executive Summary</a></li>
+    <li class="he-toc__l2"><a href="#02-findings">02 · Findings</a></li>
+    <li class="he-toc__l3"><a href="#category-design-system">Category: Design System</a></li>
+    <li class="he-toc__l3"><a href="#category-responsive">Category: Responsive</a></li>
+    <li class="he-toc__l3"><a href="#category-loading-states">Category: Loading States</a></li>
+    <li class="he-toc__l3"><a href="#category-accessibility">Category: Accessibility</a></li>
+    <li class="he-toc__l3"><a href="#category-typography">Category: Typography</a></li>
+    <li class="he-toc__l3"><a href="#category-spacing">Category: Spacing</a></li>
+    <li class="he-toc__l3"><a href="#category-animations">Category: Animations</a></li>
+    <li class="he-toc__l3"><a href="#category-navigation">Category: Navigation</a></li>
+    <li class="he-toc__l3"><a href="#category-dark-mode">Category: Dark Mode</a></li>
+    <li class="he-toc__l3"><a href="#category-protected-images">Category: Protected Images</a></li>
+    <li class="he-toc__l2"><a href="#03-appendix">03 · Appendix</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

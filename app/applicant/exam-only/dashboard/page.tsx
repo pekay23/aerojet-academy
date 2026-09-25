@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -21,7 +22,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function ExamOnlyDashboardPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -35,7 +36,7 @@ export default async function ExamOnlyDashboardPage() {
     },
   })
 
-  if (!user) redirect('/login')
+  if (!user) return await redirectToLogin()
 
   if (user.role === 'STUDENT') {
     redirect('/student')

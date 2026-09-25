@@ -1,6 +1,6 @@
 export default function ClassmatesLoading() {
   return (
-    <div className="mx-auto max-w-[1400px] space-y-8 animate-pulse">
+    <div className="mx-auto max-w-350 animate-pulse space-y-8">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <div className="h-10 w-64 rounded-xl bg-slate-200 dark:bg-slate-800" />
@@ -18,7 +18,7 @@ export default function ClassmatesLoading() {
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {[...Array(8)].map((_, i) => (
-          <div 
+          <div
             key={i}
             className="flex flex-col items-center rounded-3xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
           >

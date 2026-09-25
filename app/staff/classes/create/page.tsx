@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import CreateClassForm from './CreateClassForm'
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default async function CreateClassPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   // Fetch courses, instructors, and classrooms for the form
   const [courses, instructors, classrooms] = await Promise.all([
@@ -45,13 +45,17 @@ export default async function CreateClassPage() {
   ])
 
   return (
-    <div className="mx-auto max-w-[1800px]">
+    <div className="mx-auto max-w-450">
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">Schedule Class</h1>
-        <p className="text-slate-500 dark:text-slate-400">Create a new class instance for a course.</p>
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
+          Schedule Class
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400">
+          Create a new class instance for a course.
+        </p>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <CreateClassForm
           courses={serializePrisma(courses)}
           instructors={serializePrisma(instructors)}

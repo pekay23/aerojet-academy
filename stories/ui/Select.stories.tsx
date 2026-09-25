@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const meta: Meta<typeof Select> = {
   title: 'UI/Select',
@@ -12,7 +18,7 @@ type Story = StoryObj<typeof Select>
 export const Default: Story = {
   render: () => (
     <Select>
-      <SelectTrigger className="w-[200px]">
+      <SelectTrigger className="w-50">
         <SelectValue placeholder="Select a fruit" />
       </SelectTrigger>
       <SelectContent>
@@ -27,7 +33,7 @@ export const Default: Story = {
 export const WithDefaultValue: Story = {
   render: () => (
     <Select defaultValue="banana">
-      <SelectTrigger className="w-[200px]">
+      <SelectTrigger className="w-50">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -42,7 +48,7 @@ export const WithDefaultValue: Story = {
 export const Disabled: Story = {
   render: () => (
     <Select disabled>
-      <SelectTrigger className="w-[200px]">
+      <SelectTrigger className="w-50">
         <SelectValue placeholder="Disabled" />
       </SelectTrigger>
       <SelectContent>

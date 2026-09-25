@@ -68,13 +68,18 @@ export default async function AttendanceCompliancePage({
     const userRecords = recordsByUser.get(e.user.id) || []
     const courseRecords = userRecords.filter((r) => r.class.courseId === e.courseId)
     const total = courseRecords.length
-    const present = courseRecords.filter((r) => r.status === 'PRESENT' || r.status === 'LATE').length
+    const present = courseRecords.filter(
+      (r) => r.status === 'PRESENT' || r.status === 'LATE'
+    ).length
     const rate = total > 0 ? Math.round((present / total) * 100) : 0
-    const complianceStatus = rate >= threshold ? 'COMPLIANT' : rate >= threshold - 5 ? 'AT_RISK' : 'NON_COMPLIANT'
+    const complianceStatus =
+      rate >= threshold ? 'COMPLIANT' : rate >= threshold - 5 ? 'AT_RISK' : 'NON_COMPLIANT'
 
     return {
       studentId: e.user.studentProfile?.studentId,
-      name: `${e.user.profile?.firstName || ''} ${e.user.profile?.lastName || ''}`.trim() || e.user.email,
+      name:
+        `${e.user.profile?.firstName || ''} ${e.user.profile?.lastName || ''}`.trim() ||
+        e.user.email,
       email: e.user.email,
       moduleCode: e.course.code,
       moduleName: e.course.name,
@@ -99,7 +104,7 @@ export default async function AttendanceCompliancePage({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black text-aerojet-blue uppercase dark:text-white sm:text-3xl">
+          <h1 className="text-aerojet-blue text-2xl font-black uppercase sm:text-3xl dark:text-white">
             Attendance Compliance Report
           </h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
@@ -108,7 +113,7 @@ export default async function AttendanceCompliancePage({
         </div>
         <a
           href={exportUrl}
-          className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 font-bold text-white hover:bg-aerojet-blue/90 dark:bg-aerojet-sky"
+          className="bg-aerojet-blue hover:bg-aerojet-blue/90 dark:bg-aerojet-sky inline-flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-white"
         >
           <Download className="h-5 w-5" />
           Export CSV
@@ -140,7 +145,7 @@ export default async function AttendanceCompliancePage({
 
       {/* Filters */}
       <form className="flex flex-wrap gap-4" method="get">
-        <div className="min-w-[200px] flex-1">
+        <div className="min-w-50 flex-1">
           <label className="mb-1 block text-xs font-bold text-slate-500">Module</label>
           <select
             name="moduleCode"
@@ -188,7 +193,10 @@ export default async function AttendanceCompliancePage({
                 </tr>
               ) : (
                 report.map((r) => (
-                  <tr key={`${r.studentId}-${r.moduleCode}`} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                  <tr
+                    key={`${r.studentId}-${r.moduleCode}`}
+                    className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
+                  >
                     <td className="px-6 py-4">
                       <div>
                         <p className="font-bold text-slate-900 dark:text-white">{r.name}</p>
@@ -202,9 +210,13 @@ export default async function AttendanceCompliancePage({
                       <p className="text-xs text-slate-500">{r.moduleName}</p>
                     </td>
                     <td className="px-6 py-4 text-center font-bold">{r.total}</td>
-                    <td className="px-6 py-4 text-center font-bold text-emerald-600">{r.present}</td>
+                    <td className="px-6 py-4 text-center font-bold text-emerald-600">
+                      {r.present}
+                    </td>
                     <td className="px-6 py-4 text-right">
-                      <span className={`text-sm font-black ${r.rate >= threshold ? 'text-emerald-600' : 'text-red-600'}`}>
+                      <span
+                        className={`text-sm font-black ${r.rate >= threshold ? 'text-emerald-600' : 'text-red-600'}`}
+                      >
                         {r.rate}%
                       </span>
                     </td>

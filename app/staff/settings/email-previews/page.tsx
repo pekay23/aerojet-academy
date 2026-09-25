@@ -416,7 +416,7 @@ export default function EmailPreviewsPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="flex justify-center bg-slate-100 p-0">
-                    <div className="my-8 w-full max-w-[640px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl">
+                    <div className="my-8 w-full max-w-160 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl">
                       <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 p-3">
                         <div className="flex gap-1.5">
                           <div className="h-3 w-3 rounded-full bg-red-400" />
@@ -433,7 +433,7 @@ export default function EmailPreviewsPage() {
                       </div>
                       <iframe
                         src={`/api/staff/email-preview?template=${activeTemplate}`}
-                        className="min-h-[600px] w-full border-none"
+                        className="min-h-150 w-full border-none"
                         title="Email Preview"
                       />
                     </div>
@@ -516,7 +516,7 @@ export default function EmailPreviewsPage() {
                           <RichTextEditor
                             content={editData.body}
                             onChange={(body) => setEditData({ ...editData, body })}
-                            className="min-h-[400px]"
+                            className="min-h-100"
                           />
                         </div>
 

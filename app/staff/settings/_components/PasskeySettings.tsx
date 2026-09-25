@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -55,9 +56,7 @@ export function PasskeySettings() {
   }
 
   useEffect(() => {
-   
-   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setWebAuthnSupported(typeof window !== 'undefined' && !!window.PublicKeyCredential)
     fetchPasskeys()
   }, [])
@@ -90,7 +89,10 @@ export function PasskeySettings() {
           )
           return
         }
-        if ((err as { name?: string }).name === 'AbortError' || (err as { name?: string }).name === 'TimeoutError') {
+        if (
+          (err as { name?: string }).name === 'AbortError' ||
+          (err as { name?: string }).name === 'TimeoutError'
+        ) {
           toast.error('Passkey creation timed out. Please try again.')
           return
         }
@@ -114,9 +116,7 @@ export function PasskeySettings() {
     } catch (error: unknown) {
       console.error(error)
       toast.error(
-        error instanceof Error
-          ? error.message
-          : 'An error occurred while adding the passkey'
+        error instanceof Error ? error.message : 'An error occurred while adding the passkey'
       )
     } finally {
       setIsRegistering(false)
@@ -269,9 +269,8 @@ export function PasskeySettings() {
                           </div>
                         )}
                         <p className="text-muted-foreground text-xs">
-                          Added {new Date(passkey.createdAt).toLocaleDateString()}
-                          {passkey.lastUsedAt &&
-                            ` • Last used ${new Date(passkey.lastUsedAt).toLocaleDateString()}`}
+                          Added {formatDate(passkey.createdAt)}
+                          {passkey.lastUsedAt && ` • Last used ${formatDate(passkey.lastUsedAt)}`}
                         </p>
                       </div>
                     </div>

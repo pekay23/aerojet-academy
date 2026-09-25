@@ -1,6 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Users, GraduationCap, BookOpen, Sparkles, Calendar } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -29,7 +29,7 @@ export default async function ClassmatesPage({
   }>
 }) {
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'STUDENT') redirect('/login')
+  if (!session || session.user.role !== 'STUDENT') return await redirectToLogin()
 
   const {
     q = '',
@@ -105,9 +105,7 @@ export default async function ClassmatesPage({
 
   if (filter === 'classmates' || filter === 'class') {
     // Class-based filtering
-    const targetClassIds = classIdParam
-      ? [classIdParam]
-      : myClassesRaw.map((c) => c.classId)
+    const targetClassIds = classIdParam ? [classIdParam] : myClassesRaw.map((c) => c.classId)
 
     if (targetClassIds.length > 0) {
       const peersInClasses = await prismaUnfiltered.attendanceRecord.findMany({
@@ -182,7 +180,7 @@ export default async function ClassmatesPage({
   })
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-350 space-y-8 duration-700">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-black tracking-tight text-blue-800 sm:text-4xl dark:text-white">
@@ -191,10 +189,7 @@ export default async function ClassmatesPage({
           <p className="flex items-center gap-2 text-base font-medium text-slate-500 dark:text-slate-400">
             <Sparkles className="h-5 w-5 text-sky-400" />
             Connect with your peers from{' '}
-            <span className="font-bold text-blue-800 dark:text-sky-400">
-              {batchName}
-            </span>
-            .
+            <span className="font-bold text-blue-800 dark:text-sky-400">{batchName}</span>.
           </p>
         </div>
       </div>
@@ -214,7 +209,7 @@ export default async function ClassmatesPage({
       />
 
       {/* Results count */}
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+      <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
         {peers.length} {peers.length === 1 ? 'student' : 'students'} found
       </p>
 
@@ -228,23 +223,15 @@ export default async function ClassmatesPage({
           </div>
         ) : (
           peers.map((peer) => {
-            const name = [
-              peer.user.profile?.firstName,
-              peer.user.profile?.lastName,
-            ]
+            const name = [peer.user.profile?.firstName, peer.user.profile?.lastName]
               .filter(Boolean)
               .join(' ')
-            const initials = [
-              peer.user.profile?.firstName?.[0],
-              peer.user.profile?.lastName?.[0],
-            ]
+            const initials = [peer.user.profile?.firstName?.[0], peer.user.profile?.lastName?.[0]]
               .filter(Boolean)
               .join('')
-            const pathway =
-              peer.user.studentProfile?.pathwayRel?.name || 'Full-Time'
+            const pathway = peer.user.studentProfile?.pathwayRel?.name || 'Full-Time'
             const yearNum = peer.currentYearNumber
-            const semesterName =
-              peer.user.studentProfile?.semester?.name || null
+            const semesterName = peer.user.studentProfile?.semester?.name || null
 
             return (
               <div
@@ -254,33 +241,31 @@ export default async function ClassmatesPage({
                 <div className="relative mb-4">
                   <div className="absolute -inset-1 rounded-full bg-linear-to-tr from-blue-800 to-sky-400 opacity-0 blur transition-opacity group-hover:opacity-20" />
                   <Avatar className="h-20 w-20 border-4 border-white shadow-md dark:border-slate-800">
-                    <AvatarImage
-                      src={peer.user.profile?.profilePhotoUrl || undefined}
-                    />
+                    <AvatarImage src={peer.user.profile?.profilePhotoUrl || undefined} />
                     <AvatarFallback className="bg-slate-100 text-lg font-black text-blue-800 dark:bg-slate-800 dark:text-slate-400">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                 </div>
 
-                <h3 className="text-lg font-black text-blue-800 dark:text-white line-clamp-1">
+                <h3 className="line-clamp-1 text-lg font-black text-blue-800 dark:text-white">
                   {name}
                 </h3>
-                <p className="mt-1 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                <p className="mt-1 text-xs font-bold tracking-widest text-slate-400 uppercase">
                   {peer.user.academyEmail || peer.user.email}
                 </p>
 
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
                   <Badge
                     variant="secondary"
-                    className="bg-blue-50 text-[10px] font-black text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 uppercase"
+                    className="bg-blue-50 text-[10px] font-black text-blue-600 uppercase dark:bg-blue-900/20 dark:text-blue-400"
                   >
                     <GraduationCap className="mr-1 h-3 w-3" />
                     {pathway}
                   </Badge>
                   <Badge
                     variant="secondary"
-                    className="bg-emerald-50 text-[10px] font-black text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 uppercase"
+                    className="bg-emerald-50 text-[10px] font-black text-emerald-600 uppercase dark:bg-emerald-900/20 dark:text-emerald-400"
                   >
                     <BookOpen className="mr-1 h-3 w-3" />
                     Year {yearNum}
@@ -288,7 +273,7 @@ export default async function ClassmatesPage({
                   {semesterName && (
                     <Badge
                       variant="secondary"
-                      className="bg-purple-50 text-[10px] font-black text-purple-600 dark:bg-purple-900/20 dark:text-purple-400 uppercase"
+                      className="bg-purple-50 text-[10px] font-black text-purple-600 uppercase dark:bg-purple-900/20 dark:text-purple-400"
                     >
                       <Calendar className="mr-1 h-3 w-3" />
                       {semesterName}
@@ -296,7 +281,7 @@ export default async function ClassmatesPage({
                   )}
                 </div>
 
-                <div className="absolute right-4 top-4 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="absolute top-4 right-4 opacity-0 transition-opacity group-hover:opacity-100">
                   <div className="rounded-full bg-slate-50 p-2 dark:bg-slate-800">
                     <Users className="h-4 w-4 text-slate-400" />
                   </div>

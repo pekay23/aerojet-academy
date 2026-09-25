@@ -1,6 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -11,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function Part145Page() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)
 
   const [organisations, transfers] = await Promise.all([
@@ -33,9 +32,9 @@ export default async function Part145Page() {
   ])
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-350 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-2xl font-black tracking-tight dark:text-white">
           Part-145 Data Transition
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

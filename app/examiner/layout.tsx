@@ -26,7 +26,10 @@ export default async function ExaminerLayout({ children }: { children: React.Rea
 
   return (
     <div className="flex min-h-screen bg-slate-50/50 dark:bg-slate-950">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white"
+      >
         Skip to main content
       </a>
       <Heartbeat />
@@ -44,7 +47,7 @@ export default async function ExaminerLayout({ children }: { children: React.Rea
           composeHref="/examiner/messages?compose=true"
           actions={<TourTrigger title="Take a tour of your examiner portal" />}
         />
-        <div className="mx-auto max-w-[1920px] animate-in p-4 fade-in slide-in-from-bottom-4 duration-500 motion-reduce:animate-none motion-reduce:transition-none sm:p-8 lg:px-8 lg:py-6">
+        <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-480 p-4 duration-500 motion-reduce:animate-none motion-reduce:transition-none sm:p-8 lg:px-8 lg:py-6">
           {children}
         </div>
       </main>

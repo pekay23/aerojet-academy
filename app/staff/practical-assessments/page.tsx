@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Practical Training Assessments | Sta
 
 export default async function PracticalAssessmentsPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const [records, courses, students, instructors, ataChapters] = await Promise.all([
     // Initial 50 records
@@ -17,7 +17,9 @@ export default async function PracticalAssessmentsPage() {
       include: {
         ataChapter: { select: { id: true, code: true, title: true } },
         course: { select: { id: true, name: true, code: true } },
-        instructor: { select: { id: true, profile: { select: { firstName: true, lastName: true } } } },
+        instructor: {
+          select: { id: true, profile: { select: { firstName: true, lastName: true } } },
+        },
         studentProfile: {
           select: {
             id: true,
@@ -76,7 +78,7 @@ export default async function PracticalAssessmentsPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight uppercase dark:text-white">
             Practical Training Assessments
           </h1>
           <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">

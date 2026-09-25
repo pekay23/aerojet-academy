@@ -1,12 +1,12 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
-/* ── Tailwind v4 Theme Tokens ─────────────────────────────────────────────
+/*  Tailwind v4 Theme Tokens 
    Maps CSS custom properties to Tailwind utility class names.
    The raw CSS variables (:root / .dark below) are the source of truth;
    these @theme inline declarations expose them as bg-primary, text-muted-foreground,
    animate-accordion-down, etc. Dark mode via @custom-variant dark.
-────────────────────────────────────────────────────────────────────────── */
+ */
 @theme inline {
   /* Colors */
   --color-border: hsl(var(--border));
@@ -66,8 +66,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  /* Font Family — design tokens (docs/html/aerojet-design-tokens.css)
-     sans=Inter · serif=Playfair Display · outfit=Outfit · mono=JetBrains Mono */
+  /* Font Family  design tokens (docs/html/aerojet-design-tokens.css)
+     sans=Inter  serif=Playfair Display  outfit=Outfit  mono=JetBrains Mono */
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-serif: var(--font-playfair), Georgia, serif;
   --font-outfit: var(--font-outfit), system-ui, sans-serif;
@@ -83,10 +83,10 @@
   --z-index-80: 80;
 }
 
-/* Dark mode variant — applies to .dark or descendants of .dark */
+/* Dark mode variant  applies to .dark or descendants of .dark */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Keyframes (must be at top level) ──────────────────────────────────── */
+/*  Keyframes (must be at top level)  */
 @keyframes accordion-down {
   from {
     height: 0;
@@ -127,7 +127,7 @@
   --animate-scale-in: scale-in 0.15s ease-out;
 }
 
-/* ── Base Layer ───────────────────────────────────────────────────────────── */
+/*  Base Layer  */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -208,20 +208,20 @@
     --aero-offwhite: 222 47% 11%;
   }
 
-  /* ── Border reset ──────────────────────────────────────────────── */
+  /*  Border reset  */
   *,
   *::before,
   *::after {
     border-color: hsl(var(--border));
   }
 
-  /* ── Base body ─────────────────────────────────────────────────── */
+  /*  Base body  */
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
 
-  /* ── Prose / TipTap blockquote (from old @apply) ──────────────── */
+  /*  Prose / TipTap blockquote (from old @apply)  */
   .prose blockquote {
     border-left: 4px solid hsl(var(--aero-sky));
     background-color: hsl(204 65% 97%);
@@ -237,7 +237,7 @@
     color: hsl(215 20% 75%);
   }
 
-  /* ── Audio element within prose / editor ─────────────────────── */
+  /*  Audio element within prose / editor  */
   .prose audio,
   .ProseMirror audio {
     display: block;
@@ -253,7 +253,7 @@
     background-color: hsl(217 33% 17%);
   }
 
-  /* ── TipTap placeholder ────────────────────────────────────────── */
+  /*  TipTap placeholder  */
   .ProseMirror p.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
     pointer-events: none;
@@ -263,7 +263,7 @@
   }
 }
 
-/* ── Exam Lockdown Mode ────────────────────────────────────────────────────
+/*  Exam Lockdown Mode 
    When body.exam-lockdown is active, the student sidebar,
    portal header, breadcrumb, and registration banners are
    all hidden. The main content area fills 100% viewport. */
@@ -286,7 +286,7 @@ body.exam-lockdown > div > div:first-child {
   display: none !important;
 }
 
-/* ── News Article Component Styles ────────────────────────────── */
+/*  News Article Component Styles  */
 /* Plain CSS selectors (not inside @layer) to ensure Tailwind v4 processes them */
 .article-blockquote {
   position: relative;
@@ -311,7 +311,6 @@ body.exam-lockdown > div > div:first-child {
   font-size: 2.25rem;
   font-family: serif;
   color: hsl(var(--aero-sky) / 0.3);
-  line-height: 1;
 }
 
 .article-pullquote {
@@ -439,9 +438,9 @@ body.exam-lockdown > div > div:first-child {
   color: #60b5ff !important;
 }
 
-/* ────────────────────────────────────────────────────────────── */
+/*  */
 /*  Reduced Motion Preferences                                   */
-/* ────────────────────────────────────────────────────────────── */
+/*  */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -463,9 +462,9 @@ body {
   scrollbar-width: none;
 }
 
-/* ────────────────────────────────────────────────────────────── */
+/*  */
 /*  AppTour / react-joyride spotlight styling                    */
-/* ────────────────────────────────────────────────────────────── */
+/*  */
 .joyride-spotlight {
   border-radius: 14px;
 }

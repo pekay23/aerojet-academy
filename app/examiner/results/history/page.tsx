@@ -39,7 +39,9 @@ export default async function ExaminerResultsHistoryPage({
   if (!examiner) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-700 dark:bg-slate-800/50">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Examiner profile not found</h3>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+          Examiner profile not found
+        </h3>
       </div>
     )
   }
@@ -91,16 +93,16 @@ export default async function ExaminerResultsHistoryPage({
   )
 
   return (
-    <div className="mx-auto max-w-[1100px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-275 space-y-8 duration-700">
       <div>
         <Link
           href="/examiner/results"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition-colors hover:text-aerojet-sky"
+          className="hover:text-aerojet-sky mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to Results Entry
         </Link>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Results History
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -134,13 +136,13 @@ export default async function ExaminerResultsHistoryPage({
                     {nameById.get(r.userId) ?? r.userId}
                   </td>
                   <td className="px-4 py-3 font-mono text-slate-500">{r.moduleCode ?? '—'}</td>
-                  <td className="px-4 py-3 text-center font-mono">{r.score != null ? `${r.score}%` : '—'}</td>
+                  <td className="px-4 py-3 text-center font-mono">
+                    {r.score != null ? `${r.score}%` : '—'}
+                  </td>
                   <td className="px-4 py-3 text-center">
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                        r.passed
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-red-100 text-red-700'
+                        r.passed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
                       }`}
                     >
                       {r.passed ? 'Pass' : 'Fail'}

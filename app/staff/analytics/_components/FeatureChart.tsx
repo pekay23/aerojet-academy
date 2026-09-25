@@ -35,13 +35,15 @@ export default function FeatureChart({ data }: FeatureChartProps) {
     <div className="grid gap-4 md:grid-cols-3">
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <CardTitle className="text-sm font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
             Adoption Rate
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-black text-aerojet-blue dark:text-aerojet-sky">{data.adoptionRate}%</div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <div className="text-aerojet-blue dark:text-aerojet-sky text-3xl font-black">
+            {data.adoptionRate}%
+          </div>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             {data.adopters.toLocaleString()} of {data.totalUsers.toLocaleString()} users
           </p>
         </CardContent>
@@ -49,21 +51,23 @@ export default function FeatureChart({ data }: FeatureChartProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <CardTitle className="text-sm font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
             Avg Time to Adopt
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-black text-aerojet-blue dark:text-aerojet-sky">
+          <div className="text-aerojet-blue dark:text-aerojet-sky text-3xl font-black">
             {data.avgTimeToAdoptDays !== null ? `${data.avgTimeToAdoptDays}d` : 'N/A'}
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Days from signup to first use</p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Days from signup to first use
+          </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <CardTitle className="text-sm font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
             Non-Adopters
           </CardTitle>
         </CardHeader>
@@ -71,23 +75,34 @@ export default function FeatureChart({ data }: FeatureChartProps) {
           <div className="text-3xl font-black text-red-600 dark:text-red-400">
             {data.totalUsers - data.adopters}
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Users who haven&apos;t tried this feature</p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Users who haven&apos;t tried this feature
+          </p>
         </CardContent>
       </Card>
 
       <Card className="md:col-span-3">
         <CardHeader>
-          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <CardTitle className="text-sm font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
             Adoption Breakdown
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={featureChartConfig} className="h-[250px] w-full">
+          <ChartContainer config={featureChartConfig} className="h-62.5 w-full">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
-              <ChartTooltip content={<ChartTooltipContent indicator="dot" formatter={(value: unknown, _name: unknown) => Number(value ?? 0).toLocaleString()} />} />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    formatter={(value: unknown, _name: unknown) =>
+                      Number(value ?? 0).toLocaleString()
+                    }
+                  />
+                }
+              />
               <Bar dataKey="value" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ChartContainer>

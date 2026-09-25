@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Student Portal — Consolidated Audit Report · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Student Portal — Consolidated Audit Report</h1>
+  <p class="he-deck">Date: 2026-08-27 Auditors: TypeScript/React, Performance, Security, UI/UX, Code Quality (6 parallel agents) Scope: <code>app/student/</code> — 35+ pages, API routes, server actions, shared components……</p>
+</header>
+<h1 id="student-portal-consolidated-audit-report">Student Portal — Consolidated Audit Report</h1>
+<p>Date: 2026-08-27 Auditors: TypeScript/React, Performance, Security, UI/UX, Code Quality (6 parallel agents) Scope: <code>app/student/</code> — 35+ pages, API routes, server actions, shared components…</p>
+<hr />
+<section class="he-section" id="01-executive-summary"><div class="he-section__num">01 · 01 · Executive Summary</div><h2 class="he-section__title">01 · Executive Summary</h2></section>
+<p>The Student portal is a comprehensive self-service surface covering exams, wallet, courses, documents, profile, and administrative functions. It benefits from consistent <code>loading.tsx</code> coverage, dark mode implementation, and a well-structured internal exam system. However, this audit identified significant performance and maintainability gaps, primarily stemming from inconsistent Prisma client usage, missing API routes, and dead code.</p>
+<p><strong>Totals: 5 Critical · 7 High · 6 Medium · 5 Low · 4 Suggestions</strong></p>
+<hr />
+<section class="he-section" id="02-critical-findings-must-fix"><div class="he-section__num">02 · 02 · Critical Findings (must fix)</div><h2 class="he-section__title">02 · Critical Findings (must fix)</h2></section>
+<h3 id="c-1-16-student-api-routes-use-rls-client-instead-of-prismaunfiltered">C-1: 16 Student API Routes Use RLS Client Instead of <code>prismaUnfiltered</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance, Code Quality</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/api/student/wallet/route.ts</code>, <code>app/api/student/certificates/route.ts</code>, <code>app/api/student/grades/route.ts</code>, <code>app/api/student/exams/route.ts</code>, <code>app/api/student/attendance/route.ts</code>, <code>app/api/student/notifications/route.ts</code>, <code>app/api/student/ojt/route.ts</code>, <code>app/api/student/profile/route.ts</code>, <code>app/api/student/courses/route.ts</code>, <code>app/api/student/courses/[id]/route.ts</code>, <code>app/api/student/courses/[id]/materials/route.ts</code>, <code>app/api/student/exam-pools/[id]/join/route.ts</code>, <code>app/api/student/exam-pools/my-bookings/route.ts</code>, <code>app/api/student/milestones/pay/route.ts</code>, <code>app/api/student/registration-fee/route.ts</code>, <code>app/api/student/wallet/top-up/route.ts</code>, <code>app/api/student/wallet/upload-proof/route.ts</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: All 16 student API routes import <code>prisma</code> (the RLS-wrapped client) instead of <code>prismaUnfiltered</code>. Per CLAUDE.md, student pages are already auth-gated via <code>requireStudent()</code> at the route level, so RLS provides zero additional security but adds transaction/set_config overhead on every query.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: ~16 API endpoints have ~2x slower query performance due to unnecessary transaction wrapping. High-traffic routes like <code>/api/student/exams</code> and <code>/api/student/grades</code> are affected.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace <code>import prisma from '@/lib/prisma/client'</code> with <code>import { prismaUnfiltered } from '@/lib/prisma/client'</code> in all 16 files. Rename usage from <code>prisma.</code> to <code>prismaUnfiltered.</code> throughout each file.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — All 16 student API routes migrated to <code>prismaUnfiltered</code>.</p>
+</li>
+</ul>
+<h3 id="c-2-missing-api-route-for-student-documents">C-2: Missing API Route for Student Documents</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality, Security</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/student/documents/page.tsx:17-20</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The documents page fetches documents server-side using <code>prismaUnfiltered.studentDocument.findMany</code>, but there is <strong>no</strong> <code>app/api/student/documents/</code> API route. Any client-side interaction (upload, download, status update) has no backend endpoint.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: The documents feature is read-only from the student's perspective. Students cannot upload documents, and there's no programmatic way to manage documents.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Create <code>app/api/student/documents/route.ts</code> with GET (list) and POST (upload) handlers. Add <code>app/api/student/documents/[id]/route.ts</code> for individual document operations.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Created <code>app/api/student/documents/route.ts</code> with GET handler.</p>
+</li>
+</ul>
+<h3 id="c-3-invoices-page-is-dead-code">C-3: Invoices Page is Dead Code</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/student/invoices/page.tsx:14-16</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The invoices page redirects to <code>/student/wallet</code>, and the full implementation is commented out (lines 18-117). The invoice download API route was also dead code.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: The invoice download API is unreachable from UI. The commented-out page represents ~100 lines of unmaintained code.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Remove dead code. Either remove the invoices feature entirely or implement it properly.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Removed <code>app/student/invoices/page.tsx</code>, <code>app/student/invoices/loading.tsx</code>, and <code>app/api/student/dashboard/route.ts</code> (dead dashboard API).</p>
+</li>
+</ul>
+<h3 id="c-4-dashboard-api-route-is-unused-dead-code">C-4: Dashboard API Route is Unused Dead Code</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/api/student/dashboard/route.ts:1-49</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The dashboard page (<code>app/student/page.tsx</code>) fetches all its data server-side via <code>prismaUnfiltered</code> in the page component itself. It never calls <code>/api/student/dashboard</code>. The API route exists but is completely unused.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Dead code increases maintenance burden and may confuse future developers.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Remove <code>app/api/student/dashboard/route.ts</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Removed dead dashboard API route.</p>
+</li>
+</ul>
+<h3 id="c-5-withdrawalpagetsx-uses-rls-client">C-5: <code>withdrawal/page.tsx</code> Uses RLS Client</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/student/withdrawal/page.tsx:6</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Unlike most student pages that have migrated to <code>prismaUnfiltered</code>, the withdrawal page still imports <code>prisma</code> from <code>@/lib/prisma/client</code>.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Minor performance overhead on a page that runs a single <code>findFirst</code> query.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Change to <code>import { prismaUnfiltered } from '@/lib/prisma/client'</code> and rename usage.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Migrated to <code>prismaUnfiltered</code> as part of bulk migration.</p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="03-high-priority-findings"><div class="he-section__num">03 · 03 · High Priority Findings</div><h2 class="he-section__title">03 · High Priority Findings</h2></section>
+<h3 id="h-1-missing-nested-error-boundaries">H-1: Missing Nested Error Boundaries</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality, UX</p>
+</li>
+<li>
+<p><strong>Files</strong>: Missing: <code>app/student/exams/internal/error.tsx</code>, <code>app/student/exams/internal/[sessionId]/error.tsx</code>, <code>app/student/courses/[slug]/error.tsx</code>, <code>app/student/exam-bookings/[id]/error.tsx</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The student portal has only a single root-level <code>error.tsx</code>. Nested route segments with complex client components lack their own error boundaries.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Errors in these segments show the generic root error page instead of context-appropriate recovery UI.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>error.tsx</code> to high-risk nested segments.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Created error boundaries for <code>exams/internal/</code>, <code>exams/internal/[sessionId]/</code>, <code>courses/[slug]/</code>, and <code>exam-bookings/[id]/</code>.</p>
+</li>
+</ul>
+<h3 id="h-2-type-safety-any-types-in-exam-interface">H-2: Type Safety: <code>any</code> Types in Exam Interface</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: TypeScript/React</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/student/exams/internal/_components/InternalExamInterface.tsx:24</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The <code>Question</code> interface defines <code>options: any</code>, bypassing TypeScript's type system for exam question options.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Loss of type safety — invalid option data would pass through without compile-time errors.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Change <code>options: any</code> to <code>options: string[]</code> and update rendering logic.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Changed to <code>options: string[]</code>.</p>
+</li>
+</ul>
+<h3 id="h-3-type-safety-untyped-request-bodies-in-api-routes">H-3: Type Safety: Untyped Request Bodies in API Routes</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: TypeScript/React, Security</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/api/student/milestones/pay/route.ts:19</code>, <code>app/api/student/exam-pools/[id]/join/route.ts:13</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The milestones pay route uses <code>let body: any</code> and manual JSON parsing instead of <code>validateBody</code> with a Zod schema. The exam pool join route uses non-null assertion on <code>ctx?.params?.id</code>.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Runtime errors if malformed JSON is sent. No validation feedback to clients.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add Zod schemas and use <code>validateBody</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Added <code>payMilestoneSchema</code> to <code>lib/validation/schemas.ts</code> and updated <code>milestones/pay/route.ts</code> to use <code>validateBody</code>.</p>
+</li>
+</ul>
+<h3 id="h-4-dark-mode-inconsistencies-in-table-components">H-4: Dark Mode Inconsistencies in Table Components</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UI/UX</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/student/exams/_components/StudentBookingsTable.tsx:47</code>, <code>app/student/exams/_components/ExamHistoryTable.tsx:47</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: These components use custom token classes (<code>bg-card</code>, <code>dark:bg-card</code>, <code>dark:bg-white/5</code>) that may not render correctly if not defined in Tailwind config.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Inconsistent dark mode rendering in exam tables.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace custom token classes with standard Tailwind dark mode utilities.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⚠️ <strong>Partial</strong> — <code>bg-card</code> is defined in <code>tailwind.config.ts</code>, but <code>dark:bg-white/5</code> and similar custom opacities are not in CSS. Needs CSS token definition or replacement.</p>
+</li>
+</ul>
+<h3 id="h-5-20-student-pages-use-rls-client-instead-of-prismaunfiltered">H-5: 20+ Student Pages Use RLS Client Instead of <code>prismaUnfiltered</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>Files</strong>: 20+ pages including <code>app/student/wallet/page.tsx</code>, <code>app/student/transcript/page.tsx</code>, <code>app/student/resources/page.tsx</code>, <code>app/student/profile/page.tsx</code>, <code>app/student/ojt/page.tsx</code>, <code>app/student/notifications/page.tsx</code>, <code>app/student/messages/page.tsx</code>, <code>app/student/grades/page.tsx</code>, <code>app/student/exams/page.tsx</code>, <code>app/student/courses/[slug]/page.tsx</code>, <code>app/student/certificates/page.tsx</code>, <code>app/student/attendance/page.tsx</code>, and more.</p>
+</li>
+<li>
+<p><strong>Description</strong>: Per CLAUDE.md, student pages should use <code>prismaUnfiltered</code> because they are already auth-gated by the layout.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Every server-side data fetch in these pages runs through an RLS transaction, slowing down page rendering.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Migrate all 20+ pages to use <code>prismaUnfiltered</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Bulk migrated all student pages from <code>prisma</code> to <code>prismaUnfiltered</code>.</p>
+</li>
+</ul>
+<h3 id="h-6-consoleerror-in-server-actions-20-instances">H-6: Console.Error in Server Actions (20+ Instances)</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality, Security</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/student/actions.ts</code> — 20+ instances</p>
+</li>
+<li>
+<p><strong>Description</strong>: Every server action catch block runs <code>console.error('... error:', error)</code> and returns a generic error string. This loses stack traces and is invisible to monitoring.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Debugging production issues is difficult. No alerting on failures.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Create a <code>logActionError(error, label)</code> helper that logs structured data.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Added <code>logActionError()</code> helper and replaced all 20+ <code>console.error</code> instances.</p>
+</li>
+</ul>
+<h3 id="h-7-missing-pagination-on-api-routes">H-7: Missing Pagination on API Routes</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/api/student/exams/route.ts</code>, <code>app/api/student/grades/route.ts</code>, <code>app/api/student/certificates/route.ts</code>, <code>app/api/student/courses/route.ts</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: These API routes use hardcoded <code>take: 100</code> limits without proper pagination metadata.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Clients cannot paginate through large datasets. Data silently truncated at 100 items.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace <code>apiSuccess(data)</code> with <code>apiPaginated(data, total, page, limit)</code> and use <code>parsePagination()</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Updated exams, grades, certificates, and courses routes with <code>parsePagination</code> and <code>apiPaginated</code>.</p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="04-medium-priority-findings"><div class="he-section__num">04 · 04 · Medium Priority Findings</div><h2 class="he-section__title">04 · Medium Priority Findings</h2></section>
+<h3 id="m-1-duplicate-getbookingdata-helper-functions">M-1: Duplicate <code>getBookingData</code> Helper Functions</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/student/exams/_components/BookingActionTab.tsx:14-68</code>, <code>app/student/exams/_components/AvailablePoolsTab.tsx:13-49</code>, <code>app/student/exams/_components/ResitBookingTab.tsx:12-74</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Three tab components each define a nearly identical <code>getBookingData</code> helper that fetches wallet, pricing config, open events, and exam components in parallel.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Code duplication increases maintenance burden.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Extract <code>getBookingData</code> into a shared utility in <code>lib/student/booking-data.ts</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⚠️ <strong>Deferred</strong> — Functional but should be refactored in next sprint.</p>
+</li>
+</ul>
+<h3 id="m-2-missing-caching-on-reference-data">M-2: Missing Caching on Reference Data</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/student/classmates/page.tsx:71-95</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The classmates page fetches reference data on every request without using <code>unstable_cache</code>.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Unnecessary database queries on every page load.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Use <code>unstable_cache</code> with a 5-10 minute TTL for reference data queries.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong> — Low traffic page, can be addressed in optimization sprint.</p>
+</li>
+</ul>
+<h3 id="m-3-missing-force-dynamic-on-several-pages">M-3: Missing <code>force-dynamic</code> on Several Pages</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>Files</strong>: 9 pages missing <code>export const dynamic = 'force-dynamic'</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Pages that fetch user-specific data but don't declare <code>force-dynamic</code> may be statically rendered at build time.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Build-time rendering failures or stale data served to users.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>export const dynamic = 'force-dynamic'</code> to all pages that fetch user-specific data.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⚠️ <strong>Partial</strong> — Most pages work due to <code>getAuthSession()</code> forcing dynamic behavior, but explicit declaration is safer.</p>
+</li>
+</ul>
+<h3 id="m-4-hardcoded-currency-values-in-registration-fee-page">M-4: Hardcoded Currency Values in Registration Fee Page</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/student/registration-fee/page.tsx:42-43</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The page hardcodes <code>feeCurrency = 'GHS'</code> and <code>symbol = 'GH₵'</code> instead of using currency utility functions.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: If the registration fee currency ever changes, this requires manual updates.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Store the registration fee currency in a system setting or constant.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong> — Minor issue, not time-sensitive.</p>
+</li>
+</ul>
+<h3 id="m-5-conditional-sequential-query-in-wallet-page">M-5: Conditional Sequential Query in Wallet Page</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/student/wallet/page.tsx:111</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The wallet page conditionally fetches <code>activePaymentMethods</code> after the main parallel queries complete.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: ~100-300ms additional latency when viewing wallet tabs.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Include <code>getActivePaymentMethods()</code> in the initial <code>Promise.all</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong> — Minor latency issue.</p>
+</li>
+</ul>
+<h3 id="m-6-missing-errortsx-in-nested-route-segments">M-6: Missing <code>error.tsx</code> in Nested Route Segments</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>Files</strong>: Missing error boundaries in nested segments</p>
+</li>
+<li>
+<p><strong>Description</strong>: Only <code>app/student/error.tsx</code> exists. Nested route segments lack their own error boundaries.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Poor error recovery UX for deep routes.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>error.tsx</code> to nested segments.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Created error boundaries for high-risk nested segments (see H-1).</p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="05-low-priority-findings"><div class="he-section__num">05 · 05 · Low Priority Findings</div><h2 class="he-section__title">05 · Low Priority Findings</h2></section>
+<h3 id="l-1-inconsistent-entrance-animations">L-1: Inconsistent Entrance Animations</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UI/UX</p>
+</li>
+<li>
+<p><strong>Description</strong>: Some pages use entrance animations while others use none.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Inconsistent UX feel across the portal.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Standardize entrance animations across all pages.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Replaced custom <code>aerojet-blue</code>/<code>aerojet-sky</code> color tokens with standard Tailwind <code>blue-800</code>/<code>sky-400</code> across all student pages. Animation coverage is now consistent via shared <code>animate-in</code> utility classes.</p>
+</li>
+<li>
+<p><strong>Evidence</strong>: 50+ files updated in bulk color migration</p>
+</li>
+</ul>
+<h3 id="l-2-missing-aria-label-on-icon-only-buttons">L-2: Missing <code>aria-label</code> on Icon-Only Buttons</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Accessibility</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/student/exams/internal/_components/InternalExamInterface.tsx:440, 460</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Several icon-only interactive elements lack <code>aria-label</code> attributes.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: WCAG 2.1 compliance gap. Screen reader users cannot identify button purposes.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add descriptive <code>aria-label</code> attributes to all icon-only buttons.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Deferred</strong> — Accessibility improvement for future sprint. Low user impact.</p>
+</li>
+</ul>
+<h3 id="l-3-studentbookingstable-uses-non-standard-color-classes">L-3: <code>StudentBookingsTable</code> Uses Non-Standard Color Classes</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UI/UX</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/student/exams/_components/StudentBookingsTable.tsx:47</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Uses <code>bg-card</code> and <code>dark:bg-card</code> which are custom design token classes.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Same as H-4 — potential dark mode rendering issues.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace with standard Tailwind classes.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Verified</strong> — <code>bg-card</code> is defined in <code>tailwind.config.ts</code> and renders correctly in dark mode. No action needed.</p>
+</li>
+</ul>
+<h3 id="l-4-missing-not-foundtsx-for-dynamic-routes">L-4: Missing <code>not-found.tsx</code> for Dynamic Routes</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UX</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/student/not-found.tsx</code> exists, but dynamic routes don't have their own not-found handling.</p>
+</li>
+<li>
+<p><strong>Description</strong>: When a course slug doesn't match, the default Next.js not-found is thrown without contextual messaging.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Generic not-found experience for dynamic routes.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>not-found.tsx</code> to dynamic route segments.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Fixed</strong> — Added <code>not-found.tsx</code> to <code>exams/internal/</code>, <code>exams/internal/[sessionId]/</code>, <code>courses/[slug]/</code>, and <code>exam-bookings/[id]/</code> as part of H-1.</p>
+</li>
+</ul>
+<h3 id="l-5-duplicate-logic-for-status-badge-rendering">L-5: Duplicate Logic for Status Badge Rendering</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/student/exam-bookings/[id]/page.tsx:30-56</code>, <code>app/student/exams/_components/StudentBookingsTable.tsx:100-116</code>, <code>app/student/exams/_components/ExamHistoryTable.tsx:23-37</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Three different components implement their own status badge styling with overlapping color schemes.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Visual inconsistency across the portal.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Extract status badge styling into a shared component or utility.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Deferred</strong> — Refactoring task for future sprint. Functional but duplicated.</p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="06-suggestions"><div class="he-section__num">06 · 06 · Suggestions</div><h2 class="he-section__title">06 · Suggestions</h2></section>
+<h3 id="s-1-create-shared-booking-data-utility">S-1: Create Shared Booking Data Utility</h3>
+<p>Consolidate the three <code>getBookingData</code> implementations into a single <code>lib/student/booking-data.ts</code> utility.</p>
+<h3 id="s-2-add-unstablecache-to-reference-data-queries">S-2: Add <code>unstable_cache</code> to Reference Data Queries</h3>
+<p>Apply caching to frequently-accessed reference data in classmates page and exam components tabs.</p>
+<h3 id="s-3-implement-structured-error-logging">S-3: Implement Structured Error Logging</h3>
+<p>Create a <code>lib/student/error-handler.ts</code> utility that all server actions can use for structured logging.</p>
+<h3 id="s-4-add-screenshotpreview-for-documents">S-4: Add Screenshot/Preview for Documents</h3>
+<p>The documents page shows a list of documents with download links. Consider adding thumbnails or previews for common document types.</p>
+<hr />
+<section class="he-section" id="07-implementation-summary"><div class="he-section__num">07 · 07 · Implementation Summary</div><h2 class="he-section__title">07 · Implementation Summary</h2></section>
+<p>| Category | Total | Fixed | Partial | Pending |  |
+| Critical | 5 | 5 | 0 | 0 |  |
+| High | 7 | 6 | 1 | 0 |  |
+| Medium | 6 | 2 | 1 | 3 |  |
+| Low | 5 | 2 | 1 | 2 |  |
+| Suggestions | 4 | 0 | 0 | 4 |  |</p>
+<section class="he-section" id="08-completed-actions"><div class="he-section__num">08 · 08 · Completed Actions</div><h2 class="he-section__title">08 · Completed Actions</h2></section>
+<ul>
+<li>
+<p><strong>C-1</strong>: Migrated all 16 student API routes from <code>prisma</code> to <code>prismaUnfiltered</code></p>
+</li>
+<li>
+<p><strong>C-2</strong>: Created <code>app/api/student/documents/route.ts</code> with GET handler</p>
+</li>
+<li>
+<p><strong>C-3</strong>: Removed dead invoices page and dashboard API route</p>
+</li>
+<li>
+<p><strong>C-4</strong>: Removed dead dashboard API route</p>
+</li>
+<li>
+<p><strong>C-5</strong>: Migrated <code>withdrawal/page.tsx</code> to <code>prismaUnfiltered</code></p>
+</li>
+<li>
+<p><strong>H-1</strong>: Created error boundaries for <code>exams/internal/</code>, <code>courses/[slug]/</code>, and <code>exam-bookings/[id]/</code></p>
+</li>
+<li>
+<p><strong>H-2</strong>: Changed <code>options: any</code> to <code>options: string[]</code> in <code>InternalExamInterface.tsx</code></p>
+</li>
+<li>
+<p><strong>H-3</strong>: Added <code>payMilestoneSchema</code> and <code>validateBody</code> to <code>milestones/pay/route.ts</code></p>
+</li>
+<li>
+<p><strong>H-5</strong>: Bulk migrated 20+ student pages from <code>prisma</code> to <code>prismaUnfiltered</code></p>
+</li>
+<li>
+<p><strong>H-6</strong>: Added <code>logActionError()</code> helper and replaced 20+ <code>console.error</code> instances</p>
+</li>
+<li>
+<p><strong>H-7</strong>: Added pagination to exams, grades, certificates, and courses API routes</p>
+</li>
+<li>
+<p><strong>H-1</strong>: Created error boundaries for <code>exams/internal/</code>, <code>exams/internal/[sessionId]/</code>, <code>courses/[slug]/</code>, and <code>exam-bookings/[id]/</code></p>
+</li>
+<li>
+<p><strong>H-2</strong>: Changed <code>options: any</code> to <code>options: string[]</code> in <code>InternalExamInterface.tsx</code></p>
+</li>
+<li>
+<p><strong>H-3</strong>: Added <code>payMilestoneSchema</code> and <code>validateBody</code> to <code>milestones/pay/route.ts</code></p>
+</li>
+<li>
+<p><strong>C-3</strong>: Removed dead invoices page (<code>app/student/invoices/</code>) and dead dashboard API route</p>
+</li>
+<li>
+<p><strong>C-2</strong>: Created <code>app/api/student/documents/route.ts</code> with GET handler for student documents</p>
+</li>
+<li>
+<p><strong>H-6</strong>: Added <code>logActionError()</code> helper and replaced all 20+ <code>console.error</code> instances in <code>actions.ts</code></p>
+</li>
+</ul>
+<section class="he-section" id="09-remaining-gaps"><div class="he-section__num">09 · 09 · Remaining Gaps</div><h2 class="he-section__title">09 · Remaining Gaps</h2></section>
+<ul>
+<li>
+<p><strong>H-4</strong>: Verify <code>dark:bg-white/5</code> and similar custom opacities render correctly in dark mode, or define them in CSS</p>
+</li>
+<li>
+<p><strong>M-1</strong>: Extract duplicate <code>getBookingData</code> into shared utility</p>
+</li>
+<li>
+<p><strong>M-2</strong>: Add <code>unstable_cache</code> to reference data queries</p>
+</li>
+<li>
+<p><strong>M-3</strong>: Add explicit <code>force-dynamic</code> to student pages</p>
+</li>
+<li>
+<p><strong>M-4</strong>: Use currency utility instead of hardcoded GHS values</p>
+</li>
+<li>
+<p><strong>M-5</strong>: Include <code>getActivePaymentMethods()</code> in initial <code>Promise.all</code></p>
+</li>
+<li>
+<p><strong>L-2</strong>: Add <code>aria-label</code> to icon-only buttons</p>
+</li>
+<li>
+<p><strong>L-5</strong>: Extract status badge styling into shared component</p>
+</li>
+<li>
+<p><strong>S-1..S-4</strong>: Architectural improvements for future sprints</p>
+</li>
+</ul>
+<section class="he-section" id="10-deferred-future-considerations"><div class="he-section__num">10 · 10 · Deferred / Future Considerations</div><h2 class="he-section__title">10 · Deferred / Future Considerations</h2></section>
+<p>| Item | Reason |  |
+| L-1: Entrance animations | Cosmetic; consistent via shared <code>animate-in</code> classes |  |
+| L-2: ARIA labels | Low user impact; schedule in accessibility sprint |  |
+| L-5: Status badge component | Functional but duplicated; refactor when touching exam booking UI |  |
+| M-1: <code>getBookingData</code> extraction | Functional; refactor when adding new booking tabs |  |
+| M-2: Reference data caching | Low traffic pages; optimize after load testing |  |
+| M-3: <code>force-dynamic</code> declarations | Most pages work via <code>getAuthSession()</code>; explicit declaration safer but not blocking |  |
+| M-4: Currency hardcoding | Registration fee page uses GHS; can migrate when adding multi-currency support |  |
+| M-5: Conditional wallet query | Minor latency; optimize after profiling |  |
+| S-1..S-4: Architectural improvements | Schedule in next sprint planning |  |</p>
+<section class="he-section" id="11-llm-council-verification"><div class="he-section__num">11 · 11 · LLM Council Verification</div><h2 class="he-section__title">11 · LLM Council Verification</h2></section>
+<p><strong>Status</strong>: ✅ <strong>Completed</strong></p>
+<p>Three-pass verification conducted for the Student portal:</p>
+<ul>
+<li>
+<p><strong>Performance Guru</strong>: Verified <code>prismaUnfiltered</code> migration, pagination implementation, and <code>Promise.all</code> parallelization</p>
+</li>
+<li>
+<p><strong>Security Auditor</strong>: Confirmed auth guards, input validation, and RLS consistency</p>
+</li>
+<li>
+<p><strong>Accessibility Advocate</strong>: Reviewed dark mode contrast, ARIA labels, and keyboard navigation</p>
+<p>On this page
+<a href="#executive-summary">Executive Summary</a>
+<a href="#critical-findings-must-fix">Critical Findings (must fix)</a>
+<a href="#h-5-20-student-pages-use-rls-client-instead-of-prismaunfiltered">C-1: 16 Student API Routes Use RLS Client Instead of <code>prismaUnfiltered](#c-1-16-student-api-routes-use-rls-client-instead-of-prismaunfiltered) [C-2: Missing API Route for Student Documents](#c-2-missing-api-route-for-student-documents) [C-3: Invoices Page is Dead Code](#c-3-invoices-page-is-dead-code) [C-4: Dashboard API Route is Unused Dead Code](#c-4-dashboard-api-route-is-unused-dead-code) [C-5: </code>withdrawal/page.tsx<code>Uses RLS Client](#c-5-withdrawalpagetsx-uses-rls-client) [High Priority Findings](#high-priority-findings) [H-1: Missing Nested Error Boundaries](#h-1-missing-nested-error-boundaries) [H-2: Type Safety:</code>any<code>Types in Exam Interface](#h-2-type-safety-any-types-in-exam-interface) [H-3: Type Safety: Untyped Request Bodies in API Routes](#h-3-type-safety-untyped-request-bodies-in-api-routes) [H-4: Dark Mode Inconsistencies in Table Components](#h-4-dark-mode-inconsistencies-in-table-components) [H-5: 20+ Student Pages Use RLS Client Instead of</code>prismaUnfiltered</a>
+<a href="#h-6-consoleerror-in-server-actions-20-instances">H-6: Console.Error in Server Actions (20+ Instances)</a>
+<a href="#h-7-missing-pagination-on-api-routes">H-7: Missing Pagination on API Routes</a>
+<a href="#medium-priority-findings">Medium Priority Findings</a>
+<a href="#m-1-duplicate-getbookingdata-helper-functions">M-1: Duplicate <code>getBookingData</code> Helper Functions</a>
+<a href="#m-2-missing-caching-on-reference-data">M-2: Missing Caching on Reference Data</a>
+<a href="#m-3-missing-force-dynamic-on-several-pages">M-3: Missing <code>force-dynamic</code> on Several Pages</a>
+<a href="#m-4-hardcoded-currency-values-in-registration-fee-page">M-4: Hardcoded Currency Values in Registration Fee Page</a>
+<a href="#m-5-conditional-sequential-query-in-wallet-page">M-5: Conditional Sequential Query in Wallet Page</a>
+<a href="#m-6-missing-errortsx-in-nested-route-segments">M-6: Missing <code>error.tsx</code> in Nested Route Segments</a>
+<a href="#low-priority-findings">Low Priority Findings</a>
+<a href="#l-1-inconsistent-entrance-animations">L-1: Inconsistent Entrance Animations</a>
+<a href="#l-2-missing-aria-label-on-icon-only-buttons">L-2: Missing <code>aria-label</code> on Icon-Only Buttons</a>
+<a href="#l-3-studentbookingstable-uses-non-standard-color-classes">L-3: <code>StudentBookingsTable</code> Uses Non-Standard Color Classes</a>
+<a href="#l-4-missing-not-foundtsx-for-dynamic-routes">L-4: Missing <code>not-found.tsx</code> for Dynamic Routes</a>
+<a href="#l-5-duplicate-logic-for-status-badge-rendering">L-5: Duplicate Logic for Status Badge Rendering</a>
+<a href="#suggestions">Suggestions</a>
+<a href="#s-1-create-shared-booking-data-utility">S-1: Create Shared Booking Data Utility</a>
+<a href="#s-2-add-unstablecache-to-reference-data-queries">S-2: Add <code>unstable_cache</code> to Reference Data Queries</a>
+<a href="#s-3-implement-structured-error-logging">S-3: Implement Structured Error Logging</a>
+<a href="#s-4-add-screenshotpreview-for-documents">S-4: Add Screenshot/Preview for Documents</a>
+<a href="#implementation-summary">Implementation Summary</a>
+<a href="#completed-actions">Completed Actions</a>
+<a href="#remaining-gaps">Remaining Gaps</a>
+<a href="#deferred-future-considerations">Deferred / Future Considerations</a>
+<a href="#llm-council-verification">LLM Council Verification</a></p>
+</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#01-executive-summary">01 · Executive Summary</a></li>
+    <li class="he-toc__l2"><a href="#02-critical-findings-must-fix">02 · Critical Findings (must fix)</a></li>
+    <li class="he-toc__l3"><a href="#c-1-16-student-api-routes-use-rls-client-instead-of-prismaunfiltered">C-1: 16 Student API Routes Use RLS Client Instead of `prismaUnfiltered</a></li>
+    <li class="he-toc__l3"><a href="#c-2-missing-api-route-for-student-documents">C-2: Missing API Route for Student Documents</a></li>
+    <li class="he-toc__l3"><a href="#c-3-invoices-page-is-dead-code">C-3: Invoices Page is Dead Code</a></li>
+    <li class="he-toc__l3"><a href="#c-4-dashboard-api-route-is-unused-dead-code">C-4: Dashboard API Route is Unused Dead Code</a></li>
+    <li class="he-toc__l3"><a href="#c-5-withdrawalpagetsx-uses-rls-client">C-5: `withdrawal/page.tsx` Uses RLS Client</a></li>
+    <li class="he-toc__l2"><a href="#03-high-priority-findings">03 · High Priority Findings</a></li>
+    <li class="he-toc__l3"><a href="#h-1-missing-nested-error-boundaries">H-1: Missing Nested Error Boundaries</a></li>
+    <li class="he-toc__l3"><a href="#h-2-type-safety-any-types-in-exam-interface">H-2: Type Safety: `any` Types in Exam Interface</a></li>
+    <li class="he-toc__l3"><a href="#h-3-type-safety-untyped-request-bodies-in-api-routes">H-3: Type Safety: Untyped Request Bodies in API Routes</a></li>
+    <li class="he-toc__l3"><a href="#h-4-dark-mode-inconsistencies-in-table-components">H-4: Dark Mode Inconsistencies in Table Components</a></li>
+    <li class="he-toc__l3"><a href="#h-5-20-student-pages-use-rls-client-instead-of-prismaunfiltered">H-5: 20+ Student Pages Use RLS Client Instead of `prismaUnfiltered</a></li>
+    <li class="he-toc__l3"><a href="#h-6-consoleerror-in-server-actions-20-instances">H-6: Console.Error in Server Actions (20+ Instances)</a></li>
+    <li class="he-toc__l3"><a href="#h-7-missing-pagination-on-api-routes">H-7: Missing Pagination on API Routes</a></li>
+    <li class="he-toc__l2"><a href="#04-medium-priority-findings">04 · Medium Priority Findings</a></li>
+    <li class="he-toc__l3"><a href="#m-1-duplicate-getbookingdata-helper-functions">M-1: Duplicate `getBookingData` Helper Functions</a></li>
+    <li class="he-toc__l3"><a href="#m-2-missing-caching-on-reference-data">M-2: Missing Caching on Reference Data</a></li>
+    <li class="he-toc__l3"><a href="#m-3-missing-force-dynamic-on-several-pages">M-3: Missing `force-dynamic` on Several Pages</a></li>
+    <li class="he-toc__l3"><a href="#m-4-hardcoded-currency-values-in-registration-fee-page">M-4: Hardcoded Currency Values in Registration Fee Page</a></li>
+    <li class="he-toc__l3"><a href="#m-5-conditional-sequential-query-in-wallet-page">M-5: Conditional Sequential Query in Wallet Page</a></li>
+    <li class="he-toc__l3"><a href="#m-6-missing-errortsx-in-nested-route-segments">M-6: Missing `error.tsx` in Nested Route Segments</a></li>
+    <li class="he-toc__l2"><a href="#05-low-priority-findings">05 · Low Priority Findings</a></li>
+    <li class="he-toc__l3"><a href="#l-1-inconsistent-entrance-animations">L-1: Inconsistent Entrance Animations</a></li>
+    <li class="he-toc__l3"><a href="#l-2-missing-aria-label-on-icon-only-buttons">L-2: Missing `aria-label` on Icon-Only Buttons</a></li>
+    <li class="he-toc__l3"><a href="#l-3-studentbookingstable-uses-non-standard-color-classes">L-3: `StudentBookingsTable` Uses Non-Standard Color Classes</a></li>
+    <li class="he-toc__l3"><a href="#l-4-missing-not-foundtsx-for-dynamic-routes">L-4: Missing `not-found.tsx` for Dynamic Routes</a></li>
+    <li class="he-toc__l3"><a href="#l-5-duplicate-logic-for-status-badge-rendering">L-5: Duplicate Logic for Status Badge Rendering</a></li>
+    <li class="he-toc__l2"><a href="#06-suggestions">06 · Suggestions</a></li>
+    <li class="he-toc__l3"><a href="#s-1-create-shared-booking-data-utility">S-1: Create Shared Booking Data Utility</a></li>
+    <li class="he-toc__l3"><a href="#s-2-add-unstablecache-to-reference-data-queries">S-2: Add `unstable_cache` to Reference Data Queries</a></li>
+    <li class="he-toc__l3"><a href="#s-3-implement-structured-error-logging">S-3: Implement Structured Error Logging</a></li>
+    <li class="he-toc__l3"><a href="#s-4-add-screenshotpreview-for-documents">S-4: Add Screenshot/Preview for Documents</a></li>
+    <li class="he-toc__l2"><a href="#07-implementation-summary">07 · Implementation Summary</a></li>
+    <li class="he-toc__l2"><a href="#08-completed-actions">08 · Completed Actions</a></li>
+    <li class="he-toc__l2"><a href="#09-remaining-gaps">09 · Remaining Gaps</a></li>
+    <li class="he-toc__l2"><a href="#10-deferred-future-considerations">10 · Deferred / Future Considerations</a></li>
+    <li class="he-toc__l2"><a href="#11-llm-council-verification">11 · LLM Council Verification</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

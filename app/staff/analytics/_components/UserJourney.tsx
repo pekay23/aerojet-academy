@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -80,7 +81,7 @@ export default function UserJourney() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <UserCheck className="h-5 w-5 text-aerojet-sky" />
+            <UserCheck className="text-aerojet-sky h-5 w-5" />
             User Journey
           </CardTitle>
           <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -138,7 +139,7 @@ function UserProfileCard({ user }: { user: UserProfile }) {
     <Card className="overflow-hidden">
       <CardContent className="p-0">
         <div className="flex flex-col sm:flex-row">
-          <div className="flex h-24 w-full items-center justify-center bg-gradient-to-br from-aerojet-blue/10 to-aerojet-sky/10 sm:h-auto sm:w-24 dark:from-aerojet-blue/20 dark:to-aerojet-sky/20">
+          <div className="from-aerojet-blue/10 to-aerojet-sky/10 dark:from-aerojet-blue/20 dark:to-aerojet-sky/20 flex h-24 w-full items-center justify-center bg-gradient-to-br sm:h-auto sm:w-24">
             {user.avatarUrl ? (
               <Image
                 src={user.avatarUrl}
@@ -148,7 +149,7 @@ function UserProfileCard({ user }: { user: UserProfile }) {
                 className="h-20 w-20 rounded-full object-cover ring-4 ring-white dark:ring-slate-900"
               />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-aerojet-blue text-2xl font-black text-white ring-4 ring-white dark:ring-slate-900">
+              <div className="bg-aerojet-blue flex h-20 w-20 items-center justify-center rounded-full text-2xl font-black text-white ring-4 ring-white dark:ring-slate-900">
                 {initials}
               </div>
             )}
@@ -170,7 +171,7 @@ function UserProfileCard({ user }: { user: UserProfile }) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-aerojet-blue/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-aerojet-blue dark:bg-aerojet-blue/20">
+                <span className="bg-aerojet-blue/10 text-aerojet-blue dark:bg-aerojet-blue/20 rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase">
                   {user.role}
                 </span>
               </div>
@@ -178,12 +179,12 @@ function UserProfileCard({ user }: { user: UserProfile }) {
             <div className="mt-4 flex flex-wrap gap-4 border-t border-slate-100 pt-3 dark:border-slate-800">
               <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                 <Calendar className="h-3.5 w-3.5" />
-                <span>Joined {new Date(user.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                <span>Joined {formatDate(user.createdAt)}</span>
               </div>
               {user.lastSeenAt && (
                 <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                   <Clock className="h-3.5 w-3.5" />
-                  <span>Active {new Date(user.lastSeenAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  <span>Active {formatDate(user.lastSeenAt)}</span>
                 </div>
               )}
             </div>

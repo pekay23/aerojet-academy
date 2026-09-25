@@ -55,6 +55,15 @@ prisma/seeds/
 # docs build output
 docs/html/
 
+# proprietary/internal docs (local only)
+docs/compliance/
+docs/audits/
+docs/plans/
+docs/operations/
+
+# proprietary seed data (local only)
+scripts/easa-seed/
+
 # IDE
 .idea/
 .vscode/

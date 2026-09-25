@@ -309,7 +309,7 @@ export default function StaffTopBar({
             >
               <Bell className="h-4 w-4" />
               {notifCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
                   {formatBadge(notifCount)}
                 </span>
               )}
@@ -327,7 +327,7 @@ export default function StaffTopBar({
             {!hasAnyPending ? (
               <div className="px-4 py-6 text-center text-sm text-slate-400">No pending actions</div>
             ) : (
-              <div className="max-h-[340px] overflow-y-auto">
+              <div className="max-h-85 overflow-y-auto">
                 {/* Pending Applicants */}
                 {hasPendingApplicants && (
                   <>
@@ -513,7 +513,7 @@ export default function StaffTopBar({
             >
               <MessageSquare className="h-4 w-4" />
               {msgCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-blue-500 px-1 text-[9px] font-bold text-white">
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-500 px-1 text-[9px] font-bold text-white">
                   {formatBadge(msgCount)}
                 </span>
               )}
@@ -552,7 +552,7 @@ export default function StaffTopBar({
                 <p className="mt-1 text-xs text-slate-400">Conversations will appear here</p>
               </div>
             ) : (
-              <div className="max-h-[300px] overflow-y-auto">
+              <div className="max-h-75 overflow-y-auto">
                 {messages.map((msg) => {
                   const preview = msg.subject || msg.body.substring(0, 60)
                   const senderName = msg.sender.name || msg.sender.email

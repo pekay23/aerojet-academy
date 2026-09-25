@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Wallet, Package } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -123,7 +123,7 @@ export default async function BookingActionTab({
   type: 'group' | 'individual' | 'twin' | 'four-pack'
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const [userBundle, bookingData] = await Promise.all([
     getUserActiveBundle(session.user.id),

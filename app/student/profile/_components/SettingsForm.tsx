@@ -91,7 +91,7 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
                 }}
                 className="peer sr-only"
               />
-              <div className="peer h-6 w-11 rounded-full bg-slate-200 peer-checked:bg-blue-600 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-slate-600 dark:bg-slate-700"></div>
+              <div className="peer h-6 w-11 rounded-full bg-slate-200 peer-checked:bg-blue-600 after:absolute after:top-0.5 after:left-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-slate-600 dark:bg-slate-700"></div>
             </label>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
 
       {/* Appearance Section */}
       <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
-        <h3 className="mb-6 flex items-center gap-2 border-b border-slate-50 pb-4 text-lg font-black text-aerojet-blue dark:border-slate-800 dark:text-white">
+        <h3 className="text-aerojet-blue mb-6 flex items-center gap-2 border-b border-slate-50 pb-4 text-lg font-black dark:border-slate-800 dark:text-white">
           <Sun className="h-5 w-5 text-amber-500 dark:text-amber-400" />
           Appearance Settings
         </h3>

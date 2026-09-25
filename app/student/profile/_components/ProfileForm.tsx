@@ -1,15 +1,11 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { toast } from 'sonner'
-import {
-  User as UserIcon,
-  Loader2,
-  GraduationCap,
-  BadgeCheck
-} from 'lucide-react'
+import { User as UserIcon, Loader2, GraduationCap, BadgeCheck } from 'lucide-react'
 import { updateStudentProfile } from '@/app/student/actions'
 import { useProfileDirty } from './ProfileTabs'
 
@@ -50,7 +46,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
   // Helper to format date
   const formatDate = (date: Date | string | null) => {
     if (!date) return 'Not provided'
-    return new Date(date).toLocaleDateString()
+    return formatDate(date)
   }
 
   const fullName = user.profile

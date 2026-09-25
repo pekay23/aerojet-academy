@@ -87,14 +87,28 @@ export default function WithdrawalsManager({
   const [optimisticStatus, setOptimisticStatus] = useState<Record<string, string>>({})
   const [loadingAction, setLoadingAction] = useState<string | null>(null)
 
-  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; request: WR | null }>({ open: false, request: null })
-  const [approveDialog, setApproveDialog] = useState<{ open: boolean; request: WR | null }>({ open: false, request: null })
-  const [rejectDialog, setRejectDialog] = useState<{ open: boolean; request: WR | null; reason: string }>({
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; request: WR | null }>({
+    open: false,
+    request: null,
+  })
+  const [approveDialog, setApproveDialog] = useState<{ open: boolean; request: WR | null }>({
+    open: false,
+    request: null,
+  })
+  const [rejectDialog, setRejectDialog] = useState<{
+    open: boolean
+    request: WR | null
+    reason: string
+  }>({
     open: false,
     request: null,
     reason: '',
   })
-  const [initiateDialog, setInitiateDialog] = useState<{ open: boolean; studentId: string; reason: string }>({
+  const [initiateDialog, setInitiateDialog] = useState<{
+    open: boolean
+    studentId: string
+    reason: string
+  }>({
     open: false,
     studentId: '',
     reason: '',
@@ -114,26 +128,17 @@ export default function WithdrawalsManager({
   const totalPages = Math.ceil(filteredRequests.length / PAGE_SIZE)
   const paginatedRequests = filteredRequests.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const handleConfirm = useCallback(
-    (request: WR) => {
-      setConfirmDialog({ open: true, request })
-    },
-    []
-  )
+  const handleConfirm = useCallback((request: WR) => {
+    setConfirmDialog({ open: true, request })
+  }, [])
 
-  const handleApprove = useCallback(
-    (request: WR) => {
-      setApproveDialog({ open: true, request })
-    },
-    []
-  )
+  const handleApprove = useCallback((request: WR) => {
+    setApproveDialog({ open: true, request })
+  }, [])
 
-  const handleReject = useCallback(
-    (request: WR) => {
-      setRejectDialog({ open: true, request, reason: '' })
-    },
-    []
-  )
+  const handleReject = useCallback((request: WR) => {
+    setRejectDialog({ open: true, request, reason: '' })
+  }, [])
 
   const handleInitiate = useCallback(() => {
     setInitiateDialog({ open: true, studentId: '', reason: '' })
@@ -218,7 +223,10 @@ export default function WithdrawalsManager({
 
     setLoadingAction('initiate')
 
-    const result = await staffInitiateWithdrawal(initiateDialog.studentId, initiateDialog.reason.trim())
+    const result = await staffInitiateWithdrawal(
+      initiateDialog.studentId,
+      initiateDialog.reason.trim()
+    )
 
     setLoadingAction(null)
     if (result.error) {
@@ -245,8 +253,12 @@ export default function WithdrawalsManager({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 justify-between">
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Filter withdrawal requests by status">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div
+          className="flex flex-wrap gap-2"
+          role="group"
+          aria-label="Filter withdrawal requests by status"
+        >
           {FILTER_OPTIONS.map((f) => (
             <button
               key={f.key}
@@ -277,20 +289,37 @@ export default function WithdrawalsManager({
         )}
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800" role="region" aria-label="Withdrawal requests table" tabIndex={0}>
+      <div
+        className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800"
+        role="region"
+        aria-label="Withdrawal requests table"
+        tabIndex={0}
+      >
         <table className="w-full text-sm" role="grid" aria-label="Withdrawal requests">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/80 text-left dark:border-slate-800 dark:bg-slate-900/50">
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" scope="col">
+              <th
+                className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                scope="col"
+              >
                 Student
               </th>
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" scope="col">
+              <th
+                className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                scope="col"
+              >
                 Reason
               </th>
-              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase" scope="col">
+              <th
+                className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                scope="col"
+              >
                 Status
               </th>
-              <th className="px-4 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase" scope="col">
+              <th
+                className="px-4 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                scope="col"
+              >
                 Actions
               </th>
             </tr>
@@ -299,27 +328,31 @@ export default function WithdrawalsManager({
             {paginatedRequests.map((r, index) => {
               const studentNumber = index + 1 + (page - 1) * PAGE_SIZE
               const profile = r.user.profile
-              const name = profile
-                ? `${profile.firstName} ${profile.lastName}`
-                : r.user.email
-              const displayName = profile && profile.lastName === 'One' && profile.firstName === 'Student'
-                ? `Student ${studentNumber}`
-                : name
+              const name = profile ? `${profile.firstName} ${profile.lastName}` : r.user.email
+              const displayName =
+                profile && profile.lastName === 'One' && profile.firstName === 'Student'
+                  ? `Student ${studentNumber}`
+                  : name
               const displayStatus = getDisplayStatus(r)
               const canConfirm = displayStatus === 'REQUESTED'
-              const canApprove = isAdmin && (displayStatus === 'REQUESTED' || displayStatus === 'STAFF_CONFIRMED')
-              const canReject = ['REQUESTED', 'STAFF_CONFIRMED', 'ADMIN_APPROVED'].includes(displayStatus)
+              const canApprove =
+                isAdmin && (displayStatus === 'REQUESTED' || displayStatus === 'STAFF_CONFIRMED')
+              const canReject = ['REQUESTED', 'STAFF_CONFIRMED', 'ADMIN_APPROVED'].includes(
+                displayStatus
+              )
               const isLoading = loadingAction === r.id
 
               return (
                 <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
                   <td className="px-4 py-3">
-                    <div className="font-medium text-slate-800 dark:text-slate-200">{displayName}</div>
+                    <div className="font-medium text-slate-800 dark:text-slate-200">
+                      {displayName}
+                    </div>
                     <div className="text-xs text-slate-400">
                       {r.user.studentProfile?.studentId ?? r.user.email}
                     </div>
                   </td>
-                  <td className="max-w-[320px] px-4 py-3 text-slate-600 dark:text-slate-300">
+                  <td className="max-w-80 px-4 py-3 text-slate-600 dark:text-slate-300">
                     <p className="line-clamp-2">{r.reason}</p>
                     {r.rejectedReason && (
                       <p className="mt-1 text-xs text-red-500">Note: {r.rejectedReason}</p>
@@ -435,16 +468,23 @@ export default function WithdrawalsManager({
         </div>
       )}
 
-      <Dialog open={confirmDialog.open} onOpenChange={(open) => !open && setConfirmDialog({ open: false, request: null })}>
+      <Dialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => !open && setConfirmDialog({ open: false, request: null })}
+      >
         <DialogContent aria-modal="true">
           <DialogHeader>
             <DialogTitle>Confirm Withdrawal</DialogTitle>
             <DialogDescription>
-              Are you sure you want to confirm this withdrawal request? This will move it to Staff Confirmed status.
+              Are you sure you want to confirm this withdrawal request? This will move it to Staff
+              Confirmed status.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmDialog({ open: false, request: null })}>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialog({ open: false, request: null })}
+            >
               Cancel
             </Button>
             <Button
@@ -458,26 +498,42 @@ export default function WithdrawalsManager({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={approveDialog.open} onOpenChange={(open) => !open && setApproveDialog({ open: false, request: null })}>
+      <Dialog
+        open={approveDialog.open}
+        onOpenChange={(open) => !open && setApproveDialog({ open: false, request: null })}
+      >
         <DialogContent aria-modal="true">
           <DialogHeader>
             <DialogTitle>Approve Withdrawal</DialogTitle>
             <DialogDescription>
-              This will archive the student and mark all enrollments as withdrawn. This action cannot be undone.
+              This will archive the student and mark all enrollments as withdrawn. This action
+              cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setApproveDialog({ open: false, request: null })}>
+            <Button
+              variant="outline"
+              onClick={() => setApproveDialog({ open: false, request: null })}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={executeApprove} disabled={isPending || !!loadingAction}>
+            <Button
+              variant="destructive"
+              onClick={executeApprove}
+              disabled={isPending || !!loadingAction}
+            >
               Approve
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={rejectDialog.open} onOpenChange={(open) => !open && setRejectDialog({ open: false, request: null, reason: '' })}>
+      <Dialog
+        open={rejectDialog.open}
+        onOpenChange={(open) =>
+          !open && setRejectDialog({ open: false, request: null, reason: '' })
+        }
+      >
         <DialogContent aria-modal="true">
           <DialogHeader>
             <DialogTitle>Reject Withdrawal</DialogTitle>
@@ -487,7 +543,7 @@ export default function WithdrawalsManager({
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="reject-reason" className="block text-sm font-medium mb-1">
+              <Label htmlFor="reject-reason" className="mb-1 block text-sm font-medium">
                 Reason for rejection
               </Label>
               <Textarea
@@ -501,17 +557,29 @@ export default function WithdrawalsManager({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectDialog({ open: false, request: null, reason: '' })}>
+            <Button
+              variant="outline"
+              onClick={() => setRejectDialog({ open: false, request: null, reason: '' })}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={executeReject} disabled={isPending || !!loadingAction}>
+            <Button
+              variant="destructive"
+              onClick={executeReject}
+              disabled={isPending || !!loadingAction}
+            >
               Reject
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={initiateDialog.open} onOpenChange={(open) => !open && setInitiateDialog({ open: false, studentId: '', reason: '' })}>
+      <Dialog
+        open={initiateDialog.open}
+        onOpenChange={(open) =>
+          !open && setInitiateDialog({ open: false, studentId: '', reason: '' })
+        }
+      >
         <DialogContent aria-modal="true">
           <DialogHeader>
             <DialogTitle>Initiate Withdrawal</DialogTitle>
@@ -520,46 +588,50 @@ export default function WithdrawalsManager({
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-<div>
-               <Label htmlFor="initiate-student" className="block text-sm font-medium mb-1">
-                 Student
-               </Label>
-               <select
-                 id="initiate-student"
-                 value={initiateDialog.studentId}
-                 onChange={(e) => setInitiateDialog((prev) => ({ ...prev, studentId: e.target.value }))}
-onKeyDown={(e) => {
-                    if (e.key === 'ArrowDown' && !initiateDialog.studentId) {
-                      e.preventDefault()
-                      const firstOption = e.currentTarget.querySelector('option:not([value=""])') as HTMLOptionElement | null
-                      if (firstOption) {
-                        const newValue = firstOption.value
-                        setInitiateDialog((prev) => ({ ...prev, studentId: newValue }))
-                        e.currentTarget.value = newValue
-                        e.currentTarget.dispatchEvent(new Event('change', { bubbles: true }))
-                      }
-                    }
-                    if (e.key === 'Enter') {
-                      e.currentTarget.blur()
-                    }
-                  }}
-                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                 aria-required="true"
-                 role="combobox"
-                 aria-label="Select student"
-               >
-                 <option value="">Select a student</option>
-                 {students.map((s) => (
-                   <option key={s.id} value={s.id}>
-                     {s.profile
-                       ? `${s.profile.firstName} ${s.profile.lastName} (${s.email})`
-                       : s.email}
-                   </option>
-                 ))}
-               </select>
-             </div>
             <div>
-              <Label htmlFor="initiate-reason" className="block text-sm font-medium mb-1">
+              <Label htmlFor="initiate-student" className="mb-1 block text-sm font-medium">
+                Student
+              </Label>
+              <select
+                id="initiate-student"
+                value={initiateDialog.studentId}
+                onChange={(e) =>
+                  setInitiateDialog((prev) => ({ ...prev, studentId: e.target.value }))
+                }
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowDown' && !initiateDialog.studentId) {
+                    e.preventDefault()
+                    const firstOption = e.currentTarget.querySelector(
+                      'option:not([value=""])'
+                    ) as HTMLOptionElement | null
+                    if (firstOption) {
+                      const newValue = firstOption.value
+                      setInitiateDialog((prev) => ({ ...prev, studentId: newValue }))
+                      e.currentTarget.value = newValue
+                      e.currentTarget.dispatchEvent(new Event('change', { bubbles: true }))
+                    }
+                  }
+                  if (e.key === 'Enter') {
+                    e.currentTarget.blur()
+                  }
+                }}
+                className="border-input bg-background ring-offset-background focus:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                aria-required="true"
+                role="combobox"
+                aria-label="Select student"
+              >
+                <option value="">Select a student</option>
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.profile
+                      ? `${s.profile.firstName} ${s.profile.lastName} (${s.email})`
+                      : s.email}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="initiate-reason" className="mb-1 block text-sm font-medium">
                 Reason
               </Label>
               <Textarea
@@ -572,14 +644,17 @@ onKeyDown={(e) => {
               />
             </div>
           </div>
-<DialogFooter>
-             <Button variant="outline" onClick={() => setInitiateDialog({ open: false, studentId: '', reason: '' })}>
-               Cancel
-             </Button>
-             <Button onClick={executeInitiate} disabled={isPending || !!loadingAction}>
-               Initiate
-             </Button>
-           </DialogFooter>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setInitiateDialog({ open: false, studentId: '', reason: '' })}
+            >
+              Cancel
+            </Button>
+            <Button onClick={executeInitiate} disabled={isPending || !!loadingAction}>
+              Initiate
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -1,8 +1,18 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { Loader2, RefreshCcw, BookOpen, Calendar, AlertTriangle, Wallet, CheckCircle2, X } from 'lucide-react'
+import {
+  Loader2,
+  RefreshCcw,
+  BookOpen,
+  Calendar,
+  AlertTriangle,
+  Wallet,
+  CheckCircle2,
+  X,
+} from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
 import { bookResitExamAction } from '@/app/student/actions'
 
@@ -176,7 +186,8 @@ function ResitContent({
         </div>
         <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No failed exams</h3>
         <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-          Great news! You don&apos;t have any failed exams that require a resit. Keep up the good work!
+          Great news! You don&apos;t have any failed exams that require a resit. Keep up the good
+          work!
         </p>
       </div>
     )
@@ -193,7 +204,8 @@ function ResitContent({
               You have {totalFreeResits} free resit{totalFreeResits > 1 ? 's' : ''} available
             </p>
             <p className="mt-0.5 text-xs text-emerald-600 dark:text-emerald-400">
-              Included with your bundle booking{freeResits.length > 1 ? 's' : ''}. Free resits will be applied automatically.
+              Included with your bundle booking{freeResits.length > 1 ? 's' : ''}. Free resits will
+              be applied automatically.
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {freeResits.map((r) => (
@@ -213,7 +225,10 @@ function ResitContent({
       <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-5 py-4 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/10 dark:text-amber-300">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
         <div>
-          <p className="font-bold">Resit Fee: {currencySymbol}{resitPrice.toFixed(2)} per exam</p>
+          <p className="font-bold">
+            Resit Fee: {currencySymbol}
+            {resitPrice.toFixed(2)} per exam
+          </p>
           <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">
             Resit fees are charged outside of bundles and subject to seat availability.
             {totalFreeResits > 0 && ' Free resit credits from bundles will be used first.'}
@@ -231,7 +246,7 @@ function ResitContent({
               onClick={() => setSelectedExam(isSelected ? null : exam)}
               className={`group relative flex flex-col overflow-hidden rounded-4xl border-2 p-6 text-left transition-all duration-300 ${
                 isSelected
-                  ? 'border-red-600 bg-red-50/30 shadow-[0_20px_50px_-12px_rgba(220,38,38,0.25)] scale-[1.03] dark:border-red-500 dark:bg-red-950/20'
+                  ? 'scale-[1.03] border-red-600 bg-red-50/30 shadow-[0_20px_50px_-12px_rgba(220,38,38,0.25)] dark:border-red-500 dark:bg-red-950/20'
                   : 'border-slate-200/60 bg-white hover:border-red-300 hover:shadow-xl hover:shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-red-900/50'
               }`}
             >
@@ -243,11 +258,13 @@ function ResitContent({
               {/* Module Header */}
               <div className="relative mb-5 flex items-center justify-between">
                 <div className="space-y-1">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase transition-colors ${
-                    isSelected 
-                      ? 'bg-red-600 text-white' 
-                      : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase transition-colors ${
+                      isSelected
+                        ? 'bg-red-600 text-white'
+                        : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                    }`}
+                  >
                     <BookOpen className="h-3.5 w-3.5" />
                     {exam.moduleCode}
                   </span>
@@ -262,11 +279,15 @@ function ResitContent({
                   </span>
                 )}
               </div>
-              
+
               <div className="relative space-y-4">
-                <h4 className={`text-lg font-black leading-tight transition-colors ${
-                  isSelected ? 'text-slate-950 dark:text-white' : 'text-slate-900 dark:text-slate-100'
-                }`}>
+                <h4
+                  className={`text-lg leading-tight font-black transition-colors ${
+                    isSelected
+                      ? 'text-slate-950 dark:text-white'
+                      : 'text-slate-900 dark:text-slate-100'
+                  }`}
+                >
                   {exam.moduleName}
                 </h4>
 
@@ -274,7 +295,9 @@ function ResitContent({
                 <div className="flex items-end gap-3">
                   <div className="flex flex-col">
                     <div className="flex items-baseline gap-1">
-                      <span className={`text-4xl font-black ${isSelected ? 'text-red-600' : 'text-slate-900 dark:text-white'}`}>
+                      <span
+                        className={`text-4xl font-black ${isSelected ? 'text-red-600' : 'text-slate-900 dark:text-white'}`}
+                      >
                         {exam.score}
                       </span>
                       <span className="text-sm font-black text-slate-400">%</span>
@@ -283,7 +306,7 @@ function ResitContent({
                       Previous Score
                     </span>
                   </div>
-                  
+
                   <div className="mb-2 h-8 w-px bg-slate-100 dark:bg-slate-800" />
 
                   <div className="flex flex-col pb-0.5">
@@ -291,8 +314,8 @@ function ResitContent({
                       Target {exam.passingScore}%
                     </span>
                     <div className="mt-1 h-1.5 w-20 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                      <div 
-                        className="h-full bg-red-500" 
+                      <div
+                        className="h-full bg-red-500"
                         style={{ width: `${(exam.score / exam.passingScore) * 100}%` }}
                       />
                     </div>
@@ -304,7 +327,8 @@ function ResitContent({
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
                     <Calendar className="h-3.5 w-3.5 text-slate-400" />
                     <span>
-                      Attempted {new Date(exam.examDate).toLocaleDateString(undefined, {
+                      Attempted{' '}
+                      {new Date(exam.examDate).toLocaleDateString(undefined, {
                         month: 'short',
                         year: 'numeric',
                       })}
@@ -313,11 +337,13 @@ function ResitContent({
                 </div>
 
                 {/* Interaction Hint */}
-                <div className={`mt-4 flex items-center justify-center rounded-xl border py-2.5 text-[10px] font-black tracking-[0.2em] uppercase transition-all duration-300 ${
-                  isSelected
-                    ? 'border-red-600 bg-red-600 text-white shadow-lg shadow-red-600/20'
-                    : 'border-slate-200 bg-slate-50 text-slate-400 group-hover:border-red-200 group-hover:bg-red-50 group-hover:text-red-600 dark:border-slate-800 dark:bg-slate-950'
-                }`}>
+                <div
+                  className={`mt-4 flex items-center justify-center rounded-xl border py-2.5 text-[10px] font-black tracking-[0.2em] uppercase transition-all duration-300 ${
+                    isSelected
+                      ? 'border-red-600 bg-red-600 text-white shadow-lg shadow-red-600/20'
+                      : 'border-slate-200 bg-slate-50 text-slate-400 group-hover:border-red-200 group-hover:bg-red-50 group-hover:text-red-600 dark:border-slate-800 dark:bg-slate-950'
+                  }`}
+                >
                   {isSelected ? 'Module Selected' : 'Click to Select Module'}
                 </div>
               </div>
@@ -335,7 +361,7 @@ function ResitContent({
                 <RefreshCcw className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-black uppercase tracking-widest text-red-600 dark:text-red-400">
+                <p className="text-xs font-black tracking-widest text-red-600 uppercase dark:text-red-400">
                   Ready to Rebook
                 </p>
                 <h4 className="text-lg font-black text-slate-900 dark:text-white">
@@ -367,8 +393,8 @@ function ResitContent({
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               {/* Event Selector */}
-              <div className="flex flex-col gap-1.5 min-w-[240px]">
-                <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1">
+              <div className="flex min-w-60 flex-col gap-1.5">
+                <label className="px-1 text-[10px] font-black tracking-wider text-slate-400 uppercase">
                   Select Exam Window
                 </label>
                 <select
@@ -381,7 +407,7 @@ function ResitContent({
                   ) : (
                     events.map((ev) => (
                       <option key={ev.id} value={ev.id}>
-                        {ev.name} ({new Date(ev.startDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })})
+                        {ev.name} ({formatDate(ev.startDate)})
                       </option>
                     ))
                   )}
@@ -398,7 +424,7 @@ function ResitContent({
                 <button
                   onClick={onConfirm}
                   disabled={isPending || (!canAfford && totalFreeResits === 0) || !selectedEventId}
-                  className="h-11 inline-flex items-center gap-2 rounded-xl bg-red-600 px-8 text-sm font-black text-white shadow-lg shadow-red-600/20 transition-all hover:bg-red-700 disabled:opacity-50 active:scale-95"
+                  className="inline-flex h-11 items-center gap-2 rounded-xl bg-red-600 px-8 text-sm font-black text-white shadow-lg shadow-red-600/20 transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? (
                     <Loader2 className="h-5 w-5 animate-spin" />

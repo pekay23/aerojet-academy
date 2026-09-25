@@ -25,7 +25,7 @@ export default function PageHero({ title, subtitle, backgroundImage }: PageHeroP
     <section
       ref={ref}
       // Uses the taller height from the old hero but as a Tailwind class
-      className="relative h-[70vh] min-h-[420px] w-full overflow-hidden"
+      className="relative h-[70vh] min-h-105 w-full overflow-hidden"
     >
       {/* Background with Parallax */}
       <motion.div style={{ y: backgroundY }} className="absolute inset-0">

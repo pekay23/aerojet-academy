@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -243,7 +244,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
   }
 
   return (
-    <div className="mx-auto max-w-[1800px]">
+    <div className="mx-auto max-w-450">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-aerojet-blue text-2xl font-black tracking-tight dark:text-white">
@@ -259,7 +260,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
               <Plus className="h-4 w-4" /> Add Programme
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[480px]">
+          <DialogContent className="sm:max-w-120">
             <DialogHeader>
               <DialogTitle>Create Programme</DialogTitle>
               <DialogDescription className="sr-only">
@@ -496,9 +497,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                                       ? y.semesters.map((sem, i) => (
                                           <span key={i}>
                                             {sem.name}:{' '}
-                                            {sem.startDate
-                                              ? new Date(sem.startDate).toLocaleDateString()
-                                              : ''}
+                                            {sem.startDate ? formatDate(sem.startDate) : ''}
                                             {i < y.semesters.length - 1 ? ' · ' : ''}
                                           </span>
                                         ))
@@ -557,7 +556,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
 
       {/* Add/Edit Year Dialog */}
       <Dialog open={yearOpen} onOpenChange={setYearOpen}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-120">
           <DialogHeader>
             <DialogTitle>
               {editingYearId ? 'Edit Programme Year' : 'Add Programme Year'}
@@ -729,7 +728,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
 
       {/* Edit Programme Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-120">
           <DialogHeader>
             <DialogTitle>Edit Programme Details</DialogTitle>
             <DialogDescription className="sr-only">

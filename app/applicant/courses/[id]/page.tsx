@@ -1,6 +1,7 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import {
   ArrowLeft,
   BookOpen,
@@ -26,7 +27,7 @@ interface Props {
 
 export default async function CourseDetailsPage({ params }: Props) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { id } = await params
   const userId = session.user.id

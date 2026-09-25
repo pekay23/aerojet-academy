@@ -1,6 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -10,10 +9,10 @@ export const metadata: Metadata = { title: 'Batch Enrollment | Staff Portal' }
 
 export default async function BatchEnrollPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'STAFF']
-  if (!allowedRoles.includes(session.user.role)) redirect('/login')
+  if (!allowedRoles.includes(session.user.role)) return await redirectToLogin()
 
   // Fetch all required data
   const [academicYears, courses, students] = await Promise.all([

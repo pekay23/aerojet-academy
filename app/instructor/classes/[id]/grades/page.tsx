@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -12,7 +13,7 @@ export const dynamic = 'force-dynamic'
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'INSTRUCTOR') redirect('/login')
+  if (!session || session.user.role !== 'INSTRUCTOR') return await redirectToLogin()
 
   const data = await getClassAttendance(id)
   if (!data) redirect('/instructor/classes')
@@ -49,7 +50,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900">
         {grades.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px]">
+            <table className="w-full min-w-200">
               <thead>
                 <tr className="border-b border-slate-50 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
                   <th className="px-6 py-4 text-left text-xs font-bold tracking-widest text-slate-400 uppercase">

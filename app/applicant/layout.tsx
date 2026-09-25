@@ -1,5 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import ApplicantSidebar from './_components/ApplicantSidebar'
 import PortalTopbar from '@/components/layouts/PortalTopbar'
 import TourTrigger from '@/components/Tour/TourTrigger'
@@ -17,7 +18,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function ApplicantLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const user = session.user
   if (!['APPLICANT'].includes(user.role)) redirect('/login')
@@ -109,11 +110,11 @@ export default async function ApplicantLayout({ children }: { children: React.Re
           notificationsHref="/applicant/notifications"
           messagesHref="/applicant/messages"
           composeHref="/applicant/messages?compose=true"
-          actions={<TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />}
+          actions={
+            <TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />
+          }
         />
-        <div className="mx-auto max-w-[1920px] p-4 sm:p-8 lg:px-8 lg:py-6">
-          {children}
-        </div>
+        <div className="mx-auto max-w-480 p-4 sm:p-8 lg:px-8 lg:py-6">{children}</div>
       </main>
     </div>
   )

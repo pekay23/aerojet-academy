@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
@@ -213,8 +214,7 @@ export default function AcademicCalendarManager({
                     )}
                   </h3>
                   <p className="text-xs font-medium text-slate-500">
-                    {new Date(year.startDate).toLocaleDateString()} —{' '}
-                    {new Date(year.endDate).toLocaleDateString()}
+                    {formatDate(year.startDate)} — {formatDate(year.endDate)}
                   </p>
                 </div>
               </div>
@@ -293,8 +293,7 @@ export default function AcademicCalendarManager({
                         </div>
                       </div>
                       <p className="mb-2 flex items-center gap-2 text-xs text-slate-500">
-                        {new Date(sem.startDate).toLocaleDateString()} —{' '}
-                        {new Date(sem.endDate).toLocaleDateString()}
+                        {formatDate(sem.startDate)} — {formatDate(sem.endDate)}
                       </p>
                       {sem.isActive ? (
                         <div className="flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">

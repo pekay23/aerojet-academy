@@ -95,7 +95,7 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                       {booking.moduleCode}
                     </p>
                     <p
-                      className="max-w-[150px] truncate text-xs font-medium text-slate-500"
+                      className="max-w-37.5 truncate text-xs font-medium text-slate-500"
                       title={booking.moduleName}
                     >
                       {booking.moduleName}

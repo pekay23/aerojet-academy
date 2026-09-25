@@ -3,7 +3,12 @@
 import * as React from 'react'
 import { PieChart, Pie, Cell, Legend } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart'
 
 interface AttendanceChartProps {
   data: { name: string; value: number }[]
@@ -20,7 +25,7 @@ const attendanceConfig = {
 
 export function AttendanceChart({ data, title = 'Attendance Overview' }: AttendanceChartProps) {
   const [mounted, setMounted] = React.useState(false)
-   
+
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
@@ -29,7 +34,7 @@ export function AttendanceChart({ data, title = 'Attendance Overview' }: Attenda
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px] w-full">
+      <CardContent className="h-75 w-full">
         {mounted ? (
           <ChartContainer config={attendanceConfig} className="h-full w-full">
             <PieChart>

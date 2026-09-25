@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { Award, Download, Calendar, AlertCircle, Lock, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -38,7 +38,7 @@ export default async function CertificatesPage({
   searchParams: Promise<{ sort?: string; order?: string }>
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const params = await searchParams
   const _orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { createdAt: 'desc' })

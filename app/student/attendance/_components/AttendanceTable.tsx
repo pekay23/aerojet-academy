@@ -32,7 +32,9 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="border-b border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-        <h2 className="font-bold text-slate-900 dark:text-slate-100">Historical Attendance Registry</h2>
+        <h2 className="font-bold text-slate-900 dark:text-slate-100">
+          Historical Attendance Registry
+        </h2>
       </div>
 
       {paged.length > 0 ? (
@@ -41,11 +43,38 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
             <table className="w-full text-left text-sm" aria-label="Attendance records">
               <thead>
                 <tr className="border-b border-slate-100 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:border-slate-800">
-                  <SortHeader label="Type" sortKey="type" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
-                  <SortHeader label="Date" sortKey="_dateTs" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
-                  <SortHeader label="Activity / Module" sortKey="label" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
-                  <SortHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} align="center" className="px-6 py-4" />
-                  <th scope="col" className="px-6 py-4">Notes</th>
+                  <SortHeader
+                    label="Type"
+                    sortKey="type"
+                    currentSort={sortConfig}
+                    onSort={requestSort}
+                    className="px-6 py-4"
+                  />
+                  <SortHeader
+                    label="Date"
+                    sortKey="_dateTs"
+                    currentSort={sortConfig}
+                    onSort={requestSort}
+                    className="px-6 py-4"
+                  />
+                  <SortHeader
+                    label="Activity / Module"
+                    sortKey="label"
+                    currentSort={sortConfig}
+                    onSort={requestSort}
+                    className="px-6 py-4"
+                  />
+                  <SortHeader
+                    label="Status"
+                    sortKey="status"
+                    currentSort={sortConfig}
+                    onSort={requestSort}
+                    align="center"
+                    className="px-6 py-4"
+                  />
+                  <th scope="col" className="px-6 py-4">
+                    Notes
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -55,12 +84,18 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
                     className="transition-colors hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <td className="px-6 py-4">
-                      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                        record.type === 'CLASS' 
-                          ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                          : 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400'
-                      }`}>
-                        {record.type === 'CLASS' ? <School className="h-4 w-4" /> : <ClipboardCheck className="h-4 w-4" />}
+                      <div
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                          record.type === 'CLASS'
+                            ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                            : 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400'
+                        }`}
+                      >
+                        {record.type === 'CLASS' ? (
+                          <School className="h-4 w-4" />
+                        ) : (
+                          <ClipboardCheck className="h-4 w-4" />
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 font-medium whitespace-nowrap text-slate-900 dark:text-slate-100">
@@ -71,15 +106,18 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
                           year: 'numeric',
                         })}
                       </div>
-                      <div className="text-[10px] text-slate-400 uppercase font-bold">
-                        {new Date(record.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                      <div className="text-[10px] font-bold text-slate-400 uppercase">
+                        {new Date(record.date).toLocaleTimeString('en-GB', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-black text-slate-900 dark:text-slate-100">
                         {record.label}
                       </div>
-                      <div className="text-xs font-bold text-slate-400 uppercase tracking-tight">
+                      <div className="text-xs font-bold tracking-tight text-slate-400 uppercase">
                         {record.subLabel}
                       </div>
                     </td>
@@ -95,12 +133,14 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
                                 : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                         }`}
                       >
-                        {record.status === 'LATE' && <Clock className="h-3 w-3" aria-hidden="true" />}
+                        {record.status === 'LATE' && (
+                          <Clock className="h-3 w-3" aria-hidden="true" />
+                        )}
                         {record.status}
                         {record.minutesLate && ` (${record.minutesLate}m)`}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs font-medium text-slate-500 dark:text-slate-400 max-w-[200px] truncate">
+                    <td className="max-w-50 truncate px-6 py-4 text-xs font-medium text-slate-500 dark:text-slate-400">
                       {record.notes || <span aria-label="No notes">—</span>}
                     </td>
                   </tr>
@@ -108,7 +148,13 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
               </tbody>
             </table>
           </div>
-          <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+          <TablePagination
+            page={page}
+            perPage={perPage}
+            total={total}
+            onPageChange={setPage}
+            onPerPageChange={setPerPage}
+          />
         </>
       ) : (
         <div className="p-12 text-center">
@@ -117,7 +163,8 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
           </div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No records found</h3>
           <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
-            You don&apos;t have any attendance records yet. They will appear here once marked by your instructors or examiners.
+            You don&apos;t have any attendance records yet. They will appear here once marked by
+            your instructors or examiners.
           </p>
         </div>
       )}

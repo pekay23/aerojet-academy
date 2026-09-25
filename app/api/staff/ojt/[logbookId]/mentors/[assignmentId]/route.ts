@@ -30,7 +30,7 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx?: RouteContex
 
   const assignment = await prismaUnfiltered.oJTMentorAssignment.findUnique({
     where: { id: assignmentId },
-    select: { id: true, logbookId: true },
+    select: { id: true, logbookId: true, mentorId: true },
   })
 
   if (!assignment || assignment.logbookId !== logbookId) {
@@ -55,12 +55,21 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx?: RouteContex
     data,
   })
 
+  // Fetch mentor name for readable audit log
+  const mentorUser = await prismaUnfiltered.user.findUnique({
+    where: { id: assignment.mentorId },
+    select: { email: true, profile: { select: { firstName: true, lastName: true } } },
+  })
+  const mentorName = mentorUser?.profile
+    ? `${mentorUser.profile.firstName ?? ''} ${mentorUser.profile.lastName ?? ''}`.trim()
+    : mentorUser?.email || 'Unknown'
+
   await createAuditLog({
     userId: staff.id,
     action: AuditAction.UPDATE,
     entity: 'OJTMentorAssignment',
     entityId: assignmentId,
-    description: `Updated mentor assignment ${assignmentId}`,
+    description: `Updated mentor assignment for mentor ${mentorName}`,
     changes: parsed.data,
   })
 
@@ -81,12 +90,21 @@ export const DELETE = withErrorHandler(async (req: NextRequest, ctx?: RouteConte
 
   const assignment = await prismaUnfiltered.oJTMentorAssignment.findUnique({
     where: { id: assignmentId },
-    select: { id: true, logbookId: true },
+    select: { id: true, logbookId: true, mentorId: true },
   })
 
   if (!assignment || assignment.logbookId !== logbookId) {
     return apiError('Assignment not found', 404)
   }
+
+  // Fetch mentor name for readable audit log
+  const mentorUser = await prismaUnfiltered.user.findUnique({
+    where: { id: assignment.mentorId },
+    select: { email: true, profile: { select: { firstName: true, lastName: true } } },
+  })
+  const mentorName = mentorUser?.profile
+    ? `${mentorUser.profile.firstName ?? ''} ${mentorUser.profile.lastName ?? ''}`.trim()
+    : mentorUser?.email || 'Unknown'
 
   await prismaUnfiltered.oJTMentorAssignment.delete({ where: { id: assignmentId } })
 
@@ -95,7 +113,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest, ctx?: RouteConte
     action: AuditAction.DELETE,
     entity: 'OJTMentorAssignment',
     entityId: assignmentId,
-    description: 'Mentor assignment removed',
+    description: `Mentor ${mentorName} removed from logbook`,
     changes: { logbookId, assignmentId },
   })
 

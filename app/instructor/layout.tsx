@@ -1,5 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import InstructorSidebar from './_components/InstructorSidebar'
 import Heartbeat from '@/components/shared/Heartbeat'
@@ -12,7 +13,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function InstructorLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const user = session.user
   const allowedRoles = ['INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN']
@@ -39,7 +40,10 @@ export default async function InstructorLayout({ children }: { children: React.R
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white"
+      >
         Skip to main content
       </a>
       <Heartbeat />
@@ -59,9 +63,11 @@ export default async function InstructorLayout({ children }: { children: React.R
           notificationsHref="/instructor/notifications"
           messagesHref="/instructor/messages"
           composeHref="/instructor/messages?compose=true"
-          actions={<TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />}
+          actions={
+            <TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />
+          }
         />
-        <div className="mx-auto max-w-[1920px] p-4 sm:p-8 lg:px-8 lg:py-6">{children}</div>
+        <div className="mx-auto max-w-480 p-4 sm:p-8 lg:px-8 lg:py-6">{children}</div>
       </main>
     </div>
   )

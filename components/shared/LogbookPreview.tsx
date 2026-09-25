@@ -251,7 +251,7 @@ function PreviewPage({
 
 function CoverPage({ logbook }: { logbook: LogbookPreviewData }) {
   return (
-    <div className="flex min-h-[560px] flex-col">
+    <div className="flex min-h-140 flex-col">
       <div className="flex items-start justify-between gap-6 border-b border-slate-200 pb-5">
         <div>
           <p className="text-xs font-bold text-slate-500 uppercase">Aerojet Academy</p>
@@ -305,7 +305,7 @@ function EntriesPage({
   logbook: LogbookPreviewData
 }) {
   return (
-    <div className="min-h-[560px]">
+    <div className="min-h-140">
       <div className="mb-5 flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <p className="text-xs font-bold text-slate-500 uppercase">Aerojet Academy</p>

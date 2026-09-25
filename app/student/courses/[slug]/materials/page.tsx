@@ -1,4 +1,5 @@
-﻿import { Metadata } from 'next'
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
+import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import {
@@ -105,7 +106,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function MaterialsPage({ params }: PageProps) {
   const { slug } = await params
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const allEnrollments = await prismaUnfiltered.enrollment.findMany({
     where: { userId: session.user.id },
@@ -191,7 +192,10 @@ export default async function MaterialsPage({ params }: PageProps) {
           </div>
 
           <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2 dark:bg-emerald-500/10">
-            <ShieldCheck aria-hidden="true" className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <ShieldCheck
+              aria-hidden="true"
+              className="h-4 w-4 text-emerald-600 dark:text-emerald-400"
+            />
             <span className="text-xs font-black tracking-widest text-emerald-600 uppercase dark:text-emerald-400">
               Access Verified
             </span>
@@ -244,13 +248,27 @@ export default async function MaterialsPage({ params }: PageProps) {
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 text-xs font-black tracking-widest text-slate-600 uppercase dark:bg-slate-800/50">
                   <tr>
-                    <th scope="col" className="w-12 px-4 py-3">#</th>
-                    <th scope="col" className="px-4 py-3">Name</th>
-                    <th scope="col" className="px-4 py-3">Description</th>
-                    <th scope="col" className="px-4 py-3">Category</th>
-                    <th scope="col" className="px-4 py-3">Type</th>
-                    <th scope="col" className="px-4 py-3">Uploaded</th>
-                    <th scope="col" className="px-4 py-3 text-right">Action</th>
+                    <th scope="col" className="w-12 px-4 py-3">
+                      #
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      Name
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      Description
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      Category
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      Type
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      Uploaded
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-right">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -312,7 +330,15 @@ export default async function MaterialsPage({ params }: PageProps) {
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
                         {r.description || (
-                          <><span className="sr-only">Not applicable</span><span aria-hidden="true" className="italic text-slate-300 dark:text-slate-600">—</span></>
+                          <>
+                            <span className="sr-only">Not applicable</span>
+                            <span
+                              aria-hidden="true"
+                              className="text-slate-300 italic dark:text-slate-600"
+                            >
+                              —
+                            </span>
+                          </>
                         )}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
@@ -329,7 +355,7 @@ export default async function MaterialsPage({ params }: PageProps) {
                           href={r.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-all hover:bg-blue-800 hover:text-white active:scale-95 dark:bg-slate-800 dark:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-all hover:bg-blue-800 hover:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-95 dark:bg-slate-800 dark:text-slate-300"
                           aria-label={`Download ${r.name}`}
                         >
                           <Download aria-hidden="true" className="h-4 w-4" />
@@ -355,8 +381,8 @@ export default async function MaterialsPage({ params }: PageProps) {
               Usage Policy
             </h3>
             <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              These materials are proprietary to Aerojet Academy. Redistribution or external
-              sharing is strictly prohibited and governed by the academy&apos;s digital usage policy.
+              These materials are proprietary to Aerojet Academy. Redistribution or external sharing
+              is strictly prohibited and governed by the academy&apos;s digital usage policy.
             </p>
           </div>
         </div>
@@ -381,8 +407,8 @@ export default async function MaterialsPage({ params }: PageProps) {
           </h3>
           <div className="space-y-4">
             <p className="text-xs leading-relaxed font-medium text-slate-600 dark:text-slate-400">
-              If you are experiencing issues accessing specific documents, please contact
-              technical support or your instructor directly.
+              If you are experiencing issues accessing specific documents, please contact technical
+              support or your instructor directly.
             </p>
             <Link
               href="/student/messages"
@@ -432,11 +458,21 @@ function ResourceTable({
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs font-black tracking-widest text-slate-600 uppercase dark:bg-slate-800/50">
               <tr>
-                <th scope="col" className="w-12 px-4 py-3">#</th>
-                <th scope="col" className="px-4 py-3">Name</th>
-                <th scope="col" className="px-4 py-3">Description</th>
-                <th scope="col" className="px-4 py-3">Type</th>
-                <th scope="col" className="px-4 py-3 text-right">Action</th>
+                <th scope="col" className="w-12 px-4 py-3">
+                  #
+                </th>
+                <th scope="col" className="px-4 py-3">
+                  Name
+                </th>
+                <th scope="col" className="px-4 py-3">
+                  Description
+                </th>
+                <th scope="col" className="px-4 py-3">
+                  Type
+                </th>
+                <th scope="col" className="px-4 py-3 text-right">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -458,7 +494,15 @@ function ResourceTable({
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
                     {r.description || (
-                      <><span className="sr-only">Not applicable</span><span aria-hidden="true" className="italic text-slate-300 dark:text-slate-600">—</span></>
+                      <>
+                        <span className="sr-only">Not applicable</span>
+                        <span
+                          aria-hidden="true"
+                          className="text-slate-300 italic dark:text-slate-600"
+                        >
+                          —
+                        </span>
+                      </>
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
@@ -469,7 +513,7 @@ function ResourceTable({
                       href={r.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-all hover:bg-blue-800 hover:text-white active:scale-95 dark:bg-slate-800 dark:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-all hover:bg-blue-800 hover:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-95 dark:bg-slate-800 dark:text-slate-300"
                       aria-label={`Open ${r.name}`}
                     >
                       <Download aria-hidden="true" className="h-4 w-4" />
@@ -489,5 +533,3 @@ function ResourceTable({
     </div>
   )
 }
-
-

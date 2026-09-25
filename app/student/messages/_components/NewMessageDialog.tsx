@@ -90,7 +90,7 @@ export default function NewMessageDialog({
           <span>New Message</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle>Send Message</DialogTitle>
           <DialogDescription>
@@ -149,7 +149,7 @@ export default function NewMessageDialog({
             <Textarea
               id="body"
               placeholder="Type your message here..."
-              className="min-h-[150px]"
+              className="min-h-37.5"
               value={formData.body}
               onChange={(e) => {
                 setFormData({ ...formData, body: e.target.value })

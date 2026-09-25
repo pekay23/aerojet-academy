@@ -1,6 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import React from 'react'
 import {
   TrendingUp,
@@ -36,6 +36,7 @@ import {
 } from '@/lib/analytics/reports'
 import ReportsTabs from '../_components/ReportsTabs'
 import { PeriodFilter } from './_components/PeriodFilter'
+import { AttendanceTableClient } from './_components/AttendanceTableClient'
 import {
   YoYRevenueChart,
   YoYEnrollmentChart,
@@ -130,7 +131,7 @@ async function OverviewTab({ period, from, to }: { period: string; from?: string
   if (period === 'custom') periodLabel = 'vs previous interval'
 
   return (
-    <div className="mx-auto max-w-[1920px]">
+    <div className="mx-auto max-w-480">
       {/* Metric Cards Grid */}
       <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
@@ -280,7 +281,7 @@ async function EnrollmentTab() {
   const topCourse = data[0]
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1920px] space-y-8 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-480 space-y-8 duration-700">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-900/20">
           <TrendingUp className="h-7 w-7" />
@@ -403,7 +404,7 @@ async function RevenueTab() {
   const currency = await getSystemSetting('course_currency', 'EUR')
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1920px] space-y-8 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-480 space-y-8 duration-700">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-900/20">
@@ -560,7 +561,7 @@ async function PoolsTab() {
   const pendingSeats = totalCapacity - totalMembers
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1920px] space-y-8 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-480 space-y-8 duration-700">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20">
           <Calendar className="h-7 w-7" />
@@ -710,13 +711,24 @@ async function PoolsTab() {
 
 /* ────────────────────────────── Attendance Tab ────────────────────────────── */
 
-async function AttendanceTab() {
-  const [report, metrics] = await Promise.all([getAttendanceReport(), getAttendanceRate()])
+async function AttendanceTab({
+  page = 1,
+  limit = 25,
+  query = '',
+}: {
+  page?: number
+  limit?: number
+  query?: string
+}) {
+  const [report, metrics] = await Promise.all([
+    getAttendanceReport(page, limit, query),
+    getAttendanceRate(),
+  ])
 
-  const { records, chartData } = report
+  const { records, totalRecords, chartData } = report
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1920px] space-y-8 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-480 space-y-8 duration-700">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20">
           <Calendar className="h-7 w-7" />
@@ -743,7 +755,7 @@ async function AttendanceTab() {
         />
         <MetricCard
           title="Present Today"
-          value={metrics.present}
+          value={metrics.presentToday}
           icon={Users}
           color="bg-blue-50 text-blue-600"
           label="Total present instances"
@@ -775,73 +787,13 @@ async function AttendanceTab() {
           <AttendanceChart data={chartData} />
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
-          <div className="border-b border-slate-100 bg-slate-50/30 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/30">
-            <h3 className="text-aerojet-blue text-sm font-black tracking-widest uppercase dark:text-slate-100">
-              Recent Attendance History
-            </h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50/50 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/20">
-                <tr>
-                  <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Student</th>
-                  <th className="px-6 py-4">Module / Event</th>
-                  <th className="px-6 py-4 text-center">Status</th>
-                  <th className="px-6 py-4 text-right">Time</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {records.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-6 py-12 text-center text-sm font-medium text-slate-400 italic"
-                    >
-                      No attendance records found.
-                    </td>
-                  </tr>
-                ) : (
-                  records.map((record) => (
-                    <tr
-                      key={record.id}
-                      className="group transition-all duration-150 ease-out hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
-                    >
-                      <td className="px-6 py-4 font-mono text-xs font-bold text-slate-400">
-                        {format(new Date(record.date), 'MMM d, yyyy')}
-                      </td>
-                      <td className="text-aerojet-blue px-6 py-4 font-black dark:text-slate-100">
-                        {record.user.profile
-                          ? `${record.user.profile.firstName} ${record.user.profile.lastName}`
-                          : record.user.email}
-                      </td>
-                      <td className="px-6 py-4 font-bold text-slate-400">
-                        {record.class?.name || 'Unknown Class'}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span
-                          className={`rounded-lg px-2 py-0.5 text-[10px] font-black uppercase ${
-                            record.status === 'PRESENT'
-                              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
-                              : record.status === 'ABSENT'
-                                ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                                : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
-                          }`}
-                        >
-                          {record.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono text-xs text-slate-400">
-                        {format(new Date(record.createdAt), 'HH:mm')}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <AttendanceTableClient
+          records={records}
+          totalRecords={totalRecords}
+          currentPage={page}
+          currentLimit={limit}
+          currentQuery={query}
+        />
       </div>
     </div>
   )
@@ -860,7 +812,7 @@ async function ExamsTab() {
   ]
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1920px] space-y-8 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-480 space-y-8 duration-700">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-900/20">
           <Award className="h-7 w-7" />
@@ -1276,7 +1228,7 @@ async function YoYTab({ year }: { year?: number }) {
   ]
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1920px] space-y-8 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-480 space-y-8 duration-700">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20">
           <TrendingUp className="h-7 w-7" />
@@ -1389,15 +1341,26 @@ async function YoYTab({ year }: { year?: number }) {
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; period?: string; from?: string; to?: string }>
+  searchParams: Promise<{
+    tab?: string
+    period?: string
+    from?: string
+    to?: string
+    page?: string
+    limit?: string
+    q?: string
+  }>
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
-  const { tab = 'overview', period = 'mom', from, to } = await searchParams
+  const { tab = 'overview', period = 'mom', from, to, page, limit, q } = await searchParams
+
+  const pageNum = page ? parseInt(page, 10) : 1
+  const limitNum = limit ? parseInt(limit, 10) : 25
 
   return (
-    <div className="mx-auto max-w-[1920px] space-y-8">
+    <div className="mx-auto max-w-480 space-y-8">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <h1 className="text-aerojet-blue text-3xl font-black tracking-tight sm:text-4xl dark:text-white">
@@ -1418,7 +1381,7 @@ export default async function ReportsPage({
           {tab === 'enrollment' && <EnrollmentTab />}
           {tab === 'revenue' && <RevenueTab />}
           {tab === 'pools' && <PoolsTab />}
-          {tab === 'attendance' && <AttendanceTab />}
+          {tab === 'attendance' && <AttendanceTab page={pageNum} limit={limitNum} query={q} />}
           {tab === 'exams' && <ExamsTab />}
           {tab === 'yoy' && <YoYTab />}
         </div>

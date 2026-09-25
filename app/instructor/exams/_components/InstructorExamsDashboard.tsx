@@ -607,7 +607,7 @@ function BankQuestionPanel({ bankId, instructorId }: { bankId: string; instructo
                   ) : null}
                   <span className="inline-flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {q.createdAt ? new Date(q.createdAt).toLocaleDateString() : '—'}
+                    {q.createdAt ? formatDate(q.createdAt) : '—'}
                   </span>
                   {(q.timesServed ?? 0) > 0 ? (
                     <span className="inline-flex items-center gap-1">

@@ -130,7 +130,7 @@ const LogRow = memo(
         </td>
 
         {/* User */}
-        <td className="min-w-[200px] px-6 py-5">
+        <td className="min-w-50 px-6 py-5">
           <div className="flex items-center gap-3 overflow-hidden">
             <div
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white font-bold text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-800 dark:text-slate-300"
@@ -281,7 +281,7 @@ export default function AuditLogTable({
   return (
     <>
       <div className="overflow-x-auto rounded-3xl border border-slate-200/60 bg-white shadow-xl dark:border-slate-800/80 dark:bg-[#0A0F1C]">
-        <table className="w-full min-w-[1240px] border-collapse">
+        <table className="w-full min-w-310 border-collapse">
           {/* Header Row */}
           <thead>
             <tr className="hidden border-b border-slate-100 bg-slate-50/50 text-xs font-bold tracking-wider text-slate-500 uppercase lg:table-row dark:border-slate-800/80 dark:bg-slate-900/50 dark:text-slate-400">

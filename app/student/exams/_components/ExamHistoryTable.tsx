@@ -22,17 +22,26 @@ interface HistoryRecord {
 
 function resultBadgeClass(result?: string | null) {
   const normalized = result?.toUpperCase()
-  if (normalized === 'PASS') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+  if (normalized === 'PASS')
+    return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
   if (normalized === 'FAIL') return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
   if (normalized === 'ABSENT') return 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-  if (normalized?.includes('PENDING')) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-  if (normalized?.includes('EXCUSED')) return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-  if (normalized === 'MIGRATED') return 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
-  if (normalized === 'SCHEDULED') return 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400'
-  if (normalized === 'EXECUTED') return 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-  if (normalized === 'POSTPONED') return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-  if (normalized === 'ROLLED FORWARD') return 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
-  if (normalized === 'CANCELLED') return 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+  if (normalized?.includes('PENDING'))
+    return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+  if (normalized?.includes('EXCUSED'))
+    return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+  if (normalized === 'MIGRATED')
+    return 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+  if (normalized === 'SCHEDULED')
+    return 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400'
+  if (normalized === 'EXECUTED')
+    return 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+  if (normalized === 'POSTPONED')
+    return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+  if (normalized === 'ROLLED FORWARD')
+    return 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
+  if (normalized === 'CANCELLED')
+    return 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
   return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
 }
 
@@ -55,15 +64,21 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                 currentSort={sortConfig}
                 onSort={requestSort}
               />
-              <th scope="col" className="px-6 py-4">Source</th>
+              <th scope="col" className="px-6 py-4">
+                Source
+              </th>
               <SortHeader
                 label="Date"
                 sortKey="date"
                 currentSort={sortConfig}
                 onSort={requestSort}
               />
-              <th scope="col" className="px-6 py-4">Attendance</th>
-              <th scope="col" className="px-6 py-4">Result</th>
+              <th scope="col" className="px-6 py-4">
+                Attendance
+              </th>
+              <th scope="col" className="px-6 py-4">
+                Result
+              </th>
               <SortHeader
                 label="Details"
                 sortKey="score"
@@ -83,7 +98,10 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                   <p className="font-bold text-slate-900 uppercase dark:text-white">
                     {h.moduleCode}
                   </p>
-                  <p className="max-w-[150px] truncate text-xs font-medium text-slate-500" title={h.moduleName}>
+                  <p
+                    className="max-w-37.5 truncate text-xs font-medium text-slate-500"
+                    title={h.moduleName}
+                  >
                     {h.moduleName}
                   </p>
                 </td>
@@ -102,17 +120,19 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                   <div>
                     <div>
                       {h.dateDisplayKind === 'DATE' && h.date ? (
-                        new Date(h.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                        new Date(h.date).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })
                       ) : (
-                        <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                        <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700 uppercase dark:bg-amber-900/30 dark:text-amber-300">
                           {h.dateDisplay || 'TBD'}
                         </span>
                       )}
                     </div>
                     {h.sittingLabel && (
-                      <div className="text-[10px] uppercase text-slate-400">
-                        {h.sittingLabel}
-                      </div>
+                      <div className="text-[10px] text-slate-400 uppercase">{h.sittingLabel}</div>
                     )}
                   </div>
                 </td>
@@ -134,7 +154,9 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
                     {h.result && !['pass', 'fail', 'PASS', 'FAIL'].includes(h.result) ? (
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${resultBadgeClass(h.result)}`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${resultBadgeClass(h.result)}`}
+                      >
                         {h.result}
                       </span>
                     ) : (
@@ -188,24 +210,30 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
       {/* Legend */}
       <div className="border-t border-stone-100 bg-stone-50/30 px-6 py-3 dark:border-white/5 dark:bg-slate-800/20">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[10px] font-medium text-slate-400">
-          <span className="font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Legend:</span>
+          <span className="font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400">
+            Legend:
+          </span>
           <span className="flex items-center gap-1.5">
-            <span className="inline-block rounded bg-indigo-50 px-1.5 py-0.5 font-black text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">ORIGINAL</span>
+            <span className="inline-block rounded bg-indigo-50 px-1.5 py-0.5 font-black text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">
+              ORIGINAL
+            </span>
             Result recorded in this system
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="inline-block rounded bg-amber-50 px-1.5 py-0.5 font-black text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">HISTORICAL</span>
+            <span className="inline-block rounded bg-amber-50 px-1.5 py-0.5 font-black text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+              HISTORICAL
+            </span>
             Imported from legacy records
           </span>
-          <span className="hidden sm:flex items-center gap-1.5">
+          <span className="hidden items-center gap-1.5 sm:flex">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
             Pass
           </span>
-          <span className="hidden sm:flex items-center gap-1.5">
+          <span className="hidden items-center gap-1.5 sm:flex">
             <span className="inline-block h-2 w-2 rounded-full bg-red-500" />
             Fail
           </span>
-          <span className="hidden sm:flex items-center gap-1.5">
+          <span className="hidden items-center gap-1.5 sm:flex">
             <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
             Pending
           </span>

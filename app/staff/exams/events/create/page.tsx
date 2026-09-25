@@ -34,9 +34,9 @@ type ExamEventFormValues = z.input<typeof createExamEventSchema>
 export default function CreateExamEventPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-const form = useForm<ExamEventFormValues>({
-  resolver: zodResolver(createExamEventSchema),
-  defaultValues: {
+  const form = useForm<ExamEventFormValues>({
+    resolver: zodResolver(createExamEventSchema),
+    defaultValues: {
       name: '',
       minRevenueTarget: 25000,
       minRevenueCurrency: 'EUR',
@@ -90,7 +90,7 @@ const form = useForm<ExamEventFormValues>({
   }
 
   return (
-    <div className="mx-auto max-w-[1800px] px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-450 px-4 sm:px-6 lg:px-8">
       {/* Header Section */}
       <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1">

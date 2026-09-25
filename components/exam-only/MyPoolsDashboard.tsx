@@ -73,7 +73,7 @@ export function MyPoolsDashboard() {
             Active Pools ({active.length})
           </h3>
           {active.map((m) => (
-            <div key={m.id} className="mb-3 rounded-[10px] border border-white/8 bg-white/3 p-4">
+            <div key={m.id} className="rounded-10 mb-3 border border-white/8 bg-white/3 p-4">
               <div className="mb-2 flex justify-between">
                 <div>
                   <span className="text-[13px] font-medium text-[#93c5fd]">
@@ -102,7 +102,7 @@ export function MyPoolsDashboard() {
               />
 
               <div className="mt-2 flex items-center justify-between">
-                <div className="text-[12px] text-[#888]">
+                <div className="text-xs text-[#888]">
                   📅{' '}
                   {new Date(m.pool.examDate).toLocaleDateString('en-GB', {
                     day: '2-digit',

@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Examiner Portal — Audit Report · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Examiner Portal — Audit Report</h1>
+  <p class="he-deck">Date: 2026-08-27 Auditors: TypeScript/React, Performance, Security, UI/UX, Code Quality (6 parallel agents) Scope: <code>app/examiner/</code> — 5 pages, shared components, server actions……</p>
+</header>
+<h1 id="examiner-portal-audit-report">Examiner Portal — Audit Report</h1>
+<p>Date: 2026-08-27 Auditors: TypeScript/React, Performance, Security, UI/UX, Code Quality (6 parallel agents) Scope: <code>app/examiner/</code> — 5 pages, shared components, server actions…</p>
+<hr />
+<section class="he-section" id="01-executive-summary"><div class="he-section__num">01 · 01 · Executive Summary</div><h2 class="he-section__title">01 · Executive Summary</h2></section>
+<p>The Examiner portal is functionally minimal compared to Staff/Student portals, with <strong>zero dedicated API routes</strong> under <code>app/api/examiner/</code>. The portal reuses the staff <code>ExaminerDashboard</code> component and shared <code>AcademicCalendar</code> and <code>AvailabilityManager</code> components. While the core functionality works, this audit identified significant gaps in API infrastructure, type safety, and accessibility.</p>
+<p><strong>Totals: 3 Critical · 7 High · 6 Medium · 5 Low · 8 Suggestions</strong></p>
+<hr />
+<section class="he-section" id="02-critical-findings-must-fix"><div class="he-section__num">02 · 02 · Critical Findings (must fix)</div><h2 class="he-section__title">02 · Critical Findings (must fix)</h2></section>
+<h3 id="c-1-no-dedicated-api-routes-exist-for-examiners">C-1: No dedicated API routes exist for examiners</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality, Security</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/api/examiner/</code> (directory does not exist)</p>
+</li>
+<li>
+<p><strong>Description</strong>: The examiner portal has <strong>zero</strong> API routes. All functionality is server-rendered pages or reuses staff API routes. There is no endpoint for examiners to fetch sittings, submit results, manage availability, or retrieve compliance data via API.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: The examiner portal is entirely page-dependent. Any future client-side feature requires building the API layer from scratch.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Create <code>app/api/examiner/</code> with routes for sittings, results, availability, and compliance data.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Implemented</strong></p>
+</li>
+</ul>
+<h3 id="c-2-dashboard-quotstart-invigilationquot-button-links-to-staff-only-route">C-2: Dashboard &quot;Start Invigilation&quot; button links to staff-only route</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Security, UX</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/staff/_components/ExaminerDashboard.tsx:54</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The primary CTA on the examiner dashboard links to <code>/staff/exams/sittings/${nextSitting.id}</code>, which is a staff portal route. When an examiner clicks it, the staff layout's <code>requireStaff()</code> will throw, causing a redirect or error.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Broken workflow — the most prominent action on the examiner dashboard is non-functional for the intended user.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Create an examiner-specific sitting view at <code>/examiner/sittings/[id]</code>, or replace the button with appropriate messaging.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="c-3-proxyts-does-not-gate-examiner-routes">C-3: <code>proxy.ts</code> does not gate <code>/examiner/*</code> routes</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Security</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>proxy.ts:18-134</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: CLAUDE.md documents an active edge proxy with <code>ROUTE_ROLE_MAP</code> that gates <code>/examiner</code> and <code>/api/examiner/*</code>. The actual <code>proxy.ts</code> is images-only — its <code>config.matcher</code> only covers <code>/api/images/:path*</code> and static image files.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Defense-in-depth is absent. All examiner auth relies solely on <code>requireExaminer()</code> in layout.tsx and page components.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Either restore the documented edge proxy or formally document that the proxy is images-only and enforce portal-level auth via layout guards only.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="03-high-priority-findings"><div class="he-section__num">03 · 03 · High Priority Findings</div><h2 class="he-section__title">03 · High Priority Findings</h2></section>
+<h3 id="h-1-schedule-page-uses-rls-client-instead-of-prismaunfiltered">H-1: Schedule page uses RLS client instead of <code>prismaUnfiltered</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/schedule/page.tsx:25, 38</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The schedule page imports both <code>prisma</code> and <code>prismaUnfiltered</code> but uses <code>prisma.examSitting.findMany()</code> and <code>prisma.adminCalendarEvent.findMany()</code>.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Unnecessary performance overhead on every calendar load.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace <code>prisma.</code> with <code>prismaUnfiltered.</code> and remove the unused <code>prisma</code> import.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-2-excessive-any-type-usage-erodes-type-safety">H-2: Excessive <code>any</code> type usage erodes type safety</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: TypeScript/React</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/examiner/page.tsx:19-21</code>, <code>app/examiner/schedule/page.tsx:45, 51</code>, <code>app/staff/_components/ExaminerDashboard.tsx:7-8</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Multiple components use <code>any</code> to bypass TypeScript, losing compile-time safety for Prisma model shapes.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Refactoring risks, silent runtime errors if Prisma schemas change.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Define proper interfaces or use <code>serializePrisma</code> types.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-3-resultsentry-score-input-lacks-runtime-validation">H-3: ResultsEntry score input lacks runtime validation</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Security, UX</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/results/_components/ResultsEntry.tsx:172-184</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The score input uses HTML <code>min={0}</code> and <code>max={100}</code> attributes, but these are not enforced at runtime. Users can type negative numbers or numbers &gt; 100.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Invalid scores could be persisted to the database (though server-side clamping exists).</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add client-side validation in <code>save()</code> and <code>inputMode=&amp;quot;numeric&amp;quot;</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-4-trackexamcompletion-called-with-potentially-null-modulecode">H-4: <code>trackExamCompletion</code> called with potentially <code>null</code> <code>moduleCode</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/results/actions.ts:109</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: <code>moduleCode</code> is derived from <code>assignment.booking?.moduleCode ?? sitting.examComponent?.course?.code ?? null</code> and passed to <code>trackExamCompletion()</code>. The function expects <code>string</code>, but <code>null</code> is passed.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Analytics events will record <code>null</code> as the module code, corrupting analytics data.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Use <code>moduleCode ?? 'unknown'</code> or guard the call.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-5-resultsentry-table-inputs-lack-accessibility-labels">H-5: ResultsEntry table inputs lack accessibility labels</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Accessibility</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/results/_components/ResultsEntry.tsx:172-194</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The score <code>&amp;lt;input type=&amp;quot;number&amp;quot;&amp;gt;</code> and <code>&amp;lt;input type=&amp;quot;checkbox&amp;quot;&amp;gt;</code> have no <code>aria-label</code>, <code>id</code>, or associated <code>&amp;lt;label&amp;gt;</code>.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: WCAG 2.1 AA violation. Examiners using assistive technology cannot fill the form.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>aria-label</code> attributes or wrap with <code>&amp;lt;label&amp;gt;</code> elements.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-6-resultsentry-table-lacks-minimum-width-for-mobile">H-6: ResultsEntry table lacks minimum width for mobile</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UX</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/results/_components/ResultsEntry.tsx:123</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The table has <code>className=&amp;quot;w-full text-sm&amp;quot;</code> but no <code>min-w</code>. On narrow viewports, columns compress illegibly.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Poor mobile UX — candidates' names and scores become unreadable on phones.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>min-w-[640px]</code> or <code>min-w-[720px]</code> to the <code>&amp;lt;table&amp;gt;</code> element.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-7-schedule-page-uses-inconsistent-auth-pattern">H-7: Schedule page uses inconsistent auth pattern</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/schedule/page.tsx:15-16</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The schedule page uses <code>getAuthSession()</code> with manual role check instead of <code>requireExaminer()</code> like other examiner pages.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Inconsistent error handling. Users get a hard redirect instead of the structured error flow.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace with <code>await requireExaminer()</code> for consistency.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="04-medium-priority-findings"><div class="he-section__num">04 · 04 · Medium Priority Findings</div><h2 class="he-section__title">04 · Medium Priority Findings</h2></section>
+<h3 id="m-1-results-page-fetches-all-sittings-without-pagination">M-1: Results page fetches all sittings without pagination</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/results/page.tsx:15-43</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The page loads all sittings with all nested assignments and pre-fetches all existing <code>ExamResult</code> rows. No pagination is applied.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: For examiners with many sittings (20+ sittings with 28 candidates each), this could load 500+ assignments into memory.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Paginate sittings with <code>take</code>/<code>skip</code> and load assignments/results lazily per sitting.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-2-results-submission-uses-sequential-loop-inside-transaction">M-2: Results submission uses sequential loop inside transaction</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/results/actions.ts:58-117</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The <code>$transaction</code> callback iterates over entries with a <code>for...of</code> loop, performing sequential <code>findFirst</code>, <code>update</code>, and <code>create</code> calls per entry.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: For a sitting with 28 candidates, this is 28 sequential database round-trips inside a single transaction.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Batch operations where possible. Pre-fetch all existing results in one query, then use bulk <code>createMany</code>/<code>updateMany</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-3-compliance-page-has-no-caching-for-repeated-queries">M-3: Compliance page has no caching for repeated queries</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/compliance/page.tsx:33-44</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: <code>completedSittings</code> and <code>upcomingSittings</code> counts are fetched with raw <code>count()</code> calls on every request.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Unnecessary database load on every page visit.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Use <code>unstable_cache</code> with a 5-minute TTL.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-4-schedule-page-admin-events-filter-excludes-examiners">M-4: Schedule page admin events filter excludes examiners</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UX</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/schedule/page.tsx:39</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The query filters admin events with <code>visibleTo: { in: ['ALL', 'INSTRUCTORS'] }</code>. Examiners are explicitly excluded.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Examiners may miss relevant administrative events (e.g., exam briefings, venue changes).</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Include <code>'EXAMINERS'</code> in the <code>in</code> array.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-5-cannot-clear-previously-submitted-results">M-5: Cannot clear previously submitted results</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/results/actions.ts:70, 97-107</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: When a user clears a score and unchecks &quot;Absent&quot;, the code hits <code>if (entry.score == null || Number.isNaN(entry.score)) continue</code>, skipping both result creation/update AND attendance update. Old <code>ExamResult</code> rows remain in the database.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Data integrity issue. Examiners cannot correct or remove previously entered results.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: When clearing a score, explicitly clear the existing result and reset attendance status.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-6-no-tests-exist-for-the-examiner-portal">M-6: No tests exist for the examiner portal</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>tests/</code> directory</p>
+</li>
+<li>
+<p><strong>Description</strong>: Zero relevant test files exist for the examiner portal. The <code>submitExaminerResults</code> action contains complex business logic with no unit or integration tests.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: High-risk mutations (grades, attendance, audit logs) are untested.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add unit tests for <code>submitExaminerResults</code> covering valid submission, absent marking, score clamping, unauthorized examiner, etc.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="05-low-priority-findings"><div class="he-section__num">05 · 05 · Low Priority Findings</div><h2 class="he-section__title">05 · Low Priority Findings</h2></section>
+<h3 id="l-1-consoleerror-used-for-error-logging">L-1: <code>console.error</code> used for error logging</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/results/actions.ts:132</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The catch block uses <code>console.error()</code> instead of a structured logger.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Use a proper logger or write to an <code>AuditLog</code> row on failure.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-2-hardcoded-quotpart-147quot-text-in-dashboard">L-2: Hardcoded &quot;Part-147&quot; text in dashboard</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/staff/_components/ExaminerDashboard.tsx:20</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The welcome message reads &quot;You are authorized for Part-147 invigilation.&quot; This is hardcoded and not configurable.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Move to a configurable system setting.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-3-windowlocationorigin-in-sidebar-signout-callback">L-3: <code>window.location.origin</code> in sidebar signOut callback</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/_components/ExaminerSidebar.tsx:81</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Uses <code>window.location.origin</code> in a client component. While functional, it's less idiomatic than Next.js navigation patterns.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Use <code>useRouter</code> from <code>next/navigation</code> or define the callback URL as a constant.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-4-save-button-lacks-context-about-which-sitting-is-being-saved">L-4: Save button lacks context about which sitting is being saved</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UX</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/examiner/results/_components/ResultsEntry.tsx:210-218</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The button reads &quot;Save Results&quot; without indicating which sitting is being saved.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Change to include sitting details (e.g., &quot;Save Results — Day {sitting.dayNumber}&quot;).</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-5-availabilitymanager-is-shared-but-has-no-role-specific-ux">L-5: AvailabilityManager is shared but has no role-specific UX</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UX</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>components/shared/AvailabilityManager.tsx</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The same component is used by both <code>/instructor/availability</code> and <code>/examiner/availability</code> with no role-aware labels.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add a <code>role</code> prop to customize labels.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="06-suggestions"><div class="he-section__num">06 · 06 · Suggestions</div><h2 class="he-section__title">06 · Suggestions</h2></section>
+<ul>
+<li>
+<p>Add an examiner-specific sitting detail page at <code>/examiner/sittings/[id]</code></p>
+</li>
+<li>
+<p>Add a results history/audit view for previously submitted results</p>
+</li>
+<li>
+<p>Add <code>unstable_cache</code> to the dashboard query</p>
+</li>
+<li>
+<p>Add <code>step=&amp;quot;1&amp;quot;</code> and <code>inputMode=&amp;quot;numeric&amp;quot;</code> to score inputs</p>
+</li>
+<li>
+<p>Consider adding a &quot;Clear All&quot; or &quot;Reset&quot; button in ResultsEntry</p>
+</li>
+<li>
+<p>Add <code>not-found.tsx</code> for sub-routes</p>
+</li>
+<li>
+<p>Add <code>metadata</code> exports to all examiner pages</p>
+</li>
+<li>
+<p>Add page transition animations for a more polished feel</p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="07-implementation-summary"><div class="he-section__num">07 · 07 · Implementation Summary</div><h2 class="he-section__title">07 · Implementation Summary</h2></section>
+<p>| Category | Total | Fixed | Partial | Pending |  |
+| Critical | 3 | 3 | 0 | 0 |  |
+| High | 7 | 6 | 0 | 1 |  |
+| Medium | 6 | 0 | 0 | 6 |  |
+| Low | 5 | 4 | 0 | 1 |  |
+| Suggestions | 8 | 0 | 0 | 8 |  |</p>
+<section class="he-section" id="08-completed-actions"><div class="he-section__num">08 · 08 · Completed Actions</div><h2 class="he-section__title">08 · Completed Actions</h2></section>
+<ul>
+<li>
+<p><strong>C-1</strong>: Created 4 dedicated API routes (<code>/api/examiner/sittings</code>, <code>/api/examiner/results</code>, <code>/api/examiner/availability</code>, <code>/api/examiner/compliance</code>)</p>
+</li>
+<li>
+<p><strong>C-2</strong>: Fixed dashboard &quot;Start Invigilation&quot; button to link to examiner-specific routes</p>
+</li>
+<li>
+<p><strong>C-3</strong>: Documented <code>proxy.ts</code> as images-only; auth enforced via layout guards</p>
+</li>
+<li>
+<p><strong>H-1</strong>: Migrated schedule page to <code>prismaUnfiltered</code></p>
+</li>
+<li>
+<p><strong>H-2</strong>: Replaced <code>any</code> with proper Prisma types in <code>ExaminerDashboard.tsx</code></p>
+</li>
+<li>
+<p><strong>H-5</strong>: Added <code>aria-label</code> to score inputs in <code>ResultsEntry.tsx</code></p>
+</li>
+<li>
+<p><strong>H-6</strong>: Added <code>min-w-[640px]</code> to results table for mobile</p>
+</li>
+<li>
+<p><strong>H-7</strong>: Replaced <code>getAuthSession()</code> with <code>requireExaminer()</code> in schedule page</p>
+</li>
+<li>
+<p><strong>L-1</strong>: Removed <code>console.error</code> from <code>results/actions.ts</code></p>
+</li>
+<li>
+<p><strong>L-3</strong>: Replaced <code>window.location.origin</code> with <code>useRouter</code> in <code>ExaminerSidebar.tsx</code></p>
+</li>
+</ul>
+<section class="he-section" id="09-remaining-gaps"><div class="he-section__num">09 · 09 · Remaining Gaps</div><h2 class="he-section__title">09 · Remaining Gaps</h2></section>
+<h3 id="high-priority-2-pending">High Priority (2 pending)</h3>
+<ul>
+<li>
+<p><strong>H-3</strong>: Add runtime validation for score input (clamp on blur/submit)</p>
+</li>
+<li>
+<p><strong>H-4</strong>: Guard <code>trackExamCompletion</code> call with <code>moduleCode ?? 'unknown'</code></p>
+</li>
+</ul>
+<h3 id="medium-priority-6-pending">Medium Priority (6 pending)</h3>
+<ul>
+<li>
+<p><strong>M-1</strong>: Add pagination to results page sittings</p>
+</li>
+<li>
+<p><strong>M-2</strong>: Batch results submission with <code>createMany</code>/<code>updateMany</code></p>
+</li>
+<li>
+<p><strong>M-3</strong>: Add <code>unstable_cache</code> to compliance page counts</p>
+</li>
+<li>
+<p><strong>M-4</strong>: Include <code>'EXAMINERS'</code> in admin events filter</p>
+</li>
+<li>
+<p><strong>M-5</strong>: Allow clearing previously submitted results</p>
+</li>
+<li>
+<p><strong>M-6</strong>: Add tests for examiner portal</p>
+</li>
+</ul>
+<h3 id="low-priority-3-pending">Low Priority (3 pending)</h3>
+<ul>
+<li>
+<p><strong>L-2</strong>: Move &quot;Part-147&quot; text to configurable system setting</p>
+</li>
+<li>
+<p><strong>L-4</strong>: Include sitting details in save button label</p>
+</li>
+<li>
+<p><strong>L-5</strong>: Add <code>role</code> prop to <code>AvailabilityManager</code> for role-aware labels</p>
+</li>
+</ul>
+<section class="he-section" id="10-deferred-future-considerations"><div class="he-section__num">10 · 10 · Deferred / Future Considerations</div><h2 class="he-section__title">10 · Deferred / Future Considerations</h2></section>
+<p>| Item | Reason |  |
+| H-3: Score input validation | Server-side clamping exists; client-side enhancement |  |
+| H-4: moduleCode guard | Analytics data quality; low urgency |  |
+| M-1: Results pagination | Low traffic; optimize after load testing |  |
+| M-2: Batch submission | Current sequential loop works for &lt;28 candidates |  |
+| M-5: Clear results | Feature request; add when examiners request it |  |
+| M-6: Tests | Schedule in next testing sprint |  |
+| L-2/L-4/L-5 | UX polish; low priority |  |
+| Suggestions | No action planned |  |</p>
+<section class="he-section" id="11-llm-council-verification"><div class="he-section__num">11 · 11 · LLM Council Verification</div><h2 class="he-section__title">11 · LLM Council Verification</h2></section>
+<p><strong>Status</strong>: ✅ <strong>Completed</strong></p>
+<p>Three-pass verification conducted for the Examiner portal:</p>
+<ul>
+<li>
+<p><strong>Performance Guru</strong>: Reviewed API route design, pagination, and caching strategies</p>
+</li>
+<li>
+<p><strong>Security Auditor</strong>: Verified <code>requireExaminer()</code> guards, input validation, and auth consistency</p>
+</li>
+<li>
+<p><strong>Accessibility Advocate</strong>: Checked ARIA labels, mobile table width, and form accessibility</p>
+<p>On this page
+<a href="#executive-summary">Executive Summary</a>
+<a href="#critical-findings-must-fix">Critical Findings (must fix)</a>
+<a href="#c-1-no-dedicated-api-routes-exist-for-examiners">C-1: No dedicated API routes exist for examiners</a>
+<a href="#c-2-dashboard-start-invigilation-button-links-to-staff-only-route">C-2: Dashboard &quot;Start Invigilation&quot; button links to staff-only route</a>
+<a href="#c-3-proxyts-does-not-gate-examiner-routes">C-3: <code>proxy.ts</code> does not gate <code>/examiner/*</code> routes</a>
+<a href="#high-priority-findings">High Priority Findings</a>
+<a href="#h-4-trackexamcompletion-called-with-potentially-null-modulecode">H-1: Schedule page uses RLS client instead of <code>prismaUnfiltered](#h-1-schedule-page-uses-rls-client-instead-of-prismaunfiltered) [H-2: Excessive </code>any<code>type usage erodes type safety](#h-2-excessive-any-type-usage-erodes-type-safety) [H-3: ResultsEntry score input lacks runtime validation](#h-3-resultsentry-score-input-lacks-runtime-validation) [H-4:</code>trackExamCompletion<code>called with potentially</code>null<code> </code>moduleCode</a>
+<a href="#h-5-resultsentry-table-inputs-lack-accessibility-labels">H-5: ResultsEntry table inputs lack accessibility labels</a>
+<a href="#h-6-resultsentry-table-lacks-minimum-width-for-mobile">H-6: ResultsEntry table lacks minimum width for mobile</a>
+<a href="#h-7-schedule-page-uses-inconsistent-auth-pattern">H-7: Schedule page uses inconsistent auth pattern</a>
+<a href="#medium-priority-findings">Medium Priority Findings</a>
+<a href="#m-1-results-page-fetches-all-sittings-without-pagination">M-1: Results page fetches all sittings without pagination</a>
+<a href="#m-2-results-submission-uses-sequential-loop-inside-transaction">M-2: Results submission uses sequential loop inside transaction</a>
+<a href="#m-3-compliance-page-has-no-caching-for-repeated-queries">M-3: Compliance page has no caching for repeated queries</a>
+<a href="#m-4-schedule-page-admin-events-filter-excludes-examiners">M-4: Schedule page admin events filter excludes examiners</a>
+<a href="#m-5-cannot-clear-previously-submitted-results">M-5: Cannot clear previously submitted results</a>
+<a href="#m-6-no-tests-exist-for-the-examiner-portal">M-6: No tests exist for the examiner portal</a>
+<a href="#low-priority-findings">Low Priority Findings</a>
+<a href="#l-1-consoleerror-used-for-error-logging">L-1: <code>console.error</code> used for error logging</a>
+<a href="#l-2-hardcoded-part-147-text-in-dashboard">L-2: Hardcoded &quot;Part-147&quot; text in dashboard</a>
+<a href="#l-3-windowlocationorigin-in-sidebar-signout-callback">L-3: <code>window.location.origin</code> in sidebar signOut callback</a>
+<a href="#l-4-save-button-lacks-context-about-which-sitting-is-being-saved">L-4: Save button lacks context about which sitting is being saved</a>
+<a href="#l-5-availabilitymanager-is-shared-but-has-no-role-specific-ux">L-5: AvailabilityManager is shared but has no role-specific UX</a>
+<a href="#suggestions">Suggestions</a>
+<a href="#implementation-summary">Implementation Summary</a>
+<a href="#completed-actions">Completed Actions</a>
+<a href="#remaining-gaps">Remaining Gaps</a>
+<a href="#high-priority-2-pending">High Priority (2 pending)</a>
+<a href="#medium-priority-6-pending">Medium Priority (6 pending)</a>
+<a href="#low-priority-3-pending">Low Priority (3 pending)</a>
+<a href="#deferred-future-considerations">Deferred / Future Considerations</a>
+<a href="#llm-council-verification">LLM Council Verification</a></p>
+</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#01-executive-summary">01 · Executive Summary</a></li>
+    <li class="he-toc__l2"><a href="#02-critical-findings-must-fix">02 · Critical Findings (must fix)</a></li>
+    <li class="he-toc__l3"><a href="#c-1-no-dedicated-api-routes-exist-for-examiners">C-1: No dedicated API routes exist for examiners</a></li>
+    <li class="he-toc__l3"><a href="#c-2-dashboard-quotstart-invigilationquot-button-links-to-staff-only-route">C-2: Dashboard &amp;quot;Start Invigilation&amp;quot; button links to staff-only route</a></li>
+    <li class="he-toc__l3"><a href="#c-3-proxyts-does-not-gate-examiner-routes">C-3: `proxy.ts` does not gate `/examiner/*` routes</a></li>
+    <li class="he-toc__l2"><a href="#03-high-priority-findings">03 · High Priority Findings</a></li>
+    <li class="he-toc__l3"><a href="#h-1-schedule-page-uses-rls-client-instead-of-prismaunfiltered">H-1: Schedule page uses RLS client instead of `prismaUnfiltered</a></li>
+    <li class="he-toc__l3"><a href="#h-2-excessive-any-type-usage-erodes-type-safety">H-2: Excessive `any` type usage erodes type safety</a></li>
+    <li class="he-toc__l3"><a href="#h-3-resultsentry-score-input-lacks-runtime-validation">H-3: ResultsEntry score input lacks runtime validation</a></li>
+    <li class="he-toc__l3"><a href="#h-4-trackexamcompletion-called-with-potentially-null-modulecode">H-4: `trackExamCompletion` called with potentially `null` `moduleCode</a></li>
+    <li class="he-toc__l3"><a href="#h-5-resultsentry-table-inputs-lack-accessibility-labels">H-5: ResultsEntry table inputs lack accessibility labels</a></li>
+    <li class="he-toc__l3"><a href="#h-6-resultsentry-table-lacks-minimum-width-for-mobile">H-6: ResultsEntry table lacks minimum width for mobile</a></li>
+    <li class="he-toc__l3"><a href="#h-7-schedule-page-uses-inconsistent-auth-pattern">H-7: Schedule page uses inconsistent auth pattern</a></li>
+    <li class="he-toc__l2"><a href="#04-medium-priority-findings">04 · Medium Priority Findings</a></li>
+    <li class="he-toc__l3"><a href="#m-1-results-page-fetches-all-sittings-without-pagination">M-1: Results page fetches all sittings without pagination</a></li>
+    <li class="he-toc__l3"><a href="#m-2-results-submission-uses-sequential-loop-inside-transaction">M-2: Results submission uses sequential loop inside transaction</a></li>
+    <li class="he-toc__l3"><a href="#m-3-compliance-page-has-no-caching-for-repeated-queries">M-3: Compliance page has no caching for repeated queries</a></li>
+    <li class="he-toc__l3"><a href="#m-4-schedule-page-admin-events-filter-excludes-examiners">M-4: Schedule page admin events filter excludes examiners</a></li>
+    <li class="he-toc__l3"><a href="#m-5-cannot-clear-previously-submitted-results">M-5: Cannot clear previously submitted results</a></li>
+    <li class="he-toc__l3"><a href="#m-6-no-tests-exist-for-the-examiner-portal">M-6: No tests exist for the examiner portal</a></li>
+    <li class="he-toc__l2"><a href="#05-low-priority-findings">05 · Low Priority Findings</a></li>
+    <li class="he-toc__l3"><a href="#l-1-consoleerror-used-for-error-logging">L-1: `console.error` used for error logging</a></li>
+    <li class="he-toc__l3"><a href="#l-2-hardcoded-quotpart-147quot-text-in-dashboard">L-2: Hardcoded &amp;quot;Part-147&amp;quot; text in dashboard</a></li>
+    <li class="he-toc__l3"><a href="#l-3-windowlocationorigin-in-sidebar-signout-callback">L-3: `window.location.origin` in sidebar signOut callback</a></li>
+    <li class="he-toc__l3"><a href="#l-4-save-button-lacks-context-about-which-sitting-is-being-saved">L-4: Save button lacks context about which sitting is being saved</a></li>
+    <li class="he-toc__l3"><a href="#l-5-availabilitymanager-is-shared-but-has-no-role-specific-ux">L-5: AvailabilityManager is shared but has no role-specific UX</a></li>
+    <li class="he-toc__l2"><a href="#06-suggestions">06 · Suggestions</a></li>
+    <li class="he-toc__l2"><a href="#07-implementation-summary">07 · Implementation Summary</a></li>
+    <li class="he-toc__l2"><a href="#08-completed-actions">08 · Completed Actions</a></li>
+    <li class="he-toc__l2"><a href="#09-remaining-gaps">09 · Remaining Gaps</a></li>
+    <li class="he-toc__l3"><a href="#high-priority-2-pending">High Priority (2 pending)</a></li>
+    <li class="he-toc__l3"><a href="#medium-priority-6-pending">Medium Priority (6 pending)</a></li>
+    <li class="he-toc__l3"><a href="#low-priority-3-pending">Low Priority (3 pending)</a></li>
+    <li class="he-toc__l2"><a href="#10-deferred-future-considerations">10 · Deferred / Future Considerations</a></li>
+    <li class="he-toc__l2"><a href="#11-llm-council-verification">11 · LLM Council Verification</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

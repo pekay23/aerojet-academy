@@ -1,5 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
 import {
@@ -33,7 +34,7 @@ interface Props {
 
 export default async function CourseDetailsPage({ params }: Props) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { id } = await params
 
@@ -81,7 +82,7 @@ export default async function CourseDetailsPage({ params }: Props) {
   const serializedCategories = serializePrisma(categories)
 
   return (
-    <div className="mx-auto max-w-[1800px]">
+    <div className="mx-auto max-w-450">
       {/* Header */}
       <div className="mb-6">
         <Link

@@ -1,5 +1,6 @@
 import { getCachedSession } from '@/lib/auth/session-context'
 import { redirect } from 'next/navigation'
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import StaffSidebar from './_components/StaffSidebar'
 import StaffTopBar from './_components/StaffTopBar'
@@ -17,7 +18,7 @@ export const dynamic = 'force-dynamic'
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
   const session = await getCachedSession()
 
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'STAFF']
   if (!allowedRoles.includes(session.user.role)) {
@@ -27,7 +28,14 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   const user = session.user
 
   // Run all queries in parallel; use prismaUnfiltered to bypass RLS transaction overhead
-  const [dbUser, welcomeMessages, internalExamEnabled, dashboardAlerts, registrationConfigData, pdfTemplateEnabled] = await Promise.all([
+  const [
+    dbUser,
+    welcomeMessages,
+    internalExamEnabled,
+    dashboardAlerts,
+    registrationConfigData,
+    pdfTemplateEnabled,
+  ] = await Promise.all([
     prismaUnfiltered.user.findUnique({
       where: { id: user.id },
       select: {
@@ -37,11 +45,14 @@ export default async function StaffLayout({ children }: { children: React.ReactN
         profile: { select: { firstName: true, middleName: true, lastName: true } },
       },
     }),
-    getWelcomeMessages(prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient, user.role),
+    getWelcomeMessages(
+      prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient,
+      user.role
+    ),
     isInternalExamSystemEnabled(),
     getDashboardAlerts(),
     getRegistrationConfig(),
-    getSystemSetting('pdf_template_system_enabled', 'false').then(v => v === 'true'),
+    getSystemSetting('pdf_template_system_enabled', 'false').then((v) => v === 'true'),
   ])
 
   if (
@@ -62,7 +73,10 @@ export default async function StaffLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white"
+      >
         Skip to main content
       </a>
       <Heartbeat />

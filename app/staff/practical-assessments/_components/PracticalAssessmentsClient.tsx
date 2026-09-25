@@ -18,6 +18,7 @@ import { useConfirmDialog } from '@/hooks/use-confirm-dialog'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
+import { formatDate } from '@/lib/utils/formatters'
 
 type PracticalResult = 'SATISFACTORY' | 'UNSATISFACTORY' | 'NEEDS_REVIEW'
 type PracticalTaskCategory = 'P1' | 'P2'
@@ -90,8 +91,8 @@ export default function PracticalAssessmentsClient({
 
       const res = await fetch(`/api/staff/practical-training?${params.toString()}`)
       if (res.ok) {
-        const data = await res.json()
-        setRecords(data.records)
+        const json = await res.json()
+        setRecords(json.data?.records || [])
       } else {
         toast.error('Failed to load records')
       }
@@ -100,7 +101,8 @@ export default function PracticalAssessmentsClient({
     } finally {
       setIsLoading(false)
     }
-  }, [studentFilter, courseFilter, resultFilter, toast])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [studentFilter, courseFilter, resultFilter])
 
   // Debounce filter changes
   useEffect(() => {
@@ -346,7 +348,7 @@ export default function PracticalAssessmentsClient({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/60 dark:divide-slate-700/60">
-            {records.map((rec) => (
+            {(records || []).map((rec) => (
               <tr
                 key={rec.id}
                 className="transition hover:bg-slate-50/30 dark:hover:bg-slate-800/30"
@@ -354,7 +356,7 @@ export default function PracticalAssessmentsClient({
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
                     <Calendar className="h-4 w-4 text-slate-400" />
-                    {new Date(rec.date).toLocaleDateString()}
+                    {formatDate(rec.date)}
                   </div>
                   <div className="mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                     {rec.course.code}

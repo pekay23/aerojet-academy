@@ -10,15 +10,15 @@ export default meta
 type Story = StoryObj<typeof Skeleton>
 
 export const Default: Story = {
-  render: () => <Skeleton className="h-4 w-[250px]" />,
+  render: () => <Skeleton className="h-4 w-62.5" />,
 }
 
 export const TextBlock: Story = {
   render: () => (
     <div className="space-y-2">
-      <Skeleton className="h-4 w-[250px]" />
-      <Skeleton className="h-4 w-[200px]" />
-      <Skeleton className="h-4 w-[150px]" />
+      <Skeleton className="h-4 w-62.5" />
+      <Skeleton className="h-4 w-50" />
+      <Skeleton className="h-4 w-37.5" />
     </div>
   ),
 }
@@ -32,8 +32,8 @@ export const CardLayout: Story = {
     <div className="flex items-center space-x-4">
       <Skeleton className="h-12 w-12 rounded-full" />
       <div className="space-y-2">
-        <Skeleton className="h-4 w-[250px]" />
-        <Skeleton className="h-4 w-[200px]" />
+        <Skeleton className="h-4 w-62.5" />
+        <Skeleton className="h-4 w-50" />
       </div>
     </div>
   ),

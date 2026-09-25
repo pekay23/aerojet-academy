@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Calendar, BookOpen } from 'lucide-react'
 import ClassActionsMenu from '../_components/ClassActionsMenu'
@@ -17,7 +17,7 @@ export default async function ClassesPage({
   searchParams: Promise<{ page?: string; limit?: string; query?: string }>
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const params = await searchParams
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1)
@@ -75,17 +75,17 @@ export default async function ClassesPage({
   ])
 
   return (
-    <div className="mx-auto max-w-[1800px]">
+    <div className="mx-auto max-w-450">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             Classes
           </h1>
           <p className="text-slate-500 dark:text-slate-400">Manage class schedules and rosters</p>
         </div>
         <Link
           href="/staff/classes/create"
-          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
+          className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-colors"
         >
           <Plus className="h-4 w-4" />
           Schedule Class
@@ -121,7 +121,10 @@ export default async function ClassesPage({
                 </tr>
               ) : (
                 classes.map((cls) => (
-                  <tr key={cls.id} className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40">
+                  <tr
+                    key={cls.id}
+                    className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
+                  >
                     <td className="px-6 py-4">
                       <div className="font-bold text-slate-900 dark:text-slate-100">{cls.name}</div>
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">

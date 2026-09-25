@@ -111,7 +111,7 @@ export default function CourseInfoEditDialog({
           <Pencil className="h-3 w-3" /> Edit Info
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[560px]">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-140">
         <DialogHeader>
           <DialogTitle>Edit Course Info</DialogTitle>
         </DialogHeader>

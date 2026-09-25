@@ -1,14 +1,11 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import React from 'react'
 import { TrendingUp, Award, Calendar, Zap } from 'lucide-react'
 import { getExamAnalytics } from '@/lib/analytics/reports'
-import {
-  ExamTrendChart,
-  ScoreDistributionChart,
-} from '../_components/ReportCharts'
+import { ExamTrendChart, ScoreDistributionChart } from '../_components/ReportCharts'
 import MetricCard from '../_components/MetricCard'
 
 export const metadata: Metadata = { title: 'Exam Analytics | Staff Portal' }
@@ -16,7 +13,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function ExamsPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const analytics = await getExamAnalytics()
 
@@ -28,10 +25,10 @@ export default async function ExamsPage() {
   ]
 
   return (
-    <div className="mx-auto max-w-[1920px] space-y-8">
+    <div className="mx-auto max-w-480 space-y-8">
       <div className="flex flex-col flex-wrap items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight sm:text-4xl dark:text-white">
             Exam Analytics
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -259,7 +256,10 @@ export default async function ExamsPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Hardest modules by pass rate showing module code, total attempts, passes, fails, and pass rate</caption>
+              <caption className="sr-only">
+                Hardest modules by pass rate showing module code, total attempts, passes, fails, and
+                pass rate
+              </caption>
               <thead className="bg-slate-50/50 text-[11px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/20">
                 <tr>
                   <th className="px-5 py-3">Module</th>
@@ -323,7 +323,10 @@ export default async function ExamsPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Easiest modules by pass rate showing module code, total attempts, passes, fails, and pass rate</caption>
+              <caption className="sr-only">
+                Easiest modules by pass rate showing module code, total attempts, passes, fails, and
+                pass rate
+              </caption>
               <thead className="bg-slate-50/50 text-[11px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/20">
                 <tr>
                   <th className="px-5 py-3">Module</th>

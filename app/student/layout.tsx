@@ -1,5 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import Link from 'next/link'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AlertTriangle } from 'lucide-react'
@@ -20,7 +21,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const user = session.user
 
@@ -88,19 +89,29 @@ export default async function StudentLayout({ children }: { children: React.Reac
     ? [dbUser.profile.firstName, dbUser.profile.middleName, dbUser.profile.lastName]
         .filter(Boolean)
         .join(' ')
-    : (user.name || user.email || '')
+    : user.name || user.email || ''
   const userRole = user.role
 
-  const [unreadNotifications, unreadMessages, paymentAccessLevel, milestoneStatus, welcomeMessages, internalExamEnabled, showRevision] =
-    await Promise.all([
-      prismaUnfiltered.notification.count({ where: { userId: user.id, isRead: false } }),
-      prismaUnfiltered.message.count({ where: { recipientId: user.id, isRead: false } }),
-      getStudentPaymentAccessLevel(user.id, preFetchedData),
-      getEnrollmentMilestoneStatus(user.id, preFetchedData),
-      getWelcomeMessages(prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient, session.user.role),
-      isInternalExamSystemEnabled(),
-      shouldShowRevisionSupport(user.id),
-    ])
+  const [
+    unreadNotifications,
+    unreadMessages,
+    paymentAccessLevel,
+    milestoneStatus,
+    welcomeMessages,
+    internalExamEnabled,
+    showRevision,
+  ] = await Promise.all([
+    prismaUnfiltered.notification.count({ where: { userId: user.id, isRead: false } }),
+    prismaUnfiltered.message.count({ where: { recipientId: user.id, isRead: false } }),
+    getStudentPaymentAccessLevel(user.id, preFetchedData),
+    getEnrollmentMilestoneStatus(user.id, preFetchedData),
+    getWelcomeMessages(
+      prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient,
+      session.user.role
+    ),
+    isInternalExamSystemEnabled(),
+    shouldShowRevisionSupport(user.id),
+  ])
 
   const wallet = dbUser.wallet
 
@@ -108,11 +119,21 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   const milestoneStatusJson = {
     ...milestoneStatus,
-    milestones: milestoneStatus.milestones.map((m: { id: string; type: string; yearNumber: number; amountDue: number; status: string; dueDate: Date; paidAt: Date | null }) => ({
-      ...m,
-      dueDate: m.dueDate.toISOString(),
-      paidAt: m.paidAt?.toISOString() ?? null,
-    })),
+    milestones: milestoneStatus.milestones.map(
+      (m: {
+        id: string
+        type: string
+        yearNumber: number
+        amountDue: number
+        status: string
+        dueDate: Date
+        paidAt: Date | null
+      }) => ({
+        ...m,
+        dueDate: m.dueDate.toISOString(),
+        paidAt: m.paidAt?.toISOString() ?? null,
+      })
+    ),
   }
 
   const walletBalance = {
@@ -131,7 +152,10 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-slate-900 focus:shadow-lg dark:focus:bg-slate-800 dark:focus:text-white"
+      >
         Skip to main content
       </a>
       <Heartbeat />
@@ -155,7 +179,10 @@ export default async function StudentLayout({ children }: { children: React.Reac
         showRevisionSupport={showRevision}
         hasWallet={!!dbUser.wallet}
       />
-      <main id="main-content" className="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden pt-16 lg:pt-0">
+      <main
+        id="main-content"
+        className="relative min-w-0 flex-1 overflow-x-hidden overflow-y-auto pt-16 lg:pt-0"
+      >
         <PortalTopbar
           itemsEndpoint="/api/student/topbar-items"
           notificationsHref="/student/notifications"
@@ -163,11 +190,13 @@ export default async function StudentLayout({ children }: { children: React.Reac
           composeHref="/student/messages?compose=true"
           welcomeMessage={welcomeMessages[0] ?? null}
           userName={firstName}
-          actions={<TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />}
+          actions={
+            <TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />
+          }
         />
         {!dbUser.registrationPaid && (
           <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-900/20">
-            <div className="mx-auto flex max-w-[1920px] items-center gap-3">
+            <div className="mx-auto flex max-w-480 items-center gap-3">
               <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
               <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
                 Registration fee unpaid.{' '}
@@ -179,7 +208,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
             </div>
           </div>
         )}
-        <div className="mx-auto max-w-[1920px] p-4 sm:p-8 lg:px-8 lg:py-6">
+        <div className="mx-auto max-w-480 p-4 sm:p-8 lg:px-8 lg:py-6">
           {hasPathway ? (
             <div className="payment-info" data-payment-info={JSON.stringify(paymentInfo)}>
               {children}

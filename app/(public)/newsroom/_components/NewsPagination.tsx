@@ -65,7 +65,7 @@ export default function NewsPagination({ total, page, limit }: NewsPaginationPro
           Per Page
         </span>
         <Select value={limit.toString()} onValueChange={handleLimitChange}>
-          <SelectTrigger className="focus:ring-aerojet-blue/20 h-10 w-[80px] rounded-xl border-slate-200 bg-white text-xs font-bold ring-offset-white">
+          <SelectTrigger className="focus:ring-aerojet-blue/20 h-10 w-20 rounded-xl border-slate-200 bg-white text-xs font-bold ring-offset-white">
             <SelectValue placeholder={limit.toString()} />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-slate-100 bg-white p-1.5 shadow-2xl">

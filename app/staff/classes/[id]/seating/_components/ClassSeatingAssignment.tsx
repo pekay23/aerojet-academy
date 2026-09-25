@@ -234,7 +234,7 @@ export default function ClassSeatingAssignment({
 
           {showUnassigned && (
             <div
-              className="max-h-[500px] space-y-1 overflow-y-auto border-t border-slate-100 p-2 dark:border-slate-800"
+              className="max-h-125 space-y-1 overflow-y-auto border-t border-slate-100 p-2 dark:border-slate-800"
               onDragOver={(e) => {
                 e.preventDefault()
                 e.dataTransfer.dropEffect = 'move'
@@ -337,7 +337,7 @@ export default function ClassSeatingAssignment({
                         {occupant ? (
                           <>
                             <span
-                              className="max-w-[48px] truncate text-[9px] font-bold text-indigo-700 sm:max-w-[56px] dark:text-indigo-400"
+                              className="max-w-12 truncate text-[9px] font-bold text-indigo-700 sm:max-w-14 dark:text-indigo-400"
                               title={occupant.name}
                             >
                               {occupant.name.split(' ')[0]}

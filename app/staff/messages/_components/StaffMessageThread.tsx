@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState } from 'react'
 import {
@@ -54,9 +55,8 @@ function formatTime(date: Date) {
   const diff = now.getTime() - date.getTime()
   const hours = diff / (1000 * 60 * 60)
   if (hours < 24) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  if (hours < 168)
-    return date.toLocaleDateString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })
-  return date.toLocaleDateString([], { month: 'short', day: 'numeric' })
+  if (hours < 168) return formatDate(date)
+  return formatDate(date)
 }
 
 function userName(user: MessageUser | null | undefined): string {
@@ -102,7 +102,7 @@ function MessageBubble({
         <div
           className={`rounded-2xl px-5 py-3 text-sm leading-relaxed shadow-sm ${
             isOwn
-              ? 'rounded-tr-sm bg-aerojet-blue font-medium text-white shadow-blue-500/10'
+              ? 'bg-aerojet-blue rounded-tr-sm font-medium text-white shadow-blue-500/10'
               : 'rounded-tl-sm bg-slate-100 font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-100'
           }`}
         >
@@ -111,7 +111,7 @@ function MessageBubble({
         {!isOwn && (
           <button
             onClick={() => onReply(message)}
-            className="flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase opacity-0 transition-opacity group-hover:opacity-100 hover:text-aerojet-blue dark:hover:text-blue-400"
+            className="hover:text-aerojet-blue flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase opacity-0 transition-opacity group-hover:opacity-100 dark:hover:text-blue-400"
           >
             <CornerDownRight className="h-3 w-3" />
             Reply
@@ -204,7 +204,7 @@ export default function StaffMessageThread({
         </div>
         <div className="flex-1 space-y-1 overflow-hidden">
           <div className="flex items-center gap-2">
-            <p className="truncate text-base font-black text-aerojet-blue dark:text-slate-100">
+            <p className="text-aerojet-blue truncate text-base font-black dark:text-slate-100">
               {userName(otherParticipant)}
             </p>
             {otherParticipant && <PresencePill peerId={otherParticipant.id} />}
@@ -278,13 +278,13 @@ export default function StaffMessageThread({
                     e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendReply())
                   }
                   placeholder={`Type a message to ${userName(otherParticipant)}…`}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-medium text-slate-900 placeholder-slate-400 shadow-sm transition-all focus:border-aerojet-blue focus:ring-4 focus:border-aerojet-blue/5 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-900 dark:focus:ring-blue-500/5"
+                  className="focus:border-aerojet-blue focus:border-aerojet-blue/5 w-full rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-medium text-slate-900 placeholder-slate-400 shadow-sm transition-all focus:ring-4 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-900 dark:focus:ring-blue-500/5"
                 />
               </div>
               <button
                 onClick={handleSendReply}
                 disabled={sending || !replyText.trim()}
-                className="group flex items-center justify-center rounded-2xl bg-aerojet-blue px-6 text-white shadow-xl transition-all hover:scale-105 hover:bg-[#003875] disabled:scale-100 disabled:opacity-50"
+                className="group bg-aerojet-blue flex items-center justify-center rounded-2xl px-6 text-white shadow-xl transition-all hover:scale-105 hover:bg-[#003875] disabled:scale-100 disabled:opacity-50"
               >
                 {sending ? (
                   <Loader2 className="h-5 w-5 animate-spin" />

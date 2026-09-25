@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import {
   ClipboardCheck,
   AlertCircle,
@@ -72,7 +72,7 @@ export default async function ExamsPage({
   const tab = LEGACY_TAB_MAP[tabParam || ''] || tabParam || 'records'
 
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   // getStudentStatus is React.cache'd, so these multiple calls will only result in 1 DB query
   const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)

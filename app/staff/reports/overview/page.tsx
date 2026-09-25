@@ -1,21 +1,9 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import React from 'react'
-import {
-  TrendingUp,
-  Users,
-  DollarSign,
-  Sparkles,
-  AlertTriangle,
-  Award,
-  Zap,
-} from 'lucide-react'
+import { TrendingUp, Users, DollarSign, Sparkles, AlertTriangle, Award, Zap } from 'lucide-react'
 import { format } from 'date-fns'
-import {
-  getDashboardMetrics,
-  formatCurrency,
-  getTopCourses,
-} from '@/lib/analytics/metrics'
+import { getDashboardMetrics, formatCurrency, getTopCourses } from '@/lib/analytics/metrics'
 import { getCriticalAlerts } from '@/lib/analytics/reports'
 import { PeriodFilter } from '../_components/PeriodFilter'
 import MetricCard from '../_components/MetricCard'
@@ -73,10 +61,10 @@ export default async function OverviewPage({ searchParams }: OverviewPageProps) 
   const { metrics, topCourses, alerts } = await getOverviewData(period, from, to)
 
   return (
-    <div className="mx-auto max-w-[1920px] space-y-8">
+    <div className="mx-auto max-w-480 space-y-8">
       <div className="flex flex-col flex-wrap items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight sm:text-4xl dark:text-white">
             Overview
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

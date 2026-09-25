@@ -69,6 +69,31 @@ describe('GET /api/staff/attendance', () => {
     )
   })
 
+  it('deduplicates roster entries by user when enrollment data is duplicated', async () => {
+    prismaMock.attendanceRecord.findMany.mockResolvedValue([])
+    prismaMock.class.findUnique.mockResolvedValue({
+      id: 'class-1',
+      name: 'Test Class',
+      courseId: 'course-1',
+    })
+    const user = {
+      id: 'user-1',
+      email: 'duplicate@test.com',
+      profile: { firstName: 'Duplicate', lastName: 'User' },
+      studentProfile: { studentId: 'AATA-2026-0003' },
+    }
+    prismaMock.enrollment.findMany.mockResolvedValue([{ user }, { user }])
+
+    const res = await GET(
+      makeRequest('http://localhost/api/staff/attendance?classId=class-1&date=2026-09-10') as any
+    )
+    const json = await res.json()
+
+    expect(json.success).toBe(true)
+    expect(json.data.roster).toHaveLength(1)
+    expect(json.data.roster[0].id).toBe('user-1')
+  })
+
   it('filters attendance records by the requested date', async () => {
     prismaMock.attendanceRecord.findMany.mockResolvedValue([
       {
@@ -143,10 +168,7 @@ describe('POST /api/staff/attendance', () => {
       id: 'class-1',
       courseId: 'course-1',
     })
-    prismaMock.enrollment.findMany.mockResolvedValue([
-      { userId: 'user-1' },
-      { userId: 'user-2' },
-    ])
+    prismaMock.enrollment.findMany.mockResolvedValue([{ userId: 'user-1' }, { userId: 'user-2' }])
     prismaMock.$transaction.mockImplementation(async (fn: any) => {
       if (typeof fn === 'function') {
         return fn(prismaMock)

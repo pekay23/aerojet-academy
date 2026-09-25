@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { Users, UserPlus, Gift, Target } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function AmbassadorPage() {
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'STUDENT') redirect('/login')
+  if (!session || session.user.role !== 'STUDENT') return await redirectToLogin()
 
   // Ensure referral code exists
   const referralCode = await getOrCreateReferralCode(session.user.id)
@@ -25,25 +25,25 @@ export default async function AmbassadorPage() {
     include: {
       referralsMade: {
         include: {
-          referee: { select: { email: true, profile: true } }
+          referee: { select: { email: true, profile: true } },
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       },
       referralsReceived: {
         include: {
-          referrer: { select: { email: true, profile: true } }
-        }
-      }
-    }
+          referrer: { select: { email: true, profile: true } },
+        },
+      },
+    },
   })
 
-  if (!user) redirect('/login')
+  if (!user) return await redirectToLogin()
 
   const hasBeenReferred = !!user.referralsReceived
   const referrer = hasBeenReferred ? user.referralsReceived!.referrer : null
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-5xl space-y-8 pb-12 duration-700">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
@@ -106,18 +106,22 @@ export default async function AmbassadorPage() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 lg:col-span-2">
           <div className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="border-b border-slate-100 px-6 py-5 dark:border-slate-800">
-              <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">
+              <h2 className="text-sm font-black tracking-widest text-slate-400 uppercase">
                 Your Referrals
               </h2>
             </div>
             {user.referralsMade.length === 0 ? (
               <div className="p-12 text-center">
                 <UserPlus className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
-                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">No referrals yet</p>
-                <p className="mt-1 text-xs text-slate-500">Share your email with friends so they can add you as their referrer.</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  No referrals yet
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Share your email with friends so they can add you as their referrer.
+                </p>
               </div>
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -129,11 +133,13 @@ export default async function AmbassadorPage() {
                       </p>
                       <p className="text-xs text-slate-500">{ref.referee.email}</p>
                     </div>
-                    <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase ${
-                      ref.status === 'QUALIFIED' 
-                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
-                        : 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase ${
+                        ref.status === 'QUALIFIED'
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+                          : 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
+                      }`}
+                    >
                       {ref.status}
                     </span>
                   </div>
@@ -146,23 +152,25 @@ export default async function AmbassadorPage() {
         <div>
           {!hasBeenReferred ? (
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">
+              <h3 className="text-sm font-black tracking-widest text-slate-400 uppercase">
                 Who referred you?
               </h3>
               <p className="mt-2 mb-4 text-xs text-slate-500">
-                If a friend recommended Aerojet Academy, enter their <b>Email address</b> or <b>Referral Code</b> to link your accounts.
+                If a friend recommended Aerojet Academy, enter their <b>Email address</b> or{' '}
+                <b>Referral Code</b> to link your accounts.
               </p>
               <SetReferrerForm />
             </div>
           ) : (
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">
+              <h3 className="text-sm font-black tracking-widest text-slate-400 uppercase">
                 Referred By
               </h3>
               {referrer && (
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-800 font-bold dark:bg-blue-900/30">
-                    {referrer.profile?.firstName?.[0]}{referrer.profile?.lastName?.[0]}
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-800 dark:bg-blue-900/30">
+                    {referrer.profile?.firstName?.[0]}
+                    {referrer.profile?.lastName?.[0]}
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-900 dark:text-white">

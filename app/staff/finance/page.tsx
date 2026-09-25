@@ -1,6 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { getSystemSetting } from '@/lib/settings'
@@ -12,19 +12,12 @@ import PendingTopupsTable from '../_components/PendingTopupsTable'
 import TransactionsTable from '../_components/TransactionsTable'
 import ReportsPanel from '../_components/ReportsPanel'
 import { getFinanceOverviewData } from '@/lib/finance/overview'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table'
 import { SortableTh } from '@/components/ui/sortable-th'
 
 import { Badge } from '@/components/ui/badge'
 
 import { format } from 'date-fns'
-
 
 import { getCurrencySymbol } from '@/lib/currency'
 import type { SerializedTransactionRow } from '@/lib/types/staff'
@@ -38,7 +31,6 @@ import {
   getPaymentStatusBreakdown,
 } from '@/lib/analytics/reports'
 
-
 export const metadata: Metadata = { title: 'Finance | Staff Portal' }
 export const dynamic = 'force-dynamic'
 
@@ -47,7 +39,20 @@ const VALID_TABS = ['overview', 'transactions', 'wallet-topups', 'reconciliation
 async function getOverviewChartData() {
   const now = new Date()
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ]
 
   const payments = await prismaUnfiltered.payment.findMany({
     where: { status: PaymentStatus.APPROVED, approvedAt: { gte: sixMonthsAgo } },
@@ -96,11 +101,17 @@ async function getTransactionsData(query?: string) {
   const whereClause = query
     ? {
         OR: [
-          { wallet: { user: { OR: [
-            { email: { contains: query, mode: 'insensitive' as const } },
-            { profile: { firstName: { contains: query, mode: 'insensitive' as const } } },
-            { profile: { lastName: { contains: query, mode: 'insensitive' as const } } },
-          ] } } },
+          {
+            wallet: {
+              user: {
+                OR: [
+                  { email: { contains: query, mode: 'insensitive' as const } },
+                  { profile: { firstName: { contains: query, mode: 'insensitive' as const } } },
+                  { profile: { lastName: { contains: query, mode: 'insensitive' as const } } },
+                ],
+              },
+            },
+          },
           { referenceId: { contains: query, mode: 'insensitive' as const } },
           { referenceType: { contains: query, mode: 'insensitive' as const } },
         ],
@@ -127,47 +138,65 @@ async function getTransactionsData(query?: string) {
     .filter((tx: SerializedTransactionRow) => tx.referenceType === 'EXAM_BOOKING' && tx.referenceId)
     .map((tx: SerializedTransactionRow) => tx.referenceId!)
   const fullTimeEnrollmentIds = serialized
-    .filter((tx: SerializedTransactionRow) => tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId)
+    .filter(
+      (tx: SerializedTransactionRow) =>
+        tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId
+    )
     .map((tx: SerializedTransactionRow) => tx.referenceId!)
 
-  const [relatedPayments, relatedExamBookings, relatedFullTimeEnrollments, relatedModularEnrollments, relatedMilestones] =
-    await Promise.all([
-      paymentIds.length > 0
-        ? prismaUnfiltered.payment.findMany({
-            where: { id: { in: paymentIds } },
-            select: { id: true, reconciled: true, paymentCurrency: true, originalAmount: true, status: true },
-          })
-        : Promise.resolve([]),
-      transactionIds.length > 0 || examBookingReferenceIds.length > 0
-        ? prismaUnfiltered.examBooking.findMany({
-            where: {
-              OR: [
-                { id: { in: examBookingReferenceIds } },
-                { walletTxnId: { in: transactionIds } },
-              ],
-            },
-            select: { id: true, walletTxnId: true, status: true, demandStatus: true, result: true, moduleCode: true },
-          })
-        : Promise.resolve([]),
-      fullTimeEnrollmentIds.length > 0
-        ? prismaUnfiltered.fullTimeEnrollment.findMany({
-            where: { id: { in: fullTimeEnrollmentIds } },
-            select: { id: true, status: true },
-          })
-        : Promise.resolve([]),
-      transactionIds.length > 0
-        ? prismaUnfiltered.modularEnrollment.findMany({
-            where: { walletTxnId: { in: transactionIds } },
-            select: { id: true, walletTxnId: true, status: true },
-          })
-        : Promise.resolve([]),
-      transactionIds.length > 0
-        ? prismaUnfiltered.paymentMilestone.findMany({
-            where: { walletTxnId: { in: transactionIds } },
-            select: { id: true, walletTxnId: true, milestoneType: true, status: true },
-          })
-        : Promise.resolve([]),
-    ])
+  const [
+    relatedPayments,
+    relatedExamBookings,
+    relatedFullTimeEnrollments,
+    relatedModularEnrollments,
+    relatedMilestones,
+  ] = await Promise.all([
+    paymentIds.length > 0
+      ? prismaUnfiltered.payment.findMany({
+          where: { id: { in: paymentIds } },
+          select: {
+            id: true,
+            reconciled: true,
+            paymentCurrency: true,
+            originalAmount: true,
+            status: true,
+          },
+        })
+      : Promise.resolve([]),
+    transactionIds.length > 0 || examBookingReferenceIds.length > 0
+      ? prismaUnfiltered.examBooking.findMany({
+          where: {
+            OR: [{ id: { in: examBookingReferenceIds } }, { walletTxnId: { in: transactionIds } }],
+          },
+          select: {
+            id: true,
+            walletTxnId: true,
+            status: true,
+            demandStatus: true,
+            result: true,
+            moduleCode: true,
+          },
+        })
+      : Promise.resolve([]),
+    fullTimeEnrollmentIds.length > 0
+      ? prismaUnfiltered.fullTimeEnrollment.findMany({
+          where: { id: { in: fullTimeEnrollmentIds } },
+          select: { id: true, status: true },
+        })
+      : Promise.resolve([]),
+    transactionIds.length > 0
+      ? prismaUnfiltered.modularEnrollment.findMany({
+          where: { walletTxnId: { in: transactionIds } },
+          select: { id: true, walletTxnId: true, status: true },
+        })
+      : Promise.resolve([]),
+    transactionIds.length > 0
+      ? prismaUnfiltered.paymentMilestone.findMany({
+          where: { walletTxnId: { in: transactionIds } },
+          select: { id: true, walletTxnId: true, milestoneType: true, status: true },
+        })
+      : Promise.resolve([]),
+  ])
 
   return {
     serialized,
@@ -200,7 +229,7 @@ export default async function FinancePage({
   searchParams: Promise<{ tab?: string; query?: string; sort?: string; order?: string }>
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const params = await searchParams
   const tab = VALID_TABS.includes(params.tab ?? '') ? params.tab! : 'overview'
@@ -276,7 +305,9 @@ async function WalletTopupsTab({ sort, order }: { sort?: string; order?: string 
                     <TableRow key={tx.id}>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-900 dark:text-slate-100">{userName}</span>
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
+                            {userName}
+                          </span>
                           <span className="text-xs text-slate-500">{user.email}</span>
                         </div>
                       </TableCell>
@@ -286,7 +317,10 @@ async function WalletTopupsTab({ sort, order }: { sort?: string; order?: string 
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-slate-50 text-slate-600 dark:bg-slate-800">
+                        <Badge
+                          variant="outline"
+                          className="bg-slate-50 text-slate-600 dark:bg-slate-800"
+                        >
                           {tx.referenceType || 'Manual'}
                         </Badge>
                       </TableCell>
@@ -332,7 +366,7 @@ function sortTopupHistory(history: SerializedTransactionRow[], sort?: string, or
   const getKey = (tx: SerializedTransactionRow) => {
     if (sort === 'student') {
       const p = tx.wallet?.user?.profile
-      return p ? `${p.firstName ?? ''} ${p.lastName ?? ''}` : tx.wallet?.user?.email ?? ''
+      return p ? `${p.firstName ?? ''} ${p.lastName ?? ''}` : (tx.wallet?.user?.email ?? '')
     }
     if (sort === 'amount') return Number(tx.amount)
     if (sort === 'type') return tx.referenceType ?? ''

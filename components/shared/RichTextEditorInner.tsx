@@ -49,7 +49,7 @@ export default function RichTextEditor({
     editorProps: {
       attributes: {
         class: cn(
-          'prose prose-sm dark:prose-invert max-w-none min-h-[150px] p-4 focus:outline-none',
+          'prose prose-sm dark:prose-invert max-w-none min-h-37.5 p-4 focus:outline-none',
           className
         ),
       },

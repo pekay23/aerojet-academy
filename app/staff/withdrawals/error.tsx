@@ -21,7 +21,7 @@ export default function WithdrawalsError({
 
   return (
     <div
-      className="mx-auto flex min-h-[50vh] w-full max-w-[1400px] flex-col items-center justify-center px-4 py-8 text-center sm:px-6 lg:px-8"
+      className="mx-auto flex min-h-[50vh] w-full max-w-350 flex-col items-center justify-center px-4 py-8 text-center sm:px-6 lg:px-8"
       role="alert"
     >
       <div className="rounded-2xl border border-red-200 bg-red-50 p-8 dark:border-red-900/30 dark:bg-red-900/10">

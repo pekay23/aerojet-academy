@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import CoursesClient from './_components/CoursesClient'
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Courses | Staff Portal' }
 
 export default async function CoursesPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const categories = await prismaUnfiltered.courseCategory.findMany({
     include: {

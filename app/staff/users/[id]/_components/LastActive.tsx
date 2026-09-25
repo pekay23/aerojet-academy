@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useEffect } from 'react'
 import { formatDistanceToNow } from 'date-fns'
@@ -29,7 +30,7 @@ export default function LastActive({ ts }: Props) {
   const d = new Date(ts)
   if (Number.isNaN(d.getTime())) return <span>Never active</span>
   const ms = now - d.getTime()
-  if (ms < 0) return <span>{d.toLocaleDateString()}</span>
+  if (ms < 0) return <span>{formatDate(d)}</span>
   // Within 90s → "online now" (matches presence ONLINE_THRESHOLD_MS)
   if (ms < 90_000) {
     return <span className="text-emerald-600 dark:text-emerald-400">Online now</span>

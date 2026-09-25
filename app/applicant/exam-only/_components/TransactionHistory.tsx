@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -196,7 +197,7 @@ export default function TransactionHistory({ transactions, payments }: Transacti
                         {isPayment ? 'Wallet Top-Up' : item.description || item.type}
                       </p>
                       <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                        <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                        <span>{formatDate(item.createdAt)}</span>
                         <span>•</span>
                         <span>{new Date(item.createdAt).toLocaleTimeString()}</span>
                         {isPayment && item.paymentMethod && (

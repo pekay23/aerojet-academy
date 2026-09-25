@@ -153,7 +153,7 @@ export default function CourseCategoriesPage() {
 
   // ─ RENDER
   return (
-    <div className="mx-auto max-w-[1800px]">
+    <div className="mx-auto max-w-450">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">

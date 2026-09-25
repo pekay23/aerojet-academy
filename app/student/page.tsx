@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -20,7 +21,11 @@ import { getStudentStatus } from '@/lib/access-control'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
-import { serializeExamBooking, serializePaymentMilestone, serializeEnrollment } from '@/lib/student/serialization'
+import {
+  serializeExamBooking,
+  serializePaymentMilestone,
+  serializeEnrollment,
+} from '@/lib/student/serialization'
 import { SerializedPaymentMilestone } from '@/lib/student/types'
 import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
@@ -31,7 +36,7 @@ export const metadata: Metadata = {
 
 export default async function StudentDashboard() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -57,7 +62,10 @@ export default async function StudentDashboard() {
             status: { in: ['APPROVED', 'PENDING'] },
             examDate: { gte: new Date() },
           },
-          include: { exam: { include: { examComponent: { include: { course: true } } } }, event: true },
+          include: {
+            exam: { include: { examComponent: { include: { course: true } } } },
+            event: true,
+          },
           orderBy: { examDate: 'asc' },
           take: 3,
         },
@@ -69,7 +77,7 @@ export default async function StudentDashboard() {
         poolMemberships: {
           where: {
             status: { in: ACTIVE_MEMBERSHIP_STATUSES },
-            pool: { isAutoPool: false }
+            pool: { isAutoPool: false },
           },
           include: { pool: true },
           take: 3,
@@ -87,11 +95,14 @@ export default async function StudentDashboard() {
             poolMemberships: {
               where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
             },
-          }
-        }
+          },
+        },
       },
     }),
-    getWelcomeMessages(prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient, session.user.role),
+    getWelcomeMessages(
+      prismaUnfiltered as import('@/lib/welcome-messages').WelcomeMessagesPrismaClient,
+      session.user.role
+    ),
   ])
 
   const profile = userData?.studentProfile
@@ -103,20 +114,29 @@ export default async function StudentDashboard() {
 
   if (!profile) {
     return (
-      <div className="flex items-center justify-center min-h-[40vh]" role="alert">
-        <div className="text-center max-w-md">
+      <div className="flex min-h-[40vh] items-center justify-center" role="alert">
+        <div className="max-w-md text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
             <AlertCircle className="h-7 w-7" />
           </div>
-          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">Profile Not Found</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Your student profile has not been set up yet. Please contact the administration office for assistance.</p>
+          <h2 className="mb-2 text-lg font-bold text-slate-900 dark:text-slate-100">
+            Profile Not Found
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Your student profile has not been set up yet. Please contact the administration office
+            for assistance.
+          </p>
         </div>
       </div>
     )
   }
 
-  const { isFullTime, isExamOnly, isModular: isFlexible, enrollmentType } = await getStudentStatus(userId)
-
+  const {
+    isFullTime,
+    isExamOnly,
+    isModular: isFlexible,
+    enrollmentType,
+  } = await getStudentStatus(userId)
 
   // Activity data is already included in the consolidated query above
   const activityData = userData
@@ -143,8 +163,9 @@ export default async function StudentDashboard() {
   const latestResultRecord = activityData?.examResults?.[0] || null
 
   // Split enrollments back for the existing UI logic
-  const flexEnrollments = isFlexible ? (activityData?.enrollments?.slice(0, 3) || []) : []
-  const genericEnrollments = (!isFullTime && !isExamOnly) ? (activityData?.enrollments?.slice(0, 3) || []) : []
+  const flexEnrollments = isFlexible ? activityData?.enrollments?.slice(0, 3) || [] : []
+  const genericEnrollments =
+    !isFullTime && !isExamOnly ? activityData?.enrollments?.slice(0, 3) || [] : []
 
   // Full-Time: milestones are now included in the parallel fetch above — no sequential query needed
   const ftEnrollment = ftEnrollmentRaw
@@ -158,7 +179,10 @@ export default async function StudentDashboard() {
 
   const dashboardResult = latestResultRecord
     ? {
-        module: latestResultRecord.moduleCode || latestResultRecord.exam?.examComponent?.course?.code || '—',
+        module:
+          latestResultRecord.moduleCode ||
+          latestResultRecord.exam?.examComponent?.course?.code ||
+          '—',
         passed: latestResultRecord.passed,
         status: `${Number(latestResultRecord.percentage)}%`,
       }
@@ -175,7 +199,9 @@ export default async function StudentDashboard() {
                   <h2 className="text-2xl font-black text-blue-800 dark:text-white">
                     Exam Only Pathway
                   </h2>
-                  <p className="mt-1 text-slate-500 dark:text-slate-400">Manage your exam bookings and view results.</p>
+                  <p className="mt-1 text-slate-500 dark:text-slate-400">
+                    Manage your exam bookings and view results.
+                  </p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-800 text-white dark:bg-blue-600">
                   <BookOpen className="h-6 w-6" />
@@ -240,7 +266,7 @@ export default async function StudentDashboard() {
                         ID: {ftEnrollment.programme.code}
                       </span>
                       <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                         {ftEnrollment.academicYear?.name || ''}
+                        {ftEnrollment.academicYear?.name || ''}
                       </span>
                     </div>
                     <h3 className="text-sm leading-tight font-bold text-slate-900 dark:text-slate-100">
@@ -430,7 +456,7 @@ export default async function StudentDashboard() {
   const licenseList = profile.licenseTargets.map((t) => t.licenseCategory.code).join(' & ')
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
       <WelcomeBanner messages={welcomeMessages} userName={session.user.name?.split(' ')[0]} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
@@ -453,7 +479,7 @@ export default async function StudentDashboard() {
         </div>
         <Link
           href="/student/wallet/top-up"
-          className="bg-blue-800 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-800 px-4 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
         >
           <Wallet className="h-4 w-4" />
           Top Up Wallet
@@ -531,7 +557,9 @@ export default async function StudentDashboard() {
                         <span className="text-xs font-bold uppercase">
                           {new Date(exam.examDate).toLocaleString('default', { month: 'short' })}
                         </span>
-                        <span className="text-lg font-black">{new Date(exam.examDate).getDate()}</span>
+                        <span className="text-lg font-black">
+                          {new Date(exam.examDate).getDate()}
+                        </span>
                       </div>
                       <div className="flex-1">
                         <h3 className="font-bold text-slate-900 dark:text-slate-100">

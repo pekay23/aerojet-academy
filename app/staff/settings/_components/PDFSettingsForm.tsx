@@ -13,7 +13,7 @@ import { useFormDirty } from '@/hooks/useFormDirty'
 const LivePDFViewer = dynamic(() => import('./LivePDFViewer'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[500px] items-center justify-center rounded-lg border border-slate-200 bg-slate-100">
+    <div className="flex h-125 items-center justify-center rounded-lg border border-slate-200 bg-slate-100">
       <div className="flex flex-col items-center">
         <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
         <p className="font-medium text-slate-500">Loading PDF Previewer…</p>

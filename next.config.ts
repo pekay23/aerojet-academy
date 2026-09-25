@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
       { pathname: '/apple-touch-icon.webp' },
       { pathname: '/favicon.webp' },
       { pathname: '/favicon.ico' },
+      { pathname: '/favicon-aeroaviation.webp' },
     ],
   },
   ...(process.env.NODE_ENV === 'development' && {

@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { subMonths, addMonths, startOfMonth, endOfMonth } from 'date-fns'
@@ -13,7 +13,7 @@ export default async function ExaminerSchedulePage({
   searchParams: Promise<{ month?: string }>
 }) {
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'EXAMINER') redirect('/login')
+  if (!session || session.user.role !== 'EXAMINER') return await redirectToLogin()
 
   const { month } = await searchParams
   const currentDate = month ? new Date(month) : new Date()
@@ -42,22 +42,22 @@ export default async function ExaminerSchedulePage({
   ])
 
   type SittingRow = {
-  id: string
-  startTime: Date
-  endTime: Date | null
-  sessionType: string | null
-  event: { name: string } | null
-  examComponent: { code: string; name: string } | null
-}
+    id: string
+    startTime: Date
+    endTime: Date | null
+    sessionType: string | null
+    event: { name: string } | null
+    examComponent: { code: string; name: string } | null
+  }
 
-type AdminEventRow = {
-  id: string
-  title: string
-  description: string | null
-  startDate: Date
-  endDate: Date | null
-  color: string | null
-}
+  type AdminEventRow = {
+    id: string
+    title: string
+    description: string | null
+    startDate: Date
+    endDate: Date | null
+    color: string | null
+  }
 
   const events: UnifiedCalendarEvent[] = [
     ...(sittings as SittingRow[]).map((s) => ({

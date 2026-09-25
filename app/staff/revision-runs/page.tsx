@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { Calendar } from 'lucide-react'
@@ -33,7 +33,7 @@ interface RevisionRunsPageProps {
 export default async function RevisionRunsPage({ searchParams }: RevisionRunsPageProps) {
   const session = await getAuthSession()
   if (!session || !['ADMIN', 'STAFF'].includes(session.user.role)) {
-    redirect('/login')
+    return await redirectToLogin()
   }
 
   const params = await searchParams
@@ -71,7 +71,7 @@ export default async function RevisionRunsPage({ searchParams }: RevisionRunsPag
   }))
 
   return (
-    <div className="mx-auto max-w-[1400px]">
+    <div className="mx-auto max-w-350">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-aerojet-blue text-3xl font-black tracking-tight uppercase dark:text-white">

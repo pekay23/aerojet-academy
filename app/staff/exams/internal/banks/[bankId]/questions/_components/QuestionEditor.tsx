@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useEffect, useCallback } from 'react'
 import {
@@ -922,7 +923,7 @@ function QuestionList({
                   {q.createdAt && (
                     <>
                       <span>•</span>
-                      <span>Added: {new Date(q.createdAt).toLocaleDateString()}</span>
+                      <span>Added: {formatDate(q.createdAt)}</span>
                     </>
                   )}
                   {!q.isActive && (

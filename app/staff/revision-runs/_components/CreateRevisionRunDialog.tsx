@@ -87,7 +87,7 @@ export default function CreateRevisionRunDialog() {
           Schedule Revision
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle className="text-aerojet-blue text-2xl font-black uppercase">
             Schedule Revision Run

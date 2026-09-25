@@ -47,13 +47,13 @@ export default function VariantB() {
             <div className="mt-8 flex flex-wrap gap-3">
               <a
                 href="/register"
-                className="bg-aerojet-sky inline-flex h-12 items-center gap-3 rounded-md px-7 font-mono text-[12px] font-bold tracking-widest text-[#0b0e13] uppercase transition hover:bg-white"
+                className="bg-aerojet-sky inline-flex h-12 items-center gap-3 rounded-md px-7 font-mono text-xs font-bold tracking-widest text-[#0b0e13] uppercase transition hover:bg-white"
               >
                 ▸ Start Registration
               </a>
               <a
                 href="/courses"
-                className="hover:border-aerojet-sky hover:text-aerojet-sky inline-flex h-12 items-center rounded-md border border-white/20 px-7 font-mono text-[12px] font-bold tracking-widest uppercase transition"
+                className="hover:border-aerojet-sky hover:text-aerojet-sky inline-flex h-12 items-center rounded-md border border-white/20 px-7 font-mono text-xs font-bold tracking-widest uppercase transition"
               >
                 Explore Courses
               </a>

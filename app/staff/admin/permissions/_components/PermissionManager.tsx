@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -55,7 +56,11 @@ export default function PermissionManager({
   const grouped = useMemo(() => {
     const map = new Map<string, Permission[]>()
     for (const p of permissions) {
-      if (filter && !p.key.toLowerCase().includes(filter.toLowerCase()) && !p.label.toLowerCase().includes(filter.toLowerCase()))
+      if (
+        filter &&
+        !p.key.toLowerCase().includes(filter.toLowerCase()) &&
+        !p.label.toLowerCase().includes(filter.toLowerCase())
+      )
         continue
       const arr = map.get(p.category) ?? []
       arr.push(p)
@@ -65,7 +70,10 @@ export default function PermissionManager({
   }, [permissions, filter])
 
   const call = async (url: string, init: RequestInit, okMsg: string) => {
-    const res = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json', ...(init.headers || {}) } })
+    const res = await fetch(url, {
+      ...init,
+      headers: { 'Content-Type': 'application/json', ...(init.headers || {}) },
+    })
     const json = await res.json().catch(() => ({}))
     if (!res.ok || json?.success === false) {
       toast.error(json?.error || `Request failed (${res.status})`)
@@ -82,10 +90,14 @@ export default function PermissionManager({
     const label = prompt('Label:', key.replace(/_/g, ' ').toLowerCase())
     if (!label) return
     const category = prompt('Category:', 'CUSTOM') || 'CUSTOM'
-    await call('/api/staff/admin/permissions', {
-      method: 'POST',
-      body: JSON.stringify({ key: key.trim().toUpperCase(), label, category }),
-    }, 'Permission created')
+    await call(
+      '/api/staff/admin/permissions',
+      {
+        method: 'POST',
+        body: JSON.stringify({ key: key.trim().toUpperCase(), label, category }),
+      },
+      'Permission created'
+    )
   }
 
   const onDeletePermission = async (key: string) => {
@@ -94,10 +106,14 @@ export default function PermissionManager({
   }
 
   const onGrant = async (scope: 'ROLE' | 'USER', targetKey: string, permissionKey: string) => {
-    await call('/api/staff/admin/permissions/grants', {
-      method: 'POST',
-      body: JSON.stringify({ scope, targetKey, permissionKey }),
-    }, 'Grant added')
+    await call(
+      '/api/staff/admin/permissions/grants',
+      {
+        method: 'POST',
+        body: JSON.stringify({ scope, targetKey, permissionKey }),
+      },
+      'Grant added'
+    )
   }
 
   const onRevoke = async (id: string) => {
@@ -117,7 +133,7 @@ export default function PermissionManager({
             <button
               key={k}
               onClick={() => setTab(k as typeof tab)}
-              className={`rounded-xl px-3 py-1.5 text-sm font-bold ${tab === k ? 'bg-white text-aerojet-blue shadow-sm dark:bg-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'}`}
+              className={`rounded-xl px-3 py-1.5 text-sm font-bold ${tab === k ? 'text-aerojet-blue bg-white shadow-sm dark:bg-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'}`}
             >
               {label}
             </button>
@@ -134,7 +150,7 @@ export default function PermissionManager({
             <button
               disabled={isPending}
               onClick={onCreatePermission}
-              className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-3 py-1.5 text-sm font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
+              className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold text-white disabled:opacity-50"
             >
               <Plus className="h-4 w-4" /> Add permission
             </button>
@@ -154,7 +170,10 @@ export default function PermissionManager({
               </p>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {perms.map((p) => (
-                  <div key={p.key} className="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                  <div
+                    key={p.key}
+                    className="rounded-xl border border-slate-100 p-3 dark:border-slate-800"
+                  >
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="font-mono text-xs font-black text-slate-900 dark:text-slate-100">
@@ -212,7 +231,7 @@ export default function PermissionManager({
               {routeBindings.map((b) => (
                 <tr key={b.prefix} className="border-t border-slate-100 dark:border-slate-800">
                   <td className="px-4 py-2 font-mono text-xs">{b.prefix}</td>
-                  <td className="px-4 py-2 font-mono text-xs font-bold text-aerojet-blue">
+                  <td className="text-aerojet-blue px-4 py-2 font-mono text-xs font-bold">
                     {b.permission}
                   </td>
                   <td className="px-4 py-2 text-xs text-slate-500">{b.description}</td>
@@ -268,8 +287,16 @@ function GrantsTab({
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
         >
           {scope === 'ROLE'
-            ? roles.map((r) => <option key={r} value={r}>{r}</option>)
-            : staffUsers.map((u) => <option key={u.id} value={u.id}>{u.name} ({u.role})</option>)}
+            ? roles.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))
+            : staffUsers.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name} ({u.role})
+                </option>
+              ))}
         </select>
         <select
           value={permissionKey}
@@ -277,7 +304,9 @@ function GrantsTab({
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
         >
           {permissions.map((p) => (
-            <option key={p.key} value={p.key}>{p.key}</option>
+            <option key={p.key} value={p.key}>
+              {p.key}
+            </option>
           ))}
         </select>
         <button
@@ -305,14 +334,20 @@ function GrantsTab({
             {grants.map((g) => (
               <tr key={g.id} className="border-t border-slate-100 dark:border-slate-800">
                 <td className="px-4 py-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${g.scope === 'ROLE' ? 'bg-indigo-50 text-indigo-700' : 'bg-amber-50 text-amber-700'}`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${g.scope === 'ROLE' ? 'bg-indigo-50 text-indigo-700' : 'bg-amber-50 text-amber-700'}`}
+                  >
                     {g.scope}
                   </span>
                 </td>
                 <td className="px-4 py-2 font-mono text-xs">{g.targetKey}</td>
-                <td className="px-4 py-2 font-mono text-xs font-bold text-aerojet-blue">{g.permissionKey}</td>
+                <td className="text-aerojet-blue px-4 py-2 font-mono text-xs font-bold">
+                  {g.permissionKey}
+                </td>
                 <td className="px-4 py-2 text-xs">{g.grantedByName ?? '—'}</td>
-                <td className="px-4 py-2 text-xs">{g.expiresAt ? new Date(g.expiresAt).toLocaleDateString() : 'Never'}</td>
+                <td className="px-4 py-2 text-xs">
+                  {g.expiresAt ? formatDate(g.expiresAt) : 'Never'}
+                </td>
                 <td className="px-4 py-2 text-right">
                   <button
                     disabled={isPending}

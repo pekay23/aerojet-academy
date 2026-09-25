@@ -40,20 +40,20 @@ export default async function NewsroomPage({ searchParams }: NewsroomPageProps) 
   const articles = await getArticles(orderBy as Prisma.NewsArticleOrderByWithRelationInput)
 
   return (
-    <div className="mx-auto max-w-[1800px] space-y-8">
+    <div className="mx-auto max-w-450 space-y-8">
       <div className="flex flex-col flex-wrap items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight sm:text-4xl dark:text-white">
             Newsroom CMS
           </h1>
           <p className="flex items-center gap-2 text-base font-medium text-slate-500 dark:text-slate-400">
-            <Sparkles className="h-5 w-5 text-aerojet-sky" />
+            <Sparkles className="text-aerojet-sky h-5 w-5" />
             Manage public news, announcements, and academy articles.
           </p>
         </div>
         <Link
           href="/staff/newsroom/create"
-          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 text-sm font-black text-white shadow-xl transition-all hover:scale-105 hover:bg-aerojet-blue/90 dark:bg-blue-600 dark:hover:bg-blue-700"
+          className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black text-white shadow-xl transition-all hover:scale-105 dark:bg-blue-600 dark:hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" />
           Create Article
@@ -62,7 +62,7 @@ export default async function NewsroomPage({ searchParams }: NewsroomPageProps) 
 
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900/50">
         <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-          <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-slate-100">
+          <h3 className="text-aerojet-blue text-sm font-black tracking-widest uppercase dark:text-slate-100">
             Articles Inventory
           </h3>
         </div>
@@ -98,7 +98,7 @@ export default async function NewsroomPage({ searchParams }: NewsroomPageProps) 
                     className="transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                   >
                     <td className="px-6 py-4">
-                      <div className="text-base font-black text-aerojet-blue dark:text-slate-100">
+                      <div className="text-aerojet-blue text-base font-black dark:text-slate-100">
                         {article.title}
                       </div>
                       <div className="font-mono text-[10px] font-bold text-slate-400 uppercase">
@@ -137,7 +137,7 @@ export default async function NewsroomPage({ searchParams }: NewsroomPageProps) 
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/staff/newsroom/${article.id}/edit`}
-                          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-100 bg-white text-slate-400 shadow-sm transition-all hover:scale-110 hover:border-blue-100 hover:bg-blue-50 hover:text-aerojet-blue dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-blue-900/20"
+                          className="hover:text-aerojet-blue flex h-10 w-10 items-center justify-center rounded-xl border border-slate-100 bg-white text-slate-400 shadow-sm transition-all hover:scale-110 hover:border-blue-100 hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-blue-900/20"
                           title="Edit"
                         >
                           <Edit className="h-4 w-4" />

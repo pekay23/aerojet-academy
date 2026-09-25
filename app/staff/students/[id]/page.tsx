@@ -1,5 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
 import { ArrowLeft, Download } from 'lucide-react'
@@ -28,7 +29,7 @@ interface Props {
 
 export default async function StudentManagementPage({ params, searchParams }: Props) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { id } = await params
   const { tab } = await searchParams
@@ -237,7 +238,9 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
     modularEnrollments,
   }) as unknown as SerializedStudent as unknown as SerializedStudent
 
-  const serializedExamComponents = serializePrisma(examComponents) as unknown as SerializedExamComponent[] as unknown as SerializedExamComponent[]
+  const serializedExamComponents = serializePrisma(
+    examComponents
+  ) as unknown as SerializedExamComponent[] as unknown as SerializedExamComponent[]
   const serializedUpcomingEvents = serializePrisma(upcomingEvents)
   const serializedAcademicYears = serializePrisma(academicYears)
   const serializedSemesters = serializePrisma(semesters)

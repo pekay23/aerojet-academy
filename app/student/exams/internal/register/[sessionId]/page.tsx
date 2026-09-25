@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
@@ -16,7 +17,7 @@ export default async function ExamRegisterPage({
   searchParams: Promise<{ code?: string }>
 }) {
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'STUDENT') redirect('/login')
+  if (!session || session.user.role !== 'STUDENT') return await redirectToLogin()
   if (!(await isInternalExamSystemEnabled())) redirect('/student/exams?tab=records')
 
   const { sessionId } = await params
@@ -79,11 +80,7 @@ export default async function ExamRegisterPage({
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <PreExamForm
-        sessionId={sessionId}
-        examDate={examDate}
-        examLocation={examLocation}
-      />
+      <PreExamForm sessionId={sessionId} examDate={examDate} examLocation={examLocation} />
     </div>
   )
 }

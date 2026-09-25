@@ -104,33 +104,60 @@ export const getPoolAnalytics = unstable_cache(
   { revalidate: 300, tags: ['reports', 'pools'] }
 )
 
-export const getAttendanceReport = unstable_cache(
-  async () => {
-    const records = await prisma.attendanceRecord.findMany({
-      take: 50,
-      orderBy: { date: 'desc' },
-      include: {
-        user: { include: { profile: true } },
-        class: { select: { name: true } },
-      },
-    })
+export const getAttendanceReport = (page: number = 1, limit: number = 25, query?: string) =>
+  unstable_cache(
+    async () => {
+      const skip = (page - 1) * limit
 
-    // Status breakdown for chart
-    const stats = await prisma.attendanceRecord.groupBy({
-      by: ['status'],
-      _count: { id: true },
-    })
+      // Build search filter for student name or class name
+      const searchFilter = query
+        ? {
+            OR: [
+              {
+                user: {
+                  profile: {
+                    OR: [
+                      { firstName: { contains: query, mode: 'insensitive' as const } },
+                      { lastName: { contains: query, mode: 'insensitive' as const } },
+                    ],
+                  },
+                },
+              },
+              { class: { name: { contains: query, mode: 'insensitive' as const } } },
+            ],
+          }
+        : {}
 
-    const chartData = stats.map((s) => ({
-      name: s.status,
-      value: s._count.id,
-    }))
+      const [records, totalRecords] = await Promise.all([
+        prisma.attendanceRecord.findMany({
+          where: searchFilter,
+          take: limit,
+          skip,
+          orderBy: { date: 'desc' },
+          include: {
+            user: { include: { profile: true } },
+            class: { select: { name: true } },
+          },
+        }),
+        prisma.attendanceRecord.count({ where: searchFilter }),
+      ])
 
-    return { records, chartData }
-  },
-  ['reports-attendance'],
-  { revalidate: 300, tags: ['reports', 'attendance'] }
-)
+      // Status breakdown for chart (global, unaffected by pagination/search)
+      const stats = await prisma.attendanceRecord.groupBy({
+        by: ['status'],
+        _count: { id: true },
+      })
+
+      const chartData = stats.map((s) => ({
+        name: s.status,
+        value: s._count.id,
+      }))
+
+      return { records, totalRecords, chartData }
+    },
+    ['reports-attendance', String(page), String(limit), query ?? ''],
+    { revalidate: 300, tags: ['reports', 'attendance'] }
+  )()
 
 // ============================================================================
 // FINANCE REPORTS
@@ -262,7 +289,11 @@ export const getFinanceReportSummary = (filters?: { year?: number; month?: numbe
         filterMonth: targetMonth,
       }
     },
-    ['reports-finance-summary', String(filters?.year ?? 'default'), String(filters?.month ?? 'default')],
+    [
+      'reports-finance-summary',
+      String(filters?.year ?? 'default'),
+      String(filters?.month ?? 'default'),
+    ],
     { revalidate: 300, tags: ['reports', 'finance'] }
   )()
 
@@ -281,16 +312,24 @@ export const getRevenueByProgrammeType = (filters?: { year?: number; month?: num
         },
       })
 
-      const fullTimeRevenue = fullTimePayments.reduce((sum, pm) => sum + Number(pm.amountDue || 0), 0)
+      const fullTimeRevenue = fullTimePayments.reduce(
+        (sum, pm) => sum + Number(pm.amountDue || 0),
+        0
+      )
 
       // Modular enrollments
       const modularEnrollments = await prisma.modularEnrollment.findMany({
         where: {
-          status: { in: [EnrollmentStatus.APPROVED, EnrollmentStatus.ACTIVE, EnrollmentStatus.GRADUATED] },
+          status: {
+            in: [EnrollmentStatus.APPROVED, EnrollmentStatus.ACTIVE, EnrollmentStatus.GRADUATED],
+          },
           ...(dateFilter && { createdAt: dateFilter }),
         },
       })
-      const modularRevenue = modularEnrollments.reduce((sum, e) => sum + Number(e.amountPaid || 0), 0)
+      const modularRevenue = modularEnrollments.reduce(
+        (sum, e) => sum + Number(e.amountPaid || 0),
+        0
+      )
 
       // Pool/Exam payments (captured from memberships)
       const poolPayments = await prisma.poolMembership.findMany({
@@ -373,7 +412,11 @@ export const getRevenueByProgrammeType = (filters?: { year?: number; month?: num
         },
       ]
     },
-    ['reports-revenue-by-programme', String(filters?.year ?? 'default'), String(filters?.month ?? 'default')],
+    [
+      'reports-revenue-by-programme',
+      String(filters?.year ?? 'default'),
+      String(filters?.month ?? 'default'),
+    ],
     { revalidate: 300, tags: ['reports', 'finance'] }
   )()
 
@@ -411,8 +454,18 @@ export const getMonthlyRevenueData = (filters?: { year?: number }) =>
       const targetYear = filters?.year ?? now.getFullYear()
 
       const monthNames = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
       ]
 
       const startOfYear = new Date(targetYear, 0, 1)
@@ -463,7 +516,11 @@ export const getPaymentStatusBreakdown = (filters?: { year?: number; month?: num
         percentage: total > 0 ? Math.round((Number(s._sum.amount || 0) / total) * 100) : 0,
       }))
     },
-    ['reports-payment-status', String(filters?.year ?? 'default'), String(filters?.month ?? 'default')],
+    [
+      'reports-payment-status',
+      String(filters?.year ?? 'default'),
+      String(filters?.month ?? 'default'),
+    ],
     { revalidate: 300, tags: ['reports', 'finance'] }
   )()
 
@@ -568,7 +625,9 @@ export const getExamAnalytics = unstable_cache(
     const totalBookings = allBookings.length
     const totalResults = allResults.length
     const resultKeys = new Set(
-      allResults.map((result) => `${result.userId}:${(result.moduleCode || 'UNKNOWN').toUpperCase()}`)
+      allResults.map(
+        (result) => `${result.userId}:${(result.moduleCode || 'UNKNOWN').toUpperCase()}`
+      )
     )
 
     const normalizeAttempt = (attempt?: string | null) => {
@@ -661,8 +720,24 @@ export const getExamAnalytics = unstable_cache(
 
     // === Monthly exam volume (last 12 months) ===
     const now = new Date()
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const monthlyVolume: Record<string, { month: string; exams: number; passes: number; fails: number }> = {}
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ]
+    const monthlyVolume: Record<
+      string,
+      { month: string; exams: number; passes: number; fails: number }
+    > = {}
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
       const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
@@ -776,19 +851,45 @@ export const getExamAnalytics = unstable_cache(
       ...stats,
       passPercentage: stats.total > 0 ? Math.round((stats.passed / stats.total) * 100) : 0,
       failPercentage: stats.total > 0 ? Math.round((stats.failed / stats.total) * 100) : 0,
-      easaPassRate: stats.easa.total > 0 ? Math.round((stats.easa.passed / stats.easa.total) * 100) : 0,
-      internalPassRate: stats.internal.total > 0 ? Math.round((stats.internal.passed / stats.internal.total) * 100) : 0,
+      easaPassRate:
+        stats.easa.total > 0 ? Math.round((stats.easa.passed / stats.easa.total) * 100) : 0,
+      internalPassRate:
+        stats.internal.total > 0
+          ? Math.round((stats.internal.passed / stats.internal.total) * 100)
+          : 0,
       // New enhanced data
-      firstAttemptPassRate: firstAttemptTotal > 0 ? Math.round((firstAttemptPass / firstAttemptTotal) * 100) : 0,
+      firstAttemptPassRate:
+        firstAttemptTotal > 0 ? Math.round((firstAttemptPass / firstAttemptTotal) * 100) : 0,
       firstAttemptTotal,
       firstAttemptPass,
       resitPassRate: resitTotal > 0 ? Math.round((resitPass / resitTotal) * 100) : 0,
       resitTotal,
       resitPass,
       // Resit specific pass rates
-      resit1PassRate: stats.attempts.RESIT_1 > 0 ? Math.round((gradedRecords.filter(b => b.attemptType === 'RESIT_1' && b.passed).length / stats.attempts.RESIT_1) * 100) : 0,
-      resit2PassRate: stats.attempts.RESIT_2 > 0 ? Math.round((gradedRecords.filter(b => b.attemptType === 'RESIT_2' && b.passed).length / stats.attempts.RESIT_2) * 100) : 0,
-      resit3PassRate: stats.attempts.RESIT_3 > 0 ? Math.round((gradedRecords.filter(b => b.attemptType === 'RESIT_3' && b.passed).length / stats.attempts.RESIT_3) * 100) : 0,
+      resit1PassRate:
+        stats.attempts.RESIT_1 > 0
+          ? Math.round(
+              (gradedRecords.filter((b) => b.attemptType === 'RESIT_1' && b.passed).length /
+                stats.attempts.RESIT_1) *
+                100
+            )
+          : 0,
+      resit2PassRate:
+        stats.attempts.RESIT_2 > 0
+          ? Math.round(
+              (gradedRecords.filter((b) => b.attemptType === 'RESIT_2' && b.passed).length /
+                stats.attempts.RESIT_2) *
+                100
+            )
+          : 0,
+      resit3PassRate:
+        stats.attempts.RESIT_3 > 0
+          ? Math.round(
+              (gradedRecords.filter((b) => b.attemptType === 'RESIT_3' && b.passed).length /
+                stats.attempts.RESIT_3) *
+                100
+            )
+          : 0,
       scoreDistribution,
       monthlyTrend: Object.values(monthlyVolume),
       hardestModules,
@@ -811,7 +912,20 @@ export const getYoYComparison = (baseYear?: number) =>
       const currentYear = baseYear ?? now.getFullYear()
       const previousYear = currentYear - 1
 
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const monthNames = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ]
 
       const startCurrent = new Date(currentYear, 0, 1)
       const endCurrent = new Date(currentYear + 1, 0, 1)
@@ -864,23 +978,62 @@ export const getYoYComparison = (baseYear?: number) =>
       ])
 
       // Helper: build empty 12-month buckets
-      function emptyMonths(): Record<number, { revenue: number; enrollments: number; examTotal: number; examPassed: number; newStudents: number }> {
-        const m: Record<number, { revenue: number; enrollments: number; examTotal: number; examPassed: number; newStudents: number }> = {}
-        for (let i = 0; i < 12; i++) m[i] = { revenue: 0, enrollments: 0, examTotal: 0, examPassed: 0, newStudents: 0 }
+      function emptyMonths(): Record<
+        number,
+        {
+          revenue: number
+          enrollments: number
+          examTotal: number
+          examPassed: number
+          newStudents: number
+        }
+      > {
+        const m: Record<
+          number,
+          {
+            revenue: number
+            enrollments: number
+            examTotal: number
+            examPassed: number
+            newStudents: number
+          }
+        > = {}
+        for (let i = 0; i < 12; i++)
+          m[i] = { revenue: 0, enrollments: 0, examTotal: 0, examPassed: 0, newStudents: 0 }
         return m
       }
 
       const cur = emptyMonths()
       const prev = emptyMonths()
 
-      currentPayments.forEach((p) => { if (p.approvedAt) cur[new Date(p.approvedAt).getMonth()].revenue += Number(p.amount) })
-      previousPayments.forEach((p) => { if (p.approvedAt) prev[new Date(p.approvedAt).getMonth()].revenue += Number(p.amount) })
-      currentEnrollments.forEach((e) => { cur[new Date(e.enrolledAt).getMonth()].enrollments++ })
-      previousEnrollments.forEach((e) => { prev[new Date(e.enrolledAt).getMonth()].enrollments++ })
-      currentResults.forEach((r) => { const m = cur[new Date(r.createdAt).getMonth()]; m.examTotal++; if (r.passed) m.examPassed++ })
-      previousResults.forEach((r) => { const m = prev[new Date(r.createdAt).getMonth()]; m.examTotal++; if (r.passed) m.examPassed++ })
-      currentStudents.forEach((s) => { cur[new Date(s.createdAt).getMonth()].newStudents++ })
-      previousStudents.forEach((s) => { prev[new Date(s.createdAt).getMonth()].newStudents++ })
+      currentPayments.forEach((p) => {
+        if (p.approvedAt) cur[new Date(p.approvedAt).getMonth()].revenue += Number(p.amount)
+      })
+      previousPayments.forEach((p) => {
+        if (p.approvedAt) prev[new Date(p.approvedAt).getMonth()].revenue += Number(p.amount)
+      })
+      currentEnrollments.forEach((e) => {
+        cur[new Date(e.enrolledAt).getMonth()].enrollments++
+      })
+      previousEnrollments.forEach((e) => {
+        prev[new Date(e.enrolledAt).getMonth()].enrollments++
+      })
+      currentResults.forEach((r) => {
+        const m = cur[new Date(r.createdAt).getMonth()]
+        m.examTotal++
+        if (r.passed) m.examPassed++
+      })
+      previousResults.forEach((r) => {
+        const m = prev[new Date(r.createdAt).getMonth()]
+        m.examTotal++
+        if (r.passed) m.examPassed++
+      })
+      currentStudents.forEach((s) => {
+        cur[new Date(s.createdAt).getMonth()].newStudents++
+      })
+      previousStudents.forEach((s) => {
+        prev[new Date(s.createdAt).getMonth()].newStudents++
+      })
 
       const monthlyData = monthNames.map((name, i) => ({
         month: name,
@@ -888,8 +1041,10 @@ export const getYoYComparison = (baseYear?: number) =>
         [`${previousYear}_revenue`]: prev[i].revenue,
         [`${currentYear}_enrollments`]: cur[i].enrollments,
         [`${previousYear}_enrollments`]: prev[i].enrollments,
-        [`${currentYear}_passRate`]: cur[i].examTotal > 0 ? Math.round((cur[i].examPassed / cur[i].examTotal) * 100) : 0,
-        [`${previousYear}_passRate`]: prev[i].examTotal > 0 ? Math.round((prev[i].examPassed / prev[i].examTotal) * 100) : 0,
+        [`${currentYear}_passRate`]:
+          cur[i].examTotal > 0 ? Math.round((cur[i].examPassed / cur[i].examTotal) * 100) : 0,
+        [`${previousYear}_passRate`]:
+          prev[i].examTotal > 0 ? Math.round((prev[i].examPassed / prev[i].examTotal) * 100) : 0,
         [`${currentYear}_newStudents`]: cur[i].newStudents,
         [`${previousYear}_newStudents`]: prev[i].newStudents,
       }))
@@ -902,17 +1057,23 @@ export const getYoYComparison = (baseYear?: number) =>
           revenue: currentPayments.reduce((s, p) => s + Number(p.amount), 0),
           enrollments: currentEnrollments.length,
           newStudents: currentStudents.length,
-          passRate: currentResults.length > 0
-            ? Math.round((currentResults.filter(r => r.passed).length / currentResults.length) * 100)
-            : 0,
+          passRate:
+            currentResults.length > 0
+              ? Math.round(
+                  (currentResults.filter((r) => r.passed).length / currentResults.length) * 100
+                )
+              : 0,
         },
         previous: {
           revenue: previousPayments.reduce((s, p) => s + Number(p.amount), 0),
           enrollments: previousEnrollments.length,
           newStudents: previousStudents.length,
-          passRate: previousResults.length > 0
-            ? Math.round((previousResults.filter(r => r.passed).length / previousResults.length) * 100)
-            : 0,
+          passRate:
+            previousResults.length > 0
+              ? Math.round(
+                  (previousResults.filter((r) => r.passed).length / previousResults.length) * 100
+                )
+              : 0,
         },
       }
 

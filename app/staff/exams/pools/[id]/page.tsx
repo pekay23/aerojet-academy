@@ -1,16 +1,9 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
-import {
-  ChevronLeft,
-  Users,
-  Calendar,
-  BookOpen,
-  UserPlus,
-  Settings,
-  Clock3,
-} from 'lucide-react'
+import { ChevronLeft, Users, Calendar, BookOpen, UserPlus, Settings, Clock3 } from 'lucide-react'
 import { getPoolWithDetails } from '@/lib/pools/operations'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
@@ -26,14 +19,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params
   const pool = await prismaUnfiltered.examPool.findUnique({
     where: { id },
-    select: { name: true }
+    select: { name: true },
   })
   return { title: `Pool: ${pool?.name || 'Details'} | Staff Portal` }
 }
 
 export default async function ExamPoolDetailPage({ params }: PageProps) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { id } = await params
   const pool = await getPoolWithDetails(id, { includeAllStatuses: true, unfiltered: true })
@@ -59,11 +52,11 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
     : []
 
   return (
-    <div className="mx-auto max-w-[1800px]">
+    <div className="mx-auto max-w-450">
       <div className="mb-6">
         <Link
           href={pool.eventId ? `/staff/exams/events/${pool.eventId}` : '/staff/exams'}
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-aerojet-blue dark:text-slate-400"
+          className="hover:text-aerojet-blue inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400"
         >
           <ChevronLeft className="h-4 w-4" />
           Back to Event: {pool.event?.name || 'Details'}
@@ -73,7 +66,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <div className="mb-2 flex items-center gap-3">
-            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+            <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
               {pool.name}
             </h1>
             <PoolStatusBadge status={pool.status} />
@@ -81,7 +74,8 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
           <div className="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-slate-400" />
-              Exam Date: {pool.examDate ? format(new Date(pool.examDate), 'EEEE, MMM d, yyyy') : 'No Date Set'}
+              Exam Date:{' '}
+              {pool.examDate ? format(new Date(pool.examDate), 'EEEE, MMM d, yyyy') : 'No Date Set'}
             </div>
             <div className="flex items-center gap-1.5">
               <Users className="h-4 w-4 text-slate-400" />
@@ -99,7 +93,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
               status: pool.status,
               allowedModules: pool.allowedModules,
             }}
-            eventPools={siblingPools.map(p => ({
+            eventPools={siblingPools.map((p) => ({
               id: p.id,
               name: p.name,
               currentMemberCount: p.currentMemberCount,
@@ -117,7 +111,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
           </Link>
           <Link
             href={`/staff/exams/pools/${pool.id}/add-candidate`}
-            className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
+            className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-colors"
           >
             <UserPlus className="h-4 w-4" />
             Add Candidate
@@ -156,16 +150,19 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                 </tr>
               ) : (
                 pool.memberships.map((member) => (
-                  <tr key={member.id} className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40">
+                  <tr
+                    key={member.id}
+                    className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue">
+                        <div className="text-aerojet-blue flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold">
                           {member.user?.profile?.firstName?.charAt(0) || 'U'}
                           {member.user?.profile?.lastName?.charAt(0) || ''}
                         </div>
                         <div>
                           <div className="font-bold text-slate-900 dark:text-slate-100">
-                            {(member.user?.profile?.firstName || member.user?.profile?.lastName)
+                            {member.user?.profile?.firstName || member.user?.profile?.lastName
                               ? `${member.user.profile.firstName || ''} ${member.user.profile.lastName || ''}`
                               : member.user?.email || 'Unknown User'}
                           </div>
@@ -177,7 +174,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-aerojet-blue" />
+                        <BookOpen className="text-aerojet-blue h-4 w-4" />
                         <span className="font-medium text-slate-700">
                           {member.examComponent?.course?.code || 'N/A'}
                         </span>
@@ -188,7 +185,9 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                       {(() => {
                         const activeAssignment = member.booking?.sittingAssignments?.[0] || null
                         const attendanceStatus =
-                          member.examAttendance?.status || activeAssignment?.attendanceStatus || null
+                          member.examAttendance?.status ||
+                          activeAssignment?.attendanceStatus ||
+                          null
 
                         return (
                           <span
@@ -210,12 +209,13 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                     <td className="px-6 py-4">
                       {(() => {
                         const activeAssignment = member.booking?.sittingAssignments?.[0] || null
-                        const sitting = member.examAttendance?.sitting || activeAssignment?.sitting || null
+                        const sitting =
+                          member.examAttendance?.sitting || activeAssignment?.sitting || null
 
                         return sitting ? (
                           <Link
                             href={`/staff/exams/events/${pool.eventId}#sitting-${sitting.id}`}
-                            className="block text-xs text-slate-600 transition-colors hover:text-aerojet-blue dark:text-slate-400 dark:hover:text-blue-400"
+                            className="hover:text-aerojet-blue block text-xs text-slate-600 transition-colors dark:text-slate-400 dark:hover:text-blue-400"
                           >
                             <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
                               <Clock3 className="h-3.5 w-3.5 text-slate-400" />
@@ -248,7 +248,8 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                     <td className="px-6 py-4 text-right">
                       {(() => {
                         const activeAssignment = member.booking?.sittingAssignments?.[0] || null
-                        const sitting = member.examAttendance?.sitting || activeAssignment?.sitting || null
+                        const sitting =
+                          member.examAttendance?.sitting || activeAssignment?.sitting || null
 
                         return (
                           <MemberActions
@@ -256,7 +257,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                             bookingId={member.bookingId}
                             sittingId={sitting?.id || null}
                             memberName={
-                              (member.user?.profile?.firstName || member.user?.profile?.lastName)
+                              member.user?.profile?.firstName || member.user?.profile?.lastName
                                 ? `${member.user.profile.firstName || ''} ${member.user.profile.lastName || ''}`
                                 : member.user?.email || 'Unknown User'
                             }

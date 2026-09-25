@@ -1,6 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Image from 'next/image'
-import { redirect } from 'next/navigation'
 import { FileText, Download, AlertTriangle } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -21,7 +21,7 @@ function isImageUrl(url: string): boolean {
 
 export default async function StudentDocumentsPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const documents = await prismaUnfiltered.studentDocument.findMany({
     where: { userId: session.user.id, status: 'ACTIVE' },

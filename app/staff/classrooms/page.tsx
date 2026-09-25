@@ -1,6 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Plus, Users, MapPin, Building, LayoutGrid } from 'lucide-react'
 import Link from 'next/link'
@@ -18,7 +18,8 @@ interface ClassroomsPageProps {
 
 export default async function ClassroomsPage({ searchParams }: ClassroomsPageProps) {
   const session = await getAuthSession()
-  if (!session || !['SUPER_ADMIN', 'ADMIN'].includes(session.user.role)) redirect('/login')
+  if (!session || !['SUPER_ADMIN', 'ADMIN'].includes(session.user.role))
+    return await redirectToLogin()
 
   const params = await searchParams
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1)
@@ -42,7 +43,7 @@ export default async function ClassroomsPage({ searchParams }: ClassroomsPagePro
   ])
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1400px] space-y-8 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-350 space-y-8 duration-700">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <h1 className="text-aerojet-blue text-3xl font-black tracking-tight sm:text-4xl dark:text-white">

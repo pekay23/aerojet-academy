@@ -1,18 +1,14 @@
 'use client'
 
 import * as React from 'react'
-import {
-  Bar,
-  BarChart,
-  Line,
-  ComposedChart,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from 'recharts'
+import { Bar, BarChart, Line, ComposedChart, Cell, XAxis, YAxis, CartesianGrid } from 'recharts'
 
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart'
 
 interface ExamTrendChartProps {
   data: { month: string; exams: number; passes: number; fails: number }[]
@@ -35,12 +31,12 @@ const examTrendConfig = {
 
 export function ExamTrendChart({ data }: ExamTrendChartProps) {
   const [mounted, setMounted] = React.useState(false)
-   
+
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
   return (
-    <div className="h-[300px] w-full">
+    <div className="h-75 w-full">
       {mounted ? (
         <ChartContainer config={examTrendConfig} className="h-full w-full">
           <ComposedChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
@@ -52,12 +48,7 @@ export function ExamTrendChart({ data }: ExamTrendChartProps) {
               axisLine={false}
               tick={{ fill: '#94A3B8' }}
             />
-            <YAxis
-              fontSize={10}
-              tickLine={false}
-              axisLine={false}
-              tick={{ fill: '#94A3B8' }}
-            />
+            <YAxis fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#94A3B8' }} />
             <ChartTooltip
               content={
                 <ChartTooltipContent
@@ -102,13 +93,12 @@ const scoreDistributionConfig = {
 } satisfies ChartConfig
 
 export function ScoreDistributionChart({ data }: ScoreDistributionChartProps) {
-   
   const [mounted, setMounted] = React.useState(false)
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), [])
 
   return (
-    <div className="h-[260px] w-full">
+    <div className="h-65 w-full">
       {mounted ? (
         <ChartContainer config={scoreDistributionConfig} className="h-full w-full">
           <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
@@ -120,12 +110,7 @@ export function ScoreDistributionChart({ data }: ScoreDistributionChartProps) {
               axisLine={false}
               tick={{ fill: '#64748B', fontWeight: 700 }}
             />
-            <YAxis
-              fontSize={10}
-              tickLine={false}
-              axisLine={false}
-              tick={{ fill: '#94A3B8' }}
-            />
+            <YAxis fontSize={10} tickLine={false} axisLine={false} tick={{ fill: '#94A3B8' }} />
             <ChartTooltip
               content={
                 <ChartTooltipContent

@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Staff Portal — Code Quality &amp;amp; Maintainability Audit · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Staff Portal — Code Quality &amp;amp; Maintainability Audit</h1>
+  <p class="he-deck">Date: 2026-08-27 Auditor: Code Quality Auditor Agent……</p>
+</header>
+<h1 id="staff-portal-code-quality-amp-maintainability-audit">Staff Portal — Code Quality &amp; Maintainability Audit</h1>
+<p>Date: 2026-08-27 Auditor: Code Quality Auditor Agent…</p>
+<section class="he-section" id="01-executive-summary"><div class="he-section__num">01 · 01 · Executive Summary</div><h2 class="he-section__title">01 · Executive Summary</h2></section>
+<p>The Staff portal contains <strong>24 files exceeding 500 lines</strong>, with the largest (<code>reports/page.tsx</code> at 1,427 lines and <code>students/import/page.tsx</code> at 1,139 lines) acting as catch-all monoliths that mix server data fetching, client state, and inline tab components. Significant duplication exists across table components (<code>UsersTable</code>, <code>StudentsTable</code>, <code>InstructorsTable</code>, <code>ExaminersTable</code>), which each independently reimplement search, pagination, and bulk-action plumbing. Error boundaries and not-found pages are almost entirely absent (80 directories missing both), and the codebase relies heavily on <code>any</code> types (100+ instances) and <code>console.error</code> statements in production code.</p>
+<hr />
+<section class="he-section" id="02-findings"><div class="he-section__num">02 · 02 · Findings</div><h2 class="he-section__title">02 · Findings</h2></section>
+<h3 id="category-file-size">Category: File Size</h3>
+<p>Monolithic Reports Page</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/reports/page.tsx</code></p>
+</li>
+<li>
+<p><strong>Lines</strong>: 1,427</p>
+</li>
+<li>
+<p><strong>Severity</strong>: High</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: This single file contains the main page component plus six full tab implementations (<code>OverviewTab</code>, <code>EnrollmentTab</code>, <code>RevenueTab</code>, <code>PoolsTab</code>, <code>AttendanceTab</code>, <code>ExamsTab</code>, <code>YoYTab</code>) and an inline <code>MetricCard</code> component. It is the largest file in the staff portal and violates single-responsibility principle.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Extract each tab into its own component file under <code>app/staff/reports/_components/</code> (e.g., <code>OverviewTab.tsx</code>, <code>EnrollmentTab.tsx</code>). Move <code>MetricCard</code> to a shared location if reused elsewhere.</p>
+</li>
+<li>
+<p><strong>Code Reference</strong>: Lines 112-1,214 contain the six async tab components.</p>
+</li>
+</ul>
+<p>Massive Student Import Wizard</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/students/import/page.tsx</code></p>
+</li>
+<li>
+<p><strong>Lines</strong>: 1,139</p>
+</li>
+<li>
+<p><strong>Severity</strong>: High</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: A single client component handles CSV parsing, manual entry forms, credential export, and all associated UI state. The CSV parsing logic alone spans ~100 lines of imperative string manipulation.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Extract the CSV parser into <code>lib/import/</code> utilities, split the manual entry form into a separate client component, and keep the page component as a thin orchestrator.</p>
+</li>
+<li>
+<p><strong>Code Reference</strong>: Lines 163-275 (CSV parsing), lines 309-377 (manual entry helpers).</p>
+</li>
+</ul>
+<p>Oversized Exam Records Tab</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/exams/_components/RecordsTab.tsx</code></p>
+</li>
+<li>
+<p><strong>Lines</strong>: 1,047</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Combines the &quot;Add Exam Record&quot; form, inline editing, bulk actions, and the records table into one component. State management includes 15+ <code>useState</code> declarations.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Split into <code>ExamRecordForm.tsx</code> (add/edit), <code>ExamRecordTable.tsx</code> (list + bulk actions), and keep <code>RecordsTab.tsx</code> as a thin coordinator.</p>
+</li>
+</ul>
+<p>Giant Calendar Grid Component</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/calendar/_components/StaffCalendarGrid.tsx</code></p>
+</li>
+<li>
+<p><strong>Lines</strong>: 883</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Contains all calendar rendering logic, event creation/editing modals, and audience/color configuration inline.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Extract event dialogs into separate components and move configuration (audience options, color options) to a constants file.</p>
+</li>
+</ul>
+<p>Oversized OJT Logbook Detail</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/ojt/[logbookId]/_components/LogbookDetail.tsx</code></p>
+</li>
+<li>
+<p><strong>Lines</strong>: 838</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Mixes entry editing, ATA chapter selection, supervisor selection, and analytics rendering in one component.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Extract <code>EntryForm.tsx</code>, <code>ATASelector.tsx</code>, and <code>LogbookAnalytics.tsx</code>.</p>
+</li>
+</ul>
+<h2>Additional Large Files (&gt;500 lines)
+| File | Lines | Severity |  |
+| <code>app/staff/_components/StudentDetailPanel.tsx</code> | 811 | Medium |  |
+| <code>app/staff/programmes/_components/ProgrammesClient.tsx</code> | 772 | Medium |  |
+| <code>app/staff/students/[id]/_components/JourneyTab.tsx</code> | 735 | Medium |  |
+| <code>app/staff/exams/page.tsx</code> | 686 | Medium |  |
+| <code>app/staff/newsroom/_components/NewsMarkdownEditor.tsx</code> | 684 | Medium |  |
+| <code>app/staff/practical-assessments/_components/PracticalAssessmentsClient.tsx</code> | 652 | Medium |  |
+| <code>app/staff/_components/PaymentsQueue.tsx</code> | 641 | Medium |  |
+| <code>app/staff/exams/internal/_components/ExamOperations.tsx</code> | 614 | Medium |  |
+| <code>app/staff/resources/_components/ResourceForm.tsx</code> | 592 | Medium |  |
+| <code>app/staff/settings/email-previews/page.tsx</code> | 589 | Medium |  |
+| <code>app/staff/students/[id]/_components/WalletTab.tsx</code> | 581 | Medium |  |
+| <code>app/staff/users/[id]/_components/AcademicHistorySection.tsx</code> | 581 | Medium |  |
+| <code>app/staff/users/[id]/page.tsx</code> | 555 | Medium |  |
+| <code>app/staff/_components/ApplicantDetailDrawer.tsx</code> | 543 | Medium |  |
+| <code>app/staff/students/[id]/_components/BookExamForStudentDialog.tsx</code> | 528 | Medium |  |
+| <code>app/staff/courses/_components/CoursesClient.tsx</code> | 527 | Medium |  |
+| <code>app/staff/scheduling/_components/SchedulingClient.tsx</code> | 522 | Medium |  |
+| <code>app/staff/_components/ApplicantsQueue.tsx</code> | 513 | Medium |  |
+| <code>app/staff/documents/_components/DocumentsManager.tsx</code> | 506 | Medium |  |</h2>
+<h3 id="category-duplication">Category: Duplication</h3>
+<p>Duplicated <code>slugify</code> Utility</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/classes/[id]/page.tsx:32</code>, <code>app/staff/classes/[id]/edit/page.tsx:18</code>, <code>app/staff/_components/UserActionsMenu.tsx:39</code>, <code>app/staff/_components/StudentDetailPanel.tsx:110</code>, <code>app/staff/_components/InstructorsTable.tsx:40</code>, <code>app/staff/_components/ClassActionsMenu.tsx:23</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: The same <code>slugify</code> helper function is copy-pasted into six files.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Extract to <code>lib/utils/string.ts</code> (already exists) and import from there.</p>
+</li>
+</ul>
+<p>Duplicated Table Fetch/Pagination/Bulk-Action Pattern</p>
+<ul>
+<li>
+<p><strong>Files</strong>: <code>app/staff/_components/UsersTable.tsx</code>, <code>app/staff/_components/StudentsTable.tsx</code>, <code>app/staff/_components/InstructorsTable.tsx</code>, <code>app/staff/_components/ExaminersTable.tsx</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: High</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+</ul>
+<p><strong>Description</strong>: All four table components independently reimplement:</p>
+<ul>
+<li>
+<p>URL search params construction</p>
+</li>
+<li>
+<p>Debounced search via <code>setTimeout</code></p>
+</li>
+<li>
+<p>Pagination state (<code>page</code>, <code>perPage</code>, <code>total</code>)</p>
+</li>
+<li>
+<p>Bulk action dropdowns with identical <code>activate</code>, <code>suspend</code>, <code>archive</code>, <code>bypass password change</code> flows</p>
+</li>
+<li>
+<p><code>useEffect(() =&amp;gt; setPage(1), [search])</code> reset pattern</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Create a generic <code>useUserTable</code> hook in <code>lib/hooks/</code> that encapsulates fetching, pagination, and selection state. Create a shared <code>UserTableShell</code> component for the toolbar + table wrapper.</p>
+</li>
+</ul>
+<p>Duplicated <code>statusBadgeClass</code> Logic</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/exams/_components/RecordsTab.tsx:102-116</code> (inline function)</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Exam result-to-badge-color mapping is defined inline. Similar badge logic is scattered across <code>components/shared/StatusBadge.tsx</code> and other tab files.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Centralize in <code>components/shared/StatusBadge.tsx</code> or a <code>lib/exams/badge-config.ts</code> utility.</p>
+</li>
+</ul>
+<p>Duplicated Empty Table States</p>
+<ul>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Multiple table components render their own empty-state JSX with icons and text instead of using the shared <code>EmptyState</code> component from <code>components/shared/EmptyState.tsx</code>.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Standardize on <code>EmptyState</code> across all tables.</p>
+</li>
+</ul>
+<p>Duplicated <code>MetricCard</code> Inline</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/reports/page.tsx:57-110</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: <code>MetricCard</code> is defined inline in the reports page. A similar card pattern appears in <code>app/staff/dashboard/page.tsx</code>.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Extract to <code>components/shared/MetricCard.tsx</code> and reuse.</p>
+</li>
+</ul>
+<hr />
+<h3 id="category-dead-code">Category: Dead Code</h3>
+<p><code>console.error</code> in Production Code</p>
+<ul>
+<li>
+<p><strong>Files</strong>: 32 instances across 18 files including <code>StudentDetailPanel.tsx</code>, <code>EditProfilePhotoDialog.tsx</code>, <code>RecordsTab.tsx</code>, <code>exams/page.tsx</code>, <code>settings/email-previews/page.tsx</code>, etc.</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Client-side error handling writes directly to the browser console. In production, these are invisible to users and admins. The codebase already uses <code>sonner</code> for user-facing toasts.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace with <code>toast.error()</code> for user-visible errors, or route through a centralized logger if backend reporting is needed.</p>
+</li>
+</ul>
+<p><code>console.log</code> in Production Code</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/newsroom/_components/NewsMarkdownEditor.tsx:523, 574, 584</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Debug logging for image/audio upload responses remains in production code.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Remove or guard with <code>process.env.NODE_ENV !== 'production'</code>.</p>
+</li>
+</ul>
+<p>Unused Imports</p>
+<ul>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: No critical unused imports were found, but several files import large icon sets from <code>lucide-react</code> and only use a subset (e.g., <code>InstructorsTable.tsx</code> imports 17 icons but uses ~8).</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Audit and trim icon imports to reduce bundle size.</p>
+</li>
+</ul>
+<hr />
+<h3 id="category-error-boundaries">Category: Error Boundaries</h3>
+<p>Missing <code>error.tsx</code> in Route Segments</p>
+<ul>
+<li>
+<p><strong>Count</strong>: 80 directories with <code>page.tsx</code> lack <code>error.tsx</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: High</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Only the top-level <code>app/staff/error.tsx</code> exists. Every nested route segment with a <code>page.tsx</code> should have its own <code>error.tsx</code> to provide granular error recovery without full-page reloads.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>error.tsx</code> to every directory containing a <code>page.tsx</code>. At minimum, cover high-traffic routes: <code>dashboard</code>, <code>users</code>, <code>students</code>, <code>exams</code>, <code>classes</code>, <code>courses</code>, <code>finance</code>, <code>reports</code>.</p>
+</li>
+</ul>
+<p>Missing <code>not-found.tsx</code> in Route Segments</p>
+<ul>
+<li>
+<p><strong>Count</strong>: 80 directories with <code>page.tsx</code> lack <code>not-found.tsx</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Only <code>app/staff/not-found.tsx</code> exists. Invalid IDs (e.g., <code>/staff/users/invalid-id</code>) currently bubble up to the root not-found page rather than showing a context-aware message.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>not-found.tsx</code> to route groups, or at minimum to dynamic route parents (<code>users/[id]</code>, <code>students/[id]</code>, <code>classes/[id]</code>, <code>courses/[id]</code>, <code>exams/events/[id]</code>).</p>
+</li>
+</ul>
+<hr />
+<h3 id="category-naming-conventions">Category: Naming Conventions</h3>
+<p>Inconsistent Table Component Naming</p>
+<ul>
+<li>
+<p><strong>Files</strong>: <code>UsersTable.tsx</code>, <code>StudentsTable.tsx</code>, <code>InstructorsTable.tsx</code>, <code>ExaminersTable.tsx</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: The shared component prefix is inconsistent: <code>UsersTable</code> (plural) vs the pattern used elsewhere for singular entity views.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: No immediate action required; this is a minor inconsistency.</p>
+</li>
+</ul>
+<p>Mixed Pagination Component Usage</p>
+<ul>
+<li>
+<p><strong>Files</strong>: <code>TablePagination.tsx</code> (shared) vs inline pagination in <code>StudentDetailPanel.tsx</code>, <code>ExamsTab.tsx</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: Some components use the shared <code>TablePagination</code> while others render their own page controls.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Standardize on <code>TablePagination</code> across all list views.</p>
+</li>
+</ul>
+<hr />
+<h3 id="category-separation-of-concerns">Category: Separation of Concerns</h3>
+<p>Monolithic Server Actions File</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/actions.ts</code></p>
+</li>
+<li>
+<p><strong>Lines</strong>: 1,015</p>
+</li>
+<li>
+<p><strong>Severity</strong>: High</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: All staff server actions are crammed into one file: user CRUD, enrollment bulk ops, payment bulk ops, exam booking ops, messaging, OJT, calendar events, course management, etc. This creates merge conflicts and makes it hard to locate related logic.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Split by domain into colocated <code>actions.ts</code> files (e.g., <code>app/staff/users/actions.ts</code>, <code>app/staff/enrollments/actions.ts</code>, <code>app/staff/exams/actions.ts</code>, <code>app/staff/finance/actions.ts</code>). Keep only cross-cutting utilities in the root <code>actions.ts</code>.</p>
+</li>
+</ul>
+<p>Client Components Fetching Their Own Data</p>
+<ul>
+<li>
+<p><strong>Files</strong>: <code>UsersTable.tsx</code>, <code>StudentsTable.tsx</code>, <code>InstructorsTable.tsx</code>, <code>ExaminersTable.tsx</code>, and many others</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Client components directly call <code>fetch('/api/staff/users?...')</code> instead of receiving data via props from a server component. This bypasses React Server Components, increases client bundle size, and duplicates auth/parsing logic.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Move data fetching to parent server components and pass serialized data + callbacks as props. Use <code>unstable_cache</code> for reference data.</p>
+</li>
+</ul>
+<p>Server Component with Client-Only Patterns</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/reports/page.tsx</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: The main <code>ReportsPage</code> is an async server component, but it renders tab components that each independently call analytics functions. The tab switching is controlled via URL search params rendered client-side, creating a hybrid pattern that is hard to follow.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Keep the server component pattern by prefetching all tab data in parallel with <code>Promise.all</code>, or convert tab switching to client-side with a single data-loading boundary.</p>
+</li>
+</ul>
+<hr />
+<h3 id="category-component-patterns">Category: Component Patterns</h3>
+<p>Underutilized Shared <code>DataTable</code></p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>components/shared/DataTable.tsx</code></p>
+</li>
+<li>
+<p><strong>Lines</strong>: 57</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: A generic typed <code>DataTable</code> exists but is not adopted by most staff tables, which all roll their own <code>&amp;lt;table&amp;gt;</code> markup with duplicated header/body/empty-state patterns.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Either enhance <code>DataTable</code> to support sorting, selection, and custom cell renderers and migrate tables to it, or deprecate it if the team prefers custom markup.</p>
+</li>
+</ul>
+<p>Inconsistent Bulk-Action Patterns</p>
+<ul>
+<li>
+<p><strong>Files</strong>: <code>BulkActionsDropdown.tsx</code> vs inline action bars in <code>PaymentsQueue.tsx</code>, <code>ReconciliationQueue.tsx</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: Some pages use the shared <code>BulkActionsDropdown</code>, while others (PaymentsQueue, ReconciliationQueue) have custom inline action bars with similar functionality.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Consolidate on <code>BulkActionsDropdown</code> or extract a <code>BulkActionBar</code> that supports both dropdown and inline variants.</p>
+</li>
+</ul>
+<p>Mixed <code>'use client'</code> in <code>_components</code> Nested Directories</p>
+<ul>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: Client components are scattered across <code>_components/</code> at multiple nesting levels (<code>app/staff/_components/</code>, <code>app/staff/users/[id]/_components/</code>, <code>app/staff/students/[id]/_components/</code>, etc.). This is not wrong, but makes it harder to distinguish server vs client boundaries at a glance.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Consider a flatter convention: server components in <code>app/staff/X/page.tsx</code>, client components in <code>components/staff/XClient.tsx</code>, or keep <code>_components/</code> but ensure <code>'use client'</code> is the very first line in every client file.</p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="03-appendix"><div class="he-section__num">03 · 03 · Appendix</div><h2 class="he-section__title">03 · Appendix</h2></section>
+<h3 id="files-audited">Files Audited</h3>
+<ul>
+<li>
+<p><code>app/staff/</code> — 200+ files (pages, components, actions, layouts, loading states)</p>
+</li>
+<li>
+<p><code>app/staff/_components/</code> — 39 shared client components</p>
+</li>
+<li>
+<p><code>app/staff/**/_components/</code> — 60+ nested feature components</p>
+</li>
+<li>
+<p><code>components/shared/</code> — 39 shared UI components</p>
+</li>
+<li>
+<p><code>lib/</code> — utilities, Prisma clients, auth helpers, analytics</p>
+</li>
+</ul>
+<h3 id="summary-statistics">Summary Statistics</h3>
+<p>| Metric | Count |  |
+| Files &gt; 500 lines | 24 |  |
+| Missing <code>error.tsx</code> | 80 directories |  |
+| Missing <code>not-found.tsx</code> | 80 directories |  |
+| <code>console.error</code> instances | 32 |  |
+| <code>console.log</code> instances | 3 |  |
+| <code>any</code> type usages | 100+ |  |
+| Duplicated <code>slugify</code> | 6 files |  |
+| Duplicated table fetch pattern | 4 files |  |</p>
+<h3 id="total-findings">Total Findings</h3>
+<ul>
+<li>
+<p>Critical: 0</p>
+</li>
+<li>
+<p>High: 4</p>
+</li>
+<li>
+<p>Medium: 12</p>
+</li>
+<li>
+<p>Low: 8</p>
+</li>
+<li>
+<p>No Action Needed: 0</p>
+<p>On this page
+<a href="#executive-summary">Executive Summary</a>
+<a href="#findings">Findings</a>
+<a href="#category-file-size">Category: File Size</a>
+<a href="#category-duplication">Category: Duplication</a>
+<a href="#category-dead-code">Category: Dead Code</a>
+<a href="#category-error-boundaries">Category: Error Boundaries</a>
+<a href="#category-naming-conventions">Category: Naming Conventions</a>
+<a href="#category-separation-of-concerns">Category: Separation of Concerns</a>
+<a href="#category-component-patterns">Category: Component Patterns</a>
+<a href="#appendix">Appendix</a>
+<a href="#files-audited">Files Audited</a>
+<a href="#summary-statistics">Summary Statistics</a>
+<a href="#total-findings">Total Findings</a></p>
+</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#01-executive-summary">01 · Executive Summary</a></li>
+    <li class="he-toc__l2"><a href="#02-findings">02 · Findings</a></li>
+    <li class="he-toc__l3"><a href="#category-file-size">Category: File Size</a></li>
+    <li class="he-toc__l3"><a href="#category-duplication">Category: Duplication</a></li>
+    <li class="he-toc__l3"><a href="#category-dead-code">Category: Dead Code</a></li>
+    <li class="he-toc__l3"><a href="#category-error-boundaries">Category: Error Boundaries</a></li>
+    <li class="he-toc__l3"><a href="#category-naming-conventions">Category: Naming Conventions</a></li>
+    <li class="he-toc__l3"><a href="#category-separation-of-concerns">Category: Separation of Concerns</a></li>
+    <li class="he-toc__l3"><a href="#category-component-patterns">Category: Component Patterns</a></li>
+    <li class="he-toc__l2"><a href="#03-appendix">03 · Appendix</a></li>
+    <li class="he-toc__l3"><a href="#files-audited">Files Audited</a></li>
+    <li class="he-toc__l3"><a href="#summary-statistics">Summary Statistics</a></li>
+    <li class="he-toc__l3"><a href="#total-findings">Total Findings</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

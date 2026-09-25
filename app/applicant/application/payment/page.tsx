@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import PaymentUploadForm from './_components/PaymentUploadForm'
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function PaymentPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -23,7 +23,7 @@ export default async function PaymentPage() {
     },
   })
 
-  if (!applicant) redirect('/login')
+  if (!applicant) return await redirectToLogin()
 
   // Fetch global registration settings and bank details
   const settings = await prismaUnfiltered.systemSetting.findMany({
@@ -51,9 +51,9 @@ export default async function PaymentPage() {
   const registrationCurrency = globalSettings.registration_currency || 'EUR'
 
   return (
-    <div className="max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 max-w-4xl space-y-6 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Upload Payment Proof
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -74,8 +74,10 @@ export default async function PaymentPage() {
       ) : (
         <>
           {/* Bank Details */}
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-            <h2 className="mb-4 font-bold text-slate-900 dark:text-slate-100">Bank Transfer Details</h2>
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 font-bold text-slate-900 dark:text-slate-100">
+              Bank Transfer Details
+            </h2>
             <dl className="space-y-3 text-sm">
               {[
                 { label: 'Bank', value: globalSettings.bank_name },
@@ -92,10 +94,12 @@ export default async function PaymentPage() {
                   key={label}
                   className="flex items-start justify-between gap-4 border-b border-slate-50 pb-2 last:border-0"
                 >
-                  <dt className="w-36 shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <dt className="w-36 shrink-0 text-xs font-semibold tracking-wide text-slate-400 uppercase">
                     {label}
                   </dt>
-                  <dd className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">{value ?? '—'}</dd>
+                  <dd className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
+                    {value ?? '—'}
+                  </dd>
                 </div>
               ))}
             </dl>

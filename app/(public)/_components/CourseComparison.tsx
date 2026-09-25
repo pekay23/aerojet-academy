@@ -74,7 +74,7 @@ export default function CourseComparison() {
       transition={{ duration: 0.6 }}
       className="overflow-x-auto"
     >
-      <table className="w-full min-w-[600px] text-left text-sm">
+      <table className="w-full min-w-150 text-left text-sm">
         <thead>
           <tr>
             <th className="p-4 text-xs font-bold tracking-widest text-slate-400 uppercase">

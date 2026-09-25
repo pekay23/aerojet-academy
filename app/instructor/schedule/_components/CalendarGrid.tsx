@@ -259,7 +259,7 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
                 {weekDays.map((day, i) => (
                   <div
                     key={i}
-                    className="h-[2400px] border-r border-slate-100 last:border-r-0 dark:border-slate-800"
+                    className="h-600 border-r border-slate-100 last:border-r-0 dark:border-slate-800"
                   ></div>
                 ))}
 

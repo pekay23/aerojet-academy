@@ -150,7 +150,7 @@ export default function EditRevisionRunDialog({ run }: EditRevisionRunDialogProp
           <Edit2 className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle className="text-aerojet-blue text-2xl font-black uppercase">
             Edit Revision Run

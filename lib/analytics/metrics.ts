@@ -135,11 +135,19 @@ export const getDashboardMetrics = (period: string = 'mom', customFrom?: Date, c
         openPools,
         totalRevenue: {
           value: totalRevenue,
-          growth: calculateGrowth(Number(currentRevenue._sum.amount || 0), Number(previousRevenue._sum.amount || 0)),
+          growth: calculateGrowth(
+            Number(currentRevenue._sum.amount || 0),
+            Number(previousRevenue._sum.amount || 0)
+          ),
         },
       }
     },
-    ['metrics-dashboard', period, customFrom?.toISOString() ?? 'none', customTo?.toISOString() ?? 'none'],
+    [
+      'metrics-dashboard',
+      period,
+      customFrom?.toISOString() ?? 'none',
+      customTo?.toISOString() ?? 'none',
+    ],
     { revalidate: 300, tags: ['metrics', 'dashboard'] }
   )()
 
@@ -217,37 +225,49 @@ export const getBehavioralMetrics = (period: string = 'mom', customFrom?: Date, 
         }
       }
 
-      const [
-        totalEvents,
-        activeUsersRaw,
-        currentPageViews,
-        previousPageViews,
-        featureAdoptersRaw,
-      ] = await Promise.all([
-        prisma.auditLog.count({
-          where: { entity: 'ANALYTICS', createdAt: { gte: currentStart, lt: now } },
-        }),
-        prisma.auditLog.findMany({
-          where: { entity: 'ANALYTICS', createdAt: { gte: currentStart, lt: now } },
-          select: { userId: true },
-          distinct: ['userId'],
-        }),
-        prisma.auditLog.count({
-          where: { action: 'PAGE_VIEW', entity: 'ANALYTICS', createdAt: { gte: currentStart, lt: now } },
-        }),
-        prisma.auditLog.count({
-          where: { action: 'PAGE_VIEW', entity: 'ANALYTICS', createdAt: { gte: previousStart, lt: currentStart } },
-        }),
-        prisma.auditLog.findMany({
-          where: { action: 'FEATURE_USED', entity: 'ANALYTICS', createdAt: { gte: currentStart, lt: now } },
-          select: { userId: true },
-          distinct: ['userId'],
-        }),
-      ])
+      const [totalEvents, activeUsersRaw, currentPageViews, previousPageViews, featureAdoptersRaw] =
+        await Promise.all([
+          prisma.auditLog.count({
+            where: { entity: 'ANALYTICS', createdAt: { gte: currentStart, lt: now } },
+          }),
+          prisma.auditLog.findMany({
+            where: { entity: 'ANALYTICS', createdAt: { gte: currentStart, lt: now } },
+            select: { userId: true },
+            distinct: ['userId'],
+          }),
+          prisma.auditLog.count({
+            where: {
+              action: 'PAGE_VIEW',
+              entity: 'ANALYTICS',
+              createdAt: { gte: currentStart, lt: now },
+            },
+          }),
+          prisma.auditLog.count({
+            where: {
+              action: 'PAGE_VIEW',
+              entity: 'ANALYTICS',
+              createdAt: { gte: previousStart, lt: currentStart },
+            },
+          }),
+          prisma.auditLog.findMany({
+            where: {
+              action: 'FEATURE_USED',
+              entity: 'ANALYTICS',
+              createdAt: { gte: currentStart, lt: now },
+            },
+            select: { userId: true },
+            distinct: ['userId'],
+          }),
+        ])
 
-      const activeUsers = activeUsersRaw.filter((u): u is { userId: string } => Boolean(u.userId)).length
-      const featureAdopters = featureAdoptersRaw.filter((u): u is { userId: string } => Boolean(u.userId)).length
-      const featureAdoptionRate = activeUsers > 0 ? Math.round((featureAdopters / activeUsers) * 100) : 0
+      const activeUsers = activeUsersRaw.filter((u): u is { userId: string } =>
+        Boolean(u.userId)
+      ).length
+      const featureAdopters = featureAdoptersRaw.filter((u): u is { userId: string } =>
+        Boolean(u.userId)
+      ).length
+      const featureAdoptionRate =
+        activeUsers > 0 ? Math.round((featureAdopters / activeUsers) * 100) : 0
       const avgSessionEvents = activeUsers > 0 ? Math.round(totalEvents / activeUsers) : 0
       const pageViewGrowth = calculateGrowth(currentPageViews, previousPageViews)
 
@@ -260,7 +280,12 @@ export const getBehavioralMetrics = (period: string = 'mom', customFrom?: Date, 
         featureAdoptionRate,
       }
     },
-    ['metrics-behavioral', period, customFrom?.toISOString() ?? 'none', customTo?.toISOString() ?? 'none'],
+    [
+      'metrics-behavioral',
+      period,
+      customFrom?.toISOString() ?? 'none',
+      customTo?.toISOString() ?? 'none',
+    ],
     { revalidate: 300, tags: ['metrics', 'behavioral'] }
   )()
 
@@ -275,14 +300,27 @@ export const getAttendanceRate = (userId?: string) =>
           select: { id: true },
         })
         if (!userExists) {
-          return { total: 0, present: 0, absent: 0, rate: 0 }
+          return { total: 0, present: 0, presentToday: 0, absent: 0, rate: 0 }
         }
         where.userId = userId
       }
 
-      const [total, present] = await Promise.all([
+      // Today's date range (start of day to end of day)
+      const todayStart = new Date()
+      todayStart.setHours(0, 0, 0, 0)
+      const todayEnd = new Date()
+      todayEnd.setHours(23, 59, 59, 999)
+
+      const [total, present, presentToday] = await Promise.all([
         prisma.attendanceRecord.count({ where }),
         prisma.attendanceRecord.count({ where: { ...where, status: 'PRESENT' } }),
+        prisma.attendanceRecord.count({
+          where: {
+            ...where,
+            status: 'PRESENT',
+            date: { gte: todayStart, lte: todayEnd },
+          },
+        }),
       ])
 
       const rate = total > 0 ? Math.round((present / total) * 100) : 0
@@ -290,6 +328,7 @@ export const getAttendanceRate = (userId?: string) =>
       return {
         total,
         present,
+        presentToday,
         absent: total - present,
         rate,
       }

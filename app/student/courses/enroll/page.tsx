@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -52,7 +53,7 @@ export default async function EnrollPage({
 }) {
   const { category } = await searchParams
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const studentData = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -113,7 +114,7 @@ export default async function EnrollPage({
 
   // Build set of the student's license target base codes (e.g. 'B1.1' → 'B1')
   const studentLicenseCodes = new Set(
-    studentProfile?.licenseTargets?.map(t => {
+    studentProfile?.licenseTargets?.map((t) => {
       const code = t.licenseCategory.code
       // Map specific sub-categories to their base (B1.1 → B1, B1.3 → B1, B2 → B2)
       const dotIdx = code.indexOf('.')
@@ -122,7 +123,7 @@ export default async function EnrollPage({
   )
 
   // Filter courses based on pathway constraints
-  const filteredCourses = allCourses.filter(course => {
+  const filteredCourses = allCourses.filter((course) => {
     // Rule 1: Modular students cannot see Full-Time specific categories
     if (effectiveEnrollmentType === 'MODULAR') {
       const fullTimeCategories = ['FOUR_YEAR', 'TWO_YEAR', 'MILITARY']
@@ -134,7 +135,7 @@ export default async function EnrollPage({
     // Rule 2: Filter by applicable license categories if the student has targets
     // and the course has applicableCategories set
     if (studentLicenseCodes.size > 0 && course.applicableCategories.length > 0) {
-      const hasOverlap = course.applicableCategories.some(cat => studentLicenseCodes.has(cat))
+      const hasOverlap = course.applicableCategories.some((cat) => studentLicenseCodes.has(cat))
       if (!hasOverlap) return false
     }
 
@@ -142,13 +143,15 @@ export default async function EnrollPage({
   })
 
   // Filter categories that have no visible courses left
-  const availableCategoryNames = new Set(filteredCourses.map(c => c.category?.name).filter(Boolean))
+  const availableCategoryNames = new Set(
+    filteredCourses.map((c) => c.category?.name).filter(Boolean)
+  )
   const categories = allCategories
-    .filter(cat => availableCategoryNames.has(cat.name))
+    .filter((cat) => availableCategoryNames.has(cat.name))
     .map((courseCategory) => ({
-    id: courseCategory.id,
-    name: courseCategory.name,
-  }))
+      id: courseCategory.id,
+      name: courseCategory.name,
+    }))
 
   const groupedCourses = filteredCourses.reduce(
     (acc, course) => {
@@ -161,12 +164,12 @@ export default async function EnrollPage({
   )
 
   return (
-    <div className="relative min-h-screen space-y-8 pb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 relative min-h-screen space-y-8 pb-16 duration-700">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-linear-to-b from-sky-100/60 via-white to-transparent dark:from-slate-900 dark:via-slate-950 dark:to-transparent" />
       <div className="pointer-events-none absolute -top-20 right-0 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
       <div className="pointer-events-none absolute top-52 -left-10 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
 
-      <div className="relative overflow-hidden rounded-4xl border border-slate-200/70 bg-white/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/80 sm:p-8">
+      <div className="relative overflow-hidden rounded-4xl border border-slate-200/70 bg-white/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-8 dark:border-slate-800 dark:bg-slate-950/80">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_30%),radial-gradient(circle_at_left,rgba(16,185,129,0.10),transparent_28%)]" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-4">
@@ -184,7 +187,7 @@ export default async function EnrollPage({
                 Course Enrollment Desk
               </div>
               <div>
-                <h1 className="text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-white">
                   Build Your Next Module Schedule
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
@@ -217,7 +220,9 @@ export default async function EnrollPage({
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
             <BookOpen className="h-8 w-8" />
           </div>
-          <h3 className="text-xl font-black text-slate-900 dark:text-white">No Modules Available</h3>
+          <h3 className="text-xl font-black text-slate-900 dark:text-white">
+            No Modules Available
+          </h3>
           <p className="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
             There are no active modules in this category right now. Try another filter or check back
             shortly.
@@ -250,11 +255,13 @@ export default async function EnrollPage({
                     return (
                       <article
                         key={course.id}
-                        className="group relative flex min-h-[350px] flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white/90 shadow-[0_18px_40px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-sky-300 hover:shadow-[0_24px_48px_rgba(14,165,233,0.14)] dark:border-slate-800 dark:bg-slate-950/85"
+                        className="group relative flex min-h-87.5 flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white/90 shadow-[0_18px_40px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-sky-300 hover:shadow-[0_24px_48px_rgba(14,165,233,0.14)] dark:border-slate-800 dark:bg-slate-950/85"
                       >
                         <TrackedImpression courseId={course.id} />
-                        <div className={`absolute inset-x-0 top-0 h-24 bg-linear-to-br ${accent}`} />
-                        <div className="absolute right-5 top-5">
+                        <div
+                          className={`absolute inset-x-0 top-0 h-24 bg-linear-to-br ${accent}`}
+                        />
+                        <div className="absolute top-5 right-5">
                           {isEnrolled ? (
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-black tracking-[0.18em] text-white uppercase">
                               <BadgeCheck className="h-3.5 w-3.5" />
@@ -281,7 +288,7 @@ export default async function EnrollPage({
                           </div>
 
                           <div className="space-y-3">
-                            <h2 className="text-xl font-black leading-tight text-slate-950 transition-colors group-hover:text-blue-800 dark:text-white dark:group-hover:text-blue-300">
+                            <h2 className="text-xl leading-tight font-black text-slate-950 transition-colors group-hover:text-blue-800 dark:text-white dark:group-hover:text-blue-300">
                               {course.name}
                             </h2>
                             <p className="line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
@@ -328,7 +335,7 @@ export default async function EnrollPage({
                                   Tuition
                                 </p>
                                 <div className="mt-1 flex items-baseline gap-2">
-                                  <span className="text-xs font-bold text-aerojet-sky">
+                                  <span className="text-aerojet-sky text-xs font-bold">
                                     {course.currency}
                                   </span>
                                   <span className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">

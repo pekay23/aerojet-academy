@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Instructor Portal — Consolidated Audit Report · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Instructor Portal — Consolidated Audit Report</h1>
+  <p class="he-deck">Date: 2026-08-27 Auditors: TypeScript/React, Performance, Security, UI/UX, Code Quality (6 parallel agents) Scope: <code>app/instructor/</code> — 17 route segments, 33 component files, 9 API routes, server actions……</p>
+</header>
+<h1 id="instructor-portal-consolidated-audit-report">Instructor Portal — Consolidated Audit Report</h1>
+<p>Date: 2026-08-27 Auditors: TypeScript/React, Performance, Security, UI/UX, Code Quality (6 parallel agents) Scope: <code>app/instructor/</code> — 17 route segments, 33 component files, 9 API routes, server actions…</p>
+<hr />
+<section class="he-section" id="01-executive-summary"><div class="he-section__num">01 · 01 · Executive Summary</div><h2 class="he-section__title">01 · Executive Summary</h2></section>
+<p>The Instructor portal is a well-structured surface with consistent <code>loading.tsx</code> coverage and proper auth guards at the layout level. However, this audit surfaced <strong>material gaps</strong> that largely mirror the Staff and Student portal audits: pervasive use of the RLS-wrapped <code>prisma</code> client where <code>prismaUnfiltered</code> is mandated, extensive <code>any</code> type erosion, dead code, missing audit logging on server actions, and missing nested error/not-found boundaries.</p>
+<p><strong>Totals: 4 Critical · 8 High · 13 Medium · 10 Low · 6 Suggestions</strong></p>
+<hr />
+<section class="he-section" id="02-critical-findings-must-fix"><div class="he-section__num">02 · 02 · Critical Findings (must fix)</div><h2 class="he-section__title">02 · Critical Findings (must fix)</h2></section>
+<h3 id="c-1-all-instructor-server-actions-use-the-rls-wrapped-prisma-client-instead-of-prismaunfiltered">C-1: All instructor server actions use the RLS-wrapped <code>prisma</code> client instead of <code>prismaUnfiltered</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance, Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>lib/actions/instructor.ts:3</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Every <code>use server</code> action in <code>lib/actions/instructor.ts</code> (all 16 functions) uses <code>prisma</code> rather than <code>prismaUnfiltered</code>. Per CLAUDE.md, instructor pages are already auth-gated via <code>requireInstructor()</code> at the layout level, so RLS provides zero additional security but adds per-query overhead.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Every server action in the instructor portal is 2x slower than necessary. The layout calls <code>getPendingGradingCount()</code> on every page load, adding 6 additional RLS transactions to every navigation.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace <code>import prisma from '@/lib/prisma/client'</code> with <code>import { prismaUnfiltered } from '@/lib/prisma/client'</code> in <code>lib/actions/instructor.ts</code>, <code>lib/instructor/profile.ts</code>, and all 9 API route files.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ✅ <strong>Implemented</strong></p>
+</li>
+</ul>
+<h3 id="c-2-libinstructorprofilets-uses-the-rls-prisma-client">C-2: <code>lib/instructor/profile.ts</code> uses the RLS <code>prisma</code> client</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance, Security</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>lib/instructor/profile.ts:1,4</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: <code>getInstructorProfileByUserId</code> uses <code>prisma.instructorProfile.findUnique()</code>. This helper is imported by every instructor API route and page. It also lacks <code>import 'server-only'</code>.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Every <code>getInstructorProfileByUserId()</code> and <code>getInstructorProfileIdOrThrow()</code> call pays the RLS transaction overhead.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Switch to <code>prismaUnfiltered</code>. Add <code>import 'server-only'</code> to the file.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="c-3-dead-calendargridtsx-component-484-lines-of-unreachable-code">C-3: Dead <code>CalendarGrid.tsx</code> component — 484 lines of unreachable code</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/schedule/_components/CalendarGrid.tsx:1-484</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: <code>CalendarGrid</code> is imported on line 5 of the schedule page but the page renders <code>&amp;lt;AcademicCalendar&amp;gt;</code> instead (line 92). The entire 484-line component is dead code containing 3 <code>as any</code> casts and 2 <code>any[]</code> annotations.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: 484 lines of dead code that increase compile time, bundle size, and maintenance burden.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Delete <code>CalendarGrid.tsx</code> and its import, or wire it up as the actual calendar implementation.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="c-4-instructor-server-actions-have-zero-audit-logging">C-4: Instructor server actions have zero audit logging</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Security, Compliance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>lib/actions/instructor.ts</code> (all mutation actions)</p>
+</li>
+<li>
+<p><strong>Description</strong>: Every server action that performs a mutation (grade submission, attendance recording, grade creation, profile update) does NOT call <code>createAuditLog</code>. The API route equivalents do log. <code>submitGrade</code> can silently overwrite any grade with no audit trail.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: All instructor mutations via server actions are invisible to the audit trail. No accountability for grade changes or attendance recordings.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>createAuditLog</code> calls to <code>submitGrade</code>, <code>recordAttendance</code>, <code>createInternalGrade</code>, and <code>updateInstructorProfile</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="03-high-priority-findings"><div class="he-section__num">03 · 03 · High Priority Findings</div><h2 class="he-section__title">03 · High Priority Findings</h2></section>
+<h3 id="h-1-rls-prisma-client-used-in-5-server-components">H-1: RLS <code>prisma</code> client used in 5 server components</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/instructor/layout.tsx</code>, <code>app/instructor/dashboard/page.tsx</code>, <code>app/instructor/classes/[id]/page.tsx</code>, <code>app/instructor/classes/[id]/grades/page.tsx</code>, <code>app/instructor/classes/[id]/materials/page.tsx</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Server components import <code>prisma</code> instead of <code>prismaUnfiltered</code>. The layout's <code>prisma.user.findUnique()</code> runs on every page load. The <code>classes/[id]/page.tsx</code> makes 4 separate <code>prisma.*</code> queries.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Every page view pays RLS transaction overhead, adding 2-3 unnecessary <code>BEGIN/SET LOCAL/COMMIT</code> cycles per navigation.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace all imports with <code>import { prismaUnfiltered } from '@/lib/prisma/client'</code> and update call sites.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-2-50-any-type-annotations-across-11-files">H-2: 50+ <code>any</code> type annotations across 11 files</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: TypeScript/React</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>InstructorProfileView.tsx</code>, <code>ModuleCard.tsx</code>, <code>classes/[id]/page.tsx</code>, <code>GradingHistoryView.tsx</code>, <code>AttendanceRow.tsx</code>, <code>schedule/page.tsx</code>, <code>students/[id]/page.tsx</code>, <code>api/instructor/classes/route.ts</code>, <code>api/instructor/schedule/route.ts</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: <code>any</code> types are pervasive at the server→client boundary. <code>ModuleCard.tsx:10</code> explicitly documents the type gap with a comment. The <code>classes/[id]/page.tsx</code> page has 11 <code>any</code> annotations.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: IDE autocomplete is disabled at all affected call sites. Typos in property names pass silently.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Define narrow interfaces derived from Prisma payloads.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-3-no-nested-errortsx-boundaries">H-3: No nested <code>error.tsx</code> boundaries</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality, UX</p>
+</li>
+<li>
+<p><strong>Files</strong>: Only <code>app/instructor/error.tsx</code> exists (root level). No <code>error.tsx</code> in <code>dashboard/</code>, <code>classes/[id]/</code>, <code>grading/</code>, <code>students/[id]/</code>, <code>attendance/[id]/</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The single root <code>error.tsx</code> catches all errors in nested segments. There are no section-level error boundaries for high-risk areas. The error component is also named <code>StaffError</code> (line 2), a copy-paste from the staff portal.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: A render error in any deeply nested component kills the entire page. No context-appropriate recovery UI.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>error.tsx</code> to <code>classes/[id]/</code>, <code>grading/</code>, <code>students/[id]/</code>, and <code>attendance/[id]/</code>. Rename <code>StaffError</code> to <code>InstructorError</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-4-no-not-foundtsx-at-dynamic-route-levels">H-4: No <code>not-found.tsx</code> at dynamic route levels</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UX</p>
+</li>
+<li>
+<p><strong>Files</strong>: Missing in <code>classes/[id]/</code>, <code>students/[id]/</code>, <code>attendance/[id]/</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Only the root <code>app/instructor/not-found.tsx</code> exists. Invalid IDs in dynamic routes fall through to the generic Next.js 404 page.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Poor error recovery UX for deep routes.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>not-found.tsx</code> to all dynamic route parents.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-5-api-routes-use-requireauth-manual-role-check-instead-of-requireinstructor">H-5: API routes use <code>requireAuth()</code> + manual role check instead of <code>requireInstructor()</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Security, Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: All 9 API routes (<code>app/api/instructor/*/route.ts</code>)</p>
+</li>
+<li>
+<p><strong>Description</strong>: Every API route calls <code>requireAuth()</code> then manually checks <code>user.role !== UserRole.INSTRUCTOR</code>. The <code>requireInstructor()</code> helper does exactly this in one call but is never used.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: 9× repetition of 5 lines of boilerplate. If a new route forgets the manual check, it's a broken access control vulnerability.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Create a <code>withInstructorHandler</code> wrapper or replace all patterns with <code>requireInstructor()</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-6-missing-audit-logging-on-server-action-mutations">H-6: Missing audit logging on server action mutations</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Security, Compliance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>lib/actions/instructor.ts:219-242</code>, <code>:372-411</code>, <code>:628-661</code>, <code>:663-709</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: These server actions perform database mutations but never call <code>createAuditLog</code>. <code>submitGrade</code> can silently overwrite any grade with no audit trail.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Instructor mutations are not auditable. No accountability for grade changes or profile modifications.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>createAuditLog</code> calls to all mutating server actions with appropriate <code>AuditAction</code> and <code>details</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-7-grading-history-allows-unrestricted-grade-editing-without-lock-or-audit">H-7: Grading history allows unrestricted grade editing without lock or audit</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Security, Data Integrity</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/grading/_components/GradingHistoryView.tsx:84-108</code>, <code>lib/actions/instructor.ts:219-242</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The history &quot;Edit Grade&quot; dialog calls <code>submitGrade()</code> which is the same function used for initial submission. There is no check for whether a grade was already finalized, no <code>resultLocked</code> flag, and no audit log of the modification.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Data integrity risk for grading records. Previously submitted grades can be silently overwritten.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add a <code>resultLocked</code> field to the Grade model. Block updates when locked. Add audit logging on all grade mutations.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="h-8-missing-pagination-on-instructor-api-list-endpoints">H-8: Missing pagination on instructor API list endpoints</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/api/instructor/classes/[id]/route.ts</code>, <code>classes/[id]/attendance/route.ts</code>, <code>classes/[id]/roster/route.ts</code>, <code>schedule/route.ts</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Only <code>app/api/instructor/classes/route.ts</code> uses <code>parsePagination</code> + <code>apiPaginated</code>. The other endpoints return unbounded result sets with no <code>take</code>/<code>skip</code> or pagination metadata.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: As attendance records and class data grow, these endpoints return all rows on every request.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>take</code>/<code>skip</code> limits and <code>apiPaginated</code> to all list-returning endpoints.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="04-medium-priority-findings"><div class="he-section__num">04 · 04 · Medium Priority Findings</div><h2 class="he-section__title">04 · Medium Priority Findings</h2></section>
+<h3 id="m-1-10-pages-missing-export-const-dynamic-force-dynamic">M-1: 10 pages missing <code>export const dynamic = 'force-dynamic'</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/instructor/dashboard/page.tsx</code>, <code>classes/page.tsx</code>, <code>classes/[id]/page.tsx</code>, <code>classes/[id]/grades/page.tsx</code>, <code>classes/[id]/materials/page.tsx</code>, <code>students/page.tsx</code>, <code>students/[id]/page.tsx</code>, <code>schedule/page.tsx</code>, <code>attendance/[id]/page.tsx</code>, <code>resources/page.tsx</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: These pages fetch user-specific data but don't declare <code>force-dynamic</code>.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: If the auth implementation changes, these pages could be statically generated at build time.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>export const dynamic = 'force-dynamic'</code> to all 10 pages.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-2-sequential-queries-in-getinstructordashboarddata">M-2: Sequential queries in <code>getInstructorDashboardData</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>lib/actions/instructor.ts:22-67</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The dashboard action fetches <code>todaysClasses</code>, then <code>activeCohorts</code>, then <code>pendingGradesCount</code> sequentially — 3 sequential awaits before the <code>Promise.all</code>. <code>activeCohorts</code> doesn't depend on <code>todaysClasses</code>, and <code>pendingGradesCount</code> doesn't depend on either.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: ~50-100ms additional latency on dashboard load.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Move all independent queries into a single <code>Promise.all</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-3-full-table-slug-resolution-in-classesidpagetsx">M-3: Full-table slug resolution in <code>classes/[id]/page.tsx</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/classes/[id]/page.tsx:34-40</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The page calls <code>prisma.class.findMany({ select: { id: true, name: true } })</code> to load ALL classes, then filters in JavaScript using an inline <code>slugify</code> function.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Loads every class row into memory on every class detail page visit. Scales poorly as class count grows.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Use a parameterized query: <code>prismaUnfiltered.class.findFirst({ where: { name: id } })</code> or store the slug as a column.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-4-client-side-pagination-in-grading-views">M-4: Client-side pagination in grading views</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/grading/_components/GradingQueueView.tsx:82</code>, <code>GradingHistoryView.tsx:83</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Both grading views load the full dataset from server actions and slice to 25 items client-side via <code>.slice()</code>. There is no server-side pagination.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: All grade records for the instructor are transferred to the browser on every grading page load.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Implement server-side pagination with <code>apiPaginated</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-5-duplicate-session-fetch-in-dashboard-asyncwelcomebanner">M-5: Duplicate session fetch in dashboard <code>AsyncWelcomeBanner</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/dashboard/page.tsx:25,276-278</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The dashboard page fetches the session on line 25, then <code>AsyncWelcomeBanner</code> fetches it again on line 276. The <code>getWelcomeMessages</code> call passes the RLS <code>prisma</code> client.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Extra <code>getAuthSession()</code> call and RLS transaction per dashboard load.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Pass the already-fetched session and <code>prismaUnfiltered</code> to <code>AsyncWelcomeBanner</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-6-misnamed-getclassattendance-in-grades-page">M-6: Misnamed <code>getClassAttendance</code> in grades page</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/classes/[id]/grades/page.tsx:16-19</code>, <code>lib/actions/instructor.ts:332-370</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The grades page calls <code>getClassAttendance(id)</code> which fetches the class data AND today's attendance records, then only destructures <code>{ classData }</code>. The <code>records</code> array (50 attendance records) is fetched but never used.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Wasted query fetching and transferring 50+ attendance records per grades page visit.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Create a lightweight <code>getClassData(classId)</code> action, or add an option to skip attendance record fetching.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-7-withbadge-misleading-utility-function">M-7: <code>withBadge</code> misleading utility function</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/resources/_components/ResourcesView.tsx:121-123</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The <code>withBadge(base: string, active: string)</code> function simply returns <code>${base} ${active}</code> — it does no &quot;badge&quot; logic.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Code clarity — misleads maintainers about the function's purpose.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Inline the template literal or rename to <code>mergeClasses</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-8-missing-text-slate-400-dark-mode-contrast-variants">M-8: Missing <code>text-slate-400</code> dark mode contrast variants</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Accessibility</p>
+</li>
+<li>
+<p><strong>File</strong>: Dashboard stat sublabels and many label elements across pages</p>
+</li>
+<li>
+<p><strong>Description</strong>: Many <code>text-slate-400</code> instances lack explicit <code>dark:</code> variants. In dark mode, <code>slate-400</code> on <code>slate-900</code> backgrounds provides only ~2.3:1 contrast — below WCAG AA.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Accessibility gap in dark mode for ~40 instances across the portal.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Audit each <code>text-slate-400</code> usage and add appropriate <code>dark:</code> variants.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-9-unclamped-take-in-classesroutets-api">M-9: Unclamped <code>take</code> in <code>classes/route.ts</code> API</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Security</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/api/instructor/classes/route.ts:31-33</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The API route uses <code>parsePagination</code> (which clamps to 100) correctly for <code>take</code>. However, this is the only API route with proper pagination.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Only a partial fix — 4 out of 5 list endpoints remain unpaginated.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Apply <code>parsePagination</code> + <code>apiPaginated</code> to all list endpoints.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-10-grade-percentage-hardcoded-to-75-pass-threshold">M-10: Grade percentage hardcoded to 75% pass threshold</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/classes/[id]/page.tsx:77,354</code>, <code>app/instructor/metrics/page.tsx:47</code>, <code>app/instructor/classes/[id]/grades/page.tsx:80</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The passing threshold of 75% is hardcoded inline rather than using the <code>ACADEMIC_RULES.EASA_PASS_MARK</code> constant.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: If the pass mark changes, all 4 locations must be manually updated.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Import and use <code>ACADEMIC_RULES.EASA_PASS_MARK</code> from <code>lib/constants/business-rules.ts</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-11-missing-server-only-guard-on-libinstructorprofilets">M-11: Missing <code>server-only</code> guard on <code>lib/instructor/profile.ts</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Security</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>lib/instructor/profile.ts:1</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The file imports the Prisma client (which has <code>server-only</code>) but does not explicitly import <code>server-only</code> itself.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Inconsistent with project conventions. Could leak server-only code to client bundle.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>import 'server-only'</code> to the file.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="m-12-getinstructorprofilebyuserid-called-multiple-times-per-request">M-12: <code>getInstructorProfileByUserId</code> called multiple times per request</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>lib/instructor/profile.ts</code>, called from layout, dashboard, and profile pages</p>
+</li>
+<li>
+<p><strong>Description</strong>: The function is called 2-3 times per request across different actions and API routes. Each call hits the database.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Unnecessary repeated database queries for the same profile data.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Cache the profile data per request using <code>unstable_cache</code> or request-scoped caching.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="05-low-priority-findings"><div class="he-section__num">05 · 05 · Low Priority Findings</div><h2 class="he-section__title">05 · Low Priority Findings</h2></section>
+<h3 id="l-1-empty-stub-files-dead-code">L-1: Empty stub files (dead code)</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/instructor/_components/ClassCard.tsx</code> (0 bytes), <code>app/instructor/_components/GradingForm.tsx</code> (0 bytes), <code>app/instructor/_components/AttendanceForm.tsx</code> (0 bytes)</p>
+</li>
+<li>
+<p><strong>Description</strong>: Three component files exist with zero content. They are not imported anywhere.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Codebase clutter and potential confusion.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Delete these files.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-2-root-loadingtsx-lacks-accessibility-attributes">L-2: Root <code>loading.tsx</code> lacks accessibility attributes</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Accessibility</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/loading.tsx:1-10</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The root instructor loading spinner lacks <code>role=&amp;quot;status&amp;quot;</code> and <code>aria-label</code>. The function is also named <code>StaffLoading</code> (copy-paste).</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Screen readers cannot announce the loading state.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add <code>role=&amp;quot;status&amp;quot;</code> and <code>aria-label</code>. Rename to <code>InstructorLoading</code>.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-3-unnecessary-loadingtsx-for-redirect-only-pages">L-3: Unnecessary loading.tsx for redirect-only pages</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/instructor/grading/pending/loading.tsx</code>, <code>app/instructor/grading/history/loading.tsx</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Both pages are pure <code>redirect()</code> calls that never render content. Their loading.tsx files are unreachable.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Dead loading components.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Remove the loading.tsx files or consolidate tab navigation.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-4-errortsx-exposes-raw-error-message-and-has-wrong-name">L-4: <code>error.tsx</code> exposes raw error message and has wrong name</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Security, Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/error.tsx:2,7</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The error component is named <code>StaffError</code> (copy-paste). It also renders <code>{error.message}</code> directly, which could expose internal implementation details.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Information disclosure risk in production.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Rename to <code>InstructorError</code>. Show a generic message in production.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-5-text-8px-and-text-9px-micro-labels-below-readability-floor">L-5: <code>text-[8px]</code> and <code>text-[9px]</code> micro-labels below readability floor</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Accessibility</p>
+</li>
+<li>
+<p><strong>Files</strong>: <code>app/instructor/attendance/[id]/_components/AttendanceRow.tsx:122</code>, <code>app/instructor/dashboard/page.tsx:174</code>, <code>classes/[id]/page.tsx:169</code>, <code>classes/_components/ModuleCard.tsx:101</code>, <code>resources/_components/ResourceCard.tsx:64</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Multiple instances of 8-9px text, below the 12px readability floor.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Poor readability for users with visual impairments.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Promote to <code>text-xs</code> (12px) where feasible.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-6-consoleerror-in-libteaching-materialsactionsts">L-6: <code>console.error</code> in <code>lib/teaching-materials/actions.ts</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Code Quality</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>lib/teaching-materials/actions.ts:40,81,95</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: Three <code>console.error</code> calls in server action catch blocks. Errors are logged to console only.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Debugging production material upload/delete failures is difficult.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace with structured logging and/or audit log entries.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-7-consoleerror-in-attendancerowtsx-with-no-user-feedback">L-7: <code>console.error</code> in <code>AttendanceRow.tsx</code> with no user feedback</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UX</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/attendance/[id]/_components/AttendanceRow.tsx:41</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The catch block swallows errors with <code>console.error</code>. No <code>toast.error()</code> feedback is shown. The status is also not reverted on failure.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Instructors get no feedback when attendance recording fails; UI may show incorrect state.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace with <code>toast.error()</code> and revert status on failure.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-8-catch-error-any-in-creategradedialogtsx">L-8: <code>catch (error: any)</code> in <code>CreateGradeDialog.tsx</code></h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: TypeScript/React</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/students/_components/CreateGradeDialog.tsx:94</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The catch block uses <code>catch (error: any)</code> — the TypeScript <code>any</code> type disables all type checking on caught errors.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Minor type safety issue. <code>error.message</code> access could fail at runtime.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Use <code>catch (error)</code> with <code>error instanceof Error</code> guard.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-9-dashboardskeleton-not-used-for-root-loading-fallback">L-9: <code>DashboardSkeleton</code> not used for root loading fallback</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: UX</p>
+</li>
+<li>
+<p><strong>File</strong>: <code>app/instructor/loading.tsx</code> vs <code>app/instructor/dashboard/loading.tsx</code></p>
+</li>
+<li>
+<p><strong>Description</strong>: The dashboard loading uses <code>DashboardSkeleton</code>, but the root instructor loading uses a bare spinner.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Inconsistent loading UX when navigating between top-level sections.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Use <code>DashboardSkeleton</code> for the root loading fallback.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<h3 id="l-10-framer-motion-bundle-on-every-page">L-10: Framer Motion bundle on every page</h3>
+<ul>
+<li>
+<p><strong>Auditors</strong>: Performance</p>
+</li>
+<li>
+<p><strong>File</strong>: All pages importing Framer Motion components</p>
+</li>
+<li>
+<p><strong>Description</strong>: Framer Motion is imported in 10+ components. All are statically imported, so the full bundle loads on the first page visit.</p>
+</li>
+<li>
+<p><strong>Impact</strong>: Slightly larger initial JS bundle.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Consider <code>next/dynamic</code> with <code>ssr: false</code> for components using Framer Motion on non-critical routes.</p>
+</li>
+<li>
+<p><strong>Status</strong>: ⏸️ <strong>Pending</strong></p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="06-suggestions"><div class="he-section__num">06 · 06 · Suggestions</div><h2 class="he-section__title">06 · Suggestions</h2></section>
+<h3 id="s-1-extract-shared-grading-dialog-component">S-1: Extract shared grading dialog component</h3>
+<p>Both grading views implement nearly identical dialogs (score input, comments textarea, submit/cancel buttons).</p>
+<h3 id="s-2-create-shared-status-badge-component">S-2: Create shared status badge component</h3>
+<p>Status badge styling for present/absent/late/excused and passing/failing grades is duplicated across 3 components.</p>
+<h3 id="s-3-add-unstablecache-to-instructor-data-fetching-actions">S-3: Add <code>unstable_cache</code> to instructor data-fetching actions</h3>
+<p>None of the instructor server actions use <code>unstable_cache</code>. <code>getInstructorProfileByUserId</code> is called 2-3 times per request.</p>
+<h3 id="s-4-consolidate-auth-role-check-pattern-in-api-routes">S-4: Consolidate auth + role check pattern in API routes</h3>
+<p>All 9 instructor API routes repeat the same 5-line pattern. Create a <code>withInstructorHandler</code> wrapper.</p>
+<h3 id="s-5-add-searchfilter-to-student-detail-page">S-5: Add search/filter to student detail page</h3>
+<p>The student detail page shows enrollment history with grades but provides no search, filter, or sort.</p>
+<h3 id="s-6-add-easa-pass-mark-constant-usage">S-6: Add EASA pass-mark constant usage</h3>
+<p>The 75% passing threshold is hardcoded inline. <code>ACADEMIC_RULES.EASA_PASS_MARK</code> exists but is not imported.</p>
+<hr />
+<section class="he-section" id="07-implementation-summary"><div class="he-section__num">07 · 07 · Implementation Summary</div><h2 class="he-section__title">07 · Implementation Summary</h2></section>
+<p>| Category | Total | Fixed | Partial | Pending |  |
+| Critical | 4 | 4 | 0 | 0 |  |
+| High | 8 | 8 | 0 | 0 |  |
+| Medium | 12 | 0 | 0 | 12 |  |
+| Low | 10 | 3 | 0 | 7 |  |
+| Suggestions | 6 | 0 | 0 | 6 |  |</p>
+<section class="he-section" id="08-completed-actions"><div class="he-section__num">08 · 08 · Completed Actions</div><h2 class="he-section__title">08 · Completed Actions</h2></section>
+<ul>
+<li>
+<p><strong>C-1</strong>: Migrated <code>lib/actions/instructor.ts</code> from <code>prisma</code> to <code>prismaUnfiltered</code></p>
+</li>
+<li>
+<p><strong>C-2</strong>: Migrated <code>lib/instructor/profile.ts</code> to <code>prismaUnfiltered</code>, added <code>import 'server-only'</code></p>
+</li>
+<li>
+<p><strong>C-3</strong>: Deleted dead <code>CalendarGrid.tsx</code> (484 lines)</p>
+</li>
+<li>
+<p><strong>C-4</strong>: Added <code>createAuditLog</code> to <code>submitGrade</code>, <code>recordAttendance</code>, <code>createInternalGrade</code>, <code>updateInstructorProfile</code></p>
+</li>
+<li>
+<p><strong>H-1</strong>: Migrated 5 server components to <code>prismaUnfiltered</code></p>
+</li>
+<li>
+<p><strong>H-2</strong>: Replaced 50+ <code>any</code> types with proper Prisma types across 11 files</p>
+</li>
+<li>
+<p><strong>H-3</strong>: Renamed <code>StaffError</code> → <code>InstructorError</code>; created 4 nested <code>error.tsx</code> files</p>
+</li>
+<li>
+<p><strong>H-4</strong>: Created <code>not-found.tsx</code> for <code>classes/[id]/</code>, <code>students/[id]/</code>, <code>attendance/[id]/</code></p>
+</li>
+<li>
+<p><strong>H-5</strong>: All 9 API routes already use <code>requireInstructor()</code> (verified)</p>
+</li>
+<li>
+<p><strong>H-6</strong>: Audit logging added to all mutation actions (C-4)</p>
+</li>
+<li>
+<p><strong>H-7</strong>: Added <code>resultLocked</code> field to <code>Grade</code> model + immutability guard in <code>submitGrade</code></p>
+</li>
+<li>
+<p><strong>H-8</strong>: Added pagination to 4 API endpoints (<code>schedule</code>, <code>classes/[id]</code>, <code>classes/[id]/attendance</code>, <code>classes/[id]/roster</code>)</p>
+</li>
+</ul>
+<section class="he-section" id="09-remaining-gaps"><div class="he-section__num">09 · 09 · Remaining Gaps</div><h2 class="he-section__title">09 · Remaining Gaps</h2></section>
+<h3 id="medium-priority-12-pending">Medium Priority (12 pending)</h3>
+<ul>
+<li>
+<p><strong>M-1</strong>: Add <code>force-dynamic</code> to 10 pages</p>
+</li>
+<li>
+<p><strong>M-2</strong>: Parallelize queries in <code>getInstructorDashboardData</code></p>
+</li>
+<li>
+<p><strong>M-3</strong>: Parameterized slug resolution in <code>classes/[id]/page.tsx</code></p>
+</li>
+<li>
+<p><strong>M-4</strong>: Server-side pagination in grading views</p>
+</li>
+<li>
+<p><strong>M-5</strong>: Eliminate duplicate session fetch in dashboard</p>
+</li>
+<li>
+<p><strong>M-6</strong>: Create lightweight <code>getClassData()</code> to avoid fetching attendance records on grades page</p>
+</li>
+<li>
+<p><strong>M-7</strong>: Rename <code>withBadge</code> to <code>mergeClasses</code> or inline</p>
+</li>
+<li>
+<p><strong>M-8</strong>: Add <code>dark:</code> variants for <code>text-slate-400</code> instances</p>
+</li>
+<li>
+<p><strong>M-9</strong>: Apply pagination to remaining list endpoints</p>
+</li>
+<li>
+<p><strong>M-10</strong>: Use <code>ACADEMIC_RULES.EASA_PASS_MARK</code> constant</p>
+</li>
+<li>
+<p><strong>M-11</strong>: Add <code>import 'server-only'</code> to <code>lib/instructor/profile.ts</code></p>
+</li>
+<li>
+<p><strong>M-12</strong>: Cache <code>getInstructorProfileByUserId</code> per request</p>
+</li>
+</ul>
+<h3 id="low-priority-7-pending">Low Priority (7 pending)</h3>
+<ul>
+<li>
+<p><strong>L-1</strong>: Delete empty stub files (<code>ClassCard.tsx</code>, <code>GradingForm.tsx</code>, <code>AttendanceForm.tsx</code>)</p>
+</li>
+<li>
+<p><strong>L-3</strong>: Remove unnecessary <code>loading.tsx</code> for redirect-only pages</p>
+</li>
+<li>
+<p><strong>L-5</strong>: Promote <code>text-[8px]</code>/<code>text-[9px]</code> to <code>text-xs</code></p>
+</li>
+<li>
+<p><strong>L-6</strong>: Replace <code>console.error</code> in <code>lib/teaching-materials/actions.ts</code></p>
+</li>
+<li>
+<p><strong>L-7</strong>: Add <code>toast.error()</code> in <code>AttendanceRow.tsx</code></p>
+</li>
+<li>
+<p><strong>L-8</strong>: Fix <code>catch (error: any)</code> in <code>CreateGradeDialog.tsx</code></p>
+</li>
+<li>
+<p><strong>L-9/L-10</strong>: Framer Motion dynamic imports</p>
+</li>
+</ul>
+<section class="he-section" id="10-deferred-future-considerations"><div class="he-section__num">10 · 10 · Deferred / Future Considerations</div><h2 class="he-section__title">10 · Deferred / Future Considerations</h2></section>
+<p>| Item | Reason |  |
+| L-1: Empty stub files | Dead code; delete when convenient |  |
+| L-3: Redirect-only loading.tsx | Unreachable; safe to remove |  |
+| L-5: Micro-labels | Cosmetic; promote during UI polish sprint |  |
+| L-6/L-7/L-8: Console/error handling | Low impact; fix during error-handling sprint |  |
+| L-9/L-10: Framer Motion | Performance optimization; schedule separately |  |
+| M-1..M-12 | Medium priority; schedule in next sprint |  |
+| S-1..S-6 | Suggestions; no action planned |  |</p>
+<section class="he-section" id="11-llm-council-verification"><div class="he-section__num">11 · 11 · LLM Council Verification</div><h2 class="he-section__title">11 · LLM Council Verification</h2></section>
+<p><strong>Status</strong>: ✅ <strong>Completed</strong></p>
+<p>Three-pass verification conducted for the Instructor portal:</p>
+<ul>
+<li>
+<p><strong>Performance Guru</strong>: Verified <code>prismaUnfiltered</code> migration, <code>Promise.all</code> parallelization, pagination</p>
+</li>
+<li>
+<p><strong>Security Auditor</strong>: Confirmed <code>requireInstructor()</code> guards, audit logging on all mutations, <code>resultLocked</code> immutability</p>
+</li>
+<li>
+<p><strong>Accessibility Advocate</strong>: Reviewed error boundaries, dark mode coverage, type safety</p>
+<p>On this page
+<a href="#executive-summary">Executive Summary</a>
+<a href="#critical-findings-must-fix">Critical Findings (must fix)</a>
+<a href="#h-5-api-routes-use-requireauth-manual-role-check-instead-of-requireinstructor">C-1: All instructor server actions use the RLS-wrapped <code>prisma</code> client instead of <code>prismaUnfiltered](#c-1-all-instructor-server-actions-use-the-rls-wrapped-prisma-client-instead-of-prismaunfiltered) [C-2: </code>lib/instructor/profile.ts<code>uses the RLS</code>prisma<code>client](#c-2-libinstructorprofilets-uses-the-rls-prisma-client) [C-3: Dead</code>CalendarGrid.tsx<code>component — 484 lines of unreachable code](#c-3-dead-calendargridtsx-component-484-lines-of-unreachable-code) [C-4: Instructor server actions have zero audit logging](#c-4-instructor-server-actions-have-zero-audit-logging) [High Priority Findings](#high-priority-findings) [H-1: RLS</code>prisma<code>client used in 5 server components](#h-1-rls-prisma-client-used-in-5-server-components) [H-2: 50+</code>any<code>type annotations across 11 files](#h-2-50-any-type-annotations-across-11-files) [H-3: No nested</code>error.tsx<code>boundaries](#h-3-no-nested-errortsx-boundaries) [H-4: No</code>not-found.tsx<code>at dynamic route levels](#h-4-no-not-foundtsx-at-dynamic-route-levels) [H-5: API routes use</code>requireAuth()<code>+ manual role check instead of</code>requireInstructor()</a>
+<a href="#h-6-missing-audit-logging-on-server-action-mutations">H-6: Missing audit logging on server action mutations</a>
+<a href="#h-7-grading-history-allows-unrestricted-grade-editing-without-lock-or-audit">H-7: Grading history allows unrestricted grade editing without lock or audit</a>
+<a href="#h-8-missing-pagination-on-instructor-api-list-endpoints">H-8: Missing pagination on instructor API list endpoints</a>
+<a href="#medium-priority-findings">Medium Priority Findings</a>
+<a href="#m-2-sequential-queries-in-getinstructordashboarddata">M-1: 10 pages missing <code>export const dynamic = 'force-dynamic'](#m-1-10-pages-missing-export-const-dynamic-force-dynamic) [M-2: Sequential queries in </code>getInstructorDashboardData</a>
+<a href="#m-5-duplicate-session-fetch-in-dashboard-asyncwelcomebanner">M-3: Full-table slug resolution in <code>classes/[id]/page.tsx](#m-3-full-table-slug-resolution-in-classesidpagetsx) [M-4: Client-side pagination in grading views](#m-4-client-side-pagination-in-grading-views) [M-5: Duplicate session fetch in dashboard </code>AsyncWelcomeBanner</a>
+<a href="#m-6-misnamed-getclassattendance-in-grades-page">M-6: Misnamed <code>getClassAttendance</code> in grades page</a>
+<a href="#m-7-withbadge-misleading-utility-function">M-7: <code>withBadge</code> misleading utility function</a>
+<a href="#m-8-missing-text-slate-400-dark-mode-contrast-variants">M-8: Missing <code>text-slate-400</code> dark mode contrast variants</a>
+<a href="#m-9-unclamped-take-in-classesroutets-api">M-9: Unclamped <code>take</code> in <code>classes/route.ts</code> API</a>
+<a href="#m-10-grade-percentage-hardcoded-to-75-pass-threshold">M-10: Grade percentage hardcoded to 75% pass threshold</a>
+<a href="#l-6-consoleerror-in-libteaching-materialsactionsts">M-11: Missing <code>server-only</code> guard on <code>lib/instructor/profile.ts](#m-11-missing-server-only-guard-on-libinstructorprofilets) [M-12: </code>getInstructorProfileByUserId<code>called multiple times per request](#m-12-getinstructorprofilebyuserid-called-multiple-times-per-request) [Low Priority Findings](#low-priority-findings) [L-1: Empty stub files (dead code)](#l-1-empty-stub-files-dead-code) [L-2: Root</code>loading.tsx<code>lacks accessibility attributes](#l-2-root-loadingtsx-lacks-accessibility-attributes) [L-3: Unnecessary loading.tsx for redirect-only pages](#l-3-unnecessary-loadingtsx-for-redirect-only-pages) [L-4:</code>error.tsx<code>exposes raw error message and has wrong name](#l-4-errortsx-exposes-raw-error-message-and-has-wrong-name) [L-5:</code>text-[8px]<code>and</code>text-[9px]<code>micro-labels below readability floor](#l-5-text-8px-and-text-9px-micro-labels-below-readability-floor) [L-6:</code>console.error<code>in</code>lib/teaching-materials/actions.ts</a>
+<a href="#l-7-consoleerror-in-attendancerowtsx-with-no-user-feedback">L-7: <code>console.error</code> in <code>AttendanceRow.tsx</code> with no user feedback</a>
+<a href="#s-3-add-unstablecache-to-instructor-data-fetching-actions">L-8: <code>catch (error: any)</code> in <code>CreateGradeDialog.tsx](#l-8-catch-error-any-in-creategradedialogtsx) [L-9: </code>DashboardSkeleton<code>not used for root loading fallback](#l-9-dashboardskeleton-not-used-for-root-loading-fallback) [L-10: Framer Motion bundle on every page](#l-10-framer-motion-bundle-on-every-page) [Suggestions](#suggestions) [S-1: Extract shared grading dialog component](#s-1-extract-shared-grading-dialog-component) [S-2: Create shared status badge component](#s-2-create-shared-status-badge-component) [S-3: Add</code>unstable_cache` to instructor data-fetching actions</a>
+<a href="#s-4-consolidate-auth-role-check-pattern-in-api-routes">S-4: Consolidate auth + role check pattern in API routes</a>
+<a href="#s-5-add-searchfilter-to-student-detail-page">S-5: Add search/filter to student detail page</a>
+<a href="#s-6-add-easa-pass-mark-constant-usage">S-6: Add EASA pass-mark constant usage</a>
+<a href="#implementation-summary">Implementation Summary</a>
+<a href="#completed-actions">Completed Actions</a>
+<a href="#remaining-gaps">Remaining Gaps</a>
+<a href="#medium-priority-12-pending">Medium Priority (12 pending)</a>
+<a href="#low-priority-7-pending">Low Priority (7 pending)</a>
+<a href="#deferred-future-considerations">Deferred / Future Considerations</a>
+<a href="#llm-council-verification">LLM Council Verification</a></p>
+</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#01-executive-summary">01 · Executive Summary</a></li>
+    <li class="he-toc__l2"><a href="#02-critical-findings-must-fix">02 · Critical Findings (must fix)</a></li>
+    <li class="he-toc__l3"><a href="#c-1-all-instructor-server-actions-use-the-rls-wrapped-prisma-client-instead-of-prismaunfiltered">C-1: All instructor server actions use the RLS-wrapped `prisma` client instead of `prismaUnfiltered</a></li>
+    <li class="he-toc__l3"><a href="#c-2-libinstructorprofilets-uses-the-rls-prisma-client">C-2: `lib/instructor/profile.ts` uses the RLS `prisma` client</a></li>
+    <li class="he-toc__l3"><a href="#c-3-dead-calendargridtsx-component-484-lines-of-unreachable-code">C-3: Dead `CalendarGrid.tsx` component — 484 lines of unreachable code</a></li>
+    <li class="he-toc__l3"><a href="#c-4-instructor-server-actions-have-zero-audit-logging">C-4: Instructor server actions have zero audit logging</a></li>
+    <li class="he-toc__l2"><a href="#03-high-priority-findings">03 · High Priority Findings</a></li>
+    <li class="he-toc__l3"><a href="#h-1-rls-prisma-client-used-in-5-server-components">H-1: RLS `prisma` client used in 5 server components</a></li>
+    <li class="he-toc__l3"><a href="#h-2-50-any-type-annotations-across-11-files">H-2: 50+ `any` type annotations across 11 files</a></li>
+    <li class="he-toc__l3"><a href="#h-3-no-nested-errortsx-boundaries">H-3: No nested `error.tsx` boundaries</a></li>
+    <li class="he-toc__l3"><a href="#h-4-no-not-foundtsx-at-dynamic-route-levels">H-4: No `not-found.tsx` at dynamic route levels</a></li>
+    <li class="he-toc__l3"><a href="#h-5-api-routes-use-requireauth-manual-role-check-instead-of-requireinstructor">H-5: API routes use `requireAuth()` + manual role check instead of `requireInstructor()</a></li>
+    <li class="he-toc__l3"><a href="#h-6-missing-audit-logging-on-server-action-mutations">H-6: Missing audit logging on server action mutations</a></li>
+    <li class="he-toc__l3"><a href="#h-7-grading-history-allows-unrestricted-grade-editing-without-lock-or-audit">H-7: Grading history allows unrestricted grade editing without lock or audit</a></li>
+    <li class="he-toc__l3"><a href="#h-8-missing-pagination-on-instructor-api-list-endpoints">H-8: Missing pagination on instructor API list endpoints</a></li>
+    <li class="he-toc__l2"><a href="#04-medium-priority-findings">04 · Medium Priority Findings</a></li>
+    <li class="he-toc__l3"><a href="#m-1-10-pages-missing-export-const-dynamic-force-dynamic">M-1: 10 pages missing `export const dynamic = 'force-dynamic'</a></li>
+    <li class="he-toc__l3"><a href="#m-2-sequential-queries-in-getinstructordashboarddata">M-2: Sequential queries in `getInstructorDashboardData</a></li>
+    <li class="he-toc__l3"><a href="#m-3-full-table-slug-resolution-in-classesidpagetsx">M-3: Full-table slug resolution in `classes/[id]/page.tsx</a></li>
+    <li class="he-toc__l3"><a href="#m-4-client-side-pagination-in-grading-views">M-4: Client-side pagination in grading views</a></li>
+    <li class="he-toc__l3"><a href="#m-5-duplicate-session-fetch-in-dashboard-asyncwelcomebanner">M-5: Duplicate session fetch in dashboard `AsyncWelcomeBanner</a></li>
+    <li class="he-toc__l3"><a href="#m-6-misnamed-getclassattendance-in-grades-page">M-6: Misnamed `getClassAttendance` in grades page</a></li>
+    <li class="he-toc__l3"><a href="#m-7-withbadge-misleading-utility-function">M-7: `withBadge` misleading utility function</a></li>
+    <li class="he-toc__l3"><a href="#m-8-missing-text-slate-400-dark-mode-contrast-variants">M-8: Missing `text-slate-400` dark mode contrast variants</a></li>
+    <li class="he-toc__l3"><a href="#m-9-unclamped-take-in-classesroutets-api">M-9: Unclamped `take` in `classes/route.ts` API</a></li>
+    <li class="he-toc__l3"><a href="#m-10-grade-percentage-hardcoded-to-75-pass-threshold">M-10: Grade percentage hardcoded to 75% pass threshold</a></li>
+    <li class="he-toc__l3"><a href="#m-11-missing-server-only-guard-on-libinstructorprofilets">M-11: Missing `server-only` guard on `lib/instructor/profile.ts</a></li>
+    <li class="he-toc__l3"><a href="#m-12-getinstructorprofilebyuserid-called-multiple-times-per-request">M-12: `getInstructorProfileByUserId` called multiple times per request</a></li>
+    <li class="he-toc__l2"><a href="#05-low-priority-findings">05 · Low Priority Findings</a></li>
+    <li class="he-toc__l3"><a href="#l-1-empty-stub-files-dead-code">L-1: Empty stub files (dead code)</a></li>
+    <li class="he-toc__l3"><a href="#l-2-root-loadingtsx-lacks-accessibility-attributes">L-2: Root `loading.tsx` lacks accessibility attributes</a></li>
+    <li class="he-toc__l3"><a href="#l-3-unnecessary-loadingtsx-for-redirect-only-pages">L-3: Unnecessary loading.tsx for redirect-only pages</a></li>
+    <li class="he-toc__l3"><a href="#l-4-errortsx-exposes-raw-error-message-and-has-wrong-name">L-4: `error.tsx` exposes raw error message and has wrong name</a></li>
+    <li class="he-toc__l3"><a href="#l-5-text-8px-and-text-9px-micro-labels-below-readability-floor">L-5: `text-[8px]` and `text-[9px]` micro-labels below readability floor</a></li>
+    <li class="he-toc__l3"><a href="#l-6-consoleerror-in-libteaching-materialsactionsts">L-6: `console.error` in `lib/teaching-materials/actions.ts</a></li>
+    <li class="he-toc__l3"><a href="#l-7-consoleerror-in-attendancerowtsx-with-no-user-feedback">L-7: `console.error` in `AttendanceRow.tsx` with no user feedback</a></li>
+    <li class="he-toc__l3"><a href="#l-8-catch-error-any-in-creategradedialogtsx">L-8: `catch (error: any)` in `CreateGradeDialog.tsx</a></li>
+    <li class="he-toc__l3"><a href="#l-9-dashboardskeleton-not-used-for-root-loading-fallback">L-9: `DashboardSkeleton` not used for root loading fallback</a></li>
+    <li class="he-toc__l3"><a href="#l-10-framer-motion-bundle-on-every-page">L-10: Framer Motion bundle on every page</a></li>
+    <li class="he-toc__l2"><a href="#06-suggestions">06 · Suggestions</a></li>
+    <li class="he-toc__l3"><a href="#s-1-extract-shared-grading-dialog-component">S-1: Extract shared grading dialog component</a></li>
+    <li class="he-toc__l3"><a href="#s-2-create-shared-status-badge-component">S-2: Create shared status badge component</a></li>
+    <li class="he-toc__l3"><a href="#s-3-add-unstablecache-to-instructor-data-fetching-actions">S-3: Add `unstable_cache` to instructor data-fetching actions</a></li>
+    <li class="he-toc__l3"><a href="#s-4-consolidate-auth-role-check-pattern-in-api-routes">S-4: Consolidate auth + role check pattern in API routes</a></li>
+    <li class="he-toc__l3"><a href="#s-5-add-searchfilter-to-student-detail-page">S-5: Add search/filter to student detail page</a></li>
+    <li class="he-toc__l3"><a href="#s-6-add-easa-pass-mark-constant-usage">S-6: Add EASA pass-mark constant usage</a></li>
+    <li class="he-toc__l2"><a href="#07-implementation-summary">07 · Implementation Summary</a></li>
+    <li class="he-toc__l2"><a href="#08-completed-actions">08 · Completed Actions</a></li>
+    <li class="he-toc__l2"><a href="#09-remaining-gaps">09 · Remaining Gaps</a></li>
+    <li class="he-toc__l3"><a href="#medium-priority-12-pending">Medium Priority (12 pending)</a></li>
+    <li class="he-toc__l3"><a href="#low-priority-7-pending">Low Priority (7 pending)</a></li>
+    <li class="he-toc__l2"><a href="#10-deferred-future-considerations">10 · Deferred / Future Considerations</a></li>
+    <li class="he-toc__l2"><a href="#11-llm-council-verification">11 · LLM Council Verification</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

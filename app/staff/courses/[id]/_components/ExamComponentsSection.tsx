@@ -275,7 +275,7 @@ export default function ExamComponentsSection({
               <Plus className="h-3 w-3" /> Add Component
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[440px]">
+          <DialogContent className="sm:max-w-110">
             <DialogHeader>
               <DialogTitle>{editingId ? 'Edit Exam Component' : 'Add Exam Component'}</DialogTitle>
             </DialogHeader>

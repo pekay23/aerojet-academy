@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { FileCheck, Users, Calendar, MapPin, Wallet, Info, AlertCircle } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -59,7 +59,7 @@ async function getBookingData(userId: string) {
 
 export default async function AvailablePoolsTab() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const [pools, bookingData, myMemberships] = await Promise.all([
     prisma.examPool.findMany({

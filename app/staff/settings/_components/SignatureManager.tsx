@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
@@ -384,9 +385,7 @@ export default function SignatureManager() {
                         </p>
                         <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-400">
                           <Clock className="h-3 w-3" />
-                          {sig.expiresAt
-                            ? new Date(sig.expiresAt).toLocaleDateString()
-                            : 'No expiry'}
+                          {sig.expiresAt ? formatDate(sig.expiresAt) : 'No expiry'}
                           {expired && (
                             <span className="ml-1 inline-flex items-center gap-0.5 text-red-600 dark:text-red-400">
                               <AlertCircle className="h-3 w-3" />

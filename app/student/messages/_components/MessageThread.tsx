@@ -1,13 +1,8 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState } from 'react'
-import {
-  ChevronDown,
-  ChevronRight,
-  CornerDownRight,
-  Send,
-  Loader2,
-} from 'lucide-react'
+import { ChevronDown, ChevronRight, CornerDownRight, Send, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { sendMessage } from '../../actions'
@@ -49,9 +44,8 @@ function formatTime(date: Date) {
   const diff = now.getTime() - date.getTime()
   const hours = diff / (1000 * 60 * 60)
   if (hours < 24) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  if (hours < 168)
-    return date.toLocaleDateString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })
-  return date.toLocaleDateString([], { month: 'short', day: 'numeric' })
+  if (hours < 168) return formatDate(date)
+  return formatDate(date)
 }
 
 function userName(user: MessageUser) {

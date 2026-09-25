@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, LucideIcon } from 'lucide-react'
 
-
 export interface BulkAction {
   label: string
   icon: LucideIcon
@@ -20,11 +19,7 @@ interface BulkActionsBarProps {
   onClear: () => void
 }
 
-export default function BulkActionsBar({
-  selectedIds,
-  actions,
-  onClear,
-}: BulkActionsBarProps) {
+export default function BulkActionsBar({ selectedIds, actions, onClear }: BulkActionsBarProps) {
   const [loading, setLoading] = useState(false)
   const [activeAction, setActiveAction] = useState<BulkAction | null>(null)
 
@@ -59,11 +54,16 @@ export default function BulkActionsBar({
 
   const getIconColor = (variant?: string) => {
     switch (variant) {
-      case 'danger': return 'text-red-400'
-      case 'warning': return 'text-amber-400'
-      case 'success': return 'text-emerald-400'
-      case 'primary': return 'text-blue-400'
-      default: return 'text-white'
+      case 'danger':
+        return 'text-red-400'
+      case 'warning':
+        return 'text-amber-400'
+      case 'success':
+        return 'text-emerald-400'
+      case 'primary':
+        return 'text-blue-400'
+      default:
+        return 'text-white'
     }
   }
 
@@ -76,9 +76,9 @@ export default function BulkActionsBar({
           exit={{ y: 100, opacity: 0 }}
           className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2"
         >
-          <div className="flex items-center gap-6 rounded-2xl bg-aerojet-blue px-6 py-4 text-white shadow-2xl dark:bg-slate-900 border border-white/10">
+          <div className="bg-aerojet-blue flex items-center gap-6 rounded-2xl border border-white/10 px-6 py-4 text-white shadow-2xl dark:bg-slate-900">
             <div className="flex items-center gap-3 border-r border-white/10 pr-6">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-aerojet-blue text-[10px] font-black">
+              <div className="text-aerojet-blue flex h-6 w-6 items-center justify-center rounded-full bg-white text-[10px] font-black">
                 {count}
               </div>
               <span className="text-sm font-bold tracking-tight">Selected</span>
@@ -106,7 +106,7 @@ export default function BulkActionsBar({
 
             <button
               onClick={onClear}
-              className="ml-2 flex items-center justify-center rounded-full p-1.5 transition-all hover:bg-white/10 text-white/50 hover:text-white"
+              className="ml-2 flex items-center justify-center rounded-full p-1.5 text-white/50 transition-all hover:bg-white/10 hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>
@@ -116,7 +116,7 @@ export default function BulkActionsBar({
 
       <AnimatePresence>
         {activeAction && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -124,14 +124,17 @@ export default function BulkActionsBar({
               className="w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900"
             >
               <div className="flex flex-col items-center text-center">
-                <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-3xl ${activeAction.variant === 'danger' ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-500'}`}>
+                <div
+                  className={`mb-4 flex h-16 w-16 items-center justify-center rounded-3xl ${activeAction.variant === 'danger' ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-500'}`}
+                >
                   <activeAction.icon className="h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-black text-aerojet-blue dark:text-white">
+                <h3 className="text-aerojet-blue text-xl font-black dark:text-white">
                   {activeAction.confirmTitle || 'Confirm Action'}
                 </h3>
                 <p className="mt-2 text-sm text-slate-500">
-                  {activeAction.confirmMessage || `Are you sure you want to perform this action on ${count} items?`}
+                  {activeAction.confirmMessage ||
+                    `Are you sure you want to perform this action on ${count} items?`}
                 </p>
 
                 <div className="mt-8 flex w-full flex-col gap-2">
@@ -139,7 +142,9 @@ export default function BulkActionsBar({
                     disabled={loading}
                     onClick={() => handleExecute(activeAction)}
                     className={`w-full rounded-2xl py-3 text-sm font-black text-white transition-all ${
-                      activeAction.variant === 'danger' ? 'bg-red-500 hover:bg-red-600' : 'bg-aerojet-blue hover:bg-slate-800'
+                      activeAction.variant === 'danger'
+                        ? 'bg-red-500 hover:bg-red-600'
+                        : 'bg-aerojet-blue hover:bg-slate-800'
                     }`}
                   >
                     {loading ? 'Processing...' : 'Confirm Action'}

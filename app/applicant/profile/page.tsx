@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import ProfileForm from './_components/ProfileForm'
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function ProfilePage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -25,7 +25,7 @@ export default async function ProfilePage() {
     }),
   ])
 
-  if (!user) redirect('/login')
+  if (!user) return await redirectToLogin()
 
   return (
     <PageTransition className="max-w-7xl space-y-8">

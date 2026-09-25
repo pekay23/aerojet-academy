@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -10,7 +10,7 @@ import { queryAuditLogs } from '@/lib/audit/logger'
 export default async function AuditLogsPage(req: { searchParams: Promise<{ page?: string }> }) {
   const session = await getAuthSession()
   if (!session || (session.user.role !== 'STAFF' && session.user.role !== 'ADMIN')) {
-    redirect('/login')
+    return await redirectToLogin()
   }
 
   const searchParams = (await req.searchParams) || {}
@@ -140,6 +140,31 @@ export default async function AuditLogsPage(req: { searchParams: Promise<{ page?
         .filter(Boolean)
     ),
   ] as string[]
+  // OJT entity types
+  const ojtLogbookIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'OJTLogbook')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const ojtEntryIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'OJTLogbookEntry')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const ojtMentorAssignmentIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'OJTMentorAssignment')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
 
   // Fetch all entity labels in parallel instead of sequentially
   const [
@@ -157,6 +182,9 @@ export default async function AuditLogsPage(req: { searchParams: Promise<{ page?
     usersLowercase,
     licenseCategories,
     licenseModuleReqs,
+    ojtLogbooks,
+    ojtEntries,
+    ojtMentorAssignments,
   ] = await Promise.all([
     userIds.length > 0
       ? prismaUnfiltered.user.findMany({
@@ -221,7 +249,54 @@ export default async function AuditLogsPage(req: { searchParams: Promise<{ page?
           },
         })
       : Promise.resolve([]),
+    ojtLogbookIds.length > 0
+      ? prismaUnfiltered.oJTLogbook.findMany({
+          where: { id: { in: ojtLogbookIds } },
+          include: {
+            studentProfile: {
+              select: {
+                studentId: true,
+                user: {
+                  select: { email: true, profile: { select: { firstName: true, lastName: true } } },
+                },
+              },
+            },
+            licenceCategory: { select: { code: true } },
+          },
+        })
+      : Promise.resolve([]),
+    ojtEntryIds.length > 0
+      ? prismaUnfiltered.oJTLogbookEntry.findMany({
+          where: { id: { in: ojtEntryIds } },
+          include: {
+            logbook: { select: { studentProfile: { select: { studentId: true } } } },
+            ataChapter: { select: { code: true } },
+          },
+        })
+      : Promise.resolve([]),
+    ojtMentorAssignmentIds.length > 0
+      ? prismaUnfiltered.oJTMentorAssignment.findMany({
+          where: { id: { in: ojtMentorAssignmentIds } },
+          include: { logbook: { select: { studentProfile: { select: { studentId: true } } } } },
+        })
+      : Promise.resolve([]),
   ])
+
+  // Fetch mentor names for OJT mentor assignments
+  const mentorIds = ojtMentorAssignments.map((m) => m.mentorId).filter(Boolean)
+  const mentors =
+    mentorIds.length > 0
+      ? await prismaUnfiltered.user.findMany({
+          where: { id: { in: mentorIds } },
+          include: { profile: true },
+        })
+      : []
+  const mentorNameMap = new Map(
+    mentors.map((u) => [
+      u.id,
+      u.profile ? `${u.profile.firstName ?? ''} ${u.profile.lastName ?? ''}`.trim() : u.email,
+    ])
+  )
 
   users.forEach(
     (u) =>
@@ -264,9 +339,27 @@ export default async function AuditLogsPage(req: { searchParams: Promise<{ page?
     const catName = lmr.licenseCategory?.name || ''
     entityLabels[lmr.id] = `${courseName}${catName ? ` — ${catName}` : ''}`
   })
+  ojtLogbooks.forEach((lb) => {
+    const studentName = lb.studentProfile.user.profile
+      ? `${lb.studentProfile.user.profile.firstName ?? ''} ${lb.studentProfile.user.profile.lastName ?? ''}`.trim()
+      : lb.studentProfile.user.email
+    entityLabels[lb.id] =
+      `${studentName} (${lb.studentProfile.studentId}) — ${lb.licenceCategory?.code || 'Unknown'}`
+  })
+  ojtEntries.forEach((e) => {
+    const studentId = e.logbook?.studentProfile?.studentId || 'Unknown'
+    const ataCode = e.ataChapter?.code || 'Unknown'
+    entityLabels[e.id] = `Entry: ${studentId} — ATA ${ataCode}`
+  })
+  ojtMentorAssignments.forEach((m) => {
+    const studentId = m.logbook?.studentProfile?.studentId || 'Unknown'
+    const mentorName = mentorNameMap.get(m.mentorId) || 'Unknown'
+    entityLabels[m.id] =
+      `Mentor Assignment: ${studentId} — Mentor: ${mentorName} (Primary: ${m.isPrimary})`
+  })
 
   return (
-    <div className="mx-auto max-w-[1800px] space-y-6">
+    <div className="mx-auto max-w-450 space-y-6">
       <div>
         <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
           System Audit Logs

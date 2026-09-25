@@ -8,7 +8,7 @@ import { startAuthentication, type AuthenticationResponseJSON } from '@simpleweb
 import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck, Fingerprint } from 'lucide-react'
 import { useFormErrorAnnouncer } from '@/hooks/useFormErrorAnnouncer'
 
-export default function LoginForm() {
+export default function LoginForm({ returnTo }: { returnTo?: string }) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -47,7 +47,9 @@ export default function LoginForm() {
         }
         const session = await getSession()
         const userRole = session?.user?.role
-        if (userRole === 'STUDENT' || userRole === 'APPLICANT') {
+        if (returnTo) {
+          router.push(returnTo)
+        } else if (userRole === 'STUDENT' || userRole === 'APPLICANT') {
           router.push('/student')
         } else {
           router.push('/staff')
@@ -55,7 +57,7 @@ export default function LoginForm() {
         router.refresh()
       })
     },
-    [router]
+    [router, returnTo]
   )
 
   // Conditional UI: automatically prompt passkey when email field is focused (if browser supports it)
@@ -196,13 +198,14 @@ export default function LoginForm() {
           }
 
           // Use window.location for full page navigation after auth
-          window.location.href = redirectMap[role || ''] ?? '/login'
+          // If a returnTo destination was provided, redirect there instead of the role default
+          window.location.href = returnTo || redirectMap[role || ''] || '/login'
         } catch (err: unknown) {
           setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
         }
       })
     },
-    [email, password, needs2FA, totpCode]
+    [email, password, needs2FA, totpCode, returnTo]
   )
 
   const handleSubmit = (e: React.FormEvent) => {

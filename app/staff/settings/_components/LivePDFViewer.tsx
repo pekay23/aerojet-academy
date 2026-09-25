@@ -152,7 +152,7 @@ export default function LivePDFViewer({ pdfSettings }: LivePDFViewerProps) {
         </button>
       </div>
 
-      <div className="h-[700px] w-full overflow-hidden rounded-lg border border-slate-300 bg-slate-100 shadow-inner">
+      <div className="h-175 w-full overflow-hidden rounded-lg border border-slate-300 bg-slate-100 shadow-inner">
         <PDFViewer style={{ width: '100%', height: '100%', border: 'none' }}>
           {template === 'certificate' ? (
             <CertificateTemplate

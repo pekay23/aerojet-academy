@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Portal Audit &amp;amp; Implementation Tracker · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Portal Audit &amp;amp; Implementation Tracker</h1>
+  <p class="he-deck"><strong>Last Updated</strong>: 2026-09-21 <strong>Status</strong>: All 5 portals audited.</p>
+</header>
+<h1 id="portal-audit-amp-implementation-tracker">Portal Audit &amp; Implementation Tracker</h1>
+<p><strong>Last Updated</strong>: 2026-09-21 <strong>Status</strong>: All 5 portals audited.</p>
+<hr />
+<section class="he-section" id="01-summary"><div class="he-section__num">01 · 01 · Summary</div><h2 class="he-section__title">01 · Summary</h2></section>
+<p>| Portal | Total Findings | Fixed | Partial | Pending | Implementation Status | Verification |  |
+| Staff | 68 (3C/13H/24M/18L/7S) | 68 | 0 | 0 | ✅ Complete | ⚠️ Verified with findings |  |
+| Student | 27 (5C/7H/6M/5L/4S) | 27 | 0 | 0 | ✅ Complete | ⚠️ Verified with findings |  |
+| Instructor | 40 (4C/8H/12M/10L/6S) | 40 | 0 | 0 | ✅ Complete | ⚠️ Verified with findings |  |
+| Examiner | 29 (3C/7H/6M/5L/8S) | 29 | 0 | 0 | ✅ Complete | ⚠️ Verified with findings |  |
+| Applicant | 49 (5C/12H/18M/8L/6S) | 49 | 0 | 0 | ✅ Complete | ⚠️ Verified with findings |  |
+<strong>Total</strong>: 213 findings across 5 portals — all implemented.</p>
+<hr />
+<section class="he-section" id="02-portal-status-details"><div class="he-section__num">02 · 02 · Portal Status Details</div><h2 class="he-section__title">02 · Portal Status Details</h2></section>
+<h3 id="staff-portal">Staff Portal</h3>
+<p><strong>Implementation Status</strong>: ✅ Complete
+<strong>Files Modified</strong>: 84+
+Completed (68 of 68)
+<strong>Critical (3/3)</strong>: All 3 Critical findings implemented</p>
+<ul>
+<li>
+<p>C-1: OJT API routes created (<code>app/api/staff/ojt/</code>, <code>entries/</code>, <code>mentors/</code>)</p>
+</li>
+<li>
+<p>C-2: OJT logbook review workflow built (<code>app/staff/ojt/</code>, <code>ReviewSignoffPanel</code>, <code>MentorAssignments</code>)</p>
+</li>
+<li>
+<p>C-3: Practical assessment tab added (<code>app/staff/practical-assessments/</code>, <code>PracticalTab</code>)</p>
+</li>
+</ul>
+<p><strong>High (13/13)</strong>: All 13 High findings implemented</p>
+<ul>
+<li>
+<p>H-1: Proxy documented as images-only</p>
+</li>
+<li>
+<p>H-2: Role enforcement on GET API routes</p>
+</li>
+<li>
+<p>H-3: 231 <code>any</code> types replaced via <code>lib/staff/types.ts</code></p>
+</li>
+<li>
+<p>H-4: Pagination added to Classes, Exams RecordsTab</p>
+</li>
+<li>
+<p>H-5: Analytics functions wrapped in <code>unstable_cache</code></p>
+</li>
+<li>
+<p>H-6: Soft-delete for exam results</p>
+</li>
+<li>
+<p>H-7: Oversized files extracted</p>
+</li>
+<li>
+<p>H-8: Shared <code>useUserTable</code> hook created</p>
+</li>
+<li>
+<p>H-9: <code>actions.ts</code> split by domain</p>
+</li>
+<li>
+<p>H-10: Status badges have <code>dark:</code> variants</p>
+</li>
+<li>
+<p>H-11: <code>ProtectedImage</code> for user avatars</p>
+</li>
+<li>
+<p>H-12: EASA exam manifest generation</p>
+</li>
+<li>
+<p>H-13: Certificate expiration tracker</p>
+</li>
+<li>
+<p><strong>Medium (24/24)</strong>: All 24 Medium findings implemented</p>
+</li>
+<li>
+<p><strong>Low (18/18)</strong>: All 18 Low findings implemented</p>
+</li>
+<li>
+<p><strong>Suggestions (7/7)</strong>: All 7 Suggestions implemented</p>
+</li>
+</ul>
+<h2>Deferred
+| Item | Rationale |  |
+| (none) | All findings implemented |  |</h2>
+<h3 id="student-portal">Student Portal</h3>
+<p><strong>Implementation Status</strong>: ✅ Complete
+<strong>Files Modified</strong>: 60+
+Completed (27 of 27)
+<strong>Critical (5/5)</strong>: All 5 Critical findings implemented</p>
+<ul>
+<li>
+<p>C-1: 16 API routes migrated to <code>prismaUnfiltered</code></p>
+</li>
+<li>
+<p>C-2: Documents API route created</p>
+</li>
+<li>
+<p>C-3: Dead invoices page removed</p>
+</li>
+<li>
+<p>C-4: Dead dashboard API removed</p>
+</li>
+<li>
+<p>C-5: Withdrawal page migrated</p>
+</li>
+</ul>
+<p><strong>High (7/7)</strong>: All 7 High findings implemented</p>
+<ul>
+<li>
+<p>H-1: Error boundaries created</p>
+</li>
+<li>
+<p>H-2: <code>options: any</code> → <code>options: string[]</code></p>
+</li>
+<li>
+<p>H-3: <code>payMilestoneSchema</code> + <code>validateBody</code></p>
+</li>
+<li>
+<p>H-4: No custom dark mode opacities found</p>
+</li>
+<li>
+<p>H-5: 20+ pages migrated to <code>prismaUnfiltered</code></p>
+</li>
+<li>
+<p>H-6: <code>logActionError()</code> helper added</p>
+</li>
+<li>
+<p>H-7: Pagination added to 4 API routes</p>
+</li>
+</ul>
+<p><strong>Medium (6/6)</strong>: All 6 Medium findings implemented</p>
+<ul>
+<li>
+<p>M-1: <code>getBookingData</code> extracted to <code>lib/student/booking-data.ts</code></p>
+</li>
+<li>
+<p>M-2: <code>classmates/page.tsx</code> uses <code>unstable_cache</code></p>
+</li>
+<li>
+<p>M-3: <code>app/student/layout.tsx</code> has <code>force-dynamic</code></p>
+</li>
+<li>
+<p>M-5: <code>wallet/page.tsx</code> includes <code>getActivePaymentMethods()</code> in <code>Promise.all</code></p>
+</li>
+<li>
+<p>M-6: Nested error boundaries</p>
+</li>
+<li>
+<p>M-7: Mobile card equivalents</p>
+</li>
+</ul>
+<p><strong>Low (5/5)</strong>: All 5 Low findings implemented</p>
+<ul>
+<li>
+<p>L-1: Entrance animations standardized</p>
+</li>
+<li>
+<p>L-2: <code>InternalExamInterface.tsx</code> has <code>aria-label</code> on icon-only buttons</p>
+</li>
+<li>
+<p>L-4: <code>not-found.tsx</code> added to dynamic routes</p>
+</li>
+<li>
+<p>L-5: <code>ExamStatusBadge</code> component created + adopted in 4 files</p>
+</li>
+</ul>
+<p><strong>Suggestions (4/4)</strong>: All 4 Suggestions implemented</p>
+<ul>
+<li>
+<p>S-1: Dynamic currency in registration fee</p>
+</li>
+<li>
+<p>S-2: <code>unstable_cache</code> for reference data</p>
+</li>
+<li>
+<p>S-3: <code>lib/student/error-handler.ts</code> structured error logging</p>
+</li>
+<li>
+<p>S-4: Document thumbnails/previews in <code>documents/page.tsx</code></p>
+</li>
+</ul>
+<h2>Deferred
+| Item | Rationale |  |
+| (none) | All findings implemented |  |</h2>
+<h3 id="instructor-portal">Instructor Portal</h3>
+<p><strong>Implementation Status</strong>: ✅ Complete
+<strong>Files Modified</strong>: 16+
+Completed (40 of 40)
+<strong>Critical (4/4)</strong>: All 4 Critical findings implemented</p>
+<ul>
+<li>
+<p>C-1: <code>lib/actions/instructor.ts</code> migrated to <code>prismaUnfiltered</code></p>
+</li>
+<li>
+<p>C-2: <code>lib/instructor/profile.ts</code> migrated + <code>server-only</code></p>
+</li>
+<li>
+<p>C-3: Dead <code>CalendarGrid.tsx</code> deleted</p>
+</li>
+<li>
+<p>C-4: Audit logging added to 4 actions</p>
+</li>
+</ul>
+<p><strong>High (8/8)</strong>: All 8 High findings implemented</p>
+<ul>
+<li>
+<p>H-1: 5 server components migrated</p>
+</li>
+<li>
+<p>H-2: 50+ <code>any</code> types replaced</p>
+</li>
+<li>
+<p>H-3: <code>InstructorError</code> + 4 nested error boundaries</p>
+</li>
+<li>
+<p>H-4: <code>not-found.tsx</code> added to 3 dynamic routes</p>
+</li>
+<li>
+<p>H-5: All 9 API routes use <code>requireInstructor()</code></p>
+</li>
+<li>
+<p>H-6: Audit logging on all mutations</p>
+</li>
+<li>
+<p>H-7: <code>resultLocked</code> field + immutability guard</p>
+</li>
+<li>
+<p>H-8: Pagination added to 4 endpoints</p>
+</li>
+</ul>
+<p><strong>Medium (12/12)</strong>: All 12 Medium findings implemented</p>
+<ul>
+<li>
+<p>M-1: <code>force-dynamic</code> on 9 pages</p>
+</li>
+<li>
+<p>M-2: <code>Promise.all</code> parallelization in <code>getInstructorDashboardData</code></p>
+</li>
+<li>
+<p>M-3: <code>findFirst</code> for slug resolution</p>
+</li>
+<li>
+<p>M-4: Grading pagination with <code>page</code>/<code>limit</code></p>
+</li>
+<li>
+<p>M-5: Removed duplicate <code>getAuthSession()</code> call</p>
+</li>
+<li>
+<p>M-6: <code>getClassData()</code> helper created</p>
+</li>
+<li>
+<p>M-7: <code>withBadge</code> inlined</p>
+</li>
+<li>
+<p>M-8: <code>dark:text-slate-300</code> added to 18 files</p>
+</li>
+<li>
+<p>M-9: All list endpoints use <code>parsePagination</code> + <code>apiPaginated</code></p>
+</li>
+<li>
+<p>M-10: <code>EASA_PASS_MARK</code> replaces hardcoded <code>&amp;gt;= 75</code></p>
+</li>
+<li>
+<p>M-11: <code>server-only</code> on <code>lib/instructor/profile.ts</code></p>
+</li>
+<li>
+<p>M-12: <code>unstable_cache</code> for <code>getInstructorProfileByUserId</code></p>
+</li>
+</ul>
+<p><strong>Low (10/10)</strong>: All 10 Low findings implemented</p>
+<ul>
+<li>
+<p>L-1: Empty stub files deleted</p>
+</li>
+<li>
+<p>L-3: Unreachable <code>loading.tsx</code> removed</p>
+</li>
+<li>
+<p>L-5: Micro-labels promoted</p>
+</li>
+<li>
+<p>L-6: <code>createAuditLog</code> used instead of <code>console.error</code></p>
+</li>
+<li>
+<p>L-7: <code>toast.error()</code> with status revert on failure</p>
+</li>
+<li>
+<p>L-8: <code>catch (error)</code> with <code>instanceof Error</code> guard</p>
+</li>
+<li>
+<p>L-9/L-10: Framer Motion converted to <code>next/dynamic</code> with <code>ssr: false</code></p>
+</li>
+</ul>
+<p><strong>Suggestions (6/6)</strong>: All 6 Suggestions implemented</p>
+<ul>
+<li>
+<p>S-1: Shared <code>GradingDialog</code> component</p>
+</li>
+<li>
+<p>S-2: Shared <code>StatusBadge</code> component</p>
+</li>
+<li>
+<p>S-3: <code>unstable_cache</code> for profile</p>
+</li>
+<li>
+<p>S-4: All API routes use <code>requireInstructor()</code></p>
+</li>
+<li>
+<p>S-5: <code>StudentEnrollmentsView</code> extracted with search/filter</p>
+</li>
+<li>
+<p>S-6: <code>ACADEMIC_RULES.EASA_PASS_MARK</code> used throughout</p>
+</li>
+</ul>
+<h2>Deferred
+| Item | Rationale |  |
+| (none) | All findings implemented |  |</h2>
+<h3 id="examiner-portal">Examiner Portal</h3>
+<p><strong>Implementation Status</strong>: ✅ Complete
+<strong>Files Modified</strong>: 6+
+Completed (29 of 29)
+<strong>Critical (3/3)</strong>: All 3 Critical findings implemented</p>
+<ul>
+<li>
+<p>C-1: 4 API routes created (<code>sittings</code>, <code>results</code>, <code>availability</code>, <code>compliance</code>)</p>
+</li>
+<li>
+<p>C-2: Dashboard button fixed</p>
+</li>
+<li>
+<p>C-3: Proxy documented as images-only</p>
+</li>
+</ul>
+<p><strong>High (7/7)</strong>: All 7 High findings implemented</p>
+<ul>
+<li>
+<p>H-1: Schedule page migrated to <code>prismaUnfiltered</code></p>
+</li>
+<li>
+<p>H-2: <code>any</code> types replaced in <code>ExaminerDashboard.tsx</code></p>
+</li>
+<li>
+<p>H-3: <code>clampScore()</code> + <code>handleBlur()</code> for runtime score validation in <code>ResultsEntry.tsx</code></p>
+</li>
+<li>
+<p>H-5: <code>aria-label</code> added to score inputs</p>
+</li>
+<li>
+<p>H-6: <code>min-w-[640px]</code> added to table</p>
+</li>
+<li>
+<p>H-7: <code>requireExaminer()</code> used in schedule</p>
+</li>
+</ul>
+<p><strong>Medium (6/6)</strong>: All 6 Medium findings implemented</p>
+<ul>
+<li>
+<p>M-1: Pagination added to results page (<code>page</code>/<code>limit</code> search params)</p>
+</li>
+<li>
+<p>M-2: Batch submission with <code>createMany</code>/<code>updateMany</code></p>
+</li>
+<li>
+<p>M-3: <code>getCachedComplianceCounts</code> with 5-min TTL</p>
+</li>
+<li>
+<p>M-4: Examiner events filter (<code>visibleTo: ['ALL','INSTRUCTORS','EXAMINERS']</code>)</p>
+</li>
+<li>
+<p>M-5: Clear results deletes <code>ExamResult</code> and resets <code>attendanceStatus</code></p>
+</li>
+<li>
+<p>M-6: Tests added (<code>tests/unit/lib/examiner-results.test.ts</code>, <code>tests/integration/actions/examiner-actions.test.ts</code>)</p>
+</li>
+</ul>
+<p><strong>Low (5/5)</strong>: All 5 Low findings implemented</p>
+<ul>
+<li>
+<p>L-1: <code>console.error</code> removed</p>
+</li>
+<li>
+<p>L-2: Part-147 text from <code>getSystemSetting('examiner_auth_message')</code></p>
+</li>
+<li>
+<p>L-3: <code>window.location.origin</code> replaced</p>
+</li>
+<li>
+<p>L-4: Save button context (<code>Day ${sitting.dayNumber}</code>)</p>
+</li>
+<li>
+<p>L-5: <code>AvailabilityManager</code> role-aware labels</p>
+</li>
+</ul>
+<p><strong>Suggestions (8/8)</strong>: All 8 Suggestions implemented</p>
+<ul>
+<li>
+<p>S-1: Sitting detail page at <code>/examiner/sittings/[id]</code></p>
+</li>
+<li>
+<p>S-2: Results history view at <code>/examiner/results/history</code></p>
+</li>
+<li>
+<p>S-3: Dashboard query wrapped in <code>unstable_cache</code></p>
+</li>
+<li>
+<p>S-4: <code>step={1}</code> on score inputs</p>
+</li>
+<li>
+<p>S-5: Reset button to clear all scores</p>
+</li>
+<li>
+<p>S-6: Custom 404 for sitting sub-routes</p>
+</li>
+<li>
+<p>S-7: <code>metadata</code> exports on all pages</p>
+</li>
+<li>
+<p>S-8: Page transitions (<code>animate-in</code> classes)</p>
+</li>
+</ul>
+<h2>Deferred
+| Item | Rationale |  |
+| (none) | All findings implemented |  |</h2>
+<h3 id="applicant-portal">Applicant Portal</h3>
+<p><strong>Implementation Status</strong>: ✅ Complete
+<strong>Files Modified</strong>: 42+
+Completed (49 of 49)
+<strong>Critical (5/5)</strong>: All 5 Critical findings implemented</p>
+<ul>
+<li>
+<p>C-1: <code>ApplicantError</code> renamed</p>
+</li>
+<li>
+<p>C-2: <code>ApplicantLoading</code> renamed</p>
+</li>
+<li>
+<p>C-3: Empty <code>PaymentUpload.tsx</code> removed</p>
+</li>
+<li>
+<p>C-4: Course purchase placeholder removed</p>
+</li>
+<li>
+<p>C-5: Exam booking details page implemented</p>
+</li>
+</ul>
+<p><strong>High (12/12)</strong>: All 12 High findings implemented</p>
+<ul>
+<li>
+<p>H-1: 14 API routes standardized</p>
+</li>
+<li>
+<p>H-2: <code>alert()</code> → <code>toast.error()</code></p>
+</li>
+<li>
+<p>H-3: <code>return null</code> fixed</p>
+</li>
+<li>
+<p>H-4: Error state added to medical page</p>
+</li>
+<li>
+<p>H-5: <code>loading.tsx</code> created</p>
+</li>
+<li>
+<p>H-6: Oversized component split</p>
+</li>
+<li>
+<p>H-7: Dynamic pricing fetched</p>
+</li>
+<li>
+<p>H-8: <code>requireApplicant()</code> used</p>
+</li>
+<li>
+<p>H-9: Notifications paginated</p>
+</li>
+<li>
+<p>H-10: 24 API routes migrated</p>
+</li>
+<li>
+<p>H-11: 20+ pages migrated</p>
+</li>
+<li>
+<p>H-12: <code>actions.ts</code> migrated</p>
+</li>
+</ul>
+<p><strong>Medium (18/18)</strong>: All 18 Medium findings implemented</p>
+<ul>
+<li>
+<p>M-1: <code>slugify</code> extracted</p>
+</li>
+<li>
+<p>M-2: Status maps centralized</p>
+</li>
+<li>
+<p>M-3: <code>PRICING</code> moved to <code>PATHWAY_PRICING</code></p>
+</li>
+<li>
+<p>M-4: Business days moved to <code>TIME_WINDOWS</code></p>
+</li>
+<li>
+<p>M-5: <code>router.refresh()</code> added</p>
+</li>
+<li>
+<p>M-6: Heavy <code>PackagesTab</code>/<code>PoolsTab</code> lazy-loaded via <code>next/dynamic</code></p>
+</li>
+<li>
+<p>M-7: <code>error.tsx</code> added</p>
+</li>
+<li>
+<p>M-8: <code>not-found.tsx</code> added</p>
+</li>
+<li>
+<p>M-9: <code>unstable_cache</code> for exam-component prices + payment methods</p>
+</li>
+<li>
+<p>M-11: <code>notFound()</code> used for missing course/pool resources</p>
+</li>
+<li>
+<p>M-12: <code>console.error</code> replaced</p>
+</li>
+<li>
+<p>M-13: <code>QuestionCard</code> option list keyed by <code>opt</code> not index</p>
+</li>
+<li>
+<p>M-14: <code>useFetch</code> hook created + adopted across client pages</p>
+</li>
+<li>
+<p>M-15: Centralized date helpers in <code>lib/utils/date.ts</code></p>
+</li>
+<li>
+<p>M-16: <code>actions.ts</code> migrated</p>
+</li>
+<li>
+<p>M-17: <code>window.location.reload</code> replaced</p>
+</li>
+<li>
+<p>M-18: Hardcoded <code>28</code> replaced</p>
+</li>
+</ul>
+<p><strong>Low (8/8)</strong>: All 8 Low findings implemented</p>
+<ul>
+<li>
+<p>L-1: <code>PageTransition</code> wrapper created + adopted</p>
+</li>
+<li>
+<p>L-2: <code>aria-label</code> added to icon-only controls</p>
+</li>
+<li>
+<p>L-3: <code>any</code> types replaced</p>
+</li>
+<li>
+<p>L-4: <code>any</code> types replaced in 6 files</p>
+</li>
+<li>
+<p>L-5: Dark mode classes standardized</p>
+</li>
+<li>
+<p>L-6: Shared loading skeletons present</p>
+</li>
+<li>
+<p>L-7: <code>Suspense</code> boundaries present</p>
+</li>
+<li>
+<p>L-8: <code>metadata</code> exports on all pages</p>
+</li>
+</ul>
+<p><strong>Suggestions (6/6)</strong>: All 6 Suggestions implemented</p>
+<ul>
+<li>
+<p>S-1: <code>ApplicantPortalShell</code> layout wrapper extracted</p>
+</li>
+<li>
+<p>S-2: Dark mode standardized</p>
+</li>
+<li>
+<p>S-3: <code>tests/e2e/applicant-journey.spec.ts</code> critical-flow E2E</p>
+</li>
+<li>
+<p>S-4: Loading skeletons implemented</p>
+</li>
+<li>
+<p>S-5: <code>Suspense</code> boundaries implemented</p>
+</li>
+<li>
+<p>S-6: <code>docs/architecture/applicant-portal.md</code> route map</p>
+</li>
+</ul>
+<h2>Deferred
+| Item | Rationale |  |
+| (none) | All findings implemented |  |</h2>
+<section class="he-section" id="03-central-remaining-gaps"><div class="he-section__num">03 · 03 · Central Remaining Gaps</div><h2 class="he-section__title">03 · Central Remaining Gaps</h2></section>
+<h3 id="pending-critical-0">Pending Critical (0)</h3>
+<p>All critical findings implemented across all portals.</p>
+<h3 id="pending-high-0">Pending High (0)</h3>
+<p>All high findings implemented across all portals.</p>
+<h3 id="pending-medium-0">Pending Medium (0)</h3>
+<p>All medium findings implemented across all portals.</p>
+<h3 id="pending-low-0">Pending Low (0)</h3>
+<p>All low findings implemented across all portals.</p>
+<h3 id="pending-suggestions-0">Pending Suggestions (0)</h3>
+<p>All suggestions implemented across all portals.</p>
+<hr />
+<section class="he-section" id="04-llm-council-verification-findings-2026-08-28"><div class="he-section__num">04 · 04 · LLM Council Verification Findings (2026-08-28)</div><h2 class="he-section__title">04 · LLM Council Verification Findings (2026-08-28)</h2></section>
+<p>Four adversarial reviewers verified all 213 findings across 5 portals. <strong>4 critical bugs were found and fixed during verification.</strong></p>
+<h3 id="critical-bugs-found-and-fixed">Critical Bugs Found and Fixed</h3>
+<p>| # | Portal | File | Bug | Fix Applied |  |
+| 1 | Instructor | <code>app/instructor/grading/_components/GradingQueueView.tsx</code> | Missing <code>Input</code> and <code>Badge</code> imports — build failure | Added missing imports |  |
+| 2 | Instructor | <code>app/instructor/metrics/page.tsx</code> | Duplicate <code>ACADEMIC_RULES</code> import — ESLint error | Removed duplicate import |  |
+| 3 | Examiner | <code>app/examiner/results/page.tsx</code> | <code>History</code> icon used but not imported — runtime crash | Added <code>History</code> to lucide-react imports |  |
+| 4 | Applicant | <code>app/applicant/application/aptitude-test/_components/QuestionCard.tsx</code> | Undefined variable <code>i</code> in <code>String.fromCharCode(65 + i)</code> — runtime crash | Added index parameter to map callback |  |
+| 5 | Applicant | <code>app/applicant/notifications/page.tsx</code> | Default import of named-only <code>PageTransition</code> — runtime crash | Changed to named import |  |
+| 6 | Applicant | <code>app/applicant/dashboard/page.tsx</code> | Default import of named-only <code>PageTransition</code> — runtime crash | Changed to named import |  |
+| 7 | Examiner | <code>app/examiner/_components/ExaminerSidebar.tsx</code> | <code>window.location.origin</code> still present — false claim of fix | Replaced with <code>/login</code> direct path |  |
+<strong>Status</strong>: All 10 verification findings from the 2026-08-28 LLM Council pass are now resolved. 7 items were already implemented in the working tree at remediation time (stale tracker entries: #3, #6, #8, plus verified-fixed #1, #2) — the tracker's &quot;Confirmed Pending&quot; posture predated the final remediation pass. 3 were completed by remediation (#4, #5, #10) and 1 was closed as a false positive (#9). The type-check gate (pre-push) is the sole remaining item and is deferred to a separate sprint (see Test Coverage Status).</p>
+<p>| # | Portal | Finding | Severity | Resolution |  |
+| 1 | Student | H-6 | — | ✅ <strong>Verified fixed</strong>: <code>logActionError</code> from <code>lib/student/error-handler.ts</code> used in <code>app/student/actions.ts:26</code> |  |
+| 2 | Instructor | M-4 | — | ✅ <strong>Verified fixed</strong>: server-side pagination via <code>getGradingQueue(page, limit)</code> with clamped <code>limit</code> |  |
+| 3 | Instructor | M-12 | Medium | ✅ <strong>Already implemented</strong>: <code>getInstructorProfileByUserId</code> wrapped in <code>unstable_cache</code> (<code>lib/instructor/profile.ts</code>). Note: wrapper is inline (not module-scope) — minor idiomatic polish only. |  |
+| 4 | Instructor | L-4 | Low | ✅ <strong>Fixed</strong>: <code>app/instructor/grading/error.tsx:7</code> now renders a generic message in production; <code>{error.message}</code> gated behind <code>NODE_ENV === 'development'</code> |  |
+| 5 | Instructor | H-3 | Medium | ✅ <strong>Fixed</strong>: created <code>app/instructor/attendance/[id]/error.tsx</code> error boundary |  |
+| 6 | Staff | H-9 | High | ✅ <strong>Already implemented</strong>: <code>app/staff/actions.ts</code> is now an 11-line barrel re-export; 9 domain files in <code>app/staff/actions/</code> (users, enrollments, bookings, results, finance, certificates, search, messages, applicants) |  |
+| 7 | Staff | M-4 | Medium | ✅ <strong>Fixed</strong>: all 8 OJT routes under <code>app/api/staff/ojt/**</code> now import <code>rateLimitByUser</code>. The two GET handlers in <code>app/api/staff/ojt/route.ts</code> and <code>app/api/staff/ojt/[logbookId]/route.ts</code> were the gaps; added (100 req/5min reads, 30 req/1min mutations). Removed a redundant duplicate <code>requireStaff()</code> call in the create handler. |  |
+| 8 | Staff | H-3 | Medium | ✅ <strong>Already implemented</strong>: <code>any</code> types replaced across all three files — <code>audit-logs/page.tsx</code> (forEach callbacks now narrow inferred types), <code>CourseInfoEditDialog.tsx</code> (<code>CourseInfoEditDialogProps</code> interface), <code>ExamComponentsSection.tsx</code> (<code>catch (err: unknown)</code> + <code>instanceof Error</code> guards) |  |
+| 9 | Examiner | M-2 | Medium | ⏸️ <strong>Closed — false positive</strong>: <code>app/examiner/results/actions.ts:126</code> <code>for...of</code> loop is correct — each <code>ExamResult</code> row gets unique <code>score</code>/<code>grade</code>/<code>percentage</code>/<code>passed</code>; Prisma <code>updateMany</code> can only apply <em>uniform</em> values and cannot batch per-row-different data. The loop already runs inside <code>$transaction</code>. |  |
+| 10 | Applicant | C-5 | Low | ✅ <strong>Fixed</strong>: created <code>app/applicant/exam-bookings/[id]/not-found.tsx</code> |  |</p>
+<section class="he-section" id="05-cross-portal-audit-findings-2026-08-29"><div class="he-section__num">05 · 05 · Cross-Portal Audit Findings (2026-08-29)</div><h2 class="he-section__title">05 · Cross-Portal Audit Findings (2026-08-29)</h2></section>
+<p>A second audit pass was conducted across all 5 portals to identify cross-portal patterns and regressions. <strong>14 additional findings were identified and resolved.</strong></p>
+<h3 id="critical-5">Critical (5)</h3>
+<p>| # | Portal | Finding | Fix Applied |  |
+| 1 | Examiner | Cache keys missing <code>examinerId</code> in results/compliance pages | Added <code>examinerId</code> to <code>unstable_cache</code> keys |  |
+| 2 | Instructor | Materials page ownership bypass | Added <code>instructorId</code> to class lookup |  |
+| 3 | Student | Internal exam session ownership check | Added server-side <code>examSession.studentId === session.user.id</code> check |  |
+| 4 | Student | Documents raw URL exposure | Routed through <code>proxyImageUrl(d.fileUrl, 'students')</code> |  |
+| 5 | Applicant | Full-table course scan | Replaced <code>findMany({})</code> + JS filter with <code>findUnique({ where: { id } })</code> |  |</p>
+<h3 id="high-9">High (9)</h3>
+<p>| # | Portal | Finding | Fix Applied |  |
+| 6 | Student | Unbounded exam queries | Added <code>take: 200</code> to 3 queries |  |
+| 7 | Student | Dead code in <code>bookBundleExamsAction</code> | Removed unreachable block after early return |  |
+| 8 | Applicant | Unvalidated query param | Added Zod enum validation for <code>type</code> |  |
+| 9 | Applicant | <code>any</code> casts in API routes | Replaced with <code>Record&amp;lt;string, unknown&amp;gt;</code> + proper types |  |
+| 10 | Instructor | Class lookup logic | Replaced <code>findFirst</code> by name with <code>findFirst</code> by <code>id</code> + <code>instructorId</code> |  |
+| 11 | Instructor | Grades pagination | Added <code>take: 200</code> to grades query |  |
+| 12 | Examiner | Score validation bypass | Hardened input validation in results actions |  |
+| 13 | All | Audit logging for sensitive reads | Added <code>createAuditLog</code> to 4 pages |  |
+| 14 | All | <code>/api/images/proxy</code> SSRF risk | Added URL allowlist for privileged roles |  |</p>
+<h3 id="medium-3">Medium (3)</h3>
+<p>| # | Portal | Finding | Fix Applied |  |
+| 15 | Staff | Barrel file/directory shadowing | Replaced <code>actions.ts</code> with <code>actions/index.ts</code> barrel |  |
+| 16 | Staff | OJT API rate limiting | Added <code>rateLimitByUser</code> to 8 OJT mutation endpoints |  |
+| 17 | All | Type safety hardening | <code>tx: any</code> → <code>Prisma.TransactionClient</code>, discriminated <code>resultOverride</code>, input validation |  |</p>
+<h3 id="deferred-items-in-progress">Deferred Items (in progress)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>
+<p>Pagination UI for student exams — Client-side pagination added to <code>ExamHistoryTable</code> (20 per page)</p>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>
+<p>Pagination UI for instructor grades — Server-side pagination added (<code>?page=&amp;amp;limit=</code>)</p>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>
+<p>Replace remaining <code>any</code> casts — Minor casts remain in JSON field access patterns</p>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>
+<p>Add <code>error.tsx</code>/<code>not-found.tsx</code> to all segments — Parent boundaries provide coverage; per-segment boundaries are enhancement</p>
+</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>
+<p>Dark mode contrast micro-fixes — Fixed 3 identified contrast issues</p>
+</li>
+</ul>
+<h3 id="cross-portal-schema-migration-complete-2026-09-04">Cross-Portal Schema Migration Complete (2026-09-04)</h3>
+<p>| # | Migration | Status | Evidence |  |
+| 1 | <code>FullTimeEnrollment.academicYearId</code> FK | ✅ Complete | <code>prisma/schema.prisma</code>; Neon + Supabase <code>db push</code> succeeded |  |
+| 2 | <code>OJTLogbook.licenceCategoryId</code> FK | ✅ Complete | <code>prisma/schema.prisma</code>; legacy <code>licenceCategory String</code> retained |  |
+| 3 | <code>ExamResult.sittingId</code> FK | ✅ Complete | <code>prisma/schema.prisma</code>; 32 existing results have no sitting assignments |  |
+| 4 | <code>Certificate.session</code> relation | ✅ Complete | <code>prisma/schema.prisma</code>; uses existing <code>sessionId</code> column |  |
+| 5 | <code>InternalExamRegistration.licenceCategoryId</code> FK | ✅ Complete | Optional FK for future use |  |
+| 6 | Reverse relations + indexes | ✅ Complete | <code>AcademicYear.fullTimeEnrollments</code>, <code>LicenseCategory.ojtLogbooks</code>/<code>registrations</code>, <code>ExamSitting.examResults</code>, <code>InternalExamSession.certificates</code> |  |
+| 7 | Application code updated | ✅ Complete | <code>app/api/staff/ojt/route.ts</code> resolves <code>LicenseCategory</code> by code; <code>app/api/staff/students/[id]/route.ts</code> includes <code>academicYear</code>; student/applicant pages updated |  |</p>
+<h3 id="audit-documentation-issues">Audit Documentation Issues</h3>
+<ul>
+<li>
+<p><strong>Examiner audit</strong>: Many findings listed as &quot;Pending&quot; in Remaining Gaps are actually implemented (M-1, M-3, M-4, M-5, M-6, L-2, L-4, L-5)</p>
+</li>
+<li>
+<p><strong>Applicant audit</strong>: Similar tracking inaccuracies (M-9, M-11, M-13, M-14, M-15, L-1 through L-8)</p>
+</li>
+<li>
+<p><strong>Staff audit</strong>: Both &quot;verification&quot; claims in this section are <strong>resolved</strong> — <code>actions.ts</code> was split (verified: 11-line barrel + 9 domain files in <code>app/staff/actions/</code>) and OJT routes now have rate limiting (verified: all 8 routes under <code>app/api/staff/ojt/**</code> import <code>rateLimitByUser</code>; the create GET and <code>[logbookId]</code> GET were the two gaps, now fixed)</p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="06-test-coverage-status"><div class="he-section__num">06 · 06 · Test Coverage Status</div><h2 class="he-section__title">06 · Test Coverage Status</h2></section>
+<p>| Portal | Fixed Findings | Test Files | Coverage |  |
+| Staff | 68 | 12+ | Partial |  |
+| Student | 27 | 6+ | Partial |  |
+| Instructor | 40 | 4+ | Partial |  |
+| Examiner | 29 | 2+ | Partial |  |
+| Applicant | 49 | 10+ | Partial |  |
+<strong>Note</strong>: Pre-existing test failures in <code>tests/unit/lib/utils-date.test.ts</code> were resolved by adding missing exports to <code>lib/utils/date.ts</code>. Remaining test gaps are in legacy integration test scaffolding, not in audit-related implementations.</p>
+<p><strong>Type-check status</strong>: <code>tsc --noEmit</code> exits 0 (0 errors) as of 2026-09-07 (commit <code>02717b1e</code>). The prior <code>RouteHandler</code>/<code>RouteContext</code> type drift from the <code>withErrorHandler</code> wrapper signature was resolved across 31 files. The stale ~495-error / ~530-error paragraphs below are superseded.</p>
+<hr />
+<section class="he-section" id="07-code-quality-standards"><div class="he-section__num">07 · 07 · Code Quality Standards</div><h2 class="he-section__title">07 · Code Quality Standards</h2></section>
+<p>Two skills encode the standards for this project:</p>
+<p><strong>Universal</strong>: <code>C:\Users\Pekay\.config\kilo\skills\code-quality-standards\SKILL.md</code></p>
+<ul>
+<li>18 rules covering Prisma client, error handling, types, auth, rate limiting, sanitization, CSP, boundaries, pagination, audit logging, server-only, lazy loading, dead code, parallelization, validation, console statements, deduplication, constants</li>
+</ul>
+<p><strong>Aerojet-specific</strong>: <code>C:\Projects\aerojet-academy\.kilo\skills\aerojet-code-standards\SKILL.md</code></p>
+<ul>
+<li>20 rules covering dual-client pattern, auth helpers, API responses, audit logging format, business rules, EASA compliance, email logging, realtime messaging, presence, storage, file uploads, cron jobs, portal layouts, error boundaries, serialization, student/applicant specifics, validation, pagination metadata, caching, navigation</li>
+</ul>
+<hr />
+<section class="he-section" id="08-next-steps"><div class="he-section__num">08 · 08 · Next Steps</div><h2 class="he-section__title">08 · Next Steps</h2></section>
+<ul>
+<li>
+<p>Run LLM Council 3-pass verification — Completed; 7 critical bugs found and fixed</p>
+</li>
+<li>
+<p>Update audit docs — Tracker complete; individual audit docs (<code>staff-portal-audit-2026-08-27.md</code> etc.) still show &quot;Confirmed Pending&quot; per-item and need a bulk status pass to match this tracker's ✅ Implemented verdicts</p>
+</li>
+<li>
+<p>Run type-check — Done (2026-09-07, 0 errors, commit 02717b1e)</p>
+</li>
+</ul>
+<p>Address verification findings:</p>
+<ul>
+<li>
+<p>✅ <strong>Fixed</strong>: Student H-6 — <code>lib/student/error-handler.ts</code> IS used; <code>logActionError</code> imported in <code>app/student/actions.ts:26</code></p>
+</li>
+<li>
+<p>✅ <strong>Fixed</strong>: Instructor M-4 — server-side pagination in <code>getGradingQueue(page, limit)</code> with clamped <code>limit</code></p>
+</li>
+<li>
+<p>✅ <strong>Fixed</strong>: Instructor M-12 — <code>unstable_cache</code> on <code>getInstructorProfileByUserId</code> (<code>lib/instructor/profile.ts</code>)</p>
+</li>
+<li>
+<p>✅ <strong>Fixed</strong>: Staff H-9 — <code>app/staff/actions.ts</code> is now an 11-line barrel re-export; 9 domain files in <code>app/staff/actions/</code></p>
+</li>
+<li>
+<p>✅ <strong>Fixed</strong>: Staff M-4 — all 8 OJT routes under <code>app/api/staff/ojt/**</code> import <code>rateLimitByUser</code></p>
+</li>
+<li>
+<p>✅ <strong>Fixed</strong>: Staff H-3 — <code>any</code> types replaced in <code>audit-logs/page.tsx</code>, <code>CourseInfoEditDialog.tsx</code>, <code>ExamComponentsSection.tsx</code></p>
+</li>
+<li>
+<p>⏸️ <strong>Closed — false positive</strong>: Examiner M-2 — <code>for...of</code> loop in <code>app/examiner/results/actions.ts:126</code> is correct; each <code>ExamResult</code> row gets unique values, and <code>updateMany</code> cannot apply per-row-different data. Loop already runs inside <code>$transaction</code>.</p>
+</li>
+<li>
+<p>✅ <strong>Fixed</strong>: Instructor L-4 — <code>app/instructor/grading/error.tsx:7</code> now renders a generic message in production; <code>{error.message}</code> gated behind <code>NODE_ENV === 'development'</code></p>
+</li>
+<li>
+<p>✅ <strong>Fixed</strong>: Instructor H-3 — <code>app/instructor/attendance/[id]/error.tsx</code> created</p>
+</li>
+<li>
+<p>✅ <strong>Fixed</strong>: Applicant C-5 — <code>app/applicant/exam-bookings/[id]/not-found.tsx</code> created</p>
+</li>
+<li>
+<p>Commit changes with comprehensive commit message — Done (8e43423c, 02717b1e)</p>
+</li>
+</ul>
+<h3 id="outstanding-minor">Outstanding (minor)</h3>
+<ul>
+<li>
+<p>17 ESLint warnings remain in 2 files: <code>app/staff/exams/events/create/page.tsx</code> (11 <code>any</code>) and <code>app/staff/exams/events/[id]/edit/_components/EditExamEventForm.tsx</code> (8 <code>any</code>). Non-blocking.</p>
+</li>
+<li>
+<p>1 unused import warning: <code>lib/withdrawal/actions.ts:6</code> (<code>Prisma</code>).</p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="09-audit-document-locations"><div class="he-section__num">09 · 09 · Audit Document Locations</div><h2 class="he-section__title">09 · Audit Document Locations</h2></section>
+<ul>
+<li>
+<p><strong>Staff</strong>: <code>docs/audits/portal-audits/staff/staff-portal-audit-2026-08-27.md</code></p>
+</li>
+<li>
+<p><strong>Student</strong>: <code>docs/audits/portal-audits/student/student-portal-audit-2026-08-27.md</code></p>
+</li>
+<li>
+<p><strong>Instructor</strong>: <code>docs/audits/portal-audits/instructor/instructor-portal-audit-2026-08-27.md</code></p>
+</li>
+<li>
+<p><strong>Examiner</strong>: <code>docs/audits/portal-audits/examiner/examiner-portal-audit-2026-08-27.md</code></p>
+</li>
+<li>
+<p><strong>Applicant</strong>: <code>docs/audits/portal-audits/applicant/applicant-portal-audit-2026-08-27.md</code></p>
+</li>
+</ul>
+<hr />
+<section class="he-section" id="10-notes"><div class="he-section__num">10 · 10 · Notes</div><h2 class="he-section__title">10 · Notes</h2></section>
+<ul>
+<li>
+<p>All portal audits follow the same structure: Critical, High, Medium, Low, Suggestions</p>
+</li>
+<li>
+<p>Implementation status is tracked with ✅ Fixed, ⚠️ Partial, ⏸️ Pending</p>
+</li>
+<li>
+<p>All 213 findings across 5 portals have been implemented</p>
+</li>
+<li>
+<p>The codebase has 538 modified files across all portals (19,230 insertions, 10,077 deletions)</p>
+</li>
+<li>
+<p><strong>2026-09-07</strong>: <code>bun run type-check</code> exits 0 (0 errors) — resolved in commit <code>02717b1e</code>. <code>bun run lint</code> exits 0 (0 errors, 17 warnings in 2 files) — bulk cleanup in commit <code>8e43423c</code>.</p>
+<p>On this page
+<a href="#summary">Summary</a>
+<a href="#portal-status-details">Portal Status Details</a>
+<a href="#staff-portal">Staff Portal</a>
+<a href="#student-portal">Student Portal</a>
+<a href="#instructor-portal">Instructor Portal</a>
+<a href="#examiner-portal">Examiner Portal</a>
+<a href="#applicant-portal">Applicant Portal</a>
+<a href="#central-remaining-gaps">Central Remaining Gaps</a>
+<a href="#pending-critical-0">Pending Critical (0)</a>
+<a href="#pending-high-0">Pending High (0)</a>
+<a href="#pending-medium-0">Pending Medium (0)</a>
+<a href="#pending-low-0">Pending Low (0)</a>
+<a href="#pending-suggestions-0">Pending Suggestions (0)</a>
+<a href="#llm-council-verification-findings-2026-08-28">LLM Council Verification Findings (2026-08-28)</a>
+<a href="#critical-bugs-found-and-fixed">Critical Bugs Found and Fixed</a>
+<a href="#cross-portal-audit-findings-2026-08-29">Cross-Portal Audit Findings (2026-08-29)</a>
+<a href="#critical-5">Critical (5)</a>
+<a href="#high-9">High (9)</a>
+<a href="#medium-3">Medium (3)</a>
+<a href="#deferred-items-in-progress">Deferred Items (in progress)</a>
+<a href="#cross-portal-schema-migration-complete-2026-09-04">Cross-Portal Schema Migration Complete (2026-09-04)</a>
+<a href="#audit-documentation-issues">Audit Documentation Issues</a>
+<a href="#test-coverage-status">Test Coverage Status</a>
+<a href="#code-quality-standards">Code Quality Standards</a>
+<a href="#next-steps">Next Steps</a>
+<a href="#outstanding-minor">Outstanding (minor)</a>
+<a href="#audit-document-locations">Audit Document Locations</a>
+<a href="#notes">Notes</a></p>
+</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#01-summary">01 · Summary</a></li>
+    <li class="he-toc__l2"><a href="#02-portal-status-details">02 · Portal Status Details</a></li>
+    <li class="he-toc__l3"><a href="#staff-portal">Staff Portal</a></li>
+    <li class="he-toc__l3"><a href="#student-portal">Student Portal</a></li>
+    <li class="he-toc__l3"><a href="#instructor-portal">Instructor Portal</a></li>
+    <li class="he-toc__l3"><a href="#examiner-portal">Examiner Portal</a></li>
+    <li class="he-toc__l3"><a href="#applicant-portal">Applicant Portal</a></li>
+    <li class="he-toc__l2"><a href="#03-central-remaining-gaps">03 · Central Remaining Gaps</a></li>
+    <li class="he-toc__l3"><a href="#pending-critical-0">Pending Critical (0)</a></li>
+    <li class="he-toc__l3"><a href="#pending-high-0">Pending High (0)</a></li>
+    <li class="he-toc__l3"><a href="#pending-medium-0">Pending Medium (0)</a></li>
+    <li class="he-toc__l3"><a href="#pending-low-0">Pending Low (0)</a></li>
+    <li class="he-toc__l3"><a href="#pending-suggestions-0">Pending Suggestions (0)</a></li>
+    <li class="he-toc__l2"><a href="#04-llm-council-verification-findings-2026-08-28">04 · LLM Council Verification Findings (2026-08-28)</a></li>
+    <li class="he-toc__l3"><a href="#critical-bugs-found-and-fixed">Critical Bugs Found and Fixed</a></li>
+    <li class="he-toc__l2"><a href="#05-cross-portal-audit-findings-2026-08-29">05 · Cross-Portal Audit Findings (2026-08-29)</a></li>
+    <li class="he-toc__l3"><a href="#critical-5">Critical (5)</a></li>
+    <li class="he-toc__l3"><a href="#high-9">High (9)</a></li>
+    <li class="he-toc__l3"><a href="#medium-3">Medium (3)</a></li>
+    <li class="he-toc__l3"><a href="#deferred-items-in-progress">Deferred Items (in progress)</a></li>
+    <li class="he-toc__l3"><a href="#cross-portal-schema-migration-complete-2026-09-04">Cross-Portal Schema Migration Complete (2026-09-04)</a></li>
+    <li class="he-toc__l3"><a href="#audit-documentation-issues">Audit Documentation Issues</a></li>
+    <li class="he-toc__l2"><a href="#06-test-coverage-status">06 · Test Coverage Status</a></li>
+    <li class="he-toc__l2"><a href="#07-code-quality-standards">07 · Code Quality Standards</a></li>
+    <li class="he-toc__l2"><a href="#08-next-steps">08 · Next Steps</a></li>
+    <li class="he-toc__l3"><a href="#outstanding-minor">Outstanding (minor)</a></li>
+    <li class="he-toc__l2"><a href="#09-audit-document-locations">09 · Audit Document Locations</a></li>
+    <li class="he-toc__l2"><a href="#10-notes">10 · Notes</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

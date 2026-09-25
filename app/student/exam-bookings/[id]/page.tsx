@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
@@ -57,7 +58,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.E
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id: bookingId } = await params
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'STUDENT') redirect('/login')
+  if (!session || session.user.role !== 'STUDENT') return await redirectToLogin()
 
   const booking = await prismaUnfiltered.examBooking.findUnique({
     where: { id: bookingId },

@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import { getPDFSettings } from '@/lib/pdf-settings'
@@ -305,7 +305,7 @@ export default async function SettingsPage({
   searchParams: Promise<{ tab?: string }>
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { tab = 'general' } = await searchParams
 

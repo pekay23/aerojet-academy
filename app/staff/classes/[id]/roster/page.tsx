@@ -1,6 +1,7 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { ArrowLeft, Users, UserPlus } from 'lucide-react'
 import Link from 'next/link'
@@ -15,7 +16,8 @@ interface Props {
 
 export default async function ClassRosterPage({ params }: Props) {
   const session = await getAuthSession()
-  if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) redirect('/login')
+  if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role))
+    return await redirectToLogin()
 
   const { id } = await params
 
@@ -52,7 +54,7 @@ export default async function ClassRosterPage({ params }: Props) {
       : []
 
   return (
-    <div className="mx-auto max-w-[1800px] space-y-8">
+    <div className="mx-auto max-w-450 space-y-8">
       <div className="mb-6">
         <Link
           href={`/staff/classes/${id}`}

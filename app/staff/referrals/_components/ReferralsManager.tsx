@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -37,7 +38,10 @@ export default function ReferralsManager({
   }
 
   const callJson = async (url: string, init: RequestInit, ok: string) => {
-    const res = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json', ...(init.headers || {}) } })
+    const res = await fetch(url, {
+      ...init,
+      headers: { 'Content-Type': 'application/json', ...(init.headers || {}) },
+    })
     const json = await res.json().catch(() => ({}))
     if (!res.ok || json?.success === false) {
       toast.error(json?.error || `Request failed (${res.status})`)
@@ -62,24 +66,36 @@ export default function ReferralsManager({
     if (selected.size === 0) return
     const reason = prompt(`Disqualify ${selected.size} referral(s). Reason?`)
     if (!reason) return
-    await callJson('/api/staff/referrals/bulk', {
-      method: 'POST',
-      body: JSON.stringify({ action: 'disqualify', ids: Array.from(selected), reason }),
-    }, `Disqualified ${selected.size} referrals`)
+    await callJson(
+      '/api/staff/referrals/bulk',
+      {
+        method: 'POST',
+        body: JSON.stringify({ action: 'disqualify', ids: Array.from(selected), reason }),
+      },
+      `Disqualified ${selected.size} referrals`
+    )
     setSelected(new Set())
   }
 
   const onRevokeAmbassador = async (userId: string, name: string) => {
     const reason = prompt(`Revoke ambassador status for ${name}. Reason?`)
     if (!reason) return
-    await callJson(`/api/staff/referrals/ambassador/${userId}/revoke`, {
-      method: 'POST',
-      body: JSON.stringify({ reason }),
-    }, 'Ambassador revoked')
+    await callJson(
+      `/api/staff/referrals/ambassador/${userId}/revoke`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      },
+      'Ambassador revoked'
+    )
   }
 
   const onRunFraud = async () => {
-    await callJson('/api/staff/referrals/fraud-scan', { method: 'POST', body: '{}' }, 'Fraud scan complete')
+    await callJson(
+      '/api/staff/referrals/fraud-scan',
+      { method: 'POST', body: '{}' },
+      'Fraud scan complete'
+    )
   }
 
   return (
@@ -102,7 +118,10 @@ export default function ReferralsManager({
           type="number"
           className="w-36 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
         />
-        <button onClick={applyFilters} className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-bold hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+        <button
+          onClick={applyFilters}
+          className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-bold hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+        >
           Apply
         </button>
         <div className="ml-auto flex gap-2">
@@ -127,7 +146,16 @@ export default function ReferralsManager({
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800">
             <tr>
-              <th className="px-3 py-2"><input type="checkbox" onChange={(e) => setSelected(e.target.checked ? new Set(initialReferrals.map((r) => r.id)) : new Set())} /></th>
+              <th className="px-3 py-2">
+                <input
+                  type="checkbox"
+                  onChange={(e) =>
+                    setSelected(
+                      e.target.checked ? new Set(initialReferrals.map((r) => r.id)) : new Set()
+                    )
+                  }
+                />
+              </th>
               <th className="px-3 py-2">Referrer</th>
               <th className="px-3 py-2">Referee</th>
               <th className="px-3 py-2">Status</th>
@@ -139,12 +167,21 @@ export default function ReferralsManager({
           <tbody>
             {initialReferrals.map((r) => (
               <tr key={r.id} className="border-t border-slate-100 dark:border-slate-800">
-                <td className="px-3 py-2"><input type="checkbox" checked={selected.has(r.id)} onChange={() => toggle(r.id)} /></td>
+                <td className="px-3 py-2">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(r.id)}
+                    onChange={() => toggle(r.id)}
+                  />
+                </td>
                 <td className="px-3 py-2">
                   <p className="font-bold text-slate-900 dark:text-slate-100">{r.referrer.name}</p>
                   <p className="text-xs text-slate-500">{r.referrer.email}</p>
                   {r.referrer.isAmbassador && (
-                    <button onClick={() => onRevokeAmbassador(r.referrer.id, r.referrer.name)} className="mt-1 inline-flex items-center gap-1 text-[10px] font-black text-emerald-600 hover:text-red-600">
+                    <button
+                      onClick={() => onRevokeAmbassador(r.referrer.id, r.referrer.name)}
+                      className="mt-1 inline-flex items-center gap-1 text-[10px] font-black text-emerald-600 hover:text-red-600"
+                    >
                       <Shield className="h-3 w-3" /> Ambassador (revoke)
                     </button>
                   )}
@@ -154,33 +191,49 @@ export default function ReferralsManager({
                   <p className="text-xs text-slate-500">{r.referee.email}</p>
                 </td>
                 <td className="px-3 py-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${
-                    r.status === 'QUALIFIED' ? 'bg-emerald-50 text-emerald-700'
-                    : r.status === 'DISQUALIFIED' ? 'bg-red-50 text-red-700'
-                    : 'bg-slate-100 text-slate-600'
-                  }`}>{r.status}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${
+                      r.status === 'QUALIFIED'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : r.status === 'DISQUALIFIED'
+                          ? 'bg-red-50 text-red-700'
+                          : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {r.status}
+                  </span>
                 </td>
                 <td className="px-3 py-2">
-                  <span className={`inline-flex items-center gap-1 font-mono text-xs font-black ${
-                    r.fraudScore >= 50 ? 'text-red-600' : r.fraudScore >= 30 ? 'text-amber-600' : 'text-slate-400'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center gap-1 font-mono text-xs font-black ${
+                      r.fraudScore >= 50
+                        ? 'text-red-600'
+                        : r.fraudScore >= 30
+                          ? 'text-amber-600'
+                          : 'text-slate-400'
+                    }`}
+                  >
                     {r.fraudScore >= 30 && <AlertTriangle className="h-3 w-3" />} {r.fraudScore}
                   </span>
                   {r.fraudReasons.length > 0 && (
                     <p className="mt-0.5 text-[10px] text-slate-400">{r.fraudReasons.join(', ')}</p>
                   )}
                 </td>
-                <td className="px-3 py-2 text-xs text-slate-500">{new Date(r.createdAt).toLocaleDateString()}</td>
+                <td className="px-3 py-2 text-xs text-slate-500">{formatDate(r.createdAt)}</td>
                 <td className="px-3 py-2">
                   <button
                     disabled={isPending || r.status === 'DISQUALIFIED'}
                     onClick={async () => {
                       const reason = prompt('Disqualify reason?')
                       if (!reason) return
-                      await callJson('/api/staff/referrals/bulk', {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'disqualify', ids: [r.id], reason }),
-                      }, 'Disqualified')
+                      await callJson(
+                        '/api/staff/referrals/bulk',
+                        {
+                          method: 'POST',
+                          body: JSON.stringify({ action: 'disqualify', ids: [r.id], reason }),
+                        },
+                        'Disqualified'
+                      )
                     }}
                     className="rounded-lg bg-red-50 px-2 py-1 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-30"
                   >
@@ -190,7 +243,11 @@ export default function ReferralsManager({
               </tr>
             ))}
             {initialReferrals.length === 0 && (
-              <tr><td colSpan={7} className="px-3 py-8 text-center text-sm text-slate-400">No referrals match these filters.</td></tr>
+              <tr>
+                <td colSpan={7} className="px-3 py-8 text-center text-sm text-slate-400">
+                  No referrals match these filters.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

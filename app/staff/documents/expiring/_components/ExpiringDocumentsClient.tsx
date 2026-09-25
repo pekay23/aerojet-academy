@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState } from 'react'
 import { Calendar, FileText, IdCard, ExternalLink } from 'lucide-react'
@@ -139,7 +140,7 @@ export default function ExpiringDocumentsClient({ documents, licenses, windowDay
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-slate-400" />
           <Select value={String(window)} onValueChange={(v) => setWindow(Number(v))}>
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-30">
               <SelectValue placeholder="Window" />
             </SelectTrigger>
             <SelectContent>
@@ -201,7 +202,7 @@ export default function ExpiringDocumentsClient({ documents, licenses, windowDay
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <span className="text-sm">
-                            {doc.expiresAt ? new Date(doc.expiresAt).toLocaleDateString() : '—'}
+                            {doc.expiresAt ? formatDate(doc.expiresAt) : '—'}
                           </span>
                           {days !== null && (
                             <span
@@ -290,13 +291,13 @@ export default function ExpiringDocumentsClient({ documents, licenses, windowDay
                       </TableCell>
                       <TableCell>
                         <span className="text-sm">
-                          {lic.validFrom ? new Date(lic.validFrom).toLocaleDateString() : '—'}
+                          {lic.validFrom ? formatDate(lic.validFrom) : '—'}
                         </span>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <span className="text-sm">
-                            {lic.expiresAt ? new Date(lic.expiresAt).toLocaleDateString() : '—'}
+                            {lic.expiresAt ? formatDate(lic.expiresAt) : '—'}
                           </span>
                           {days !== null && (
                             <span

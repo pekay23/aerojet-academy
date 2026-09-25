@@ -69,9 +69,9 @@ export default function CreateCoursePage() {
       try {
         const [catsRes, licensesRes] = await Promise.all([
           fetch('/api/staff/course-categories'),
-          fetch('/api/staff/license-categories')
+          fetch('/api/staff/license-categories'),
         ])
-        
+
         const catsData = await catsRes.json()
         const licensesData = await licensesRes.json()
 
@@ -79,10 +79,12 @@ export default function CreateCoursePage() {
           setCategories(catsData.data)
         }
         if (licensesData.success) {
-          setLicenseCategories(licensesData.data.map((l: { code: string; name: string }) => ({
-            label: `${l.code} - ${l.name}`,
-            value: l.code
-          })))
+          setLicenseCategories(
+            licensesData.data.map((l: { code: string; name: string }) => ({
+              label: `${l.code} - ${l.name}`,
+              value: l.code,
+            }))
+          )
         }
       } catch (error) {
         console.error('Failed to fetch data:', error)
@@ -142,15 +144,15 @@ export default function CreateCoursePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1800px]">
+    <div className="mx-auto max-w-450">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             Create Course
           </h1>
           <p className="text-slate-500 dark:text-slate-400">Add a new course to the catalog.</p>
         </div>
-        <Link href="/staff/courses" className="text-sm font-bold text-aerojet-blue hover:underline">
+        <Link href="/staff/courses" className="text-aerojet-blue text-sm font-bold hover:underline">
           Cancel
         </Link>
       </div>
@@ -167,7 +169,12 @@ export default function CreateCoursePage() {
                     <FormItem>
                       <FormLabel htmlFor="course-code">Course Code</FormLabel>
                       <FormControl>
-                        <Input id="course-code" placeholder="e.g., M1" autoComplete="off" {...field} />
+                        <Input
+                          id="course-code"
+                          placeholder="e.g., M1"
+                          autoComplete="off"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -180,7 +187,12 @@ export default function CreateCoursePage() {
                     <FormItem>
                       <FormLabel htmlFor="course-name">Course Name</FormLabel>
                       <FormControl>
-                        <Input id="course-name" placeholder="e.g., Mathematics" autoComplete="off" {...field} />
+                        <Input
+                          id="course-name"
+                          placeholder="e.g., Mathematics"
+                          autoComplete="off"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -195,7 +207,12 @@ export default function CreateCoursePage() {
                   <FormItem>
                     <FormLabel htmlFor="course-description">Description</FormLabel>
                     <FormControl>
-                      <Textarea id="course-description" placeholder="A brief description of the course" autoComplete="off" {...field} />
+                      <Textarea
+                        id="course-description"
+                        placeholder="A brief description of the course"
+                        autoComplete="off"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -245,9 +262,16 @@ export default function CreateCoursePage() {
                   name="prerequisites"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="course-prerequisites">Prerequisites (Course Codes)</FormLabel>
+                      <FormLabel htmlFor="course-prerequisites">
+                        Prerequisites (Course Codes)
+                      </FormLabel>
                       <FormControl>
-                        <Input id="course-prerequisites" placeholder="e.g., M1, M2 (comma separated)" autoComplete="off" {...field} />
+                        <Input
+                          id="course-prerequisites"
+                          placeholder="e.g., M1, M2 (comma separated)"
+                          autoComplete="off"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -285,7 +309,9 @@ export default function CreateCoursePage() {
                   name="applicableCategories"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="course-app-categories">Applicable License Categories</FormLabel>
+                      <FormLabel htmlFor="course-app-categories">
+                        Applicable License Categories
+                      </FormLabel>
                       <FormControl>
                         <MultiSelect
                           options={licenseCategories}
@@ -308,7 +334,13 @@ export default function CreateCoursePage() {
                     <FormItem>
                       <FormLabel htmlFor="course-duration">Duration (hours)</FormLabel>
                       <FormControl>
-                        <Input id="course-duration" type="number" placeholder="e.g., 100" autoComplete="off" {...field} />
+                        <Input
+                          id="course-duration"
+                          type="number"
+                          placeholder="e.g., 100"
+                          autoComplete="off"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -324,7 +356,13 @@ export default function CreateCoursePage() {
                         Currency is set in system settings.
                       </div>
                       <FormControl>
-                        <Input id="course-price" type="number" step="0.01" autoComplete="off" {...field} />
+                        <Input
+                          id="course-price"
+                          type="number"
+                          step="0.01"
+                          autoComplete="off"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

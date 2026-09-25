@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
@@ -122,10 +123,7 @@ function computeEventStats(activeEventRaw: ActiveEventRaw | null | undefined, no
     : null
   return {
     name: activeEventRaw.name,
-    totalSeatsFilled: activeEventRaw.pools.reduce(
-      (sum, p) => sum + p._count.memberships,
-      0
-    ),
+    totalSeatsFilled: activeEventRaw.pools.reduce((sum, p) => sum + p._count.memberships, 0),
     totalCapacity: activeEventRaw.pools.reduce((sum, p) => sum + p.maxCandidates, 0),
     totalConfirmedRevenue: activeEventRaw.examBookings.reduce(
       (sum, b) => sum + Number(b.amountPaid || 0),
@@ -257,9 +255,7 @@ async function getDashboardData() {
         loadApprovedTopupsSince(tx, sixMonthsAgo),
       ])
 
-      const { totalUsers, pendingApplicants, activeStudents } = computeUserStats(
-        userStatusCounts
-      )
+      const { totalUsers, pendingApplicants, activeStudents } = computeUserStats(userStatusCounts)
 
       return {
         totalUsers,
@@ -283,7 +279,7 @@ async function getDashboardData() {
 
 export default async function StaffDashboardPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   if (session.user.role === 'EXAMINER') {
     redirect('/examiner')
@@ -413,7 +409,7 @@ export default async function StaffDashboardPage() {
               isNearDeadline={data.activeEvent.isNearDeadline}
             />
           ) : (
-            <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center dark:border-slate-700 dark:bg-slate-800/50">
+            <div className="flex h-full min-h-50 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center dark:border-slate-700 dark:bg-slate-800/50">
               <Clock className="mb-2 h-8 w-8 text-slate-300" />
               <p className="text-sm font-bold text-slate-400">No active exam bookings</p>
               <p className="mt-1 text-xs text-slate-300">Create an exam event to get started</p>

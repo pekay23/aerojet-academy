@@ -1,7 +1,7 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getStudentResources } from '@/lib/actions/resources'
 import StudentResourcesView from './_components/StudentResourcesView'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import {
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default async function StudentResourcesPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { isFullTime } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'materials')
@@ -41,7 +41,7 @@ export default async function StudentResourcesPage() {
     }
 
     return (
-      <div className="mx-auto max-w-[1600px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-400 space-y-8 duration-700">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             Resources
@@ -63,7 +63,7 @@ export default async function StudentResourcesPage() {
   const resources = await getStudentResources()
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-400 space-y-8 duration-700">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
           Resources

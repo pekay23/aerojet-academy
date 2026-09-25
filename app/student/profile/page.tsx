@@ -1,6 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import ProfileForm from './_components/ProfileForm'
@@ -19,7 +18,7 @@ import { PasskeySettings } from '@/app/staff/settings/_components/PasskeySetting
 
 async function InfoTab() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -39,7 +38,7 @@ async function InfoTab() {
     },
   })
 
-  if (!user) redirect('/login')
+  if (!user) return await redirectToLogin()
 
   const serializedUser = serializeUserProfile(user)
 
@@ -48,7 +47,7 @@ async function InfoTab() {
 
 async function SettingsTab() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -57,9 +56,10 @@ async function SettingsTab() {
     },
   })
 
-  if (!user) redirect('/login')
+  if (!user) return await redirectToLogin()
 
-  const serializedSettings = (user.settings as { notifications?: { email?: boolean }; theme?: string }) || {}
+  const serializedSettings =
+    (user.settings as { notifications?: { email?: boolean }; theme?: string }) || {}
 
   return <SettingsForm initialSettings={serializedSettings} />
 }

@@ -565,12 +565,12 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
           </div>
 
           {/* Week Grid */}
-          <div className="flex h-[800px] overflow-y-auto">
+          <div className="flex h-200 overflow-y-auto">
             <div className="relative grid w-full grid-cols-[80px_1fr]">
               {/* Times */}
               <div className="border-r border-slate-100 dark:border-slate-800">
                 {timeSlots.map((hour) => (
-                  <div key={hour} className="relative h-[80px]">
+                  <div key={hour} className="relative h-20">
                     <span className="absolute -top-3 left-0 w-full text-center text-xs font-medium text-slate-400">
                       {hour === 0
                         ? '12 am'
@@ -591,7 +591,7 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
                   {timeSlots.map((hour) => (
                     <div
                       key={hour}
-                      className="h-[80px] border-b border-slate-100 dark:border-slate-800"
+                      className="h-20 border-b border-slate-100 dark:border-slate-800"
                     ></div>
                   ))}
                 </div>
@@ -599,7 +599,7 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
                 {weekDays.map((day, i) => (
                   <div
                     key={i}
-                    className="h-[1920px] border-r border-slate-100 last:border-r-0 dark:border-slate-800"
+                    className="h-480 border-r border-slate-100 last:border-r-0 dark:border-slate-800"
                   ></div>
                 ))}
 
@@ -687,7 +687,7 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
                     setCurrentDate(new Date(dayInfo.date))
                   }}
                   className={cn(
-                    'relative min-h-[120px] cursor-pointer border-r border-b border-slate-100 p-2 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50',
+                    'relative min-h-30 cursor-pointer border-r border-b border-slate-100 p-2 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50',
                     !dayInfo.isCurrentMonth && 'bg-slate-50/50 dark:bg-slate-900/50',
                     isToday && 'bg-[#F8FBFF] dark:bg-blue-900/10'
                   )}
@@ -737,7 +737,7 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
       {/* Popover Card */}
       {popupEvent && (
         <Dialog open={!!popupEvent} onOpenChange={() => setPopupEvent(null)}>
-          <DialogContent className="overflow-hidden rounded-[32px] border-0 p-0 shadow-2xl sm:max-w-[400px]">
+          <DialogContent className="overflow-hidden rounded-4xl border-0 p-0 shadow-2xl sm:max-w-100">
             <DialogTitle className="sr-only">{popupEvent?.title ?? 'Event Details'}</DialogTitle>
             <div className="relative bg-white p-8 dark:bg-slate-900">
               <div className="mb-6 flex items-center gap-2">
@@ -807,8 +807,8 @@ export default function CalendarGrid({ events, userId }: CalendarGridProps) {
 
       {/* Legacy Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[32px] border border-slate-200 bg-white p-8 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-4xl border border-slate-200 bg-white p-8 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
             <div className="mb-6 flex items-center justify-between">
               <h3 className="text-xl font-black text-slate-900 dark:text-white">
                 {editingEvent ? 'Edit Event' : 'New Event'}

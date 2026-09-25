@@ -9,10 +9,10 @@ export default async function StaffResourcesPage() {
   const resources = await getAdminResources()
 
   return (
-    <div className="mx-auto max-w-[1800px] space-y-8">
+    <div className="mx-auto max-w-450 space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             General Resources
           </h1>
           <p className="text-slate-500 dark:text-slate-400">

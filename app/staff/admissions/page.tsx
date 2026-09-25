@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { ApplicationStage, ProgrammeChoice } from '@prisma/client'
 import { format } from 'date-fns'
@@ -50,7 +50,7 @@ export default async function AdmissionsPipelinePage({
   searchParams: Promise<{ cycle?: string; programme?: string }>
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { cycle, programme } = await searchParams
 
@@ -60,12 +60,7 @@ export default async function AdmissionsPipelinePage({
   if (programme) where.programmeChoice = programme
 
   /* ── Parallel data fetches ── */
-  const [
-    stageCountsRaw,
-    programmeCounts,
-    recentApplications,
-    intakeCycles,
-  ] = await Promise.all([
+  const [stageCountsRaw, programmeCounts, recentApplications, intakeCycles] = await Promise.all([
     // 1. Count per stage
     prismaUnfiltered.application.groupBy({
       by: ['stage'],
@@ -107,14 +102,9 @@ export default async function AdmissionsPipelinePage({
   ])
 
   /* ── Derive stats ── */
-  const stageMap = new Map(
-    stageCountsRaw.map((s) => [s.stage, s._count.id])
-  )
+  const stageMap = new Map(stageCountsRaw.map((s) => [s.stage, s._count.id]))
 
-  const totalApplications = stageCountsRaw.reduce(
-    (sum, s) => sum + s._count.id,
-    0
-  )
+  const totalApplications = stageCountsRaw.reduce((sum, s) => sum + s._count.id, 0)
   const activeApplications = stageCountsRaw
     .filter((s) => !TERMINAL_STAGES.includes(s.stage))
     .reduce((sum, s) => sum + s._count.id, 0)
@@ -137,15 +127,15 @@ export default async function AdmissionsPipelinePage({
   }
 
   return (
-    <div className="mx-auto max-w-[1920px] space-y-8">
+    <div className="mx-auto max-w-480 space-y-8">
       {/* ── Header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight sm:text-4xl dark:text-white">
             Admissions Pipeline
           </h1>
           <p className="mt-1 flex items-center gap-2 text-base font-medium text-slate-500 dark:text-slate-400">
-            <Sparkles className="h-5 w-5 text-aerojet-sky" />
+            <Sparkles className="text-aerojet-sky h-5 w-5" />
             Track applicants across every stage of the admissions process.
           </p>
         </div>
@@ -182,11 +172,9 @@ export default async function AdmissionsPipelinePage({
       </div>
 
       {/* ── Pipeline Funnel ── */}
-      <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-6">
-          <h2 className="text-lg font-black text-aerojet-blue dark:text-white">
-            Pipeline Funnel
-          </h2>
+          <h2 className="text-aerojet-blue text-lg font-black dark:text-white">Pipeline Funnel</h2>
           <p className="text-sm font-medium text-slate-400">
             Applicant distribution across stage groups
           </p>
@@ -199,9 +187,7 @@ export default async function AdmissionsPipelinePage({
             if (groupTotal === 0 && group === 'terminal') return null
 
             const barWidth =
-              totalApplications > 0
-                ? Math.max((groupTotal / totalApplications) * 100, 2)
-                : 0
+              totalApplications > 0 ? Math.max((groupTotal / totalApplications) * 100, 2) : 0
 
             return (
               <div key={group}>
@@ -209,7 +195,7 @@ export default async function AdmissionsPipelinePage({
                   <h3 className="text-xs font-black tracking-widest text-slate-500 uppercase dark:text-slate-400">
                     {STAGE_GROUP_LABELS[group]}
                   </h3>
-                  <span className="text-sm font-black text-aerojet-blue dark:text-slate-100">
+                  <span className="text-aerojet-blue text-sm font-black dark:text-slate-100">
                     {groupTotal}
                   </span>
                 </div>
@@ -256,23 +242,16 @@ export default async function AdmissionsPipelinePage({
       {/* ── Bottom Grid: Programme Breakdown + Recent Applications ── */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Programme Breakdown */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-          <h2 className="mb-1 text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="text-aerojet-blue mb-1 text-sm font-black tracking-widest uppercase dark:text-white">
             By Programme
           </h2>
-          <p className="mb-6 text-xs font-medium text-slate-400">
-            Application distribution
-          </p>
+          <p className="mb-6 text-xs font-medium text-slate-400">Application distribution</p>
 
           <div className="space-y-4">
             {Object.values(ProgrammeChoice).map((pc) => {
-              const count =
-                programmeCounts.find((p) => p.programmeChoice === pc)?._count
-                  .id ?? 0
-              const pct =
-                totalApplications > 0
-                  ? Math.round((count / totalApplications) * 100)
-                  : 0
+              const count = programmeCounts.find((p) => p.programmeChoice === pc)?._count.id ?? 0
+              const pct = totalApplications > 0 ? Math.round((count / totalApplications) * 100) : 0
 
               return (
                 <div key={pc}>
@@ -280,11 +259,9 @@ export default async function AdmissionsPipelinePage({
                     <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
                       {PROGRAMME_LABELS[pc]}
                     </span>
-                    <span className="text-xs font-black text-aerojet-blue dark:text-slate-100">
+                    <span className="text-aerojet-blue text-xs font-black dark:text-slate-100">
                       {count}
-                      <span className="ml-1 text-[10px] font-bold text-slate-400">
-                        ({pct}%)
-                      </span>
+                      <span className="ml-1 text-[10px] font-bold text-slate-400">({pct}%)</span>
                     </span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
@@ -304,12 +281,12 @@ export default async function AdmissionsPipelinePage({
         {/* Recent Applications Table */}
         <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/30 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/30">
-            <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-slate-100">
+            <h3 className="text-aerojet-blue text-sm font-black tracking-widest uppercase dark:text-slate-100">
               Recent Applications
             </h3>
             <Link
               href="/staff/users?tab=applicants"
-              className="flex items-center gap-1 text-xs font-bold text-aerojet-blue transition-colors hover:text-aerojet-sky dark:text-aerojet-sky"
+              className="text-aerojet-blue hover:text-aerojet-sky dark:text-aerojet-sky flex items-center gap-1 text-xs font-bold transition-colors"
             >
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -348,7 +325,7 @@ export default async function AdmissionsPipelinePage({
                       >
                         <td className="px-6 py-4">
                           <div className="flex flex-col">
-                            <span className="font-black text-aerojet-blue dark:text-slate-100">
+                            <span className="text-aerojet-blue font-black dark:text-slate-100">
                               {name}
                             </span>
                             <span className="text-[10px] font-bold tracking-tighter text-slate-400 uppercase">
@@ -419,7 +396,7 @@ function StatCard({
   return (
     <div className="group relative overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
       <div
-        className={`absolute -right-4 -top-4 h-24 w-24 rounded-full opacity-[0.03] transition-transform group-hover:scale-150 ${color}`}
+        className={`absolute -top-4 -right-4 h-24 w-24 rounded-full opacity-[0.03] transition-transform group-hover:scale-150 ${color}`}
       />
       <div className="relative flex items-start justify-between">
         <div
@@ -429,12 +406,8 @@ function StatCard({
         </div>
       </div>
       <div className="mt-4">
-        <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-          {title}
-        </p>
-        <h3 className="text-3xl font-black text-aerojet-blue dark:text-slate-100">
-          {value}
-        </h3>
+        <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">{title}</p>
+        <h3 className="text-aerojet-blue text-3xl font-black dark:text-slate-100">{value}</h3>
       </div>
     </div>
   )
@@ -452,17 +425,13 @@ function QuickLink({
   return (
     <Link
       href={href}
-      className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-aerojet-blue/20 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-sky/30"
+      className="group hover:border-aerojet-blue/20 dark:hover:border-aerojet-sky/30 flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
     >
       <div>
-        <h3 className="font-black text-aerojet-blue dark:text-slate-100">
-          {title}
-        </h3>
-        <p className="mt-0.5 text-xs font-medium text-slate-400">
-          {description}
-        </p>
+        <h3 className="text-aerojet-blue font-black dark:text-slate-100">{title}</h3>
+        <p className="mt-0.5 text-xs font-medium text-slate-400">{description}</p>
       </div>
-      <ChevronRight className="h-5 w-5 text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-aerojet-blue dark:text-slate-600 dark:group-hover:text-aerojet-sky" />
+      <ChevronRight className="group-hover:text-aerojet-blue dark:group-hover:text-aerojet-sky h-5 w-5 text-slate-300 transition-transform group-hover:translate-x-1 dark:text-slate-600" />
     </Link>
   )
 }

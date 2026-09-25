@@ -1,6 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
 import { Armchair, MapPin, BookOpen, Calendar, Ban } from 'lucide-react'
@@ -20,7 +20,7 @@ interface LayoutData {
 
 export default async function StudentSeatingPage() {
   const session = await getAuthSession()
-  if (!session || session.user.role !== 'STUDENT') redirect('/login')
+  if (!session || session.user.role !== 'STUDENT') return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -72,12 +72,8 @@ export default async function StudentSeatingPage() {
   ])
 
   // Load class seating assignments from system settings (depends on myClasses)
-  const classesWithLayout = myClasses.filter(
-    (c) => c.class.classroom?.layout
-  )
-  const classSeatingKeys = classesWithLayout.map(
-    (c) => `class_seating_${c.classId}`
-  )
+  const classesWithLayout = myClasses.filter((c) => c.class.classroom?.layout)
+  const classSeatingKeys = classesWithLayout.map((c) => `class_seating_${c.classId}`)
   const classSeatingSettings =
     classSeatingKeys.length > 0
       ? await prismaUnfiltered.systemSetting.findMany({
@@ -108,9 +104,7 @@ export default async function StudentSeatingPage() {
     // Find which seat this student is assigned to
     const mySeatEntry = Object.entries(assignments).find(([, uid]) => uid === userId)
     const mySeatId = mySeatEntry?.[0] ?? null
-    const mySeat = mySeatId
-      ? c.class.classroom!.seats.find((s) => s.id === mySeatId)
-      : null
+    const mySeat = mySeatId ? c.class.classroom!.seats.find((s) => s.id === mySeatId) : null
 
     classSeatInfos.push({
       classId: c.classId,
@@ -147,8 +141,7 @@ export default async function StudentSeatingPage() {
     .filter((a) => a.seat?.classroom?.layout)
     .map((a) => ({
       eventName: a.sitting.event?.name || 'Exam',
-      componentCode:
-        a.sitting.examComponent.course?.code || a.sitting.examComponent.code,
+      componentCode: a.sitting.examComponent.course?.code || a.sitting.examComponent.code,
       componentName: a.sitting.examComponent.name,
       dayNumber: a.sitting.dayNumber,
       sessionType: a.sitting.sessionType,
@@ -167,12 +160,12 @@ export default async function StudentSeatingPage() {
   const hasAnySeating = classSeatInfos.length > 0 || examSeatInfos.length > 0
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-350 space-y-8 duration-700">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-blue-800 sm:text-4xl dark:text-white">
           My Seating
         </h1>
-          <p className="mt-1 text-base font-medium text-slate-600 dark:text-slate-300">
+        <p className="mt-1 text-base font-medium text-slate-600 dark:text-slate-300">
           View your assigned seats in classes and exams.
         </p>
       </div>
@@ -184,7 +177,8 @@ export default async function StudentSeatingPage() {
             No Seating Assignments
           </h3>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            You don't have any seating assignments yet. Check back when your classes or exams are scheduled.
+            You don't have any seating assignments yet. Check back when your classes or exams are
+            scheduled.
           </p>
         </div>
       )}
@@ -288,9 +282,7 @@ function SeatCard({
           >
             {Array.from({ length: layout.rows }, (_, r) =>
               Array.from({ length: layout.cols }, (_, c) => {
-                const cell = layout.cells.find(
-                  (cell) => cell.row === r && cell.col === c
-                )
+                const cell = layout.cells.find((cell) => cell.row === r && cell.col === c)
                 const type = cell?.type ?? 'AISLE'
 
                 if (type !== 'DESK') {
@@ -299,9 +291,7 @@ function SeatCard({
                       key={`${r}-${c}`}
                       className={cn(
                         'h-7 w-7 rounded',
-                        type === 'OBSTACLE'
-                          ? 'bg-red-50 dark:bg-red-900/10'
-                          : ''
+                        type === 'OBSTACLE' ? 'bg-red-50 dark:bg-red-900/10' : ''
                       )}
                     >
                       {type === 'OBSTACLE' && (

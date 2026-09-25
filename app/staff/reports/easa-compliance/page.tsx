@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { getEasaComplianceReport } from '@/lib/compliance/reports'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
@@ -33,12 +33,12 @@ const STATUS_STYLES: Record<
 
 export default async function EasaCompliancePage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const report = await getEasaComplianceReport()
 
   return (
-    <div className="mx-auto max-w-[1920px] space-y-8">
+    <div className="mx-auto max-w-480 space-y-8">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <h1 className="text-aerojet-blue text-3xl font-black tracking-tight sm:text-4xl dark:text-white">
@@ -51,7 +51,7 @@ export default async function EasaCompliancePage() {
         </div>
         <a
           href="/api/staff/reports/easa-compliance/export"
-          className="flex items-center gap-2 rounded-2xl bg-aerojet-blue px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] hover:bg-aerojet-blue/90 active:scale-[0.98]"
+          className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           <Download className="h-4 w-4" />
           Export CSV
@@ -136,7 +136,9 @@ export default async function EasaCompliancePage() {
                         <td className="px-6 py-4 text-center font-bold text-slate-700 dark:text-slate-300">
                           {m.totalAttempts}
                         </td>
-                        <td className="px-6 py-4 text-center font-bold text-emerald-600">{m.passed}</td>
+                        <td className="px-6 py-4 text-center font-bold text-emerald-600">
+                          {m.passed}
+                        </td>
                         <td className="px-6 py-4 text-center font-bold text-red-500">{m.failed}</td>
                         <td className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center gap-2">
@@ -176,8 +178,8 @@ export default async function EasaCompliancePage() {
             </table>
           </div>
           <p className="px-6 py-3 text-xs text-slate-400">
-            Generated {format(report.generatedAt, 'MMM d, yyyy HH:mm')} · Compliance threshold: pass rate ≥{' '}
-            {report.passMark}%.
+            Generated {format(report.generatedAt, 'MMM d, yyyy HH:mm')} · Compliance threshold: pass
+            rate ≥ {report.passMark}%.
           </p>
         </CardContent>
       </Card>

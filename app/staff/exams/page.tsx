@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import StaffExamsTabs from '../_components/StaffExamsTabs'
 import ExamBookingsTable, { type ExamBookingWithDetails } from '../_components/ExamBookingsTable'
@@ -7,7 +7,7 @@ import RecordsTab from './_components/RecordsTab'
 import { GroupCharterModal } from './_components/GroupCharterModal'
 import { getAvailableModules } from '../actions/index'
 import { serializePrisma } from '@/lib/utils/serialization'
-import { normalizeAttemptType, resolveAttemptType } from '@/lib/exams/attempt-types'
+import { mergeAttemptType } from '@/lib/exams/attempt-types'
 
 import Link from 'next/link'
 import SearchInput from '@/components/SearchInput'
@@ -137,7 +137,7 @@ export default async function StaffExamsPage({
   searchParams: Promise<{ tab?: string; query?: string; page?: string; limit?: string }>
 }) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const params = await searchParams
   const tab = VALID_TABS.includes(params.tab ?? '') ? params.tab! : 'events'
@@ -705,15 +705,15 @@ async function RecordsTabServer({ query }: { query?: string }) {
       } as ExamRecord
 
       unifiedRecords.push(record)
-      const bModule = (b.moduleCode || '').toUpperCase()
-      const bAttempt = normalizeAttemptType(b.attemptType) || resolveAttemptType(b.attemptType)
+      const bModule = (b.moduleCode || '').trim().toUpperCase()
+      const bAttempt = mergeAttemptType(b.attemptType)
       bookingsMap.set(`${b.userId}:${bModule}:${bAttempt}`, record)
     }
 
     // 2. Merge results into bookings or add as standalone
     for (const r of resultsRaw) {
-      const rModule = (r.moduleCode || '').toUpperCase()
-      const rAttempt = normalizeAttemptType(r.attemptType) || resolveAttemptType(r.attemptType)
+      const rModule = (r.moduleCode || '').trim().toUpperCase()
+      const rAttempt = mergeAttemptType(r.attemptType)
       const mapKey = `${r.userId}:${rModule}:${rAttempt}`
       const existingRecord = bookingsMap.get(mapKey)
 
@@ -742,17 +742,7 @@ async function RecordsTabServer({ query }: { query?: string }) {
           }
         }
       } else {
-        // Standalone result row — match only by exact (userId, moduleCode, normalizedAttemptType).
-        // No fuzzy substring fallback (prevents M1 colliding with M10).
-        const matchingBooking = bookingsRaw.find((b) => {
-          if (b.userId !== r.userId) return false
-          const bModule = (b.moduleCode || '').trim().toUpperCase()
-          const rModuleNorm = rModule.trim()
-          if (!rModuleNorm || bModule !== rModuleNorm) return false
-          const bAttempt = normalizeAttemptType(b.attemptType) || resolveAttemptType(b.attemptType)
-          return bAttempt === rAttempt
-        })
-
+        // Standalone result row (no matching booking found).
         unifiedRecords.push({
           ...r,
           id: `result_${r.id}`,
@@ -764,10 +754,10 @@ async function RecordsTabServer({ query }: { query?: string }) {
           examDate: r.createdAt,
           dateDisplayKind: 'DATE',
           dateDisplay: format(new Date(r.createdAt), 'MMM d, yyyy'),
-          bookingType: matchingBooking?.bookingType || 'INDIVIDUAL',
+          bookingType: 'INDIVIDUAL',
           isMigrated: !!r.migrationRef,
           migrationRef: r.migrationRef,
-          examCategory: r.examCategory || matchingBooking?.examCategory || 'OFFICIAL_EASA',
+          examCategory: r.examCategory || 'OFFICIAL_EASA',
         } as ExamRecord)
       }
     }
@@ -777,9 +767,8 @@ async function RecordsTabServer({ query }: { query?: string }) {
     const seenKeys = new Set<string>()
     const deduped: ExamRecord[] = []
     for (const rec of unifiedRecords) {
-      const recModule = (rec.moduleCode || '').toUpperCase()
-      const recAttempt =
-        normalizeAttemptType(rec.attemptType) || resolveAttemptType(rec.attemptType)
+      const recModule = (rec.moduleCode || '').trim().toUpperCase()
+      const recAttempt = mergeAttemptType(rec.attemptType)
       const key = `${rec.userId}:${recModule}:${recAttempt}:${rec.source}`
       if (seenKeys.has(key)) continue
       seenKeys.add(key)

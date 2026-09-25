@@ -190,7 +190,7 @@ export default function SchedulingMatrix({
   }
 
   return (
-    <div className="mx-auto max-w-[1800px] space-y-6 px-4 py-8 md:space-y-8 md:px-8">
+    <div className="mx-auto max-w-450 space-y-6 px-4 py-8 md:space-y-8 md:px-8">
       {/* Header */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">

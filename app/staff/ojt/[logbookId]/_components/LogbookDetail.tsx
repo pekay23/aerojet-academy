@@ -40,6 +40,7 @@ interface Entry {
   maintenanceType: string
   durationHours: number
   supervisorId: string
+  supervisorName: string
   supervisorSignature: boolean
   studentSignature: boolean
   verifiedByManagement: boolean
@@ -871,6 +872,11 @@ export default function LogbookDetail({
                                 <span className="text-slate-600 dark:text-slate-300">
                                   Supervisor
                                 </span>
+                                {entry.supervisorName && entry.supervisorName !== 'Unknown' && (
+                                  <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">
+                                    ({entry.supervisorName})
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center gap-1">
                                 {entry.studentSignature ? (

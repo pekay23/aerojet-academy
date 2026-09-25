@@ -11,24 +11,24 @@ import dynamic from 'next/dynamic'
 // warnings during the dynamic-chunk swap.
 
 const Placeholder = () => (
-  <div className="h-[280px] w-full animate-pulse rounded-2xl bg-slate-100/60 dark:bg-slate-800/40" />
+  <div className="h-70 w-full animate-pulse rounded-2xl bg-slate-100/60 dark:bg-slate-800/40" />
 )
 
-const YoYRevenueChart = dynamic(
-  () => import('./YoYChartsInner').then((m) => m.YoYRevenueChart),
-  { ssr: false, loading: () => <Placeholder /> }
-)
+const YoYRevenueChart = dynamic(() => import('./YoYChartsInner').then((m) => m.YoYRevenueChart), {
+  ssr: false,
+  loading: () => <Placeholder />,
+})
 const YoYEnrollmentChart = dynamic(
   () => import('./YoYChartsInner').then((m) => m.YoYEnrollmentChart),
   { ssr: false, loading: () => <Placeholder /> }
 )
-const YoYPassRateChart = dynamic(
-  () => import('./YoYChartsInner').then((m) => m.YoYPassRateChart),
-  { ssr: false, loading: () => <Placeholder /> }
-)
-const YoYStudentChart = dynamic(
-  () => import('./YoYChartsInner').then((m) => m.YoYStudentChart),
-  { ssr: false, loading: () => <Placeholder /> }
-)
+const YoYPassRateChart = dynamic(() => import('./YoYChartsInner').then((m) => m.YoYPassRateChart), {
+  ssr: false,
+  loading: () => <Placeholder />,
+})
+const YoYStudentChart = dynamic(() => import('./YoYChartsInner').then((m) => m.YoYStudentChart), {
+  ssr: false,
+  loading: () => <Placeholder />,
+})
 
 export { YoYRevenueChart, YoYEnrollmentChart, YoYPassRateChart, YoYStudentChart }

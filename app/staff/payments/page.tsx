@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import PaymentsQueue from '../_components/PaymentsQueue'
 import { Metadata } from 'next'
@@ -14,7 +14,7 @@ export default async function PaymentsPage({
 }) {
   const { tab: tabParam } = await searchParams
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const pendingCount = await prismaUnfiltered.payment.count({ where: { status: 'PENDING' } })
   const validTabs: PaymentStatus[] = ['PENDING', 'APPROVED', 'REJECTED']

@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 animate-pulse">
+    <div className="mx-auto max-w-350 animate-pulse space-y-6">
       <div>
         <div className="h-4 w-32 rounded bg-slate-100 dark:bg-slate-800" />
         <div className="mt-2 h-8 w-72 rounded-lg bg-slate-200 dark:bg-slate-700" />
@@ -19,7 +19,7 @@ export default function Loading() {
           ))}
         </div>
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950">
-          <div className="grid grid-cols-8 gap-1.5 mx-auto max-w-fit">
+          <div className="mx-auto grid max-w-fit grid-cols-8 gap-1.5">
             {Array.from({ length: 48 }).map((_, i) => (
               <div key={i} className="h-16 w-16 rounded-lg bg-slate-200 dark:bg-slate-700" />
             ))}

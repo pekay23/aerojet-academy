@@ -26,7 +26,7 @@ export default function VariantD() {
           <span className="bg-aerojet-sky inline-block rounded-full px-4 py-1.5 text-[11px] font-black tracking-widest uppercase">
             {HERO.eyebrow}
           </span>
-          <h1 className="font-outfit mt-7 text-5xl leading-[0.95] font-black tracking-tighter sm:text-7xl lg:text-[6rem]">
+          <h1 className="font-outfit mt-7 text-5xl leading-[0.95] font-black tracking-tighter sm:text-7xl lg:text-8xl">
             CERTIFIED
             <br />
             <span className="text-aerojet-sky">AIRCRAFT</span>

@@ -1,6 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -11,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function AdvancementPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)
 
   const [pathways, academicYears] = await Promise.all([

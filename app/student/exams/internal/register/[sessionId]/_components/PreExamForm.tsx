@@ -30,9 +30,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UploadButton } from '@/lib/uploads/uploadthing'
 import { PROGRAMMES } from '@/lib/utils/constants'
-import {
-  internalExamRegistrationSchema,
-} from '@/lib/validation/schemas'
+import { internalExamRegistrationSchema } from '@/lib/validation/schemas'
 import { format } from 'date-fns'
 
 interface PreExamFormProps {
@@ -428,7 +426,7 @@ export default function PreExamForm({ sessionId, examDate, examLocation }: PreEx
             </div>
 
             <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading} className="min-w-[160px]">
+              <Button type="submit" disabled={isLoading} className="min-w-40">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

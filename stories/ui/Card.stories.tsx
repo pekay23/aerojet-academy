@@ -1,5 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
 const meta: Meta<typeof Card> = {
@@ -12,7 +19,7 @@ type Story = StoryObj<typeof Card>
 
 export const Default: Story = {
   render: () => (
-    <Card className="w-[350px]">
+    <Card className="w-87.5">
       <CardHeader>
         <CardTitle>Card Title</CardTitle>
         <CardDescription>Card description goes here.</CardDescription>
@@ -30,15 +37,15 @@ export const Default: Story = {
 
 export const Simple: Story = {
   render: () => (
-    <Card className="w-[350px] p-6">
-      <p className="text-sm text-muted-foreground">Simple card with just content and padding.</p>
+    <Card className="w-87.5 p-6">
+      <p className="text-muted-foreground text-sm">Simple card with just content and padding.</p>
     </Card>
   ),
 }
 
 export const HeaderOnly: Story = {
   render: () => (
-    <Card className="w-[350px]">
+    <Card className="w-87.5">
       <CardHeader>
         <CardTitle>Notifications</CardTitle>
         <CardDescription>You have 3 unread messages.</CardDescription>

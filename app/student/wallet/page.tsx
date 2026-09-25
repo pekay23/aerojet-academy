@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
   Wallet,
@@ -51,7 +51,7 @@ export default async function WalletPage({
 }) {
   const { tab: tabParam, action: actionParam } = await searchParams
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const user = session.user
   const tab = tabParam || 'overview'

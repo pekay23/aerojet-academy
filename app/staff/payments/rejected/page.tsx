@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import PaymentsQueue from '../../_components/PaymentsQueue'
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Rejected Payments | Staff Portal' }
 
 export default async function RejectedPaymentsPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const pendingCount = await prismaUnfiltered.payment.count({ where: { status: 'PENDING' } })
 

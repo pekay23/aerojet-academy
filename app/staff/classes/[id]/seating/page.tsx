@@ -1,6 +1,7 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
 import { ArrowLeft, AlertCircle } from 'lucide-react'
@@ -11,14 +12,10 @@ export const metadata: Metadata = {
   description: 'Manage seating arrangement for a class.',
 }
 
-export default async function ClassSeatingPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function ClassSeatingPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getAuthSession()
   if (!session || !['SUPER_ADMIN', 'ADMIN', 'STAFF'].includes(session.user.role)) {
-    redirect('/login')
+    return await redirectToLogin()
   }
 
   const { id } = await params
@@ -39,16 +36,16 @@ export default async function ClassSeatingPage({
 
   if (!cls.classroom || !cls.classroom.layout) {
     return (
-      <div className="mx-auto max-w-[1400px] space-y-6">
+      <div className="mx-auto max-w-350 space-y-6">
         <div>
           <Link
             href={`/staff/classes/${id}`}
-            className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition-colors hover:text-aerojet-sky"
+            className="hover:text-aerojet-sky mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to {cls.name}
           </Link>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             Class Seating
           </h1>
         </div>
@@ -61,7 +58,7 @@ export default async function ClassSeatingPage({
             The assigned classroom doesn't have a floor plan yet. Go to{' '}
             <Link
               href={`/staff/classrooms/${cls.classroomId}`}
-              className="font-bold text-aerojet-sky hover:underline"
+              className="text-aerojet-sky font-bold hover:underline"
             >
               design its layout
             </Link>{' '}
@@ -96,22 +93,20 @@ export default async function ClassSeatingPage({
   // The simple approach: we store seat assignments as classroom-level data
   const students = attendanceUsers.map((a) => ({
     id: a.userId,
-    name: a.user.profile
-      ? `${a.user.profile.firstName} ${a.user.profile.lastName}`
-      : 'Unknown',
+    name: a.user.profile ? `${a.user.profile.firstName} ${a.user.profile.lastName}` : 'Unknown',
   }))
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-350 space-y-6 duration-700">
       <div>
         <Link
           href={`/staff/classes/${id}`}
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition-colors hover:text-aerojet-sky"
+          className="hover:text-aerojet-sky mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to {cls.name}
         </Link>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Class Seating — {cls.course.code}
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

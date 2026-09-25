@@ -94,7 +94,7 @@ export function PeriodFilter() {
           <CalendarRange className="h-5 w-5" />
         </div>
         <Select value={showCustom ? 'custom' : period} onValueChange={handlePeriodChange}>
-          <SelectTrigger className="text-aerojet-blue hover:border-aerojet-blue/30 w-[200px] rounded-xl border-slate-100 bg-white font-black shadow-sm transition-all dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+          <SelectTrigger className="text-aerojet-blue hover:border-aerojet-blue/30 w-50 rounded-xl border-slate-100 bg-white font-black shadow-sm transition-all dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
             <SelectValue placeholder="Select period" />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800">

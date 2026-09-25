@@ -67,7 +67,7 @@ export default async function ExamManifestPage({
   }))
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6">
+    <div className="mx-auto max-w-350 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">

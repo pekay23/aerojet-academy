@@ -209,7 +209,7 @@ export function CurrencyDisplay({
         )}
       </div>
       {showDisclaimer && activeCurrency.toUpperCase() !== baseCurrency.toUpperCase() && (
-        <p className="max-w-[200px] text-[10px] leading-tight text-slate-400 dark:text-slate-500">
+        <p className="max-w-50 text-[10px] leading-tight text-slate-400 dark:text-slate-500">
           {sources[activeCurrency.toUpperCase()] === 'admin' ? (
             <span className="font-semibold text-blue-500 dark:text-blue-400">
               Official Academy Rate. Check with your bank for any transfer fees.

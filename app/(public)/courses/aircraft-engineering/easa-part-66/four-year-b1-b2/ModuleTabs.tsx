@@ -28,7 +28,7 @@ export default function ModuleTabs({ b1Modules, b2Modules }: ModuleTabsProps) {
         ariaLabel="Module categories"
       />
 
-      <div className="min-h-[400px]">
+      <div className="min-h-100">
         {activeTab === 'b1' && <ModuleGrid modules={b1Modules} />}
         {activeTab === 'b2' && <ModuleGrid modules={b2Modules} />}
       </div>

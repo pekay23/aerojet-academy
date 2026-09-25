@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { Mail } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -24,7 +24,7 @@ export default async function MessagesPage({
 }) {
   const { subject: subjectParam } = await searchParams
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -96,7 +96,7 @@ export default async function MessagesPage({
   const totalUnread = threads.reduce((sum, t) => sum + t.unreadCount, 0)
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
       {/* Realtime push (Supabase) — falls back to the 60s polling below */}
       <MessagesRealtime userId={userId} />
       <AutoRefresh intervalMs={60000} />
@@ -106,7 +106,7 @@ export default async function MessagesPage({
           <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             Messages
             {totalUnread > 0 && (
-              <span className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-full bg-red-500 px-2 text-xs font-bold text-white">
+              <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-red-500 px-2 text-xs font-bold text-white">
                 {totalUnread}
               </span>
             )}
@@ -115,15 +115,15 @@ export default async function MessagesPage({
             Your conversations with staff and instructors.
           </p>
         </div>
-        <NewMessageDialog 
-          recipients={recipients} 
+        <NewMessageDialog
+          recipients={recipients}
           defaultSubject={subjectParam}
-          defaultOpen={!!subjectParam} 
+          defaultOpen={!!subjectParam}
         />
       </div>
 
       {threads.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-12 text-center">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
             <Mail className="h-8 w-8 text-slate-400" />
           </div>

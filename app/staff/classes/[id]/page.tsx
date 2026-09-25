@@ -1,5 +1,6 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
 import Link from 'next/link'
@@ -27,18 +28,11 @@ const DAY_LABELS: Record<number, string> = {
   6: 'Saturday',
 }
 
-function WeeklyScheduleDisplay({
-  schedule,
-}: {
-  schedule: Record<string, unknown>
-}) {
-  const entries = Array.isArray(schedule)
-    ? (schedule as unknown[])
-    : Object.values(schedule)
+function WeeklyScheduleDisplay({ schedule }: { schedule: Record<string, unknown> }) {
+  const entries = Array.isArray(schedule) ? (schedule as unknown[]) : Object.values(schedule)
 
   const weekly = entries.filter(
-    (e): e is Record<string, unknown> =>
-      typeof e === 'object' && e !== null && 'day' in e
+    (e): e is Record<string, unknown> => typeof e === 'object' && e !== null && 'day' in e
   )
 
   if (weekly.length === 0) {
@@ -61,9 +55,7 @@ function WeeklyScheduleDisplay({
             key={i}
             className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800/50"
           >
-            <span className="font-bold text-slate-700 dark:text-slate-300">
-              {label}
-            </span>
+            <span className="font-bold text-slate-700 dark:text-slate-300">{label}</span>
             <span className="font-mono text-xs text-slate-500">
               {start} → {end}
             </span>
@@ -82,19 +74,29 @@ interface Props {
 
 export default async function ClassDetailsPage({ params }: Props) {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const { id } = await params
 
   function slugify(text: string) {
-    return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+    return (
+      text
+        ?.toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-') || ''
+    )
   }
 
   // Fallback: If id is a slug, find the class by name
   let targetId = id
   if (id.length < 20) {
-    const allBasicClasses = await prismaUnfiltered.class.findMany({ select: { id: true, name: true } })
-    const matchedClass = allBasicClasses.find(c => slugify(c.name) === id)
+    const allBasicClasses = await prismaUnfiltered.class.findMany({
+      select: { id: true, name: true },
+    })
+    const matchedClass = allBasicClasses.find((c) => slugify(c.name) === id)
     if (matchedClass) targetId = matchedClass.id
   }
 
@@ -122,19 +124,19 @@ export default async function ClassDetailsPage({ params }: Props) {
     : 'Unassigned'
 
   return (
-    <div className="mx-auto max-w-[1800px]">
+    <div className="mx-auto max-w-450">
       {/* Header */}
       <div className="mb-6">
         <Link
           href="/staff/classes"
-          className="mb-4 inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-bold text-slate-400 transition-all duration-150 ease-out hover:bg-slate-100 hover:text-aerojet-blue dark:hover:bg-slate-800/60"
+          className="hover:text-aerojet-blue mb-4 inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-bold text-slate-400 transition-all duration-150 ease-out hover:bg-slate-100 dark:hover:bg-slate-800/60"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Classes
         </Link>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-6">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-aerojet-blue/5 text-3xl font-black text-aerojet-blue shadow-sm">
-              <Users className="h-10 w-10 text-aerojet-sky" />
+            <div className="bg-aerojet-blue/5 text-aerojet-blue flex h-20 w-20 items-center justify-center rounded-2xl text-3xl font-black shadow-sm">
+              <Users className="text-aerojet-sky h-10 w-10" />
             </div>
             <div>
               <div className="flex items-center gap-3">
@@ -145,7 +147,7 @@ export default async function ClassDetailsPage({ params }: Props) {
                   {cls.semester?.name || 'Current Semester'}
                 </span>
               </div>
-              <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+              <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
                 {cls.name}
               </h1>
             </div>
@@ -154,7 +156,7 @@ export default async function ClassDetailsPage({ params }: Props) {
             {cls.classroomId && (
               <Link
                 href={`/staff/classes/${cls.id}/seating`}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition-all hover:border-aerojet-sky hover:text-aerojet-blue dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+                className="hover:border-aerojet-sky hover:text-aerojet-blue flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition-all dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
               >
                 <Armchair className="h-4 w-4" />
                 Manage Seating
@@ -177,14 +179,14 @@ export default async function ClassDetailsPage({ params }: Props) {
               <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-4 dark:border-slate-700/50 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Course</p>
                 <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
-                  <BookOpen className="h-4 w-4 text-aerojet-sky" />
+                  <BookOpen className="text-aerojet-sky h-4 w-4" />
                   {cls.course.name}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-4 dark:border-slate-700/50 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Instructor</p>
                 <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
-                  <UserIcon className="h-4 w-4 text-aerojet-sky" />
+                  <UserIcon className="text-aerojet-sky h-4 w-4" />
                   {instructorName}
                 </div>
               </div>
@@ -193,7 +195,7 @@ export default async function ClassDetailsPage({ params }: Props) {
                   Current Occupancy
                 </p>
                 <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
-                  <Users className="h-4 w-4 text-aerojet-sky" />
+                  <Users className="text-aerojet-sky h-4 w-4" />
                   {cls.currentStudents} / {cls.maxStudents} Students
                 </div>
               </div>
@@ -239,7 +241,9 @@ export default async function ClassDetailsPage({ params }: Props) {
             </h2>
             <div className="space-y-2">
               {cls.schedule ? (
-                <WeeklyScheduleDisplay schedule={cls.schedule as unknown as Record<string, unknown>} />
+                <WeeklyScheduleDisplay
+                  schedule={cls.schedule as unknown as Record<string, unknown>}
+                />
               ) : (
                 <p className="text-xs text-slate-400 italic">No specific weekly schedule set.</p>
               )}

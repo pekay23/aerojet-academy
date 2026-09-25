@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic'
 const EmailPreviewsPage = dynamic(() => import('../email-previews/page'), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[400px] animate-pulse rounded-md border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800" />
+    <div className="min-h-100 animate-pulse rounded-md border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800" />
   ),
 })
 

@@ -1,5 +1,5 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'ATA Chapters | Staff Portal' }
 
 export default async function ATAChaptersPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const ataChapters = await prismaUnfiltered.aTAChapter.findMany({
     orderBy: { sortOrder: 'asc' },
@@ -18,7 +18,7 @@ export default async function ATAChaptersPage() {
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight uppercase dark:text-white">
           ATA Chapters
         </h1>
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">

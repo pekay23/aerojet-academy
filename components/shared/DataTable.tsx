@@ -1,7 +1,14 @@
 'use client'
 
 import { ChevronUp, ChevronDown } from 'lucide-react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from './EmptyState'
 import { cn } from '@/lib/utils'
@@ -70,7 +77,10 @@ export function DataTable<T>({
 
   const getRowId = rowKey
     ? rowKey
-    : (row: T, index: number) => (typeof row === 'object' && row !== null && 'id' in row ? String((row as Record<string, unknown>).id) : String(index))
+    : (row: T, index: number) =>
+        typeof row === 'object' && row !== null && 'id' in row
+          ? String((row as Record<string, unknown>).id)
+          : String(index)
 
   const allSelected = selectedIds.length > 0 && data.every((row) => String(getRowId(row, 0)) === '')
 
@@ -98,7 +108,7 @@ export function DataTable<T>({
                     type="checkbox"
                     checked={allSelected}
                     readOnly
-                    className="h-4 w-4 cursor-pointer rounded border-slate-300 text-aerojet-blue"
+                    className="text-aerojet-blue h-4 w-4 cursor-pointer rounded border-slate-300"
                   />
                 </button>
               </TableHead>
@@ -106,7 +116,10 @@ export function DataTable<T>({
             {columns.map((col) => {
               const isSorted = col.sortable && sortKey === col.key
               return (
-                <TableHead key={col.key} className={cn(col.className, col.headerClassName, 'select-none')}>
+                <TableHead
+                  key={col.key}
+                  className={cn(col.className, col.headerClassName, 'select-none')}
+                >
                   {col.sortable ? (
                     <button
                       onClick={() => onSort?.(col.key)}
@@ -116,9 +129,9 @@ export function DataTable<T>({
                       <span className="flex flex-col text-slate-300">
                         {isSorted ? (
                           sortOrder === 'asc' ? (
-                            <ChevronUp className="h-3 w-3 text-aerojet-blue" />
+                            <ChevronUp className="text-aerojet-blue h-3 w-3" />
                           ) : (
-                            <ChevronDown className="h-3 w-3 text-aerojet-blue" />
+                            <ChevronDown className="text-aerojet-blue h-3 w-3" />
                           )
                         ) : (
                           <ChevronUp className="h-3 w-3 opacity-30" />
@@ -141,7 +154,11 @@ export function DataTable<T>({
             return (
               <TableRow
                 key={rowId}
-                className={cn('group', onRowClick ? 'cursor-pointer' : '', isSelected ? 'bg-aerojet-blue/5' : '')}
+                className={cn(
+                  'group',
+                  onRowClick ? 'cursor-pointer' : '',
+                  isSelected ? 'bg-aerojet-blue/5' : ''
+                )}
                 onClick={() => onRowClick?.(row)}
               >
                 {onSelectionChange && (
@@ -162,7 +179,7 @@ export function DataTable<T>({
                         type="checkbox"
                         checked={isSelected}
                         readOnly
-                        className="h-4 w-4 cursor-pointer rounded border-slate-300 text-aerojet-blue"
+                        className="text-aerojet-blue h-4 w-4 cursor-pointer rounded border-slate-300"
                       />
                     </button>
                   </TableCell>
@@ -172,7 +189,7 @@ export function DataTable<T>({
                     {col.cell ? (
                       col.cell(row)
                     ) : (
-                      <span className="block max-w-[200px] truncate">
+                      <span className="block max-w-50 truncate">
                         {String((row as Record<string, unknown>)[col.key] ?? '—')}
                       </span>
                     )}
@@ -189,7 +206,8 @@ export function DataTable<T>({
           <div className="flex items-center justify-between text-sm">
             <div className="text-slate-500 dark:text-slate-400">
               Showing {Math.min((pagination.page - 1) * pagination.perPage + 1, pagination.total)}–
-              {Math.min(pagination.page * pagination.perPage, pagination.total)} of {pagination.total}
+              {Math.min(pagination.page * pagination.perPage, pagination.total)} of{' '}
+              {pagination.total}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -199,7 +217,9 @@ export function DataTable<T>({
               >
                 Prev
               </button>
-              {Array.from({ length: Math.min(5, Math.ceil(pagination.total / pagination.perPage)) }).map((_, i) => {
+              {Array.from({
+                length: Math.min(5, Math.ceil(pagination.total / pagination.perPage)),
+              }).map((_, i) => {
                 const pageNum = Math.max(1, pagination.page - 2) + i
                 return (
                   <button

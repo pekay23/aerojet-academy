@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import Link from 'next/link'
 import {
@@ -99,10 +100,6 @@ function getStatusBadge(cls: ClassData) {
     label: 'Active',
     className: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400',
   }
-}
-
-function formatDate(date: string | Date) {
-  return new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function ClassRow({ cls }: { cls: ClassData }) {

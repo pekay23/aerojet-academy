@@ -1,4 +1,5 @@
 'use client'
+import { formatDate } from '@/lib/utils/formatters'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -41,7 +42,10 @@ export default function GdprQueue({ requests }: { requests: DsrRow[] }) {
   })
 
   const call = async (url: string, init: RequestInit, ok: string) => {
-    const res = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json', ...(init.headers || {}) } })
+    const res = await fetch(url, {
+      ...init,
+      headers: { 'Content-Type': 'application/json', ...(init.headers || {}) },
+    })
     const json = await res.json().catch(() => ({}))
     if (!res.ok || json?.success === false) {
       toast.error(json?.error || `Request failed (${res.status})`)
@@ -53,7 +57,11 @@ export default function GdprQueue({ requests }: { requests: DsrRow[] }) {
   }
 
   const onTransition = async (id: string, status: DsrRow['status']) => {
-    await call(`/api/staff/gdpr/requests/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }, `Status -> ${status}`)
+    await call(
+      `/api/staff/gdpr/requests/${id}`,
+      { method: 'PATCH', body: JSON.stringify({ status }) },
+      `Status -> ${status}`
+    )
   }
 
   const onExport = (userId: string) => {
@@ -68,10 +76,14 @@ export default function GdprQueue({ requests }: { requests: DsrRow[] }) {
     }
     const reason = prompt('Reason for anonymisation:')
     if (!reason) return
-    await call(`/api/staff/users/${userId}/anonymise`, {
-      method: 'POST',
-      body: JSON.stringify({ reason, confirmEmail }),
-    }, `${name} anonymised`)
+    await call(
+      `/api/staff/users/${userId}/anonymise`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ reason, confirmEmail }),
+      },
+      `${name} anonymised`
+    )
   }
 
   return (
@@ -86,7 +98,10 @@ export default function GdprQueue({ requests }: { requests: DsrRow[] }) {
             {f === 'open' ? 'Open' : f === 'overdue' ? 'Overdue' : 'All'}
           </button>
         ))}
-        <a href="/staff/settings/retention" className="ml-auto text-sm font-bold text-aerojet-blue hover:underline">
+        <a
+          href="/staff/settings/retention"
+          className="text-aerojet-blue ml-auto text-sm font-bold hover:underline"
+        >
           Edit retention policies {'->'}
         </a>
       </div>
@@ -112,33 +127,65 @@ export default function GdprQueue({ requests }: { requests: DsrRow[] }) {
                     <p className="font-bold text-slate-900 dark:text-slate-100">{r.user.name}</p>
                     <p className="text-xs text-slate-500">{r.user.email}</p>
                   </td>
-                  <td className="px-3 py-2"><span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black tracking-widest text-slate-600 uppercase dark:bg-slate-800 dark:text-slate-300">{r.requestType}</span></td>
-                  <td className="px-3 py-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${STATUS_COLOR[r.status]}`}>{r.status}</span></td>
                   <td className="px-3 py-2">
-                    <span className={`inline-flex items-center gap-1 text-xs ${overdue ? 'font-black text-red-600' : 'text-slate-500'}`}>
-                      {overdue ? <AlertOctagon className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-                      {new Date(r.dueBy).toLocaleDateString()}
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black tracking-widest text-slate-600 uppercase dark:bg-slate-800 dark:text-slate-300">
+                      {r.requestType}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${STATUS_COLOR[r.status]}`}
+                    >
+                      {r.status}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs ${overdue ? 'font-black text-red-600' : 'text-slate-500'}`}
+                    >
+                      {overdue ? (
+                        <AlertOctagon className="h-3 w-3" />
+                      ) : (
+                        <Clock className="h-3 w-3" />
+                      )}
+                      {formatDate(r.dueBy)}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-xs text-slate-500">{r.assignedToEmail ?? '-'}</td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap gap-1">
                       {r.requestType === 'ACCESS' && (
-                        <button onClick={() => onExport(r.user.id)} className="flex items-center gap-1 rounded bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100">
+                        <button
+                          onClick={() => onExport(r.user.id)}
+                          className="flex items-center gap-1 rounded bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100"
+                        >
                           <Download className="h-3 w-3" /> Export
                         </button>
                       )}
                       {r.requestType === 'ERASURE' && r.status !== 'COMPLETED' && (
-                        <button onClick={() => onAnonymise(r.user.id, r.user.name, r.user.email)} className="flex items-center gap-1 rounded bg-red-50 px-2 py-1 text-xs font-bold text-red-700 hover:bg-red-100">
+                        <button
+                          onClick={() => onAnonymise(r.user.id, r.user.name, r.user.email)}
+                          className="flex items-center gap-1 rounded bg-red-50 px-2 py-1 text-xs font-bold text-red-700 hover:bg-red-100"
+                        >
                           <Trash2 className="h-3 w-3" /> Anonymise
                         </button>
                       )}
                       {r.status !== 'COMPLETED' && (
                         <>
                           {r.status === 'RECEIVED' && (
-                            <button disabled={isPending} onClick={() => onTransition(r.id, 'IN_PROGRESS')} className="rounded bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-30">Start</button>
+                            <button
+                              disabled={isPending}
+                              onClick={() => onTransition(r.id, 'IN_PROGRESS')}
+                              className="rounded bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-30"
+                            >
+                              Start
+                            </button>
                           )}
-                          <button disabled={isPending} onClick={() => onTransition(r.id, 'COMPLETED')} className="rounded bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-30">
+                          <button
+                            disabled={isPending}
+                            onClick={() => onTransition(r.id, 'COMPLETED')}
+                            className="rounded bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-30"
+                          >
                             <CheckCircle2 className="inline h-3 w-3" /> Complete
                           </button>
                         </>
@@ -149,7 +196,11 @@ export default function GdprQueue({ requests }: { requests: DsrRow[] }) {
               )
             })}
             {visible.length === 0 && (
-              <tr><td colSpan={6} className="px-3 py-8 text-center text-sm text-slate-400">No requests match this filter.</td></tr>
+              <tr>
+                <td colSpan={6} className="px-3 py-8 text-center text-sm text-slate-400">
+                  No requests match this filter.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

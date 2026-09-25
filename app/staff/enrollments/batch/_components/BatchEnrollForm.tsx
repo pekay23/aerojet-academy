@@ -253,7 +253,7 @@ export default function BatchEnrollForm({
               {selectedStudentIds.size === students.length ? 'Deselect All' : 'Select All'}
             </button>
           </div>
-          <div className="max-h-[400px] overflow-y-auto p-3 sm:p-4">
+          <div className="max-h-100 overflow-y-auto p-3 sm:p-4">
             {students.length === 0 ? (
               <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 No full-time students found.
@@ -337,7 +337,7 @@ export default function BatchEnrollForm({
               </button>
             )}
           </div>
-          <div className="max-h-[400px] overflow-y-auto p-3 sm:p-4">
+          <div className="max-h-100 overflow-y-auto p-3 sm:p-4">
             {/* EASA Modules */}
             {easaModules.length > 0 && (
               <div className="mb-4">

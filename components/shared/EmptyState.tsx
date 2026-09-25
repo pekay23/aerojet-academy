@@ -12,11 +12,11 @@ export function EmptyState({ icon: Icon = Inbox, title, description, action }: E
     <div
       role="status"
       aria-live="polite"
-      className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-8 text-center"
+      className="flex min-h-75 flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-8 text-center"
     >
-      <Icon className="h-12 w-12 text-muted-foreground/50" aria-hidden="true" />
+      <Icon className="text-muted-foreground/50 h-12 w-12" aria-hidden="true" />
       <h3 className="text-lg font-semibold">{title}</h3>
-      {description && <p className="max-w-sm text-sm text-muted-foreground">{description}</p>}
+      {description && <p className="text-muted-foreground max-w-sm text-sm">{description}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>
   )

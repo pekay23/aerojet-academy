@@ -10,7 +10,7 @@ import dynamic from 'next/dynamic'
 const RichTextEditor = dynamic(() => import('./RichTextEditorInner'), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[200px] animate-pulse rounded-md border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800" />
+    <div className="min-h-50 animate-pulse rounded-md border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800" />
   ),
 })
 

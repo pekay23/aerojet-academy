@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Staff Portal — TypeScript, React &amp;amp; Next.js Audit · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/index.html">Architecture</a>
+    <a href="../guides/index.html">Guides</a>
+    <a href="../audits/index.html">Audits</a>
+    <a href="../compliance/index.html">Compliance</a>
+    <a href="../plans/index.html">Plans</a>
+    <a href="../design/index.html">Design</a>
+    <a href="../operations/index.html">Operations</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Staff Portal — TypeScript, React &amp;amp; Next.js Audit</h1>
+  <p class="he-deck">Date: 2026-08-27 Auditor: TypeScript/React Auditor Agent……</p>
+</header>
+<h1 id="staff-portal-typescript-react-amp-nextjs-audit">Staff Portal — TypeScript, React &amp; Next.js Audit</h1>
+<p>Date: 2026-08-27 Auditor: TypeScript/React Auditor Agent…</p>
+<section class="he-section" id="01-executive-summary"><div class="he-section__num">01 · 01 · Executive Summary</div><h2 class="he-section__title">01 · Executive Summary</h2></section>
+<p>The Staff portal is feature-rich and follows several strong conventions — pervasive use of <code>prismaUnfiltered</code> in staff pages, well-structured <code>Promise.all</code> parallelization, correct <code>serializePrisma()</code> handoff to client components, and disciplined <code>next/dynamic</code> lazy-loading of heavy chart/PDF editors. However, type safety is the portal's weakest dimension: there are <strong>231 occurrences of <code>any</code> across 63 files</strong>, including server components that bypass Prisma's generated types, and a widespread pattern of client components accepting untyped <code>any</code> props (especially the student/user detail surfaces). Beyond types, (1) <strong>20 route segments are missing the <code>loading.tsx</code> files</strong> that CLAUDE.md mandates for Suspense streaming, (2) the portal has <strong>only a single root-level <code>error.tsx</code></strong> with no nested error boundaries for high-risk sections, and (3) server-action <code>catch</code> blocks consistently swallow errors into <code>console.error</code> with no structured error tracking. These are largely low-to-medium severity individually, but together they meaningfully erode maintainability and runtime safety.</p>
+<section class="he-section" id="02-findings"><div class="he-section__num">02 · 02 · Findings</div><h2 class="he-section__title">02 · Findings</h2></section>
+<h3 id="category-type-safety-pervasive-any-usage">Category: Type Safety — Pervasive <code>any</code> Usage</h3>
+<p>Finding 1 — 231 <code>any</code> occurrences across 63 files undermine TypeScript's guarantees</p>
+<ul>
+<li>
+<p><strong>File</strong>: 63 files across <code>app/staff/**</code> (see Appendix for the full list)</p>
+</li>
+<li>
+<p><strong>Lines</strong>: representative hotspots — <code>students/[id]/_components/StudentDetailTabs.tsx:27-32</code> (6 props typed <code>any</code>), <code>_components/TransactionsTable.tsx:22,24,75,81,88,92,93,97,98,111,140</code> (12), <code>scheduling/_components/SchedulingClient.tsx</code> (20), <code>reports/_components/YoYChartsInner.tsx</code> (12), <code>dashboard/page.tsx:41,77,207,387</code> (7), <code>audit-logs/page.tsx</code> (14), <code>_components/ReportsPanel.tsx</code> (14), <code>_components/StudentDetailPanel.tsx</code> (13)</p>
+</li>
+<li>
+<p><strong>Severity</strong>: High</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: A repo-wide scan found <strong>231</strong> <code>: any</code> / <code>as any</code> / <code>: any[]</code> occurrences in 63 files under <code>app/staff</code>. This is not confined to legacy corners — it is concentrated in the most-active surfaces: the student/user detail tabs, financial tables, scheduling client, and reports. Because these types flow in from Prisma queries, the root cause is usually one of: (a) Prisma results being passed through <code>serializePrisma()</code> and then consumed without a matching interface, or (b) props declared as <code>any</code> to dodge defining a shape. The cost is real: refactors silently break call sites, IDE autocomplete is disabled on <code>any</code>-typed data, and the <code>formatCurrency</code> client-import trap (documented in CLAUDE.md) becomes harder to spot when everything is already <code>any</code>.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Prioritize the highest-traffic surfaces. For each, define a narrow interface (e.g. <code>StudentDetail</code>, <code>TransactionRow</code>, <code>ScheduleEntry</code>) — many can be derived from Prisma via <code>Prisma.UserGetPayload&amp;lt;{ include: ... }&amp;gt;</code> or <code>Prisma.Enumerable&amp;lt;...&amp;gt;</code> rather than redeclared by hand. Enable <code>noImplicitAny</code> (if not already set) and add an ESLint <code>@typescript-eslint/no-explicit-any</code> rule with a gradual fix plan. The student detail tabs (<code>StudentDetailTabs.tsx</code>, <code>WalletTab.tsx</code>, <code>JourneyTab.tsx</code>, <code>ExamsTab.tsx</code>) are the highest-value target since they are rendered for every student view.</p>
+</li>
+</ul>
+<p><strong>Code Reference</strong> (<code>students/[id]/_components/StudentDetailTabs.tsx</code>):</p>
+<pre><code class="language-tsx">interface Props {
+  student: any          // ❌ should be SerializedStudent
+  examComponents: any[] // ❌ should be ExamComponent[]
+  upcomingEvents: any[] // ❌ should be ExamEvent[]
+  academicYears: any[]  // ❌ should be AcademicYear[]
+  semesters: any[]      // ❌ should be Semester[]
+  studyPathways: any[]  // ❌ should be StudyPathway[]
+  initialTab: string
+}
+
+</code></pre>
+<p>Finding 2 — <code>as any</code> type assertions silence real type errors in server components</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>dashboard/page.tsx:207</code>, <code>users/[id]/page.tsx:118,302,373</code>, <code>exams/_components/RecordsTab.tsx:283,337,339,506,834,850</code>, <code>enrollments/_components/EnrollmentsTable.tsx:122</code>, <code>admissions/interviews/page.tsx:83</code>, <code>admissions/medical/page.tsx:48</code>, <code>analytics/_components/RetentionHeatmap.tsx:68,89</code>, <code>analytics/_components/FeatureChart.tsx:90</code>, <code>newsroom/_components/NewsMarkdownEditor.tsx:526,577</code>, <code>resources/_components/ResourceForm.tsx:307,308</code>, <code>students/import/page.tsx:340,363</code></p>
+</li>
+<li>
+<p><strong>Lines</strong>: see above</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: <code>as any</code> is used to force-compile code where the author either didn't know the correct type or the correct type was inconvenient. Unlike a deliberate <code>as unknown as T</code> double-cast, a bare <code>as any</code> disables all checking on the resulting value and is easy to miss in review. Several are in server components (<code>dashboard/page.tsx:207</code> casts <code>userStatusCounts</code> to <code>any</code> before passing to <code>computeEventStats</code>; <code>users/[id]/page.tsx:118</code> maps enrollments into an untyped <code>ojtData</code>). These mask genuine mismatches — e.g. when a Prisma <code>include</code> changes shape, the <code>as any</code> call sites silently keep compiling while returning wrong data.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Replace each <code>as any</code> with the proper generated type. For Prisma <code>groupBy</code> results (the <code>dashboard/page.tsx:207</code> case), type the accumulator explicitly: <code>Prisma.GetAggregationOutputType&amp;lt;{ by: ['role','status']; _count: { _all: true } }&amp;gt;</code>. For the RecordsTab/ATAChapters select-value casts, narrow the state type instead of casting the event value. Ban bare <code>as any</code> via ESLint <code>@typescript-eslint/no-unsafe-...</code> rules.</p>
+</li>
+</ul>
+<h3 id="category-react-patterns-client-component-props-amp-keys">Category: React Patterns — Client Component Props &amp; Keys</h3>
+<p>Finding 3 — Client components accept untyped <code>any</code> props, breaking the server→client contract</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>students/[id]/_components/WalletTab.tsx:46</code> (<code>student: any</code>), <code>students/[id]/_components/ExamsTab.tsx:41-42</code> (<code>student: any; examComponents: any[]</code>), <code>students/[id]/_components/JourneyTab.tsx:140</code> (<code>student: any</code>), <code>practical-assessments/_components/PracticalAssessmentsClient.tsx:62-66</code> (5 <code>any[]</code> props), <code>_components/TransactionsTable.tsx:22,24</code> (<code>initialData: any[]; initialRelated: any</code>)</p>
+</li>
+<li>
+<p><strong>Lines</strong>: see above</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Server components fetch and <code>serializePrisma()</code> data, then hand it to client components. When the client component declares the prop as <code>any</code>, the entire type-safe chain built on the server is broken at the boundary — the single most important place to be typed. <code>WalletTab</code>, <code>ExamsTab</code>, and <code>JourneyTab</code> together form the core student-detail surface and all accept <code>student: any</code>, so a typo like <code>student.waletBalance</code> (vs <code>wallet.balance</code>) compiles and silently returns <code>undefined</code> at runtime.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Define shared serialized types (e.g. in <code>lib/types/student.ts</code>) derived from the Prisma queries, and type every client-component prop interface with them. The server→client serialization boundary is the highest-leverage place for types to live.</p>
+</li>
+</ul>
+<p>Finding 4 — <code>React.ComponentType&amp;lt;any&amp;gt;</code> in <code>AlertsCenter</code> severs icon-prop checking</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/dashboard/_components/AlertsCenter.tsx:16</code></p>
+</li>
+<li>
+<p><strong>Lines</strong>: 16</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Low</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: <code>SEVERITY_STYLE</code> declares <code>Icon: React.ComponentType&amp;lt;any&amp;gt;</code>, so any value (including a non-component) would compile. The map is internal and currently always correct, but the <code>any</code> defeats the safety net for future edits.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Use <code>React.ComponentType&amp;lt;{ className?: string }&amp;gt;</code> (the props actually passed at line 61), or import the lucide <code>LucideProps</code> type.</p>
+</li>
+</ul>
+<h3 id="category-error-handling-amp-resilience">Category: Error Handling &amp; Resilience</h3>
+<p>Finding 5 — Server actions swallow errors into <code>console.error</code> with no structured tracking</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/actions.ts:72-74, 92-94, 116-118, 140-142, 181-183, 202-204, 225-227, 247-249, 268-270, 289-291, 525-527, 722-724, 758-760, 799-801, 846-848, 862-864, 955-957, 1011-1013</code>; also <code>scheduling/actions.ts</code>, <code>ata-chapters/actions.ts</code></p>
+</li>
+<li>
+<p><strong>Lines</strong>: every <code>catch (error)</code> block in <code>app/staff/actions.ts</code> (18 occurrences)</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: Every server action wraps its body in <code>try/catch</code> and, on failure, runs <code>console.error('… error:', error)</code> and returns <code>{ error: 'Failed to …' }</code>. This pattern (a) loses the stack trace and Prisma error code that would aid debugging, (b) is invisible to any monitoring/alerting system, and (c) returns a generic string that the client can't distinguish (validation failure vs. DB timeout vs. not-found). The <code>error</code> variable is also implicitly typed — in <code>strict</code> mode it's <code>unknown</code>, so <code>error.message</code> accesses in some catch blocks (<code>academic/scheduling/_components/SchedulingMatrix.tsx:136</code>) would fail to compile unless the param is <code>err: any</code>.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Create a small <code>handleActionError(error: unknown, label: string)</code> helper that logs to a structured channel (or at minimum <code>console.error</code> with the serialized error + stack) and returns a typed <code>ActionResult</code>. Distinguish <code>error instanceof Error</code> and Prisma's <code>Prisma.PrismaClientKnownRequestError</code> so callers can branch. This is a cross-portal improvement, but the staff actions are the densest concentration.</p>
+</li>
+</ul>
+<p>Finding 6 — Only a single root-level <code>error.tsx</code>; no nested error isolation</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>app/staff/error.tsx</code> (1 file), <code>app/staff/not-found.tsx</code> (1 file)</p>
+</li>
+<li>
+<p><strong>Lines</strong>: N/A (absence of nested boundaries)</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Improvement</p>
+</li>
+<li>
+<p><strong>Description</strong>: The entire Staff portal shares <strong>one</strong> <code>error.tsx</code> at the root. Next.js error boundaries are scoped to their directory — a render error in any section (analytics charts, scheduling matrix, reports) kills the whole page and shows the same generic &quot;Something went wrong&quot; panel. High-risk sections that pull large datasets or mount third-party editors (analytics, scheduling, newsroom markdown editor, reports) are good candidates for their own <code>error.tsx</code> so a failure in one widget doesn't collapse the whole route. The root <code>error.tsx</code> also does not log the error anywhere (no <code>console.error</code>, no telemetry) — the <code>reset</code> handler just retries silently.</p>
+</li>
+<li>
+<p><strong>Recommendation</strong>: Add section-level <code>error.tsx</code> files under at least <code>analytics/</code>, <code>scheduling/</code>, <code>reports/</code>, <code>newsroom/</code>, and <code>exams/events/[id]/</code>. In the root boundary, add a <code>console.error(error)</code> (or telemetry) so failures are observable. The boundary's props are correctly typed (<code>{ error: Error; reset }</code>) — that part is fine.</p>
+</li>
+</ul>
+<h3 id="category-nextjs-conventions-loading-states-amp-performance">Category: Next.js Conventions — Loading States &amp; Performance</h3>
+<p>Finding 7 — 20 route segments missing required <code>loading.tsx</code></p>
+<ul>
+<li>
+<p><strong>File</strong>: 20 directories lack a <code>loading.tsx</code> (listed in Appendix)</p>
+</li>
+<li>
+<p><strong>Lines</strong>: N/A (absence)</p>
+</li>
+<li>
+<p><strong>Severity</strong>: Medium</p>
+</li>
+<li>
+<p><strong>Type</strong>: Bug</p>
+</li>
+<li>
+<p><strong>Description</strong>: CLAUDE.md states: &quot;Every page directory MUST have a <code>loading.tsx</code>&quot;. An automated scan of all <code>page.tsx</code> directories under <code>app/staff</code> found <strong>20</strong> with no sibling <code>loading.tsx</code>: <code>admissions/aptitude/banks/[id]</code>, <code>classes/[id]</code>, <code>classes/[id]/edit</code>, <code>classes/[id]/roster</code>, <code>classes/[id]/seating</code>, <code>classrooms/[id]</code>, <code>courses/[id]</code>, <code>courses/[id]/edit</code>, <code>exams/events/[id]</code>, <code>exams/events/[id]/edit</code>, <code>exams/events/[id]/pools/create</code>, <code>exams/pools/[id]</code>, <code>exams/pools/[id]/add-candidate</code>, <code>exams/pools/[id]/edit</code>, <code>exams/sittings/[id]/seating</code>, <code>newsroom/[id]/edit</code>, <code>ojt/preview</code>, <code>ojt/[logbookId]</code>, <code>students/[id]</code>, <code>users/[id]</code>. Without a segment-level <code>loading.tsx</code>, navigation falls back to the root <code>app/staff/loading.tsx</code> full-screen spinner, defeating Suspense streaming and producing a coarser loading experience. The most impactful missing ones are <code>students/[id]</code> and <code>users/[id]</code> — the two most-visited detail pages.</p>
+</li>
+</ul>
+<p><strong>Recommendation</strong>: Add a <code>loading.tsx</code> to each of the 20 directories, reusing the shared <code>DashboardSkeleton</code> / <code>TableSkeleton</code> from <code>components/shared/DashboardSkeleton.tsx</code> (already the established pattern — see <code>dashboard/loading.tsx</code>). A one-liner per route:</p>
+<pre><code class="language-tsx">import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
+export default function Loading() { return &amp;lt;TableSkeleton rows={8} /&amp;gt; }
+
+</code></pre>
+<p>Finding 8 — Heavy client components are correctly lazy-loaded (No Action Needed)</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>_components/DashboardCharts.tsx:6</code>, <code>_components/FinanceOverview.tsx:14</code>, <code>newsroom/create/page.tsx:22</code>, <code>newsroom/[id]/edit/page.tsx:23</code>, <code>reports/_components/ReportCharts.tsx:18-43</code>, <code>reports/_components/YoYCharts.tsx:17</code>, <code>settings/_components/PDFSettingsForm.tsx:9</code>, <code>settings/_components/EmailPreviewsTab.tsx:8</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: No Action Needed</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: Recharts, the TipTap markdown editor, the PDF viewer, and the email-previews page are all loaded via <code>next/dynamic</code> with <code>ssr: false</code>, exactly as CLAUDE.md's performance convention (&quot;Use <code>next/dynamic</code> for heavy client components&quot;) prescribes. This is a genuine strength and is applied consistently. No issues found.</p>
+</li>
+</ul>
+<h3 id="category-data-fetching-amp-prisma-conventions">Category: Data Fetching &amp; Prisma Conventions</h3>
+<p>Finding 9 — <code>prismaUnfiltered</code> is used correctly in staff pages (No Action Needed)</p>
+<ul>
+<li>
+<p><strong>File</strong>: throughout <code>app/staff/**</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: No Action Needed</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: Staff pages consistently import <code>prismaUnfiltered</code> (the non-RLS client) rather than the default RLS-wrapped <code>prisma</code>, matching CLAUDE.md's &quot;Always use <code>prismaUnfiltered</code> in staff pages&quot; rule. Parallelization via <code>Promise.all</code> is also the norm (e.g. <code>dashboard/page.tsx:197</code>, <code>students/[id]/page.tsx:149</code>, <code>users/[id]/page.tsx:103</code>). No violations found.</p>
+</li>
+</ul>
+<p>Finding 10 — <code>serializePrisma()</code> handoff to client components is consistent (No Action Needed)</p>
+<ul>
+<li>
+<p><strong>File</strong>: <code>dashboard/page.tsx:215-218</code>, <code>students/[id]/page.tsx:228-241</code>, <code>users/[id]/page.tsx:100,116,124</code></p>
+</li>
+<li>
+<p><strong>Severity</strong>: No Action Needed</p>
+</li>
+<li>
+<p><strong>Type</strong>: Suggestion</p>
+</li>
+<li>
+<p><strong>Description</strong>: Server components serialize Prisma results via <code>serializePrisma()</code> before passing them to client components, so <code>Decimal</code>/<code>Date</code> values are safely converted. The pattern is applied consistently. The gap is not the serialization itself but the missing <em>types</em> for the serialized shapes (see Finding 3).</p>
+</li>
+</ul>
+<section class="he-section" id="03-appendix"><div class="he-section__num">03 · 03 · Appendix</div><h2 class="he-section__title">03 · Appendix</h2></section>
+<ul>
+<li>
+<p><strong>Total <code>any</code> occurrences</strong>: 231 across 63 files. Worst offenders: <code>scheduling/_components/SchedulingClient.tsx</code> (20), <code>_components/TransactionsTable.tsx</code> (12), <code>reports/_components/YoYChartsInner.tsx</code> (12), <code>audit-logs/page.tsx</code> (14), <code>_components/ReportsPanel.tsx</code> (14), <code>_components/StudentDetailPanel.tsx</code> (13), <code>exams/_components/RecordsTab.tsx</code> (9), <code>finance/page.tsx</code> (8), <code>resources/_components/ResourceForm.tsx</code> (8), <code>students/import/page.tsx</code> (9), <code>dashboard/page.tsx</code> (7), <code>practical-assessments/_components/PracticalAssessmentsClient.tsx</code> (7).</p>
+</li>
+<li>
+<p><strong>Directories missing <code>loading.tsx</code></strong> (20): <code>admissions/aptitude/banks/[id]</code>, <code>classes/[id]</code>, <code>classes/[id]/edit</code>, <code>classes/[id]/roster</code>, <code>classes/[id]/seating</code>, <code>classrooms/[id]</code>, <code>courses/[id]</code>, <code>courses/[id]/edit</code>, <code>exams/events/[id]</code>, <code>exams/events/[id]/edit</code>, <code>exams/events/[id]/pools/create</code>, <code>exams/pools/[id]</code>, <code>exams/pools/[id]/add-candidate</code>, <code>exams/pools/[id]/edit</code>, <code>exams/sittings/[id]/seating</code>, <code>newsroom/[id]/edit</code>, <code>ojt/preview</code>, <code>ojt/[logbookId]</code>, <code>students/[id]</code>, <code>users/[id]</code>.</p>
+</li>
+<li>
+<p><strong>Error/not-found boundaries</strong>: only root-level <code>app/staff/error.tsx</code> and <code>app/staff/not-found.tsx</code> exist; no nested section boundaries.</p>
+</li>
+</ul>
+<p><strong>Total findings</strong>: 10</p>
+<ul>
+<li>
+<p>Critical: 0</p>
+</li>
+<li>
+<p>High: 1 (Finding 1)</p>
+</li>
+<li>
+<p>Medium: 5 (Finding 2, 3, 5, 6, 7)</p>
+</li>
+<li>
+<p>Low: 2 (Finding 4, plus the implicit-<code>any</code> subset already covered)</p>
+</li>
+<li>
+<p>No Action Needed: 3 categories (Finding 8, 9, 10)</p>
+<p>On this page
+<a href="#executive-summary">Executive Summary</a>
+<a href="#findings">Findings</a>
+<a href="#category-type-safety-pervasive-any-usage">Category: Type Safety — Pervasive <code>any</code> Usage</a>
+<a href="#category-react-patterns-client-component-props-keys">Category: React Patterns — Client Component Props &amp; Keys</a>
+<a href="#category-error-handling-resilience">Category: Error Handling &amp; Resilience</a>
+<a href="#category-nextjs-conventions-loading-states-performance">Category: Next.js Conventions — Loading States &amp; Performance</a>
+<a href="#category-data-fetching-prisma-conventions">Category: Data Fetching &amp; Prisma Conventions</a>
+<a href="#appendix">Appendix</a></p>
+</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#01-executive-summary">01 · Executive Summary</a></li>
+    <li class="he-toc__l2"><a href="#02-findings">02 · Findings</a></li>
+    <li class="he-toc__l3"><a href="#category-type-safety-pervasive-any-usage">Category: Type Safety — Pervasive `any` Usage</a></li>
+    <li class="he-toc__l3"><a href="#category-react-patterns-client-component-props-amp-keys">Category: React Patterns — Client Component Props &amp;amp; Keys</a></li>
+    <li class="he-toc__l3"><a href="#category-error-handling-amp-resilience">Category: Error Handling &amp;amp; Resilience</a></li>
+    <li class="he-toc__l3"><a href="#category-nextjs-conventions-loading-states-amp-performance">Category: Next.js Conventions — Loading States &amp;amp; Performance</a></li>
+    <li class="he-toc__l3"><a href="#category-data-fetching-amp-prisma-conventions">Category: Data Fetching &amp;amp; Prisma Conventions</a></li>
+    <li class="he-toc__l2"><a href="#03-appendix">03 · Appendix</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

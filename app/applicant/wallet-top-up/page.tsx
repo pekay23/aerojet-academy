@@ -1,3 +1,4 @@
+import { redirectToLogin } from '@/lib/auth/redirect-to-login'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -13,7 +14,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function ApplicantWalletTopUpPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
+  if (!session) return await redirectToLogin()
 
   const userId = session.user.id
 
@@ -43,7 +44,7 @@ export default async function ApplicantWalletTopUpPage() {
       }),
     ])
 
-  if (!applicant) redirect('/login')
+  if (!applicant) return await redirectToLogin()
 
   if (applicant.role === 'STUDENT') {
     redirect('/student/wallet')

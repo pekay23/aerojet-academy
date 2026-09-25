@@ -13,7 +13,7 @@ export default function CoursesError({
   const router = useRouter()
 
   return (
-    <div className="mx-auto flex min-h-[50vh] max-w-[1800px] flex-col items-center justify-center px-4 py-12 text-center">
+    <div className="mx-auto flex min-h-[50vh] max-w-450 flex-col items-center justify-center px-4 py-12 text-center">
       <AlertTriangle className="h-10 w-10 text-red-500 dark:text-red-400" aria-hidden="true" />
       <h2 className="mt-4 text-2xl font-black tracking-tight text-slate-900 dark:text-white">
         Unable to load courses

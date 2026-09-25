@@ -84,6 +84,16 @@ export default async function LogbookDetailPage({
     ? `${logbook.studentProfile.user.profile.firstName ?? ''} ${logbook.studentProfile.user.profile.lastName ?? ''}`.trim()
     : logbook.studentProfile.user.email
 
+  // Create a map for quick supervisor name lookup
+  const supervisorNameMap = new Map(
+    staffMembers.map((s) => [
+      s.id,
+      s.profile
+        ? `${s.profile.firstName ?? ''} ${s.profile.lastName ?? ''}`.trim() || s.email
+        : s.email,
+    ])
+  )
+
   const serialised = {
     id: logbook.id,
     studentName,
@@ -110,6 +120,7 @@ export default async function LogbookDetailPage({
       maintenanceType: e.maintenanceType,
       durationHours: e.durationHours,
       supervisorId: e.supervisorId,
+      supervisorName: supervisorNameMap.get(e.supervisorId) || 'Unknown',
       supervisorSignature: e.supervisorSignature,
       studentSignature: e.studentSignature,
       verifiedByManagement: e.verifiedByManagement,
