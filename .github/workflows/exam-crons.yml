@@ -16,24 +16,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Run exam timeout processing
+      - name: Validate secrets and trigger cron jobs
         env:
-          CRON_URL: ${{ secrets.PRODUCTION_URL }}/api/cron/exam-timeout
+          BASE_URL: ${{ secrets.PRODUCTION_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          curl --fail-with-body \
-            --retry 3 \
-            -X POST \
-            -H "Authorization: Bearer ${CRON_SECRET}" \
-            "${CRON_URL}"
+          set -euo pipefail
 
-      - name: Run exam recovery processing
-        env:
-          CRON_URL: ${{ secrets.PRODUCTION_URL }}/api/cron/recover-exams
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-        run: |
+          if [ -z "${BASE_URL}" ]; then
+            echo "::error::Secret PRODUCTION_URL is missing or empty."
+            exit 1
+          fi
+
+          if [ -z "${CRON_SECRET}" ]; then
+            echo "::error::Secret CRON_SECRET is missing or empty."
+            exit 1
+          fi
+
+          # Ensure URL starts with protocol
+          if [[ "${BASE_URL}" != http://* && "${BASE_URL}" != https://* ]]; then
+            BASE_URL="https://${BASE_URL}"
+          fi
+
+          # Strip trailing slash if present
+          CLEAN_BASE_URL="${BASE_URL%/}"
+
+          echo "Targeting base URL: ${CLEAN_BASE_URL}"
+
+          echo "::group::Executing exam-timeout cron"
           curl --fail-with-body \
+            --show-error \
+            --location \
+            --connect-timeout 15 \
+            --max-time 60 \
             --retry 3 \
+            --retry-delay 5 \
             -X POST \
             -H "Authorization: Bearer ${CRON_SECRET}" \
-            "${CRON_URL}"
+            "${CLEAN_BASE_URL}/api/cron/exam-timeout"
+          echo -e "\nExam timeout job completed successfully."
+          echo "::endgroup::"
+
+          echo "::group::Executing recover-exams cron"
+          curl --fail-with-body \
+            --show-error \
+            --location \
+            --connect-timeout 15 \
+            --max-time 60 \
+            --retry 3 \
+            --retry-delay 5 \
+            -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${CLEAN_BASE_URL}/api/cron/recover-exams"
+          echo -e "\nExam recovery job completed successfully."
+          echo "::endgroup::"
+
