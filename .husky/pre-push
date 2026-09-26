@@ -1,2 +1,3 @@
-bun run type-check
-bun run test --run --no-file-parallelism --no-color
+# Heavy validation (type-check, tests, build) is delegated to GitHub Actions CI
+# to keep local git pushes instantaneous.
+
